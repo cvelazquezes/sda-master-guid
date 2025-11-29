@@ -1,0 +1,161 @@
+/**
+ * API Client
+ * Centralized HTTP client with retry logic, circuit breaker, and error handling
+ */
+
+import axios, { AxiosInstance, AxiosError } from 'axios';
+import { environment } from '../config/environment';
+import { secureStorage } from '../utils/secureStorage';
+import { logger } from '../utils/logger';
+import { retryPolicy } from '../utils/api/retryPolicy';
+import { apiCircuitBreaker } from '../utils/api/circuitBreaker';
+import {
+  NetworkError,
+  TimeoutError,
+  AuthenticationError,
+  toAppError,
+} from '../utils/errors';
+
+// Constants
+const API_TIMEOUT_MS = 10000;
+const MAX_RETRY_ATTEMPTS = 3;
+
+/**
+ * Creates configured axios instance
+ */
+const createApiClient = (): AxiosInstance => {
+  const client = axios.create({
+    baseURL: environment.apiUrl,
+    timeout: API_TIMEOUT_MS,
+    headers: {
+      'Content-Type': 'application/json',
+      'X-App-Version': '1.0.0',
+    },
+  });
+
+  // Request interceptor - add auth token
+  client.interceptors.request.use(
+    async (config) => {
+      try {
+        const token = await secureStorage.getAccessToken();
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+      } catch (error) {
+        logger.warn('Failed to get auth token', { error });
+      }
+      return config;
+    },
+    (error: AxiosError) => {
+      logger.error('Request interceptor error', error);
+      return Promise.reject(toAppError(error));
+    }
+  );
+
+  // Response interceptor - handle errors
+  client.interceptors.response.use(
+    (response) => response,
+    async (error: AxiosError) => {
+      if (error.response?.status === 401) {
+        // Unauthorized - clear tokens and let app handle redirect
+        logger.warn('Unauthorized request - clearing auth tokens');
+        await secureStorage.clearAuth();
+        throw new AuthenticationError('Session expired. Please login again.');
+      }
+
+      if (error.code === 'ECONNABORTED') {
+        throw new TimeoutError('Request timed out');
+      }
+
+      if (!error.response) {
+        throw new NetworkError('Network request failed', error.config?.url);
+      }
+
+      throw toAppError(error);
+    }
+  );
+
+  return client;
+};
+
+/**
+ * API client instance
+ */
+const api = createApiClient();
+
+/**
+ * Makes HTTP request with retry logic and circuit breaker
+ */
+async function makeRequest<T>(
+  requestFn: () => Promise<T>
+): Promise<T> {
+  return await apiCircuitBreaker.execute(async () => {
+    return await retryPolicy.execute(requestFn);
+  });
+}
+
+/**
+ * API service with typed methods
+ */
+export const apiService = {
+  /**
+   * GET request
+   */
+  async get<T>(url: string, config?: any): Promise<T> {
+    logger.debug(`GET ${url}`);
+    const response = await makeRequest(() => api.get<T>(url, config));
+    return response.data;
+  },
+
+  /**
+   * POST request
+   */
+  async post<T>(url: string, data?: any, config?: any): Promise<T> {
+    logger.debug(`POST ${url}`);
+    const response = await makeRequest(() => api.post<T>(url, data, config));
+    return response.data;
+  },
+
+  /**
+   * PUT request
+   */
+  async put<T>(url: string, data?: any, config?: any): Promise<T> {
+    logger.debug(`PUT ${url}`);
+    const response = await makeRequest(() => api.put<T>(url, data, config));
+    return response.data;
+  },
+
+  /**
+   * PATCH request
+   */
+  async patch<T>(url: string, data?: any, config?: any): Promise<T> {
+    logger.debug(`PATCH ${url}`);
+    const response = await makeRequest(() => api.patch<T>(url, data, config));
+    return response.data;
+  },
+
+  /**
+   * DELETE request
+   */
+  async delete<T>(url: string, config?: any): Promise<T> {
+    logger.debug(`DELETE ${url}`);
+    const response = await makeRequest(() => api.delete<T>(url, config));
+    return response.data;
+  },
+
+  /**
+   * Get circuit breaker stats
+   */
+  getStats() {
+    return apiCircuitBreaker.getStats();
+  },
+
+  /**
+   * Reset circuit breaker
+   */
+  resetCircuitBreaker() {
+    apiCircuitBreaker.reset();
+  },
+};
+
+export default api;
