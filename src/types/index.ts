@@ -18,6 +18,12 @@ export enum MatchStatus {
   CANCELLED = 'cancelled',
 }
 
+export enum ApprovalStatus {
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+}
+
 export interface User {
   id: string;
   email: string;
@@ -27,6 +33,7 @@ export interface User {
   clubId: string | null; // Required for all users except admin (hierarchy comes from club)
   isActive: boolean;
   isPaused: boolean;
+  approvalStatus: ApprovalStatus; // Approval status for club membership
   timezone: string;
   language: string;
   createdAt: string;
@@ -84,4 +91,3 @@ export interface AuthContextType {
   logout: () => Promise<void>;
   updateUser: (userData: Partial<User>) => Promise<void>;
 }
-

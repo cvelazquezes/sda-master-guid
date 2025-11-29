@@ -1,6 +1,6 @@
 import api from './api';
-import { Club, MatchFrequency } from '../types';
-import { mockClubs, mockUsers, getUsersByClub } from './mockData';
+import { Club, MatchFrequency, User } from '../types';
+import { mockClubs, getUsersByClub } from './mockData';
 
 const USE_MOCK_DATA = true;
 
@@ -18,7 +18,9 @@ export const clubService = {
     if (USE_MOCK_DATA) {
       const club = mockClubs.find((c) => c.id === clubId);
       if (!club) throw new Error('Club not found');
-      return { ...club, memberCount: getUsersByClub(clubId).length };
+      // Only count approved members in memberCount
+      const approvedMembers = getUsersByClub(clubId).filter((u) => u.approvalStatus === 'approved');
+      return { ...club, memberCount: approvedMembers.length };
     }
     const response = await api.get(`/clubs/${clubId}`);
     return response.data;
@@ -73,7 +75,11 @@ export const clubService = {
       await new Promise((resolve) => setTimeout(resolve, 300));
       const clubIndex = mockClubs.findIndex((c) => c.id === clubId);
       if (clubIndex === -1) throw new Error('Club not found');
-      mockClubs[clubIndex] = { ...mockClubs[clubIndex], ...data, updatedAt: new Date().toISOString() };
+      mockClubs[clubIndex] = {
+        ...mockClubs[clubIndex],
+        ...data,
+        updatedAt: new Date().toISOString(),
+      };
       return mockClubs[clubIndex];
     }
     const response = await api.patch(`/clubs/${clubId}`, data);
@@ -109,7 +115,7 @@ export const clubService = {
     await api.post(`/clubs/${clubId}/leave`);
   },
 
-  async getClubMembers(clubId: string): Promise<any[]> {
+  async getClubMembers(clubId: string): Promise<User[]> {
     if (USE_MOCK_DATA) {
       return getUsersByClub(clubId);
     }
@@ -117,4 +123,3 @@ export const clubService = {
     return response.data;
   },
 };
-

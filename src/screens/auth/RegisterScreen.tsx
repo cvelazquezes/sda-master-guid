@@ -65,8 +65,8 @@ const RegisterScreen = () => {
 
   const getUniqueAssociations = () => {
     if (!union) return [];
-    const filteredClubs = clubs.filter((club) => 
-      club.division === division && club.union === union && club.isActive
+    const filteredClubs = clubs.filter(
+      (club) => club.division === division && club.union === union && club.isActive
     );
     const values = filteredClubs.map((club) => club.association).filter(Boolean);
     return Array.from(new Set(values)).sort();
@@ -74,11 +74,12 @@ const RegisterScreen = () => {
 
   const getUniqueChurches = () => {
     if (!association) return [];
-    const filteredClubs = clubs.filter((club) => 
-      club.division === division && 
-      club.union === union && 
-      club.association === association &&
-      club.isActive
+    const filteredClubs = clubs.filter(
+      (club) =>
+        club.division === division &&
+        club.union === union &&
+        club.association === association &&
+        club.isActive
     );
     const values = filteredClubs.map((club) => club.church).filter(Boolean);
     return Array.from(new Set(values)).sort();
@@ -86,12 +87,13 @@ const RegisterScreen = () => {
 
   const getFilteredClubs = () => {
     if (!church) return [];
-    return clubs.filter((club) => 
-      club.division === division && 
-      club.union === union && 
-      club.association === association && 
-      club.church === church &&
-      club.isActive
+    return clubs.filter(
+      (club) =>
+        club.division === division &&
+        club.union === union &&
+        club.association === association &&
+        club.church === church &&
+        club.isActive
     );
   };
 
@@ -131,7 +133,10 @@ const RegisterScreen = () => {
     // Validate WhatsApp number format (basic validation)
     const whatsappRegex = /^\+?[1-9]\d{1,14}$/;
     if (!whatsappRegex.test(whatsappNumber.replace(/[\s()-]/g, ''))) {
-      Alert.alert('Error', 'Please enter a valid WhatsApp number with country code (e.g., +1 555 123 4567)');
+      Alert.alert(
+        'Error',
+        'Please enter a valid WhatsApp number with country code (e.g., +1 555 123 4567)'
+      );
       return;
     }
 
@@ -148,8 +153,9 @@ const RegisterScreen = () => {
     setLoading(true);
     try {
       await register(email, password, name, whatsappNumber, clubId);
-    } catch (error: any) {
-      Alert.alert('Registration Failed', error.response?.data?.message || 'Registration failed');
+      // Registration successful - user will be redirected to PendingApprovalScreen automatically
+    } catch (error) {
+      Alert.alert('Registration Failed', 'Registration failed');
     } finally {
       setLoading(false);
     }
@@ -178,7 +184,12 @@ const RegisterScreen = () => {
 
         <View style={styles.form}>
           <View style={styles.inputContainer}>
-            <MaterialCommunityIcons name="account" size={20} color="#666" style={styles.inputIcon} />
+            <MaterialCommunityIcons
+              name="account"
+              size={20}
+              color="#666"
+              style={styles.inputIcon}
+            />
             <TextInput
               style={styles.input}
               placeholder="Full Name"
@@ -202,7 +213,12 @@ const RegisterScreen = () => {
           </View>
 
           <View style={styles.inputContainer}>
-            <MaterialCommunityIcons name="whatsapp" size={20} color="#666" style={styles.inputIcon} />
+            <MaterialCommunityIcons
+              name="whatsapp"
+              size={20}
+              color="#666"
+              style={styles.inputIcon}
+            />
             <TextInput
               style={styles.input}
               placeholder="WhatsApp Number (e.g., +1 555 123 4567)"
@@ -351,7 +367,12 @@ const RegisterScreen = () => {
           </View>
 
           <View style={styles.inputContainer}>
-            <MaterialCommunityIcons name="lock-check" size={20} color="#666" style={styles.inputIcon} />
+            <MaterialCommunityIcons
+              name="lock-check"
+              size={20}
+              color="#666"
+              style={styles.inputIcon}
+            />
             <TextInput
               style={styles.input}
               placeholder="Confirm Password"
@@ -550,4 +571,3 @@ const styles = StyleSheet.create({
 });
 
 export default RegisterScreen;
-

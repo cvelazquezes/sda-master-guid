@@ -64,5 +64,18 @@ export const userService = {
   async resumeUser(userId: string): Promise<User> {
     return this.updateUser(userId, { isPaused: false });
   },
-};
 
+  async approveUser(userId: string): Promise<User> {
+    return this.updateUser(userId, {
+      approvalStatus: 'approved',
+      isActive: true,
+    });
+  },
+
+  async rejectUser(userId: string): Promise<User> {
+    return this.updateUser(userId, {
+      approvalStatus: 'rejected',
+      isActive: false,
+    });
+  },
+};

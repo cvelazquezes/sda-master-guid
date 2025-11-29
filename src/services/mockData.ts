@@ -1,4 +1,13 @@
-import { User, Club, Match, MatchRound, UserRole, MatchFrequency, MatchStatus } from '../types';
+import {
+  User,
+  Club,
+  Match,
+  MatchRound,
+  UserRole,
+  MatchFrequency,
+  MatchStatus,
+  ApprovalStatus,
+} from '../types';
 
 // Mock Users - One of each type
 // Note: Users get their organizational hierarchy from their club
@@ -12,6 +21,7 @@ export const mockUsers: User[] = [
     clubId: null, // Admin doesn't need a club
     isActive: true,
     isPaused: false,
+    approvalStatus: ApprovalStatus.APPROVED, // Admin is auto-approved
     timezone: 'America/New_York',
     language: 'en',
     createdAt: new Date().toISOString(),
@@ -26,6 +36,7 @@ export const mockUsers: User[] = [
     clubId: '1', // Member of Club 1 (hierarchy from club)
     isActive: true,
     isPaused: false,
+    approvalStatus: ApprovalStatus.APPROVED, // Club admin is auto-approved
     timezone: 'America/New_York',
     language: 'en',
     createdAt: new Date().toISOString(),
@@ -40,7 +51,53 @@ export const mockUsers: User[] = [
     clubId: '1', // Member of Club 1 (hierarchy from club)
     isActive: true,
     isPaused: false,
+    approvalStatus: ApprovalStatus.APPROVED, // Approved member
     timezone: 'America/New_York',
+    language: 'en',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: '4',
+    email: 'pending1@sda.com',
+    name: 'Sarah Johnson',
+    whatsappNumber: '+1 (555) 345-6789',
+    role: UserRole.USER,
+    clubId: '1', // Member of Club 1 (hierarchy from club)
+    isActive: false,
+    isPaused: false,
+    approvalStatus: ApprovalStatus.PENDING, // Pending approval
+    timezone: 'America/New_York',
+    language: 'en',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: '5',
+    email: 'pending2@sda.com',
+    name: 'Michael Brown',
+    whatsappNumber: '+1 (555) 456-7890',
+    role: UserRole.USER,
+    clubId: '1', // Member of Club 1 (hierarchy from club)
+    isActive: false,
+    isPaused: false,
+    approvalStatus: ApprovalStatus.PENDING, // Pending approval
+    timezone: 'America/New_York',
+    language: 'en',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: '6',
+    email: 'pending3@sda.com',
+    name: 'Emily Davis',
+    whatsappNumber: '+1 (555) 567-8901',
+    role: UserRole.USER,
+    clubId: '4', // Member of Narvarte church club (Elphis Kalein)
+    isActive: false,
+    isPaused: false,
+    approvalStatus: ApprovalStatus.PENDING, // Pending approval
+    timezone: 'America/Mexico_City',
     language: 'en',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -54,6 +111,7 @@ export const mockUsers: User[] = [
     clubId: '4', // Member of Narvarte church club (Elphis Kalein)
     isActive: true,
     isPaused: false,
+    approvalStatus: ApprovalStatus.APPROVED, // Approved member
     timezone: 'America/Mexico_City',
     language: 'es',
     createdAt: new Date().toISOString(),
@@ -68,6 +126,7 @@ export const mockUsers: User[] = [
     clubId: '5', // Member of Portales church club (Panteras)
     isActive: true,
     isPaused: false,
+    approvalStatus: ApprovalStatus.APPROVED, // Approved member
     timezone: 'America/Mexico_City',
     language: 'es',
     createdAt: new Date().toISOString(),
@@ -91,7 +150,7 @@ export const mockClubs: Club[] = [
     division: 'North American Division',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    memberCount: 2,
+    memberCount: 2, // Only approved members (John Doe + Club Admin)
   },
   {
     id: '2',
@@ -107,7 +166,7 @@ export const mockClubs: Club[] = [
     division: 'North American Division',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    memberCount: 1,
+    memberCount: 0,
   },
   {
     id: '3',
@@ -139,7 +198,7 @@ export const mockClubs: Club[] = [
     division: 'División Interamericana',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    memberCount: 1,
+    memberCount: 1, // Only approved members (Carlos Martínez)
   },
   {
     id: '5',
@@ -228,9 +287,11 @@ export const getMatchRoundsByClub = (clubId: string): MatchRound[] => {
 
 // Initialize mock data - ensures data is ready
 export const initializeMockData = () => {
-  // Update club member counts
+  // Update club member counts (only count approved members)
   mockClubs.forEach((club) => {
-    club.memberCount = getUsersByClub(club.id).length;
+    club.memberCount = getUsersByClub(club.id).filter(
+      (u) => u.approvalStatus === ApprovalStatus.APPROVED
+    ).length;
   });
 
   // Ensure all data is properly initialized

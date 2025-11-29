@@ -17,16 +17,9 @@ import {
   RegisterSchema,
   UpdateUserSchema,
 } from '../utils/validation';
-import {
-  AuthenticationError,
-  ConflictError,
-  NotFoundError,
-} from '../utils/errors';
+import { AuthenticationError, ConflictError, NotFoundError } from '../utils/errors';
 import { User } from '../types';
-import {
-  mockUsers,
-  getUserByEmail,
-} from './mockData';
+import { mockUsers, getUserByEmail } from './mockData';
 
 // Constants
 const MOCK_API_DELAY_MS = 500;
@@ -134,7 +127,7 @@ class AuthService {
       throw new ConflictError('User already exists');
     }
 
-    // Create new user (hierarchy comes from their club)
+    // Create new user with pending approval status
     const newUser: User = {
       id: String(mockUsers.length + 1),
       email: data.email,
@@ -142,8 +135,9 @@ class AuthService {
       whatsappNumber: data.whatsappNumber,
       role: 'user',
       clubId: data.clubId, // User gets hierarchy from their club
-      isActive: true,
+      isActive: false, // Inactive until approved
       isPaused: false,
+      approvalStatus: 'pending', // Pending approval by club admin
       timezone: 'America/New_York',
       language: 'en',
       createdAt: new Date().toISOString(),
@@ -155,7 +149,7 @@ class AuthService {
     const token = `mock_token_${newUser.id}`;
     await this.saveAuthData({ user: newUser, token });
 
-    logger.info('Mock registration successful', { userId: newUser.id });
+    logger.info('Mock registration successful - pending approval', { userId: newUser.id });
     return { user: newUser, token };
   }
 
@@ -283,16 +277,15 @@ class AuthService {
     try {
       // Check platform before saving
       if (Platform.OS === 'web') {
-        logger.warn(
-          'Web platform detected. Tokens should be managed by server-side sessions with httpOnly cookies.'
-        );
+        logger.warn('Web platform. Use server-side sessions with httpOnly cookies.');
         // For development/testing on web, we'll skip secure storage
         // In production, this should use server-side session management
         return;
       }
 
       await Promise.all([
-        secureStorage.saveTokens(authResponse.token, authResponse.token), // Using same for refresh in mock
+        // Using same token for refresh in mock mode
+        secureStorage.saveTokens(authResponse.token, authResponse.token),
         secureStorage.saveUserId(authResponse.user.id),
       ]);
     } catch (error) {

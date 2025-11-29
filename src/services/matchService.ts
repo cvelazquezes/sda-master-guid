@@ -5,7 +5,6 @@ import { Match, MatchRound, MatchStatus } from '../types';
 import {
   mockMatches,
   mockMatchRounds,
-  mockUsers,
   mockClubs,
   getMatchesForUser,
   getMatchesByClub,
@@ -99,19 +98,21 @@ export const matchService = {
   async generateMatches(clubId: string): Promise<MatchRound> {
     if (USE_MOCK_DATA) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      
+
       const club = mockClubs.find((c) => c.id === clubId);
       if (!club) throw new Error('Club not found');
-      
-      const members = getUsersByClub(clubId).filter((u) => u.isActive && !u.isPaused);
+
+      const members = getUsersByClub(clubId).filter(
+        (u) => u.isActive && !u.isPaused && u.approvalStatus === 'approved'
+      );
       if (members.length < club.groupSize) {
         throw new Error(`Not enough active members. Need at least ${club.groupSize}`);
       }
-      
+
       // Simple matching algorithm: pair/group members
       const newMatches: Match[] = [];
       const shuffled = [...members].sort(() => Math.random() - 0.5);
-      
+
       for (let i = 0; i < shuffled.length; i += club.groupSize) {
         const group = shuffled.slice(i, i + club.groupSize);
         if (group.length === club.groupSize) {
@@ -125,9 +126,9 @@ export const matchService = {
           });
         }
       }
-      
+
       mockMatches.push(...newMatches);
-      
+
       const newRound: MatchRound = {
         id: String(mockMatchRounds.length + 1),
         clubId,
@@ -136,7 +137,7 @@ export const matchService = {
         status: 'active',
         createdAt: new Date().toISOString(),
       };
-      
+
       mockMatchRounds.push(newRound);
       return newRound;
     }
@@ -152,4 +153,3 @@ export const matchService = {
     return response.data;
   },
 };
-
