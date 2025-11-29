@@ -43,6 +43,52 @@ const RegisterScreen = () => {
     loadClubs();
   }, []);
 
+  // Auto-select when only one option is available
+  useEffect(() => {
+    if (clubs.length > 0 && !division) {
+      const divisions = getUniqueDivisions();
+      if (divisions.length === 1) {
+        setDivision(divisions[0]);
+      }
+    }
+  }, [clubs, division]);
+
+  useEffect(() => {
+    if (division && !union) {
+      const unions = getUniqueUnions();
+      if (unions.length === 1) {
+        setUnion(unions[0]);
+      }
+    }
+  }, [division, union]);
+
+  useEffect(() => {
+    if (union && !association) {
+      const associations = getUniqueAssociations();
+      if (associations.length === 1) {
+        setAssociation(associations[0]);
+      }
+    }
+  }, [union, association]);
+
+  useEffect(() => {
+    if (association && !church) {
+      const churches = getUniqueChurches();
+      if (churches.length === 1) {
+        setChurch(churches[0]);
+      }
+    }
+  }, [association, church]);
+
+  useEffect(() => {
+    if (church && !clubId) {
+      const filteredClubs = getFilteredClubs();
+      if (filteredClubs.length === 1) {
+        setClubId(filteredClubs[0].id);
+      }
+    }
+  }, [church, clubId]);
+
   const loadClubs = async () => {
     try {
       const clubsList = await clubService.getAllClubs();
@@ -127,6 +173,52 @@ const RegisterScreen = () => {
     setChurch(newChurch);
     setClubId('');
   };
+
+  // Auto-select when only one option is available
+  useEffect(() => {
+    if (clubs.length > 0 && !division) {
+      const divisions = getUniqueDivisions();
+      if (divisions.length === 1) {
+        setDivision(divisions[0]);
+      }
+    }
+  }, [clubs, division]);
+
+  useEffect(() => {
+    if (division && !union) {
+      const unions = getUniqueUnions();
+      if (unions.length === 1) {
+        setUnion(unions[0]);
+      }
+    }
+  }, [division, union]);
+
+  useEffect(() => {
+    if (union && !association) {
+      const associations = getUniqueAssociations();
+      if (associations.length === 1) {
+        setAssociation(associations[0]);
+      }
+    }
+  }, [union, association]);
+
+  useEffect(() => {
+    if (association && !church) {
+      const churches = getUniqueChurches();
+      if (churches.length === 1) {
+        setChurch(churches[0]);
+      }
+    }
+  }, [association, church]);
+
+  useEffect(() => {
+    if (church && !clubId) {
+      const filteredClubs = getFilteredClubs();
+      if (filteredClubs.length === 1) {
+        setClubId(filteredClubs[0].id);
+      }
+    }
+  }, [church, clubId]);
 
   const handleRegister = async () => {
     if (!name || !email || !whatsappNumber || !password || !clubId) {

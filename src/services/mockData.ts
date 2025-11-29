@@ -32,84 +32,52 @@ export const mockUsers: User[] = [
     id: '2',
     email: 'clubadmin@sda.com',
     name: 'Club Admin',
-    whatsappNumber: '+1 (555) 123-4567',
+    whatsappNumber: '+52 55 9999 0000',
     role: UserRole.CLUB_ADMIN,
-    clubId: '1', // Member of Club 1 (hierarchy from club)
+    clubId: '4', // Member of Elphis Kalein (Narvarte)
     isActive: true,
     isPaused: false,
     approvalStatus: ApprovalStatus.APPROVED, // Club admin is auto-approved
     classes: ['Guide', 'Voyager'],
-    timezone: 'America/New_York',
-    language: 'en',
+    timezone: 'America/Mexico_City',
+    language: 'es',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
   {
     id: '3',
-    email: 'user@sda.com',
-    name: 'John Doe',
-    whatsappNumber: '+1 (555) 234-5678',
+    email: 'pending1@sda.com',
+    name: 'Ana García',
+    whatsappNumber: '+52 55 1111 2222',
     role: UserRole.USER,
-    clubId: '1', // Member of Club 1 (hierarchy from club)
-    isActive: true,
+    clubId: '4', // Member of Elphis Kalein (Narvarte)
+    isActive: false,
     isPaused: false,
-    approvalStatus: ApprovalStatus.APPROVED, // Approved member
-    classes: ['Explorer', 'Ranger'],
-    timezone: 'America/New_York',
-    language: 'en',
+    approvalStatus: ApprovalStatus.PENDING, // Pending approval
+    classes: ['Friend', 'Companion'],
+    timezone: 'America/Mexico_City',
+    language: 'es',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
   {
     id: '4',
-    email: 'pending1@sda.com',
-    name: 'Sarah Johnson',
-    whatsappNumber: '+1 (555) 345-6789',
+    email: 'pending2@sda.com',
+    name: 'Luis Hernández',
+    whatsappNumber: '+52 55 3333 4444',
     role: UserRole.USER,
-    clubId: '1', // Member of Club 1 (hierarchy from club)
+    clubId: '5', // Member of Panteras (Portales)
     isActive: false,
     isPaused: false,
     approvalStatus: ApprovalStatus.PENDING, // Pending approval
-    classes: ['Friend', 'Companion'],
-    timezone: 'America/New_York',
-    language: 'en',
+    classes: ['Explorer'],
+    timezone: 'America/Mexico_City',
+    language: 'es',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
   {
     id: '5',
-    email: 'pending2@sda.com',
-    name: 'Michael Brown',
-    whatsappNumber: '+1 (555) 456-7890',
-    role: UserRole.USER,
-    clubId: '1', // Member of Club 1 (hierarchy from club)
-    isActive: false,
-    isPaused: false,
-    approvalStatus: ApprovalStatus.PENDING, // Pending approval
-    classes: ['Explorer'],
-    timezone: 'America/New_York',
-    language: 'en',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '6',
-    email: 'pending3@sda.com',
-    name: 'Emily Davis',
-    whatsappNumber: '+1 (555) 567-8901',
-    role: UserRole.USER,
-    clubId: '4', // Member of Narvarte church club (Elphis Kalein)
-    isActive: false,
-    isPaused: false,
-    approvalStatus: ApprovalStatus.PENDING, // Pending approval
-    classes: ['Ranger', 'Voyager', 'Guide'],
-    timezone: 'America/Mexico_City',
-    language: 'en',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '7',
     email: 'carlos.martinez@sda.com',
     name: 'Carlos Martínez',
     whatsappNumber: '+52 55 1234 5678',
@@ -125,7 +93,7 @@ export const mockUsers: User[] = [
     updatedAt: new Date().toISOString(),
   },
   {
-    id: '8',
+    id: '6',
     email: 'maria.lopez@sda.com',
     name: 'María López',
     whatsappNumber: '+52 55 2345 6789',
@@ -142,56 +110,8 @@ export const mockUsers: User[] = [
   },
 ];
 
-// Mock Clubs
+// Mock Clubs - Only Asociación Metropolitana Mexicana
 export const mockClubs: Club[] = [
-  {
-    id: '1',
-    name: 'SDA Master Guid - Main',
-    description: 'Main coffee chat club for SDA members',
-    adminId: '2',
-    isActive: true,
-    matchFrequency: MatchFrequency.WEEKLY,
-    groupSize: 2,
-    church: 'First SDA Church',
-    association: 'Greater New York Conference',
-    union: 'Atlantic Union Conference',
-    division: 'North American Division',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    memberCount: 2, // Only approved members (John Doe + Club Admin)
-  },
-  {
-    id: '2',
-    name: 'SDA Master Guid - Secondary',
-    description: 'Secondary club for additional members',
-    adminId: '2',
-    isActive: true,
-    matchFrequency: MatchFrequency.BIWEEKLY,
-    groupSize: 3,
-    church: 'Central SDA Church',
-    association: 'Southern California Conference',
-    union: 'Pacific Union Conference',
-    division: 'North American Division',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    memberCount: 0,
-  },
-  {
-    id: '3',
-    name: 'SDA Master Guid - Monthly',
-    description: 'Monthly coffee chat club',
-    adminId: '2',
-    isActive: true,
-    matchFrequency: MatchFrequency.MONTHLY,
-    groupSize: 2,
-    church: 'Mountain View SDA Church',
-    association: 'Potomac Conference',
-    union: 'Columbia Union Conference',
-    division: 'North American Division',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    memberCount: 0,
-  },
   {
     id: '4',
     name: 'Elphis Kalein',
@@ -206,7 +126,7 @@ export const mockClubs: Club[] = [
     division: 'División Interamericana',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    memberCount: 1, // Only approved members (Carlos Martínez)
+    memberCount: 2, // Carlos Martínez + Club Admin
   },
   {
     id: '5',
@@ -222,7 +142,7 @@ export const mockClubs: Club[] = [
     division: 'División Interamericana',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    memberCount: 1,
+    memberCount: 1, // María López
   },
 ];
 
