@@ -15,12 +15,13 @@ import { clubService } from '../../services/clubService';
 import { userService } from '../../services/userService';
 import { useAuth } from '../../context/AuthContext';
 import { UserDetailModal } from '../../components/UserDetailModal';
-import { User, PathfinderClass } from '../../types';
+import { User, PathfinderClass, Club } from '../../types';
 import { ClassSelectionModal } from '../../components/ClassSelectionModal';
 
 const ClubMembersScreen = () => {
   const { user } = useAuth();
   const [members, setMembers] = useState<User[]>([]);
+  const [club, setClub] = useState<Club | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedMember, setSelectedMember] = useState<User | null>(null);
   const [detailVisible, setDetailVisible] = useState(false);
@@ -30,6 +31,12 @@ const ClubMembersScreen = () => {
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'paused'>('all');
   const [activeTab, setActiveTab] = useState<'approved' | 'pending'>('approved');
+
+  // Hierarchical filters
+  const [divisionFilter, setDivisionFilter] = useState('');
+  const [unionFilter, setUnionFilter] = useState('');
+  const [associationFilter, setAssociationFilter] = useState('');
+  const [churchFilter, setChurchFilter] = useState('');
 
   // Class editing
   const [classEditModalVisible, setClassEditModalVisible] = useState(false);
@@ -45,8 +52,12 @@ const ClubMembersScreen = () => {
     if (!user?.clubId) return;
 
     try {
-      const membersData = await clubService.getClubMembers(user.clubId);
+      const [membersData, clubData] = await Promise.all([
+        clubService.getClubMembers(user.clubId),
+        clubService.getClub(user.clubId),
+      ]);
       setMembers(membersData);
+      setClub(clubData);
     } catch (error) {
       Alert.alert('Error', 'Failed to load data');
     } finally {
@@ -142,6 +153,10 @@ const ClubMembersScreen = () => {
 
   const clearFilters = () => {
     setStatusFilter('all');
+    setDivisionFilter('');
+    setUnionFilter('');
+    setAssociationFilter('');
+    setChurchFilter('');
     setFilterModalVisible(false);
   };
 
@@ -207,6 +222,24 @@ const ClubMembersScreen = () => {
       }
     }
   }, [activeTab, members, statusFilter]);
+
+  // Auto-select hierarchical filters based on club data
+  useEffect(() => {
+    if (club && filterModalVisible) {
+      if (!divisionFilter && club.division) {
+        setDivisionFilter(club.division);
+      }
+      if (!unionFilter && club.union) {
+        setUnionFilter(club.union);
+      }
+      if (!associationFilter && club.association) {
+        setAssociationFilter(club.association);
+      }
+      if (!churchFilter && club.church) {
+        setChurchFilter(club.church);
+      }
+    }
+  }, [club, filterModalVisible, divisionFilter, unionFilter, associationFilter, churchFilter]);
 
   return (
     <ScrollView
@@ -426,9 +459,74 @@ const ClubMembersScreen = () => {
             </View>
 
             <ScrollView style={styles.modalBody}>
+              {/* Organization Hierarchy */}
+              {club && (
+                <View style={styles.filterSection}>
+                  <Text style={styles.filterSectionTitle}>Organization</Text>
+
+                  {/* Division */}
+                  <View style={styles.hierarchyItem}>
+                    <MaterialCommunityIcons name="earth" size={18} color="#6200ee" />
+                    <View style={styles.hierarchyInfo}>
+                      <Text style={styles.hierarchyLabel}>Division</Text>
+                      <Text style={styles.hierarchyValue}>{club.division}</Text>
+                    </View>
+                    {divisionFilter && (
+                      <MaterialCommunityIcons name="check-circle" size={18} color="#4caf50" />
+                    )}
+                  </View>
+
+                  {/* Union */}
+                  <View style={styles.hierarchyItem}>
+                    <MaterialCommunityIcons name="map-marker-radius" size={18} color="#6200ee" />
+                    <View style={styles.hierarchyInfo}>
+                      <Text style={styles.hierarchyLabel}>Union</Text>
+                      <Text style={styles.hierarchyValue}>{club.union}</Text>
+                    </View>
+                    {unionFilter && (
+                      <MaterialCommunityIcons name="check-circle" size={18} color="#4caf50" />
+                    )}
+                  </View>
+
+                  {/* Association */}
+                  <View style={styles.hierarchyItem}>
+                    <MaterialCommunityIcons name="office-building" size={18} color="#6200ee" />
+                    <View style={styles.hierarchyInfo}>
+                      <Text style={styles.hierarchyLabel}>Association</Text>
+                      <Text style={styles.hierarchyValue}>{club.association}</Text>
+                    </View>
+                    {associationFilter && (
+                      <MaterialCommunityIcons name="check-circle" size={18} color="#4caf50" />
+                    )}
+                  </View>
+
+                  {/* Church */}
+                  <View style={styles.hierarchyItem}>
+                    <MaterialCommunityIcons name="church" size={18} color="#6200ee" />
+                    <View style={styles.hierarchyInfo}>
+                      <Text style={styles.hierarchyLabel}>Church</Text>
+                      <Text style={styles.hierarchyValue}>{club.church}</Text>
+                    </View>
+                    {churchFilter && (
+                      <MaterialCommunityIcons name="check-circle" size={18} color="#4caf50" />
+                    )}
+                  </View>
+
+                  {/* Club */}
+                  <View style={styles.hierarchyItem}>
+                    <MaterialCommunityIcons name="account-group" size={18} color="#6200ee" />
+                    <View style={styles.hierarchyInfo}>
+                      <Text style={styles.hierarchyLabel}>Club</Text>
+                      <Text style={styles.hierarchyValue}>{club.name}</Text>
+                    </View>
+                    <MaterialCommunityIcons name="check-circle" size={18} color="#4caf50" />
+                  </View>
+                </View>
+              )}
+
               {/* Status Filter */}
               <View style={styles.filterSection}>
-                <Text style={styles.filterSectionTitle}>Status</Text>
+                <Text style={styles.filterSectionTitle}>Member Status</Text>
 
                 <TouchableOpacity
                   style={[styles.filterOption, statusFilter === 'all' && styles.filterOptionActive]}
@@ -857,6 +955,30 @@ const styles = StyleSheet.create({
   rejectButtonText: {
     color: '#fff',
     fontSize: 16,
+    fontWeight: '600',
+  },
+  hierarchyItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+    marginBottom: 8,
+    gap: 12,
+  },
+  hierarchyInfo: {
+    flex: 1,
+  },
+  hierarchyLabel: {
+    fontSize: 12,
+    color: '#999',
+    fontWeight: '500',
+    textTransform: 'uppercase',
+    marginBottom: 2,
+  },
+  hierarchyValue: {
+    fontSize: 14,
+    color: '#333',
     fontWeight: '600',
   },
   approvedMemberCard: {
