@@ -3,7 +3,7 @@
  * User authentication with validation and error handling
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -21,14 +21,11 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { validate, LoginSchema } from '../../utils/validation';
 import { getErrorMessage } from '../../utils/errors';
 
-// Test users for quick login (development only)
+// Test users for quick login (development only) - One of each type
 const TEST_USERS = [
   { email: 'admin@sda.com', name: 'Admin User', role: 'Admin', color: '#f44336' },
   { email: 'clubadmin@sda.com', name: 'Club Admin', role: 'Club Admin', color: '#ff9800' },
-  { email: 'user1@sda.com', name: 'John Doe', role: 'User', color: '#2196f3' },
-  { email: 'user2@sda.com', name: 'Jane Smith', role: 'User', color: '#2196f3' },
-  { email: 'user3@sda.com', name: 'Bob Johnson', role: 'User (Paused)', color: '#9e9e9e' },
-  { email: 'user4@sda.com', name: 'Alice Williams', role: 'User', color: '#2196f3' },
+  { email: 'user@sda.com', name: 'John Doe', role: 'User', color: '#2196f3' },
 ] as const;
 
 const DEFAULT_TEST_PASSWORD = 'password123';
@@ -38,7 +35,7 @@ const LoginScreen: React.FC = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-  
+
   const { login } = useAuth();
   const navigation = useNavigation();
 
@@ -47,7 +44,7 @@ const LoginScreen: React.FC = () => {
    */
   const validateForm = useCallback((): boolean => {
     const result = validate(LoginSchema, { email, password });
-    
+
     if (!result.success) {
       const formErrors: { email?: string; password?: string } = {};
       result.errors.forEach((error) => {
@@ -60,7 +57,7 @@ const LoginScreen: React.FC = () => {
       setErrors(formErrors);
       return false;
     }
-    
+
     setErrors({});
     return true;
   }, [email, password]);
@@ -88,21 +85,24 @@ const LoginScreen: React.FC = () => {
   /**
    * Handles quick login with test user
    */
-  const handleQuickLogin = useCallback(async (userEmail: string) => {
-    setEmail(userEmail);
-    setPassword(DEFAULT_TEST_PASSWORD);
-    setErrors({});
-    
-    setLoading(true);
-    try {
-      await login(userEmail, DEFAULT_TEST_PASSWORD);
-    } catch (error) {
-      const errorMessage = getErrorMessage(error);
-      Alert.alert('Login Failed', errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  }, [login]);
+  const handleQuickLogin = useCallback(
+    async (userEmail: string) => {
+      setEmail(userEmail);
+      setPassword(DEFAULT_TEST_PASSWORD);
+      setErrors({});
+
+      setLoading(true);
+      try {
+        await login(userEmail, DEFAULT_TEST_PASSWORD);
+      } catch (error) {
+        const errorMessage = getErrorMessage(error);
+        Alert.alert('Login Failed', errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [login]
+  );
 
   /**
    * Handles navigation to register screen
@@ -126,12 +126,7 @@ const LoginScreen: React.FC = () => {
         <View style={styles.form}>
           {/* Email Input */}
           <View style={styles.inputContainer}>
-            <MaterialCommunityIcons 
-              name="email" 
-              size={20} 
-              color="#666" 
-              style={styles.inputIcon} 
-            />
+            <MaterialCommunityIcons name="email" size={20} color="#666" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Email"
@@ -148,12 +143,7 @@ const LoginScreen: React.FC = () => {
 
           {/* Password Input */}
           <View style={styles.inputContainer}>
-            <MaterialCommunityIcons 
-              name="lock" 
-              size={20} 
-              color="#666" 
-              style={styles.inputIcon} 
-            />
+            <MaterialCommunityIcons name="lock" size={20} color="#666" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Password"
@@ -174,9 +164,7 @@ const LoginScreen: React.FC = () => {
             disabled={loading}
             testID="login-button"
           >
-            <Text style={styles.buttonText}>
-              {loading ? 'Logging in...' : 'Login'}
-            </Text>
+            <Text style={styles.buttonText}>{loading ? 'Logging in...' : 'Login'}</Text>
           </TouchableOpacity>
 
           {/* Register Link */}
@@ -186,7 +174,7 @@ const LoginScreen: React.FC = () => {
             disabled={loading}
           >
             <Text style={styles.linkText}>
-              Don't have an account? <Text style={styles.linkTextBold}>Register</Text>
+              Don&apos;t have an account? <Text style={styles.linkTextBold}>Register</Text>
             </Text>
           </TouchableOpacity>
 

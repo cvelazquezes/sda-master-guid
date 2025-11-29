@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
+  Platform,
+  StatusBar,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { User, Club } from '../types';
@@ -19,11 +21,7 @@ interface UserDetailModalProps {
   onClose: () => void;
 }
 
-export const UserDetailModal: React.FC<UserDetailModalProps> = ({
-  visible,
-  user,
-  onClose,
-}) => {
+export const UserDetailModal: React.FC<UserDetailModalProps> = ({ visible, user, onClose }) => {
   const [club, setClub] = useState<Club | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -54,6 +52,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
       animationType="fade"
       transparent={true}
       onRequestClose={onClose}
+      statusBarTranslucent
     >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
@@ -61,9 +60,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
           <View style={styles.header}>
             <View style={styles.headerLeft}>
               <View style={styles.avatar}>
-                <Text style={styles.avatarText}>
-                  {user.name.charAt(0).toUpperCase()}
-                </Text>
+                <Text style={styles.avatarText}>{user.name.charAt(0).toUpperCase()}</Text>
               </View>
               <View style={styles.headerInfo}>
                 <Text style={styles.headerTitle}>{user.name}</Text>
@@ -75,11 +72,11 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
             </TouchableOpacity>
           </View>
 
-          <ScrollView style={styles.content}>
+          <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
             {/* Personal Information */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Personal Information</Text>
-              
+
               <View style={styles.infoRow}>
                 <MaterialCommunityIcons name="account" size={20} color="#6200ee" />
                 <View style={styles.infoContent}>
@@ -110,9 +107,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 <MaterialCommunityIcons name="shield-account" size={20} color="#6200ee" />
                 <View style={styles.infoContent}>
                   <Text style={styles.infoLabel}>Role</Text>
-                  <Text style={styles.infoValue}>
-                    {user.role.replace('_', ' ').toUpperCase()}
-                  </Text>
+                  <Text style={styles.infoValue}>{user.role.replace('_', ' ').toUpperCase()}</Text>
                 </View>
               </View>
             </View>
@@ -120,16 +115,14 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
             {/* Status */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Status</Text>
-              
+
               <View style={styles.statusRow}>
                 <MaterialCommunityIcons
                   name={user.isActive ? 'check-circle' : 'cancel'}
                   size={20}
                   color={user.isActive ? '#4caf50' : '#f44336'}
                 />
-                <Text style={styles.statusText}>
-                  {user.isActive ? 'Active' : 'Inactive'}
-                </Text>
+                <Text style={styles.statusText}>{user.isActive ? 'Active' : 'Inactive'}</Text>
               </View>
 
               <View style={styles.statusRow}>
@@ -182,13 +175,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 20,
   },
   modalContent: {
     backgroundColor: '#fff',
     borderRadius: 20,
     width: '100%',
     maxWidth: 600,
-    maxHeight: '90%',
+    height: 600,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   header: {
     flexDirection: 'row',
@@ -235,6 +234,9 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  contentContainer: {
+    flexGrow: 1,
   },
   section: {
     padding: 20,
@@ -288,4 +290,3 @@ const styles = StyleSheet.create({
     color: '#666',
   },
 });
-

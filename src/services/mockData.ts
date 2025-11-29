@@ -1,6 +1,6 @@
 import { User, Club, Match, MatchRound, UserRole, MatchFrequency, MatchStatus } from '../types';
 
-// Mock Users
+// Mock Users - One of each type
 // Note: Users get their organizational hierarchy from their club
 export const mockUsers: User[] = [
   {
@@ -33,53 +33,11 @@ export const mockUsers: User[] = [
   },
   {
     id: '3',
-    email: 'user1@sda.com',
+    email: 'user@sda.com',
     name: 'John Doe',
     whatsappNumber: '+1 (555) 234-5678',
     role: UserRole.USER,
     clubId: '1', // Member of Club 1 (hierarchy from club)
-    isActive: true,
-    isPaused: false,
-    timezone: 'America/New_York',
-    language: 'en',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '4',
-    email: 'user2@sda.com',
-    name: 'Jane Smith',
-    whatsappNumber: '+1 (555) 345-6789',
-    role: UserRole.USER,
-    clubId: '1', // Member of Club 1 (hierarchy from club)
-    isActive: true,
-    isPaused: false,
-    timezone: 'America/Los_Angeles',
-    language: 'en',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '5',
-    email: 'user3@sda.com',
-    name: 'Bob Johnson',
-    whatsappNumber: '+1 (555) 456-7890',
-    role: UserRole.USER,
-    clubId: '1', // Member of Club 1 (hierarchy from club)
-    isActive: true,
-    isPaused: true, // This user has paused matches
-    timezone: 'America/Chicago',
-    language: 'en',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '6',
-    email: 'user4@sda.com',
-    name: 'Alice Williams',
-    whatsappNumber: '+1 (555) 567-8901',
-    role: UserRole.USER,
-    clubId: '2', // Member of Club 2 (hierarchy from club)
     isActive: true,
     isPaused: false,
     timezone: 'America/New_York',
@@ -105,7 +63,7 @@ export const mockClubs: Club[] = [
     division: 'North American Division',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    memberCount: 4,
+    memberCount: 2,
   },
   {
     id: '2',
@@ -214,7 +172,7 @@ export const initializeMockData = () => {
   mockClubs.forEach((club) => {
     club.memberCount = getUsersByClub(club.id).length;
   });
-  
+
   // Ensure all data is properly initialized
   return {
     users: mockUsers,
@@ -226,4 +184,3 @@ export const initializeMockData = () => {
 
 // Pre-initialize data on module load
 initializeMockData();
-

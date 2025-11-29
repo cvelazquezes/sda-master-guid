@@ -42,6 +42,14 @@ coverage/
 # Temporary files
 *.tmp
 *.temp
+*screenshot*.png
+app_screenshot*.png
+physical_device_screenshot.png
+
+# Debug and helper scripts (optional - for development)
+RUN_DEBUG.sh
+connect-device.sh
+DEBUG_ANDROID.md
 
 # Environment variables
 .env

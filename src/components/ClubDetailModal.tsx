@@ -6,6 +6,8 @@ import {
   Modal,
   TouchableOpacity,
   ScrollView,
+  Platform,
+  StatusBar,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Club } from '../types';
@@ -17,11 +19,7 @@ interface ClubDetailModalProps {
   onClose: () => void;
 }
 
-export const ClubDetailModal: React.FC<ClubDetailModalProps> = ({
-  visible,
-  club,
-  onClose,
-}) => {
+export const ClubDetailModal: React.FC<ClubDetailModalProps> = ({ visible, club, onClose }) => {
   if (!club) return null;
 
   return (
@@ -30,6 +28,7 @@ export const ClubDetailModal: React.FC<ClubDetailModalProps> = ({
       animationType="fade"
       transparent={true}
       onRequestClose={onClose}
+      statusBarTranslucent
     >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
@@ -49,11 +48,11 @@ export const ClubDetailModal: React.FC<ClubDetailModalProps> = ({
             </TouchableOpacity>
           </View>
 
-          <ScrollView style={styles.content}>
+          <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
             {/* Basic Information */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Basic Information</Text>
-              
+
               <View style={styles.infoRow}>
                 <MaterialCommunityIcons name="label" size={20} color="#6200ee" />
                 <View style={styles.infoContent}>
@@ -78,9 +77,7 @@ export const ClubDetailModal: React.FC<ClubDetailModalProps> = ({
                 />
                 <View style={styles.infoContent}>
                   <Text style={styles.infoLabel}>Status</Text>
-                  <Text style={styles.infoValue}>
-                    {club.isActive ? 'Active' : 'Inactive'}
-                  </Text>
+                  <Text style={styles.infoValue}>{club.isActive ? 'Active' : 'Inactive'}</Text>
                 </View>
               </View>
             </View>
@@ -88,14 +85,12 @@ export const ClubDetailModal: React.FC<ClubDetailModalProps> = ({
             {/* Match Settings */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Match Settings</Text>
-              
+
               <View style={styles.infoRow}>
                 <MaterialCommunityIcons name="calendar-clock" size={20} color="#6200ee" />
                 <View style={styles.infoContent}>
                   <Text style={styles.infoLabel}>Match Frequency</Text>
-                  <Text style={styles.infoValue}>
-                    {club.matchFrequency.replace('_', '-')}
-                  </Text>
+                  <Text style={styles.infoValue}>{club.matchFrequency.replace('_', '-')}</Text>
                 </View>
               </View>
 
@@ -146,13 +141,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 20,
   },
   modalContent: {
     backgroundColor: '#fff',
     borderRadius: 20,
     width: '100%',
     maxWidth: 600,
-    maxHeight: '90%',
+    height: 600,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   header: {
     flexDirection: 'row',
@@ -195,6 +196,9 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
+  contentContainer: {
+    flexGrow: 1,
+  },
   section: {
     padding: 20,
     borderBottomWidth: 1,
@@ -226,4 +230,3 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 });
-
