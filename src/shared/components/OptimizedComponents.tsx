@@ -1,0 +1,329 @@
+/**
+ * Optimized Components
+ * 
+ * Examples of React.memo usage and performance best practices.
+ * Use these patterns throughout the app for optimal performance.
+ */
+
+import React, { memo, useCallback, useMemo } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, ViewProps } from 'react-native';
+import { useTheme } from '../theme';
+
+// ============================================================================
+// Basic React.memo Example
+// ============================================================================
+
+interface ButtonProps {
+  title: string;
+  onPress: () => void;
+  variant?: 'primary' | 'secondary';
+  disabled?: boolean;
+}
+
+/**
+ * Optimized Button Component
+ * 
+ * Only re-renders when props actually change.
+ * 
+ * @example
+ * ```typescript
+ * <OptimizedButton
+ *   title="Click Me"
+ *   onPress={handleClick}
+ *   variant="primary"
+ * />
+ * ```
+ */
+export const OptimizedButton = memo<ButtonProps>(function OptimizedButton({
+  title,
+  onPress,
+  variant = 'primary',
+  disabled = false,
+}) {
+  const { theme } = useTheme();
+
+  const backgroundColor = variant === 'primary' 
+    ? theme.colors.primary 
+    : theme.colors.secondary;
+
+  return (
+    <TouchableOpacity
+      style={[
+        styles.button,
+        { backgroundColor },
+        disabled && styles.disabled,
+      ]}
+      onPress={onPress}
+      disabled={disabled}
+    >
+      <Text style={[styles.buttonText, { color: theme.colors.white }]}>
+        {title}
+      </Text>
+    </TouchableOpacity>
+  );
+});
+
+// ============================================================================
+// React.memo with Custom Comparison
+// ============================================================================
+
+interface CardProps {
+  id: string;
+  title: string;
+  description: string;
+  timestamp: Date;
+  onPress: (id: string) => void;
+}
+
+/**
+ * Optimized Card Component with custom comparison
+ * 
+ * Only re-renders when specific props change (ignores onPress reference changes)
+ */
+export const OptimizedCard = memo<CardProps>(
+  function OptimizedCard({ id, title, description, timestamp, onPress }) {
+    const { theme } = useTheme();
+
+    const handlePress = useCallback(() => {
+      onPress(id);
+    }, [id, onPress]);
+
+    const formattedDate = useMemo(() => {
+      return timestamp.toLocaleDateString();
+    }, [timestamp]);
+
+    return (
+      <TouchableOpacity
+        style={[styles.card, { backgroundColor: theme.colors.surface }]}
+        onPress={handlePress}
+      >
+        <Text style={[styles.cardTitle, { color: theme.colors.onSurface }]}>
+          {title}
+        </Text>
+        <Text style={[styles.cardDescription, { color: theme.colors.onSurfaceVariant }]}>
+          {description}
+        </Text>
+        <Text style={[styles.cardDate, { color: theme.colors.onSurfaceVariant }]}>
+          {formattedDate}
+        </Text>
+      </TouchableOpacity>
+    );
+  },
+  // Custom comparison function
+  (prevProps, nextProps) => {
+    // Only re-render if these props change
+    return (
+      prevProps.id === nextProps.id &&
+      prevProps.title === nextProps.title &&
+      prevProps.description === nextProps.description &&
+      prevProps.timestamp.getTime() === nextProps.timestamp.getTime()
+    );
+    // onPress is intentionally excluded from comparison
+  }
+);
+
+// ============================================================================
+// Optimized List Item
+// ============================================================================
+
+interface ListItemProps {
+  id: string;
+  name: string;
+  email: string;
+  onPress: (id: string) => void;
+  selected?: boolean;
+}
+
+/**
+ * Optimized List Item for use in FlatList
+ * 
+ * @example
+ * ```typescript
+ * <FlatList
+ *   data={items}
+ *   renderItem={({ item }) => (
+ *     <OptimizedListItem
+ *       id={item.id}
+ *       name={item.name}
+ *       email={item.email}
+ *       onPress={handlePress}
+ *       selected={item.id === selectedId}
+ *     />
+ *   )}
+ *   keyExtractor={(item) => item.id}
+ * />
+ * ```
+ */
+export const OptimizedListItem = memo<ListItemProps>(function OptimizedListItem({
+  id,
+  name,
+  email,
+  onPress,
+  selected = false,
+}) {
+  const { theme } = useTheme();
+
+  const handlePress = useCallback(() => {
+    onPress(id);
+  }, [id, onPress]);
+
+  const backgroundColor = selected 
+    ? theme.colors.primaryLight 
+    : theme.colors.surface;
+
+  return (
+    <TouchableOpacity
+      style={[styles.listItem, { backgroundColor }]}
+      onPress={handlePress}
+    >
+      <View style={styles.listItemContent}>
+        <Text style={[styles.listItemName, { color: theme.colors.onSurface }]}>
+          {name}
+        </Text>
+        <Text style={[styles.listItemEmail, { color: theme.colors.onSurfaceVariant }]}>
+          {email}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  );
+});
+
+// ============================================================================
+// Optimized Container with Children
+// ============================================================================
+
+interface ContainerProps extends ViewProps {
+  children: React.ReactNode;
+  padding?: number;
+}
+
+/**
+ * Optimized Container Component
+ * 
+ * Memoizes container to prevent re-renders when parent updates
+ * but container props haven't changed.
+ */
+export const OptimizedContainer = memo<ContainerProps>(function OptimizedContainer({
+  children,
+  padding = 16,
+  style,
+  ...rest
+}) {
+  const { theme } = useTheme();
+
+  return (
+    <View
+      style={[
+        { 
+          backgroundColor: theme.colors.background,
+          padding,
+        },
+        style,
+      ]}
+      {...rest}
+    >
+      {children}
+    </View>
+  );
+});
+
+// ============================================================================
+// Performance Best Practices Guide
+// ============================================================================
+
+/**
+ * BEST PRACTICES:
+ * 
+ * 1. Use React.memo for components that:
+ *    - Render often with same props
+ *    - Are in lists (FlatList items)
+ *    - Have expensive render logic
+ *    - Receive stable props
+ * 
+ * 2. DON'T use React.memo for:
+ *    - Components that rarely re-render
+ *    - Components with always-changing props
+ *    - Very simple components (overhead > benefit)
+ * 
+ * 3. Combine with useMemo and useCallback:
+ *    - useMemo for expensive calculations
+ *    - useCallback for stable function references
+ * 
+ * 4. Custom comparison functions:
+ *    - Use when you want fine-grained control
+ *    - Ignore props that don't affect render
+ *    - Keep comparison logic simple
+ * 
+ * 5. List optimization:
+ *    - Always use keyExtractor
+ *    - Memoize list items
+ *    - Use FlatList's built-in optimizations
+ *    - Consider using FlashList for very large lists
+ * 
+ * @example
+ * ```typescript
+ * // Good: Stable callback
+ * const handlePress = useCallback((id: string) => {
+ *   console.log(id);
+ * }, []); // Empty deps = stable reference
+ * 
+ * // Good: Memoized expensive calculation
+ * const sortedData = useMemo(() => {
+ *   return data.sort((a, b) => a.name.localeCompare(b.name));
+ * }, [data]); // Only recalculate when data changes
+ * 
+ * // Good: Memoized component
+ * const MemoizedItem = memo(Item);
+ * ```
+ */
+
+const styles = StyleSheet.create({
+  button: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  disabled: {
+    opacity: 0.5,
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  card: {
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  cardDescription: {
+    fontSize: 14,
+    marginBottom: 8,
+  },
+  cardDate: {
+    fontSize: 12,
+  },
+  listItem: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+  },
+  listItemContent: {
+    flex: 1,
+  },
+  listItemName: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  listItemEmail: {
+    fontSize: 14,
+  },
+});
+
