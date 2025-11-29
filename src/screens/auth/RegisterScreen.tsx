@@ -15,7 +15,8 @@ import { useAuth } from '../../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { clubService } from '../../services/clubService';
-import { Club } from '../../types';
+import { Club, PathfinderClass } from '../../types';
+import { ClassSelectionModal } from '../../components/ClassSelectionModal';
 
 const RegisterScreen = () => {
   const [name, setName] = useState('');
@@ -32,6 +33,9 @@ const RegisterScreen = () => {
   const [clubs, setClubs] = useState<Club[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingClubs, setLoadingClubs] = useState(true);
+  // Class selection
+  const [selectedClasses, setSelectedClasses] = useState<PathfinderClass[]>(['Friend']);
+  const [classModalVisible, setClassModalVisible] = useState(false);
   const { register } = useAuth();
   const navigation = useNavigation();
 
@@ -130,6 +134,11 @@ const RegisterScreen = () => {
       return;
     }
 
+    if (selectedClasses.length === 0) {
+      Alert.alert('Error', 'Please select at least one Pathfinder class');
+      return;
+    }
+
     // Validate WhatsApp number format (basic validation)
     const whatsappRegex = /^\+?[1-9]\d{1,14}$/;
     if (!whatsappRegex.test(whatsappNumber.replace(/[\s()-]/g, ''))) {
@@ -152,7 +161,8 @@ const RegisterScreen = () => {
 
     setLoading(true);
     try {
-      await register(email, password, name, whatsappNumber, clubId);
+      // Pass classes as additional data
+      await register(email, password, name, whatsappNumber, clubId, selectedClasses);
       // Registration successful - user will be redirected to PendingApprovalScreen automatically
     } catch (error) {
       Alert.alert('Registration Failed', 'Registration failed');
@@ -354,6 +364,30 @@ const RegisterScreen = () => {
             </View>
           )}
 
+          {/* Pathfinder Classes Selection */}
+          <View style={styles.sectionHeader}>
+            <MaterialCommunityIcons name="school" size={20} color="#6200ee" />
+            <Text style={styles.sectionTitle}>Pathfinder Classes</Text>
+          </View>
+          <Text style={styles.sectionDescription}>
+            Select 1 to 3 Pathfinder classes you belong to
+          </Text>
+
+          <TouchableOpacity
+            style={styles.classSelectionButton}
+            onPress={() => setClassModalVisible(true)}
+          >
+            <View style={styles.classSelectionContent}>
+              <MaterialCommunityIcons name="school" size={20} color="#6200ee" />
+              <Text style={styles.classSelectionText}>
+                {selectedClasses.length > 0
+                  ? `Selected: ${selectedClasses.join(', ')}`
+                  : 'Select Classes'}
+              </Text>
+            </View>
+            <MaterialCommunityIcons name="chevron-right" size={24} color="#6200ee" />
+          </TouchableOpacity>
+
           <View style={styles.inputContainer}>
             <MaterialCommunityIcons name="lock" size={20} color="#666" style={styles.inputIcon} />
             <TextInput
@@ -401,6 +435,14 @@ const RegisterScreen = () => {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Class Selection Modal */}
+      <ClassSelectionModal
+        visible={classModalVisible}
+        initialClasses={selectedClasses}
+        onSave={(classes) => setSelectedClasses(classes)}
+        onClose={() => setClassModalVisible(false)}
+      />
     </KeyboardAvoidingView>
   );
 };
@@ -567,6 +609,29 @@ const styles = StyleSheet.create({
   linkTextBold: {
     color: '#6200ee',
     fontWeight: 'bold',
+  },
+  classSelectionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    marginBottom: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 16,
+    backgroundColor: '#f9f9f9',
+  },
+  classSelectionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+  },
+  classSelectionText: {
+    fontSize: 16,
+    color: '#333',
+    flex: 1,
   },
 });
 

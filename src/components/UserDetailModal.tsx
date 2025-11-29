@@ -112,6 +112,21 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ visible, user,
               </View>
             </View>
 
+            {/* Pathfinder Classes */}
+            {user.role !== 'admin' && user.classes && user.classes.length > 0 && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Pathfinder Classes</Text>
+                <View style={styles.classesContainer}>
+                  {user.classes.map((pathfinderClass, index) => (
+                    <View key={index} style={styles.classBadge}>
+                      <MaterialCommunityIcons name="school" size={16} color="#6200ee" />
+                      <Text style={styles.classBadgeText}>{pathfinderClass}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
             {/* Status */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Status</Text>
@@ -288,5 +303,24 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     fontSize: 14,
     color: '#666',
+  },
+  classesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  classBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f0e6ff',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    gap: 6,
+  },
+  classBadgeText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#6200ee',
   },
 });

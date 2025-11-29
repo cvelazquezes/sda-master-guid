@@ -15,8 +15,8 @@ import { clubService } from '../../services/clubService';
 import { userService } from '../../services/userService';
 import { useAuth } from '../../context/AuthContext';
 import { UserDetailModal } from '../../components/UserDetailModal';
-import { UserCard } from '../../components/UserCard';
-import { User } from '../../types';
+import { User, PathfinderClass } from '../../types';
+import { ClassSelectionModal } from '../../components/ClassSelectionModal';
 
 const ClubMembersScreen = () => {
   const { user } = useAuth();
@@ -30,6 +30,10 @@ const ClubMembersScreen = () => {
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'paused'>('all');
   const [activeTab, setActiveTab] = useState<'approved' | 'pending'>('approved');
+
+  // Class editing
+  const [classEditModalVisible, setClassEditModalVisible] = useState(false);
+  const [memberToEdit, setMemberToEdit] = useState<User | null>(null);
 
   useEffect(() => {
     if (user?.clubId) {
@@ -117,6 +121,23 @@ const ClubMembersScreen = () => {
         },
       },
     ]);
+  };
+
+  const handleEditClasses = (member: User) => {
+    setMemberToEdit(member);
+    setClassEditModalVisible(true);
+  };
+
+  const handleSaveClasses = async (classes: PathfinderClass[]) => {
+    if (!memberToEdit) return;
+
+    try {
+      await userService.updateUser(memberToEdit.id, { classes });
+      Alert.alert('Success', 'Classes updated successfully');
+      loadData();
+    } catch (error) {
+      Alert.alert('Error', 'Failed to update classes');
+    }
   };
 
   const clearFilters = () => {
@@ -277,17 +298,68 @@ const ClubMembersScreen = () => {
           ) : (
             // Approved members with normal actions
             filteredMembers.map((member) => (
-              <UserCard
-                key={member.id}
-                user={member}
-                onPress={() => {
-                  setSelectedMember(member);
-                  setDetailVisible(true);
-                }}
-                showAdminActions={true}
-                onToggleStatus={() => handleToggleMemberStatus(member.id, member.isActive)}
-                onDelete={() => handleDeleteMember(member.id, member.name)}
-              />
+              <View key={member.id} style={styles.approvedMemberCard}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setSelectedMember(member);
+                    setDetailVisible(true);
+                  }}
+                  style={styles.approvedMemberMain}
+                >
+                  <View style={styles.approvedMemberHeader}>
+                    <View style={styles.approvedMemberInfo}>
+                      <Text style={styles.approvedMemberName}>{member.name}</Text>
+                      <Text style={styles.approvedMemberEmail}>{member.email}</Text>
+                      {member.classes && member.classes.length > 0 && (
+                        <View style={styles.classesRow}>
+                          <MaterialCommunityIcons name="school" size={14} color="#6200ee" />
+                          <Text style={styles.classesText}>{member.classes.join(', ')}</Text>
+                        </View>
+                      )}
+                    </View>
+                    <View style={styles.memberStatusBadge}>
+                      <MaterialCommunityIcons
+                        name={member.isPaused ? 'pause-circle' : 'check-circle'}
+                        size={16}
+                        color={member.isPaused ? '#ff9800' : '#4caf50'}
+                      />
+                      <Text style={styles.memberStatusText}>
+                        {member.isPaused ? 'Paused' : 'Active'}
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+
+                <View style={styles.approvedMemberActions}>
+                  <TouchableOpacity
+                    style={styles.actionButton}
+                    onPress={() => handleEditClasses(member)}
+                  >
+                    <MaterialCommunityIcons name="school-outline" size={18} color="#6200ee" />
+                    <Text style={styles.actionButtonText}>Edit Classes</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.actionButton}
+                    onPress={() => handleToggleMemberStatus(member.id, member.isActive)}
+                  >
+                    <MaterialCommunityIcons
+                      name={member.isPaused ? 'play' : 'pause'}
+                      size={18}
+                      color="#ff9800"
+                    />
+                    <Text style={styles.actionButtonText}>
+                      {member.isPaused ? 'Resume' : 'Pause'}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.actionButton}
+                    onPress={() => handleDeleteMember(member.id, member.name)}
+                  >
+                    <MaterialCommunityIcons name="delete-outline" size={18} color="#f44336" />
+                    <Text style={[styles.actionButtonText, { color: '#f44336' }]}>Delete</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             ))
           )
         ) : (
@@ -432,6 +504,17 @@ const ClubMembersScreen = () => {
         onClose={() => {
           setDetailVisible(false);
           setSelectedMember(null);
+        }}
+      />
+
+      {/* Class Edit Modal */}
+      <ClassSelectionModal
+        visible={classEditModalVisible}
+        initialClasses={memberToEdit?.classes || []}
+        onSave={handleSaveClasses}
+        onClose={() => {
+          setClassEditModalVisible(false);
+          setMemberToEdit(null);
         }}
       />
     </ScrollView>
@@ -750,6 +833,84 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  approvedMemberCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    overflow: 'hidden',
+  },
+  approvedMemberMain: {
+    padding: 16,
+  },
+  approvedMemberHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  approvedMemberInfo: {
+    flex: 1,
+    marginRight: 12,
+  },
+  approvedMemberName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  approvedMemberEmail: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 8,
+  },
+  classesRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  classesText: {
+    fontSize: 13,
+    color: '#6200ee',
+    fontWeight: '500',
+  },
+  memberStatusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    gap: 4,
+  },
+  memberStatusText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#666',
+  },
+  approvedMemberActions: {
+    flexDirection: 'row',
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    gap: 6,
+    borderRightWidth: 1,
+    borderRightColor: '#f0f0f0',
+  },
+  actionButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#666',
   },
 });
 

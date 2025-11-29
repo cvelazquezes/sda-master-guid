@@ -88,7 +88,8 @@ class AuthService {
     password: string,
     name: string,
     whatsappNumber: string,
-    clubId: string
+    clubId: string,
+    classes?: string[]
   ): Promise<AuthResponse> {
     // Validate input
     const data: RegisterData = validateOrThrow(RegisterSchema, {
@@ -102,7 +103,7 @@ class AuthService {
     logger.info('Registration attempt', { email: data.email });
 
     if (this.useMockData) {
-      return await this.mockRegister(data);
+      return await this.mockRegister(data, classes);
     }
 
     try {
@@ -119,7 +120,7 @@ class AuthService {
   /**
    * Mock registration implementation
    */
-  private async mockRegister(data: RegisterData): Promise<AuthResponse> {
+  private async mockRegister(data: RegisterData, classes?: string[]): Promise<AuthResponse> {
     await this.sleep(MOCK_API_DELAY_MS);
 
     // Check if user already exists
@@ -138,6 +139,7 @@ class AuthService {
       isActive: false, // Inactive until approved
       isPaused: false,
       approvalStatus: 'pending', // Pending approval by club admin
+      classes: (classes || ['Friend']) as string[], // Default to Friend if not provided
       timezone: 'America/New_York',
       language: 'en',
       createdAt: new Date().toISOString(),

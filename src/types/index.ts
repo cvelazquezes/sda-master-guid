@@ -24,6 +24,18 @@ export enum ApprovalStatus {
   REJECTED = 'rejected',
 }
 
+// Available Pathfinder classes
+export const PATHFINDER_CLASSES = [
+  'Friend',
+  'Companion',
+  'Explorer',
+  'Ranger',
+  'Voyager',
+  'Guide',
+] as const;
+
+export type PathfinderClass = (typeof PATHFINDER_CLASSES)[number];
+
 export interface User {
   id: string;
   email: string;
@@ -34,6 +46,7 @@ export interface User {
   isActive: boolean;
   isPaused: boolean;
   approvalStatus: ApprovalStatus; // Approval status for club membership
+  classes: PathfinderClass[]; // Pathfinder classes (min 1, max 3)
   timezone: string;
   language: string;
   createdAt: string;
@@ -86,7 +99,8 @@ export interface AuthContextType {
     password: string,
     name: string,
     whatsappNumber: string,
-    clubId: string
+    clubId: string,
+    classes?: PathfinderClass[]
   ) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (userData: Partial<User>) => Promise<void>;

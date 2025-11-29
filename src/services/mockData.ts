@@ -22,6 +22,7 @@ export const mockUsers: User[] = [
     isActive: true,
     isPaused: false,
     approvalStatus: ApprovalStatus.APPROVED, // Admin is auto-approved
+    classes: [], // Admin doesn't need classes
     timezone: 'America/New_York',
     language: 'en',
     createdAt: new Date().toISOString(),
@@ -37,6 +38,7 @@ export const mockUsers: User[] = [
     isActive: true,
     isPaused: false,
     approvalStatus: ApprovalStatus.APPROVED, // Club admin is auto-approved
+    classes: ['Guide', 'Voyager'],
     timezone: 'America/New_York',
     language: 'en',
     createdAt: new Date().toISOString(),
@@ -52,6 +54,7 @@ export const mockUsers: User[] = [
     isActive: true,
     isPaused: false,
     approvalStatus: ApprovalStatus.APPROVED, // Approved member
+    classes: ['Explorer', 'Ranger'],
     timezone: 'America/New_York',
     language: 'en',
     createdAt: new Date().toISOString(),
@@ -67,6 +70,7 @@ export const mockUsers: User[] = [
     isActive: false,
     isPaused: false,
     approvalStatus: ApprovalStatus.PENDING, // Pending approval
+    classes: ['Friend', 'Companion'],
     timezone: 'America/New_York',
     language: 'en',
     createdAt: new Date().toISOString(),
@@ -82,6 +86,7 @@ export const mockUsers: User[] = [
     isActive: false,
     isPaused: false,
     approvalStatus: ApprovalStatus.PENDING, // Pending approval
+    classes: ['Explorer'],
     timezone: 'America/New_York',
     language: 'en',
     createdAt: new Date().toISOString(),
@@ -97,6 +102,7 @@ export const mockUsers: User[] = [
     isActive: false,
     isPaused: false,
     approvalStatus: ApprovalStatus.PENDING, // Pending approval
+    classes: ['Ranger', 'Voyager', 'Guide'],
     timezone: 'America/Mexico_City',
     language: 'en',
     createdAt: new Date().toISOString(),
@@ -112,6 +118,7 @@ export const mockUsers: User[] = [
     isActive: true,
     isPaused: false,
     approvalStatus: ApprovalStatus.APPROVED, // Approved member
+    classes: ['Friend', 'Companion', 'Explorer'],
     timezone: 'America/Mexico_City',
     language: 'es',
     createdAt: new Date().toISOString(),
@@ -127,6 +134,7 @@ export const mockUsers: User[] = [
     isActive: true,
     isPaused: false,
     approvalStatus: ApprovalStatus.APPROVED, // Approved member
+    classes: ['Voyager'],
     timezone: 'America/Mexico_City',
     language: 'es',
     createdAt: new Date().toISOString(),

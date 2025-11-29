@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { User, AuthContextType } from '../types';
 import { authService } from '../services/authService';
 import { logger } from '../utils/logger';
-import { getErrorMessage } from '../utils/errors';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -41,7 +40,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     password: string,
     name: string,
     whatsappNumber: string,
-    clubId: string
+    clubId: string,
+    classes?: string[]
   ): Promise<void> => {
     try {
       const { user: registeredUser } = await authService.register(
@@ -49,7 +49,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         password,
         name,
         whatsappNumber,
-        clubId
+        clubId,
+        classes
       );
       setUser(registeredUser);
     } catch (error) {
@@ -107,4 +108,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
