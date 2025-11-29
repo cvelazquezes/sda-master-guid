@@ -185,8 +185,9 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   classList: {
-    flex: 1,
+    maxHeight: 400,
     paddingHorizontal: 16,
+    marginBottom: 16,
   },
   classOption: {
     flexDirection: 'row',
