@@ -19,8 +19,11 @@ export const ClassSelectionModal: React.FC<ClassSelectionModalProps> = ({
   const [selectedClasses, setSelectedClasses] = useState<PathfinderClass[]>(initialClasses);
 
   useEffect(() => {
-    setSelectedClasses(initialClasses);
-  }, [initialClasses, visible]);
+    // Only reset when modal becomes visible, not when initialClasses changes
+    if (visible) {
+      setSelectedClasses(initialClasses);
+    }
+  }, [visible]); // Removed initialClasses from dependencies
 
   const toggleClass = (pathfinderClass: PathfinderClass) => {
     if (selectedClasses.includes(pathfinderClass)) {
