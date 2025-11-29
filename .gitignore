@@ -16,6 +16,7 @@ web-build/
 *.mobileprovision
 android/app/build/
 android/app/release/
+android/local.properties
 ios/Pods/
 ios/build/
 *.ipa
