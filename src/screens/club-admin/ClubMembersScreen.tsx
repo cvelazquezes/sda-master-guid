@@ -183,6 +183,31 @@ const ClubMembersScreen = () => {
     return members.filter((m) => m.approvalStatus === 'approved').length;
   }, [members]);
 
+  // Auto-select tab if only one has members
+  useEffect(() => {
+    if (members.length > 0 && pendingCount === 0 && approvedCount > 0) {
+      setActiveTab('approved');
+    } else if (members.length > 0 && approvedCount === 0 && pendingCount > 0) {
+      setActiveTab('pending');
+    }
+  }, [members, pendingCount, approvedCount]);
+
+  // Auto-select status filter based on available data
+  useEffect(() => {
+    if (activeTab === 'approved' && members.length > 0) {
+      const approvedMembers = members.filter((m) => m.approvalStatus === 'approved');
+      const hasActive = approvedMembers.some((m) => !m.isPaused);
+      const hasPaused = approvedMembers.some((m) => m.isPaused);
+
+      // If only one type exists, auto-select it
+      if (hasActive && !hasPaused && statusFilter === 'all') {
+        setStatusFilter('active');
+      } else if (hasPaused && !hasActive && statusFilter === 'all') {
+        setStatusFilter('paused');
+      }
+    }
+  }, [activeTab, members, statusFilter]);
+
   return (
     <ScrollView
       style={styles.container}
