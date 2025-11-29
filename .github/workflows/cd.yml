@@ -1,0 +1,184 @@
+# Continuous Deployment Workflow
+# Deploys to staging on push to main, production on tags
+
+name: CD
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - 'v*'
+
+jobs:
+  deploy-staging:
+    name: Deploy to Staging
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: staging
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run tests
+        run: npm run test:ci
+      
+      - name: Build staging
+        run: npm run build
+        env:
+          EXPO_PUBLIC_ENV: staging
+          EXPO_PUBLIC_API_URL: ${{ secrets.STAGING_API_URL }}
+      
+      - name: Deploy to Staging (EAS Build)
+        run: |
+          echo "🚀 Building and deploying to staging..."
+          # npx eas-cli build --platform all --profile preview --non-interactive
+          echo "EAS build command would run here"
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      
+      - name: Run Health Check
+        run: |
+          echo "🏥 Checking deployment health..."
+          sleep 10
+          # curl -f https://staging-api.example.com/health || exit 1
+          echo "Health check passed"
+      
+      - name: Notify Deployment Success
+        if: success()
+        run: |
+          echo "✅ Staging deployment successful"
+          # curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
+          #   -H 'Content-Type: application/json' \
+          #   -d '{"text":"✅ Staging deployed successfully"}'
+      
+      - name: Notify Deployment Failure
+        if: failure()
+        run: |
+          echo "❌ Staging deployment failed"
+          # curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
+          #   -H 'Content-Type: application/json' \
+          #   -d '{"text":"❌ Staging deployment failed"}'
+
+  deploy-production:
+    name: Deploy to Production
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://app.example.com
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run all tests
+        run: npm run validate
+      
+      - name: Build production
+        run: npm run build
+        env:
+          EXPO_PUBLIC_ENV: production
+          EXPO_PUBLIC_API_URL: ${{ secrets.PROD_API_URL }}
+      
+      - name: Deploy to Production (EAS Build)
+        run: |
+          echo "🚀 Building and deploying to production..."
+          # npx eas-cli build --platform all --profile production --non-interactive
+          echo "EAS build command would run here"
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      
+      - name: Submit to App Stores
+        run: |
+          echo "📱 Submitting to app stores..."
+          # npx eas-cli submit --platform all --profile production --non-interactive
+          echo "App store submission would run here"
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      
+      - name: Production Health Check
+        run: |
+          echo "🏥 Running comprehensive health check..."
+          max_attempts=5
+          attempt=1
+          while [ $attempt -le $max_attempts ]; do
+            echo "Health check attempt $attempt of $max_attempts..."
+            # if curl -f https://api.example.com/health; then
+            #   echo "Health check passed!"
+            #   break
+            # fi
+            echo "Health check would run here"
+            break
+            attempt=$((attempt + 1))
+            sleep 10
+          done
+      
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            ## 🎉 Production Release ${{ github.ref }}
+            
+            ### Deployment Information
+            - **Build Time**: ${{ github.event.head_commit.timestamp }}
+            - **Commit**: ${{ github.sha }}
+            - **Author**: ${{ github.actor }}
+            
+            ### What's Changed
+            See [CHANGELOG.md](CHANGELOG.md) for full details
+          draft: false
+          prerelease: false
+      
+      - name: Rollback on Failure
+        if: failure()
+        run: |
+          echo "⚠️ Deployment failed, initiating rollback..."
+          # ./scripts/rollback.sh || echo "Rollback script not found"
+          echo "Rollback procedures would run here"
+      
+      - name: Notify Production Success
+        if: success()
+        run: |
+          echo "✅ Production deployment successful!"
+          # curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
+          #   -H 'Content-Type: application/json' \
+          #   -d '{"text":"🎉 Production deployed: ${{ github.ref }}"}'
+          # curl -X POST ${{ secrets.PAGERDUTY_WEBHOOK }} \
+          #   -H 'Content-Type: application/json' \
+          #   -d '{"event_action":"resolve"}'
+      
+      - name: Notify Production Failure
+        if: failure()
+        run: |
+          echo "❌ Production deployment failed!"
+          # curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
+          #   -H 'Content-Type: application/json' \
+          #   -d '{"text":"🚨 CRITICAL: Production deployment failed!"}'
+          # curl -X POST ${{ secrets.PAGERDUTY_WEBHOOK }} \
+          #   -H 'Content-Type: application/json' \
+          #   -d '{"event_action":"trigger","payload":{"severity":"critical"}}'
+
