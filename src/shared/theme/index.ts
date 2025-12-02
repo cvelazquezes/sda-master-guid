@@ -4,11 +4,22 @@
  * Comprehensive design system combining colors, typography, spacing, and more.
  * Supports light/dark modes and follows Material Design & iOS HIG principles.
  * 
+ * Updated with SDA Master Guide Brand Colors and Design Tokens
+ * 
  * Based on design systems from:
  * - Material Design 3
  * - iOS Human Interface Guidelines
  * - Tailwind CSS
  * - Chakra UI
+ * 
+ * DESIGN TOKENS (Recommended - Single Source of Truth):
+ * Import from './tokens' for the new unified token system:
+ * 
+ * ```typescript
+ * import { useDesignTokens } from '../hooks/useDesignTokens';
+ * // or
+ * import { designTokensV2, resolveTokens } from '../theme/tokens';
+ * ```
  */
 
 import { colors, colorUtils } from './colors';
@@ -26,6 +37,31 @@ import {
   componentSpacing,
   containerSpacing,
 } from './spacing';
+import {
+  mobileTypography,
+  mobileFontSizes,
+  mobileIconSizes,
+  touchTargets,
+  textStyles,
+  getResponsiveFontSize,
+  calculateLineHeight,
+  isMobileFriendly,
+} from './mobileTypography';
+
+// SDA Brand Colors and Design Tokens
+import sdaColors, {
+  sdaBrandColors,
+  sdaSemanticColors,
+  roleColors,
+  statusColors,
+  hierarchyColors,
+  sdaColorUtils,
+} from './sdaColors';
+
+import { designTokens } from './designTokens';
+
+// NEW: Design Tokens V2 - Single Source of Truth
+import { designTokensV2 } from './tokens';
 
 /**
  * Theme modes
@@ -187,107 +223,18 @@ export function getTheme(mode: ThemeMode): Theme {
 }
 
 /**
- * Theme provider hook (for React Context)
+ * Note: useTheme hook is re-exported from ThemeContext for convenience.
+ * The app uses ThemeContext for theme management.
  */
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { Appearance, ColorSchemeName } from 'react-native';
 
-interface ThemeContextValue {
-  theme: Theme;
-  mode: ThemeMode;
-  toggleTheme: () => void;
-  setTheme: (mode: ThemeMode) => void;
-}
-
-const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
-
-/**
- * Theme Provider Component
- * 
- * @example
- * ```typescript
- * <ThemeProvider>
- *   <App />
- * </ThemeProvider>
- * ```
- */
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [mode, setMode] = useState<ThemeMode>('system');
-  const [effectiveMode, setEffectiveMode] = useState<'light' | 'dark'>('light');
-
-  // Listen to system theme changes
-  useEffect(() => {
-    const subscription = Appearance.addChangeListener(({ colorScheme }) => {
-      if (mode === 'system') {
-        setEffectiveMode(colorScheme === 'dark' ? 'dark' : 'light');
-      }
-    });
-
-    // Set initial theme
-    if (mode === 'system') {
-      const systemScheme = Appearance.getColorScheme();
-      setEffectiveMode(systemScheme === 'dark' ? 'dark' : 'light');
-    } else {
-      setEffectiveMode(mode);
-    }
-
-    return () => subscription.remove();
-  }, [mode]);
-
-  const currentTheme = getTheme(effectiveMode);
-
-  const toggleTheme = useCallback(() => {
-    setMode((prev) => {
-      if (prev === 'light') return 'dark';
-      if (prev === 'dark') return 'system';
-      return 'light';
-    });
-  }, []);
-
-  const setThemeMode = useCallback((newMode: ThemeMode) => {
-    setMode(newMode);
-  }, []);
-
-  const value: ThemeContextValue = {
-    theme: currentTheme,
-    mode: effectiveMode,
-    toggleTheme,
-    setTheme: setThemeMode,
-  };
-
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
-}
-
-/**
- * Hook to use theme in components
- * 
- * @returns Theme context value
- * 
- * @example
- * ```typescript
- * function MyComponent() {
- *   const { theme, toggleTheme } = useTheme();
- *   
- *   return (
- *     <View style={{ backgroundColor: theme.colors.background }}>
- *       <Text style={theme.typography.bodyLarge}>Hello</Text>
- *     </View>
- *   );
- * }
- * ```
- */
-export function useTheme(): ThemeContextValue {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error('useTheme must be used within ThemeProvider');
-  }
-  return context;
-}
+// Re-export useTheme from ThemeContext
+export { useTheme } from '../../contexts/ThemeContext';
 
 /**
  * Export all theme-related utilities
  */
 export {
+  // Legacy colors and typography
   colors,
   colorUtils,
   typography,
@@ -306,7 +253,31 @@ export {
   opacity,
   sizes,
   iconSizes,
+  mobileTypography,
+  mobileFontSizes,
+  mobileIconSizes,
+  touchTargets,
+  textStyles,
+  getResponsiveFontSize,
+  calculateLineHeight,
+  isMobileFriendly,
+  
+  // SDA Brand System (Recommended)
+  sdaColors,
+  sdaBrandColors,
+  sdaSemanticColors,
+  roleColors,
+  statusColors,
+  hierarchyColors,
+  sdaColorUtils,
+  designTokens,
+  
+  // NEW: Design Tokens V2 - Single Source of Truth (RECOMMENDED)
+  designTokensV2,
 };
+
+// Export the new token system
+export * from './tokens';
 
 /**
  * Export types
