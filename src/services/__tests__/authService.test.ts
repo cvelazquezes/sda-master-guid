@@ -94,6 +94,7 @@ describe('AuthService', () => {
         'new@example.com',
         'SecurePass123!',
         'New User',
+        '+1234567890',
         'club1'
       );
 
@@ -124,6 +125,7 @@ describe('AuthService', () => {
           'existing@example.com',
           'password123',
           'New User',
+          '+1234567890',
           'club1'
         )
       ).rejects.toThrow('User already exists');
@@ -205,6 +207,9 @@ describe('AuthService', () => {
         isPaused: false,
         timezone: 'UTC',
         language: 'en',
+        whatsappNumber: '+1234567890',
+        approvalStatus: 'approved' as any,
+        classes: ['Friend'] as any,
         createdAt: '2024-01-01',
         updatedAt: '2024-01-01',
       };

@@ -20,7 +20,6 @@ export const mockUsers: User[] = [
     role: UserRole.ADMIN,
     clubId: null, // Admin doesn't need a club
     isActive: true,
-    isPaused: false,
     approvalStatus: ApprovalStatus.APPROVED, // Admin is auto-approved
     classes: [], // Admin doesn't need classes
     timezone: 'America/New_York',
@@ -36,7 +35,6 @@ export const mockUsers: User[] = [
     role: UserRole.CLUB_ADMIN,
     clubId: '4', // Member of Elphis Kalein (Narvarte)
     isActive: true,
-    isPaused: false,
     approvalStatus: ApprovalStatus.APPROVED, // Club admin is auto-approved
     classes: ['Guide', 'Voyager'],
     timezone: 'America/Mexico_City',
@@ -52,7 +50,6 @@ export const mockUsers: User[] = [
     role: UserRole.USER,
     clubId: '4', // Member of Elphis Kalein (Narvarte)
     isActive: false,
-    isPaused: false,
     approvalStatus: ApprovalStatus.PENDING, // Pending approval
     classes: ['Friend', 'Companion'],
     timezone: 'America/Mexico_City',
@@ -68,7 +65,6 @@ export const mockUsers: User[] = [
     role: UserRole.USER,
     clubId: '5', // Member of Panteras (Portales)
     isActive: false,
-    isPaused: false,
     approvalStatus: ApprovalStatus.PENDING, // Pending approval
     classes: ['Explorer'],
     timezone: 'America/Mexico_City',
@@ -84,7 +80,6 @@ export const mockUsers: User[] = [
     role: UserRole.USER,
     clubId: '4', // Member of Narvarte church club (Elphis Kalein)
     isActive: true,
-    isPaused: false,
     approvalStatus: ApprovalStatus.APPROVED, // Approved member
     classes: ['Friend', 'Companion', 'Explorer'],
     timezone: 'America/Mexico_City',
@@ -100,7 +95,6 @@ export const mockUsers: User[] = [
     role: UserRole.USER,
     clubId: '5', // Member of Portales church club (Panteras)
     isActive: true,
-    isPaused: false,
     approvalStatus: ApprovalStatus.APPROVED, // Approved member
     classes: ['Voyager'],
     timezone: 'America/Mexico_City',
@@ -110,8 +104,9 @@ export const mockUsers: User[] = [
   },
 ];
 
-// Mock Clubs - Only Asociación Metropolitana Mexicana
+// Mock Clubs - Diverse organizational hierarchy
 export const mockClubs: Club[] = [
+  // División Interamericana > Unión Mexicana Central > Asociación Metropolitana Mexicana
   {
     id: '4',
     name: 'Elphis Kalein',
@@ -124,6 +119,12 @@ export const mockClubs: Club[] = [
     association: 'Asociación Metropolitana Mexicana',
     union: 'Unión Mexicana Central',
     division: 'División Interamericana',
+    feeSettings: {
+      monthlyFeeAmount: 50.00,
+      currency: 'MXN',
+      activeMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], // January to October
+      isActive: true,
+    },
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     memberCount: 2, // Carlos Martínez + Club Admin
@@ -140,9 +141,153 @@ export const mockClubs: Club[] = [
     association: 'Asociación Metropolitana Mexicana',
     union: 'Unión Mexicana Central',
     division: 'División Interamericana',
+    feeSettings: {
+      monthlyFeeAmount: 75.00,
+      currency: 'MXN',
+      activeMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], // All year
+      isActive: true,
+    },
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     memberCount: 1, // María López
+  },
+  
+  // División Interamericana > Unión Mexicana Central > Asociación del Bajío
+  {
+    id: '6',
+    name: 'Conquistadores León',
+    description: 'Club de actividades y aventura en León',
+    adminId: '2',
+    isActive: true,
+    matchFrequency: MatchFrequency.WEEKLY,
+    groupSize: 3,
+    church: 'Iglesia Adventista de León',
+    association: 'Asociación del Bajío',
+    union: 'Unión Mexicana Central',
+    division: 'División Interamericana',
+    feeSettings: {
+      monthlyFeeAmount: 60.00,
+      currency: 'MXN',
+      activeMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      isActive: true,
+    },
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    memberCount: 0,
+  },
+  {
+    id: '7',
+    name: 'Águilas Querétaro',
+    description: 'Club de compañerismo y servicio en Querétaro',
+    adminId: '2',
+    isActive: true,
+    matchFrequency: MatchFrequency.MONTHLY,
+    groupSize: 2,
+    church: 'Iglesia Adventista de Querétaro',
+    association: 'Asociación del Bajío',
+    union: 'Unión Mexicana Central',
+    division: 'División Interamericana',
+    feeSettings: {
+      monthlyFeeAmount: 55.00,
+      currency: 'MXN',
+      activeMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      isActive: false,
+    },
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    memberCount: 0,
+  },
+
+  // División Interamericana > Unión del Norte de México > Asociación de Chihuahua
+  {
+    id: '8',
+    name: 'Pioneros del Desierto',
+    description: 'Club de exploradores en Chihuahua',
+    adminId: '2',
+    isActive: true,
+    matchFrequency: MatchFrequency.BIWEEKLY,
+    groupSize: 2,
+    church: 'Iglesia Adventista de Chihuahua Central',
+    association: 'Asociación de Chihuahua',
+    union: 'Unión del Norte de México',
+    division: 'División Interamericana',
+    feeSettings: {
+      monthlyFeeAmount: 65.00,
+      currency: 'MXN',
+      activeMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+      isActive: true,
+    },
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    memberCount: 0,
+  },
+  {
+    id: '9',
+    name: 'Centinelas del Norte',
+    description: 'Club de liderazgo juvenil en Chihuahua',
+    adminId: '2',
+    isActive: true,
+    matchFrequency: MatchFrequency.WEEKLY,
+    groupSize: 2,
+    church: 'Iglesia Adventista de Chihuahua Norte',
+    association: 'Asociación de Chihuahua',
+    union: 'Unión del Norte de México',
+    division: 'División Interamericana',
+    feeSettings: {
+      monthlyFeeAmount: 70.00,
+      currency: 'MXN',
+      activeMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      isActive: true,
+    },
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    memberCount: 0,
+  },
+
+  // División Sudamericana > Unión Austral > Asociación Argentina del Sur
+  {
+    id: '10',
+    name: 'Amigos de Buenos Aires',
+    description: 'Club de café y compañerismo en Buenos Aires',
+    adminId: '2',
+    isActive: true,
+    matchFrequency: MatchFrequency.WEEKLY,
+    groupSize: 2,
+    church: 'Iglesia Adventista de Buenos Aires Central',
+    association: 'Asociación Argentina del Sur',
+    union: 'Unión Austral',
+    division: 'División Sudamericana',
+    feeSettings: {
+      monthlyFeeAmount: 1500.00,
+      currency: 'ARS',
+      activeMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+      isActive: true,
+    },
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    memberCount: 0,
+  },
+  {
+    id: '11',
+    name: 'Guardianes del Sur',
+    description: 'Club de servicio comunitario en Buenos Aires',
+    adminId: '2',
+    isActive: true,
+    matchFrequency: MatchFrequency.BIWEEKLY,
+    groupSize: 3,
+    church: 'Iglesia Adventista de Belgrano',
+    association: 'Asociación Argentina del Sur',
+    union: 'Unión Austral',
+    division: 'División Sudamericana',
+    feeSettings: {
+      monthlyFeeAmount: 1200.00,
+      currency: 'ARS',
+      activeMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      isActive: true,
+    },
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    memberCount: 0,
   },
 ];
 

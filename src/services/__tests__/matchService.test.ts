@@ -295,7 +295,7 @@ describe('MatchService', () => {
         },
       ];
 
-      (getMatchRoundsByClub as jest.Mock) = jest.fn().mockReturnValue(mockRounds);
+      (getMatchesByClub as jest.Mock) = jest.fn().mockReturnValue(mockRounds);
 
       const result = await matchService.getMatchRounds('club1');
 

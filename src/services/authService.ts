@@ -18,6 +18,7 @@ import {
   UpdateUserSchema,
 } from '../utils/validation';
 import { AuthenticationError, ConflictError, NotFoundError } from '../utils/errors';
+import { UserRole, ApprovalStatus, PathfinderClass } from '../types';
 import { User } from '../types';
 import { mockUsers, getUserByEmail } from './mockData';
 
@@ -89,7 +90,8 @@ class AuthService {
     name: string,
     whatsappNumber: string,
     clubId: string,
-    classes?: string[]
+    classes?: string[],
+    isClubAdmin?: boolean
   ): Promise<AuthResponse> {
     // Validate input
     const data: RegisterData = validateOrThrow(RegisterSchema, {
@@ -100,14 +102,14 @@ class AuthService {
       clubId,
     });
 
-    logger.info('Registration attempt', { email: data.email });
+    logger.info('Registration attempt', { email: data.email, isClubAdmin });
 
     if (this.useMockData) {
-      return await this.mockRegister(data, classes);
+      return await this.mockRegister(data, classes, isClubAdmin);
     }
 
     try {
-      const response = await apiService.post<AuthResponse>('/auth/register', data);
+      const response = await apiService.post<AuthResponse>('/auth/register', { ...data, isClubAdmin });
       await this.saveAuthData(response);
       logger.info('Registration successful', { userId: response.user.id });
       return response;
@@ -120,7 +122,7 @@ class AuthService {
   /**
    * Mock registration implementation
    */
-  private async mockRegister(data: RegisterData, classes?: string[]): Promise<AuthResponse> {
+  private async mockRegister(data: RegisterData, classes?: string[], isClubAdmin?: boolean): Promise<AuthResponse> {
     await this.sleep(MOCK_API_DELAY_MS);
 
     // Check if user already exists
@@ -128,18 +130,20 @@ class AuthService {
       throw new ConflictError('User already exists');
     }
 
+    // Determine role based on isClubAdmin flag
+    const role = isClubAdmin ? UserRole.CLUB_ADMIN : UserRole.USER;
+
     // Create new user with pending approval status
     const newUser: User = {
       id: String(mockUsers.length + 1),
       email: data.email,
       name: data.name,
       whatsappNumber: data.whatsappNumber,
-      role: 'user',
+      role: role,
       clubId: data.clubId, // User gets hierarchy from their club
       isActive: false, // Inactive until approved
-      isPaused: false,
-      approvalStatus: 'pending', // Pending approval by club admin
-      classes: (classes || ['Friend']) as string[], // Default to Friend if not provided
+      approvalStatus: ApprovalStatus.PENDING, // Pending approval (admin for club_admin, club admin for regular users)
+      classes: isClubAdmin ? [] : ((classes || ['Friend']) as PathfinderClass[]), // No classes for club admins
       timezone: 'America/New_York',
       language: 'en',
       createdAt: new Date().toISOString(),
@@ -151,7 +155,7 @@ class AuthService {
     const token = `mock_token_${newUser.id}`;
     await this.saveAuthData({ user: newUser, token });
 
-    logger.info('Mock registration successful - pending approval', { userId: newUser.id });
+    logger.info('Mock registration successful - pending approval', { userId: newUser.id, role });
     return { user: newUser, token };
   }
 
