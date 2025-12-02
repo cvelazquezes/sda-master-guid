@@ -8,6 +8,8 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList, ViewProps } from 'react-native';
 import { useTheme } from '../theme';
+import { mobileFontSizes } from '../theme/mobileTypography';
+import { designTokens } from '../theme/designTokens';
 
 // ============================================================================
 // Basic React.memo Example
@@ -281,7 +283,7 @@ const styles = StyleSheet.create({
   button: {
     paddingHorizontal: 24,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: designTokens.borderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -289,41 +291,41 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   buttonText: {
-    fontSize: 16,
+    fontSize: mobileFontSizes.lg,
     fontWeight: '600',
   },
   card: {
-    padding: 16,
-    borderRadius: 12,
+    padding: designTokens.spacing.lg,
+    borderRadius: designTokens.borderRadius.lg,
     marginBottom: 12,
   },
   cardTitle: {
-    fontSize: 18,
+    fontSize: mobileFontSizes.xl,
     fontWeight: 'bold',
     marginBottom: 8,
   },
   cardDescription: {
-    fontSize: 14,
+    fontSize: mobileFontSizes.sm,
     marginBottom: 8,
   },
   cardDate: {
-    fontSize: 12,
+    fontSize: mobileFontSizes.xs,
   },
   listItem: {
-    padding: 16,
+    padding: designTokens.spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
+    borderBottomColor: designTokens.colors.borderLight,
   },
   listItemContent: {
     flex: 1,
   },
   listItemName: {
-    fontSize: 16,
+    fontSize: mobileFontSizes.lg,
     fontWeight: '600',
     marginBottom: 4,
   },
   listItemEmail: {
-    fontSize: 14,
+    fontSize: mobileFontSizes.sm,
   },
 });
 

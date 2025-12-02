@@ -9,12 +9,14 @@ import React, { memo, useCallback } from 'react';
 import { View, Text, StyleSheet, ViewToken } from 'react-native';
 import { FlashList, ListRenderItem } from '@shopify/flash-list';
 import { useTheme } from '../theme';
+import { mobileFontSizes } from '../theme/mobileTypography';
+import { designTokens } from '../theme/designTokens';
 
 // ============================================================================
 // FlashList Wrapper with Best Practices
 // ============================================================================
 
-interface OptimizedListProps<T> {
+export interface OptimizedListProps<T> {
   data: T[];
   renderItem: ListRenderItem<T>;
   keyExtractor: (item: T, index: number) => string;
@@ -282,16 +284,16 @@ export const OptimizedUserList = memo<OptimizedUserListProps>(
 const styles = StyleSheet.create({
   userItem: {
     flexDirection: 'row',
-    padding: 16,
+    padding: designTokens.spacing.lg,
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
+    borderBottomColor: designTokens.colors.borderLight,
   },
   avatar: {
     width: 48,
     height: 48,
-    borderRadius: 24,
-    backgroundColor: '#2196F3',
+    borderRadius: designTokens.borderRadius['3xl'],
+    backgroundColor: designTokens.colors.info,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
@@ -300,22 +302,22 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   userName: {
-    fontSize: 16,
+    fontSize: mobileFontSizes.lg,
     fontWeight: '600',
     marginBottom: 4,
   },
   userEmail: {
-    fontSize: 14,
+    fontSize: mobileFontSizes.sm,
   },
   emptyContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 40,
+    padding: designTokens.spacing['4xl'],
   },
   emptyText: {
-    fontSize: 16,
-    color: '#9E9E9E',
+    fontSize: mobileFontSizes.lg,
+    color: designTokens.colors.textSecondary,
   },
 });
 

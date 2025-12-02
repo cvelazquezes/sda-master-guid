@@ -8,6 +8,8 @@
 import React, { Suspense, ComponentType, LazyExoticComponent } from 'react';
 import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
 import { useTheme } from '../theme';
+import { mobileFontSizes } from '../theme/mobileTypography';
+import { designTokens } from '../theme/designTokens';
 
 /**
  * Loading fallback component
@@ -101,7 +103,7 @@ class LazyErrorBoundary extends React.Component<
  * <Stack.Screen name="Home" component={LazyHomeScreen} />
  * ```
  */
-export function lazyScreen<P extends object>(
+export function lazyScreen<P extends Record<string, unknown>>(
   importFn: () => Promise<{ default: ComponentType<P> }>,
   options: {
     fallback?: React.ReactNode;
@@ -117,7 +119,7 @@ export function lazyScreen<P extends object>(
     return (
       <LazyErrorBoundary fallback={errorFallback}>
         <Suspense fallback={fallback}>
-          <LazyComponent {...props} />
+          <LazyComponent {...(props as P & JSX.IntrinsicAttributes)} />
         </Suspense>
       </LazyErrorBoundary>
     );
@@ -140,8 +142,12 @@ export function lazyScreen<P extends object>(
 export function preloadScreen<P extends object>(
   Component: LazyExoticComponent<ComponentType<P>>
 ): void {
-  // Force React to start loading the component
-  Component._init(Component._payload);
+  // Force React to start loading the component by accessing it
+  // This triggers the lazy loading promise
+  const lazyComp = Component as unknown as { _init?: () => void; _payload?: unknown };
+  if (lazyComp._init && lazyComp._payload) {
+    lazyComp._init();
+  }
 }
 
 const styles = StyleSheet.create({
@@ -149,26 +155,26 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: designTokens.spacing.xl,
   },
   text: {
     marginTop: 16,
-    fontSize: 16,
+    fontSize: mobileFontSizes.lg,
   },
   errorTitle: {
-    fontSize: 20,
+    fontSize: mobileFontSizes['2xl'],
     fontWeight: 'bold',
     marginBottom: 8,
   },
   errorMessage: {
-    fontSize: 14,
+    fontSize: mobileFontSizes.sm,
     textAlign: 'center',
     marginBottom: 16,
   },
   retryButton: {
-    fontSize: 16,
+    fontSize: mobileFontSizes.lg,
     fontWeight: '600',
-    padding: 12,
+    padding: designTokens.spacing.md,
   },
 });
 
