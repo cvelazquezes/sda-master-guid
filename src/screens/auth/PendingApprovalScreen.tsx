@@ -1,10 +1,16 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
+import { UserRole } from '../../types';
+import { designTokens } from '../../shared/theme/designTokens';
+import { mobileTypography, mobileFontSizes } from '../../shared/theme/mobileTypography';
 
 const PendingApprovalScreen = () => {
   const { user, logout } = useAuth();
+  
+  const isClubAdmin = user?.role === UserRole.CLUB_ADMIN;
 
   const handleLogout = async () => {
     try {
@@ -15,10 +21,11 @@ const PendingApprovalScreen = () => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.content}>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.content}>
         <View style={styles.iconContainer}>
-          <MaterialCommunityIcons name="clock-alert-outline" size={100} color="#FF9800" />
+          <MaterialCommunityIcons name="clock-alert-outline" size={100} color={designTokens.colors.warning} />
         </View>
 
         <Text style={styles.title}>Account Pending Approval</Text>
@@ -29,74 +36,112 @@ const PendingApprovalScreen = () => {
 
         <View style={styles.infoCard}>
           <View style={styles.infoRow}>
-            <MaterialCommunityIcons name="email" size={20} color="#666" />
+            <MaterialCommunityIcons name="email" size={20} color={designTokens.colors.textSecondary} />
             <Text style={styles.infoText}>{user?.email}</Text>
           </View>
           <View style={styles.infoRow}>
-            <MaterialCommunityIcons name="whatsapp" size={20} color="#666" />
+            <MaterialCommunityIcons name="whatsapp" size={20} color={designTokens.colors.textSecondary} />
             <Text style={styles.infoText}>{user?.whatsappNumber}</Text>
           </View>
         </View>
 
         <View style={styles.statusCard}>
           <View style={styles.statusHeader}>
-            <MaterialCommunityIcons name="information" size={24} color="#6200ee" />
+            <MaterialCommunityIcons name="information" size={24} color={designTokens.colors.primary} />
             <Text style={styles.statusTitle}>What happens next?</Text>
           </View>
 
-          <View style={styles.statusStep}>
-            <View style={styles.stepNumber}>
-              <Text style={styles.stepNumberText}>1</Text>
-            </View>
-            <Text style={styles.stepText}>
-              Your club administrator will review your registration
-            </Text>
-          </View>
+          {isClubAdmin ? (
+            <>
+              <View style={styles.statusStep}>
+                <View style={styles.stepNumber}>
+                  <Text style={styles.stepNumberText}>1</Text>
+                </View>
+                <Text style={styles.stepText}>
+                  A system administrator will review your club admin registration
+                </Text>
+              </View>
 
-          <View style={styles.statusStep}>
-            <View style={styles.stepNumber}>
-              <Text style={styles.stepNumberText}>2</Text>
-            </View>
-            <Text style={styles.stepText}>
-              Once approved, you&apos;ll receive a notification via WhatsApp
-            </Text>
-          </View>
+              <View style={styles.statusStep}>
+                <View style={styles.stepNumber}>
+                  <Text style={styles.stepNumberText}>2</Text>
+                </View>
+                <Text style={styles.stepText}>
+                  Once approved, you&apos;ll receive a notification via WhatsApp
+                </Text>
+              </View>
 
-          <View style={styles.statusStep}>
-            <View style={styles.stepNumber}>
-              <Text style={styles.stepNumberText}>3</Text>
-            </View>
-            <Text style={styles.stepText}>
-              You can then log in and start participating in coffee chats
-            </Text>
-          </View>
+              <View style={styles.statusStep}>
+                <View style={styles.stepNumber}>
+                  <Text style={styles.stepNumberText}>3</Text>
+                </View>
+                <Text style={styles.stepText}>
+                  You can then log in and manage your club
+                </Text>
+              </View>
+            </>
+          ) : (
+            <>
+              <View style={styles.statusStep}>
+                <View style={styles.stepNumber}>
+                  <Text style={styles.stepNumberText}>1</Text>
+                </View>
+                <Text style={styles.stepText}>
+                  Your club administrator will review your registration
+                </Text>
+              </View>
+
+              <View style={styles.statusStep}>
+                <View style={styles.stepNumber}>
+                  <Text style={styles.stepNumberText}>2</Text>
+                </View>
+                <Text style={styles.stepText}>
+                  Once approved, you&apos;ll receive a notification via WhatsApp
+                </Text>
+              </View>
+
+              <View style={styles.statusStep}>
+                <View style={styles.stepNumber}>
+                  <Text style={styles.stepNumberText}>3</Text>
+                </View>
+                <Text style={styles.stepText}>
+                  You can then log in and start participating in club activities
+                </Text>
+              </View>
+            </>
+          )}
         </View>
 
         <View style={styles.noteCard}>
-          <MaterialCommunityIcons name="alert-circle" size={20} color="#FF9800" />
+          <MaterialCommunityIcons name="alert-circle" size={20} color={designTokens.colors.warning} />
           <Text style={styles.noteText}>
             This approval process typically takes 1-2 business days. If you have any questions,
-            please contact your club administrator.
+            please contact your {isClubAdmin ? 'system administrator' : 'club administrator'}.
           </Text>
         </View>
 
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <MaterialCommunityIcons name="logout" size={20} color="#fff" />
+          <MaterialCommunityIcons name="logout" size={20} color={designTokens.colors.textInverse} />
           <Text style={styles.logoutButtonText}>Logout</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: designTokens.colors.backgroundSecondary,
+  },
   container: {
     flexGrow: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: designTokens.colors.backgroundSecondary,
   },
   content: {
     flex: 1,
-    padding: 20,
+    padding: designTokens.spacing.xl,
     paddingTop: 60,
   },
   iconContainer: {
@@ -104,28 +149,28 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   title: {
-    fontSize: 28,
+    fontSize: mobileFontSizes['4xl'],
     fontWeight: 'bold',
-    color: '#333',
+    color: designTokens.colors.textPrimary,
     textAlign: 'center',
     marginBottom: 16,
   },
   message: {
-    fontSize: 18,
-    color: '#666',
+    fontSize: mobileFontSizes.xl,
+    color: designTokens.colors.textSecondary,
     textAlign: 'center',
     marginBottom: 24,
   },
   userName: {
     fontWeight: 'bold',
-    color: '#6200ee',
+    color: designTokens.colors.primary,
   },
   infoCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
+    backgroundColor: designTokens.colors.backgroundPrimary,
+    borderRadius: designTokens.borderRadius.lg,
+    padding: designTokens.spacing.lg,
     marginBottom: 20,
-    shadowColor: '#000',
+    shadowColor: designTokens.colors.textPrimary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -138,16 +183,16 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   infoText: {
-    fontSize: 16,
-    color: '#333',
+    fontSize: mobileFontSizes.lg,
+    color: designTokens.colors.textPrimary,
     flex: 1,
   },
   statusCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
+    backgroundColor: designTokens.colors.backgroundPrimary,
+    borderRadius: designTokens.borderRadius.lg,
+    padding: designTokens.spacing.xl,
     marginBottom: 20,
-    shadowColor: '#000',
+    shadowColor: designTokens.colors.textPrimary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -160,9 +205,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   statusTitle: {
-    fontSize: 20,
+    fontSize: mobileFontSizes['2xl'],
     fontWeight: 'bold',
-    color: '#333',
+    color: designTokens.colors.textPrimary,
   },
   statusStep: {
     flexDirection: 'row',
@@ -174,50 +219,50 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#6200ee',
+    backgroundColor: designTokens.colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
   stepNumberText: {
-    color: '#fff',
-    fontSize: 14,
+    color: designTokens.colors.textInverse,
+    fontSize: mobileFontSizes.sm,
     fontWeight: 'bold',
   },
   stepText: {
     flex: 1,
-    fontSize: 16,
-    color: '#666',
+    fontSize: mobileFontSizes.lg,
+    color: designTokens.colors.textSecondary,
     lineHeight: 22,
     marginTop: 3,
   },
   noteCard: {
     flexDirection: 'row',
-    backgroundColor: '#FFF3E0',
-    borderRadius: 12,
-    padding: 16,
+    backgroundColor: designTokens.colors.warningLight,
+    borderRadius: designTokens.borderRadius.lg,
+    padding: designTokens.spacing.lg,
     marginBottom: 24,
     gap: 12,
     borderLeftWidth: 4,
-    borderLeftColor: '#FF9800',
+    borderLeftColor: designTokens.colors.warning,
   },
   noteText: {
     flex: 1,
-    fontSize: 14,
-    color: '#666',
+    fontSize: mobileFontSizes.sm,
+    color: designTokens.colors.textSecondary,
     lineHeight: 20,
   },
   logoutButton: {
     flexDirection: 'row',
-    backgroundColor: '#6200ee',
-    padding: 16,
-    borderRadius: 12,
+    backgroundColor: designTokens.colors.primary,
+    padding: designTokens.spacing.lg,
+    borderRadius: designTokens.borderRadius.lg,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
   },
   logoutButtonText: {
-    color: '#fff',
-    fontSize: 16,
+    color: designTokens.colors.textInverse,
+    fontSize: mobileFontSizes.lg,
     fontWeight: 'bold',
   },
 });

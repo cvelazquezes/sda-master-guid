@@ -1,51 +1,80 @@
+/**
+ * ClubAdminDashboardScreen
+ * Dashboard for club administrators
+ * Supports dynamic theming (light/dark mode)
+ */
+
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { ClubDetailModal } from '../../components/ClubDetailModal';
 import { ClubCard } from '../../components/ClubCard';
+import { StatCard } from '../../components/StatCard';
 import { clubService } from '../../services/clubService';
+import { matchService } from '../../services/matchService';
 import { Club } from '../../types';
+import { designTokens } from '../../shared/theme/designTokens';
+import { ScreenHeader, SectionHeader, MenuCard } from '../../shared/components';
+import { MESSAGES } from '../../shared/constants';
 
 const ClubAdminDashboardScreen = () => {
   const navigation = useNavigation();
   const { user } = useAuth();
+  const { colors } = useTheme();
   const [club, setClub] = useState<Club | null>(null);
   const [clubDetailVisible, setClubDetailVisible] = useState(false);
+  const [stats, setStats] = useState({
+    totalMembers: 0,
+    activeMembers: 0,
+    pendingApprovals: 0,
+    upcomingMatches: 0,
+  });
 
   useEffect(() => {
     if (user?.clubId) {
-      loadClub();
+      loadData();
     }
   }, [user]);
 
-  const loadClub = async () => {
+  const loadData = async () => {
     if (!user?.clubId) return;
     try {
-      const clubData = await clubService.getClub(user.clubId);
+      const [clubData, members, matches] = await Promise.all([
+        clubService.getClub(user.clubId),
+        clubService.getClubMembers(user.clubId),
+        matchService.getClubMatches(user.clubId),
+      ]);
+      
       setClub(clubData);
+      setStats({
+        totalMembers: members.length,
+        activeMembers: members.filter((m) => m.isActive).length,
+        pendingApprovals: members.filter((m) => m.approvalStatus === 'pending').length,
+        upcomingMatches: matches.filter((m) => m.status === 'pending' || m.status === 'scheduled').length,
+      });
     } catch (error) {
-      Alert.alert('Error', 'Failed to load club information');
+      Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_LOAD_CLUB_INFO);
     }
   };
 
-  const menuItems = [
+  const quickActions = [
     {
-      id: 'members',
-      title: 'Club Members',
-      description: 'View and manage club members',
-      icon: 'account-group',
-      screen: 'ClubMembers',
-      color: '#2196f3',
+      id: 'activities',
+      title: 'Generate Activities',
+      description: 'Create new social activity rounds',
+      icon: 'account-heart',
+      screen: 'GenerateMatches',
+      color: colors.success,
     },
     {
-      id: 'matches',
-      title: 'Generate Matches',
-      description: 'Create new match rounds for your club',
-      icon: 'coffee',
-      screen: 'GenerateMatches',
-      color: '#4caf50',
+      id: 'directive',
+      title: 'Club Directive',
+      description: 'Assign leadership positions',
+      icon: 'account-star',
+      screen: 'ClubDirective',
+      color: colors.warning,
     },
     {
       id: 'settings',
@@ -53,17 +82,17 @@ const ClubAdminDashboardScreen = () => {
       description: 'Configure club preferences',
       icon: 'cog',
       screen: 'ClubSettings',
-      color: '#ff9800',
+      color: colors.info,
     },
   ];
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Club Admin Dashboard</Text>
-        <Text style={styles.subtitle}>Welcome, {user?.name}</Text>
-        
-        {/* Show club using standard ClubCard */}
+    <ScrollView style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
+      <ScreenHeader
+        title="Club Dashboard"
+        subtitle={`Manage your club effectively`}
+      >
+        {/* Show club card in header */}
         {club && (
           <View style={styles.clubCardContainer}>
             <ClubCard
@@ -72,24 +101,56 @@ const ClubAdminDashboardScreen = () => {
             />
           </View>
         )}
+      </ScreenHeader>
+
+      {/* Statistics Section */}
+      <View style={styles.statsSection}>
+        <SectionHeader title="Club Overview" />
+        <View style={styles.statsGrid}>
+          <StatCard
+            icon="account-group"
+            label="Members"
+            value={stats.totalMembers}
+            color={colors.info}
+            subtitle={`${stats.activeMembers} active`}
+            onPress={() => navigation.navigate('Members' as never)}
+          />
+          <StatCard
+            icon="account-heart"
+            label="Activities"
+            value={stats.upcomingMatches}
+            color={colors.success}
+            subtitle="upcoming"
+            onPress={() => navigation.navigate('More' as never)}
+          />
+        </View>
+        {stats.pendingApprovals > 0 && (
+          <View style={styles.statsRow}>
+            <StatCard
+              icon="clock-alert-outline"
+              label="Pending Approvals"
+              value={stats.pendingApprovals}
+              color={colors.warning}
+              subtitle="members awaiting approval"
+              onPress={() => navigation.navigate('Members' as never)}
+            />
+          </View>
+        )}
       </View>
 
+      {/* Quick Actions Menu */}
       <View style={styles.content}>
-        {menuItems.map((item) => (
-          <TouchableOpacity
+        <SectionHeader title="Quick Actions" />
+        {quickActions.map((item) => (
+          <MenuCard
             key={item.id}
-            style={styles.menuCard}
+            title={item.title}
+            description={item.description}
+            icon={item.icon}
+            color={item.color}
+            badge={item.badge}
             onPress={() => navigation.navigate(item.screen as never)}
-          >
-            <View style={[styles.iconContainer, { backgroundColor: `${item.color}20` }]}>
-              <MaterialCommunityIcons name={item.icon as any} size={32} color={item.color} />
-            </View>
-            <View style={styles.menuContent}>
-              <Text style={styles.menuTitle}>{item.title}</Text>
-              <Text style={styles.menuDescription}>{item.description}</Text>
-            </View>
-            <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
-          </TouchableOpacity>
+          />
         ))}
       </View>
 
@@ -106,65 +167,25 @@ const ClubAdminDashboardScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 4,
-  },
-  content: {
-    padding: 16,
-  },
-  menuCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 12,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  iconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  menuContent: {
-    flex: 1,
-  },
-  menuTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
-  },
-  menuDescription: {
-    fontSize: 14,
-    color: '#666',
   },
   clubCardContainer: {
-    marginTop: 16,
+    marginTop: designTokens.spacing.lg,
+  },
+  statsSection: {
+    padding: designTokens.spacing.lg,
+    paddingBottom: 0,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    gap: designTokens.spacing.md,
+    marginBottom: designTokens.spacing.md,
+  },
+  statsRow: {
+    marginBottom: designTokens.spacing.md,
+  },
+  content: {
+    padding: designTokens.spacing.lg,
   },
 });
 
 export default ClubAdminDashboardScreen;
-

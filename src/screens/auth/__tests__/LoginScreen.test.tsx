@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import { LoginScreen } from '../LoginScreen';
+import LoginScreen from '../LoginScreen';
 import { useAuth } from '../../../context/AuthContext';
 import { NavigationContainer } from '@react-navigation/native';
 import { AuthenticationError, NetworkError } from '../../../shared/utils/errors';

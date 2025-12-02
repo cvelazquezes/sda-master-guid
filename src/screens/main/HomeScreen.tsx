@@ -1,3 +1,9 @@
+/**
+ * HomeScreen
+ * Main dashboard for regular users
+ * Supports dynamic theming (light/dark mode)
+ */
+
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -8,21 +14,34 @@ import {
   Alert,
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
+import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { matchService } from '../../services/matchService';
 import { clubService } from '../../services/clubService';
-import { Match, Club } from '../../types';
-import { format } from 'date-fns';
+import { Club, User } from '../../types';
 import { ClubDetailModal } from '../../components/ClubDetailModal';
 import { ClubCard } from '../../components/ClubCard';
+import { StatCard } from '../../components/StatCard';
+import { mobileTypography, designTokens } from '../../shared/theme';
+import { EmptyState, Card, SectionHeader, MenuCard } from '../../shared/components';
+import { MESSAGES } from '../../shared/constants';
 
 const HomeScreen = () => {
   const { user } = useAuth();
-  const [matches, setMatches] = useState<Match[]>([]);
+  const { colors } = useTheme();
+  const navigation = useNavigation();
   const [club, setClub] = useState<Club | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [clubDetailVisible, setClubDetailVisible] = useState(false);
+  const [stats, setStats] = useState({
+    totalMembers: 0,
+    upcomingMeetings: 0,
+    pendingFees: 0,
+    upcomingActivities: 0,
+  });
+  const [recentMembers, setRecentMembers] = useState<User[]>([]);
 
   useEffect(() => {
     loadData();
@@ -32,14 +51,32 @@ const HomeScreen = () => {
     if (!user?.clubId) return;
 
     try {
-      const [matchesData, clubData] = await Promise.all([
-        matchService.getMyMatches(),
+      const [clubData, members, matches] = await Promise.all([
         clubService.getClub(user.clubId),
+        clubService.getClubMembers(user.clubId),
+        matchService.getMyMatches(),
       ]);
-      setMatches(matchesData.filter((m) => m.status === 'pending' || m.status === 'scheduled'));
+      
       setClub(clubData);
+      
+      // Calculate stats
+      const activeMembers = members.filter((m) => m.isActive);
+      const upcomingActivities = matches.filter((m) => m.status === 'pending' || m.status === 'scheduled');
+      
+      setStats({
+        totalMembers: activeMembers.length,
+        upcomingMeetings: 0, // This would come from a meeting service
+        pendingFees: 0, // This would come from a fees service
+        upcomingActivities: upcomingActivities.length,
+      });
+      
+      // Get most recent 3 members
+      const sortedMembers = [...activeMembers].sort((a, b) => 
+        new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+      );
+      setRecentMembers(sortedMembers.slice(0, 3));
     } catch (error) {
-      Alert.alert('Error', 'Failed to load data');
+      Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_LOAD_DATA);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -53,69 +90,132 @@ const HomeScreen = () => {
 
   if (!user?.clubId) {
     return (
-      <View style={styles.container}>
-        <View style={styles.emptyContainer}>
-          <MaterialCommunityIcons name="account-alert" size={64} color="#999" />
-          <Text style={styles.emptyText}>You are not part of a club</Text>
-          <Text style={styles.emptySubtext}>Please contact an administrator</Text>
-        </View>
+      <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
+        <EmptyState
+          icon="account-alert"
+          title="You are not part of a club"
+          description="Please contact an administrator to join a club and start connecting with other members"
+          iconColor={colors.warning}
+        />
       </View>
     );
   }
 
   return (
     <ScrollView
-      style={styles.container}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}
+      refreshControl={
+        <RefreshControl 
+          refreshing={refreshing} 
+          onRefresh={onRefresh}
+          tintColor={colors.primary}
+          colors={[colors.primary]}
+        />
+      }
     >
-      <View style={styles.header}>
-        <Text style={styles.welcomeText}>Welcome back, {user.name}!</Text>
-        
-        {club && (
+      {/* Header with Welcome */}
+      <View style={[styles.header, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
+        <Text style={[styles.welcomeText, { color: colors.textPrimary }]}>
+          Welcome back, {user.name}!
+        </Text>
+        <Text style={[styles.subtitleText, { color: colors.textSecondary }]}>
+          Here's what's happening in your club
+        </Text>
+      </View>
+
+      {/* Club Card */}
+      {club && (
+        <View style={styles.clubSection}>
           <ClubCard
             club={club}
             onPress={() => setClubDetailVisible(true)}
           />
-        )}
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Upcoming Matches</Text>
-        {matches.length === 0 ? (
-          <View style={styles.emptyMatches}>
-            <MaterialCommunityIcons name="coffee-outline" size={48} color="#999" />
-            <Text style={styles.emptyMatchesText}>No upcoming matches</Text>
-            <Text style={styles.emptyMatchesSubtext}>
-              New matches will appear here when they're generated
-            </Text>
-          </View>
-        ) : (
-          matches.map((match) => (
-            <View key={match.id} style={styles.matchCard}>
-              <MaterialCommunityIcons name="coffee" size={32} color="#6200ee" />
-              <View style={styles.matchInfo}>
-                <Text style={styles.matchStatus}>
-                  Status: {match.status.charAt(0).toUpperCase() + match.status.slice(1)}
-                </Text>
-                {match.scheduledDate && (
-                  <Text style={styles.matchDate}>
-                    Scheduled: {format(new Date(match.scheduledDate), 'MMM dd, yyyy')}
-                  </Text>
-                )}
-                <Text style={styles.matchParticipants}>
-                  {match.participants.length} participant(s)
-                </Text>
-              </View>
-            </View>
-          ))
-        )}
-      </View>
-
-      {user.isPaused && (
-        <View style={styles.pausedBanner}>
-          <MaterialCommunityIcons name="pause-circle" size={24} color="#ff9800" />
-          <Text style={styles.pausedText}>Your matches are currently paused</Text>
         </View>
+      )}
+
+      {/* Quick Stats */}
+      <View style={styles.section}>
+        <SectionHeader title="Club Overview" />
+        <View style={styles.statsGrid}>
+          <StatCard
+            icon="account-group"
+            label="Members"
+            value={stats.totalMembers}
+            color={colors.info}
+            onPress={() => navigation.navigate('Members' as never)}
+          />
+          <StatCard
+            icon="calendar-check"
+            label="Meetings"
+            value={stats.upcomingMeetings}
+            color={colors.success}
+            subtitle="upcoming"
+          />
+        </View>
+        <View style={styles.statsGrid}>
+          <StatCard
+            icon="calendar-clock"
+            label="Meetings"
+            value={stats.upcomingActivities}
+            color={colors.primary}
+            subtitle="upcoming"
+            onPress={() => navigation.navigate('Meetings' as never)}
+          />
+          <StatCard
+            icon="cash"
+            label="Finances"
+            value={stats.pendingFees}
+            color={colors.warning}
+            subtitle="pending"
+            onPress={() => navigation.navigate('Finances' as never)}
+          />
+        </View>
+      </View>
+
+      {/* Recent Members */}
+      {recentMembers.length > 0 && (
+        <View style={styles.section}>
+          <SectionHeader title="Recent Members" />
+          {recentMembers.map((member) => (
+            <Card key={member.id} variant="elevated" style={styles.memberCard}>
+              <View style={styles.memberRow}>
+                <View style={[styles.memberAvatar, { backgroundColor: colors.primary }]}>
+                  <Text style={[styles.memberAvatarText, { color: '#fff' }]}>
+                    {member.name.charAt(0).toUpperCase()}
+                  </Text>
+                </View>
+                <View style={styles.memberInfo}>
+                  <Text style={[styles.memberName, { color: colors.textPrimary }]}>{member.name}</Text>
+                  <Text style={[styles.memberEmail, { color: colors.textSecondary }]}>{member.email}</Text>
+                </View>
+                <MaterialCommunityIcons 
+                  name="account-check" 
+                  size={24} 
+                  color={colors.success} 
+                />
+              </View>
+            </Card>
+          ))}
+        </View>
+      )}
+
+      {/* Inactive Account Warning */}
+      {!user.isActive && (
+        <Card variant="outlined" style={[styles.inactiveBanner, { borderLeftColor: colors.error }]}>
+          <View style={styles.inactiveBannerContent}>
+            <MaterialCommunityIcons 
+              name="alert-circle" 
+              size={designTokens.icon.sizes.lg} 
+              color={colors.error} 
+            />
+            <View style={styles.inactiveBannerText}>
+              <Text style={[styles.inactiveBannerTitle, { color: colors.error }]}>Account Inactive</Text>
+              <Text style={[styles.inactiveBannerDescription, { color: colors.textSecondary }]}>
+                Your account is currently inactive. Contact your club admin to activate it.
+              </Text>
+            </View>
+          </View>
+        </Card>
       )}
 
       {/* Club Detail Modal */}
@@ -131,114 +231,77 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   header: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    padding: designTokens.spacing.lg,
+    paddingBottom: designTokens.spacing.md,
+    borderBottomWidth: designTokens.borderWidth.thin,
   },
   welcomeText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 16,
+    ...mobileTypography.heading1,
+    marginBottom: 4,
+  },
+  subtitleText: {
+    ...mobileTypography.body,
+  },
+  clubSection: {
+    padding: designTokens.spacing.lg,
+    paddingBottom: 0,
   },
   section: {
-    padding: 20,
+    padding: designTokens.spacing.lg,
   },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 16,
+  statsGrid: {
+    flexDirection: 'row',
+    gap: designTokens.spacing.md,
+    marginBottom: designTokens.spacing.md,
   },
-  matchCard: {
+  memberCard: {
+    marginBottom: designTokens.spacing.md,
+  },
+  memberRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    gap: designTokens.spacing.md,
   },
-  matchInfo: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  matchStatus: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
-  matchDate: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
-  },
-  matchParticipants: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
-  },
-  emptyContainer: {
-    flex: 1,
+  memberAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: designTokens.borderRadius.xxl,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 40,
   },
-  emptyText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginTop: 16,
+  memberAvatarText: {
+    ...mobileTypography.heading4,
   },
-  emptySubtext: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 8,
-    textAlign: 'center',
+  memberInfo: {
+    flex: 1,
   },
-  emptyMatches: {
-    alignItems: 'center',
-    padding: 40,
-    backgroundColor: '#fff',
-    borderRadius: 8,
+  memberName: {
+    ...mobileTypography.bodyLargeBold,
   },
-  emptyMatchesText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#666',
-    marginTop: 16,
+  memberEmail: {
+    ...mobileTypography.caption,
+    marginTop: 2,
   },
-  emptyMatchesSubtext: {
-    fontSize: 14,
-    color: '#999',
-    marginTop: 8,
-    textAlign: 'center',
-  },
-  pausedBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff3cd',
-    padding: 16,
-    margin: 20,
-    borderRadius: 8,
+  inactiveBanner: {
+    margin: designTokens.spacing.lg,
     borderLeftWidth: 4,
-    borderLeftColor: '#ff9800',
   },
-  pausedText: {
-    marginLeft: 12,
-    fontSize: 14,
-    color: '#856404',
-    fontWeight: '500',
+  inactiveBannerContent: {
+    flexDirection: 'row',
+    gap: designTokens.spacing.md,
+  },
+  inactiveBannerText: {
+    flex: 1,
+    gap: designTokens.spacing.xs,
+  },
+  inactiveBannerTitle: {
+    ...mobileTypography.bodyLargeBold,
+  },
+  inactiveBannerDescription: {
+    ...mobileTypography.bodySmall,
   },
 });
 
 export default HomeScreen;
-

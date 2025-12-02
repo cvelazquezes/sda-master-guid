@@ -1,13 +1,13 @@
 /**
  * Login Screen
  * User authentication with validation and error handling
+ * Supports dynamic theming (light/dark mode)
  */
 
 import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   Alert,
@@ -15,18 +15,16 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { validate, LoginSchema } from '../../utils/validation';
 import { getErrorMessage } from '../../utils/errors';
-
-// Test users for quick login (development only) - One of each type
-const TEST_USERS = [
-  { email: 'admin@sda.com', name: 'Admin User', role: 'Admin', color: '#f44336' },
-  { email: 'clubadmin@sda.com', name: 'Club Admin', role: 'Club Admin', color: '#ff9800' },
-  { email: 'user@sda.com', name: 'John Doe', role: 'User', color: '#2196f3' },
-] as const;
+import { mobileTypography, designTokens } from '../../shared/theme';
+import { StandardButton, StandardInput, Card, Badge } from '../../shared/components';
+import { MESSAGES } from '../../shared/constants';
 
 const DEFAULT_TEST_PASSWORD = 'password123';
 
@@ -37,7 +35,15 @@ const LoginScreen: React.FC = () => {
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
   const { login } = useAuth();
+  const { colors } = useTheme();
   const navigation = useNavigation();
+
+  // Test users for quick login (development only) - One of each type
+  const TEST_USERS = [
+    { email: 'admin@sda.com', name: 'Admin User', role: 'Admin', color: colors.error },
+    { email: 'clubadmin@sda.com', name: 'Club Admin', role: 'Club Admin', color: colors.warning },
+    { email: 'carlos.martinez@sda.com', name: 'Carlos Martínez', role: 'User', color: colors.info },
+  ];
 
   /**
    * Validates login form
@@ -76,7 +82,7 @@ const LoginScreen: React.FC = () => {
       // Navigation handled by AuthContext
     } catch (error) {
       const errorMessage = getErrorMessage(error);
-      Alert.alert('Login Failed', errorMessage);
+      Alert.alert(MESSAGES.TITLES.LOGIN_FAILED, errorMessage);
     } finally {
       setLoading(false);
     }
@@ -96,7 +102,7 @@ const LoginScreen: React.FC = () => {
         await login(userEmail, DEFAULT_TEST_PASSWORD);
       } catch (error) {
         const errorMessage = getErrorMessage(error);
-        Alert.alert('Login Failed', errorMessage);
+        Alert.alert(MESSAGES.TITLES.LOGIN_FAILED, errorMessage);
       } finally {
         setLoading(false);
       }
@@ -112,60 +118,54 @@ const LoginScreen: React.FC = () => {
   }, [navigation]);
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <MaterialCommunityIcons name="coffee" size={80} color="#6200ee" />
-          <Text style={styles.title}>SDA Master Guid</Text>
-          <Text style={styles.subtitle}>Coffee Chat App</Text>
-        </View>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]} edges={['top', 'left', 'right']}>
+      <KeyboardAvoidingView
+        style={[styles.container, { backgroundColor: colors.background }]}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <View style={styles.header}>
+            <MaterialCommunityIcons name="account-group" size={80} color={colors.primary} />
+            <Text style={[styles.title, { color: colors.textPrimary }]}>SDA Master Guid</Text>
+            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Club Management App</Text>
+          </View>
 
         <View style={styles.form}>
           {/* Email Input */}
-          <View style={styles.inputContainer}>
-            <MaterialCommunityIcons name="email" size={20} color="#666" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoComplete="email"
-              testID="email-input"
-              editable={!loading}
-            />
-          </View>
-          {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+          <StandardInput
+            label="Email"
+            icon="email"
+            placeholder={MESSAGES.PLACEHOLDERS.EMAIL}
+            value={email}
+            onChangeText={setEmail}
+            error={errors.email}
+            disabled={loading}
+            testID="email-input"
+          />
 
           {/* Password Input */}
-          <View style={styles.inputContainer}>
-            <MaterialCommunityIcons name="lock" size={20} color="#666" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              autoCapitalize="none"
-              testID="password-input"
-              editable={!loading}
-            />
-          </View>
-          {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
+          <StandardInput
+            label="Password"
+            icon="lock"
+            placeholder={MESSAGES.PLACEHOLDERS.PASSWORD}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            error={errors.password}
+            disabled={loading}
+            testID="password-input"
+          />
 
           {/* Login Button */}
-          <TouchableOpacity
-            style={[styles.button, loading && styles.buttonDisabled]}
+          <StandardButton
+            title={loading ? 'Logging in...' : 'Login'}
             onPress={handleLogin}
+            variant="primary"
+            loading={loading}
             disabled={loading}
+            fullWidth
             testID="login-button"
-          >
-            <Text style={styles.buttonText}>{loading ? 'Logging in...' : 'Login'}</Text>
-          </TouchableOpacity>
+          />
 
           {/* Register Link */}
           <TouchableOpacity
@@ -173,31 +173,37 @@ const LoginScreen: React.FC = () => {
             onPress={navigateToRegister}
             disabled={loading}
           >
-            <Text style={styles.linkText}>
-              Don&apos;t have an account? <Text style={styles.linkTextBold}>Register</Text>
+            <Text style={[styles.linkText, { color: colors.textSecondary }]}>
+              Don&apos;t have an account? <Text style={[styles.linkTextBold, { color: colors.primary }]}>Register</Text>
             </Text>
           </TouchableOpacity>
 
           {/* Quick Login Section (Development Only) */}
           {__DEV__ && (
-            <View style={styles.quickLoginSection}>
-              <Text style={styles.quickLoginTitle}>Quick Login (Test Users)</Text>
-              <Text style={styles.quickLoginSubtitle}>Click to auto-fill and login</Text>
+            <View style={[styles.quickLoginSection, { borderTopColor: colors.border }]}>
+              <View style={styles.quickLoginHeader}>
+                <Text style={[styles.quickLoginTitle, { color: colors.textPrimary }]}>Quick Login (Test Users)</Text>
+                <Badge label="DEV" variant="warning" size="sm" />
+              </View>
+              <Text style={[styles.quickLoginSubtitle, { color: colors.textSecondary }]}>Click to auto-fill and login</Text>
               <View style={styles.quickLoginGrid}>
                 {TEST_USERS.map((user) => (
-                  <TouchableOpacity
+                  <Card
                     key={user.email}
-                    style={[styles.quickLoginButton, { borderLeftColor: user.color }]}
                     onPress={() => handleQuickLogin(user.email)}
-                    disabled={loading}
+                    style={{
+                      ...styles.quickLoginCard,
+                      borderLeftColor: user.color,
+                      borderLeftWidth: 4,
+                    }}
                   >
                     <View style={styles.quickLoginInfo}>
-                      <Text style={styles.quickLoginName}>{user.name}</Text>
-                      <Text style={styles.quickLoginRole}>{user.role}</Text>
-                      <Text style={styles.quickLoginEmail}>{user.email}</Text>
+                      <Text style={[styles.quickLoginName, { color: colors.textPrimary }]}>{user.name}</Text>
+                      <Text style={[styles.quickLoginRole, { color: colors.textSecondary }]}>{user.role}</Text>
+                      <Text style={[styles.quickLoginEmail, { color: colors.textTertiary }]}>{user.email}</Text>
                     </View>
-                    <MaterialCommunityIcons name="chevron-right" size={20} color="#999" />
-                  </TouchableOpacity>
+                    <MaterialCommunityIcons name="chevron-right" size={designTokens.icon.sizes.md} color={colors.textTertiary} />
+                  </Card>
                 ))}
               </View>
             </View>
@@ -205,135 +211,90 @@ const LoginScreen: React.FC = () => {
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
-    padding: 20,
+    padding: designTokens.spacing.lg,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: designTokens.spacing['4xl'],
   },
   title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#333',
-    marginTop: 20,
+    ...mobileTypography.displayMedium,
+    fontSize: designTokens.typography.fontSizes['5xl'],
+    marginTop: designTokens.spacing.lg,
   },
   subtitle: {
-    fontSize: 18,
-    color: '#666',
-    marginTop: 8,
+    ...mobileTypography.heading3,
+    marginTop: designTokens.spacing.sm,
   },
   form: {
     width: '100%',
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    marginBottom: 8,
-    paddingHorizontal: 12,
-    backgroundColor: '#f9f9f9',
-  },
-  inputIcon: {
-    marginRight: 10,
-  },
-  input: {
-    flex: 1,
-    height: 50,
-    fontSize: 16,
-  },
-  errorText: {
-    color: '#f44336',
-    fontSize: 12,
-    marginBottom: 8,
-    marginLeft: 4,
-  },
-  button: {
-    backgroundColor: '#6200ee',
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+    gap: designTokens.spacing.md,
   },
   linkButton: {
-    marginTop: 20,
+    marginTop: designTokens.spacing.lg,
     alignItems: 'center',
+    padding: designTokens.spacing.sm,
   },
   linkText: {
-    color: '#666',
-    fontSize: 14,
+    ...mobileTypography.bodySmall,
   },
   linkTextBold: {
-    color: '#6200ee',
-    fontWeight: 'bold',
+    ...mobileTypography.bodySmallBold,
   },
   quickLoginSection: {
-    marginTop: 32,
-    paddingTop: 24,
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
+    marginTop: designTokens.spacing['3xl'],
+    paddingTop: designTokens.spacing.xxl,
+    borderTopWidth: designTokens.borderWidth.thin,
+  },
+  quickLoginHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: designTokens.spacing.sm,
+    marginBottom: designTokens.spacing.xs,
   },
   quickLoginTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
+    ...mobileTypography.heading4,
   },
   quickLoginSubtitle: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 16,
+    ...mobileTypography.label,
+    marginBottom: designTokens.spacing.lg,
   },
   quickLoginGrid: {
-    gap: 8,
+    gap: designTokens.spacing.sm,
   },
-  quickLoginButton: {
+  quickLoginCard: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#f9f9f9',
-    padding: 12,
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    marginBottom: 8,
+    marginBottom: 0,
   },
   quickLoginInfo: {
     flex: 1,
   },
   quickLoginName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 2,
+    ...mobileTypography.bodySmallBold,
+    marginBottom: 3,
   },
   quickLoginRole: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 2,
+    ...mobileTypography.label,
+    marginBottom: 3,
   },
   quickLoginEmail: {
-    fontSize: 11,
-    color: '#999',
+    ...mobileTypography.caption,
   },
 });
 

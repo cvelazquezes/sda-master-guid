@@ -4,19 +4,24 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
   Alert,
   RefreshControl,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { matchService } from '../../services/matchService';
 import { clubService } from '../../services/clubService';
 import { useAuth } from '../../context/AuthContext';
 import { MatchRound, Club } from '../../types';
+import { StandardButton } from '../../shared/components/StandardButton';
+import { mobileTypography, mobileIconSizes } from '../../shared/theme';
+import { designTokens } from '../../shared/theme/designTokens';
 import { format } from 'date-fns';
+import { MESSAGES } from '../../shared/constants';
 
 const GenerateMatchesScreen = () => {
   const { user } = useAuth();
+  const navigation = useNavigation();
   const [club, setClub] = useState<Club | null>(null);
   const [matchRounds, setMatchRounds] = useState<MatchRound[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,7 +47,7 @@ const GenerateMatchesScreen = () => {
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       ));
     } catch (error) {
-      Alert.alert('Error', 'Failed to load data');
+      Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_LOAD_DATA);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -58,22 +63,22 @@ const GenerateMatchesScreen = () => {
     if (!user?.clubId) return;
 
     Alert.alert(
-      'Generate Matches',
-      'This will create a new match round for all active club members. Continue?',
+      MESSAGES.TITLES.GENERATE_ACTIVITIES,
+      MESSAGES.WARNINGS.CONFIRM_GENERATE_MATCHES,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: MESSAGES.BUTTONS.CANCEL, style: 'cancel' },
         {
           text: 'Generate',
           onPress: async () => {
             setGenerating(true);
             try {
               await matchService.generateMatches(user.clubId!);
-              Alert.alert('Success', 'Matches generated successfully!');
+              Alert.alert(MESSAGES.TITLES.SUCCESS, MESSAGES.SUCCESS.ACTIVITIES_GENERATED);
               loadData();
             } catch (error: any) {
               Alert.alert(
-                'Error',
-                error.response?.data?.message || 'Failed to generate matches'
+                MESSAGES.TITLES.ERROR,
+                error.response?.data?.message || 'Failed to generate activities'
               );
             } finally {
               setGenerating(false);
@@ -90,42 +95,52 @@ const GenerateMatchesScreen = () => {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <View style={styles.header}>
-        <Text style={styles.title}>Generate Matches</Text>
+        <Text style={styles.title}>Generate Social Activities</Text>
         {club && (
           <Text style={styles.subtitle}>
-            {club.name} • {club.matchFrequency.replace('_', '-')} matches
+            {club.name} • {club.matchFrequency.replace('_', '-')} activities
           </Text>
         )}
       </View>
 
       <View style={styles.content}>
-        <TouchableOpacity
-          style={[styles.generateButton, generating && styles.generateButtonDisabled]}
-          onPress={handleGenerateMatches}
-          disabled={generating}
-        >
-          <MaterialCommunityIcons name="coffee" size={24} color="#fff" />
-          <Text style={styles.generateButtonText}>
-            {generating ? 'Generating...' : 'Generate New Match Round'}
-          </Text>
-        </TouchableOpacity>
+        {/* Action Buttons */}
+        <View style={styles.actionsContainer}>
+          <StandardButton
+            title={generating ? 'Generating...' : 'Generate New Round'}
+            icon="account-heart"
+            variant="primary"
+            size="large"
+            fullWidth
+            loading={generating}
+            onPress={handleGenerateMatches}
+          />
+          <StandardButton
+            title="View All Activities"
+            icon="view-list"
+            variant="secondary"
+            size="large"
+            fullWidth
+            onPress={() => navigation.navigate('ClubMatches' as never)}
+          />
+        </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Match Rounds History</Text>
+          <Text style={styles.sectionTitle}>Activity Rounds History</Text>
           {matchRounds.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <MaterialCommunityIcons name="coffee-outline" size={48} color="#999" />
-              <Text style={styles.emptyText}>No match rounds yet</Text>
+              <MaterialCommunityIcons name="account-heart-outline" size={mobileIconSizes.xxlarge * 1.5} color={designTokens.colors.textTertiary} />
+              <Text style={styles.emptyText}>No activity rounds yet</Text>
               <Text style={styles.emptySubtext}>
-                Generate your first match round to get started
+                Generate your first activity round to get started
               </Text>
             </View>
           ) : (
-            matchRounds.map((round) => (
+            matchRounds.slice(0, 5).map((round) => (
               <View key={round.id} style={styles.roundCard}>
                 <View style={styles.roundHeader}>
                   <View style={styles.roundInfo}>
-                    <MaterialCommunityIcons name="calendar-clock" size={24} color="#6200ee" />
+                    <MaterialCommunityIcons name="calendar-clock" size={mobileIconSizes.large} color={designTokens.colors.primary} />
                     <View style={styles.roundDetails}>
                       <Text style={styles.roundDate}>
                         {format(new Date(round.scheduledDate), 'MMM dd, yyyy')}
@@ -137,7 +152,7 @@ const GenerateMatchesScreen = () => {
                   </View>
                   <View style={styles.roundBadge}>
                     <Text style={styles.roundBadgeText}>
-                      {round.matches.length} match(es)
+                      {round.matches.length} activit{round.matches.length === 1 ? 'y' : 'ies'}
                     </Text>
                   </View>
                 </View>
@@ -146,6 +161,16 @@ const GenerateMatchesScreen = () => {
                 </Text>
               </View>
             ))
+          )}
+          
+          {matchRounds.length > 5 && (
+            <StandardButton
+              title="View All Match History"
+              icon="history"
+              variant="ghost"
+              fullWidth
+              onPress={() => navigation.navigate('ClubMatches' as never)}
+            />
           )}
         </View>
       </View>
@@ -156,63 +181,45 @@ const GenerateMatchesScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: designTokens.colors.backgroundSecondary,
   },
   header: {
-    backgroundColor: '#fff',
-    padding: 20,
+    backgroundColor: designTokens.colors.backgroundPrimary,
+    padding: designTokens.spacing.xl,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: designTokens.colors.borderLight,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
+    ...mobileTypography.displayMedium,
   },
   subtitle: {
-    fontSize: 14,
-    color: '#666',
+    ...mobileTypography.bodySmall,
+    color: designTokens.colors.textSecondary,
     marginTop: 4,
   },
   content: {
-    padding: 16,
+    padding: designTokens.spacing.lg,
   },
-  generateButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#6200ee',
-    padding: 16,
-    borderRadius: 8,
+  actionsContainer: {
     marginBottom: 24,
-  },
-  generateButtonDisabled: {
-    opacity: 0.6,
-  },
-  generateButtonText: {
-    marginLeft: 8,
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+    gap: 12,
   },
   section: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 8,
+    backgroundColor: designTokens.colors.backgroundPrimary,
+    padding: designTokens.spacing.lg,
+    borderRadius: designTokens.borderRadius.lg,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    ...mobileTypography.heading3,
     marginBottom: 16,
   },
   roundCard: {
-    backgroundColor: '#f9f9f9',
-    padding: 16,
-    borderRadius: 8,
+    backgroundColor: designTokens.colors.inputBackground,
+    padding: designTokens.spacing.lg,
+    borderRadius: designTokens.borderRadius.lg,
     marginBottom: 12,
     borderLeftWidth: 4,
-    borderLeftColor: '#6200ee',
+    borderLeftColor: designTokens.colors.primary,
   },
   roundHeader: {
     flexDirection: 'row',
@@ -229,43 +236,39 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   roundDate: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    ...mobileTypography.bodyLargeBold,
   },
   roundStatus: {
-    fontSize: 12,
-    color: '#666',
+    ...mobileTypography.caption,
+    color: designTokens.colors.textSecondary,
     marginTop: 4,
   },
   roundBadge: {
-    backgroundColor: '#e3f2fd',
+    backgroundColor: designTokens.colors.infoLight,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 12,
+    borderRadius: designTokens.borderRadius.lg,
   },
   roundBadgeText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#2196f3',
+    ...mobileTypography.captionBold,
+    color: designTokens.colors.info,
   },
   roundCreated: {
-    fontSize: 12,
-    color: '#999',
+    ...mobileTypography.caption,
+    color: designTokens.colors.textTertiary,
   },
   emptyContainer: {
     alignItems: 'center',
-    padding: 40,
+    padding: designTokens.spacing['4xl'],
   },
   emptyText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#666',
+    ...mobileTypography.heading4,
+    color: designTokens.colors.textSecondary,
     marginTop: 16,
   },
   emptySubtext: {
-    fontSize: 14,
-    color: '#999',
+    ...mobileTypography.bodySmall,
+    color: designTokens.colors.textTertiary,
     marginTop: 8,
     textAlign: 'center',
   },

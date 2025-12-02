@@ -13,9 +13,16 @@ import { clubService } from '../../services/clubService';
 import { useAuth } from '../../context/AuthContext';
 import { Club, MatchFrequency } from '../../types';
 import { OrganizationHierarchy } from '../../components/OrganizationHierarchy';
+import { designTokens } from '../../shared/theme/designTokens';
+import { mobileTypography } from '../../shared/theme/mobileTypography';
+import { MESSAGES } from '../../shared/constants';
+import { ThemeSwitcher } from '../../components/ThemeSwitcher';
+import { LanguageSwitcher } from '../../components/LanguageSwitcher';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const ClubSettingsScreen = () => {
   const { user } = useAuth();
+  const { colors } = useTheme();
   const [club, setClub] = useState<Club | null>(null);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
@@ -44,7 +51,7 @@ const ClubSettingsScreen = () => {
         groupSize: clubData.groupSize,
       });
     } catch (error) {
-      Alert.alert('Error', 'Failed to load club settings');
+      Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_LOAD_CLUB_SETTINGS);
     } finally {
       setLoading(false);
     }
@@ -52,31 +59,31 @@ const ClubSettingsScreen = () => {
 
   const handleSave = async () => {
     if (!user?.clubId || !formData.name || !formData.description) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.MISSING_FIELDS);
       return;
     }
 
     try {
       await clubService.updateClub(user.clubId, formData);
       loadClub();
-      Alert.alert('Success', 'Club settings updated successfully');
+      Alert.alert(MESSAGES.TITLES.SUCCESS, MESSAGES.SUCCESS.CLUB_UPDATED);
     } catch (error) {
-      Alert.alert('Error', 'Failed to update club settings');
+      Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_UPDATE_CLUB_SETTINGS);
     }
   };
 
   if (!club) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.loadingText}>Loading...</Text>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading...</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Club Settings</Text>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <Text style={[styles.title, { color: colors.textPrimary }]}>Club Settings</Text>
       </View>
 
       <View style={styles.content}>
@@ -96,17 +103,19 @@ const ClubSettingsScreen = () => {
           </View>
         )}
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Basic Information</Text>
+        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Basic Information</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { borderColor: colors.border, color: colors.textPrimary, backgroundColor: colors.inputBackground }]}
             placeholder="Club Name"
+            placeholderTextColor={colors.textTertiary}
             value={formData.name}
             onChangeText={(text) => setFormData({ ...formData, name: text })}
           />
           <TextInput
-            style={[styles.input, styles.textArea]}
+            style={[styles.input, styles.textArea, { borderColor: colors.border, color: colors.textPrimary, backgroundColor: colors.inputBackground }]}
             placeholder="Description"
+            placeholderTextColor={colors.textTertiary}
             value={formData.description}
             onChangeText={(text) => setFormData({ ...formData, description: text })}
             multiline
@@ -114,24 +123,26 @@ const ClubSettingsScreen = () => {
           />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Match Settings</Text>
+        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Activity Settings</Text>
           <View style={styles.selectContainer}>
-            <Text style={styles.selectLabel}>Match Frequency</Text>
+            <Text style={[styles.selectLabel, { color: colors.textPrimary }]}>Activity Frequency</Text>
             <View style={styles.selectOptions}>
               {Object.values(MatchFrequency).map((freq) => (
                 <TouchableOpacity
                   key={freq}
                   style={[
                     styles.selectOption,
-                    formData.matchFrequency === freq && styles.selectOptionActive,
+                    { borderColor: colors.border, backgroundColor: colors.inputBackground },
+                    formData.matchFrequency === freq && { backgroundColor: colors.primary, borderColor: colors.primary },
                   ]}
                   onPress={() => setFormData({ ...formData, matchFrequency: freq })}
                 >
                   <Text
                     style={[
                       styles.selectOptionText,
-                      formData.matchFrequency === freq && styles.selectOptionTextActive,
+                      { color: colors.textSecondary },
+                      formData.matchFrequency === freq && { color: colors.textInverse, fontWeight: '600' },
                     ]}
                   >
                     {freq.replace('_', '-')}
@@ -142,21 +153,23 @@ const ClubSettingsScreen = () => {
           </View>
 
           <View style={styles.selectContainer}>
-            <Text style={styles.selectLabel}>Group Size</Text>
+            <Text style={[styles.selectLabel, { color: colors.textPrimary }]}>Group Size</Text>
             <View style={styles.selectOptions}>
               {[2, 3].map((size) => (
                 <TouchableOpacity
                   key={size}
                   style={[
                     styles.selectOption,
-                    formData.groupSize === size && styles.selectOptionActive,
+                    { borderColor: colors.border, backgroundColor: colors.inputBackground },
+                    formData.groupSize === size && { backgroundColor: colors.primary, borderColor: colors.primary },
                   ]}
                   onPress={() => setFormData({ ...formData, groupSize: size })}
                 >
                   <Text
                     style={[
                       styles.selectOptionText,
-                      formData.groupSize === size && styles.selectOptionTextActive,
+                      { color: colors.textSecondary },
+                      formData.groupSize === size && { color: colors.textInverse, fontWeight: '600' },
                     ]}
                   >
                     {size}
@@ -167,8 +180,22 @@ const ClubSettingsScreen = () => {
           </View>
         </View>
 
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>Save Changes</Text>
+        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>User Preferences</Text>
+          
+          {/* Theme Switcher */}
+          <View style={styles.preferenceItem}>
+            <ThemeSwitcher showLabel={true} />
+          </View>
+
+          {/* Language Switcher */}
+          <View style={styles.preferenceItem}>
+            <LanguageSwitcher showLabel={true} />
+          </View>
+        </View>
+
+        <TouchableOpacity style={[styles.saveButton, { backgroundColor: colors.primary }]} onPress={handleSave}>
+          <Text style={[styles.saveButtonText, { color: colors.textInverse }]}>Save Changes</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -178,101 +205,77 @@ const ClubSettingsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   header: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    padding: designTokens.spacing.lg,
+    borderBottomWidth: designTokens.borderWidth.thin,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
+    ...mobileTypography.displaySmall,
   },
   content: {
-    padding: 16,
+    padding: designTokens.spacing.md,
   },
   section: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 8,
-    marginBottom: 16,
+    padding: designTokens.spacing.lg,
+    borderRadius: designTokens.borderRadius.md,
+    marginBottom: designTokens.spacing.md,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 16,
+    ...mobileTypography.heading3,
+    marginBottom: designTokens.spacing.md,
+  },
+  preferenceItem: {
+    marginBottom: designTokens.spacing.sm,
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-    fontSize: 16,
-    backgroundColor: '#f9f9f9',
+    borderWidth: designTokens.borderWidth.thin,
+    borderRadius: designTokens.borderRadius.md,
+    padding: designTokens.spacing.md,
+    marginBottom: designTokens.spacing.md,
+    ...mobileTypography.bodyLarge,
   },
   textArea: {
     height: 100,
     textAlignVertical: 'top',
   },
   selectContainer: {
-    marginBottom: 20,
+    marginBottom: designTokens.spacing.lg,
   },
   selectLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 12,
+    ...mobileTypography.bodyLargeBold,
+    marginBottom: designTokens.spacing.md,
   },
   selectOptions: {
     flexDirection: 'row',
-    gap: 12,
+    gap: designTokens.spacing.md,
   },
   selectOption: {
     flex: 1,
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ddd',
+    padding: designTokens.spacing.md,
+    borderRadius: designTokens.borderRadius.md,
+    borderWidth: designTokens.borderWidth.thin,
     alignItems: 'center',
-    backgroundColor: '#f9f9f9',
-  },
-  selectOptionActive: {
-    backgroundColor: '#6200ee',
-    borderColor: '#6200ee',
   },
   selectOptionText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  selectOptionTextActive: {
-    color: '#fff',
-    fontWeight: '600',
+    ...mobileTypography.body,
   },
   saveButton: {
-    backgroundColor: '#6200ee',
-    padding: 16,
-    borderRadius: 8,
+    padding: designTokens.spacing.md,
+    borderRadius: designTokens.borderRadius.md,
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: designTokens.spacing.sm,
   },
   saveButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+    ...mobileTypography.buttonMedium,
   },
   loadingText: {
     textAlign: 'center',
-    marginTop: 40,
-    fontSize: 16,
-    color: '#666',
+    marginTop: designTokens.spacing['3xl'],
+    ...mobileTypography.bodyLarge,
   },
   hierarchySection: {
-    marginBottom: 16,
+    marginBottom: designTokens.spacing.md,
   },
 });
 

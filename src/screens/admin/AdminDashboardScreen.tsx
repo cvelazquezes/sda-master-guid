@@ -1,55 +1,117 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+/**
+ * AdminDashboardScreen
+ * Dashboard for platform administrators
+ * Supports dynamic theming (light/dark mode)
+ */
+
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
+import { StatCard } from '../../components/StatCard';
+import { userService } from '../../services/userService';
+import { clubService } from '../../services/clubService';
+import { designTokens } from '../../shared/theme/designTokens';
+import { ScreenHeader, SectionHeader, MenuCard } from '../../shared/components';
 
 const AdminDashboardScreen = () => {
   const navigation = useNavigation();
   const { user } = useAuth();
+  const { colors } = useTheme();
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    activeUsers: 0,
+    totalClubs: 0,
+    activeClubs: 0,
+    pendingApprovals: 0,
+  });
+
+  useEffect(() => {
+    loadStats();
+  }, []);
+
+  const loadStats = async () => {
+    try {
+      const [users, clubs] = await Promise.all([
+        userService.getAllUsers(),
+        clubService.getAllClubs(),
+      ]);
+      
+      setStats({
+        totalUsers: users.length,
+        activeUsers: users.filter((u) => u.isActive).length,
+        totalClubs: clubs.length,
+        activeClubs: clubs.filter((c) => c.isActive).length,
+        pendingApprovals: users.filter((u) => u.approvalStatus === 'pending').length,
+      });
+    } catch (error) {
+      console.error('Failed to load stats:', error);
+    }
+  };
 
   const menuItems = [
     {
-      id: 'users',
-      title: 'Manage Users',
-      description: 'View, edit, and manage all users',
-      icon: 'account-group',
-      screen: 'UsersManagement',
-      color: '#2196f3',
-    },
-    {
-      id: 'clubs',
-      title: 'Manage Clubs',
-      description: 'Create, edit, and manage clubs',
-      icon: 'account-multiple',
-      screen: 'ClubsManagement',
-      color: '#4caf50',
+      id: 'organization',
+      title: 'Organization Structure',
+      description: 'Manage divisions, unions, associations, and churches',
+      icon: 'sitemap',
+      screen: 'OrganizationManagement',
+      color: colors.primary,
     },
   ];
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Admin Dashboard</Text>
-        <Text style={styles.subtitle}>Welcome, {user?.name}</Text>
+    <ScrollView style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
+      <ScreenHeader
+        title="Admin Dashboard"
+        subtitle={`Welcome, ${user?.name}`}
+      />
+
+      {/* Statistics Section */}
+      <View style={styles.statsSection}>
+        <SectionHeader title="Overview" />
+        <View style={styles.statsGrid}>
+          <StatCard
+            icon="account-group"
+            label="Total Users"
+            value={stats.totalUsers}
+            color={colors.info}
+            subtitle={`${stats.activeUsers} active`}
+          />
+          <StatCard
+            icon="account-group"
+            label="Total Clubs"
+            value={stats.totalClubs}
+            color={colors.success}
+            subtitle={`${stats.activeClubs} active`}
+          />
+        </View>
+        {stats.pendingApprovals > 0 && (
+          <View style={styles.statsRow}>
+            <StatCard
+              icon="clock-alert-outline"
+              label="Pending Approvals"
+              value={stats.pendingApprovals}
+              color={colors.warning}
+              onPress={() => navigation.navigate('UsersManagement' as never)}
+            />
+          </View>
+        )}
       </View>
 
+      {/* Management Menu */}
       <View style={styles.content}>
+        <SectionHeader title="Management" />
         {menuItems.map((item) => (
-          <TouchableOpacity
+          <MenuCard
             key={item.id}
-            style={styles.menuCard}
+            title={item.title}
+            description={item.description}
+            icon={item.icon}
+            color={item.color}
             onPress={() => navigation.navigate(item.screen as never)}
-          >
-            <View style={[styles.iconContainer, { backgroundColor: `${item.color}20` }]}>
-              <MaterialCommunityIcons name={item.icon as any} size={32} color={item.color} />
-            </View>
-            <View style={styles.menuContent}>
-              <Text style={styles.menuTitle}>{item.title}</Text>
-              <Text style={styles.menuDescription}>{item.description}</Text>
-            </View>
-            <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
-          </TouchableOpacity>
+          />
         ))}
       </View>
     </ScrollView>
@@ -59,62 +121,22 @@ const AdminDashboardScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
-  header: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+  statsSection: {
+    padding: designTokens.spacing.lg,
+    paddingBottom: 0,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
+  statsGrid: {
+    flexDirection: 'row',
+    gap: designTokens.spacing.md,
+    marginBottom: designTokens.spacing.md,
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 4,
+  statsRow: {
+    marginBottom: designTokens.spacing.md,
   },
   content: {
-    padding: 16,
-  },
-  menuCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 12,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  iconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  menuContent: {
-    flex: 1,
-  },
-  menuTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
-  },
-  menuDescription: {
-    fontSize: 14,
-    color: '#666',
+    padding: designTokens.spacing.lg,
   },
 });
 
 export default AdminDashboardScreen;
-

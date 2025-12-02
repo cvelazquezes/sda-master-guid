@@ -1,37 +1,49 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   RefreshControl,
   Alert,
-  TextInput,
   TouchableOpacity,
-  Modal,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { clubService } from '../../services/clubService';
 import { userService } from '../../services/userService';
+import { paymentService } from '../../services/paymentService';
 import { useAuth } from '../../context/AuthContext';
 import { UserDetailModal } from '../../components/UserDetailModal';
-import { User, PathfinderClass } from '../../types';
+import { User, PathfinderClass, Club, PATHFINDER_CLASSES, MemberBalance, UserRole } from '../../types';
 import { ClassSelectionModal } from '../../components/ClassSelectionModal';
+import { 
+  ScreenHeader, 
+  SearchBar, 
+  TabBar, 
+  FilterModal, 
+  EmptyState,
+  IconButton,
+  type FilterSection,
+  type Tab 
+} from '../../shared/components';
+import { designTokens } from '../../shared/theme/designTokens';
+import { Text } from 'react-native';
+import { mobileTypography, mobileFontSizes } from '../../shared/theme/mobileTypography';
+import { MESSAGES, dynamicMessages } from '../../shared/constants';
 
 const ClubMembersScreen = () => {
   const { user } = useAuth();
   const [members, setMembers] = useState<User[]>([]);
+  const [club, setClub] = useState<Club | null>(null);
+  const [balances, setBalances] = useState<MemberBalance[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedMember, setSelectedMember] = useState<User | null>(null);
   const [detailVisible, setDetailVisible] = useState(false);
-
-  // Search and Filter states
   const [searchQuery, setSearchQuery] = useState('');
   const [filterModalVisible, setFilterModalVisible] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'paused'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  const [paymentFilter, setPaymentFilter] = useState<'all' | 'paid' | 'pending' | 'overdue'>('all');
   const [activeTab, setActiveTab] = useState<'approved' | 'pending'>('approved');
-
-  // Class editing
+  const [classFilter, setClassFilter] = useState<PathfinderClass[]>([]);
   const [classEditModalVisible, setClassEditModalVisible] = useState(false);
   const [memberToEdit, setMemberToEdit] = useState<User | null>(null);
 
@@ -45,10 +57,26 @@ const ClubMembersScreen = () => {
     if (!user?.clubId) return;
 
     try {
-      const membersData = await clubService.getClubMembers(user.clubId);
+      const [membersData, clubData] = await Promise.all([
+        clubService.getClubMembers(user.clubId),
+        clubService.getClub(user.clubId),
+      ]);
       setMembers(membersData);
+      setClub(clubData);
+
+      const approvedMemberIds = membersData
+        .filter((m) => m.approvalStatus === 'approved')
+        .map((m) => m.id);
+      
+      if (approvedMemberIds.length > 0) {
+        const balancesData = await paymentService.getAllMembersBalances(
+          user.clubId,
+          approvedMemberIds
+        );
+        setBalances(balancesData);
+      }
     } catch (error) {
-      Alert.alert('Error', 'Failed to load data');
+      Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_LOAD_DATA);
     } finally {
       setRefreshing(false);
     }
@@ -64,22 +92,22 @@ const ClubMembersScreen = () => {
       await userService.updateUser(memberId, { isActive: !isActive });
       loadData();
     } catch (error) {
-      Alert.alert('Error', 'Failed to update member status');
+      Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_UPDATE_MEMBER_STATUS);
     }
   };
 
   const handleDeleteMember = (memberId: string, memberName: string) => {
-    Alert.alert('Delete Member', `Are you sure you want to delete ${memberName}?`, [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(MESSAGES.TITLES.DELETE_MEMBER, dynamicMessages.confirmDeleteMember(memberName), [
+      { text: MESSAGES.BUTTONS.CANCEL, style: 'cancel' },
       {
-        text: 'Delete',
+        text: MESSAGES.BUTTONS.DELETE,
         style: 'destructive',
         onPress: async () => {
           try {
             await userService.deleteUser(memberId);
             loadData();
           } catch (error) {
-            Alert.alert('Error', 'Failed to delete member');
+            Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_DELETE_MEMBER);
           }
         },
       },
@@ -87,17 +115,17 @@ const ClubMembersScreen = () => {
   };
 
   const handleApproveMember = async (memberId: string, memberName: string) => {
-    Alert.alert('Approve Member', `Approve ${memberName} to join the club?`, [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(MESSAGES.TITLES.APPROVE_MEMBER, dynamicMessages.confirmApproveMember(memberName), [
+      { text: MESSAGES.BUTTONS.CANCEL, style: 'cancel' },
       {
-        text: 'Approve',
+        text: MESSAGES.BUTTONS.APPROVE,
         onPress: async () => {
           try {
             await userService.approveUser(memberId);
-            Alert.alert('Success', `${memberName} has been approved!`);
+            Alert.alert(MESSAGES.TITLES.SUCCESS, dynamicMessages.memberApproved(memberName));
             loadData();
           } catch (error) {
-            Alert.alert('Error', 'Failed to approve member');
+            Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_APPROVE_MEMBER);
           }
         },
       },
@@ -105,18 +133,18 @@ const ClubMembersScreen = () => {
   };
 
   const handleRejectMember = (memberId: string, memberName: string) => {
-    Alert.alert('Reject Member', `Reject ${memberName}'s application? This cannot be undone.`, [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(MESSAGES.TITLES.REJECT_MEMBER, dynamicMessages.confirmRejectMember(memberName), [
+      { text: MESSAGES.BUTTONS.CANCEL, style: 'cancel' },
       {
-        text: 'Reject',
+        text: MESSAGES.BUTTONS.REJECT,
         style: 'destructive',
         onPress: async () => {
           try {
             await userService.rejectUser(memberId);
-            Alert.alert('Success', `${memberName}'s application has been rejected`);
+            Alert.alert(MESSAGES.TITLES.SUCCESS, dynamicMessages.memberRejected(memberName));
             loadData();
           } catch (error) {
-            Alert.alert('Error', 'Failed to reject member');
+            Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_REJECT_MEMBER);
           }
         },
       },
@@ -133,15 +161,17 @@ const ClubMembersScreen = () => {
 
     try {
       await userService.updateUser(memberToEdit.id, { classes });
-      Alert.alert('Success', 'Classes updated successfully');
+      Alert.alert(MESSAGES.TITLES.SUCCESS, MESSAGES.SUCCESS.CLASSES_UPDATED);
       loadData();
     } catch (error) {
-      Alert.alert('Error', 'Failed to update classes');
+      Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_UPDATE_CLASSES);
     }
   };
 
   const clearFilters = () => {
     setStatusFilter('all');
+    setClassFilter([]);
+    setPaymentFilter('all');
     setFilterModalVisible(false);
   };
 
@@ -149,380 +179,378 @@ const ClubMembersScreen = () => {
     setFilterModalVisible(false);
   };
 
-  // Filtered and searched members
   const filteredMembers = useMemo(() => {
     return members.filter((member) => {
-      // Approval status filter
+      // Club admins should not see club_admin applications in their pending list
+      // Those require system admin approval
+      if (member.role === UserRole.CLUB_ADMIN) {
+        return false;
+      }
+
       const matchesApprovalStatus =
         (activeTab === 'approved' && member.approvalStatus === 'approved') ||
         (activeTab === 'pending' && member.approvalStatus === 'pending');
 
-      // Search filter
       const searchLower = searchQuery.toLowerCase();
       const matchesSearch =
         !searchQuery ||
         member.name.toLowerCase().includes(searchLower) ||
         member.email.toLowerCase().includes(searchLower);
 
-      // Status filter (only for approved members)
       const matchesStatus =
-        activeTab === 'pending' || // Don't filter pending members by active/paused status
+        activeTab === 'pending' ||
         statusFilter === 'all' ||
-        (statusFilter === 'active' && !member.isPaused) ||
-        (statusFilter === 'paused' && member.isPaused);
+        (statusFilter === 'active' && member.isActive) ||
+        (statusFilter === 'inactive' && !member.isActive);
 
-      return matchesApprovalStatus && matchesSearch && matchesStatus;
+      const matchesClass =
+        classFilter.length === 0 ||
+        (member.classes && member.classes.some((c) => classFilter.includes(c)));
+
+      return matchesApprovalStatus && matchesSearch && matchesStatus && matchesClass;
     });
-  }, [members, searchQuery, statusFilter, activeTab]);
+  }, [members, searchQuery, statusFilter, activeTab, classFilter]);
 
   const pendingCount = useMemo(() => {
-    return members.filter((m) => m.approvalStatus === 'pending').length;
+    // Only count regular users pending approval, not club admins
+    return members.filter((m) => m.approvalStatus === 'pending' && m.role !== UserRole.CLUB_ADMIN).length;
   }, [members]);
 
   const approvedCount = useMemo(() => {
     return members.filter((m) => m.approvalStatus === 'approved').length;
   }, [members]);
 
-  // Auto-select tab if only one has members
-  useEffect(() => {
-    if (members.length > 0 && pendingCount === 0 && approvedCount > 0) {
-      setActiveTab('approved');
-    } else if (members.length > 0 && approvedCount === 0 && pendingCount > 0) {
-      setActiveTab('pending');
-    }
-  }, [members, pendingCount, approvedCount]);
+  const availableClasses = useMemo(() => {
+    const classes = new Set<PathfinderClass>();
+    members.forEach((member) => {
+      if (member.classes) {
+        member.classes.forEach((c) => classes.add(c));
+      }
+    });
+    return Array.from(classes);
+  }, [members]);
 
-  // Auto-select status filter based on available data
-  useEffect(() => {
-    if (activeTab === 'approved' && members.length > 0) {
-      const approvedMembers = members.filter((m) => m.approvalStatus === 'approved');
-      const hasActive = approvedMembers.some((m) => !m.isPaused);
-      const hasPaused = approvedMembers.some((m) => m.isPaused);
+  // Filter active count
+  const hasActiveFilters = statusFilter !== 'all' || classFilter.length > 0 || paymentFilter !== 'all';
 
-      // If only one type exists, auto-select it
-      if (hasActive && !hasPaused && statusFilter === 'all') {
-        setStatusFilter('active');
-      } else if (hasPaused && !hasActive && statusFilter === 'all') {
-        setStatusFilter('paused');
+  // Tab configuration
+  const tabs: Tab[] = [
+    {
+      id: 'approved',
+      label: `Approved (${approvedCount})`,
+      icon: 'account-check',
+    },
+    {
+      id: 'pending',
+      label: `Pending (${pendingCount})`,
+      icon: 'clock-alert-outline',
+      badge: pendingCount,
+    },
+  ];
+
+  // Filter sections configuration
+  const filterSections: FilterSection[] = [
+    {
+      id: 'status',
+      title: 'Member Status',
+      selectedValue: statusFilter,
+      options: [
+        { id: 'all', label: 'All Members', value: 'all', icon: 'account-group' },
+        { id: 'active', label: 'Active Only', value: 'active', icon: 'check-circle', color: designTokens.colors.success },
+        { id: 'inactive', label: 'Inactive Only', value: 'inactive', icon: 'cancel', color: designTokens.colors.error },
+      ],
+    },
+    {
+      id: 'payment',
+      title: 'Payment Status',
+      selectedValue: paymentFilter,
+      options: [
+        { id: 'all', label: 'All Payments', value: 'all', icon: 'cash-multiple' },
+        { id: 'paid', label: 'Paid Up', value: 'paid', icon: 'check-circle', color: designTokens.colors.success },
+        { id: 'pending', label: 'Pending Payments', value: 'pending', icon: 'clock-alert-outline', color: designTokens.colors.warning },
+        { id: 'overdue', label: 'Overdue Payments', value: 'overdue', icon: 'alert-circle', color: designTokens.colors.error },
+      ],
+    },
+  ];
+
+  if (availableClasses.length > 0) {
+    filterSections.push({
+      id: 'class',
+      title: 'Pathfinder Class',
+      selectedValue: classFilter,
+      multiSelect: true,
+      infoBanner: {
+        icon: 'information',
+        text: 'Select classes to filter. Members with at least one selected class will be shown.',
+      },
+      options: PATHFINDER_CLASSES.filter((c) => availableClasses.includes(c)).map((pathfinderClass) => ({
+        id: pathfinderClass,
+        label: pathfinderClass,
+        value: pathfinderClass,
+        icon: 'school',
+      })),
+    });
+  }
+
+  const handleFilterSelect = (sectionId: string, value: string) => {
+    if (sectionId === 'status') {
+      setStatusFilter(value as any);
+    } else if (sectionId === 'payment') {
+      setPaymentFilter(value as any);
+    } else if (sectionId === 'class') {
+      if (classFilter.includes(value as PathfinderClass)) {
+        setClassFilter(classFilter.filter((c) => c !== value));
+      } else {
+        setClassFilter([...classFilter, value as PathfinderClass]);
       }
     }
-  }, [activeTab, members, statusFilter]);
+  };
 
   return (
     <ScrollView
       style={styles.container}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <View style={styles.header}>
-        <Text style={styles.title}>Club Members</Text>
-        <Text style={styles.subtitle}>
-          {approvedCount} approved • {pendingCount} pending
-        </Text>
-      </View>
+      <ScreenHeader
+        title="Club Members"
+        subtitle={`${approvedCount} approved • ${pendingCount} pending`}
+      />
 
-      {/* Tabs for Approved/Pending */}
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'approved' && styles.tabActive]}
-          onPress={() => setActiveTab('approved')}
-        >
-          <MaterialCommunityIcons
-            name="account-check"
-            size={20}
-            color={activeTab === 'approved' ? '#6200ee' : '#999'}
-          />
-          <Text style={[styles.tabText, activeTab === 'approved' && styles.tabTextActive]}>
-            Approved ({approvedCount})
-          </Text>
-        </TouchableOpacity>
+      <TabBar
+        tabs={tabs}
+        activeTabId={activeTab}
+        onTabChange={(tabId) => setActiveTab(tabId as 'approved' | 'pending')}
+      />
 
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'pending' && styles.tabActive]}
-          onPress={() => setActiveTab('pending')}
-        >
-          <MaterialCommunityIcons
-            name="clock-alert-outline"
-            size={20}
-            color={activeTab === 'pending' ? '#6200ee' : '#999'}
-          />
-          <Text style={[styles.tabText, activeTab === 'pending' && styles.tabTextActive]}>
-            Pending ({pendingCount})
-          </Text>
-          {pendingCount > 0 && (
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>{pendingCount}</Text>
-            </View>
-          )}
-        </TouchableOpacity>
-      </View>
-
-      {/* Search and Filter Section */}
-      <View style={styles.searchSection}>
-        <View style={styles.searchContainer}>
-          <MaterialCommunityIcons name="magnify" size={20} color="#999" />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search members..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            placeholderTextColor="#999"
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <MaterialCommunityIcons name="close-circle" size={20} color="#999" />
-            </TouchableOpacity>
-          )}
-        </View>
-
-        {activeTab === 'approved' && (
-          <TouchableOpacity style={styles.filterButton} onPress={() => setFilterModalVisible(true)}>
-            <MaterialCommunityIcons name="filter-variant" size={20} color="#6200ee" />
-            <Text style={styles.filterButtonText}>Filters</Text>
-            {statusFilter !== 'all' && <View style={styles.filterBadge} />}
-          </TouchableOpacity>
-        )}
-      </View>
+      <SearchBar
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        placeholder="Search members..."
+        onFilterPress={activeTab === 'approved' ? () => setFilterModalVisible(true) : undefined}
+        filterActive={hasActiveFilters}
+      />
 
       <View style={styles.content}>
         {filteredMembers.length > 0 ? (
           activeTab === 'pending' ? (
-            // Pending members with approve/reject actions
             filteredMembers.map((member) => (
               <View key={member.id} style={styles.pendingMemberCard}>
+                <View style={styles.pendingAvatar}>
+                  <Text style={styles.pendingAvatarText}>
+                    {member.name.charAt(0).toUpperCase()}
+                  </Text>
+                  <View style={styles.pendingBadge}>
+                    <MaterialCommunityIcons name="clock" size={10} color={designTokens.colors.warning} />
+                  </View>
+                </View>
+
                 <View style={styles.pendingMemberInfo}>
-                  <View style={styles.pendingMemberHeader}>
-                    <MaterialCommunityIcons name="account-clock" size={24} color="#FF9800" />
-                    <View style={styles.pendingMemberDetails}>
-                      <Text style={styles.pendingMemberName}>{member.name}</Text>
-                      <Text style={styles.pendingMemberEmail}>{member.email}</Text>
-                      <View style={styles.pendingMemberContact}>
-                        <MaterialCommunityIcons name="whatsapp" size={16} color="#25D366" />
-                        <Text style={styles.pendingMemberPhone}>{member.whatsappNumber}</Text>
-                      </View>
+                  <View style={styles.pendingHeader}>
+                    <Text style={styles.pendingMemberName} numberOfLines={1}>
+                      {member.name}
+                    </Text>
+                    <View style={styles.pendingStatusBadge}>
+                      <MaterialCommunityIcons name="clock-alert-outline" size={12} color={designTokens.colors.warning} />
+                      <Text style={styles.pendingStatusText}>Pending</Text>
                     </View>
                   </View>
-                  <View style={styles.pendingMemberActions}>
-                    <TouchableOpacity
-                      style={styles.rejectButton}
-                      onPress={() => handleRejectMember(member.id, member.name)}
-                    >
-                      <MaterialCommunityIcons name="close-circle" size={20} color="#fff" />
-                      <Text style={styles.rejectButtonText}>Reject</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.approveButton}
-                      onPress={() => handleApproveMember(member.id, member.name)}
-                    >
-                      <MaterialCommunityIcons name="check-circle" size={20} color="#fff" />
-                      <Text style={styles.approveButtonText}>Approve</Text>
-                    </TouchableOpacity>
+
+                  <Text style={styles.pendingMemberEmail} numberOfLines={1}>
+                    {member.email}
+                  </Text>
+
+                  <View style={styles.pendingDetailsRow}>
+                    {member.whatsappNumber && (
+                      <View style={styles.metaItem}>
+                        <MaterialCommunityIcons name="whatsapp" size={12} color={designTokens.colors.success} />
+                        <Text style={styles.metaText} numberOfLines={1}>
+                          {member.whatsappNumber}
+                        </Text>
+                      </View>
+                    )}
+                    {member.classes && member.classes.length > 0 && (
+                      <View style={styles.metaItem}>
+                        <MaterialCommunityIcons name="school" size={12} color={designTokens.colors.primary} />
+                        <Text style={styles.metaText} numberOfLines={1}>
+                          {member.classes.slice(0, 2).join(', ')}{member.classes.length > 2 ? '...' : ''}
+                        </Text>
+                      </View>
+                    )}
                   </View>
+                </View>
+
+                <View style={styles.pendingActionsContainer}>
+                  <IconButton
+                    icon="close-circle"
+                    onPress={() => handleRejectMember(member.id, member.name)}
+                    size="md"
+                    color={designTokens.colors.textInverse}
+                    style={styles.rejectButton}
+                    accessibilityLabel="Reject member"
+                  />
+                  <IconButton
+                    icon="check-circle"
+                    onPress={() => handleApproveMember(member.id, member.name)}
+                    size="md"
+                    color={designTokens.colors.textInverse}
+                    style={styles.approveButton}
+                    accessibilityLabel="Approve member"
+                  />
                 </View>
               </View>
             ))
           ) : (
-            // Approved members with normal actions
-            filteredMembers.map((member) => (
-              <View key={member.id} style={styles.approvedMemberCard}>
+            filteredMembers.map((member) => {
+              const memberBalance = balances.find((b) => b.userId === member.id);
+              const balanceColor = memberBalance 
+                ? (memberBalance.balance >= 0 
+                    ? designTokens.colors.success 
+                    : memberBalance.overdueCharges > 0 
+                      ? designTokens.colors.error 
+                      : designTokens.colors.warning)
+                : designTokens.colors.textSecondary;
+
+              return (
                 <TouchableOpacity
+                  key={member.id}
+                  style={[styles.memberCard, !member.isActive && styles.memberCardInactive]}
                   onPress={() => {
                     setSelectedMember(member);
                     setDetailVisible(true);
                   }}
-                  style={styles.approvedMemberMain}
+                  activeOpacity={0.7}
                 >
-                  <View style={styles.approvedMemberHeader}>
-                    <View style={styles.approvedMemberInfo}>
-                      <Text style={styles.approvedMemberName}>{member.name}</Text>
-                      <Text style={styles.approvedMemberEmail}>{member.email}</Text>
+                  <View style={[styles.avatar, { backgroundColor: member.isActive ? balanceColor : designTokens.colors.backgroundTertiary }]}>
+                    <Text style={[styles.avatarText, !member.isActive && styles.avatarTextInactive]}>
+                      {member.name.charAt(0).toUpperCase()}
+                    </Text>
+                  </View>
+
+                  <View style={styles.memberInfo}>
+                    <View style={styles.memberHeader}>
+                      <Text style={[styles.memberName, !member.isActive && styles.textInactive]} numberOfLines={1}>
+                        {member.name}
+                      </Text>
+                      <View style={styles.roleBadge}>
+                        <Text style={[styles.roleText, !member.isActive && styles.roleTextInactive]}>
+                          {member.role === 'club_admin' ? 'CLUB ADMIN' : 'USER'}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <Text style={[styles.memberEmail, !member.isActive && styles.textInactive]} numberOfLines={1}>
+                      {member.email}
+                    </Text>
+
+                    <View style={styles.detailsRow}>
                       {member.classes && member.classes.length > 0 && (
-                        <View style={styles.classesRow}>
-                          <MaterialCommunityIcons name="school" size={14} color="#6200ee" />
-                          <Text style={styles.classesText}>{member.classes.join(', ')}</Text>
+                        <View style={styles.metaItem}>
+                          <MaterialCommunityIcons 
+                            name="school" 
+                            size={12} 
+                            color={member.isActive ? designTokens.colors.primary : designTokens.colors.textQuaternary} 
+                          />
+                          <Text style={[styles.metaText, !member.isActive && styles.textInactive]} numberOfLines={1}>
+                            {member.classes.slice(0, 2).join(', ')}{member.classes.length > 2 ? '...' : ''}
+                          </Text>
                         </View>
                       )}
+
+                      {member.whatsappNumber && (
+                        <View style={styles.metaItem}>
+                          <MaterialCommunityIcons 
+                            name="whatsapp" 
+                            size={12} 
+                            color={member.isActive ? designTokens.colors.success : designTokens.colors.textQuaternary} 
+                          />
+                          <Text style={[styles.metaText, !member.isActive && styles.textInactive]} numberOfLines={1}>
+                            {member.whatsappNumber}
+                          </Text>
+                        </View>
+                      )}
+
+                      <View style={styles.statusBadge}>
+                        <MaterialCommunityIcons
+                          name={member.isActive ? 'check-circle' : 'cancel'}
+                          size={12}
+                          color={member.isActive ? designTokens.colors.success : designTokens.colors.error}
+                        />
+                        <Text style={styles.statusText}>
+                          {member.isActive ? 'Active' : 'Inactive'}
+                        </Text>
+                      </View>
                     </View>
-                    <View style={styles.memberStatusBadge}>
-                      <MaterialCommunityIcons
-                        name={member.isPaused ? 'pause-circle' : 'check-circle'}
-                        size={16}
-                        color={member.isPaused ? '#ff9800' : '#4caf50'}
-                      />
-                      <Text style={styles.memberStatusText}>
-                        {member.isPaused ? 'Paused' : 'Active'}
-                      </Text>
-                    </View>
+
+                    {memberBalance && (
+                      <View style={styles.balanceRow}>
+                        <View style={[styles.balanceIndicator, { backgroundColor: balanceColor }]}>
+                          <MaterialCommunityIcons name="cash" size={14} color={designTokens.colors.textInverse} />
+                          <Text style={styles.balanceText}>
+                            ${Math.abs(memberBalance.balance).toFixed(2)}
+                          </Text>
+                          {memberBalance.balance < 0 && (
+                            <Text style={styles.balanceLabel}>
+                              {memberBalance.overdueCharges > 0 ? 'OVERDUE' : 'PENDING'}
+                            </Text>
+                          )}
+                          {memberBalance.balance >= 0 && (
+                            <Text style={styles.balanceLabel}>PAID UP</Text>
+                          )}
+                        </View>
+                      </View>
+                    )}
+                  </View>
+
+                  <View style={styles.actionsContainer}>
+                    <IconButton
+                      icon="school-outline"
+                      onPress={() => handleEditClasses(member)}
+                      size="md"
+                      color={designTokens.colors.primary}
+                      accessibilityLabel="Edit classes"
+                    />
+                    <IconButton
+                      icon={member.isActive ? 'cancel' : 'check-circle'}
+                      onPress={() => handleToggleMemberStatus(member.id, member.isActive)}
+                      size="md"
+                      color={member.isActive ? designTokens.colors.error : designTokens.colors.success}
+                      accessibilityLabel={member.isActive ? 'Deactivate member' : 'Activate member'}
+                    />
+                    <IconButton
+                      icon="delete-outline"
+                      onPress={() => handleDeleteMember(member.id, member.name)}
+                      size="md"
+                      color={designTokens.colors.error}
+                      accessibilityLabel="Delete member"
+                    />
                   </View>
                 </TouchableOpacity>
-
-                <View style={styles.approvedMemberActions}>
-                  <TouchableOpacity
-                    style={styles.actionButton}
-                    onPress={() => handleEditClasses(member)}
-                  >
-                    <MaterialCommunityIcons name="school-outline" size={18} color="#6200ee" />
-                    <Text style={styles.actionButtonText}>Edit Classes</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.actionButton}
-                    onPress={() => handleToggleMemberStatus(member.id, member.isActive)}
-                  >
-                    <MaterialCommunityIcons
-                      name={member.isPaused ? 'play' : 'pause'}
-                      size={18}
-                      color="#ff9800"
-                    />
-                    <Text style={styles.actionButtonText}>
-                      {member.isPaused ? 'Resume' : 'Pause'}
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.actionButton}
-                    onPress={() => handleDeleteMember(member.id, member.name)}
-                  >
-                    <MaterialCommunityIcons name="delete-outline" size={18} color="#f44336" />
-                    <Text style={[styles.actionButtonText, { color: '#f44336' }]}>Delete</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))
+              );
+            })
           )
         ) : (
-          <View style={styles.emptyState}>
-            <MaterialCommunityIcons
-              name={activeTab === 'pending' ? 'clock-check-outline' : 'account-search'}
-              size={64}
-              color="#ccc"
-            />
-            <Text style={styles.emptyStateText}>
-              {activeTab === 'pending' ? 'No pending approvals' : 'No members found'}
-            </Text>
-            <Text style={styles.emptyStateSubtext}>
-              {activeTab === 'pending'
+          <EmptyState
+            icon={activeTab === 'pending' ? 'clock-check-outline' : 'account-search'}
+            title={activeTab === 'pending' ? 'No pending approvals' : 'No members found'}
+            description={
+              activeTab === 'pending'
                 ? 'All member registrations have been processed'
-                : 'Try adjusting your search or filters'}
-            </Text>
-          </View>
+                : 'Try adjusting your search or filters'
+            }
+          />
         )}
       </View>
 
-      {/* Filter Modal */}
-      <Modal
+      <FilterModal
         visible={filterModalVisible}
-        animationType="fade"
-        transparent={true}
-        onRequestClose={() => setFilterModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Filter Members</Text>
-              <TouchableOpacity
-                onPress={() => setFilterModalVisible(false)}
-                style={styles.closeButton}
-              >
-                <MaterialCommunityIcons name="close" size={24} color="#666" />
-              </TouchableOpacity>
-            </View>
+        title="Filter Members"
+        sections={filterSections}
+        onClose={() => setFilterModalVisible(false)}
+        onClear={clearFilters}
+        onApply={applyFilters}
+        onSelectOption={handleFilterSelect}
+      />
 
-            <ScrollView style={styles.modalBody}>
-              {/* Status Filter */}
-              <View style={styles.filterSection}>
-                <Text style={styles.filterSectionTitle}>Member Status</Text>
-
-                <TouchableOpacity
-                  style={[styles.filterOption, statusFilter === 'all' && styles.filterOptionActive]}
-                  onPress={() => setStatusFilter('all')}
-                >
-                  <View style={styles.filterOptionContent}>
-                    <MaterialCommunityIcons
-                      name="account-group"
-                      size={20}
-                      color={statusFilter === 'all' ? '#6200ee' : '#666'}
-                    />
-                    <Text
-                      style={[
-                        styles.filterOptionText,
-                        statusFilter === 'all' && styles.filterOptionTextActive,
-                      ]}
-                    >
-                      All Members
-                    </Text>
-                  </View>
-                  {statusFilter === 'all' && (
-                    <MaterialCommunityIcons name="check" size={20} color="#6200ee" />
-                  )}
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[
-                    styles.filterOption,
-                    statusFilter === 'active' && styles.filterOptionActive,
-                  ]}
-                  onPress={() => setStatusFilter('active')}
-                >
-                  <View style={styles.filterOptionContent}>
-                    <MaterialCommunityIcons
-                      name="check-circle"
-                      size={20}
-                      color={statusFilter === 'active' ? '#6200ee' : '#4caf50'}
-                    />
-                    <Text
-                      style={[
-                        styles.filterOptionText,
-                        statusFilter === 'active' && styles.filterOptionTextActive,
-                      ]}
-                    >
-                      Active Only
-                    </Text>
-                  </View>
-                  {statusFilter === 'active' && (
-                    <MaterialCommunityIcons name="check" size={20} color="#6200ee" />
-                  )}
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[
-                    styles.filterOption,
-                    statusFilter === 'paused' && styles.filterOptionActive,
-                  ]}
-                  onPress={() => setStatusFilter('paused')}
-                >
-                  <View style={styles.filterOptionContent}>
-                    <MaterialCommunityIcons
-                      name="pause-circle"
-                      size={20}
-                      color={statusFilter === 'paused' ? '#6200ee' : '#ff9800'}
-                    />
-                    <Text
-                      style={[
-                        styles.filterOptionText,
-                        statusFilter === 'paused' && styles.filterOptionTextActive,
-                      ]}
-                    >
-                      Paused Only
-                    </Text>
-                  </View>
-                  {statusFilter === 'paused' && (
-                    <MaterialCommunityIcons name="check" size={20} color="#6200ee" />
-                  )}
-                </TouchableOpacity>
-              </View>
-            </ScrollView>
-
-            <View style={styles.modalFooter}>
-              <TouchableOpacity style={styles.clearButton} onPress={clearFilters}>
-                <Text style={styles.clearButtonText}>Clear All</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.applyButton} onPress={applyFilters}>
-                <Text style={styles.applyButtonText}>Apply</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Member Detail Modal */}
       <UserDetailModal
         visible={detailVisible}
         user={selectedMember}
@@ -532,7 +560,6 @@ const ClubMembersScreen = () => {
         }}
       />
 
-      {/* Class Edit Modal */}
       <ClassSelectionModal
         visible={classEditModalVisible}
         initialClasses={memberToEdit?.classes || []}
@@ -549,393 +576,235 @@ const ClubMembersScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
-  },
-  searchSection: {
-    flexDirection: 'row',
-    padding: 16,
-    gap: 12,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  searchContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    height: 48,
-    gap: 8,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-    color: '#333',
-  },
-  filterButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#f0e6ff',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    height: 48,
-    gap: 6,
-    position: 'relative',
-  },
-  filterButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#6200ee',
-  },
-  filterBadge: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#f44336',
+    backgroundColor: designTokens.colors.backgroundSecondary,
   },
   content: {
-    padding: 16,
+    padding: designTokens.spacing.lg,
   },
-  emptyState: {
+  pendingMemberCard: {
+    backgroundColor: designTokens.colors.warningLight,
+    borderRadius: designTokens.borderRadius.lg,
+    marginBottom: designTokens.spacing.md,
+    ...designTokens.shadows.sm,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 60,
+    padding: designTokens.spacing.lg,
+    minHeight: 80,
+    borderLeftWidth: 3,
+    borderLeftColor: designTokens.colors.warning,
   },
-  emptyStateText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#666',
-    marginTop: 16,
-  },
-  emptyStateSubtext: {
-    fontSize: 14,
-    color: '#999',
-    marginTop: 8,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  pendingAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: designTokens.borderRadius['3xl'],
+    backgroundColor: designTokens.colors.warningLight,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    width: '100%',
-    maxWidth: 600,
-    maxHeight: '90%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  closeButton: {
-    padding: 4,
-  },
-  modalBody: {
-    maxHeight: 400,
-  },
-  filterSection: {
-    padding: 20,
-  },
-  filterSectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 12,
-  },
-  filterOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 8,
-    backgroundColor: '#f5f5f5',
-  },
-  filterOptionActive: {
-    backgroundColor: '#f0e6ff',
-    borderWidth: 2,
-    borderColor: '#6200ee',
-  },
-  filterOptionContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  filterOptionText: {
-    fontSize: 16,
-    color: '#666',
-  },
-  filterOptionTextActive: {
-    color: '#6200ee',
-    fontWeight: '600',
-  },
-  modalFooter: {
-    flexDirection: 'row',
-    padding: 20,
-    gap: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-  },
-  clearButton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 12,
-    backgroundColor: '#f5f5f5',
-    alignItems: 'center',
-  },
-  clearButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#666',
-  },
-  applyButton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 12,
-    backgroundColor: '#6200ee',
-    alignItems: 'center',
-  },
-  applyButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  tab: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    gap: 8,
-    borderBottomWidth: 3,
-    borderBottomColor: 'transparent',
+    marginRight: designTokens.spacing.md,
+    flexShrink: 0,
     position: 'relative',
   },
-  tabActive: {
-    borderBottomColor: '#6200ee',
+  pendingAvatarText: {
+    ...mobileTypography.heading3,
+    color: designTokens.colors.warning,
   },
-  tabText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#999',
-  },
-  tabTextActive: {
-    color: '#6200ee',
-    fontWeight: '600',
-  },
-  badge: {
+  pendingBadge: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: '#f44336',
+    bottom: -2,
+    right: -2,
+    backgroundColor: designTokens.colors.backgroundPrimary,
     borderRadius: 10,
-    minWidth: 20,
+    width: 20,
     height: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 6,
-  },
-  badgeText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  pendingMemberCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    borderLeftWidth: 4,
-    borderLeftColor: '#FF9800',
+    borderWidth: 2,
+    borderColor: designTokens.colors.warningLight,
   },
   pendingMemberInfo: {
-    gap: 16,
-  },
-  pendingMemberHeader: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  pendingMemberDetails: {
     flex: 1,
-    gap: 4,
+    marginRight: designTokens.spacing.md,
+    minWidth: 0,
+  },
+  pendingHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+    gap: designTokens.spacing.sm,
   },
   pendingMemberName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    ...mobileTypography.bodyMediumBold,
+    color: designTokens.colors.textPrimary,
+    flex: 1,
+  },
+  pendingStatusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: designTokens.colors.warningLight,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: designTokens.borderRadius.sm,
+    flexShrink: 0,
+  },
+  pendingStatusText: {
+    fontSize: mobileFontSizes.xs,
+    fontWeight: '600',
+    color: designTokens.colors.warning,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   pendingMemberEmail: {
-    fontSize: 14,
-    color: '#666',
-  },
-  pendingMemberContact: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 4,
-  },
-  pendingMemberPhone: {
-    fontSize: 14,
-    color: '#666',
-  },
-  pendingMemberActions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  approveButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#4caf50',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    gap: 6,
-  },
-  approveButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  rejectButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#f44336',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    gap: 6,
-  },
-  rejectButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  approvedMemberCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    overflow: 'hidden',
-  },
-  approvedMemberMain: {
-    padding: 16,
-  },
-  approvedMemberHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  approvedMemberInfo: {
-    flex: 1,
-    marginRight: 12,
-  },
-  approvedMemberName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    ...mobileTypography.bodySmall,
+    color: designTokens.colors.textSecondary,
     marginBottom: 4,
   },
-  approvedMemberEmail: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
+  pendingDetailsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: designTokens.spacing.sm,
   },
-  classesRow: {
+  pendingActionsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    flexShrink: 0,
   },
-  classesText: {
-    fontSize: 13,
-    color: '#6200ee',
-    fontWeight: '500',
+  rejectButton: {
+    backgroundColor: designTokens.colors.error,
   },
-  memberStatusBadge: {
+  approveButton: {
+    backgroundColor: designTokens.colors.success,
+  },
+  memberCard: {
+    backgroundColor: designTokens.colors.backgroundPrimary,
+    borderRadius: designTokens.borderRadius.lg,
+    marginBottom: designTokens.spacing.md,
+    ...designTokens.shadows.sm,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 12,
+    padding: designTokens.spacing.lg,
+    minHeight: 80,
+  },
+  memberCardInactive: {
+    backgroundColor: designTokens.colors.backgroundTertiary,
+    opacity: 0.8,
+  },
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: designTokens.borderRadius['3xl'],
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: designTokens.spacing.md,
+    flexShrink: 0,
+  },
+  avatarText: {
+    ...mobileTypography.heading3,
+    color: designTokens.colors.textInverse,
+  },
+  avatarTextInactive: {
+    color: designTokens.colors.textQuaternary,
+  },
+  memberInfo: {
+    flex: 1,
+    marginRight: designTokens.spacing.md,
+    minWidth: 0,
+  },
+  memberHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+    gap: designTokens.spacing.sm,
+  },
+  memberName: {
+    ...mobileTypography.bodyMediumBold,
+    color: designTokens.colors.textPrimary,
+    flex: 1,
+  },
+  textInactive: {
+    color: designTokens.colors.textQuaternary,
+  },
+  roleBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: designTokens.borderRadius.sm,
+    backgroundColor: designTokens.colors.infoLight,
+    flexShrink: 0,
+  },
+  roleText: {
+    fontSize: mobileFontSizes.xs,
+    fontWeight: '600',
+    color: designTokens.colors.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  roleTextInactive: {
+    color: designTokens.colors.textQuaternary,
+  },
+  memberEmail: {
+    ...mobileTypography.bodySmall,
+    color: designTokens.colors.textSecondary,
+    marginBottom: 4,
+  },
+  detailsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: designTokens.spacing.sm,
+  },
+  metaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 4,
   },
-  memberStatusText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#666',
+  metaText: {
+    ...mobileTypography.caption,
+    color: designTokens.colors.textSecondary,
   },
-  approvedMemberActions: {
-    flexDirection: 'row',
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-  },
-  actionButton: {
-    flex: 1,
+  statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    gap: 6,
-    borderRightWidth: 1,
-    borderRightColor: '#f0f0f0',
+    gap: 3,
   },
-  actionButtonText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#666',
+  statusText: {
+    ...mobileTypography.caption,
+    color: designTokens.colors.textSecondary,
+    fontWeight: '500',
+  },
+  actionsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    flexShrink: 0,
+  },
+  balanceRow: {
+    marginTop: designTokens.spacing.sm,
+    paddingTop: designTokens.spacing.sm,
+    borderTopWidth: designTokens.borderWidth.thin,
+    borderTopColor: designTokens.colors.borderLight,
+  },
+  balanceIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: designTokens.borderRadius.lg,
+    alignSelf: 'flex-start',
+  },
+  balanceText: {
+    ...mobileTypography.labelBold,
+    color: designTokens.colors.textInverse,
+  },
+  balanceLabel: {
+    fontSize: mobileFontSizes.xs,
+    fontWeight: '700',
+    color: designTokens.colors.textInverse,
+    marginLeft: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
 });
 

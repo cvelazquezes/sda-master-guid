@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   Alert,
@@ -11,12 +10,17 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { clubService } from '../../services/clubService';
 import { Club, PathfinderClass } from '../../types';
 import { ClassSelectionModal } from '../../components/ClassSelectionModal';
+import { StandardInput, StandardButton } from '../../shared/components';
+import { mobileTypography, mobileIconSizes } from '../../shared/theme';
+import { designTokens } from '../../shared/theme/designTokens';
+import { MESSAGES, VALIDATION, LIMITS } from '../../shared/constants';
 
 const RegisterScreen = () => {
   const [name, setName] = useState('');
@@ -33,6 +37,8 @@ const RegisterScreen = () => {
   const [clubs, setClubs] = useState<Club[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingClubs, setLoadingClubs] = useState(true);
+  // Role selection
+  const [isClubAdmin, setIsClubAdmin] = useState(false);
   // Class selection
   const [selectedClasses, setSelectedClasses] = useState<PathfinderClass[]>(['Friend']);
   const [classModalVisible, setClassModalVisible] = useState(false);
@@ -94,7 +100,7 @@ const RegisterScreen = () => {
       const clubsList = await clubService.getAllClubs();
       setClubs(clubsList.filter((club) => club.isActive));
     } catch (error) {
-      Alert.alert('Error', 'Failed to load clubs');
+      Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_LOAD_CLUBS);
     } finally {
       setLoadingClubs(false);
     }
@@ -222,42 +228,50 @@ const RegisterScreen = () => {
 
   const handleRegister = async () => {
     if (!name || !email || !whatsappNumber || !password || !clubId) {
-      Alert.alert('Error', 'Please fill in all fields including club selection');
+      Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.MISSING_CLUB_SELECTION);
       return;
     }
 
-    if (selectedClasses.length === 0) {
-      Alert.alert('Error', 'Please select at least one Pathfinder class');
+    // Only validate classes for regular users, not club admins
+    if (!isClubAdmin && selectedClasses.length === LIMITS.MIN_ARRAY_LENGTH) {
+      Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.MISSING_CLASS_SELECTION);
       return;
     }
 
     // Validate WhatsApp number format (basic validation)
-    const whatsappRegex = /^\+?[1-9]\d{1,14}$/;
-    if (!whatsappRegex.test(whatsappNumber.replace(/[\s()-]/g, ''))) {
+    if (!VALIDATION.WHATSAPP.REGEX.test(whatsappNumber.replace(/[\s()-]/g, ''))) {
       Alert.alert(
-        'Error',
-        'Please enter a valid WhatsApp number with country code (e.g., +1 555 123 4567)'
+        MESSAGES.TITLES.ERROR,
+        MESSAGES.ERRORS.INVALID_WHATSAPP
       );
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.PASSWORD_MISMATCH);
       return;
     }
 
-    if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters');
+    if (password.length < VALIDATION.PASSWORD.MIN_LENGTH) {
+      Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.PASSWORD_TOO_SHORT);
       return;
     }
 
     setLoading(true);
     try {
-      // Pass classes as additional data
-      await register(email, password, name, whatsappNumber, clubId, selectedClasses);
+      // Pass classes and club admin flag
+      await register(
+        email,
+        password,
+        name,
+        whatsappNumber,
+        clubId,
+        isClubAdmin ? [] : selectedClasses,
+        isClubAdmin
+      );
       // Registration successful - user will be redirected to PendingApprovalScreen automatically
     } catch (error) {
-      Alert.alert('Registration Failed', 'Registration failed');
+      Alert.alert(MESSAGES.TITLES.REGISTRATION_FAILED, MESSAGES.ERRORS.REGISTRATION_FAILED);
     } finally {
       setLoading(false);
     }
@@ -265,75 +279,90 @@ const RegisterScreen = () => {
 
   if (loadingClubs) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6200ee" />
-        <Text style={styles.loadingText}>Loading clubs...</Text>
-      </View>
+      <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={designTokens.colors.primary} />
+          <Text style={styles.loadingText}>{MESSAGES.INFO.LOADING_CLUBS}</Text>
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <MaterialCommunityIcons name="account-plus" size={60} color="#6200ee" />
+          <MaterialCommunityIcons name="account-plus" size={60} color={designTokens.colors.primary} />
           <Text style={styles.title}>Create Account</Text>
           <Text style={styles.subtitle}>Join a club to get started</Text>
         </View>
 
         <View style={styles.form}>
-          <View style={styles.inputContainer}>
-            <MaterialCommunityIcons
-              name="account"
-              size={20}
-              color="#666"
-              style={styles.inputIcon}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Full Name"
-              value={name}
-              onChangeText={setName}
-              autoCapitalize="words"
-            />
-          </View>
+          <StandardInput
+            label="Full Name"
+            icon="account"
+            placeholder={MESSAGES.PLACEHOLDERS.FULL_NAME}
+            value={name}
+            onChangeText={setName}
+            autoCapitalize="words"
+            required
+          />
 
-          <View style={styles.inputContainer}>
-            <MaterialCommunityIcons name="email" size={20} color="#666" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoComplete="email"
-            />
-          </View>
+          <StandardInput
+            label="Email"
+            icon="email"
+            placeholder={MESSAGES.PLACEHOLDERS.EMAIL}
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoComplete="email"
+            required
+          />
 
-          <View style={styles.inputContainer}>
-            <MaterialCommunityIcons
-              name="whatsapp"
-              size={20}
-              color="#666"
-              style={styles.inputIcon}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="WhatsApp Number (e.g., +1 555 123 4567)"
-              value={whatsappNumber}
-              onChangeText={setWhatsappNumber}
-              keyboardType="phone-pad"
-              autoCapitalize="none"
-            />
+          <StandardInput
+            label="WhatsApp Number"
+            icon="whatsapp"
+            placeholder={MESSAGES.PLACEHOLDERS.WHATSAPP}
+            value={whatsappNumber}
+            onChangeText={setWhatsappNumber}
+            keyboardType="phone-pad"
+            autoCapitalize="none"
+            required
+          />
+
+          {/* Role Selection */}
+          <View style={styles.sectionHeader}>
+            <MaterialCommunityIcons name="account-cog" size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+            <Text style={styles.sectionTitle}>Account Type</Text>
           </View>
+          <TouchableOpacity
+            style={styles.checkboxContainer}
+            onPress={() => setIsClubAdmin(!isClubAdmin)}
+          >
+            <MaterialCommunityIcons
+              name={isClubAdmin ? 'checkbox-marked' : 'checkbox-blank-outline'}
+              size={mobileIconSizes.large}
+              color={designTokens.colors.primary}
+            />
+            <Text style={styles.checkboxLabel}>I am a club admin</Text>
+          </TouchableOpacity>
+          {isClubAdmin && (
+            <View style={styles.infoBox}>
+              <MaterialCommunityIcons name="information" size={mobileIconSizes.medium} color={designTokens.colors.info} />
+              <Text style={styles.infoText}>
+                Club admin accounts require approval from a system administrator.
+              </Text>
+            </View>
+          )}
 
           {/* Club Selection via Organizational Hierarchy */}
           <View style={styles.sectionHeader}>
-            <MaterialCommunityIcons name="sitemap" size={20} color="#6200ee" />
+            <MaterialCommunityIcons name="sitemap" size={mobileIconSizes.medium} color={designTokens.colors.primary} />
             <Text style={styles.sectionTitle}>Find Your Club</Text>
           </View>
           <Text style={styles.sectionDescription}>
@@ -352,8 +381,8 @@ const RegisterScreen = () => {
                 >
                   <MaterialCommunityIcons
                     name={division === div ? 'radiobox-marked' : 'radiobox-blank'}
-                    size={20}
-                    color={division === div ? '#6200ee' : '#666'}
+                    size={mobileIconSizes.medium}
+                    color={division === div ? designTokens.colors.primary : designTokens.colors.textSecondary}
                   />
                   <Text style={styles.optionText}>{div}</Text>
                 </TouchableOpacity>
@@ -374,8 +403,8 @@ const RegisterScreen = () => {
                   >
                     <MaterialCommunityIcons
                       name={union === uni ? 'radiobox-marked' : 'radiobox-blank'}
-                      size={20}
-                      color={union === uni ? '#6200ee' : '#666'}
+                      size={mobileIconSizes.medium}
+                      color={union === uni ? designTokens.colors.primary : designTokens.colors.textSecondary}
                     />
                     <Text style={styles.optionText}>{uni}</Text>
                   </TouchableOpacity>
@@ -397,8 +426,8 @@ const RegisterScreen = () => {
                   >
                     <MaterialCommunityIcons
                       name={association === assoc ? 'radiobox-marked' : 'radiobox-blank'}
-                      size={20}
-                      color={association === assoc ? '#6200ee' : '#666'}
+                      size={mobileIconSizes.medium}
+                      color={association === assoc ? designTokens.colors.primary : designTokens.colors.textSecondary}
                     />
                     <Text style={styles.optionText}>{assoc}</Text>
                   </TouchableOpacity>
@@ -420,8 +449,8 @@ const RegisterScreen = () => {
                   >
                     <MaterialCommunityIcons
                       name={church === ch ? 'radiobox-marked' : 'radiobox-blank'}
-                      size={20}
-                      color={church === ch ? '#6200ee' : '#666'}
+                      size={mobileIconSizes.medium}
+                      color={church === ch ? designTokens.colors.primary : designTokens.colors.textSecondary}
                     />
                     <Text style={styles.optionText}>{ch}</Text>
                   </TouchableOpacity>
@@ -443,8 +472,8 @@ const RegisterScreen = () => {
                   >
                     <MaterialCommunityIcons
                       name={clubId === club.id ? 'radiobox-marked' : 'radiobox-blank'}
-                      size={20}
-                      color={clubId === club.id ? '#6200ee' : '#666'}
+                      size={mobileIconSizes.medium}
+                      color={clubId === club.id ? designTokens.colors.primary : designTokens.colors.textSecondary}
                     />
                     <View style={styles.clubInfo}>
                       <Text style={styles.clubName}>{club.name}</Text>
@@ -456,75 +485,69 @@ const RegisterScreen = () => {
             </View>
           )}
 
-          {/* Pathfinder Classes Selection */}
-          <View style={styles.sectionHeader}>
-            <MaterialCommunityIcons name="school" size={20} color="#6200ee" />
-            <Text style={styles.sectionTitle}>Pathfinder Classes</Text>
-          </View>
-          <Text style={styles.sectionDescription}>
-            Select 1 to 3 Pathfinder classes you belong to
-          </Text>
-
-          <TouchableOpacity
-            style={styles.classSelectionButton}
-            onPress={() => setClassModalVisible(true)}
-          >
-            <View style={styles.classSelectionContent}>
-              <MaterialCommunityIcons name="school" size={20} color="#6200ee" />
-              <Text style={styles.classSelectionText}>
-                {selectedClasses.length > 0
-                  ? `Selected: ${selectedClasses.join(', ')}`
-                  : 'Select Classes'}
+          {/* Pathfinder Classes Selection - Only for regular users */}
+          {!isClubAdmin && (
+            <>
+              <View style={styles.sectionHeader}>
+                <MaterialCommunityIcons name="school" size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+                <Text style={styles.sectionTitle}>Pathfinder Classes</Text>
+              </View>
+              <Text style={styles.sectionDescription}>
+                Select 1 to 3 Pathfinder classes you belong to
               </Text>
-            </View>
-            <MaterialCommunityIcons name="chevron-right" size={24} color="#6200ee" />
-          </TouchableOpacity>
 
-          <View style={styles.inputContainer}>
-            <MaterialCommunityIcons name="lock" size={20} color="#666" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              autoCapitalize="none"
-            />
-          </View>
+              <TouchableOpacity
+                style={styles.classSelectionButton}
+                onPress={() => setClassModalVisible(true)}
+              >
+                <View style={styles.classSelectionContent}>
+                  <MaterialCommunityIcons name="school" size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+                  <Text style={styles.classSelectionText}>
+                    {selectedClasses.length > 0
+                      ? `Selected: ${selectedClasses.join(', ')}`
+                      : 'Select Classes'}
+                  </Text>
+                </View>
+                <MaterialCommunityIcons name="chevron-right" size={mobileIconSizes.large} color={designTokens.colors.primary} />
+              </TouchableOpacity>
+            </>
+          )}
 
-          <View style={styles.inputContainer}>
-            <MaterialCommunityIcons
-              name="lock-check"
-              size={20}
-              color="#666"
-              style={styles.inputIcon}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Confirm Password"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry
-              autoCapitalize="none"
-            />
-          </View>
+          <StandardInput
+            label="Password"
+            icon="lock"
+            placeholder={MESSAGES.PLACEHOLDERS.PASSWORD}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            autoCapitalize="none"
+            required
+          />
 
-          <TouchableOpacity
-            style={[styles.button, loading && styles.buttonDisabled]}
+          <StandardInput
+            label="Confirm Password"
+            icon="lock-check"
+            placeholder={MESSAGES.PLACEHOLDERS.CONFIRM_PASSWORD}
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry
+            autoCapitalize="none"
+            required
+          />
+
+          <StandardButton
+            title={loading ? 'Creating account...' : 'Register'}
             onPress={handleRegister}
             disabled={loading}
-          >
-            <Text style={styles.buttonText}>{loading ? 'Creating account...' : 'Register'}</Text>
-          </TouchableOpacity>
+            loading={loading}
+            icon="account-plus"
+          />
 
-          <TouchableOpacity
-            style={styles.linkButton}
+          <StandardButton
+            title="Already have an account? Login"
+            variant="ghost"
             onPress={() => navigation.navigate('Login' as never)}
-          >
-            <Text style={styles.linkText}>
-              Already have an account? <Text style={styles.linkTextBold}>Login</Text>
-            </Text>
-          </TouchableOpacity>
+          />
         </View>
       </ScrollView>
 
@@ -536,43 +559,46 @@ const RegisterScreen = () => {
         onClose={() => setClassModalVisible(false)}
       />
     </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: designTokens.colors.backgroundPrimary,
+  },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: designTokens.colors.backgroundPrimary,
   },
   scrollContent: {
     flexGrow: 1,
-    padding: 20,
-    paddingTop: 40,
+    padding: designTokens.spacing.lg,
+    paddingTop: designTokens.spacing['3xl'],
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: designTokens.colors.backgroundPrimary,
   },
   loadingText: {
-    marginTop: 16,
-    color: '#666',
+    ...mobileTypography.bodyMedium,
+    marginTop: designTokens.spacing.md,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: designTokens.spacing.xxl,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-    marginTop: 16,
+    ...mobileTypography.displayMedium,
+    marginTop: designTokens.spacing.md,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 8,
+    ...mobileTypography.bodyLarge,
+    color: designTokens.colors.textSecondary,
+    marginTop: designTokens.spacing.sm,
   },
   form: {
     width: '100%',
@@ -580,139 +606,131 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    marginBottom: 16,
-    paddingHorizontal: 12,
-    backgroundColor: '#f9f9f9',
+    borderWidth: designTokens.borderWidth.thin,
+    borderColor: designTokens.colors.borderMedium,
+    borderRadius: designTokens.borderRadius.md,
+    marginBottom: designTokens.spacing.md,
+    paddingHorizontal: designTokens.spacing.md,
+    backgroundColor: designTokens.colors.inputBackground,
   },
   inputIcon: {
-    marginRight: 10,
+    marginRight: designTokens.spacing.sm,
   },
   input: {
     flex: 1,
     height: 50,
-    fontSize: 16,
+    ...mobileTypography.bodyLarge,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
-    marginBottom: 16,
-    gap: 8,
+    marginTop: designTokens.spacing.sm,
+    marginBottom: designTokens.spacing.md,
+    gap: designTokens.spacing.sm,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#6200ee',
+    ...mobileTypography.heading3,
+    color: designTokens.colors.primary,
   },
   sectionDescription: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 16,
-    marginTop: -8,
+    ...mobileTypography.bodySmall,
+    color: designTokens.colors.textSecondary,
+    marginBottom: designTokens.spacing.md,
+    marginTop: -designTokens.spacing.sm,
   },
   pickerContainer: {
-    marginBottom: 16,
+    marginBottom: designTokens.spacing.md,
   },
   pickerLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 12,
+    ...mobileTypography.bodyLargeBold,
+    marginBottom: designTokens.spacing.md,
   },
   optionsList: {
     maxHeight: 150,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    backgroundColor: '#f9f9f9',
+    borderWidth: designTokens.borderWidth.thin,
+    borderColor: designTokens.colors.borderMedium,
+    borderRadius: designTokens.borderRadius.md,
+    backgroundColor: designTokens.colors.inputBackground,
   },
   option: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    padding: designTokens.spacing.md,
+    borderBottomWidth: designTokens.borderWidth.thin,
+    borderBottomColor: designTokens.colors.borderLight,
   },
   optionSelected: {
-    backgroundColor: '#f0e6ff',
+    backgroundColor: designTokens.colors.primaryLight,
   },
   optionText: {
-    marginLeft: 12,
-    fontSize: 16,
-    color: '#333',
+    marginLeft: designTokens.spacing.md,
+    ...mobileTypography.bodyLarge,
   },
   clubsList: {
     maxHeight: 200,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    backgroundColor: '#f9f9f9',
+    borderWidth: designTokens.borderWidth.thin,
+    borderColor: designTokens.colors.borderMedium,
+    borderRadius: designTokens.borderRadius.md,
+    backgroundColor: designTokens.colors.inputBackground,
   },
   clubOption: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    padding: designTokens.spacing.md,
+    borderBottomWidth: designTokens.borderWidth.thin,
+    borderBottomColor: designTokens.colors.borderLight,
   },
   clubOptionSelected: {
-    backgroundColor: '#f0e6ff',
+    backgroundColor: designTokens.colors.primaryLight,
   },
   clubInfo: {
-    marginLeft: 12,
+    marginLeft: designTokens.spacing.md,
     flex: 1,
   },
   clubName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    ...mobileTypography.bodyLargeBold,
   },
   clubDescription: {
-    fontSize: 14,
-    color: '#666',
+    ...mobileTypography.bodySmall,
     marginTop: 4,
   },
   button: {
-    backgroundColor: '#6200ee',
-    padding: 16,
-    borderRadius: 8,
+    backgroundColor: designTokens.colors.primary,
+    padding: designTokens.spacing.md,
+    borderRadius: designTokens.borderRadius.md,
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: designTokens.spacing.sm,
+    minHeight: 52,
   },
   buttonDisabled: {
     opacity: 0.6,
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+    ...mobileTypography.button,
   },
   linkButton: {
     marginTop: 20,
     alignItems: 'center',
   },
   linkText: {
-    color: '#666',
-    fontSize: 14,
+    ...mobileTypography.bodySmall,
+    color: designTokens.colors.textSecondary,
   },
   linkTextBold: {
-    color: '#6200ee',
-    fontWeight: 'bold',
+    ...mobileTypography.bodySmallBold,
+    color: designTokens.colors.primary,
   },
   classSelectionButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
+    borderColor: designTokens.colors.borderLight,
+    borderRadius: designTokens.borderRadius.md,
     marginBottom: 16,
     paddingHorizontal: 12,
     paddingVertical: 16,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: designTokens.colors.inputBackground,
   },
   classSelectionContent: {
     flexDirection: 'row',
@@ -721,8 +739,31 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   classSelectionText: {
-    fontSize: 16,
-    color: '#333',
+    ...mobileTypography.bodyLarge,
+    flex: 1,
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    paddingVertical: 8,
+  },
+  checkboxLabel: {
+    ...mobileTypography.bodyLarge,
+    marginLeft: 12,
+    color: designTokens.colors.textPrimary,
+  },
+  infoBox: {
+    flexDirection: 'row',
+    backgroundColor: designTokens.colors.infoLight,
+    borderRadius: designTokens.borderRadius.md,
+    padding: designTokens.spacing.md,
+    marginBottom: 16,
+    gap: 10,
+  },
+  infoText: {
+    ...mobileTypography.bodySmall,
+    color: designTokens.colors.info,
     flex: 1,
   },
 });
