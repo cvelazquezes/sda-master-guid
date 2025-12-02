@@ -10,18 +10,24 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import { ClubCard } from '../ClubCard';
-import { Club } from '../../types';
+import { Club, MatchFrequency } from '../../types';
 
 // Test data builders
 const createMockClub = (overrides?: Partial<Club>): Club => ({
   id: '1',
   name: 'Test Club',
   description: 'A test club for testing',
-  matchFrequency: 'weekly',
+  adminId: 'admin-1',
+  church: 'Test Church',
+  association: 'Test Association',
+  union: 'Test Union',
+  division: 'Test Division',
+  matchFrequency: MatchFrequency.WEEKLY,
   groupSize: 2,
   isActive: true,
   memberCount: 10,
-  createdAt: new Date('2024-01-01'),
+  createdAt: new Date('2024-01-01').toISOString(),
+  updatedAt: new Date('2024-01-01').toISOString(),
   ...overrides,
 });
 
@@ -30,8 +36,8 @@ describe('ClubCard', () => {
     it('should render club information correctly', () => {
       const club = createMockClub({
         name: 'SDA Master Guid',
-        description: 'Coffee chat club for SDA',
-        matchFrequency: 'bi_weekly',
+        description: 'Club management and social activities for SDA',
+        matchFrequency: MatchFrequency.BIWEEKLY,
         groupSize: 3,
         memberCount: 25,
       });
@@ -39,7 +45,7 @@ describe('ClubCard', () => {
       const { getByText } = render(<ClubCard club={club} />);
 
       expect(getByText('SDA Master Guid')).toBeTruthy();
-      expect(getByText('Coffee chat club for SDA')).toBeTruthy();
+      expect(getByText('Club management and social activities for SDA')).toBeTruthy();
       expect(getByText('bi-weekly')).toBeTruthy();
       expect(getByText('3 per group')).toBeTruthy();
       expect(getByText('25 members')).toBeTruthy();
@@ -48,10 +54,10 @@ describe('ClubCard', () => {
     it('should display club icon', () => {
       const club = createMockClub();
 
-      const { container } = render(<ClubCard club={club} />);
+      const { getByText } = render(<ClubCard club={club} />);
 
-      // Icon should be rendered (MaterialCommunityIcons)
-      expect(container).toBeTruthy();
+      // Icon should be rendered along with club name
+      expect(getByText(club.name)).toBeTruthy();
     });
 
     it('should not show member count when not provided', () => {
@@ -92,7 +98,7 @@ describe('ClubCard', () => {
 
   describe('Match Frequency', () => {
     it('should display weekly frequency', () => {
-      const club = createMockClub({ matchFrequency: 'weekly' });
+      const club = createMockClub({ matchFrequency: MatchFrequency.WEEKLY });
 
       const { getByText } = render(<ClubCard club={club} />);
 
@@ -100,7 +106,7 @@ describe('ClubCard', () => {
     });
 
     it('should display bi-weekly frequency with dash', () => {
-      const club = createMockClub({ matchFrequency: 'bi_weekly' });
+      const club = createMockClub({ matchFrequency: MatchFrequency.BIWEEKLY });
 
       const { getByText } = render(<ClubCard club={club} />);
 
@@ -108,7 +114,7 @@ describe('ClubCard', () => {
     });
 
     it('should display monthly frequency', () => {
-      const club = createMockClub({ matchFrequency: 'monthly' });
+      const club = createMockClub({ matchFrequency: MatchFrequency.MONTHLY });
 
       const { getByText } = render(<ClubCard club={club} />);
 

@@ -1,7 +1,17 @@
+/**
+ * ClubCard Component
+ * Displays club information in a card format
+ * Supports dynamic theming (light/dark mode)
+ */
+
 import React, { memo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTheme } from '../contexts/ThemeContext';
 import { Club } from '../types';
+import { mobileTypography } from '../shared/theme';
+import { designTokens } from '../shared/theme/designTokens';
+import { StatusIndicator, IconButton } from '../shared/components';
 
 interface ClubCardProps {
   club: Club;
@@ -18,130 +28,173 @@ const ClubCardComponent: React.FC<ClubCardProps> = ({
   onToggleStatus,
   onDelete,
 }) => {
+  const { colors, isDark } = useTheme();
+
   const CardContent = (
-    <View style={[styles.card, !club.isActive && styles.cardInactive]}>
-      <View style={styles.cardContent}>
-        {/* Icon */}
-        <View style={[styles.icon, { backgroundColor: club.isActive ? '#f0e6ff' : '#f5f5f5' }]}>
-          <MaterialCommunityIcons
-            name="account-group"
-            size={28}
-            color={club.isActive ? '#6200ee' : '#999'}
+    <View style={[
+      styles.card,
+      { 
+        backgroundColor: colors.surface,
+        shadowColor: '#000',
+        shadowOpacity: isDark ? 0.4 : 0.2,
+        elevation: isDark ? 8 : 5,
+      },
+      !club.isActive && { backgroundColor: colors.surfaceLight, opacity: 0.8 }
+    ]}>
+      {/* Icon */}
+      <View style={[
+        styles.icon,
+        { backgroundColor: club.isActive ? colors.primaryAlpha10 : colors.surfaceLight }
+      ]}>
+        <MaterialCommunityIcons
+          name="account-group"
+          size={designTokens.icon.sizes.lg}
+          color={club.isActive ? colors.primary : colors.textTertiary}
+        />
+      </View>
+
+      {/* Club Info */}
+      <View style={styles.clubInfo}>
+        <View style={styles.clubHeader}>
+          <Text 
+            style={[
+              styles.clubName, 
+              { color: club.isActive ? colors.textPrimary : colors.textTertiary }
+            ]} 
+            numberOfLines={1}
+          >
+            {club.name}
+          </Text>
+          <StatusIndicator
+            status={club.isActive ? 'active' : 'inactive'}
+            showIcon
           />
         </View>
 
-        {/* Club Info */}
-        <View style={styles.clubInfo}>
-          <Text style={[styles.clubName, !club.isActive && styles.textInactive]} numberOfLines={1}>
-            {club.name}
-          </Text>
-          <Text style={[styles.clubDescription, !club.isActive && styles.textInactive]} numberOfLines={2}>
-            {club.description}
-          </Text>
+        <Text 
+          style={[
+            styles.clubDescription, 
+            { color: club.isActive ? colors.textSecondary : colors.textTertiary }
+          ]} 
+          numberOfLines={1}
+        >
+          {club.description}
+        </Text>
 
-          {/* Club Details */}
-          <View style={styles.clubDetails}>
-            <View style={styles.detailItem}>
-              <MaterialCommunityIcons 
-                name="calendar-clock" 
-                size={14} 
-                color={club.isActive ? '#666' : '#999'} 
-              />
-              <Text style={[styles.detailText, !club.isActive && styles.textInactive]}>
-                {club.matchFrequency.replace('_', '-')}
-              </Text>
-            </View>
-            <View style={styles.detailItem}>
-              <MaterialCommunityIcons 
-                name="account-multiple" 
-                size={14} 
-                color={club.isActive ? '#666' : '#999'} 
-              />
-              <Text style={[styles.detailText, !club.isActive && styles.textInactive]}>
-                {club.groupSize} per group
-              </Text>
-            </View>
-            {club.memberCount !== undefined && (
-              <View style={styles.detailItem}>
-                <MaterialCommunityIcons 
-                  name="account-group" 
-                  size={14} 
-                  color={club.isActive ? '#666' : '#999'} 
-                />
-                <Text style={[styles.detailText, !club.isActive && styles.textInactive]}>
-                  {club.memberCount} members
-                </Text>
-              </View>
-            )}
-          </View>
-
-          {/* Status Badge */}
-          <View style={styles.statusContainer}>
-            <View style={[styles.statusBadge, club.isActive && styles.statusBadgeActive]}>
+        {/* Organizational Hierarchy */}
+        <View style={styles.hierarchyContainer}>
+          {club.church && (
+            <View style={styles.hierarchyItem}>
               <MaterialCommunityIcons
-                name={club.isActive ? 'check-circle' : 'cancel'}
-                size={14}
-                color={club.isActive ? '#4caf50' : '#f44336'}
+                name="church"
+                size={designTokens.icon.sizes.xs}
+                color={club.isActive ? colors.primary : colors.textTertiary}
               />
-              <Text style={styles.statusText}>
-                {club.isActive ? 'Active' : 'Inactive'}
+              <Text 
+                style={[
+                  styles.hierarchyText, 
+                  { color: club.isActive ? colors.textSecondary : colors.textTertiary }
+                ]} 
+                numberOfLines={1}
+              >
+                {club.church}
               </Text>
             </View>
-          </View>
+          )}
+          {club.association && (
+            <View style={styles.hierarchyItem}>
+              <MaterialCommunityIcons
+                name="office-building"
+                size={designTokens.icon.sizes.xs}
+                color={club.isActive ? colors.primary : colors.textTertiary}
+              />
+              <Text 
+                style={[
+                  styles.hierarchyText, 
+                  { color: club.isActive ? colors.textSecondary : colors.textTertiary }
+                ]} 
+                numberOfLines={1}
+              >
+                {club.association}
+              </Text>
+            </View>
+          )}
         </View>
 
-        {/* Chevron for views with tap-to-details */}
-        {onPress && (
-          <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
-        )}
+        {/* Club Details */}
+        <View style={styles.clubDetails}>
+          <View style={styles.detailItem}>
+            <MaterialCommunityIcons
+              name="calendar-clock"
+              size={designTokens.icon.sizes.xs}
+              color={club.isActive ? colors.textSecondary : colors.textTertiary}
+            />
+            <Text style={[styles.detailText, { color: club.isActive ? colors.textSecondary : colors.textTertiary }]}>
+              {club.matchFrequency.replace('_', '-')}
+            </Text>
+          </View>
+          <View style={styles.detailItem}>
+            <MaterialCommunityIcons
+              name="account-multiple"
+              size={designTokens.icon.sizes.xs}
+              color={club.isActive ? colors.textSecondary : colors.textTertiary}
+            />
+            <Text style={[styles.detailText, { color: club.isActive ? colors.textSecondary : colors.textTertiary }]}>
+              {club.groupSize}/group
+            </Text>
+          </View>
+          {club.memberCount !== undefined && (
+            <View style={styles.detailItem}>
+              <MaterialCommunityIcons
+                name="account-group"
+                size={designTokens.icon.sizes.xs}
+                color={club.isActive ? colors.textSecondary : colors.textTertiary}
+              />
+              <Text style={[styles.detailText, { color: club.isActive ? colors.textSecondary : colors.textTertiary }]}>
+                {club.memberCount} members
+              </Text>
+            </View>
+          )}
+        </View>
       </View>
 
-      {/* Admin Actions Footer - Only visible when showAdminActions is true */}
-      {showAdminActions && (onToggleStatus || onDelete) && (
-        <View style={styles.actionsFooter}>
-          <View style={styles.actionsDivider} />
-          <View style={styles.actionsRow}>
-            {onToggleStatus && (
-              <TouchableOpacity
-                style={[
-                  styles.iconButton,
-                  club.isActive ? styles.pauseButton : styles.resumeButton
-                ]}
-                onPress={onToggleStatus}
-                accessible={true}
-                accessibilityRole="button"
-                accessibilityLabel={club.isActive ? 'Deactivate club' : 'Activate club'}
-                accessibilityHint={`Double tap to ${club.isActive ? 'deactivate' : 'activate'} ${club.name}`}
-              >
-                <MaterialCommunityIcons
-                  name={club.isActive ? 'pause-circle' : 'play-circle'}
-                  size={24}
-                  color={club.isActive ? '#f57c00' : '#4caf50'}
-                />
-              </TouchableOpacity>
-            )}
-            {onDelete && (
-              <TouchableOpacity
-                style={[styles.iconButton, styles.deleteButton]}
-                onPress={onDelete}
-                accessible={true}
-                accessibilityRole="button"
-                accessibilityLabel={`Delete ${club.name}`}
-                accessibilityHint="Double tap to delete this club"
-              >
-                <MaterialCommunityIcons name="delete" size={24} color="#f44336" />
-              </TouchableOpacity>
-            )}
-          </View>
+      {/* Actions */}
+      {showAdminActions && (onToggleStatus || onDelete) ? (
+        <View style={styles.actionsContainer}>
+          {onToggleStatus && (
+            <IconButton
+              icon={club.isActive ? 'cancel' : 'check-circle'}
+              onPress={onToggleStatus}
+              size="md"
+              color={club.isActive ? colors.error : colors.success}
+              accessibilityLabel={club.isActive ? 'Deactivate club' : 'Activate club'}
+            />
+          )}
+          {onDelete && (
+            <IconButton
+              icon="delete-outline"
+              onPress={onDelete}
+              size="md"
+              color={colors.error}
+              accessibilityLabel={`Delete ${club.name}`}
+            />
+          )}
         </View>
-      )}
+      ) : onPress ? (
+        <MaterialCommunityIcons
+          name="chevron-right"
+          size={designTokens.icon.sizes.lg}
+          color={colors.textTertiary}
+          style={styles.chevron}
+        />
+      ) : null}
     </View>
   );
 
   if (onPress) {
     return (
-      <TouchableOpacity 
-        onPress={onPress} 
+      <TouchableOpacity
+        onPress={onPress}
         activeOpacity={0.7}
         accessible={true}
         accessibilityRole="button"
@@ -165,6 +218,10 @@ export const ClubCard = memo(ClubCardComponent, (prevProps, nextProps) => {
     prevProps.club.description === nextProps.club.description &&
     prevProps.club.isActive === nextProps.club.isActive &&
     prevProps.club.memberCount === nextProps.club.memberCount &&
+    prevProps.club.division === nextProps.club.division &&
+    prevProps.club.union === nextProps.club.union &&
+    prevProps.club.association === nextProps.club.association &&
+    prevProps.club.church === nextProps.club.church &&
     prevProps.showAdminActions === nextProps.showAdminActions
   );
 });
@@ -173,53 +230,63 @@ ClubCard.displayName = 'ClubCard';
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    marginBottom: 12,
+    borderRadius: designTokens.borderRadius.lg,
+    marginBottom: designTokens.spacing.md,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: 8,
     elevation: 3,
-    overflow: 'hidden',
-  },
-  cardInactive: {
-    backgroundColor: '#fafafa',
-    opacity: 0.7,
-  },
-  cardContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    padding: designTokens.spacing.lg,
+    minHeight: 80,
   },
   icon: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 48,
+    height: 48,
+    borderRadius: designTokens.borderRadius['3xl'],
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: designTokens.spacing.md,
+    flexShrink: 0,
   },
   clubInfo: {
     flex: 1,
-    marginRight: 8,
+    marginRight: designTokens.spacing.md,
+    minWidth: 0,
+  },
+  clubHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+    gap: designTokens.spacing.sm,
   },
   clubName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
+    ...mobileTypography.bodyMediumBold,
+    flex: 1,
   },
   clubDescription: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
+    ...mobileTypography.bodySmall,
+    marginBottom: 4,
+  },
+  hierarchyContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: designTokens.spacing.sm,
+    marginBottom: 4,
+  },
+  hierarchyItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  hierarchyText: {
+    ...mobileTypography.caption,
   },
   clubDetails: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 8,
+    gap: designTokens.spacing.sm,
   },
   detailItem: {
     flexDirection: 'row',
@@ -227,56 +294,15 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   detailText: {
-    fontSize: 12,
-    color: '#666',
+    ...mobileTypography.caption,
   },
-  textInactive: {
-    color: '#999',
-  },
-  statusContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  statusBadge: {
+  actionsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    flexShrink: 0,
   },
-  statusBadgeActive: {
-    // Additional styling for active clubs if needed
-  },
-  statusText: {
-    fontSize: 12,
-    color: '#666',
-  },
-  actionsFooter: {
-    backgroundColor: '#fafafa',
-  },
-  actionsDivider: {
-    height: 1,
-    backgroundColor: '#e0e0e0',
-  },
-  actionsRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-  },
-  iconButton: {
-    padding: 8,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pauseButton: {
-    backgroundColor: '#fff3e0',
-  },
-  resumeButton: {
-    backgroundColor: '#e8f5e9',
-  },
-  deleteButton: {
-    backgroundColor: '#ffebee',
+  chevron: {
+    flexShrink: 0,
   },
 });
-

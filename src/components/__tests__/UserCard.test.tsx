@@ -10,19 +10,23 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import { UserCard } from '../UserCard';
-import { User } from '../../types';
+import { User, UserRole, ApprovalStatus } from '../../types';
 
 // Test data builders
 const createMockUser = (overrides?: Partial<User>): User => ({
   id: '1',
   email: 'test@example.com',
   name: 'Test User',
-  role: 'user',
+  role: UserRole.USER,
   clubId: 'club-1',
   isActive: true,
-  isPaused: false,
+  approvalStatus: ApprovalStatus.APPROVED,
   whatsappNumber: '+1234567890',
-  createdAt: new Date('2024-01-01'),
+  classes: ['Friend'],
+  timezone: 'America/Mexico_City',
+  language: 'en',
+  createdAt: new Date('2024-01-01').toISOString(),
+  updatedAt: new Date('2024-01-01').toISOString(),
   ...overrides,
 });
 
@@ -32,7 +36,7 @@ describe('UserCard', () => {
       const user = createMockUser({
         name: 'John Doe',
         email: 'john@example.com',
-        role: 'admin',
+        role: UserRole.ADMIN,
       });
 
       const { getByText } = render(<UserCard user={user} />);
@@ -85,14 +89,6 @@ describe('UserCard', () => {
       expect(getByText('Inactive')).toBeTruthy();
     });
 
-    it('should show "Paused" badge when user is paused', () => {
-      const user = createMockUser({ isPaused: true });
-
-      const { getByText } = render(<UserCard user={user} />);
-
-      expect(getByText('Paused')).toBeTruthy();
-    });
-
     it('should apply inactive styles to inactive users', () => {
       const user = createMockUser({ isActive: false });
 
@@ -106,7 +102,7 @@ describe('UserCard', () => {
 
   describe('User Roles', () => {
     it('should display "ADMIN" badge for admin users', () => {
-      const user = createMockUser({ role: 'admin' });
+      const user = createMockUser({ role: UserRole.ADMIN });
 
       const { getByText } = render(<UserCard user={user} />);
 
@@ -114,7 +110,7 @@ describe('UserCard', () => {
     });
 
     it('should display "CLUB ADMIN" badge for club admin users', () => {
-      const user = createMockUser({ role: 'club_admin' });
+      const user = createMockUser({ role: UserRole.CLUB_ADMIN });
 
       const { getByText } = render(<UserCard user={user} />);
 
@@ -122,7 +118,7 @@ describe('UserCard', () => {
     });
 
     it('should display "USER" badge for regular users', () => {
-      const user = createMockUser({ role: 'user' });
+      const user = createMockUser({ role: UserRole.USER });
 
       const { getByText } = render(<UserCard user={user} />);
 

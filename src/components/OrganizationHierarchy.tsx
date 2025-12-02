@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { designTokens } from '../shared/theme/designTokens';
+import { mobileTypography, mobileFontSizes } from '../shared/theme/mobileTypography';
 
 interface HierarchyData {
   division?: string;
@@ -36,7 +38,7 @@ export const OrganizationHierarchy: React.FC<OrganizationHierarchyProps> = ({
       <View style={styles.compactContainer}>
         {data.division && (
           <View style={styles.compactItem}>
-            <MaterialCommunityIcons name="earth" size={14} color="#666" />
+            <MaterialCommunityIcons name="earth" size={14} color={designTokens.colors.textSecondary} />
             <Text style={styles.compactText} numberOfLines={1}>
               {data.division}
             </Text>
@@ -44,7 +46,7 @@ export const OrganizationHierarchy: React.FC<OrganizationHierarchyProps> = ({
         )}
         {data.church && (
           <View style={styles.compactItem}>
-            <MaterialCommunityIcons name="church" size={14} color="#666" />
+            <MaterialCommunityIcons name="church" size={14} color={designTokens.colors.textSecondary} />
             <Text style={styles.compactText} numberOfLines={1}>
               {data.church}
             </Text>
@@ -52,7 +54,7 @@ export const OrganizationHierarchy: React.FC<OrganizationHierarchyProps> = ({
         )}
         {data.clubName && (
           <View style={styles.compactItem}>
-            <MaterialCommunityIcons name="account-group" size={14} color="#666" />
+            <MaterialCommunityIcons name="account-group" size={14} color={designTokens.colors.textSecondary} />
             <Text style={styles.compactText} numberOfLines={1}>
               {data.clubName}
             </Text>
@@ -70,13 +72,13 @@ export const OrganizationHierarchy: React.FC<OrganizationHierarchyProps> = ({
         activeOpacity={0.7}
       >
         <View style={styles.headerLeft}>
-          <MaterialCommunityIcons name="sitemap" size={20} color="#6200ee" />
+          <MaterialCommunityIcons name="sitemap" size={20} color={designTokens.colors.primary} />
           <Text style={styles.title}>{title}</Text>
         </View>
         <MaterialCommunityIcons
           name={expanded ? 'chevron-up' : 'chevron-down'}
           size={24}
-          color="#666"
+          color={designTokens.colors.textSecondary}
         />
       </TouchableOpacity>
 
@@ -85,7 +87,7 @@ export const OrganizationHierarchy: React.FC<OrganizationHierarchyProps> = ({
           {data.division && (
             <View style={styles.hierarchyItem}>
               <View style={styles.levelContainer}>
-                <MaterialCommunityIcons name="earth" size={18} color="#666" />
+                <MaterialCommunityIcons name="earth" size={18} color={designTokens.colors.textSecondary} />
                 <Text style={styles.levelLabel}>Division</Text>
                 <View style={styles.levelBadge}>
                   <Text style={styles.levelBadgeText}>Level 1</Text>
@@ -98,7 +100,7 @@ export const OrganizationHierarchy: React.FC<OrganizationHierarchyProps> = ({
           {data.union && (
             <View style={styles.hierarchyItem}>
               <View style={styles.levelContainer}>
-                <MaterialCommunityIcons name="domain" size={18} color="#666" />
+                <MaterialCommunityIcons name="domain" size={18} color={designTokens.colors.textSecondary} />
                 <Text style={styles.levelLabel}>Union</Text>
                 <View style={styles.levelBadge}>
                   <Text style={styles.levelBadgeText}>Level 2</Text>
@@ -111,7 +113,7 @@ export const OrganizationHierarchy: React.FC<OrganizationHierarchyProps> = ({
           {data.association && (
             <View style={styles.hierarchyItem}>
               <View style={styles.levelContainer}>
-                <MaterialCommunityIcons name="office-building" size={18} color="#666" />
+                <MaterialCommunityIcons name="office-building" size={18} color={designTokens.colors.textSecondary} />
                 <Text style={styles.levelLabel}>Association</Text>
                 <View style={styles.levelBadge}>
                   <Text style={styles.levelBadgeText}>Level 3</Text>
@@ -124,7 +126,7 @@ export const OrganizationHierarchy: React.FC<OrganizationHierarchyProps> = ({
           {data.church && (
             <View style={styles.hierarchyItem}>
               <View style={styles.levelContainer}>
-                <MaterialCommunityIcons name="church" size={18} color="#666" />
+                <MaterialCommunityIcons name="church" size={18} color={designTokens.colors.textSecondary} />
                 <Text style={styles.levelLabel}>Church</Text>
                 <View style={styles.levelBadge}>
                   <Text style={styles.levelBadgeText}>Level 4</Text>
@@ -137,7 +139,7 @@ export const OrganizationHierarchy: React.FC<OrganizationHierarchyProps> = ({
           {data.clubName && (
             <View style={styles.hierarchyItem}>
               <View style={styles.levelContainer}>
-                <MaterialCommunityIcons name="account-group" size={18} color="#666" />
+                <MaterialCommunityIcons name="account-group" size={18} color={designTokens.colors.textSecondary} />
                 <Text style={styles.levelLabel}>Club</Text>
                 <View style={styles.levelBadge}>
                   <Text style={styles.levelBadgeText}>Level 5</Text>
@@ -154,18 +156,18 @@ export const OrganizationHierarchy: React.FC<OrganizationHierarchyProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
+    backgroundColor: designTokens.colors.backgroundPrimary,
+    borderRadius: designTokens.borderRadius.md,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: designTokens.colors.borderLight,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
-    backgroundColor: '#f8f9fa',
+    padding: designTokens.spacing.lg,
+    backgroundColor: designTokens.colors.backgroundSecondary,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -173,12 +175,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   title: {
-    fontSize: 16,
+    fontSize: mobileFontSizes.lg,
     fontWeight: '600',
-    color: '#6200ee',
+    color: designTokens.colors.primary,
   },
   content: {
-    padding: 16,
+    padding: designTokens.spacing.lg,
     gap: 12,
   },
   hierarchyItem: {
@@ -190,24 +192,24 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   levelLabel: {
-    fontSize: 14,
+    fontSize: mobileFontSizes.sm,
     fontWeight: '600',
-    color: '#333',
+    color: designTokens.colors.textPrimary,
   },
   levelBadge: {
-    backgroundColor: '#e3f2fd',
+    backgroundColor: designTokens.colors.infoLight,
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 12,
+    borderRadius: designTokens.borderRadius.lg,
   },
   levelBadgeText: {
-    fontSize: 10,
+    fontSize: mobileFontSizes.xs,
     fontWeight: '600',
-    color: '#1976d2',
+    color: designTokens.colors.info,
   },
   hierarchyValue: {
-    fontSize: 15,
-    color: '#555',
+    fontSize: mobileFontSizes.md,
+    color: designTokens.colors.textSecondary,
     marginLeft: 26,
     fontWeight: '500',
   },
@@ -221,15 +223,15 @@ const styles = StyleSheet.create({
   compactItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f0f0f0',
+    backgroundColor: designTokens.colors.borderLight,
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 12,
+    borderRadius: designTokens.borderRadius.lg,
     gap: 4,
   },
   compactText: {
-    fontSize: 12,
-    color: '#555',
+    fontSize: mobileFontSizes.xs,
+    color: designTokens.colors.textSecondary,
     fontWeight: '500',
     maxWidth: 120,
   },

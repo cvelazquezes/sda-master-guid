@@ -1,10 +1,16 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { User, UserRole } from '../types';
+import { useTheme } from '../contexts/ThemeContext';
+import { User, UserRole, MemberBalance } from '../types';
+import { mobileTypography, mobileFontSizes } from '../shared/theme';
+import { designTokens } from '../shared/theme/designTokens';
+import { Badge, StatusIndicator, IconButton } from '../shared/components';
 
 interface UserCardProps {
   user: User;
+  clubName?: string | null;
+  balance?: MemberBalance;
   onPress?: () => void;
   showAdminActions?: boolean;
   onToggleStatus?: () => void;
@@ -13,147 +19,177 @@ interface UserCardProps {
 
 const UserCardComponent: React.FC<UserCardProps> = ({
   user,
+  clubName,
+  balance,
   onPress,
   showAdminActions = false,
   onToggleStatus,
   onDelete,
 }) => {
-  const getRoleBadgeStyle = (role: UserRole) => {
+  const { colors, isDark } = useTheme();
+
+  const getRoleConfig = (role: UserRole) => {
     switch (role) {
       case 'admin':
-        return styles.roleBadgeAdmin;
+        return { color: colors.error, bg: colors.errorLight };
       case 'club_admin':
-        return styles.roleBadgeClubAdmin;
+        return { color: colors.warning, bg: colors.warningLight };
       default:
-        return styles.roleBadgeUser;
+        return { color: colors.info, bg: colors.infoLight };
     }
   };
 
-  const getRoleColor = (role: UserRole) => {
-    switch (role) {
-      case 'admin':
-        return '#f44336';
-      case 'club_admin':
-        return '#ff9800';
-      default:
-        return '#2196f3';
-    }
+  const getBalanceColor = () => {
+    if (!balance) return colors.textSecondary;
+    if (balance.balance >= 0) return colors.success;
+    if (balance.overdueCharges > 0) return colors.error;
+    return colors.warning;
   };
+
+  const roleConfig = getRoleConfig(user.role);
 
   const CardContent = (
-    <View style={[styles.card, !user.isActive && styles.cardInactive]}>
-      <View style={styles.cardContent}>
-        {/* Avatar */}
-        <View style={[styles.avatar, { backgroundColor: user.isActive ? getRoleColor(user.role) : '#f5f5f5' }]}>
-          <Text style={[styles.avatarText, !user.isActive && styles.avatarTextInactive]}>
-            {user.name.charAt(0).toUpperCase()}
+    <View style={[
+      styles.card,
+      { 
+        backgroundColor: colors.surface, 
+        shadowColor: '#000',
+        shadowOpacity: isDark ? 0.4 : 0.2,
+        elevation: isDark ? 8 : 5,
+      },
+      !user.isActive && { backgroundColor: colors.surfaceLight, opacity: 0.8 }
+    ]}>
+      {/* Avatar */}
+      <View style={[
+        styles.avatar,
+        { backgroundColor: user.isActive ? roleConfig.color : colors.surfaceLight }
+      ]}>
+        <Text style={[styles.avatarText, { color: '#fff' }, !user.isActive && { color: colors.textTertiary }]}>
+          {user.name.charAt(0).toUpperCase()}
+        </Text>
+      </View>
+
+      {/* User Info */}
+      <View style={styles.userInfo}>
+        <View style={styles.userHeader}>
+          <Text style={[styles.userName, { color: colors.textPrimary }, !user.isActive && { color: colors.textTertiary }]} numberOfLines={1}>
+            {user.name}
           </Text>
+          <Badge
+            label={user.role === 'club_admin' ? 'CLUB ADMIN' : user.role.toUpperCase()}
+            variant="neutral"
+            size="sm"
+            backgroundColor={user.isActive ? roleConfig.bg : colors.surfaceLight}
+            textColor={user.isActive ? roleConfig.color : colors.textTertiary}
+          />
         </View>
 
-        {/* User Info */}
-        <View style={styles.userInfo}>
-          <View style={styles.userHeader}>
-            <Text style={[styles.userName, !user.isActive && styles.textInactive]} numberOfLines={1}>
-              {user.name}
-            </Text>
-            <View style={[styles.roleBadge, user.isActive ? getRoleBadgeStyle(user.role) : styles.roleBadgeInactive]}>
-              <Text style={[styles.roleText, !user.isActive && styles.roleTextInactive]}>
-                {user.role === 'club_admin' ? 'CLUB ADMIN' : user.role.toUpperCase()}
+        <Text style={[styles.userEmail, { color: colors.textSecondary }, !user.isActive && { color: colors.textTertiary }]} numberOfLines={1}>
+          {user.email}
+        </Text>
+
+        <View style={styles.detailsRow}>
+          {/* Club Name */}
+          {clubName && (
+            <View style={styles.metaItem}>
+              <MaterialCommunityIcons
+                name="account-group"
+                size={designTokens.icon.sizes.xs}
+                color={user.isActive ? colors.primary : colors.textTertiary}
+              />
+              <Text style={[styles.metaText, { color: colors.textSecondary }, !user.isActive && { color: colors.textTertiary }]} numberOfLines={1}>
+                {clubName}
               </Text>
             </View>
-          </View>
-
-          <Text style={[styles.userEmail, !user.isActive && styles.textInactive]} numberOfLines={1}>
-            {user.email}
-          </Text>
+          )}
 
           {/* WhatsApp */}
           {user.whatsappNumber && (
-            <View style={styles.whatsappContainer}>
-              <MaterialCommunityIcons 
-                name="whatsapp" 
-                size={14} 
-                color={user.isActive ? '#25D366' : '#999'} 
+            <View style={styles.metaItem}>
+              <MaterialCommunityIcons
+                name="whatsapp"
+                size={designTokens.icon.sizes.xs}
+                color={user.isActive ? colors.success : colors.textTertiary}
               />
-              <Text style={[styles.whatsappText, !user.isActive && styles.textInactive]} numberOfLines={1}>
+              <Text style={[styles.metaText, { color: colors.textSecondary }, !user.isActive && { color: colors.textTertiary }]} numberOfLines={1}>
                 {user.whatsappNumber}
               </Text>
             </View>
           )}
 
-          {/* Status */}
-          <View style={styles.statusContainer}>
-            <View style={styles.statusBadge}>
+          {/* Status Indicator */}
+          <StatusIndicator
+            status={user.isActive ? 'active' : 'inactive'}
+            showIcon
+          />
+        </View>
+
+        {/* Payment Balance */}
+        {balance && (
+          <View style={[styles.balanceSection, { borderTopColor: colors.border }]}>
+            <View style={styles.balanceRow}>
               <MaterialCommunityIcons
-                name={user.isActive ? 'check-circle' : 'cancel'}
-                size={14}
-                color={user.isActive ? '#4caf50' : '#f44336'}
+                name="wallet"
+                size={designTokens.icon.sizes.sm}
+                color={getBalanceColor()}
               />
-              <Text style={styles.statusText}>
-                {user.isActive ? 'Active' : 'Inactive'}
+              <Text style={[styles.balanceText, { color: getBalanceColor() }]}>
+                Saldo: ${Math.abs(balance.balance).toFixed(2)} {balance.balance < 0 ? '(debe)' : ''}
               </Text>
             </View>
-            {user.isPaused && (
-              <View style={styles.statusBadge}>
-                <MaterialCommunityIcons name="pause-circle" size={14} color="#ff9800" />
-                <Text style={styles.statusText}>Paused</Text>
+            {balance.overdueCharges > 0 && (
+              <View style={[styles.overdueWarning, { backgroundColor: colors.errorLight }]}>
+                <MaterialCommunityIcons
+                  name="alert-circle"
+                  size={designTokens.icon.sizes.xs}
+                  color={colors.error}
+                />
+                <Text style={[styles.overdueWarningText, { color: colors.error }]}>
+                  ${balance.overdueCharges.toFixed(2)} vencidos
+                </Text>
               </View>
             )}
           </View>
-        </View>
-
-        {/* Chevron for views with tap-to-details */}
-        {onPress && (
-          <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
         )}
       </View>
 
-      {/* Admin Actions Footer - Only visible when showAdminActions is true */}
-      {showAdminActions && (onToggleStatus || onDelete) && (
-        <View style={styles.actionsFooter}>
-          <View style={styles.actionsDivider} />
-          <View style={styles.actionsRow}>
-            {onToggleStatus && (
-              <TouchableOpacity
-                style={[
-                  styles.iconButton,
-                  user.isActive ? styles.pauseButton : styles.resumeButton
-                ]}
-                onPress={onToggleStatus}
-                accessible={true}
-                accessibilityRole="button"
-                accessibilityLabel={user.isActive ? 'Pause user' : 'Resume user'}
-                accessibilityHint={`Double tap to ${user.isActive ? 'pause' : 'resume'} ${user.name}`}
-              >
-                <MaterialCommunityIcons
-                  name={user.isActive ? 'pause-circle' : 'play-circle'}
-                  size={24}
-                  color={user.isActive ? '#f57c00' : '#4caf50'}
-                />
-              </TouchableOpacity>
-            )}
-            {onDelete && (
-              <TouchableOpacity
-                style={[styles.iconButton, styles.deleteButton]}
-                onPress={onDelete}
-                accessible={true}
-                accessibilityRole="button"
-                accessibilityLabel={`Delete ${user.name}`}
-                accessibilityHint="Double tap to delete this user"
-              >
-                <MaterialCommunityIcons name="delete" size={24} color="#f44336" />
-              </TouchableOpacity>
-            )}
-          </View>
+      {/* Actions */}
+      {showAdminActions && (onToggleStatus || onDelete) ? (
+        <View style={styles.actionsContainer}>
+          {onToggleStatus && (
+            <IconButton
+              icon={user.isActive ? 'cancel' : 'check-circle'}
+              onPress={onToggleStatus}
+              size="md"
+              color={user.isActive ? colors.error : colors.success}
+              accessibilityLabel={user.isActive ? 'Deactivate user' : 'Activate user'}
+            />
+          )}
+          {onDelete && (
+            <IconButton
+              icon="delete-outline"
+              onPress={onDelete}
+              size="md"
+              color={colors.error}
+              accessibilityLabel={`Delete ${user.name}`}
+            />
+          )}
         </View>
-      )}
+      ) : onPress ? (
+        <MaterialCommunityIcons
+          name="chevron-right"
+          size={designTokens.icon.sizes.lg}
+          color={colors.textTertiary}
+          style={styles.chevron}
+        />
+      ) : null}
     </View>
   );
 
   if (onPress) {
     return (
-      <TouchableOpacity 
-        onPress={onPress} 
+      <TouchableOpacity
+        onPress={onPress}
         activeOpacity={0.7}
         accessible={true}
         accessibilityRole="button"
@@ -176,9 +212,11 @@ export const UserCard = memo(UserCardComponent, (prevProps, nextProps) => {
     prevProps.user.name === nextProps.user.name &&
     prevProps.user.email === nextProps.user.email &&
     prevProps.user.isActive === nextProps.user.isActive &&
-    prevProps.user.isPaused === nextProps.user.isPaused &&
     prevProps.user.role === nextProps.user.role &&
-    prevProps.showAdminActions === nextProps.showAdminActions
+    prevProps.clubName === nextProps.clubName &&
+    prevProps.showAdminActions === nextProps.showAdminActions &&
+    prevProps.balance?.balance === nextProps.balance?.balance &&
+    prevProps.balance?.overdueCharges === nextProps.balance?.overdueCharges
   );
 });
 
@@ -186,143 +224,114 @@ UserCard.displayName = 'UserCard';
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    marginBottom: 12,
-    shadowColor: '#000',
+    borderRadius: designTokens.borderRadius.lg,
+    marginBottom: designTokens.spacing.md,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    overflow: 'hidden',
-  },
-  cardInactive: {
-    backgroundColor: '#fafafa',
-    opacity: 0.7,
-  },
-  cardContent: {
+    shadowRadius: 8,
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    padding: designTokens.spacing.lg,
+    minHeight: 80,
+  },
+  cardInactive: {
+    backgroundColor: designTokens.colors.backgroundTertiary,
+    opacity: 0.8,
   },
   avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 48,
+    height: 48,
+    borderRadius: designTokens.borderRadius['3xl'],
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: designTokens.spacing.md,
+    flexShrink: 0,
   },
   avatarText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
+    ...mobileTypography.heading3,
+    color: designTokens.colors.textInverse,
   },
   avatarTextInactive: {
-    color: '#999',
+    color: designTokens.colors.textQuaternary,
   },
   userInfo: {
     flex: 1,
-    marginRight: 8,
+    marginRight: designTokens.spacing.md,
+    minWidth: 0,
   },
   userHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 4,
-    gap: 8,
+    gap: designTokens.spacing.sm,
   },
   userName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    ...mobileTypography.bodyMediumBold,
+    color: designTokens.colors.textPrimary,
     flex: 1,
   },
   textInactive: {
-    color: '#999',
-  },
-  roleBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  roleBadgeAdmin: {
-    backgroundColor: '#ffebee',
-  },
-  roleBadgeClubAdmin: {
-    backgroundColor: '#fff3e0',
-  },
-  roleBadgeUser: {
-    backgroundColor: '#e3f2fd',
-  },
-  roleBadgeInactive: {
-    backgroundColor: '#f5f5f5',
+    color: designTokens.colors.textQuaternary,
   },
   roleText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#666',
-  },
-  roleTextInactive: {
-    color: '#999',
+    ...mobileTypography.badge,
+    fontSize: mobileFontSizes.xs,
   },
   userEmail: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 6,
+    ...mobileTypography.bodySmall,
+    color: designTokens.colors.textSecondary,
+    marginBottom: 4,
   },
-  whatsappContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 6,
-    gap: 4,
-  },
-  whatsappText: {
-    fontSize: 12,
-    color: '#25D366',
-    fontWeight: '500',
-  },
-  statusContainer: {
+  detailsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    alignItems: 'center',
+    gap: designTokens.spacing.sm,
   },
-  statusBadge: {
+  metaItem: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
   },
-  statusText: {
-    fontSize: 12,
-    color: '#666',
+  metaText: {
+    ...mobileTypography.caption,
+    color: designTokens.colors.textSecondary,
   },
-  actionsFooter: {
-    backgroundColor: '#fafafa',
-  },
-  actionsDivider: {
-    height: 1,
-    backgroundColor: '#e0e0e0',
-  },
-  actionsRow: {
+  actionsContainer: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-  },
-  iconButton: {
-    padding: 8,
-    borderRadius: 20,
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: 4,
+    flexShrink: 0,
   },
-  pauseButton: {
-    backgroundColor: '#fff3e0',
+  chevron: {
+    flexShrink: 0,
   },
-  resumeButton: {
-    backgroundColor: '#e8f5e9',
+  balanceSection: {
+    marginTop: designTokens.spacing.sm,
+    paddingTop: designTokens.spacing.sm,
+    borderTopWidth: designTokens.borderWidth.thin,
+    borderTopColor: designTokens.colors.borderLight,
+    gap: 4,
   },
-  deleteButton: {
-    backgroundColor: '#ffebee',
+  balanceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  balanceText: {
+    ...mobileTypography.labelBold,
+  },
+  overdueWarning: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: designTokens.colors.errorLight,
+    paddingHorizontal: designTokens.spacing.sm,
+    paddingVertical: 6,
+    borderRadius: designTokens.borderRadius.sm,
+  },
+  overdueWarningText: {
+    ...mobileTypography.caption,
+    color: designTokens.colors.error,
+    fontWeight: '600',
   },
 });
-

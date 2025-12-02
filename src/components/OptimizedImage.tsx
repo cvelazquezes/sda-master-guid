@@ -27,6 +27,7 @@ import {
   ViewStyle,
   ImageSourcePropType,
 } from 'react-native';
+import { designTokens } from '../shared/theme/designTokens';
 
 /**
  * Image loading priority
@@ -197,8 +198,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           styles.image,
           style,
           { opacity: imageOpacity },
-          loading && blurRadius ? { blurRadius } : undefined,
         ]}
+        blurRadius={loading && blurRadius ? blurRadius : undefined}
         resizeMode={resizeMode}
         onLoad={handleLoad}
         onError={handleError}
@@ -210,7 +211,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       {/* Loading indicator */}
       {loading && showLoading && (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="small" color="#007AFF" />
+          <ActivityIndicator size="small" color={designTokens.colors.primary} />
         </View>
       )}
     </View>
@@ -221,7 +222,7 @@ const styles = StyleSheet.create({
   container: {
     position: 'relative',
     overflow: 'hidden',
-    backgroundColor: '#f0f0f0',
+    backgroundColor: designTokens.colors.borderLight,
   },
   image: {
     width: '100%',

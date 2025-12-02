@@ -7,6 +7,8 @@ import React, { Component, ReactNode } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { logger } from '../utils/logger';
+import { designTokens } from '../shared/theme/designTokens';
+import { mobileTypography, mobileFontSizes } from '../shared/theme/mobileTypography';
 
 interface Props {
   children: ReactNode;
@@ -73,7 +75,7 @@ export class ErrorBoundary extends Component<Props, State> {
             <MaterialCommunityIcons
               name="alert-circle-outline"
               size={64}
-              color="#f44336"
+              color={designTokens.colors.error}
             />
             <Text style={styles.title}>Something went wrong</Text>
             <Text style={styles.message}>
@@ -112,67 +114,67 @@ export class ErrorBoundary extends Component<Props, State> {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: designTokens.colors.backgroundSecondary,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: designTokens.spacing.xl,
   },
   content: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 24,
+    backgroundColor: designTokens.colors.backgroundPrimary,
+    borderRadius: designTokens.borderRadius.lg,
+    padding: designTokens.spacing.xxl,
     maxWidth: 400,
     width: '100%',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: designTokens.colors.textPrimary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
   title: {
-    fontSize: 24,
+    fontSize: mobileFontSizes['3xl'],
     fontWeight: 'bold',
-    color: '#333',
+    color: designTokens.colors.textPrimary,
     marginTop: 16,
     marginBottom: 8,
   },
   message: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: mobileFontSizes.lg,
+    color: designTokens.colors.textSecondary,
     textAlign: 'center',
     marginBottom: 24,
   },
   errorDetails: {
     width: '100%',
     maxHeight: 200,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
-    padding: 12,
+    backgroundColor: designTokens.colors.inputBackground,
+    borderRadius: designTokens.borderRadius.md,
+    padding: designTokens.spacing.md,
     marginBottom: 16,
   },
   errorTitle: {
-    fontSize: 14,
+    fontSize: mobileFontSizes.sm,
     fontWeight: '600',
-    color: '#f44336',
+    color: designTokens.colors.error,
     marginBottom: 8,
   },
   errorText: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: mobileFontSizes.xs,
+    color: designTokens.colors.textSecondary,
     fontFamily: 'monospace',
   },
   button: {
-    backgroundColor: '#6200ee',
+    backgroundColor: designTokens.colors.primary,
     paddingVertical: 12,
     paddingHorizontal: 24,
-    borderRadius: 8,
+    borderRadius: designTokens.borderRadius.md,
     minWidth: 150,
     alignItems: 'center',
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 16,
+    color: designTokens.colors.textInverse,
+    fontSize: mobileFontSizes.lg,
     fontWeight: '600',
   },
 });

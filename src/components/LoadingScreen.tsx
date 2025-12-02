@@ -5,6 +5,8 @@
 
 import React from 'react';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { designTokens } from '../shared/theme/designTokens';
+import { mobileTypography } from '../shared/theme/mobileTypography';
 
 interface LoadingScreenProps {
   message?: string;
@@ -15,7 +17,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
 }) => {
   return (
     <View style={styles.container}>
-      <ActivityIndicator size="large" color="#6200ee" />
+      <ActivityIndicator size="large" color={designTokens.colors.primary} />
       <Text style={styles.message}>{message}</Text>
     </View>
   );
@@ -26,12 +28,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: designTokens.colors.backgroundPrimary,
   },
   message: {
-    marginTop: 16,
-    fontSize: 16,
-    color: '#666',
+    marginTop: designTokens.spacing.md,
+    ...mobileTypography.bodyLarge,
+    color: designTokens.colors.textSecondary,
   },
 });
 
