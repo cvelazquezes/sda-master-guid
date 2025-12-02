@@ -3,8 +3,9 @@
  * Implements resilient API call retry logic
  */
 
-import { logger } from '../logger';
-import { NetworkError, TimeoutError } from '../errors';
+import { logger } from '../../utils/logger';
+import { NetworkError, TimeoutError } from '../../utils/errors';
+import { BUSINESS_RULES } from '../../constants';
 
 interface RetryOptions {
   maxRetries: number;
@@ -16,12 +17,12 @@ interface RetryOptions {
 }
 
 const DEFAULT_OPTIONS: RetryOptions = {
-  maxRetries: 3,
-  baseDelay: 1000,
-  maxDelay: 30000,
-  backoffMultiplier: 2,
+  maxRetries: BUSINESS_RULES.MAX_RETRY_ATTEMPTS,
+  baseDelay: BUSINESS_RULES.RETRY_BASE_DELAY_MS,
+  maxDelay: BUSINESS_RULES.RETRY_MAX_DELAY_MS,
+  backoffMultiplier: BUSINESS_RULES.RETRY_BACKOFF_MULTIPLIER,
   jitter: true,
-  retryableStatuses: [408, 429, 500, 502, 503, 504],
+  retryableStatuses: [...BUSINESS_RULES.RETRYABLE_HTTP_STATUSES],
 };
 
 export class RetryPolicy {

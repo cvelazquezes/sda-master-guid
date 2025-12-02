@@ -5,6 +5,7 @@
 
 import { logger } from '../utils/logger';
 import { environment } from '../config/environment';
+import { TIMING } from '../constants';
 
 // ============================================================================
 // Types
@@ -318,7 +319,7 @@ export function createHealthCheckWithRetry(
         if (result) return true;
         
         if (i < maxRetries) {
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+          await new Promise((resolve) => setTimeout(resolve, TIMING.RETRY.FIRST));
         }
       } catch {
         if (i === maxRetries) return false;

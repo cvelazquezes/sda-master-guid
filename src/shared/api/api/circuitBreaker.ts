@@ -3,7 +3,8 @@
  * Prevents cascading failures by failing fast when service is down
  */
 
-import { logger } from '../logger';
+import { logger } from '../../utils/logger';
+import { BUSINESS_RULES } from '../../constants';
 
 export enum CircuitState {
   CLOSED = 'CLOSED',       // Normal operation
@@ -19,10 +20,10 @@ interface CircuitBreakerOptions {
 }
 
 const DEFAULT_OPTIONS: CircuitBreakerOptions = {
-  failureThreshold: 5,
-  successThreshold: 2,
-  timeout: 60000,
-  halfOpenMaxCalls: 3,
+  failureThreshold: BUSINESS_RULES.CIRCUIT_BREAKER_FAILURE_THRESHOLD,
+  successThreshold: BUSINESS_RULES.CIRCUIT_BREAKER_SUCCESS_THRESHOLD,
+  timeout: BUSINESS_RULES.CIRCUIT_BREAKER_TIMEOUT_MS,
+  halfOpenMaxCalls: BUSINESS_RULES.CIRCUIT_BREAKER_HALF_OPEN_MAX_CALLS,
 };
 
 export class CircuitBreaker {

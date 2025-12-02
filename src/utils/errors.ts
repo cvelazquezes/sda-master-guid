@@ -27,6 +27,9 @@ export class AuthenticationError extends AppError {
   }
 }
 
+// Alias for backward compatibility
+export const AuthError = AuthenticationError;
+
 /**
  * Authorization errors
  */

@@ -3,7 +3,7 @@
  * Provides fluent builders for test data following the Test Data Builder pattern
  */
 
-import { User, Club, Match } from '../../types';
+import { User, Club, Match, UserRole, MatchStatus, ApprovalStatus, MatchFrequency } from '../../types';
 
 // ============================================================================
 // User Builder
@@ -14,10 +14,14 @@ export class UserBuilder {
     id: `user-${Date.now()}`,
     email: 'test@example.com',
     name: 'Test User',
-    role: 'user',
+    role: UserRole.USER,
     clubId: 'club-1',
     isActive: true,
-    isPaused: false,
+    whatsappNumber: '+1234567890',
+    approvalStatus: ApprovalStatus.APPROVED,
+    classes: ['Friend'],
+    timezone: 'America/Mexico_City',
+    language: 'en',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -62,16 +66,6 @@ export class UserBuilder {
     return this;
   }
 
-  paused(): UserBuilder {
-    this.user.isPaused = true;
-    return this;
-  }
-
-  notPaused(): UserBuilder {
-    this.user.isPaused = false;
-    return this;
-  }
-
   asUser(): UserBuilder {
     this.user.role = 'user';
     return this;
@@ -110,10 +104,15 @@ export class ClubBuilder {
   private club: Partial<Club> = {
     id: `club-${Date.now()}`,
     name: 'Test Club',
-    address: '123 Test St',
-    city: 'Test City',
-    country: 'Test Country',
-    numberOfCourts: 4,
+    description: 'A test club',
+    adminId: 'admin-1',
+    isActive: true,
+    matchFrequency: MatchFrequency.WEEKLY,
+    groupSize: 2,
+    church: 'Test Church',
+    association: 'Test Association',
+    union: 'Test Union',
+    division: 'Test Division',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -128,28 +127,23 @@ export class ClubBuilder {
     return this;
   }
 
-  withAddress(address: string): ClubBuilder {
-    this.club.address = address;
+  withDescription(description: string): ClubBuilder {
+    this.club.description = description;
     return this;
   }
 
-  withCity(city: string): ClubBuilder {
-    this.club.city = city;
+  withAdminId(adminId: string): ClubBuilder {
+    this.club.adminId = adminId;
     return this;
   }
 
-  withCountry(country: string): ClubBuilder {
-    this.club.country = country;
+  withMatchFrequency(frequency: MatchFrequency): ClubBuilder {
+    this.club.matchFrequency = frequency;
     return this;
   }
 
-  withNumberOfCourts(count: number): ClubBuilder {
-    this.club.numberOfCourts = count;
-    return this;
-  }
-
-  withCourtNames(names: string[]): ClubBuilder {
-    this.club.courtNames = names;
+  withGroupSize(size: number): ClubBuilder {
+    this.club.groupSize = size;
     return this;
   }
 
@@ -183,7 +177,7 @@ export class MatchBuilder {
     date: new Date().toISOString(),
     courtNumber: 1,
     participants: [],
-    status: 'scheduled',
+    status: MatchStatus.SCHEDULED,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -330,16 +324,6 @@ export function aRegularUser(clubId?: string): UserBuilder {
   }
   
   return builder;
-}
-
-/**
- * Creates a paused user
- */
-export function aPausedUser(): UserBuilder {
-  return aUser()
-    .paused()
-    .withEmail('paused@example.com')
-    .withName('Paused User');
 }
 
 /**

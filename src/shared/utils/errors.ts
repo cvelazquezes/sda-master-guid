@@ -7,13 +7,17 @@
  * Base application error
  */
 export class AppError extends Error {
+  public cause?: Error;
+  
   constructor(
     message: string,
-    public code: string,
-    public statusCode: number = 500
+    public code: string = 'APP_ERROR',
+    public statusCode: number = 500,
+    cause?: Error | unknown
   ) {
     super(message);
     this.name = 'AppError';
+    this.cause = cause instanceof Error ? cause : undefined;
   }
 }
 
@@ -21,11 +25,17 @@ export class AppError extends Error {
  * Authentication errors
  */
 export class AuthenticationError extends AppError {
-  constructor(message: string = 'Authentication failed') {
+  public cause?: Error;
+  
+  constructor(message: string = 'Authentication failed', cause?: Error | unknown) {
     super(message, 'AUTHENTICATION_ERROR', 401);
     this.name = 'AuthenticationError';
+    this.cause = cause instanceof Error ? cause : undefined;
   }
 }
+
+// Alias for backward compatibility
+export const AuthError = AuthenticationError;
 
 /**
  * Authorization errors

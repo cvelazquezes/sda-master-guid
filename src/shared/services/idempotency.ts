@@ -5,6 +5,7 @@
 
 import { logger } from '../utils/logger';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { TIMING } from '../constants';
 
 // ============================================================================
 // Types
@@ -211,7 +212,7 @@ class IdempotencyService {
     // Run cleanup every 5 minutes
     this.cleanupInterval = setInterval(() => {
       this.cleanup();
-    }, 5 * 60 * 1000);
+    }, TIMING.CACHE.MEDIUM);
   }
 
   /**

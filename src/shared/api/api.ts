@@ -7,8 +7,8 @@ import axios, { AxiosInstance, AxiosError } from 'axios';
 import { environment } from '../config/environment';
 import { secureStorage } from '../utils/secureStorage';
 import { logger } from '../utils/logger';
-import { retryPolicy } from '../utils/api/retryPolicy';
-import { apiCircuitBreaker } from '../utils/api/circuitBreaker';
+import { retryPolicy } from './api/retryPolicy';
+import { apiCircuitBreaker } from './api/circuitBreaker';
 import {
   NetworkError,
   TimeoutError,
