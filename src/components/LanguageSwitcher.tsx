@@ -1,0 +1,109 @@
+/**
+ * Language Switcher Component
+ * Allows users to change the app language
+ * Uses SelectionModal for consistent UI across the app
+ */
+
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
+import { LANGUAGES, changeLanguage, Language } from '../i18n';
+import { useTheme } from '../contexts/ThemeContext';
+import { SelectionModal, SelectionItem } from '../shared/components/SelectionModal';
+import { designTokens } from '../shared/theme/designTokens';
+import { mobileTypography } from '../shared/theme/mobileTypography';
+
+interface LanguageSwitcherProps {
+  showLabel?: boolean;
+}
+
+// Flag emojis for each language
+const FLAG_AVATARS: Record<string, string> = {
+  en: '🇺🇸',
+  es: '🇪🇸',
+};
+
+export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ showLabel = true }) => {
+  const { i18n, t } = useTranslation();
+  const { colors } = useTheme();
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const currentLanguage = LANGUAGES.find(lang => lang.code === i18n.language) || LANGUAGES[0];
+
+  // Convert languages to SelectionItem format
+  const selectionItems: SelectionItem[] = LANGUAGES.map(lang => ({
+    id: lang.code,
+    title: lang.nativeName,
+    subtitle: lang.name,
+    avatar: FLAG_AVATARS[lang.code] || '🌐',
+    iconColor: colors.info,
+  }));
+
+  const handleSelect = async (item: SelectionItem) => {
+    await changeLanguage(item.id as Language);
+    setModalVisible(false);
+  };
+
+  return (
+    <View>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => setModalVisible(true)}
+        accessibilityLabel="Change language"
+        accessibilityRole="button"
+      >
+        <View style={[styles.iconContainer, { backgroundColor: colors.info + '20' }]}>
+          <MaterialCommunityIcons name="translate" size={20} color={colors.info} />
+        </View>
+        {showLabel && (
+          <View style={styles.textContainer}>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>
+              {t('settings.language')}
+            </Text>
+            <Text style={[styles.value, { color: colors.textPrimary }]}>
+              {currentLanguage.nativeName}
+            </Text>
+          </View>
+        )}
+        <MaterialCommunityIcons name="chevron-down" size={20} color={colors.textTertiary} />
+      </TouchableOpacity>
+
+      <SelectionModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        title={t('settings.language')}
+        subtitle="Choose your preferred language"
+        items={selectionItems}
+        onSelectItem={handleSelect}
+        selectedItemId={i18n.language}
+      />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: designTokens.spacing.md,
+    gap: designTokens.spacing.md,
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  textContainer: {
+    flex: 1,
+  },
+  label: {
+    ...mobileTypography.caption,
+    marginBottom: 2,
+  },
+  value: {
+    ...mobileTypography.bodyLarge,
+  },
+});
