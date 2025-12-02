@@ -1,10 +1,11 @@
 {
   "expo": {
-    "name": "SDA Master Guid",
+    "name": "SDA Master Guid - Club Manager",
     "slug": "sda-master-guid",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "description": "Comprehensive club management app for SDA Master Guid - manage members, meetings, fees, and social activities",
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
