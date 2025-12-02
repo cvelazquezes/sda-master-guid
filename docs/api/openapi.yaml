@@ -3,12 +3,12 @@ info:
   title: SDA Master Guid API
   version: 1.0.0
   description: |
-    RESTful API for the SDA Master Guid Coffee Chat application.
+    RESTful API for the SDA Master Guid Club Management application.
     
     This API enables:
     - User authentication and management
     - Club administration
-    - Coffee chat match generation and scheduling
+    - Social activity generation and scheduling
     - Organizational hierarchy management
     
     ## Authentication
@@ -56,7 +56,7 @@ tags:
   - name: Clubs
     description: Club management
   - name: Matches
-    description: Coffee chat match management
+    description: Social activity match management
 
 paths:
   # ============================================================================
