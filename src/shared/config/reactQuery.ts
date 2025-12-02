@@ -91,7 +91,7 @@ export const queryClient = new QueryClient({
   
   // Global error handler
   queryCache: {
-    onError: (error, query) => {
+    onError: (error: unknown, query: { queryKey: unknown; queryHash: string }) => {
       logger.error('Query error', error as Error, {
         queryKey: query.queryKey,
         queryHash: query.queryHash,
@@ -107,7 +107,7 @@ export const queryClient = new QueryClient({
       });
     },
 
-    onSuccess: (data, query) => {
+    onSuccess: (data: unknown, query: { queryKey: unknown; queryHash: string }) => {
       logger.debug('Query success', {
         queryKey: query.queryKey,
         queryHash: query.queryHash,
@@ -116,7 +116,7 @@ export const queryClient = new QueryClient({
   } as any,
 
   mutationCache: {
-    onError: (error, variables, context, mutation) => {
+    onError: (error: unknown, variables: unknown, context: unknown, mutation: { options: { mutationKey?: unknown } }) => {
       logger.error('Mutation error', error as Error, {
         mutationKey: mutation.options.mutationKey,
       });
@@ -131,7 +131,7 @@ export const queryClient = new QueryClient({
       });
     },
 
-    onSuccess: (data, variables, context, mutation) => {
+    onSuccess: (data: unknown, variables: unknown, context: unknown, mutation: { options: { mutationKey?: unknown } }) => {
       logger.debug('Mutation success', {
         mutationKey: mutation.options.mutationKey,
       });
