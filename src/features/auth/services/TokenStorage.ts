@@ -27,7 +27,7 @@ export class SecureTokenStorage implements ITokenStorage {
       await secureStorage.setItem(this.TOKEN_KEY, token);
       logger.debug('Token stored successfully');
     } catch (error) {
-      logger.error('Failed to store token', error);
+      logger.error('Failed to store token', error instanceof Error ? error : undefined);
       throw error;
     }
   }
@@ -42,7 +42,7 @@ export class SecureTokenStorage implements ITokenStorage {
       const token = await secureStorage.getItem(this.TOKEN_KEY);
       return token;
     } catch (error) {
-      logger.error('Failed to retrieve token', error);
+      logger.error('Failed to retrieve token', error instanceof Error ? error : undefined);
       return null;
     }
   }
@@ -55,7 +55,7 @@ export class SecureTokenStorage implements ITokenStorage {
       await secureStorage.removeItem(this.TOKEN_KEY);
       logger.debug('Token removed successfully');
     } catch (error) {
-      logger.error('Failed to remove token', error);
+      logger.error('Failed to remove token', error instanceof Error ? error : undefined);
       throw error;
     }
   }
@@ -70,7 +70,7 @@ export class SecureTokenStorage implements ITokenStorage {
       await secureStorage.setItem(this.USER_ID_KEY, userId);
       logger.debug('User ID stored successfully');
     } catch (error) {
-      logger.error('Failed to store user ID', error);
+      logger.error('Failed to store user ID', error instanceof Error ? error : undefined);
       throw error;
     }
   }
@@ -85,7 +85,7 @@ export class SecureTokenStorage implements ITokenStorage {
       const userId = await secureStorage.getItem(this.USER_ID_KEY);
       return userId;
     } catch (error) {
-      logger.error('Failed to retrieve user ID', error);
+      logger.error('Failed to retrieve user ID', error instanceof Error ? error : undefined);
       return null;
     }
   }
@@ -98,7 +98,7 @@ export class SecureTokenStorage implements ITokenStorage {
       await secureStorage.removeItem(this.USER_ID_KEY);
       logger.debug('User ID removed successfully');
     } catch (error) {
-      logger.error('Failed to remove user ID', error);
+      logger.error('Failed to remove user ID', error instanceof Error ? error : undefined);
       throw error;
     }
   }
@@ -113,7 +113,7 @@ export class SecureTokenStorage implements ITokenStorage {
       await secureStorage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
       logger.debug('Refresh token stored successfully');
     } catch (error) {
-      logger.error('Failed to store refresh token', error);
+      logger.error('Failed to store refresh token', error instanceof Error ? error : undefined);
       throw error;
     }
   }
@@ -128,7 +128,7 @@ export class SecureTokenStorage implements ITokenStorage {
       const refreshToken = await secureStorage.getItem(this.REFRESH_TOKEN_KEY);
       return refreshToken;
     } catch (error) {
-      logger.error('Failed to retrieve refresh token', error);
+      logger.error('Failed to retrieve refresh token', error instanceof Error ? error : undefined);
       return null;
     }
   }
@@ -141,7 +141,7 @@ export class SecureTokenStorage implements ITokenStorage {
       await secureStorage.removeItem(this.REFRESH_TOKEN_KEY);
       logger.debug('Refresh token removed successfully');
     } catch (error) {
-      logger.error('Failed to remove refresh token', error);
+      logger.error('Failed to remove refresh token', error instanceof Error ? error : undefined);
       throw error;
     }
   }
@@ -158,7 +158,7 @@ export class SecureTokenStorage implements ITokenStorage {
       ]);
       logger.info('All auth data cleared successfully');
     } catch (error) {
-      logger.error('Failed to clear all auth data', error);
+      logger.error('Failed to clear all auth data', error instanceof Error ? error : undefined);
       throw error;
     }
   }

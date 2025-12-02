@@ -41,7 +41,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     name: string,
     whatsappNumber: string,
     clubId: string,
-    classes?: string[]
+    classes?: string[],
+    isClubAdmin?: boolean
   ): Promise<void> => {
     try {
       const { user: registeredUser } = await authService.register(
@@ -50,7 +51,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         name,
         whatsappNumber,
         clubId,
-        classes
+        classes,
+        isClubAdmin
       );
       setUser(registeredUser);
     } catch (error) {

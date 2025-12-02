@@ -69,7 +69,7 @@ export class AuthService implements IAuthService {
       logger.info(`User ${email} logged in successfully`);
       return { user, token };
     } catch (error) {
-      logger.error(`Login failed for ${email}:`, error);
+      logger.error(`Login failed for ${email}:`, error instanceof Error ? error : undefined);
       throw error;
     }
   }
@@ -120,7 +120,7 @@ export class AuthService implements IAuthService {
       logger.info(`User ${email} registered successfully`);
       return { user, token };
     } catch (error) {
-      logger.error(`Registration failed for ${email}:`, error);
+      logger.error(`Registration failed for ${email}:`, error instanceof Error ? error : undefined);
       throw error;
     }
   }
@@ -149,10 +149,10 @@ export class AuthService implements IAuthService {
 
       logger.info('Logout completed successfully');
     } catch (error) {
-      logger.error('Logout error:', error);
+      logger.error('Logout error:', error instanceof Error ? error : undefined);
       // Ensure local state is cleared even if API call fails
       await this.storage.clearAll();
-      throw new AppError('Logout failed', error);
+      throw new AppError('Logout failed', 'LOGOUT_ERROR', 500, error);
     }
   }
 
@@ -191,7 +191,7 @@ export class AuthService implements IAuthService {
 
       return user;
     } catch (error) {
-      logger.error('Error getting current user:', error);
+      logger.error('Error getting current user:', error instanceof Error ? error : undefined);
       // Clear potentially invalid tokens
       await this.storage.clearAll();
       return null;
@@ -228,7 +228,7 @@ export class AuthService implements IAuthService {
       logger.info(`User ${userId} updated successfully`);
       return updatedUser;
     } catch (error) {
-      logger.error('Error updating user:', error);
+      logger.error('Error updating user:', error instanceof Error ? error : undefined);
       throw error;
     }
   }
@@ -272,7 +272,7 @@ export class AuthService implements IAuthService {
 
       logger.info('Session refreshed successfully');
     } catch (error) {
-      logger.error('Session refresh failed:', error);
+      logger.error('Session refresh failed:', error instanceof Error ? error : undefined);
       // Clear invalid tokens
       await this.storage.clearAll();
       throw new AuthError('Session refresh failed', error);
@@ -319,12 +319,12 @@ export class AuthService implements IAuthService {
  * ```
  */
 export function createAuthService(): AuthService {
-  const repository = environment.USE_MOCK_DATA
+  const repository = environment.useMockData
     ? new MockAuthRepository()
     : new ApiAuthRepository();
 
   logger.info(
-    `AuthService created with ${environment.USE_MOCK_DATA ? 'Mock' : 'API'} repository`
+    `AuthService created with ${environment.useMockData ? 'Mock' : 'API'} repository`
   );
 
   return new AuthService(repository, tokenStorage);

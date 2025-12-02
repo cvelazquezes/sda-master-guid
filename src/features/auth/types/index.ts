@@ -128,6 +128,21 @@ export interface ITokenStorage {
   removeUserId(): Promise<void>;
   
   /**
+   * Store refresh token securely
+   */
+  setRefreshToken(token: string): Promise<void>;
+  
+  /**
+   * Retrieve refresh token
+   */
+  getRefreshToken(): Promise<string | null>;
+  
+  /**
+   * Remove refresh token
+   */
+  removeRefreshToken(): Promise<void>;
+  
+  /**
    * Clear all auth data
    */
   clearAll(): Promise<void>;

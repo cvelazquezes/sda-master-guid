@@ -6,6 +6,7 @@
  */
 
 import { z } from 'zod';
+import { VALIDATION, MESSAGES } from '../../../shared/constants';
 
 /**
  * Login credentials validation schema
@@ -18,15 +19,15 @@ import { z } from 'zod';
 export const loginSchema = z.object({
   email: z
     .string()
-    .email('Invalid email address')
+    .email(MESSAGES.ERRORS.INVALID_EMAIL_ADDRESS)
     .toLowerCase()
     .trim(),
   password: z
     .string()
-    .min(8, 'Password must be at least 8 characters long')
+    .min(VALIDATION.PASSWORD.MIN_LENGTH, MESSAGES.ERRORS.PASSWORD_TOO_SHORT_8)
     .regex(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-      'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+      MESSAGES.ERRORS.PASSWORD_REQUIREMENTS
     ),
 });
 
@@ -41,24 +42,24 @@ export const loginSchema = z.object({
 export const registerSchema = z.object({
   email: z
     .string()
-    .email('Invalid email address')
+    .email(MESSAGES.ERRORS.INVALID_EMAIL_ADDRESS)
     .toLowerCase()
     .trim(),
   password: z
     .string()
-    .min(8, 'Password must be at least 8 characters long')
+    .min(VALIDATION.PASSWORD.MIN_LENGTH, MESSAGES.ERRORS.PASSWORD_TOO_SHORT_8)
     .regex(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-      'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+      MESSAGES.ERRORS.PASSWORD_REQUIREMENTS
     ),
   name: z
     .string()
-    .min(2, 'Name must be at least 2 characters long')
-    .max(100, 'Name must not exceed 100 characters')
+    .min(VALIDATION.TEXT.NAME_MIN_LENGTH, MESSAGES.ERRORS.NAME_TOO_SHORT)
+    .max(VALIDATION.TEXT.NAME_MAX_LENGTH, MESSAGES.ERRORS.NAME_TOO_LONG)
     .trim(),
   clubId: z
     .string()
-    .min(1, 'Club ID is required')
+    .min(1, MESSAGES.ERRORS.CLUB_ID_REQUIRED)
     .trim(),
 });
 
@@ -75,30 +76,30 @@ export const registerSchema = z.object({
 export const updateUserSchema = z.object({
   name: z
     .string()
-    .min(2, 'Name must be at least 2 characters long')
-    .max(100, 'Name must not exceed 100 characters')
+    .min(VALIDATION.TEXT.NAME_MIN_LENGTH, MESSAGES.ERRORS.NAME_TOO_SHORT)
+    .max(VALIDATION.TEXT.NAME_MAX_LENGTH, MESSAGES.ERRORS.NAME_TOO_LONG)
     .trim()
     .optional(),
   email: z
     .string()
-    .email('Invalid email address')
+    .email(MESSAGES.ERRORS.INVALID_EMAIL_ADDRESS)
     .toLowerCase()
     .trim()
     .optional(),
   timezone: z
     .string()
-    .regex(/^[A-Za-z_]+\/[A-Za-z_]+$/, 'Invalid timezone format')
+    .regex(/^[A-Za-z_]+\/[A-Za-z_]+$/, MESSAGES.ERRORS.INVALID_TIMEZONE)
     .optional(),
   language: z
     .string()
-    .length(2, 'Language code must be 2 characters')
+    .length(VALIDATION.TEXT.LANGUAGE_CODE_LENGTH, MESSAGES.ERRORS.INVALID_LANGUAGE_CODE)
     .toLowerCase()
     .optional(),
   isActive: z.boolean().optional(),
   isPaused: z.boolean().optional(),
 }).refine(
   (data) => Object.keys(data).length > 0,
-  { message: 'At least one field must be provided for update' }
+  { message: MESSAGES.ERRORS.AT_LEAST_ONE_FIELD }
 );
 
 /**
@@ -110,18 +111,18 @@ export const updateUserSchema = z.object({
  * - New password must be different from current
  */
 export const changePasswordSchema = z.object({
-  currentPassword: z.string().min(1, 'Current password is required'),
+  currentPassword: z.string().min(1, MESSAGES.ERRORS.CURRENT_PASSWORD_REQUIRED),
   newPassword: z
     .string()
-    .min(8, 'Password must be at least 8 characters long')
+    .min(VALIDATION.PASSWORD.MIN_LENGTH, MESSAGES.ERRORS.PASSWORD_TOO_SHORT_8)
     .regex(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-      'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+      MESSAGES.ERRORS.PASSWORD_REQUIREMENTS
     ),
 }).refine(
   (data) => data.currentPassword !== data.newPassword,
   {
-    message: 'New password must be different from current password',
+    message: MESSAGES.ERRORS.PASSWORD_MUST_DIFFER,
     path: ['newPassword'],
   }
 );
@@ -148,7 +149,7 @@ export function isValidEmail(email: string): boolean {
  * @returns Strength level: weak, medium, strong
  */
 export function getPasswordStrength(password: string): 'weak' | 'medium' | 'strong' {
-  if (password.length < 8) return 'weak';
+  if (password.length < VALIDATION.PASSWORD.MIN_LENGTH) return 'weak';
   
   const hasLower = /[a-z]/.test(password);
   const hasUpper = /[A-Z]/.test(password);
@@ -157,7 +158,7 @@ export function getPasswordStrength(password: string): 'weak' | 'medium' | 'stro
   
   const strength = [hasLower, hasUpper, hasNumber, hasSpecial].filter(Boolean).length;
   
-  if (strength < 3 || password.length < 10) return 'medium';
+  if (strength < VALIDATION.PASSWORD.MIN_STRENGTH_REQUIREMENTS || password.length < VALIDATION.PASSWORD.MIN_LENGTH_STRONG) return 'medium';
   return 'strong';
 }
 

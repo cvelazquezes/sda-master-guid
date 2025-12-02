@@ -92,7 +92,7 @@ export class ApiAuthRepository implements IAuthRepository {
       await api.post('/auth/logout');
       logger.info('User logged out successfully');
     } catch (error) {
-      logger.error('API logout error:', error);
+      logger.error('API logout error:', error instanceof Error ? error : undefined);
       // Don't throw - logout should succeed even if API call fails
     }
   }
@@ -110,7 +110,7 @@ export class ApiAuthRepository implements IAuthRepository {
       logger.debug(`Fetched current user: ${user.email}`);
       return user;
     } catch (error) {
-      logger.error('Failed to fetch current user:', error);
+      logger.error('Failed to fetch current user:', error instanceof Error ? error : undefined);
       return null;
     }
   }
@@ -134,8 +134,8 @@ export class ApiAuthRepository implements IAuthRepository {
       logger.info(`User ${userId} updated successfully`);
       return user;
     } catch (error) {
-      logger.error('API update user error:', error);
-      throw new AppError('Failed to update user', error);
+      logger.error('API update user error:', error instanceof Error ? error : undefined);
+      throw new AppError('Failed to update user', 'UPDATE_ERROR', 500, error);
     }
   }
 
@@ -154,7 +154,7 @@ export class ApiAuthRepository implements IAuthRepository {
       logger.info('Token refreshed successfully');
       return { token, refreshToken: newRefreshToken, expiresAt };
     } catch (error) {
-      logger.error('API refresh token error:', error);
+      logger.error('API refresh token error:', error instanceof Error ? error : undefined);
       throw new AuthError('Token refresh failed', error);
     }
   }
@@ -289,7 +289,7 @@ export class MockAuthRepository implements IAuthRepository {
     const userIndex = this.mockUsers.findIndex((u) => u.id === userId);
     
     if (userIndex === -1) {
-      throw new AppError('User not found');
+      throw new AppError('User not found', 'USER_NOT_FOUND', 404);
     }
 
     this.mockUsers[userIndex] = {

@@ -8,7 +8,7 @@ import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react-native';
 import { AuthProvider, useAuth } from '../AuthContext';
 import { authService } from '../../services/authService';
-import { User } from '../../types';
+import { User, UserRole, ApprovalStatus } from '../../types';
 import { AuthenticationError } from '../../shared/utils/errors';
 
 // Mock authService
@@ -34,10 +34,16 @@ describe('AuthContext', () => {
     id: 'user-1',
     email: 'user@example.com',
     name: 'Test User',
-    role: 'user',
+    role: UserRole.USER,
     clubId: 'club-1',
     isActive: true,
+    approvalStatus: ApprovalStatus.APPROVED,
+    whatsappNumber: '+1234567890',
+    classes: ['Friend'],
+    timezone: 'America/Mexico_City',
+    language: 'en',
     createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
   };
 
   beforeEach(() => {
