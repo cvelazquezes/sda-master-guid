@@ -7,7 +7,7 @@ import { apiService } from './api';
 import { environment } from '../config/environment';
 import { logger } from '../utils/logger';
 import { secureStorage } from '../utils/secureStorage';
-import { Match, MatchRound, MatchStatus } from '../types';
+import { Match, MatchRound, MatchStatus, ApprovalStatus } from '../types';
 import {
   mockMatches,
   mockMatchRounds,
@@ -18,10 +18,10 @@ import {
   getUsersByClub,
 } from './mockData';
 import { NotFoundError, ValidationError } from '../utils/errors';
-
-// Constants
-const MOCK_API_DELAY_MS = 300;
-const MOCK_GENERATE_DELAY_MS = 1000;
+import { LOG_MESSAGES } from '../shared/constants/logMessages';
+import { TIMING } from '../shared/constants/timing';
+import { MATCH_ROUND_STATUS } from '../shared/constants/ui';
+import i18n from '../i18n';
 
 class MatchService {
   private useMockData = environment.useMockData;
@@ -30,7 +30,7 @@ class MatchService {
    * Get matches for a club
    */
   async getMatches(clubId: string): Promise<Match[]> {
-    logger.debug('Fetching matches', { clubId });
+    logger.debug(LOG_MESSAGES.MATCH.FETCHING, { clubId });
 
     if (this.useMockData) {
       return this.mockGetMatches(clubId);
@@ -38,10 +38,10 @@ class MatchService {
 
     try {
       const matches = await apiService.get<Match[]>(`/matches?clubId=${clubId}`);
-      logger.debug('Matches fetched', { clubId, count: matches.length });
+      logger.debug(LOG_MESSAGES.MATCH.FETCHED, { clubId, count: matches.length });
       return matches;
     } catch (error) {
-      logger.error('Failed to fetch matches', error as Error, { clubId });
+      logger.error(LOG_MESSAGES.MATCH.FETCH_FAILED, error as Error, { clubId });
       throw error;
     }
   }
@@ -51,7 +51,7 @@ class MatchService {
    */
   private async mockGetMatches(clubId: string): Promise<Match[]> {
     const matches = getMatchesByClub(clubId);
-    logger.debug('Mock: Matches fetched', { clubId, count: matches.length });
+    logger.debug(LOG_MESSAGES.MATCH.MOCK_FETCHED, { clubId, count: matches.length });
     return matches;
   }
 
@@ -59,7 +59,7 @@ class MatchService {
    * Get current user's matches
    */
   async getMyMatches(): Promise<Match[]> {
-    logger.debug('Fetching my matches');
+    logger.debug(LOG_MESSAGES.MATCH.FETCHING_MY);
 
     if (this.useMockData) {
       return this.mockGetMyMatches();
@@ -67,10 +67,10 @@ class MatchService {
 
     try {
       const matches = await apiService.get<Match[]>('/matches/me');
-      logger.debug('My matches fetched', { count: matches.length });
+      logger.debug(LOG_MESSAGES.MATCH.FETCHED_MY, { count: matches.length });
       return matches;
     } catch (error) {
-      logger.error('Failed to fetch my matches', error as Error);
+      logger.error(LOG_MESSAGES.MATCH.FETCH_MY_FAILED, error as Error);
       throw error;
     }
   }
@@ -81,12 +81,12 @@ class MatchService {
   private async mockGetMyMatches(): Promise<Match[]> {
     const userId = await secureStorage.getUserId();
     if (!userId) {
-      logger.warn('Mock: No user ID found');
+      logger.warn(LOG_MESSAGES.MATCH.MOCK_NO_USER);
       return [];
     }
 
     const matches = getMatchesForUser(userId);
-    logger.debug('Mock: My matches fetched', { userId, count: matches.length });
+    logger.debug(LOG_MESSAGES.MATCH.MOCK_FETCHED_MY, { userId, count: matches.length });
     return matches;
   }
 
@@ -94,7 +94,7 @@ class MatchService {
    * Get single match by ID
    */
   async getMatch(matchId: string): Promise<Match> {
-    logger.debug('Fetching match', { matchId });
+    logger.debug(LOG_MESSAGES.MATCH.FETCHING_ONE, { matchId });
 
     if (this.useMockData) {
       return this.mockGetMatch(matchId);
@@ -102,10 +102,10 @@ class MatchService {
 
     try {
       const match = await apiService.get<Match>(`/matches/${matchId}`);
-      logger.debug('Match fetched', { matchId });
+      logger.debug(LOG_MESSAGES.MATCH.FETCHED_ONE, { matchId });
       return match;
     } catch (error) {
-      logger.error('Failed to fetch match', error as Error, { matchId });
+      logger.error(LOG_MESSAGES.MATCH.FETCH_ONE_FAILED, error as Error, { matchId });
       throw error;
     }
   }
@@ -114,15 +114,15 @@ class MatchService {
    * Mock get match implementation
    */
   private async mockGetMatch(matchId: string): Promise<Match> {
-    await this.sleep(MOCK_API_DELAY_MS);
+    await this.sleep(TIMING.MOCK_API.FAST);
 
     const match = mockMatches.find((m) => m.id === matchId);
     if (!match) {
-      logger.warn('Mock: Match not found', { matchId });
-      throw new NotFoundError('Match not found');
+      logger.warn(LOG_MESSAGES.MATCH.MOCK_NOT_FOUND, { matchId });
+      throw new NotFoundError(LOG_MESSAGES.MATCH.NOT_FOUND);
     }
 
-    logger.debug('Mock: Match fetched', { matchId });
+    logger.debug(LOG_MESSAGES.MATCH.MOCK_FETCHED_ONE, { matchId });
     return match;
   }
 
@@ -130,7 +130,7 @@ class MatchService {
    * Update match status
    */
   async updateMatchStatus(matchId: string, status: MatchStatus): Promise<Match> {
-    logger.info('Updating match status', { matchId, status });
+    logger.info(LOG_MESSAGES.MATCH.UPDATING_STATUS, { matchId, status });
 
     if (this.useMockData) {
       return this.mockUpdateMatchStatus(matchId, status);
@@ -140,10 +140,10 @@ class MatchService {
       const updatedMatch = await apiService.patch<Match>(`/matches/${matchId}/status`, {
         status,
       });
-      logger.info('Match status updated', { matchId, status });
+      logger.info(LOG_MESSAGES.MATCH.STATUS_UPDATED, { matchId, status });
       return updatedMatch;
     } catch (error) {
-      logger.error('Failed to update match status', error as Error, { matchId, status });
+      logger.error(LOG_MESSAGES.MATCH.STATUS_UPDATE_FAILED, error as Error, { matchId, status });
       throw error;
     }
   }
@@ -152,12 +152,12 @@ class MatchService {
    * Mock update match status implementation
    */
   private async mockUpdateMatchStatus(matchId: string, status: MatchStatus): Promise<Match> {
-    await this.sleep(MOCK_API_DELAY_MS);
+    await this.sleep(TIMING.MOCK_API.FAST);
 
     const matchIndex = mockMatches.findIndex((m) => m.id === matchId);
     if (matchIndex === -1) {
-      logger.warn('Mock: Match not found for status update', { matchId });
-      throw new NotFoundError('Match not found');
+      logger.warn(LOG_MESSAGES.MATCH.MOCK_NOT_FOUND_STATUS, { matchId });
+      throw new NotFoundError(LOG_MESSAGES.MATCH.NOT_FOUND);
     }
 
     mockMatches[matchIndex] = {
@@ -166,7 +166,7 @@ class MatchService {
       updatedAt: new Date().toISOString(),
     };
 
-    logger.info('Mock: Match status updated', { matchId, status });
+    logger.info(LOG_MESSAGES.MATCH.MOCK_STATUS_UPDATED, { matchId, status });
     return mockMatches[matchIndex];
   }
 
@@ -174,7 +174,7 @@ class MatchService {
    * Schedule a match
    */
   async scheduleMatch(matchId: string, scheduledDate: string): Promise<Match> {
-    logger.info('Scheduling match', { matchId, scheduledDate });
+    logger.info(LOG_MESSAGES.MATCH.SCHEDULING, { matchId, scheduledDate });
 
     if (this.useMockData) {
       return this.mockScheduleMatch(matchId, scheduledDate);
@@ -184,10 +184,10 @@ class MatchService {
       const updatedMatch = await apiService.patch<Match>(`/matches/${matchId}`, {
         scheduledDate,
       });
-      logger.info('Match scheduled', { matchId, scheduledDate });
+      logger.info(LOG_MESSAGES.MATCH.SCHEDULED, { matchId, scheduledDate });
       return updatedMatch;
     } catch (error) {
-      logger.error('Failed to schedule match', error as Error, { matchId });
+      logger.error(LOG_MESSAGES.MATCH.SCHEDULE_FAILED, error as Error, { matchId });
       throw error;
     }
   }
@@ -196,12 +196,12 @@ class MatchService {
    * Mock schedule match implementation
    */
   private async mockScheduleMatch(matchId: string, scheduledDate: string): Promise<Match> {
-    await this.sleep(MOCK_API_DELAY_MS);
+    await this.sleep(TIMING.MOCK_API.FAST);
 
     const matchIndex = mockMatches.findIndex((m) => m.id === matchId);
     if (matchIndex === -1) {
-      logger.warn('Mock: Match not found for scheduling', { matchId });
-      throw new NotFoundError('Match not found');
+      logger.warn(LOG_MESSAGES.MATCH.MOCK_NOT_FOUND_SCHEDULE, { matchId });
+      throw new NotFoundError(LOG_MESSAGES.MATCH.NOT_FOUND);
     }
 
     mockMatches[matchIndex] = {
@@ -211,7 +211,7 @@ class MatchService {
       updatedAt: new Date().toISOString(),
     };
 
-    logger.info('Mock: Match scheduled', { matchId, scheduledDate });
+    logger.info(LOG_MESSAGES.MATCH.MOCK_SCHEDULED, { matchId, scheduledDate });
     return mockMatches[matchIndex];
   }
 
@@ -219,7 +219,7 @@ class MatchService {
    * Skip a match
    */
   async skipMatch(matchId: string): Promise<Match> {
-    logger.info('Skipping match', { matchId });
+    logger.info(LOG_MESSAGES.MATCH.SKIPPING, { matchId });
     return this.updateMatchStatus(matchId, MatchStatus.SKIPPED);
   }
 
@@ -227,7 +227,7 @@ class MatchService {
    * Generate matches for a club
    */
   async generateMatches(clubId: string): Promise<MatchRound> {
-    logger.info('Generating matches', { clubId });
+    logger.info(LOG_MESSAGES.MATCH.GENERATING, { clubId });
 
     if (this.useMockData) {
       return this.mockGenerateMatches(clubId);
@@ -235,10 +235,10 @@ class MatchService {
 
     try {
       const matchRound = await apiService.post<MatchRound>('/matches/generate', { clubId });
-      logger.info('Matches generated', { clubId, matchCount: matchRound.matches.length });
+      logger.info(LOG_MESSAGES.MATCH.GENERATED, { clubId, matchCount: matchRound.matches.length });
       return matchRound;
     } catch (error) {
-      logger.error('Failed to generate matches', error as Error, { clubId });
+      logger.error(LOG_MESSAGES.MATCH.GENERATE_FAILED, error as Error, { clubId });
       throw error;
     }
   }
@@ -247,26 +247,26 @@ class MatchService {
    * Mock generate matches implementation
    */
   private async mockGenerateMatches(clubId: string): Promise<MatchRound> {
-    await this.sleep(MOCK_GENERATE_DELAY_MS);
+    await this.sleep(TIMING.MOCK_API.SLOW);
 
     const club = mockClubs.find((c) => c.id === clubId);
     if (!club) {
-      logger.warn('Mock: Club not found for match generation', { clubId });
-      throw new NotFoundError('Club not found');
+      logger.warn(LOG_MESSAGES.MATCH.MOCK_NOT_FOUND_GENERATE, { clubId });
+      throw new NotFoundError(LOG_MESSAGES.CLUB.NOT_FOUND);
     }
 
     const members = getUsersByClub(clubId).filter(
-      (u) => u.isActive && u.approvalStatus === 'approved'
+      (u) => u.isActive && u.approvalStatus === ApprovalStatus.APPROVED
     );
 
     if (members.length < club.groupSize) {
-      logger.warn('Mock: Not enough members for match generation', {
+      logger.warn(LOG_MESSAGES.MATCH.MOCK_NOT_ENOUGH_MEMBERS, {
         clubId,
         memberCount: members.length,
         required: club.groupSize,
       });
       throw new ValidationError(
-        `Not enough active members. Need at least ${club.groupSize}, but only have ${members.length}`
+        i18n.t('services.validation.notEnoughMembers', { required: club.groupSize, count: members.length })
       );
     }
 
@@ -294,13 +294,13 @@ class MatchService {
       id: String(mockMatchRounds.length + 1),
       clubId,
       matches: newMatches,
-      scheduledDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      status: 'active',
+      scheduledDate: new Date(Date.now() + TIMING.MS_PER.WEEK).toISOString(),
+      status: MATCH_ROUND_STATUS.ACTIVE,
       createdAt: new Date().toISOString(),
     };
 
     mockMatchRounds.push(newRound);
-    logger.info('Mock: Matches generated', { clubId, matchCount: newMatches.length });
+    logger.info(LOG_MESSAGES.MATCH.MOCK_GENERATED, { clubId, matchCount: newMatches.length });
     return newRound;
   }
 
@@ -308,7 +308,7 @@ class MatchService {
    * Get match rounds for a club
    */
   async getMatchRounds(clubId: string): Promise<MatchRound[]> {
-    logger.debug('Fetching match rounds', { clubId });
+    logger.debug(LOG_MESSAGES.MATCH.FETCHING_ROUNDS, { clubId });
 
     if (this.useMockData) {
       return this.mockGetMatchRounds(clubId);
@@ -316,10 +316,10 @@ class MatchService {
 
     try {
       const rounds = await apiService.get<MatchRound[]>(`/matches/rounds?clubId=${clubId}`);
-      logger.debug('Match rounds fetched', { clubId, count: rounds.length });
+      logger.debug(LOG_MESSAGES.MATCH.FETCHED_ROUNDS, { clubId, count: rounds.length });
       return rounds;
     } catch (error) {
-      logger.error('Failed to fetch match rounds', error as Error, { clubId });
+      logger.error(LOG_MESSAGES.MATCH.FETCH_ROUNDS_FAILED, error as Error, { clubId });
       throw error;
     }
   }
@@ -329,7 +329,7 @@ class MatchService {
    */
   private async mockGetMatchRounds(clubId: string): Promise<MatchRound[]> {
     const rounds = getMatchRoundsByClub(clubId);
-    logger.debug('Mock: Match rounds fetched', { clubId, count: rounds.length });
+    logger.debug(LOG_MESSAGES.MATCH.MOCK_FETCHED_ROUNDS, { clubId, count: rounds.length });
     return rounds;
   }
 
@@ -337,7 +337,7 @@ class MatchService {
    * Get all matches for a club
    */
   async getClubMatches(clubId: string): Promise<Match[]> {
-    logger.debug('Fetching club matches', { clubId });
+    logger.debug(LOG_MESSAGES.MATCH.FETCHING_CLUB_MATCHES, { clubId });
 
     if (this.useMockData) {
       return this.mockGetClubMatches(clubId);
@@ -345,10 +345,10 @@ class MatchService {
 
     try {
       const matches = await apiService.get<Match[]>(`/matches/club/${clubId}`);
-      logger.debug('Club matches fetched', { clubId, count: matches.length });
+      logger.debug(LOG_MESSAGES.MATCH.FETCHED_CLUB_MATCHES, { clubId, count: matches.length });
       return matches;
     } catch (error) {
-      logger.error('Failed to fetch club matches', error as Error, { clubId });
+      logger.error(LOG_MESSAGES.MATCH.FETCH_CLUB_MATCHES_FAILED, error as Error, { clubId });
       throw error;
     }
   }
@@ -358,7 +358,7 @@ class MatchService {
    */
   private async mockGetClubMatches(clubId: string): Promise<Match[]> {
     const matches = getMatchesByClub(clubId);
-    logger.debug('Mock: Club matches fetched', { clubId, count: matches.length });
+    logger.debug(LOG_MESSAGES.MATCH.MOCK_FETCHED_CLUB, { clubId, count: matches.length });
     return matches;
   }
 

@@ -8,18 +8,23 @@ import { apiService } from './api';
 import { environment } from '../config/environment';
 import { logger } from '../utils/logger';
 import { MemberBalance, User } from '../types';
-import { TIMING } from '../shared/constants';
+import { TIMING, ALERT_BUTTON_STYLE, EMPTY_VALUE } from '../shared/constants';
+import { LOG_MESSAGES } from '../shared/constants/logMessages';
+import { NOTIFICATION_CHANNEL, LOCALE, LANGUAGE, PLATFORM, ID_PREFIX, REGEX_PATTERN } from '../shared/constants/ui';
+import i18n from '../i18n';
+
+type NotificationChannelType = typeof NOTIFICATION_CHANNEL[keyof typeof NOTIFICATION_CHANNEL];
 
 interface SendNotificationRequest {
   userId: string;
   message: string;
-  type: 'whatsapp' | 'push' | 'both';
+  type: NotificationChannelType;
 }
 
 interface BulkNotificationRequest {
   userIds: string[];
   messages: Record<string, string>; // userId -> message
-  type: 'whatsapp' | 'push' | 'both';
+  type: NotificationChannelType;
 }
 
 interface ScheduleNotificationRequest {
@@ -38,7 +43,7 @@ class NotificationService {
    * In backend mode: Sends via backend API (which can use WhatsApp Business API)
    */
   async sendWhatsAppNotification(user: User, message: string): Promise<boolean> {
-    logger.info('Sending WhatsApp notification', { userId: user.id, userName: user.name });
+    logger.info(LOG_MESSAGES.NOTIFICATION.SENDING_WHATSAPP, { userId: user.id, userName: user.name });
 
     if (this.useMockData) {
       return this.mockSendWhatsAppNotification(user, message);
@@ -48,13 +53,13 @@ class NotificationService {
       const request: SendNotificationRequest = {
         userId: user.id,
         message,
-        type: 'whatsapp',
+        type: NOTIFICATION_CHANNEL.WHATSAPP,
       };
       await apiService.post<void>('/notifications/send', request);
-      logger.info('WhatsApp notification sent via backend', { userId: user.id });
+      logger.info(LOG_MESSAGES.NOTIFICATION.WHATSAPP_SENT, { userId: user.id });
       return true;
     } catch (error) {
-      logger.error('Failed to send WhatsApp notification', error as Error, {
+      logger.error(LOG_MESSAGES.NOTIFICATION.WHATSAPP_FAILED, error as Error, {
         userId: user.id,
       });
       // Fallback to direct WhatsApp link
@@ -68,35 +73,35 @@ class NotificationService {
   private async mockSendWhatsAppNotification(user: User, message: string): Promise<boolean> {
     try {
       if (!user.whatsappNumber) {
-        logger.warn('User has no WhatsApp number', { userId: user.id, userName: user.name });
+        logger.warn(LOG_MESSAGES.NOTIFICATION.NO_WHATSAPP_NUMBER, { userId: user.id, userName: user.name });
         return false;
       }
 
       // Clean phone number (remove spaces, dashes, etc.)
-      const cleanNumber = user.whatsappNumber.replace(/[^0-9+]/g, '');
+      const cleanNumber = user.whatsappNumber.replace(REGEX_PATTERN.NON_PHONE_CHARS, EMPTY_VALUE);
 
       // Encode message for URL
       const encodedMessage = encodeURIComponent(message);
 
       // WhatsApp deep link URL
-      const whatsappUrl = `whatsapp://send?phone=${cleanNumber}&text=${encodedMessage}`;
+      const whatsappUrl = `${NOTIFICATION_CHANNEL.WHATSAPP}://send?phone=${cleanNumber}&text=${encodedMessage}`;
 
       // Check if WhatsApp can be opened
       const canOpen = await Linking.canOpenURL(whatsappUrl);
 
       if (canOpen) {
         await Linking.openURL(whatsappUrl);
-        logger.info('Mock: WhatsApp notification opened', { userId: user.id });
+        logger.info(LOG_MESSAGES.NOTIFICATION.MOCK_WHATSAPP_OPENED, { userId: user.id });
         return true;
       } else {
-        // Fallback to web WhatsApp
+        // Fallback to web WhatsApp (wa.me is WhatsApp's web redirect)
         const webWhatsappUrl = `https://wa.me/${cleanNumber}?text=${encodedMessage}`;
         await Linking.openURL(webWhatsappUrl);
-        logger.info('Mock: Web WhatsApp notification opened', { userId: user.id });
+        logger.info(LOG_MESSAGES.NOTIFICATION.MOCK_WEB_WHATSAPP_OPENED, { userId: user.id });
         return true;
       }
     } catch (error) {
-      logger.error('Mock: Error sending WhatsApp notification', error as Error, {
+      logger.error(LOG_MESSAGES.NOTIFICATION.MOCK_WHATSAPP_ERROR, error as Error, {
         userId: user.id,
       });
       return false;
@@ -111,37 +116,39 @@ class NotificationService {
     balance: MemberBalance,
     clubName: string
   ): string {
+    const t = i18n.t.bind(i18n);
+    const locale = i18n.language === LANGUAGE.SPANISH ? LOCALE.SPANISH_MX : LOCALE.ENGLISH_US;
     const messages: string[] = [];
 
-    messages.push(`🏕️ *${clubName}*`);
-    messages.push(`\nHola ${user.name},`);
-    messages.push(`\n📊 *Estado de tu cuenta:*`);
-    messages.push(`\n💰 Total adeudado: $${balance.totalOwed.toFixed(2)}`);
-    messages.push(`✅ Total pagado: $${balance.totalPaid.toFixed(2)}`);
+    messages.push(t('services.notification.paymentReminder.clubHeader', { clubName }));
+    messages.push(t('services.notification.paymentReminder.greeting', { userName: user.name }));
+    messages.push(t('services.notification.paymentReminder.accountStatusHeader'));
+    messages.push(t('services.notification.paymentReminder.totalOwed', { amount: balance.totalOwed.toFixed(2) }));
+    messages.push(t('services.notification.paymentReminder.totalPaid', { amount: balance.totalPaid.toFixed(2) }));
 
     const balanceAmount = Math.abs(balance.balance).toFixed(2);
     if (balance.balance < 0) {
-      messages.push(`\n📍 *Saldo pendiente: $${balanceAmount}*`);
+      messages.push(t('services.notification.paymentReminder.pendingBalance', { amount: balanceAmount }));
     } else {
-      messages.push(`\n📍 Saldo: $${balanceAmount} (crédito)`);
+      messages.push(t('services.notification.paymentReminder.creditBalance', { amount: balanceAmount }));
     }
 
     if (balance.overdueCharges > 0) {
-      messages.push(`\n⚠️ *Cargos vencidos: $${balance.overdueCharges.toFixed(2)}*`);
-      messages.push(`\nPor favor, ponte al corriente lo antes posible.`);
+      messages.push(t('services.notification.paymentReminder.overdueCharges', { amount: balance.overdueCharges.toFixed(2) }));
+      messages.push(t('services.notification.paymentReminder.overdueWarning'));
     } else if (balance.pendingCharges > 0) {
-      messages.push(`\n⏳ Cargos pendientes: $${balance.pendingCharges.toFixed(2)}`);
+      messages.push(t('services.notification.paymentReminder.pendingCharges', { amount: balance.pendingCharges.toFixed(2) }));
     }
 
     if (balance.lastPaymentDate) {
       const lastPayment = new Date(balance.lastPaymentDate);
-      messages.push(`\n📅 Último pago: ${lastPayment.toLocaleDateString('es-MX')}`);
+      messages.push(t('services.notification.paymentReminder.lastPayment', { date: lastPayment.toLocaleDateString(locale) }));
     }
 
-    messages.push(`\n\nGracias por tu participación en el club! 🙏`);
-    messages.push(`\n_Mensaje automático del sistema de cuotas_`);
+    messages.push(t('services.notification.paymentReminder.thankYou'));
+    messages.push(t('services.notification.paymentReminder.automatedMessage'));
 
-    return messages.join('');
+    return messages.join(EMPTY_VALUE);
   }
 
   /**
@@ -154,27 +161,29 @@ class NotificationService {
     dueDate: string,
     clubName: string
   ): string {
+    const t = i18n.t.bind(i18n);
+    const locale = i18n.language === LANGUAGE.SPANISH ? LOCALE.SPANISH_MX : LOCALE.ENGLISH_US;
     const messages: string[] = [];
     const due = new Date(dueDate);
 
-    messages.push(`🏕️ *${clubName}*`);
-    messages.push(`\nHola ${user.name},`);
-    messages.push(`\n📋 *Nuevo cargo registrado:*`);
-    messages.push(`\n${description}`);
-    messages.push(`\n💰 Monto: $${amount.toFixed(2)}`);
-    messages.push(`📅 Fecha de vencimiento: ${due.toLocaleDateString('es-MX')}`);
-    messages.push(`\n\nPor favor, considera este cargo en tu próximo pago.`);
-    messages.push(`\nGracias por tu comprensión! 🙏`);
-    messages.push(`\n_Mensaje automático del sistema de cuotas_`);
+    messages.push(t('services.notification.customCharge.clubHeader', { clubName }));
+    messages.push(t('services.notification.customCharge.greeting', { userName: user.name }));
+    messages.push(t('services.notification.customCharge.newChargeHeader'));
+    messages.push(t('services.notification.customCharge.description', { description }));
+    messages.push(t('services.notification.customCharge.amount', { amount: amount.toFixed(2) }));
+    messages.push(t('services.notification.customCharge.dueDate', { date: due.toLocaleDateString(locale) }));
+    messages.push(t('services.notification.customCharge.reminder'));
+    messages.push(t('services.notification.customCharge.thankYou'));
+    messages.push(t('services.notification.customCharge.automatedMessage'));
 
-    return messages.join('');
+    return messages.join(EMPTY_VALUE);
   }
 
   /**
    * Send notification via push notification
    */
   async sendPushNotification(userId: string, title: string, body: string): Promise<boolean> {
-    logger.info('Sending push notification', { userId, title });
+    logger.info(LOG_MESSAGES.NOTIFICATION.SENDING_PUSH, { userId, title });
 
     if (this.useMockData) {
       return this.mockSendPushNotification(userId, title, body);
@@ -184,13 +193,13 @@ class NotificationService {
       const request: SendNotificationRequest = {
         userId,
         message: `${title}\n${body}`,
-        type: 'push',
+        type: NOTIFICATION_CHANNEL.PUSH,
       };
       await apiService.post<void>('/notifications/send', request);
-      logger.info('Push notification sent via backend', { userId, title });
+      logger.info(LOG_MESSAGES.NOTIFICATION.PUSH_SENT, { userId, title });
       return true;
     } catch (error) {
-      logger.error('Failed to send push notification', error as Error, { userId, title });
+      logger.error(LOG_MESSAGES.NOTIFICATION.PUSH_FAILED, error as Error, { userId, title });
       return false;
     }
   }
@@ -204,12 +213,12 @@ class NotificationService {
     body: string
   ): Promise<boolean> {
     // TODO: Integrate with Expo Push Notifications or Firebase Cloud Messaging
-    logger.debug('Mock: Push notification (simulated)', { userId, title, body });
+    logger.debug(LOG_MESSAGES.NOTIFICATION.MOCK_PUSH_SIMULATED, { userId, title, body });
 
     // For now, just show a local alert
-    if (Platform.OS !== 'web') {
+    if (Platform.OS !== PLATFORM.WEB) {
       // In a real implementation, you would use expo-notifications here
-      logger.info('Mock: Push notification sent (simulated)', { userId });
+      logger.info(LOG_MESSAGES.NOTIFICATION.MOCK_PUSH_SENT, { userId });
     }
 
     return true;
@@ -224,24 +233,26 @@ class NotificationService {
     onSuccess?: () => void,
     onError?: () => void
   ): Promise<void> {
+    const t = i18n.t.bind(i18n);
+    
     Alert.alert(
-      'Enviar Notificación',
-      `¿Enviar mensaje de WhatsApp a ${user.name}?`,
+      t('services.notification.alerts.sendNotification'),
+      t('services.notification.alerts.sendWhatsAppConfirm', { userName: user.name }),
       [
         {
-          text: 'Cancelar',
-          style: 'cancel',
+          text: t('common.cancel'),
+          style: ALERT_BUTTON_STYLE.CANCEL,
         },
         {
-          text: 'Enviar',
+          text: t('services.notification.alerts.send'),
           onPress: async () => {
             const success = await this.sendWhatsAppNotification(user, message);
             
             if (success) {
-              Alert.alert('Éxito', 'Notificación enviada');
+              Alert.alert(t('common.success'), t('services.notification.alerts.notificationSent'));
               onSuccess?.();
             } else {
-              Alert.alert('Error', 'No se pudo enviar la notificación');
+              Alert.alert(t('common.error'), t('services.notification.alerts.notificationFailed'));
               onError?.();
             }
           },
@@ -258,7 +269,7 @@ class NotificationService {
     messages: Map<string, string>,
     onProgress?: (current: number, total: number) => void
   ): Promise<{ success: number; failed: number }> {
-    logger.info('Sending bulk notifications', { userCount: users.length });
+    logger.info(LOG_MESSAGES.NOTIFICATION.SENDING_BULK, { userCount: users.length });
 
     if (this.useMockData) {
       return this.mockSendBulkNotifications(users, messages, onProgress);
@@ -273,11 +284,11 @@ class NotificationService {
       const request: BulkNotificationRequest = {
         userIds: users.map((u) => u.id),
         messages: messageRecord,
-        type: 'whatsapp',
+        type: NOTIFICATION_CHANNEL.WHATSAPP,
       };
 
       await apiService.post<void>('/notifications/bulk', request);
-      logger.info('Bulk notifications sent via backend', { userCount: users.length });
+      logger.info(LOG_MESSAGES.NOTIFICATION.BULK_SENT, { userCount: users.length });
 
       // Simulate progress for UI
       for (let i = 0; i < users.length; i++) {
@@ -287,7 +298,7 @@ class NotificationService {
 
       return { success: users.length, failed: 0 };
     } catch (error) {
-      logger.error('Failed to send bulk notifications', error as Error, {
+      logger.error(LOG_MESSAGES.NOTIFICATION.BULK_FAILED, error as Error, {
         userCount: users.length,
       });
       // Fallback to mock implementation
@@ -326,7 +337,7 @@ class NotificationService {
       }
     }
 
-    logger.info('Mock: Bulk notifications sent', { success, failed, total: users.length });
+    logger.info(LOG_MESSAGES.NOTIFICATION.MOCK_BULK_SENT, { success, failed, total: users.length });
     return { success, failed };
   }
 
@@ -339,7 +350,7 @@ class NotificationService {
     body: string,
     scheduledDate: Date
   ): Promise<string> {
-    logger.info('Scheduling notification', { userId, title, scheduledDate });
+    logger.info(LOG_MESSAGES.NOTIFICATION.SCHEDULING, { userId, title, scheduledDate });
 
     if (this.useMockData) {
       return this.mockScheduleNotification(userId, title, body, scheduledDate);
@@ -356,13 +367,13 @@ class NotificationService {
         '/notifications/schedule',
         request
       );
-      logger.info('Notification scheduled via backend', {
+      logger.info(LOG_MESSAGES.NOTIFICATION.SCHEDULED, {
         userId,
         notificationId: response.notificationId,
       });
       return response.notificationId;
     } catch (error) {
-      logger.error('Failed to schedule notification', error as Error, { userId, title });
+      logger.error(LOG_MESSAGES.NOTIFICATION.SCHEDULE_FAILED, error as Error, { userId, title });
       // Return mock ID as fallback
       return this.mockScheduleNotification(userId, title, body, scheduledDate);
     }
@@ -378,8 +389,8 @@ class NotificationService {
     scheduledDate: Date
   ): Promise<string> {
     // TODO: Implement with expo-notifications
-    const notificationId = `notification_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    logger.info('Mock: Notification scheduled', { userId, notificationId, scheduledDate });
+    const notificationId = `${ID_PREFIX.NOTIFICATION}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    logger.info(LOG_MESSAGES.NOTIFICATION.MOCK_SCHEDULED, { userId, notificationId, scheduledDate });
     return notificationId;
   }
 
@@ -387,7 +398,7 @@ class NotificationService {
    * Cancel scheduled notification
    */
   async cancelScheduledNotification(notificationId: string): Promise<void> {
-    logger.info('Cancelling scheduled notification', { notificationId });
+    logger.info(LOG_MESSAGES.NOTIFICATION.CANCELLING, { notificationId });
 
     if (this.useMockData) {
       return this.mockCancelScheduledNotification(notificationId);
@@ -395,9 +406,9 @@ class NotificationService {
 
     try {
       await apiService.delete<void>(`/notifications/scheduled/${notificationId}`);
-      logger.info('Scheduled notification cancelled via backend', { notificationId });
+      logger.info(LOG_MESSAGES.NOTIFICATION.CANCELLED, { notificationId });
     } catch (error) {
-      logger.error('Failed to cancel scheduled notification', error as Error, {
+      logger.error(LOG_MESSAGES.NOTIFICATION.CANCEL_FAILED, error as Error, {
         notificationId,
       });
       // Fallback to mock
@@ -410,7 +421,7 @@ class NotificationService {
    */
   private async mockCancelScheduledNotification(notificationId: string): Promise<void> {
     // TODO: Implement with expo-notifications
-    logger.info('Mock: Scheduled notification cancelled', { notificationId });
+    logger.info(LOG_MESSAGES.NOTIFICATION.MOCK_CANCELLED, { notificationId });
   }
 }
 

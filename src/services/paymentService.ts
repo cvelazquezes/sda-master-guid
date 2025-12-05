@@ -15,10 +15,12 @@ import {
   PaymentStatus,
   ChargeType,
   User,
+  ApprovalStatus,
 } from '../types';
-
-const PAYMENTS_KEY = '@sda_payments';
-const CUSTOM_CHARGES_KEY = '@sda_custom_charges';
+import { LOG_MESSAGES } from '../shared/constants/logMessages';
+import { storageKeys } from '../shared/config/storage';
+import { LOCALE, LANGUAGE, ID_PREFIX, EMPTY_VALUE } from '../shared/constants/ui';
+import i18n from '../i18n';
 
 interface GenerateFeesRequest {
   clubId: string;
@@ -41,38 +43,38 @@ class PaymentService {
 
   private async getPayments(): Promise<MemberPayment[]> {
     try {
-      const data = await AsyncStorage.getItem(PAYMENTS_KEY);
+      const data = await AsyncStorage.getItem(storageKeys.PAYMENTS);
       return data ? JSON.parse(data) : [];
     } catch (error) {
-      console.error('Error loading payments:', error);
+      logger.error(LOG_MESSAGES.PAYMENT.ERROR_LOADING_PAYMENTS, error as Error);
       return [];
     }
   }
 
   private async savePayments(payments: MemberPayment[]): Promise<void> {
     try {
-      await AsyncStorage.setItem(PAYMENTS_KEY, JSON.stringify(payments));
+      await AsyncStorage.setItem(storageKeys.PAYMENTS, JSON.stringify(payments));
     } catch (error) {
-      console.error('Error saving payments:', error);
+      logger.error(LOG_MESSAGES.PAYMENT.ERROR_SAVING_PAYMENTS, error as Error);
       throw error;
     }
   }
 
   private async getCustomCharges(): Promise<CustomCharge[]> {
     try {
-      const data = await AsyncStorage.getItem(CUSTOM_CHARGES_KEY);
+      const data = await AsyncStorage.getItem(storageKeys.CUSTOM_CHARGES);
       return data ? JSON.parse(data) : [];
     } catch (error) {
-      console.error('Error loading custom charges:', error);
+      logger.error(LOG_MESSAGES.PAYMENT.ERROR_LOADING_CHARGES, error as Error);
       return [];
     }
   }
 
   private async saveCustomCharges(charges: CustomCharge[]): Promise<void> {
     try {
-      await AsyncStorage.setItem(CUSTOM_CHARGES_KEY, JSON.stringify(charges));
+      await AsyncStorage.setItem(storageKeys.CUSTOM_CHARGES, JSON.stringify(charges));
     } catch (error) {
-      console.error('Error saving custom charges:', error);
+      logger.error(LOG_MESSAGES.PAYMENT.ERROR_SAVING_CHARGES, error as Error);
       throw error;
     }
   }
@@ -87,7 +89,7 @@ class PaymentService {
     feeSettings: ClubFeeSettings,
     year: number
   ): Promise<void> {
-    logger.info('Generating monthly fees', { clubId, year, memberCount: members.length });
+    logger.info(LOG_MESSAGES.PAYMENT.GENERATING_FEES, { clubId, year, memberCount: members.length });
 
     if (this.useMockData) {
       return this.mockGenerateMonthlyFees(clubId, members, feeSettings, year);
@@ -96,9 +98,9 @@ class PaymentService {
     try {
       const request: GenerateFeesRequest = { clubId, year };
       await apiService.post<void>('/payments/generate', request);
-      logger.info('Monthly fees generated', { clubId, year });
+      logger.info(LOG_MESSAGES.PAYMENT.FEES_GENERATED, { clubId, year });
     } catch (error) {
-      logger.error('Failed to generate monthly fees', error as Error, { clubId, year });
+      logger.error(LOG_MESSAGES.PAYMENT.GENERATE_FEES_FAILED, error as Error, { clubId, year });
       throw error;
     }
   }
@@ -117,10 +119,10 @@ class PaymentService {
 
     // Filter only approved and active members
     const eligibleMembers = members.filter(
-      (m) => m.approvalStatus === 'approved' && m.isActive
+      (m) => m.approvalStatus === ApprovalStatus.APPROVED && m.isActive
     );
 
-    logger.debug('Mock: Generating fees for eligible members', {
+    logger.debug(LOG_MESSAGES.PAYMENT.MOCK_GENERATING_FEES, {
       clubId,
       year,
       eligibleCount: eligibleMembers.length,
@@ -142,7 +144,7 @@ class PaymentService {
           const dueDate = new Date(year, month, 0); // 0 = last day of previous month, so month gives us last day of that month
 
           const newPayment: MemberPayment = {
-            id: `payment_${clubId}_${member.id}_${year}_${month}_${Date.now()}`,
+            id: `${ID_PREFIX.PAYMENT}_${clubId}_${member.id}_${year}_${month}_${Date.now()}`,
             userId: member.id,
             clubId,
             year,
@@ -160,11 +162,11 @@ class PaymentService {
     }
 
     await this.savePayments(payments);
-    logger.info('Mock: Monthly fees generated', { clubId, year, paymentsCreated: payments.length });
+    logger.info(LOG_MESSAGES.PAYMENT.MOCK_FEES_GENERATED, { clubId, year, paymentsCreated: payments.length });
   }
 
   async getClubPayments(clubId: string, year?: number): Promise<MemberPayment[]> {
-    logger.debug('Fetching club payments', { clubId, year });
+    logger.debug(LOG_MESSAGES.PAYMENT.FETCHING_CLUB_PAYMENTS, { clubId, year });
 
     if (this.useMockData) {
       return this.mockGetClubPayments(clubId, year);
@@ -175,10 +177,10 @@ class PaymentService {
         ? `/payments?clubId=${clubId}&year=${year}`
         : `/payments?clubId=${clubId}`;
       const payments = await apiService.get<MemberPayment[]>(url);
-      logger.debug('Club payments fetched', { clubId, year, count: payments.length });
+      logger.debug(LOG_MESSAGES.PAYMENT.CLUB_PAYMENTS_FETCHED, { clubId, year, count: payments.length });
       return payments;
     } catch (error) {
-      logger.error('Failed to fetch club payments', error as Error, { clubId, year });
+      logger.error(LOG_MESSAGES.PAYMENT.FETCH_CLUB_PAYMENTS_FAILED, error as Error, { clubId, year });
       throw error;
     }
   }
@@ -194,12 +196,12 @@ class PaymentService {
       return true;
     });
 
-    logger.debug('Mock: Club payments fetched', { clubId, year, count: filtered.length });
+    logger.debug(LOG_MESSAGES.PAYMENT.MOCK_CLUB_PAYMENTS_FETCHED, { clubId, year, count: filtered.length });
     return filtered;
   }
 
   async getMemberPayments(userId: string, clubId: string): Promise<MemberPayment[]> {
-    logger.debug('Fetching member payments', { userId, clubId });
+    logger.debug(LOG_MESSAGES.PAYMENT.FETCHING_MEMBER_PAYMENTS, { userId, clubId });
 
     if (this.useMockData) {
       return this.mockGetMemberPayments(userId, clubId);
@@ -209,10 +211,10 @@ class PaymentService {
       const payments = await apiService.get<MemberPayment[]>(
         `/payments/member/${userId}?clubId=${clubId}`
       );
-      logger.debug('Member payments fetched', { userId, clubId, count: payments.length });
+      logger.debug(LOG_MESSAGES.PAYMENT.MEMBER_PAYMENTS_FETCHED, { userId, clubId, count: payments.length });
       return payments;
     } catch (error) {
-      logger.error('Failed to fetch member payments', error as Error, { userId, clubId });
+      logger.error(LOG_MESSAGES.PAYMENT.FETCH_MEMBER_PAYMENTS_FAILED, error as Error, { userId, clubId });
       throw error;
     }
   }
@@ -224,7 +226,7 @@ class PaymentService {
     const payments = await this.getPayments();
     const filtered = payments.filter((p) => p.userId === userId && p.clubId === clubId);
 
-    logger.debug('Mock: Member payments fetched', { userId, clubId, count: filtered.length });
+    logger.debug(LOG_MESSAGES.PAYMENT.MOCK_MEMBER_PAYMENTS_FETCHED, { userId, clubId, count: filtered.length });
     return filtered;
   }
 
@@ -234,7 +236,7 @@ class PaymentService {
     paidDate?: string,
     notes?: string
   ): Promise<void> {
-    logger.info('Updating payment status', { paymentId, status });
+    logger.info(LOG_MESSAGES.PAYMENT.UPDATING_STATUS, { paymentId, status });
 
     if (this.useMockData) {
       return this.mockUpdatePaymentStatus(paymentId, status, paidDate, notes);
@@ -246,9 +248,9 @@ class PaymentService {
         paidDate,
         notes,
       });
-      logger.info('Payment status updated', { paymentId, status });
+      logger.info(LOG_MESSAGES.PAYMENT.STATUS_UPDATED, { paymentId, status });
     } catch (error) {
-      logger.error('Failed to update payment status', error as Error, { paymentId, status });
+      logger.error(LOG_MESSAGES.PAYMENT.STATUS_UPDATE_FAILED, error as Error, { paymentId, status });
       throw error;
     }
   }
@@ -272,9 +274,9 @@ class PaymentService {
       if (notes !== undefined) payment.notes = notes;
 
       await this.savePayments(payments);
-      logger.info('Mock: Payment status updated', { paymentId, status });
+      logger.info(LOG_MESSAGES.PAYMENT.MOCK_STATUS_UPDATED, { paymentId, status });
     } else {
-      logger.warn('Mock: Payment not found', { paymentId });
+      logger.warn(LOG_MESSAGES.PAYMENT.MOCK_PAYMENT_NOT_FOUND, { paymentId });
     }
   }
 
@@ -290,7 +292,7 @@ class PaymentService {
     appliedToUserIds: string[], // User IDs to apply charge to
     createdBy: string
   ): Promise<CustomCharge> {
-    logger.info('Creating custom charge', {
+    logger.info(LOG_MESSAGES.PAYMENT.CREATING_CUSTOM_CHARGE, {
       clubId,
       description,
       amount,
@@ -317,10 +319,10 @@ class PaymentService {
         appliedToUserIds,
       };
       const charge = await apiService.post<CustomCharge>('/charges/custom', request);
-      logger.info('Custom charge created', { chargeId: charge.id, clubId });
+      logger.info(LOG_MESSAGES.PAYMENT.CUSTOM_CHARGE_CREATED, { chargeId: charge.id, clubId });
       return charge;
     } catch (error) {
-      logger.error('Failed to create custom charge', error as Error, { clubId, description });
+      logger.error(LOG_MESSAGES.PAYMENT.CREATE_CUSTOM_CHARGE_FAILED, error as Error, { clubId, description });
       throw error;
     }
   }
@@ -340,7 +342,7 @@ class PaymentService {
     const now = new Date().toISOString();
 
     const newCharge: CustomCharge = {
-      id: `charge_${clubId}_${Date.now()}`,
+      id: `${ID_PREFIX.CHARGE}_${clubId}_${Date.now()}`,
       clubId,
       description,
       amount,
@@ -359,7 +361,7 @@ class PaymentService {
     // Create payment records for this charge
     await this.applyCustomChargeToMembers(newCharge, appliedToUserIds);
 
-    logger.info('Mock: Custom charge created', { chargeId: newCharge.id, clubId });
+    logger.info(LOG_MESSAGES.PAYMENT.MOCK_CUSTOM_CHARGE_CREATED, { chargeId: newCharge.id, clubId });
     return newCharge;
   }
 
@@ -374,7 +376,7 @@ class PaymentService {
     // Create payment record for each selected user
     for (const userId of userIds) {
       const newPayment: MemberPayment = {
-        id: `payment_${charge.id}_${userId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: `${ID_PREFIX.PAYMENT}_${charge.id}_${userId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         userId,
         clubId: charge.clubId,
         year: dueDate.getFullYear(),
@@ -397,7 +399,7 @@ class PaymentService {
   }
 
   async getClubCustomCharges(clubId: string): Promise<CustomCharge[]> {
-    logger.debug('Fetching club custom charges', { clubId });
+    logger.debug(LOG_MESSAGES.PAYMENT.FETCHING_CUSTOM_CHARGES, { clubId });
 
     if (this.useMockData) {
       return this.mockGetClubCustomCharges(clubId);
@@ -407,10 +409,10 @@ class PaymentService {
       const charges = await apiService.get<CustomCharge[]>(
         `/charges/custom?clubId=${clubId}`
       );
-      logger.debug('Club custom charges fetched', { clubId, count: charges.length });
+      logger.debug(LOG_MESSAGES.PAYMENT.CUSTOM_CHARGES_FETCHED, { clubId, count: charges.length });
       return charges;
     } catch (error) {
-      logger.error('Failed to fetch club custom charges', error as Error, { clubId });
+      logger.error(LOG_MESSAGES.PAYMENT.FETCH_CUSTOM_CHARGES_FAILED, error as Error, { clubId });
       throw error;
     }
   }
@@ -422,12 +424,12 @@ class PaymentService {
     const charges = await this.getCustomCharges();
     const filtered = charges.filter((c) => c.clubId === clubId && c.isActive);
 
-    logger.debug('Mock: Club custom charges fetched', { clubId, count: filtered.length });
+    logger.debug(LOG_MESSAGES.PAYMENT.MOCK_CUSTOM_CHARGES_FETCHED, { clubId, count: filtered.length });
     return filtered;
   }
 
   async deleteCustomCharge(chargeId: string): Promise<void> {
-    logger.info('Deleting custom charge', { chargeId });
+    logger.info(LOG_MESSAGES.PAYMENT.DELETING_CUSTOM_CHARGE, { chargeId });
 
     if (this.useMockData) {
       return this.mockDeleteCustomCharge(chargeId);
@@ -435,9 +437,9 @@ class PaymentService {
 
     try {
       await apiService.delete<void>(`/charges/custom/${chargeId}`);
-      logger.info('Custom charge deleted', { chargeId });
+      logger.info(LOG_MESSAGES.PAYMENT.CUSTOM_CHARGE_DELETED, { chargeId });
     } catch (error) {
-      logger.error('Failed to delete custom charge', error as Error, { chargeId });
+      logger.error(LOG_MESSAGES.PAYMENT.DELETE_CUSTOM_CHARGE_FAILED, error as Error, { chargeId });
       throw error;
     }
   }
@@ -452,9 +454,9 @@ class PaymentService {
     if (index !== -1) {
       charges[index].isActive = false;
       await this.saveCustomCharges(charges);
-      logger.info('Mock: Custom charge deleted', { chargeId });
+      logger.info(LOG_MESSAGES.PAYMENT.MOCK_CUSTOM_CHARGE_DELETED, { chargeId });
     } else {
-      logger.warn('Mock: Custom charge not found', { chargeId });
+      logger.warn(LOG_MESSAGES.PAYMENT.MOCK_CUSTOM_CHARGE_NOT_FOUND, { chargeId });
     }
   }
 
@@ -463,7 +465,7 @@ class PaymentService {
   // ============================================
 
   async getMemberBalance(userId: string, clubId: string): Promise<MemberBalance> {
-    logger.debug('Fetching member balance', { userId, clubId });
+    logger.debug(LOG_MESSAGES.PAYMENT.FETCHING_BALANCE, { userId, clubId });
 
     if (this.useMockData) {
       return this.mockGetMemberBalance(userId, clubId);
@@ -473,10 +475,10 @@ class PaymentService {
       const balance = await apiService.get<MemberBalance>(
         `/payments/balance/${userId}?clubId=${clubId}`
       );
-      logger.debug('Member balance fetched', { userId, clubId, balance: balance.balance });
+      logger.debug(LOG_MESSAGES.PAYMENT.BALANCE_FETCHED, { userId, clubId, balance: balance.balance });
       return balance;
     } catch (error) {
-      logger.error('Failed to fetch member balance', error as Error, { userId, clubId });
+      logger.error(LOG_MESSAGES.PAYMENT.FETCH_BALANCE_FAILED, error as Error, { userId, clubId });
       throw error;
     }
   }
@@ -524,7 +526,7 @@ class PaymentService {
       lastPaymentDate,
     };
 
-    logger.debug('Mock: Member balance fetched', {
+    logger.debug(LOG_MESSAGES.PAYMENT.MOCK_BALANCE_FETCHED, {
       userId,
       clubId,
       balance: balance.balance,
@@ -577,38 +579,40 @@ class PaymentService {
   // ============================================
 
   async getNotificationMessage(balance: MemberBalance, userName: string): Promise<string> {
+    const t = i18n.t.bind(i18n);
+    const locale = i18n.language === LANGUAGE.SPANISH ? LOCALE.SPANISH_MX : LOCALE.ENGLISH_US;
     const messages: string[] = [];
 
-    messages.push(`Hello ${userName},`);
-    messages.push(`\n📊 *Account Status:*`);
-    messages.push(`\n💰 Total Owed: $${balance.totalOwed.toFixed(2)}`);
-    messages.push(`✅ Total Paid: $${balance.totalPaid.toFixed(2)}`);
+    messages.push(t('services.notification.paymentReminder.greetingSimple', { userName }));
+    messages.push(t('services.notification.paymentReminder.accountStatusHeader'));
+    messages.push(t('services.notification.paymentReminder.totalOwed', { amount: balance.totalOwed.toFixed(2) }));
+    messages.push(t('services.notification.paymentReminder.totalPaid', { amount: balance.totalPaid.toFixed(2) }));
 
     const balanceAmount = Math.abs(balance.balance).toFixed(2);
     if (balance.balance < 0) {
-      messages.push(`\n📍 *Current Balance: $${balanceAmount} (owes)*`);
+      messages.push(t('services.notification.paymentReminder.currentBalanceOwes', { amount: balanceAmount }));
     } else if (balance.balance > 0) {
-      messages.push(`\n📍 Current Balance: $${balanceAmount} (credit)`);
+      messages.push(t('services.notification.paymentReminder.currentBalanceCredit', { amount: balanceAmount }));
     } else {
-      messages.push(`\n📍 Current Balance: $0.00 (paid up)`);
+      messages.push(t('services.notification.paymentReminder.currentBalancePaidUp'));
     }
 
     if (balance.overdueCharges > 0) {
-      messages.push(`\n⚠️ *Overdue Charges: $${balance.overdueCharges.toFixed(2)}*`);
-      messages.push(`\nPlease pay as soon as possible to avoid late fees.`);
+      messages.push(t('services.notification.paymentReminder.overdueCharges', { amount: balance.overdueCharges.toFixed(2) }));
+      messages.push(t('services.notification.paymentReminder.overdueWarningLateFees'));
     } else if (balance.pendingCharges > 0) {
-      messages.push(`\n⏳ Pending Charges: $${balance.pendingCharges.toFixed(2)}`);
+      messages.push(t('services.notification.paymentReminder.pendingCharges', { amount: balance.pendingCharges.toFixed(2) }));
     }
 
     if (balance.lastPaymentDate) {
       const lastPayment = new Date(balance.lastPaymentDate);
-      messages.push(`\n📅 Last Payment: ${lastPayment.toLocaleDateString('en-US')}`);
+      messages.push(t('services.notification.paymentReminder.lastPayment', { date: lastPayment.toLocaleDateString(locale) }));
     }
 
-    messages.push(`\n\nThank you for your participation in the club! 🙏`);
-    messages.push(`\n_Automated message from the fee management system_`);
+    messages.push(t('services.notification.paymentReminder.thankYou'));
+    messages.push(t('services.notification.paymentReminder.automatedMessageFull'));
 
-    return messages.join('');
+    return messages.join(EMPTY_VALUE);
   }
 
   // ============================================
@@ -617,10 +621,10 @@ class PaymentService {
 
   async clearAllPaymentData(): Promise<void> {
     try {
-      await AsyncStorage.removeItem(PAYMENTS_KEY);
-      await AsyncStorage.removeItem(CUSTOM_CHARGES_KEY);
+      await AsyncStorage.removeItem(storageKeys.PAYMENTS);
+      await AsyncStorage.removeItem(storageKeys.CUSTOM_CHARGES);
     } catch (error) {
-      console.error('Error clearing payment data:', error);
+      logger.error(LOG_MESSAGES.PAYMENT.ERROR_CLEARING_DATA, error as Error);
       throw error;
     }
   }

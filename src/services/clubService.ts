@@ -6,12 +6,11 @@
 import { apiService } from './api';
 import { environment } from '../config/environment';
 import { logger } from '../utils/logger';
-import { Club, MatchFrequency, User } from '../types';
+import { Club, MatchFrequency, User, ApprovalStatus } from '../types';
 import { mockClubs, getUsersByClub } from './mockData';
 import { NotFoundError } from '../utils/errors';
-
-// Constants
-const MOCK_API_DELAY_MS = 300;
+import { LOG_MESSAGES } from '../shared/constants/logMessages';
+import { TIMING } from '../shared/constants/timing';
 
 interface CreateClubData {
   name: string;
@@ -31,7 +30,7 @@ class ClubService {
    * Get all clubs
    */
   async getAllClubs(): Promise<Club[]> {
-    logger.debug('Fetching all clubs');
+    logger.debug(LOG_MESSAGES.CLUB.FETCHING_ALL);
 
     if (this.useMockData) {
       return this.mockGetAllClubs();
@@ -39,10 +38,10 @@ class ClubService {
 
     try {
       const clubs = await apiService.get<Club[]>('/clubs');
-      logger.debug('Clubs fetched', { count: clubs.length });
+      logger.debug(LOG_MESSAGES.CLUB.FETCHED_ALL, { count: clubs.length });
       return clubs;
     } catch (error) {
-      logger.error('Failed to fetch clubs', error as Error);
+      logger.error(LOG_MESSAGES.CLUB.FETCH_FAILED, error as Error);
       throw error;
     }
   }
@@ -51,7 +50,7 @@ class ClubService {
    * Mock get all clubs implementation
    */
   private async mockGetAllClubs(): Promise<Club[]> {
-    logger.debug('Mock: Getting all clubs', { count: mockClubs.length });
+    logger.debug(LOG_MESSAGES.CLUB.MOCK_GETTING_ALL, { count: mockClubs.length });
     return [...mockClubs];
   }
 
@@ -59,7 +58,7 @@ class ClubService {
    * Get club by ID
    */
   async getClub(clubId: string): Promise<Club> {
-    logger.debug('Fetching club', { clubId });
+    logger.debug(LOG_MESSAGES.CLUB.FETCHING_ONE, { clubId });
 
     if (this.useMockData) {
       return this.mockGetClub(clubId);
@@ -67,10 +66,10 @@ class ClubService {
 
     try {
       const club = await apiService.get<Club>(`/clubs/${clubId}`);
-      logger.debug('Club fetched', { clubId: club.id });
+      logger.debug(LOG_MESSAGES.CLUB.FETCHED_ONE, { clubId: club.id });
       return club;
     } catch (error) {
-      logger.error('Failed to fetch club', error as Error, { clubId });
+      logger.error(LOG_MESSAGES.CLUB.FETCH_ONE_FAILED, error as Error, { clubId });
       throw error;
     }
   }
@@ -88,16 +87,16 @@ class ClubService {
   private async mockGetClub(clubId: string): Promise<Club> {
     const club = mockClubs.find((c) => c.id === clubId);
     if (!club) {
-      logger.warn('Mock: Club not found', { clubId });
-      throw new NotFoundError('Club not found');
+      logger.warn(LOG_MESSAGES.CLUB.MOCK_NOT_FOUND, { clubId });
+      throw new NotFoundError(LOG_MESSAGES.CLUB.NOT_FOUND);
     }
 
     // Only count approved members in memberCount
     const approvedMembers = getUsersByClub(clubId).filter(
-      (u) => u.approvalStatus === 'approved'
+      (u) => u.approvalStatus === ApprovalStatus.APPROVED
     );
 
-    logger.debug('Mock: Club fetched', { clubId, memberCount: approvedMembers.length });
+    logger.debug(LOG_MESSAGES.CLUB.MOCK_FETCHED, { clubId, memberCount: approvedMembers.length });
     return { ...club, memberCount: approvedMembers.length };
   }
 
@@ -125,7 +124,7 @@ class ClubService {
       division,
     };
 
-    logger.info('Creating club', { name, church });
+    logger.info(LOG_MESSAGES.CLUB.CREATING, { name, church });
 
     if (this.useMockData) {
       return this.mockCreateClub(clubData);
@@ -133,10 +132,10 @@ class ClubService {
 
     try {
       const newClub = await apiService.post<Club>('/clubs', clubData);
-      logger.info('Club created', { clubId: newClub.id, name: newClub.name });
+      logger.info(LOG_MESSAGES.CLUB.CREATED, { clubId: newClub.id, name: newClub.name });
       return newClub;
     } catch (error) {
-      logger.error('Failed to create club', error as Error, { name });
+      logger.error(LOG_MESSAGES.CLUB.CREATE_FAILED, error as Error, { name });
       throw error;
     }
   }
@@ -145,7 +144,7 @@ class ClubService {
    * Mock create club implementation
    */
   private async mockCreateClub(data: CreateClubData): Promise<Club> {
-    await this.sleep(500); // Longer delay for create operations
+    await this.sleep(TIMING.MOCK_API.NORMAL); // Longer delay for create operations
 
     const newClub: Club = {
       id: String(mockClubs.length + 1),
@@ -158,7 +157,7 @@ class ClubService {
     };
 
     mockClubs.push(newClub);
-    logger.info('Mock: Club created', { clubId: newClub.id, name: newClub.name });
+    logger.info(LOG_MESSAGES.CLUB.MOCK_CREATED, { clubId: newClub.id, name: newClub.name });
     return newClub;
   }
 
@@ -166,7 +165,7 @@ class ClubService {
    * Update club
    */
   async updateClub(clubId: string, data: Partial<Club>): Promise<Club> {
-    logger.info('Updating club', { clubId, fields: Object.keys(data) });
+    logger.info(LOG_MESSAGES.CLUB.UPDATING, { clubId, fields: Object.keys(data) });
 
     if (this.useMockData) {
       return this.mockUpdateClub(clubId, data);
@@ -174,10 +173,10 @@ class ClubService {
 
     try {
       const updatedClub = await apiService.patch<Club>(`/clubs/${clubId}`, data);
-      logger.info('Club updated', { clubId: updatedClub.id });
+      logger.info(LOG_MESSAGES.CLUB.UPDATED, { clubId: updatedClub.id });
       return updatedClub;
     } catch (error) {
-      logger.error('Failed to update club', error as Error, { clubId });
+      logger.error(LOG_MESSAGES.CLUB.UPDATE_FAILED, error as Error, { clubId });
       throw error;
     }
   }
@@ -186,12 +185,12 @@ class ClubService {
    * Mock update club implementation
    */
   private async mockUpdateClub(clubId: string, data: Partial<Club>): Promise<Club> {
-    await this.sleep(MOCK_API_DELAY_MS);
+    await this.sleep(TIMING.MOCK_API.FAST);
 
     const clubIndex = mockClubs.findIndex((c) => c.id === clubId);
     if (clubIndex === -1) {
-      logger.warn('Mock: Club not found for update', { clubId });
-      throw new NotFoundError('Club not found');
+      logger.warn(LOG_MESSAGES.CLUB.MOCK_NOT_FOUND_UPDATE, { clubId });
+      throw new NotFoundError(LOG_MESSAGES.CLUB.NOT_FOUND);
     }
 
     mockClubs[clubIndex] = {
@@ -200,7 +199,7 @@ class ClubService {
       updatedAt: new Date().toISOString(),
     };
 
-    logger.info('Mock: Club updated', { clubId });
+    logger.info(LOG_MESSAGES.CLUB.MOCK_UPDATED, { clubId });
     return mockClubs[clubIndex];
   }
 
@@ -208,7 +207,7 @@ class ClubService {
    * Delete club
    */
   async deleteClub(clubId: string): Promise<void> {
-    logger.info('Deleting club', { clubId });
+    logger.info(LOG_MESSAGES.CLUB.DELETING, { clubId });
 
     if (this.useMockData) {
       return this.mockDeleteClub(clubId);
@@ -216,9 +215,9 @@ class ClubService {
 
     try {
       await apiService.delete<void>(`/clubs/${clubId}`);
-      logger.info('Club deleted', { clubId });
+      logger.info(LOG_MESSAGES.CLUB.DELETED, { clubId });
     } catch (error) {
-      logger.error('Failed to delete club', error as Error, { clubId });
+      logger.error(LOG_MESSAGES.CLUB.DELETE_FAILED, error as Error, { clubId });
       throw error;
     }
   }
@@ -227,14 +226,14 @@ class ClubService {
    * Mock delete club implementation
    */
   private async mockDeleteClub(clubId: string): Promise<void> {
-    await this.sleep(MOCK_API_DELAY_MS);
+    await this.sleep(TIMING.MOCK_API.FAST);
 
     const clubIndex = mockClubs.findIndex((c) => c.id === clubId);
     if (clubIndex !== -1) {
       mockClubs.splice(clubIndex, 1);
-      logger.info('Mock: Club deleted', { clubId });
+      logger.info(LOG_MESSAGES.CLUB.MOCK_DELETED, { clubId });
     } else {
-      logger.warn('Mock: Club not found for deletion', { clubId });
+      logger.warn(LOG_MESSAGES.CLUB.MOCK_NOT_FOUND_DELETE, { clubId });
     }
   }
 
@@ -242,7 +241,7 @@ class ClubService {
    * Join a club
    */
   async joinClub(clubId: string): Promise<void> {
-    logger.info('Joining club', { clubId });
+    logger.info(LOG_MESSAGES.CLUB.JOINING, { clubId });
 
     if (this.useMockData) {
       return this.mockJoinClub(clubId);
@@ -250,9 +249,9 @@ class ClubService {
 
     try {
       await apiService.post<void>(`/clubs/${clubId}/join`, {});
-      logger.info('Joined club', { clubId });
+      logger.info(LOG_MESSAGES.CLUB.JOINED, { clubId });
     } catch (error) {
-      logger.error('Failed to join club', error as Error, { clubId });
+      logger.error(LOG_MESSAGES.CLUB.JOIN_FAILED, error as Error, { clubId });
       throw error;
     }
   }
@@ -261,16 +260,16 @@ class ClubService {
    * Mock join club implementation
    */
   private async mockJoinClub(clubId: string): Promise<void> {
-    await this.sleep(MOCK_API_DELAY_MS);
+    await this.sleep(TIMING.MOCK_API.FAST);
     // This would update the user's clubId in a real scenario
-    logger.info('Mock: Joined club', { clubId });
+    logger.info(LOG_MESSAGES.CLUB.MOCK_JOINED, { clubId });
   }
 
   /**
    * Leave a club
    */
   async leaveClub(clubId: string): Promise<void> {
-    logger.info('Leaving club', { clubId });
+    logger.info(LOG_MESSAGES.CLUB.LEAVING, { clubId });
 
     if (this.useMockData) {
       return this.mockLeaveClub(clubId);
@@ -278,9 +277,9 @@ class ClubService {
 
     try {
       await apiService.post<void>(`/clubs/${clubId}/leave`, {});
-      logger.info('Left club', { clubId });
+      logger.info(LOG_MESSAGES.CLUB.LEFT, { clubId });
     } catch (error) {
-      logger.error('Failed to leave club', error as Error, { clubId });
+      logger.error(LOG_MESSAGES.CLUB.LEAVE_FAILED, error as Error, { clubId });
       throw error;
     }
   }
@@ -289,15 +288,15 @@ class ClubService {
    * Mock leave club implementation
    */
   private async mockLeaveClub(clubId: string): Promise<void> {
-    await this.sleep(MOCK_API_DELAY_MS);
-    logger.info('Mock: Left club', { clubId });
+    await this.sleep(TIMING.MOCK_API.FAST);
+    logger.info(LOG_MESSAGES.CLUB.MOCK_LEFT, { clubId });
   }
 
   /**
    * Get club members
    */
   async getClubMembers(clubId: string): Promise<User[]> {
-    logger.debug('Fetching club members', { clubId });
+    logger.debug(LOG_MESSAGES.CLUB.FETCHING_MEMBERS, { clubId });
 
     if (this.useMockData) {
       return this.mockGetClubMembers(clubId);
@@ -305,10 +304,10 @@ class ClubService {
 
     try {
       const members = await apiService.get<User[]>(`/clubs/${clubId}/members`);
-      logger.debug('Club members fetched', { clubId, count: members.length });
+      logger.debug(LOG_MESSAGES.CLUB.FETCHED_MEMBERS, { clubId, count: members.length });
       return members;
     } catch (error) {
-      logger.error('Failed to fetch club members', error as Error, { clubId });
+      logger.error(LOG_MESSAGES.CLUB.FETCH_MEMBERS_FAILED, error as Error, { clubId });
       throw error;
     }
   }
@@ -318,7 +317,7 @@ class ClubService {
    */
   private async mockGetClubMembers(clubId: string): Promise<User[]> {
     const members = getUsersByClub(clubId);
-    logger.debug('Mock: Club members fetched', { clubId, count: members.length });
+    logger.debug(LOG_MESSAGES.CLUB.MOCK_FETCHED_MEMBERS, { clubId, count: members.length });
     return members;
   }
 
