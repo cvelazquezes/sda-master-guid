@@ -8,10 +8,11 @@ import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { designTokens } from '../theme/designTokens';
 import { statusColors, roleColors } from '../theme/sdaColors';
-import { mobileFontSizes } from '../theme';
+import { mobileFontSizes, layoutConstants } from '../theme';
+import { TEXT_LINES, COMPONENT_VARIANT, COMPONENT_SIZE, A11Y_ROLE } from '../constants';
 
-type BadgeVariant = 'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'error' | 'info' | 'neutral';
-type BadgeSize = 'sm' | 'md' | 'lg';
+type BadgeVariant = typeof COMPONENT_VARIANT.primary | typeof COMPONENT_VARIANT.secondary | typeof COMPONENT_VARIANT.accent | typeof COMPONENT_VARIANT.success | typeof COMPONENT_VARIANT.warning | typeof COMPONENT_VARIANT.error | typeof COMPONENT_VARIANT.info | typeof COMPONENT_VARIANT.neutral;
+type BadgeSize = typeof COMPONENT_SIZE.sm | typeof COMPONENT_SIZE.md | typeof COMPONENT_SIZE.lg;
 type StatusType = keyof typeof statusColors;
 type RoleType = keyof typeof roleColors;
 
@@ -39,8 +40,8 @@ interface BadgeProps {
 export const Badge: React.FC<BadgeProps> = ({
   label,
   icon,
-  variant = 'neutral',
-  size = 'md',
+  variant = COMPONENT_VARIANT.neutral,
+  size = COMPONENT_SIZE.md,
   status,
   role,
   backgroundColor,
@@ -69,43 +70,43 @@ export const Badge: React.FC<BadgeProps> = ({
     
     // Variant-based colors
     switch (variant) {
-      case 'primary':
+      case COMPONENT_VARIANT.primary:
         return {
           bg: designTokens.colors.primaryLight,
           text: designTokens.colors.primary,
           border: designTokens.colors.primary,
         };
-      case 'secondary':
+      case COMPONENT_VARIANT.secondary:
         return {
           bg: designTokens.colors.secondaryLight,
           text: designTokens.colors.secondary,
           border: designTokens.colors.secondary,
         };
-      case 'accent':
+      case COMPONENT_VARIANT.accent:
         return {
           bg: designTokens.colors.accentLight,
           text: designTokens.colors.accent,
           border: designTokens.colors.accent,
         };
-      case 'success':
+      case COMPONENT_VARIANT.success:
         return {
           bg: designTokens.colors.successLight,
           text: designTokens.colors.success,
           border: designTokens.colors.success,
         };
-      case 'warning':
+      case COMPONENT_VARIANT.warning:
         return {
           bg: designTokens.colors.warningLight,
           text: designTokens.colors.warning,
           border: designTokens.colors.warning,
         };
-      case 'error':
+      case COMPONENT_VARIANT.error:
         return {
           bg: designTokens.colors.errorLight,
           text: designTokens.colors.error,
           border: designTokens.colors.error,
         };
-      case 'info':
+      case COMPONENT_VARIANT.info:
         return {
           bg: designTokens.colors.infoLight,
           text: designTokens.colors.info,
@@ -129,41 +130,41 @@ export const Badge: React.FC<BadgeProps> = ({
   // Size-based styles
   const getSizeStyles = (): { container: ViewStyle; text: TextStyle; iconSize: number } => {
     switch (size) {
-      case 'sm':
+      case COMPONENT_SIZE.sm:
         return {
           container: {
-            paddingVertical: 2,
-            paddingHorizontal: 6,
+            paddingVertical: designTokens.spacing.xxs,
+            paddingHorizontal: designTokens.spacing.sm,
           },
           text: {
             fontSize: mobileFontSizes.xs,
-            lineHeight: 14,
+            lineHeight: designTokens.lineHeights.caption,
           },
-          iconSize: 10,
+          iconSize: designTokens.iconSize.xs,
         };
-      case 'lg':
+      case COMPONENT_SIZE.lg:
         return {
           container: {
-            paddingVertical: 6,
-            paddingHorizontal: 12,
+            paddingVertical: designTokens.spacing.sm,
+            paddingHorizontal: designTokens.spacing.md,
           },
           text: {
             fontSize: mobileFontSizes.xs,
-            lineHeight: 18,
+            lineHeight: designTokens.lineHeights.body,
           },
-          iconSize: 14,
+          iconSize: designTokens.iconSize.sm,
         };
       default:
         return {
           container: {
-            paddingVertical: 4,
-            paddingHorizontal: 8,
+            paddingVertical: designTokens.spacing.xs,
+            paddingHorizontal: designTokens.spacing.sm,
           },
           text: {
             fontSize: mobileFontSizes.xs,
-            lineHeight: 16,
+            lineHeight: designTokens.lineHeights.captionLarge,
           },
-          iconSize: 12,
+          iconSize: designTokens.iconSize.xs,
         };
     }
   };
@@ -183,7 +184,7 @@ export const Badge: React.FC<BadgeProps> = ({
       ]}
       testID={testID}
       accessible={true}
-      accessibilityRole="text"
+      accessibilityRole={A11Y_ROLE.TEXT}
       accessibilityLabel={label}
     >
       {icon && (
@@ -200,7 +201,7 @@ export const Badge: React.FC<BadgeProps> = ({
           sizeStyles.text,
           { color: finalTextColor },
         ]}
-        numberOfLines={1}
+        numberOfLines={TEXT_LINES.single}
       >
         {label}
       </Text>
@@ -210,14 +211,14 @@ export const Badge: React.FC<BadgeProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    alignSelf: layoutConstants.alignSelf.flexStart,
     borderRadius: designTokens.badge.borderRadius,
-    borderWidth: 0,
+    borderWidth: designTokens.borderWidth.none,
   },
   icon: {
-    marginRight: 4,
+    marginRight: designTokens.spacing.xs,
   },
   text: {
     fontWeight: designTokens.badge.fontWeight,

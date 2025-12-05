@@ -8,8 +8,9 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
-import { designTokens } from '../theme/designTokens';
-import { mobileTypography, mobileFontSizes } from '../theme/mobileTypography';
+import { mobileTypography, mobileFontSizes, designTokens, layoutConstants } from '../theme';
+import { A11Y_ROLE, ICONS, TOUCH_OPACITY, TEXT_LINES } from '../constants';
+import { flexValues } from '../constants/layoutConstants';
 
 interface MenuCardProps {
   title: string;
@@ -43,18 +44,18 @@ export const MenuCard: React.FC<MenuCardProps> = ({
         styles.container, 
         { 
           backgroundColor: colors.surface,
-          shadowColor: '#000',
-          shadowOpacity: isDark ? 0.4 : 0.2,
-          elevation: isDark ? 8 : 5,
+          shadowColor: designTokens.colors.black,
+          shadowOpacity: isDark ? designTokens.shadowConfig.dark.opacity : designTokens.shadowConfig.light.opacity,
+          elevation: isDark ? designTokens.shadowConfig.dark.elevation : designTokens.shadowConfig.light.elevation,
         },
         style
       ]}
       onPress={onPress}
       disabled={disabled}
-      activeOpacity={0.7}
+      activeOpacity={TOUCH_OPACITY.default}
       testID={testID}
       accessible={true}
-      accessibilityRole="button"
+      accessibilityRole={A11Y_ROLE.BUTTON}
       accessibilityLabel={title}
       accessibilityHint={description}
       accessibilityState={{ disabled }}
@@ -71,7 +72,7 @@ export const MenuCard: React.FC<MenuCardProps> = ({
       {/* Content */}
       <View style={styles.content}>
         <View style={styles.titleRow}>
-          <Text style={[styles.title, { color: colors.textPrimary }]} numberOfLines={1}>
+          <Text style={[styles.title, { color: colors.textPrimary }]} numberOfLines={TEXT_LINES.single}>
             {title}
           </Text>
           {badge !== undefined && (
@@ -80,14 +81,14 @@ export const MenuCard: React.FC<MenuCardProps> = ({
             </View>
           )}
         </View>
-        <Text style={[styles.description, { color: colors.textSecondary }]} numberOfLines={2}>
+        <Text style={[styles.description, { color: colors.textSecondary }]} numberOfLines={TEXT_LINES.double}>
           {description}
         </Text>
       </View>
 
       {/* Chevron */}
       <MaterialCommunityIcons
-        name="chevron-right"
+        name={ICONS.CHEVRON_RIGHT}
         size={designTokens.icon.sizes.lg}
         color={colors.textTertiary}
         style={styles.chevron}
@@ -98,57 +99,57 @@ export const MenuCard: React.FC<MenuCardProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     padding: designTokens.spacing.lg,
     borderRadius: designTokens.borderRadius.lg,
     marginBottom: designTokens.spacing.lg,
     // Shadow properties are applied via inline styles for theme-awareness
-    shadowOffset: { width: 0, height: 3 },
-    shadowRadius: 10,
+    shadowOffset: { width: 0, height: designTokens.spacing.xxs + 1 },
+    shadowRadius: designTokens.shadows.lg.shadowRadius,
   },
   iconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: designTokens.componentSizes.iconContainer['2xl'],
+    height: designTokens.componentSizes.iconContainer['2xl'],
+    borderRadius: designTokens.borderRadius['5xl'],
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
     marginRight: designTokens.spacing.lg,
-    flexShrink: 0,
+    flexShrink: flexValues.shrinkDisabled,
   },
   content: {
-    flex: 1,
+    flex: flexValues.one,
     marginRight: designTokens.spacing.sm,
   },
   titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     gap: designTokens.spacing.sm,
-    marginBottom: 4,
+    marginBottom: designTokens.spacing.xs,
   },
   title: {
     ...mobileTypography.heading4,
-    flex: 1,
+    flex: flexValues.one,
   },
   description: {
     ...mobileTypography.bodySmall,
   },
   badge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: designTokens.spacing.sm,
+    paddingVertical: designTokens.spacing.xs,
     borderRadius: designTokens.borderRadius.full,
-    minWidth: 24,
-    height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
+    minWidth: designTokens.spacing.xxl,
+    height: designTokens.componentSizes.tabBarIndicator.lg,
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
   },
   badgeText: {
     ...mobileTypography.captionBold,
-    color: '#fff',
+    color: designTokens.colors.white,
     fontSize: mobileFontSizes.xs,
   },
   chevron: {
-    flexShrink: 0,
+    flexShrink: flexValues.shrinkDisabled,
   },
 });
 

@@ -10,7 +10,10 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { mobileTypography } from '../theme/mobileTypography';
 import { designTokens } from '../theme/designTokens';
+import { layoutConstants } from '../theme';
 import { StandardButton } from './StandardButton';
+import { flexValues, dimensionValues } from '../constants/layoutConstants';
+import { COMPONENT_VARIANT, COMPONENT_SIZE, A11Y_ROLE, ICONS } from '../constants';
 
 export interface EmptyStateProps {
   // Content
@@ -35,7 +38,7 @@ export interface EmptyStateProps {
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
-  icon = 'inbox-outline',
+  icon = ICONS.INBOX_OUTLINE,
   title,
   description,
   message,
@@ -58,7 +61,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       testID={testID}
       accessible={true}
       accessibilityLabel={`${title}${displayDescription ? `. ${displayDescription}` : ''}`}
-      accessibilityRole="text"
+      accessibilityRole={A11Y_ROLE.TEXT}
     >
       {/* Icon */}
       <View style={styles.iconContainer}>
@@ -89,8 +92,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
             title={actionLabel}
             onPress={onAction}
             icon={actionIcon}
-            variant="primary"
-            size="medium"
+            variant={COMPONENT_VARIANT.primary}
+            size={COMPONENT_SIZE.md}
           />
         </View>
       )}
@@ -100,25 +103,25 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    flex: flexValues.one,
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
     padding: designTokens.spacing.xxl,
     borderRadius: designTokens.borderRadius.lg,
   },
   iconContainer: {
     marginBottom: designTokens.spacing.lg,
-    opacity: 0.6,
+    opacity: designTokens.opacity.high,
   },
   title: {
     ...mobileTypography.heading3,
-    textAlign: 'center',
+    textAlign: layoutConstants.textAlign.center,
     marginBottom: designTokens.spacing.sm,
   },
   description: {
     ...mobileTypography.bodySmall,
-    textAlign: 'center',
-    maxWidth: 300,
+    textAlign: layoutConstants.textAlign.center,
+    maxWidth: dimensionValues.maxWidth.message,
     marginBottom: designTokens.spacing.lg,
   },
   actionContainer: {

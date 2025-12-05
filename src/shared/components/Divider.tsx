@@ -6,8 +6,10 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { designTokens } from '../theme/designTokens';
+import { dimensionValues } from '../constants/layoutConstants';
+import { ORIENTATION, SPACING_KEY } from '../constants';
 
-type DividerOrientation = 'horizontal' | 'vertical';
+type DividerOrientation = typeof ORIENTATION.HORIZONTAL | typeof ORIENTATION.VERTICAL;
 
 interface DividerProps {
   orientation?: DividerOrientation;
@@ -19,8 +21,8 @@ interface DividerProps {
 }
 
 export const Divider: React.FC<DividerProps> = ({
-  orientation = 'horizontal',
-  spacing = 'md',
+  orientation = ORIENTATION.HORIZONTAL,
+  spacing = SPACING_KEY.MD,
   color = designTokens.divider.color,
   thickness = designTokens.divider.thickness,
   style,
@@ -28,16 +30,16 @@ export const Divider: React.FC<DividerProps> = ({
 }) => {
   const spacingValue = designTokens.spacing[spacing];
 
-  const dividerStyle: ViewStyle = orientation === 'horizontal'
+  const dividerStyle: ViewStyle = orientation === ORIENTATION.HORIZONTAL
     ? {
         height: thickness,
-        width: '100%',
+        width: dimensionValues.width.full,
         marginVertical: spacingValue,
         backgroundColor: color,
       }
     : {
         width: thickness,
-        height: '100%',
+        height: dimensionValues.width.full,
         marginHorizontal: spacingValue,
         backgroundColor: color,
       };

@@ -7,9 +7,11 @@
 import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
-import { designTokens } from '../theme/designTokens';
-import { mobileTypography } from '../theme/mobileTypography';
+import { mobileTypography, designTokens, layoutConstants } from '../theme';
+import { A11Y_ROLE, ICONS, EMPTY_VALUE } from '../constants';
+import { flexValues } from '../constants/layoutConstants';
 
 interface SearchBarProps {
   value: string;
@@ -24,42 +26,44 @@ interface SearchBarProps {
 export const SearchBar: React.FC<SearchBarProps> = ({
   value,
   onChangeText,
-  placeholder = 'Search...',
+  placeholder,
   onFilterPress,
   filterActive = false,
   style,
   testID,
 }) => {
+  const { t } = useTranslation();
   const { colors } = useTheme();
+  const displayPlaceholder = placeholder || t('placeholders.search');
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background, borderBottomColor: colors.border }, style]} testID={testID}>
       {/* Search Input */}
       <View style={[styles.searchContainer, { backgroundColor: colors.surfaceLight }]}>
         <MaterialCommunityIcons
-          name="magnify"
+          name={ICONS.MAGNIFY}
           size={designTokens.icon.sizes.md}
           color={colors.textTertiary}
         />
         <TextInput
           style={[styles.searchInput, { color: colors.textPrimary }]}
-          placeholder={placeholder}
+          placeholder={displayPlaceholder}
           value={value}
           onChangeText={onChangeText}
           placeholderTextColor={colors.textTertiary}
           accessible={true}
-          accessibilityLabel="Search input"
-          accessibilityHint={placeholder}
+          accessibilityLabel={t('accessibility.search')}
+          accessibilityHint={displayPlaceholder}
         />
         {value.length > 0 && (
           <TouchableOpacity
-            onPress={() => onChangeText('')}
+            onPress={() => onChangeText(EMPTY_VALUE)}
             accessible={true}
-            accessibilityRole="button"
-            accessibilityLabel="Clear search"
+            accessibilityRole={A11Y_ROLE.BUTTON}
+            accessibilityLabel={t('placeholders.search')}
           >
             <MaterialCommunityIcons
-              name="close-circle"
+              name={ICONS.CLOSE_CIRCLE}
               size={designTokens.icon.sizes.md}
               color={colors.textTertiary}
             />
@@ -73,16 +77,16 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           style={[styles.filterButton, { backgroundColor: colors.primaryAlpha10 }]}
           onPress={onFilterPress}
           accessible={true}
-          accessibilityRole="button"
-          accessibilityLabel="Open filters"
+          accessibilityRole={A11Y_ROLE.BUTTON}
+          accessibilityLabel={t('accessibility.filter')}
           accessibilityState={{ selected: filterActive }}
         >
           <MaterialCommunityIcons
-            name="filter-variant"
+            name={ICONS.FILTER_VARIANT}
             size={designTokens.icon.sizes.md}
             color={colors.primary}
           />
-          <Text style={[styles.filterButtonText, { color: colors.primary }]}>Filters</Text>
+          <Text style={[styles.filterButtonText, { color: colors.primary }]}>{t('accessibility.filter')}</Text>
           {filterActive && <View style={[styles.filterBadge, { backgroundColor: colors.error }]} />}
         </TouchableOpacity>
       )}
@@ -92,43 +96,43 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
+    flexDirection: layoutConstants.flexDirection.row,
     padding: designTokens.spacing.lg,
     gap: designTokens.spacing.md,
     borderBottomWidth: designTokens.borderWidth.thin,
   },
   searchContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flex: flexValues.one,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     borderRadius: designTokens.borderRadius.lg,
     paddingHorizontal: designTokens.spacing.md,
     height: designTokens.touchTarget.comfortable,
     gap: designTokens.spacing.sm,
   },
   searchInput: {
-    flex: 1,
+    flex: flexValues.one,
     ...mobileTypography.bodyLarge,
   },
   filterButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
     borderRadius: designTokens.borderRadius.lg,
     paddingHorizontal: designTokens.spacing.lg,
     height: designTokens.touchTarget.comfortable,
-    gap: 6,
-    position: 'relative',
+    gap: designTokens.spacing.sm,
+    position: layoutConstants.position.relative,
   },
   filterButtonText: {
     ...mobileTypography.labelBold,
   },
   filterBadge: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 8,
-    height: 8,
+    position: layoutConstants.position.absolute,
+    top: designTokens.spacing.sm,
+    right: designTokens.spacing.sm,
+    width: designTokens.componentSizes.indicator.sm,
+    height: designTokens.componentSizes.indicator.sm,
     borderRadius: designTokens.borderRadius.xs,
   },
 });

@@ -7,11 +7,12 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, View, ViewStyle, TextStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { designTokens } from '../theme/designTokens';
-import { mobileTypography } from '../theme';
+import { mobileTypography, designTokens, layoutConstants } from '../theme';
+import { A11Y_ROLE, TOUCH_OPACITY, dimensionValues, ACTIVITY_INDICATOR_SIZE, COMPONENT_VARIANT, BUTTON_SIZE, ICON_POSITION } from '../constants';
 
-type ButtonVariant = 'primary' | 'secondary' | 'accent' | 'danger' | 'outline' | 'ghost';
-type ButtonSize = 'small' | 'medium' | 'large';
+type ButtonVariant = typeof COMPONENT_VARIANT.primary | typeof COMPONENT_VARIANT.secondary | typeof COMPONENT_VARIANT.accent | typeof COMPONENT_VARIANT.danger | typeof COMPONENT_VARIANT.outline | typeof COMPONENT_VARIANT.ghost;
+type ButtonSize = typeof BUTTON_SIZE.small | typeof BUTTON_SIZE.medium | typeof BUTTON_SIZE.large;
+type IconPosition = typeof ICON_POSITION.LEFT | typeof ICON_POSITION.RIGHT;
 
 interface StandardButtonProps {
   title: string;
@@ -21,7 +22,7 @@ interface StandardButtonProps {
   disabled?: boolean;
   loading?: boolean;
   icon?: string;
-  iconPosition?: 'left' | 'right';
+  iconPosition?: IconPosition;
   fullWidth?: boolean;
   testID?: string;
   accessibilityLabel?: string;
@@ -31,12 +32,12 @@ interface StandardButtonProps {
 export const StandardButton: React.FC<StandardButtonProps> = ({
   title,
   onPress,
-  variant = 'primary',
-  size = 'medium',
+  variant = COMPONENT_VARIANT.primary,
+  size = BUTTON_SIZE.medium,
   disabled = false,
   loading = false,
   icon,
-  iconPosition = 'left',
+  iconPosition = ICON_POSITION.LEFT,
   fullWidth = false,
   testID,
   accessibilityLabel,
@@ -49,10 +50,10 @@ export const StandardButton: React.FC<StandardButtonProps> = ({
     
     // Size styles
     switch (size) {
-      case 'small':
+      case BUTTON_SIZE.small:
         baseStyle.push(styles.buttonSmall);
         break;
-      case 'large':
+      case BUTTON_SIZE.large:
         baseStyle.push(styles.buttonLarge);
         break;
       default:
@@ -61,22 +62,22 @@ export const StandardButton: React.FC<StandardButtonProps> = ({
 
     // Variant styles
     switch (variant) {
-      case 'primary':
+      case COMPONENT_VARIANT.primary:
         baseStyle.push(styles.buttonPrimary);
         break;
-      case 'secondary':
+      case COMPONENT_VARIANT.secondary:
         baseStyle.push(styles.buttonSecondary);
         break;
-      case 'accent':
+      case COMPONENT_VARIANT.accent:
         baseStyle.push(styles.buttonAccent);
         break;
-      case 'danger':
+      case COMPONENT_VARIANT.danger:
         baseStyle.push(styles.buttonDanger);
         break;
-      case 'outline':
+      case COMPONENT_VARIANT.outline:
         baseStyle.push(styles.buttonOutline);
         break;
-      case 'ghost':
+      case COMPONENT_VARIANT.ghost:
         baseStyle.push(styles.buttonGhost);
         break;
     }
@@ -99,10 +100,10 @@ export const StandardButton: React.FC<StandardButtonProps> = ({
 
     // Size text styles
     switch (size) {
-      case 'small':
+      case BUTTON_SIZE.small:
         baseStyle.push(styles.buttonTextSmall);
         break;
-      case 'large':
+      case BUTTON_SIZE.large:
         baseStyle.push(styles.buttonTextLarge);
         break;
       default:
@@ -111,16 +112,16 @@ export const StandardButton: React.FC<StandardButtonProps> = ({
 
     // Variant text styles
     switch (variant) {
-      case 'primary':
-      case 'secondary':
-      case 'danger':
+      case COMPONENT_VARIANT.primary:
+      case COMPONENT_VARIANT.secondary:
+      case COMPONENT_VARIANT.danger:
         baseStyle.push(styles.buttonTextLight);
         break;
-      case 'accent':
+      case COMPONENT_VARIANT.accent:
         baseStyle.push(styles.buttonTextDark);
         break;
-      case 'outline':
-      case 'ghost':
+      case COMPONENT_VARIANT.outline:
+      case COMPONENT_VARIANT.ghost:
         baseStyle.push(styles.buttonTextPrimary);
         break;
     }
@@ -134,9 +135,9 @@ export const StandardButton: React.FC<StandardButtonProps> = ({
 
   const getIconSize = () => {
     switch (size) {
-      case 'small':
+      case BUTTON_SIZE.small:
         return designTokens.button.sizes.small.iconSize;
-      case 'large':
+      case BUTTON_SIZE.large:
         return designTokens.button.sizes.large.iconSize;
       default:
         return designTokens.button.sizes.medium.iconSize;
@@ -146,14 +147,14 @@ export const StandardButton: React.FC<StandardButtonProps> = ({
   const getIconColor = () => {
     if (isDisabled) return designTokens.colors.textDisabled;
     switch (variant) {
-      case 'primary':
-      case 'secondary':
-      case 'danger':
+      case COMPONENT_VARIANT.primary:
+      case COMPONENT_VARIANT.secondary:
+      case COMPONENT_VARIANT.danger:
         return designTokens.colors.textOnPrimary;
-      case 'accent':
+      case COMPONENT_VARIANT.accent:
         return designTokens.colors.textOnAccent;
-      case 'outline':
-      case 'ghost':
+      case COMPONENT_VARIANT.outline:
+      case COMPONENT_VARIANT.ghost:
         return designTokens.colors.primary;
       default:
         return designTokens.colors.textOnPrimary;
@@ -165,19 +166,19 @@ export const StandardButton: React.FC<StandardButtonProps> = ({
       style={getButtonStyle()}
       onPress={onPress}
       disabled={isDisabled}
-      activeOpacity={0.7}
+      activeOpacity={TOUCH_OPACITY.default}
       testID={testID}
       accessible={true}
-      accessibilityRole="button"
+      accessibilityRole={A11Y_ROLE.BUTTON}
       accessibilityLabel={accessibilityLabel || title}
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled: isDisabled }}
     >
       {loading ? (
-        <ActivityIndicator color={getIconColor()} size="small" />
+        <ActivityIndicator color={getIconColor()} size={ACTIVITY_INDICATOR_SIZE.small} />
       ) : (
         <View style={styles.buttonContent}>
-          {icon && iconPosition === 'left' && (
+          {icon && iconPosition === ICON_POSITION.LEFT && (
             <MaterialCommunityIcons
               name={icon as any}
               size={getIconSize()}
@@ -186,7 +187,7 @@ export const StandardButton: React.FC<StandardButtonProps> = ({
             />
           )}
           <Text style={getTextStyle()}>{title}</Text>
-          {icon && iconPosition === 'right' && (
+          {icon && iconPosition === ICON_POSITION.RIGHT && (
             <MaterialCommunityIcons
               name={icon as any}
               size={getIconSize()}
@@ -203,14 +204,14 @@ export const StandardButton: React.FC<StandardButtonProps> = ({
 const styles = StyleSheet.create({
   button: {
     borderRadius: designTokens.button.borderRadius,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
   },
   buttonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
   },
 
   // Size variants
@@ -252,7 +253,7 @@ const styles = StyleSheet.create({
     backgroundColor: designTokens.button.variants.ghost.backgroundColor,
   },
   buttonFullWidth: {
-    width: '100%',
+    width: dimensionValues.width.full,
   },
   buttonDisabled: {
     opacity: designTokens.opacity.disabled,
@@ -260,7 +261,7 @@ const styles = StyleSheet.create({
 
   // Text styles
   buttonText: {
-    textAlign: 'center',
+    textAlign: layoutConstants.textAlign.center,
   },
   buttonTextSmall: {
     ...mobileTypography.buttonSmall,

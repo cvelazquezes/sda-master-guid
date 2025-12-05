@@ -7,9 +7,11 @@
 import React, { ReactNode } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, useWindowDimensions } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
-import { designTokens } from '../theme/designTokens';
-import { mobileTypography } from '../theme/mobileTypography';
+import { mobileTypography, designTokens, layoutConstants } from '../theme';
+import { ICONS, A11Y_ROLE, ANIMATION, TOUCH_OPACITY } from '../constants';
+import { flexValues, dimensionValues, borderValues } from '../constants/layoutConstants';
 
 export interface FilterOption {
   id: string;
@@ -44,7 +46,7 @@ interface FilterModalProps {
 
 export const FilterModal: React.FC<FilterModalProps> = ({
   visible,
-  title = 'Filters',
+  title,
   sections,
   onClose,
   onClear,
@@ -52,9 +54,11 @@ export const FilterModal: React.FC<FilterModalProps> = ({
   onSelectOption,
   children,
 }) => {
+  const { t } = useTranslation();
+  const displayTitle = title || t('common.filters');
   const { colors } = useTheme();
   const { width: windowWidth } = useWindowDimensions();
-  const isMobile = windowWidth < 768;
+  const isMobile = windowWidth < designTokens.breakpoints.tablet;
 
   const isOptionSelected = (sectionId: string, value: string): boolean => {
     const section = sections.find(s => s.id === sectionId);
@@ -69,7 +73,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
   return (
     <Modal
       visible={visible}
-      animationType={isMobile ? "slide" : "fade"}
+      animationType={isMobile ? ANIMATION.SLIDE : ANIMATION.FADE}
       transparent={true}
       onRequestClose={onClose}
     >
@@ -82,16 +86,16 @@ export const FilterModal: React.FC<FilterModalProps> = ({
 
           {/* Header */}
           <View style={[styles.header, { borderBottomColor: colors.border }]}>
-            <Text style={[styles.title, { color: colors.textPrimary }]}>{title}</Text>
+            <Text style={[styles.title, { color: colors.textPrimary }]}>{displayTitle}</Text>
             <TouchableOpacity
               onPress={onClose}
               style={styles.closeButton}
               accessible={true}
-              accessibilityRole="button"
-              accessibilityLabel="Close filters"
+              accessibilityRole={A11Y_ROLE.BUTTON}
+              accessibilityLabel={t('accessibility.closeModal')}
             >
               <MaterialCommunityIcons
-                name="close"
+                name={ICONS.CLOSE}
                 size={designTokens.icon.sizes.lg}
                 color={colors.textSecondary}
               />
@@ -128,11 +132,11 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                       style={[
                         styles.option,
                         { backgroundColor: colors.surfaceLight },
-                        isSelected && { backgroundColor: colors.primaryAlpha10, borderWidth: 2, borderColor: colors.primary },
+                        isSelected && { backgroundColor: colors.primaryAlpha10, borderWidth: designTokens.borderWidth.medium, borderColor: colors.primary },
                       ]}
                       onPress={() => onSelectOption(section.id, option.value.toString())}
                       accessible={true}
-                      accessibilityRole="button"
+                      accessibilityRole={A11Y_ROLE.BUTTON}
                       accessibilityLabel={option.label}
                       accessibilityState={{ selected: isSelected }}
                     >
@@ -148,7 +152,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                           style={[
                             styles.optionText,
                             { color: colors.textSecondary },
-                            isSelected && { color: colors.primary, fontWeight: '600' },
+                            isSelected && { color: colors.primary, fontWeight: designTokens.fontWeight.semibold },
                           ]}
                         >
                           {option.label}
@@ -156,7 +160,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                       </View>
                       {isSelected && (
                         <MaterialCommunityIcons
-                          name="check"
+                          name={ICONS.CHECK}
                           size={designTokens.icon.sizes.md}
                           color={colors.primary}
                         />
@@ -177,20 +181,20 @@ export const FilterModal: React.FC<FilterModalProps> = ({
               style={[styles.clearButton, { backgroundColor: colors.surfaceLight }]}
               onPress={onClear}
               accessible={true}
-              accessibilityRole="button"
-              accessibilityLabel="Clear all filters"
+              accessibilityRole={A11Y_ROLE.BUTTON}
+              accessibilityLabel={t('common.cancel')}
             >
-              <MaterialCommunityIcons name="filter-off" size={20} color={colors.textSecondary} />
-              <Text style={[styles.clearButtonText, { color: colors.textSecondary }]}>Clear All</Text>
+              <MaterialCommunityIcons name={ICONS.FILTER} size={designTokens.iconSize.md} color={colors.textSecondary} />
+              <Text style={[styles.clearButtonText, { color: colors.textSecondary }]}>{t('common.cancel')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.applyButton, { backgroundColor: colors.primary }]}
               onPress={onApply}
               accessible={true}
-              accessibilityRole="button"
-              accessibilityLabel="Apply filters"
+              accessibilityRole={A11Y_ROLE.BUTTON}
+              accessibilityLabel={t('accessibility.filter')}
             >
-              <Text style={styles.applyButtonText}>Apply Filters</Text>
+              <Text style={styles.applyButtonText}>{t('accessibility.filter')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -201,41 +205,41 @@ export const FilterModal: React.FC<FilterModalProps> = ({
 
 const styles = StyleSheet.create({
   overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flex: flexValues.one,
+    backgroundColor: designTokens.overlay.darkMedium,
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
     padding: designTokens.spacing.lg,
   },
   overlayMobile: {
-    justifyContent: 'flex-end',
-    padding: 0,
+    justifyContent: layoutConstants.justifyContent.flexEnd,
+    padding: designTokens.spacing.none,
   },
   content: {
-    borderRadius: designTokens.borderRadius.xxl,
-    width: '100%',
-    maxWidth: 500,
-    maxHeight: '90%',
+    borderRadius: designTokens.borderRadius['2xl'],
+    width: dimensionValues.width.full,
+    maxWidth: dimensionValues.maxWidth.modal,
+    maxHeight: dimensionValues.maxHeight.modalPercent,
   },
   contentMobile: {
-    maxWidth: '100%',
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
-    borderTopLeftRadius: designTokens.borderRadius.xxl,
-    borderTopRightRadius: designTokens.borderRadius.xxl,
+    maxWidth: dimensionValues.maxWidthPercent.full,
+    borderBottomLeftRadius: borderValues.radius.none,
+    borderBottomRightRadius: borderValues.radius.none,
+    borderTopLeftRadius: designTokens.borderRadius['2xl'],
+    borderTopRightRadius: designTokens.borderRadius['2xl'],
   },
   dragHandle: {
-    width: 40,
-    height: 4,
+    width: designTokens.componentSizes.handleBar.width,
+    height: designTokens.componentSizes.handleBar.height,
     borderRadius: designTokens.borderRadius.full,
-    alignSelf: 'center',
+    alignSelf: layoutConstants.alignSelf.center,
     marginTop: designTokens.spacing.sm,
     marginBottom: designTokens.spacing.xs,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    justifyContent: layoutConstants.justifyContent.spaceBetween,
+    alignItems: layoutConstants.alignItems.center,
     paddingHorizontal: designTokens.spacing.lg,
     paddingVertical: designTokens.spacing.md,
     borderBottomWidth: designTokens.borderWidth.thin,
@@ -247,7 +251,7 @@ const styles = StyleSheet.create({
     padding: designTokens.spacing.xs,
   },
   body: {
-    maxHeight: 500,
+    maxHeight: dimensionValues.maxHeight.modalBodyMedium,
   },
   section: {
     padding: designTokens.spacing.lg,
@@ -257,67 +261,67 @@ const styles = StyleSheet.create({
     marginBottom: designTokens.spacing.md,
   },
   infoBanner: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.flexStart,
     padding: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.md,
     marginBottom: designTokens.spacing.md,
     gap: designTokens.spacing.sm,
   },
   infoBannerText: {
-    flex: 1,
+    flex: flexValues.one,
     ...mobileTypography.bodySmall,
-    lineHeight: 18,
+    lineHeight: designTokens.lineHeights.body,
   },
   option: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.spaceBetween,
     padding: designTokens.spacing.lg,
     borderRadius: designTokens.borderRadius.lg,
     marginBottom: designTokens.spacing.sm,
   },
   optionContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     gap: designTokens.spacing.md,
-    flex: 1,
+    flex: flexValues.one,
   },
   optionText: {
     ...mobileTypography.bodyLarge,
   },
   footer: {
-    flexDirection: 'row',
+    flexDirection: layoutConstants.flexDirection.row,
     padding: designTokens.spacing.lg,
     gap: designTokens.spacing.md,
     borderTopWidth: designTokens.borderWidth.thin,
   },
   clearButton: {
-    flex: 1,
+    flex: flexValues.one,
     paddingVertical: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.lg,
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
+    alignItems: layoutConstants.alignItems.center,
+    flexDirection: layoutConstants.flexDirection.row,
+    justifyContent: layoutConstants.justifyContent.center,
     gap: designTokens.spacing.xs,
-    minHeight: 48,
+    minHeight: dimensionValues.minHeight.selectItem,
   },
   clearButtonText: {
     fontSize: designTokens.typography.fontSizes.md,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
   },
   applyButton: {
-    flex: 1,
+    flex: flexValues.one,
     paddingVertical: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 48,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
+    minHeight: dimensionValues.minHeight.selectItem,
   },
   applyButtonText: {
     fontSize: designTokens.typography.fontSizes.md,
-    fontWeight: '600',
-    color: '#fff',
+    fontWeight: designTokens.fontWeight.semibold,
+    color: designTokens.colors.white,
   },
 });
 

@@ -14,9 +14,11 @@ import {
   TextInputProps,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
-import { mobileTypography, mobileIconSizes } from '../theme';
-import { designTokens } from '../theme/designTokens';
+import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../theme';
+import { A11Y_ROLE, ICONS, flexValues } from '../constants';
+import { dimensionValues } from '../constants/layoutConstants';
 
 interface StandardInputProps extends TextInputProps {
   label?: string;
@@ -41,6 +43,7 @@ export const StandardInput: React.FC<StandardInputProps> = ({
   multiline,
   ...textInputProps
 }) => {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const [isSecureVisible, setIsSecureVisible] = useState(!secureTextEntry);
   const [isFocused, setIsFocused] = useState(false);
@@ -74,7 +77,7 @@ export const StandardInput: React.FC<StandardInputProps> = ({
     if (disabled) {
       baseStyle.push({ 
         backgroundColor: colors.surfaceLight,
-        opacity: 0.6,
+        opacity: designTokens.opacity.high,
       });
     }
     
@@ -135,11 +138,11 @@ export const StandardInput: React.FC<StandardInputProps> = ({
             style={styles.secureToggle}
             onPress={() => setIsSecureVisible(!isSecureVisible)}
             accessible={true}
-            accessibilityRole="button"
-            accessibilityLabel={isSecureVisible ? 'Hide password' : 'Show password'}
+            accessibilityRole={A11Y_ROLE.BUTTON}
+            accessibilityLabel={isSecureVisible ? t('accessibility.hidePassword') : t('accessibility.showPassword')}
           >
             <MaterialCommunityIcons
-              name={isSecureVisible ? 'eye-off' : 'eye'}
+              name={isSecureVisible ? ICONS.EYE_OFF : ICONS.EYE}
               size={mobileIconSizes.medium}
               color={colors.textTertiary}
             />
@@ -151,7 +154,7 @@ export const StandardInput: React.FC<StandardInputProps> = ({
       {error && (
         <View style={styles.messageContainer}>
           <MaterialCommunityIcons
-            name="alert-circle"
+            name={ICONS.ALERT_CIRCLE}
             size={mobileIconSizes.tiny}
             color={colors.error}
             style={styles.messageIcon}
@@ -179,35 +182,35 @@ const styles = StyleSheet.create({
     ...mobileTypography.labelBold,
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    borderWidth: designTokens.borderWidth.thin,
     borderRadius: designTokens.borderRadius.lg,
-    paddingHorizontal: 14,
-    minHeight: 52,
+    paddingHorizontal: designTokens.spacing.md,
+    minHeight: dimensionValues.minHeight.button,
   },
   inputContainerMultiline: {
-    alignItems: 'flex-start',
-    paddingVertical: 14,
+    alignItems: layoutConstants.alignItems.flexStart,
+    paddingVertical: designTokens.spacing.md,
   },
   icon: {
-    marginRight: 12,
+    marginRight: designTokens.spacing.md,
   },
   iconMultiline: {
-    marginTop: 2,
+    marginTop: designTokens.spacing.xxs,
   },
   input: {
-    flex: 1,
+    flex: flexValues.one,
     ...mobileTypography.bodyLarge,
-    minHeight: 52,
+    minHeight: dimensionValues.minHeight.button,
   },
   secureToggle: {
     padding: designTokens.spacing.sm,
-    marginLeft: 8,
+    marginLeft: designTokens.spacing.sm,
   },
   messageContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     marginTop: designTokens.spacing.xs,
     marginLeft: designTokens.spacing.xs,
   },
@@ -216,7 +219,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     ...mobileTypography.caption,
-    flex: 1,
+    flex: flexValues.one,
   },
   helperText: {
     ...mobileTypography.caption,

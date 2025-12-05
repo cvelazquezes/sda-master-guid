@@ -13,10 +13,12 @@ import {
   FlatList,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { StandardModal } from './StandardModal';
-import { mobileTypography, mobileIconSizes } from '../theme';
-import { designTokens } from '../theme/designTokens';
+import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../theme';
+import { A11Y_ROLE, ICONS, TOUCH_OPACITY } from '../constants';
+import { flexValues, dimensionValues } from '../constants/layoutConstants';
 
 export interface SelectionItem {
   id: string;
@@ -51,11 +53,13 @@ export const SelectionModal: React.FC<SelectionModalProps> = ({
   items,
   onSelectItem,
   selectedItemId,
-  emptyMessage = 'No items available',
+  emptyMessage,
   searchable = false,
   multiSelect = false,
 }) => {
+  const { t } = useTranslation();
   const { colors } = useTheme();
+  const displayEmptyMessage = emptyMessage || t('placeholders.noItemsAvailable');
 
   const renderItem = ({ item }: { item: SelectionItem }) => {
     const isSelected = item.id === selectedItemId;
@@ -67,13 +71,13 @@ export const SelectionModal: React.FC<SelectionModalProps> = ({
         style={[
           styles.item,
           { backgroundColor: colors.surfaceLight },
-          isSelected && { backgroundColor: colors.successLight, borderWidth: 2, borderColor: colors.success },
+          isSelected && { backgroundColor: colors.successLight, borderWidth: designTokens.borderWidth.medium, borderColor: colors.success },
           isDisabled && styles.itemDisabled,
         ]}
         onPress={() => !isDisabled && onSelectItem(item)}
         disabled={isDisabled}
-        activeOpacity={0.7}
-        accessibilityRole="button"
+        activeOpacity={TOUCH_OPACITY.default}
+        accessibilityRole={A11Y_ROLE.BUTTON}
         accessibilityLabel={`${item.title}${item.subtitle ? `. ${item.subtitle}` : ''}`}
         accessibilityState={{ selected: isSelected, disabled: isDisabled }}
       >
@@ -115,7 +119,7 @@ export const SelectionModal: React.FC<SelectionModalProps> = ({
           {item.badge && (
             <View style={[styles.badge, { backgroundColor: `${item.badgeColor || colors.primary}20` }]}>
               <MaterialCommunityIcons
-                name="check-circle"
+                name={ICONS.CHECK_CIRCLE}
                 size={mobileIconSizes.tiny}
                 color={item.badgeColor || colors.primary}
               />
@@ -128,7 +132,7 @@ export const SelectionModal: React.FC<SelectionModalProps> = ({
 
         {/* Selection Indicator */}
         <MaterialCommunityIcons
-          name={isSelected ? 'check-circle' : 'chevron-right'}
+          name={isSelected ? ICONS.CHECK_CIRCLE : ICONS.CHEVRON_RIGHT}
           size={mobileIconSizes.medium}
           color={isSelected ? colors.success : colors.textTertiary}
         />
@@ -143,12 +147,12 @@ export const SelectionModal: React.FC<SelectionModalProps> = ({
       title={title}
       subtitle={subtitle}
       scrollable={false}
-      maxHeight="85%"
+      maxHeight={dimensionValues.maxHeightPercent.eightyFive}
     >
       {items.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <MaterialCommunityIcons name="inbox" size={64} color={colors.textTertiary} />
-          <Text style={[styles.emptyText, { color: colors.textTertiary }]}>{emptyMessage}</Text>
+          <MaterialCommunityIcons name={ICONS.INBOX} size={designTokens.iconSize['3xl']} color={colors.textTertiary} />
+          <Text style={[styles.emptyText, { color: colors.textTertiary }]}>{displayEmptyMessage}</Text>
         </View>
       ) : (
         <FlatList
@@ -165,75 +169,75 @@ export const SelectionModal: React.FC<SelectionModalProps> = ({
 
 const styles = StyleSheet.create({
   list: {
-    flex: 1,
+    flex: flexValues.one,
   },
   listContent: {
     padding: designTokens.spacing.md,
   },
   item: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     padding: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.lg,
     marginBottom: designTokens.spacing.sm,
-    minHeight: 60,
+    minHeight: dimensionValues.minHeight.selectionItem,
   },
   itemDisabled: {
-    opacity: 0.5,
+    opacity: designTokens.opacity.medium,
   },
   iconContainer: {
-    width: 40,
-    height: 40,
+    width: designTokens.componentSizes.iconContainer.md,
+    height: designTokens.componentSizes.iconContainer.md,
     borderRadius: designTokens.borderRadius.xxl,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
+    marginRight: designTokens.spacing.md,
   },
   avatar: {
-    width: 40,
-    height: 40,
+    width: designTokens.componentSizes.iconContainer.md,
+    height: designTokens.componentSizes.iconContainer.md,
     borderRadius: designTokens.borderRadius.xxl,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
+    marginRight: designTokens.spacing.md,
   },
   avatarText: {
     ...mobileTypography.bodyMediumBold,
-    color: '#fff',
+    color: designTokens.colors.white,
   },
   itemContent: {
-    flex: 1,
-    marginRight: 12,
+    flex: flexValues.one,
+    marginRight: designTokens.spacing.md,
   },
   itemTitle: {
     ...mobileTypography.bodyMediumBold,
   },
   itemSubtitle: {
     ...mobileTypography.caption,
-    marginTop: 4,
+    marginTop: designTokens.spacing.xs,
   },
   badge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    gap: designTokens.spacing.sm,
+    paddingVertical: designTokens.spacing.sm,
+    paddingHorizontal: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.lg,
-    marginTop: 8,
-    alignSelf: 'flex-start',
+    marginTop: designTokens.spacing.sm,
+    alignSelf: layoutConstants.alignSelf.flexStart,
   },
   badgeText: {
     ...mobileTypography.caption,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
   },
   emptyContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 60,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
+    padding: designTokens.spacing['6xl'],
   },
   emptyText: {
     ...mobileTypography.bodyMedium,
-    marginTop: 16,
-    textAlign: 'center',
+    marginTop: designTokens.spacing.lg,
+    textAlign: layoutConstants.textAlign.center,
   },
 });

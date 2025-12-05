@@ -6,10 +6,12 @@
 import React from 'react';
 import { TouchableOpacity, StyleSheet, ViewStyle, StyleProp } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { designTokens } from '../theme/designTokens';
+import { designTokens, layoutConstants } from '../theme';
+import { A11Y_ROLE, TOUCH_OPACITY, COMPONENT_VARIANT, COMPONENT_SIZE } from '../constants';
+import { dimensionValues } from '../constants/layoutConstants';
 
-type IconButtonVariant = 'primary' | 'secondary' | 'accent' | 'danger' | 'ghost';
-type IconButtonSize = 'sm' | 'md' | 'lg';
+type IconButtonVariant = typeof COMPONENT_VARIANT.primary | typeof COMPONENT_VARIANT.secondary | typeof COMPONENT_VARIANT.accent | typeof COMPONENT_VARIANT.danger | typeof COMPONENT_VARIANT.ghost;
+type IconButtonSize = typeof COMPONENT_SIZE.sm | typeof COMPONENT_SIZE.md | typeof COMPONENT_SIZE.lg;
 
 interface IconButtonProps {
   icon: string;
@@ -28,8 +30,8 @@ interface IconButtonProps {
 export const IconButton: React.FC<IconButtonProps> = ({
   icon,
   onPress,
-  variant = 'ghost',
-  size = 'md',
+  variant = COMPONENT_VARIANT.ghost,
+  size = COMPONENT_SIZE.md,
   disabled = false,
   color,
   backgroundColor,
@@ -40,19 +42,19 @@ export const IconButton: React.FC<IconButtonProps> = ({
 }) => {
   const getSizeStyles = () => {
     switch (size) {
-      case 'sm':
+      case COMPONENT_SIZE.sm:
         return {
-          containerSize: 32,
+          containerSize: dimensionValues.minWidth.iconButtonSmall,
           iconSize: designTokens.icon.sizes.sm,
         };
-      case 'lg':
+      case COMPONENT_SIZE.lg:
         return {
-          containerSize: 48,
+          containerSize: dimensionValues.minHeight.selectItem,
           iconSize: designTokens.icon.sizes.lg,
         };
       default:
         return {
-          containerSize: 40,
+          containerSize: dimensionValues.minHeight.touchTarget,
           iconSize: designTokens.icon.sizes.md,
         };
     }
@@ -60,29 +62,29 @@ export const IconButton: React.FC<IconButtonProps> = ({
 
   const getVariantStyles = () => {
     switch (variant) {
-      case 'primary':
+      case COMPONENT_VARIANT.primary:
         return {
           backgroundColor: designTokens.colors.primary,
           color: designTokens.colors.textOnPrimary,
         };
-      case 'secondary':
+      case COMPONENT_VARIANT.secondary:
         return {
           backgroundColor: designTokens.colors.secondary,
           color: designTokens.colors.textOnSecondary,
         };
-      case 'accent':
+      case COMPONENT_VARIANT.accent:
         return {
           backgroundColor: designTokens.colors.accent,
           color: designTokens.colors.textOnAccent,
         };
-      case 'danger':
+      case COMPONENT_VARIANT.danger:
         return {
           backgroundColor: designTokens.colors.error,
           color: designTokens.colors.textInverse,
         };
       default:
         return {
-          backgroundColor: 'transparent',
+          backgroundColor: designTokens.colors.transparent,
           color: designTokens.colors.textPrimary,
         };
     }
@@ -108,10 +110,10 @@ export const IconButton: React.FC<IconButtonProps> = ({
       ]}
       onPress={onPress}
       disabled={disabled}
-      activeOpacity={0.7}
+      activeOpacity={TOUCH_OPACITY.default}
       testID={testID}
       accessible={true}
-      accessibilityRole="button"
+      accessibilityRole={A11Y_ROLE.BUTTON}
       accessibilityLabel={accessibilityLabel}
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled }}
@@ -128,8 +130,8 @@ export const IconButton: React.FC<IconButtonProps> = ({
 const styles = StyleSheet.create({
   container: {
     borderRadius: designTokens.borderRadius.full,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
   },
   disabled: {
     opacity: designTokens.opacity.disabled,

@@ -9,6 +9,8 @@ import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { designTokens } from '../theme/designTokens';
 import { mobileTypography, mobileFontSizes } from '../theme/mobileTypography';
+import { layoutConstants } from '../theme';
+import { flexValues } from '../constants';
 
 interface SectionHeaderProps {
   title: string;
@@ -44,28 +46,28 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.spaceBetween,
     marginBottom: designTokens.spacing.lg,
   },
   titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     gap: designTokens.spacing.sm,
-    flex: 1,
+    flex: flexValues.one,
   },
   title: {
     ...mobileTypography.heading2,
   },
   badge: {
     paddingHorizontal: designTokens.spacing.sm,
-    paddingVertical: 4,
+    paddingVertical: designTokens.spacing.xs,
     borderRadius: designTokens.borderRadius.full,
-    minWidth: 24,
+    minWidth: designTokens.spacing.xxl,
     height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
   },
   badgeText: {
     ...mobileTypography.captionBold,

@@ -8,9 +8,13 @@
 import React, { memo, useCallback } from 'react';
 import { View, Text, StyleSheet, ViewToken } from 'react-native';
 import { FlashList, ListRenderItem } from '@shopify/flash-list';
-import { useTheme } from '../theme';
+import { useTranslation } from 'react-i18next';
+import { useTheme, layoutConstants } from '../theme';
 import { mobileFontSizes } from '../theme/mobileTypography';
 import { designTokens } from '../theme/designTokens';
+import { flexValues } from '../constants/layoutConstants';
+import { LIST_THRESHOLDS } from '../constants';
+import { logger } from '../../services/logger';
 
 // ============================================================================
 // FlashList Wrapper with Best Practices
@@ -50,7 +54,7 @@ export function OptimizedList<T>({
   keyExtractor,
   estimatedItemSize,
   onEndReached,
-  onEndReachedThreshold = 0.5,
+  onEndReachedThreshold = LIST_THRESHOLDS.ON_END_REACHED,
   ListEmptyComponent,
   ListHeaderComponent,
   ListFooterComponent,
@@ -59,15 +63,15 @@ export function OptimizedList<T>({
 }: OptimizedListProps<T>) {
   // Memoize viewability config
   const viewabilityConfig = {
-    itemVisiblePercentThreshold: 50,
-    minimumViewTime: 300,
+    itemVisiblePercentThreshold: LIST_THRESHOLDS.ITEM_VISIBLE_PERCENT,
+    minimumViewTime: LIST_THRESHOLDS.MINIMUM_VIEW_TIME,
   };
 
   // Memoize viewability change handler
   const onViewableItemsChanged = useCallback(
     (info: { viewableItems: ViewToken[]; changed: ViewToken[] }) => {
       // Track which items are visible for analytics
-      console.log('Viewable items:', info.viewableItems.map(v => v.key));
+      logger.debug('Viewable items:', { items: info.viewableItems.map(v => v.key) });
     },
     []
   );
@@ -175,6 +179,7 @@ export const OptimizedUserList = memo<OptimizedUserListProps>(
     refreshing,
     onRefresh 
   }) {
+    const { t } = useTranslation();
     const renderItem = useCallback<ListRenderItem<User>>(
       ({ item }) => (
         <UserListItem user={item} onPress={onUserPress} />
@@ -190,7 +195,7 @@ export const OptimizedUserList = memo<OptimizedUserListProps>(
     const ListEmptyComponent = useCallback(
       () => (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No users found</Text>
+          <Text style={styles.emptyText}>{t('screens.usersManagement.noUsersFound')}</Text>
         </View>
       ),
       []
@@ -283,36 +288,36 @@ export const OptimizedUserList = memo<OptimizedUserListProps>(
 
 const styles = StyleSheet.create({
   userItem: {
-    flexDirection: 'row',
+    flexDirection: layoutConstants.flexDirection.row,
     padding: designTokens.spacing.lg,
-    alignItems: 'center',
-    borderBottomWidth: 1,
+    alignItems: layoutConstants.alignItems.center,
+    borderBottomWidth: designTokens.borderWidth.thin,
     borderBottomColor: designTokens.colors.borderLight,
   },
   avatar: {
-    width: 48,
-    height: 48,
+    width: designTokens.componentSizes.iconContainer.lg,
+    height: designTokens.componentSizes.iconContainer.lg,
     borderRadius: designTokens.borderRadius['3xl'],
     backgroundColor: designTokens.colors.info,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 16,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
+    marginRight: designTokens.spacing.lg,
   },
   userInfo: {
-    flex: 1,
+    flex: flexValues.one,
   },
   userName: {
     fontSize: mobileFontSizes.lg,
-    fontWeight: '600',
-    marginBottom: 4,
+    fontWeight: designTokens.fontWeight.semibold,
+    marginBottom: designTokens.spacing.xs,
   },
   userEmail: {
     fontSize: mobileFontSizes.sm,
   },
   emptyContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    flex: flexValues.one,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
     padding: designTokens.spacing['4xl'],
   },
   emptyText: {

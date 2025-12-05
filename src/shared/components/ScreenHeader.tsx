@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     ...mobileTypography.bodyLarge,
-    marginTop: 4,
+    marginTop: designTokens.spacing.xs,
   },
 });
 

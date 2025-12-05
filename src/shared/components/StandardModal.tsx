@@ -18,9 +18,14 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
-import { mobileTypography, mobileIconSizes } from '../theme';
-import { designTokens } from '../theme/designTokens';
+import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../theme';
+import { ICONS, A11Y_ROLE, ANIMATION, TOUCH_OPACITY, PLATFORM_OS, KEYBOARD_BEHAVIOR, MODAL_CONFIG } from '../constants';
+import { flexValues, dimensionValues, borderValues } from '../constants/layoutConstants';
+
+// Type for animation
+type AnimationType = typeof ANIMATION.FADE | typeof ANIMATION.SLIDE | typeof ANIMATION.NONE;
 
 interface StandardModalProps {
   visible: boolean;
@@ -35,7 +40,7 @@ interface StandardModalProps {
   scrollable?: boolean;
   showCloseButton?: boolean;
   footer?: React.ReactNode;
-  animationType?: 'fade' | 'slide' | 'none';
+  animationType?: AnimationType;
   fullScreen?: boolean;
   headerColor?: string;
 }
@@ -49,14 +54,15 @@ export const StandardModal: React.FC<StandardModalProps> = ({
   iconColor,
   iconBackgroundColor,
   children,
-  maxHeight = '90%',
+  maxHeight = dimensionValues.maxHeightPercent.ninety,
   scrollable = true,
   showCloseButton = true,
   footer,
-  animationType = 'slide',
+  animationType = ANIMATION.SLIDE,
   fullScreen = false,
   headerColor,
 }) => {
+  const { t } = useTranslation();
   const { colors, isDark } = useTheme();
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   
@@ -64,32 +70,32 @@ export const StandardModal: React.FC<StandardModalProps> = ({
   const finalIconBackgroundColor = iconBackgroundColor || colors.primaryAlpha10;
   
   // Determine if we should use bottom sheet (mobile) or centered modal (tablet/desktop)
-  const isMobile = windowWidth < 768;
+  const isMobile = windowWidth < designTokens.breakpoints.tablet;
   
   // Calculate responsive modal width
   const getModalWidth = () => {
-    if (windowWidth > 1200) {
+    if (windowWidth > designTokens.breakpoints.desktop) {
       // Desktop large screens
-      return Math.min(600, windowWidth * 0.45);
-    } else if (windowWidth > 768) {
+      return Math.min(designTokens.responsiveScale.maxWidth.modal, windowWidth * designTokens.responsiveScale.modal.desktop);
+    } else if (windowWidth > designTokens.breakpoints.tablet) {
       // Tablets and small desktop
-      return Math.min(500, windowWidth * 0.65);
+      return Math.min(designTokens.responsiveScale.maxWidth.modalSmall, windowWidth * designTokens.responsiveScale.modal.tablet);
     } else {
       // Mobile - full width for bottom sheet
-      return '100%';
+      return dimensionValues.maxWidthPercent.full;
     }
   };
 
   // Calculate responsive max height
   const getMaxHeight = () => {
-    if (typeof maxHeight === 'string' && maxHeight.includes('%')) {
-      const percentage = parseFloat(maxHeight) / 100;
+    if (typeof maxHeight === 'string' && maxHeight.includes(MODAL_CONFIG.PERCENTAGE_SYMBOL)) {
+      const percentage = parseFloat(maxHeight) / MODAL_CONFIG.PERCENTAGE_DIVISOR;
       return windowHeight * percentage;
     }
     if (typeof maxHeight === 'number') {
-      return Math.min(maxHeight, windowHeight * 0.9);
+      return Math.min(maxHeight, windowHeight * MODAL_CONFIG.MAX_HEIGHT_RATIO);
     }
-    return windowHeight * 0.9;
+    return windowHeight * MODAL_CONFIG.MAX_HEIGHT_RATIO;
   };
 
   const ContentWrapper = scrollable ? ScrollView : View;
@@ -103,33 +109,33 @@ export const StandardModal: React.FC<StandardModalProps> = ({
   return (
     <Modal
       visible={visible}
-      animationType={isMobile ? 'slide' : animationType}
+      animationType={isMobile ? ANIMATION.SLIDE : animationType}
       transparent={!fullScreen}
       onRequestClose={onClose}
       statusBarTranslucent
     >
       <KeyboardAvoidingView
         style={[styles.modalOverlay, isMobile && styles.modalOverlayMobile]}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === PLATFORM_OS.IOS ? KEYBOARD_BEHAVIOR.PADDING : KEYBOARD_BEHAVIOR.HEIGHT}
       >
         <TouchableOpacity
           style={[styles.backdrop, isMobile && styles.backdropMobile]}
           activeOpacity={1}
           onPress={onClose}
         >
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={(e) => e.stopPropagation()}
-            style={[
-              styles.modalContent,
-              { 
-                backgroundColor: colors.surface,
-                shadowOpacity: isDark ? 0.4 : 0.25,
-              },
-              isMobile ? styles.modalContentMobile : styles.modalContentDesktop,
-              { width: modalWidth, maxHeight: modalMaxHeight },
-            ]}
-          >
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={(e) => e.stopPropagation()}
+              style={[
+                styles.modalContent,
+                { 
+                  backgroundColor: colors.surface,
+                  shadowOpacity: isDark ? designTokens.shadowConfig.dark.opacity : designTokens.shadowConfig.lightStrong.opacity,
+                },
+                isMobile ? styles.modalContentMobile : styles.modalContentDesktop,
+                { width: modalWidth, maxHeight: modalMaxHeight },
+              ]}
+            >
             {/* Drag Handle - Mobile Only */}
             {isMobile && (
               <View style={[styles.dragHandle, { backgroundColor: colors.border }]} />
@@ -168,11 +174,11 @@ export const StandardModal: React.FC<StandardModalProps> = ({
                   onPress={onClose}
                   style={styles.closeButton}
                   accessible={true}
-                  accessibilityRole="button"
-                  accessibilityLabel="Close modal"
+                  accessibilityRole={A11Y_ROLE.BUTTON}
+                  accessibilityLabel={t('accessibility.closeModal')}
                 >
                   <MaterialCommunityIcons
-                    name="close"
+                    name={ICONS.CLOSE}
                     size={mobileIconSizes.large}
                     color={colors.textSecondary}
                   />
@@ -203,34 +209,31 @@ export const StandardModal: React.FC<StandardModalProps> = ({
 
 const styles = StyleSheet.create({
   modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 20,
+    flex: flexValues.one,
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
+    paddingTop: Platform.OS === PLATFORM_OS.ANDROID ? StatusBar.currentHeight : designTokens.spacing.xl,
   },
   modalOverlayMobile: {
-    justifyContent: 'flex-end',
-    paddingTop: 0,
+    justifyContent: layoutConstants.justifyContent.flexEnd,
+    paddingTop: designTokens.spacing.none,
   },
   backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 20,
-    paddingHorizontal: 16,
-    width: '100%',
+    flex: flexValues.one,
+    backgroundColor: designTokens.overlay.darkMedium,
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
+    paddingVertical: designTokens.spacing.xl,
+    paddingHorizontal: designTokens.spacing.lg,
+    width: dimensionValues.width.full,
   },
   backdropMobile: {
-    justifyContent: 'flex-end',
-    paddingVertical: 0,
-    paddingHorizontal: 0,
+    justifyContent: layoutConstants.justifyContent.flexEnd,
+    paddingVertical: designTokens.spacing.none,
+    paddingHorizontal: designTokens.spacing.none,
   },
   modalContent: {
-    elevation: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 8,
+    ...designTokens.shadow.xl,
   },
   modalContentDesktop: {
     borderRadius: designTokens.borderRadius.xxl,
@@ -238,68 +241,68 @@ const styles = StyleSheet.create({
   modalContentMobile: {
     borderTopLeftRadius: designTokens.borderRadius.xxl,
     borderTopRightRadius: designTokens.borderRadius.xxl,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
+    borderBottomLeftRadius: borderValues.radius.none,
+    borderBottomRightRadius: borderValues.radius.none,
   },
   dragHandle: {
-    width: 40,
-    height: 4,
+    width: designTokens.spacing['4xl'],
+    height: designTokens.spacing.xs,
     borderRadius: designTokens.borderRadius.full,
-    alignSelf: 'center',
+    alignSelf: layoutConstants.alignSelf.center,
     marginTop: designTokens.spacing.sm,
     marginBottom: designTokens.spacing.xs,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.spaceBetween,
     paddingHorizontal: designTokens.spacing.lg,
     paddingVertical: designTokens.spacing.md,
-    borderBottomWidth: 1,
+    borderBottomWidth: designTokens.borderWidth.thin,
   },
   headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    marginRight: 12,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    flex: flexValues.one,
+    marginRight: designTokens.spacing.md,
   },
   iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
+    width: designTokens.touchTarget.comfortable,
+    height: designTokens.touchTarget.comfortable,
+    borderRadius: designTokens.touchTarget.comfortable / 2,
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
+    marginRight: designTokens.spacing.md,
   },
   headerInfo: {
-    flex: 1,
+    flex: flexValues.one,
   },
   headerTitle: {
     fontSize: designTokens.typography.fontSizes.lg,
-    fontWeight: '700',
+    fontWeight: designTokens.fontWeight.bold,
   },
   headerSubtitle: {
     ...mobileTypography.label,
-    marginTop: 4,
+    marginTop: designTokens.spacing.xs,
   },
   closeButton: {
     padding: designTokens.spacing.sm,
     borderRadius: designTokens.borderRadius.full,
   },
   content: {
-    flex: 1,
+    flex: flexValues.one,
   },
   contentWrapper: {
-    flex: 1,
+    flex: flexValues.one,
   },
   scrollContent: {
-    flex: 1,
+    flex: flexValues.one,
   },
   scrollContentContainer: {
     flexGrow: 1,
   },
   footer: {
     padding: designTokens.spacing.lg,
-    borderTopWidth: 1,
+    borderTopWidth: designTokens.borderWidth.thin,
   },
 });

@@ -7,9 +7,11 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList, ViewProps } from 'react-native';
-import { useTheme } from '../theme';
+import { useTheme, layoutConstants } from '../theme';
 import { mobileFontSizes } from '../theme/mobileTypography';
 import { designTokens } from '../theme/designTokens';
+import { flexValues } from '../constants/layoutConstants';
+import { COMPONENT_VARIANT } from '../constants';
 
 // ============================================================================
 // Basic React.memo Example
@@ -18,7 +20,7 @@ import { designTokens } from '../theme/designTokens';
 interface ButtonProps {
   title: string;
   onPress: () => void;
-  variant?: 'primary' | 'secondary';
+  variant?: typeof COMPONENT_VARIANT.primary | typeof COMPONENT_VARIANT.secondary;
   disabled?: boolean;
 }
 
@@ -39,12 +41,12 @@ interface ButtonProps {
 export const OptimizedButton = memo<ButtonProps>(function OptimizedButton({
   title,
   onPress,
-  variant = 'primary',
+  variant = COMPONENT_VARIANT.primary,
   disabled = false,
 }) {
   const { theme } = useTheme();
 
-  const backgroundColor = variant === 'primary' 
+  const backgroundColor = variant === COMPONENT_VARIANT.primary 
     ? theme.colors.primary 
     : theme.colors.secondary;
 
@@ -207,7 +209,7 @@ interface ContainerProps extends ViewProps {
  */
 export const OptimizedContainer = memo<ContainerProps>(function OptimizedContainer({
   children,
-  padding = 16,
+  padding = designTokens.spacing.lg,
   style,
   ...rest
 }) {
@@ -281,48 +283,48 @@ export const OptimizedContainer = memo<ContainerProps>(function OptimizedContain
 
 const styles = StyleSheet.create({
   button: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
+    paddingHorizontal: designTokens.spacing.xxl,
+    paddingVertical: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
   },
   disabled: {
-    opacity: 0.5,
+    opacity: designTokens.opacity.medium,
   },
   buttonText: {
     fontSize: mobileFontSizes.lg,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
   },
   card: {
     padding: designTokens.spacing.lg,
     borderRadius: designTokens.borderRadius.lg,
-    marginBottom: 12,
+    marginBottom: designTokens.spacing.md,
   },
   cardTitle: {
     fontSize: mobileFontSizes.xl,
-    fontWeight: 'bold',
-    marginBottom: 8,
+    fontWeight: designTokens.fontWeight.bold,
+    marginBottom: designTokens.spacing.sm,
   },
   cardDescription: {
     fontSize: mobileFontSizes.sm,
-    marginBottom: 8,
+    marginBottom: designTokens.spacing.sm,
   },
   cardDate: {
     fontSize: mobileFontSizes.xs,
   },
   listItem: {
     padding: designTokens.spacing.lg,
-    borderBottomWidth: 1,
+    borderBottomWidth: designTokens.borderWidth.thin,
     borderBottomColor: designTokens.colors.borderLight,
   },
   listItemContent: {
-    flex: 1,
+    flex: flexValues.one,
   },
   listItemName: {
     fontSize: mobileFontSizes.lg,
-    fontWeight: '600',
-    marginBottom: 4,
+    fontWeight: designTokens.fontWeight.semibold,
+    marginBottom: designTokens.spacing.xs,
   },
   listItemEmail: {
     fontSize: mobileFontSizes.sm,

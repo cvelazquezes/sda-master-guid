@@ -6,22 +6,28 @@
  */
 
 import React, { Suspense, ComponentType, LazyExoticComponent } from 'react';
-import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
-import { useTheme } from '../theme';
+import { View, ActivityIndicator, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { useTheme, layoutConstants } from '../theme';
 import { mobileFontSizes } from '../theme/mobileTypography';
 import { designTokens } from '../theme/designTokens';
+import { flexValues } from '../constants/layoutConstants';
+import { ACTIVITY_INDICATOR_SIZE, A11Y_ROLE, TOUCH_OPACITY } from '../constants';
+import { LOG_MESSAGES } from '../constants/logMessages';
+import { logger } from '../../services/logger';
 
 /**
  * Loading fallback component
  */
 function LoadingFallback() {
+  const { t } = useTranslation();
   const { theme } = useTheme();
   
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <ActivityIndicator size="large" color={theme.colors.primary} />
+      <ActivityIndicator size={ACTIVITY_INDICATOR_SIZE.large} color={theme.colors.primary} />
       <Text style={[styles.text, { color: theme.colors.onSurface }]}>
-        Loading...
+        {t('common.loading')}
       </Text>
     </View>
   );
@@ -36,22 +42,27 @@ interface ErrorFallbackProps {
 }
 
 function ErrorFallback({ error, retry }: ErrorFallbackProps) {
+  const { t } = useTranslation();
   const { theme } = useTheme();
   
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <Text style={[styles.errorTitle, { color: theme.colors.error }]}>
-        Failed to load screen
+        {t('common.failedToLoadScreen')}
       </Text>
       <Text style={[styles.errorMessage, { color: theme.colors.onSurfaceVariant }]}>
         {error.message}
       </Text>
-      <Text 
-        style={[styles.retryButton, { color: theme.colors.primary }]}
+      <TouchableOpacity 
         onPress={retry}
+        activeOpacity={TOUCH_OPACITY.default}
+        accessibilityRole={A11Y_ROLE.BUTTON}
+        accessibilityLabel={t('common.tapToRetry')}
       >
-        Tap to retry
-      </Text>
+        <Text style={[styles.retryButton, { color: theme.colors.primary }]}>
+          {t('common.tapToRetry')}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -73,7 +84,7 @@ class LazyErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Lazy load error:', error, errorInfo);
+    logger.error(LOG_MESSAGES.LAZY_SCREEN.LOAD_ERROR, error, { errorInfo });
   }
 
   retry = () => {
@@ -152,28 +163,28 @@ export function preloadScreen<P extends object>(
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    flex: flexValues.one,
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
     padding: designTokens.spacing.xl,
   },
   text: {
-    marginTop: 16,
+    marginTop: designTokens.spacing.lg,
     fontSize: mobileFontSizes.lg,
   },
   errorTitle: {
     fontSize: mobileFontSizes['2xl'],
-    fontWeight: 'bold',
-    marginBottom: 8,
+    fontWeight: designTokens.fontWeight.bold,
+    marginBottom: designTokens.spacing.sm,
   },
   errorMessage: {
     fontSize: mobileFontSizes.sm,
-    textAlign: 'center',
-    marginBottom: 16,
+    textAlign: layoutConstants.textAlign.center,
+    marginBottom: designTokens.spacing.lg,
   },
   retryButton: {
     fontSize: mobileFontSizes.lg,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
     padding: designTokens.spacing.md,
   },
 });

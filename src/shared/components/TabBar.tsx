@@ -8,8 +8,9 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
-import { designTokens } from '../theme/designTokens';
-import { mobileTypography, mobileFontSizes } from '../theme/mobileTypography';
+import { mobileTypography, mobileFontSizes, designTokens, layoutConstants } from '../theme';
+import { flexValues } from '../constants/layoutConstants';
+import { A11Y_ROLE } from '../constants';
 
 export interface Tab {
   id: string;
@@ -44,7 +45,7 @@ export const TabBar: React.FC<TabBarProps> = ({
             style={[styles.tab, isActive && { borderBottomColor: colors.primary }]}
             onPress={() => onTabChange(tab.id)}
             accessible={true}
-            accessibilityRole="tab"
+            accessibilityRole={A11Y_ROLE.TAB}
             accessibilityLabel={tab.label}
             accessibilityState={{ selected: isActive }}
           >
@@ -72,37 +73,37 @@ export const TabBar: React.FC<TabBarProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
+    flexDirection: layoutConstants.flexDirection.row,
     borderBottomWidth: designTokens.borderWidth.thin,
   },
   tab: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flex: flexValues.one,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
     paddingVertical: designTokens.spacing.lg,
     gap: designTokens.spacing.sm,
-    borderBottomWidth: 3,
-    borderBottomColor: 'transparent',
-    position: 'relative',
+    borderBottomWidth: designTokens.borderWidth.thick,
+    borderBottomColor: designTokens.colors.transparent,
+    position: layoutConstants.position.relative,
   },
   tabText: {
     ...mobileTypography.labelBold,
   },
   badge: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
+    position: layoutConstants.position.absolute,
+    top: designTokens.spacing.sm,
+    right: designTokens.spacing.sm,
     borderRadius: designTokens.borderRadius.full,
-    minWidth: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 6,
+    minWidth: designTokens.componentSizes.indicator.lg,
+    height: designTokens.componentSizes.tabBarIndicator.md,
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
+    paddingHorizontal: designTokens.spacing.sm,
   },
   badgeText: {
     ...mobileTypography.captionBold,
-    color: '#fff',
+    color: designTokens.colors.white,
     fontSize: mobileFontSizes.xs,
   },
 });

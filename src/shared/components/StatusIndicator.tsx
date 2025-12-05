@@ -6,12 +6,15 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { statusColors } from '../theme/sdaColors';
 import { mobileTypography, mobileFontSizes } from '../theme/mobileTypography';
 import { designTokens } from '../theme/designTokens';
+import { layoutConstants } from '../theme';
+import { TEXT_LINES, COMPONENT_SIZE, A11Y_ROLE } from '../constants';
 
 type StatusType = keyof typeof statusColors;
-type StatusSize = 'sm' | 'md' | 'lg';
+type StatusSize = typeof COMPONENT_SIZE.sm | typeof COMPONENT_SIZE.md | typeof COMPONENT_SIZE.lg;
 
 interface StatusIndicatorProps {
   status: StatusType;
@@ -28,33 +31,34 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
   label,
   showIcon = true,
   showLabel = true,
-  size = 'md',
+  size = COMPONENT_SIZE.md,
   style,
   testID,
 }) => {
+  const { t } = useTranslation();
   const statusConfig = statusColors[status];
   
   const displayLabel = label || status.charAt(0).toUpperCase() + status.slice(1);
 
   const getSizeStyles = () => {
     switch (size) {
-      case 'sm':
+      case COMPONENT_SIZE.sm:
         return {
           iconSize: designTokens.icon.sizes.xs,
           fontSize: mobileFontSizes.xs,
-          gap: 3,
+          gap: designTokens.spacing.xxs,
         };
-      case 'lg':
+      case COMPONENT_SIZE.lg:
         return {
           iconSize: designTokens.icon.sizes.md,
           fontSize: mobileFontSizes.md,
-          gap: 6,
+          gap: designTokens.spacing.sm,
         };
       default:
         return {
           iconSize: designTokens.icon.sizes.sm,
           fontSize: mobileFontSizes.xs,
-          gap: 4,
+          gap: designTokens.spacing.xs,
         };
     }
   };
@@ -70,8 +74,8 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
       ]}
       testID={testID}
       accessible={true}
-      accessibilityRole="text"
-      accessibilityLabel={`Status: ${displayLabel}`}
+      accessibilityRole={A11Y_ROLE.TEXT}
+      accessibilityLabel={t('accessibility.status', { status: displayLabel })}
     >
       {showIcon && (
         <MaterialCommunityIcons
@@ -89,7 +93,7 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
               fontSize: sizeStyles.fontSize,
             },
           ]}
-          numberOfLines={1}
+          numberOfLines={TEXT_LINES.single}
         >
           {displayLabel}
         </Text>
@@ -100,9 +104,9 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    alignSelf: layoutConstants.alignSelf.flexStart,
   },
   label: {
     ...mobileTypography.labelBold,
