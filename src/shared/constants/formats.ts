@@ -9,6 +9,18 @@ export const EXTERNAL_URLS = {
   WHATSAPP_GROUP: 'https://wa.me/',
 } as const;
 
+/**
+ * Date Locale Options - Used for toLocaleDateString options
+ */
+export const DATE_LOCALE_OPTIONS = {
+  FULL_DATE: { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' } as const,
+  LONG_DATE: { year: 'numeric', month: 'long', day: 'numeric' } as const,
+  DATE_WITHOUT_YEAR: { weekday: 'long', month: 'long', day: 'numeric' } as const,
+  SHORT_DATE: { month: 'short', day: 'numeric', year: 'numeric' } as const,
+  MEDIUM_DATE: { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' } as const,
+  MONTH_DAY: { month: 'short', day: 'numeric' } as const,
+} as const;
+
 export const DATE_FORMATS = {
   // ISO Standards
   ISO_DATE: 'YYYY-MM-DD',
@@ -34,7 +46,7 @@ export const DATE_FORMATS = {
 
   // Relative Formats (for display)
   RELATIVE_SHORT: 'relative-short', // "2h ago"
-  RELATIVE_LONG: 'relative-long',   // "2 hours ago"
+  RELATIVE_LONG: 'relative-long', // "2 hours ago"
 
   // Month & Year
   MONTH_YEAR: 'MMMM YYYY',
@@ -45,6 +57,26 @@ export const DATE_FORMATS = {
   // API Formats
   API_DATE: 'YYYY-MM-DD',
   API_DATETIME: 'YYYY-MM-DDTHH:mm:ss.SSSZ',
+
+  // ============================================================================
+  // DATE-FNS FORMATS (use with date-fns format() function)
+  // ============================================================================
+  // Note: date-fns uses lowercase 'yyyy' for year, 'dd' for day
+
+  /** Format: "Jan 01, 2024 · 14:30" - Used for scheduled dates with separator */
+  DATE_FNS_DATETIME_DISPLAY: 'MMM dd, yyyy · HH:mm',
+  /** Format: "Jan 01, 2024 14:30" - Used for datetime without separator */
+  DATE_FNS_DATETIME_SHORT: 'MMM dd, yyyy HH:mm',
+  /** Format: "Jan 01, 2024" - Used for creation dates */
+  DATE_FNS_DATE_DISPLAY: 'MMM dd, yyyy',
+  /** Format: "2024-01-01" - ISO date for date-fns */
+  DATE_FNS_ISO_DATE: 'yyyy-MM-dd',
+  /** Format: "January 01, 2024" - Long date format */
+  DATE_FNS_DATE_LONG: 'MMMM dd, yyyy',
+  /** Format: "14:30" - 24-hour time */
+  DATE_FNS_TIME_24H: 'HH:mm',
+  /** Format: "2:30 PM" - 12-hour time */
+  DATE_FNS_TIME_12H: 'h:mm a',
 } as const;
 
 export const NUMBER_FORMATS = {
@@ -119,4 +151,3 @@ export function formatNumber(value: number, decimals = 2, locale = 'en-US'): str
 // Export type helpers
 export type DateFormatKey = keyof typeof DATE_FORMATS;
 export type NumberFormatKey = keyof typeof NUMBER_FORMATS;
-

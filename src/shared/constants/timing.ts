@@ -6,65 +6,93 @@
 export const TIMING = {
   // Debounce Delays (user input)
   DEBOUNCE: {
-    SEARCH: 300,        // Search input debounce
-    INPUT: 300,         // Generic input debounce
-    FAST: 150,          // Quick debounce
-    NORMAL: 300,        // Standard debounce
-    SLOW: 500,          // Slower debounce
-    VALIDATION: 500,    // Form validation debounce
+    SEARCH: 300, // Search input debounce
+    INPUT: 300, // Generic input debounce
+    FAST: 150, // Quick debounce
+    NORMAL: 300, // Standard debounce
+    SLOW: 500, // Slower debounce
+    VALIDATION: 500, // Form validation debounce
   },
 
   // Animation Durations
   ANIMATION: {
     INSTANT: 0,
-    FAST: 200,          // Quick animations
-    NORMAL: 300,        // Standard animations
-    SLOW: 500,          // Slower animations
-    MODAL: 300,         // Modal open/close
-    FADE: 300,          // Fade in/out
-    SLIDE: 300,         // Slide transitions
-    SPINNER: 1000,      // Loading spinner minimum display
+    FAST: 200, // Quick animations
+    NORMAL: 300, // Standard animations
+    SLOW: 500, // Slower animations
+    MODAL: 300, // Modal open/close
+    FADE: 300, // Fade in/out
+    SLIDE: 300, // Slide transitions
+    SPINNER: 1000, // Loading spinner minimum display
   },
 
   // Timeouts
   TIMEOUT: {
-    SHORT: 3000,        // 3 seconds
-    MEDIUM: 5000,       // 5 seconds
-    LONG: 10000,        // 10 seconds
+    SHORT: 3000, // 3 seconds
+    MEDIUM: 5000, // 5 seconds
+    LONG: 10000, // 10 seconds
     API_REQUEST: 30000, // 30 seconds for API calls
-    TOAST: 3000,        // Toast notification display
-    ALERT: 5000,        // Alert display duration
+    TOAST: 3000, // Toast notification display
+    ALERT: 5000, // Alert display duration
   },
 
   // Polling Intervals
   POLLING: {
-    REALTIME: 1000,     // 1 second (real-time updates)
-    FAST: 5000,         // 5 seconds
-    NORMAL: 10000,      // 10 seconds
-    SLOW: 30000,        // 30 seconds
-    BACKGROUND: 60000,  // 1 minute (background sync)
+    REALTIME: 1000, // 1 second (real-time updates)
+    FAST: 5000, // 5 seconds
+    NORMAL: 10000, // 10 seconds
+    SLOW: 30000, // 30 seconds
+    BACKGROUND: 60000, // 1 minute (background sync)
   },
 
   // Retry Delays
   RETRY: {
-    FIRST: 1000,        // 1 second
-    SECOND: 2000,       // 2 seconds
-    THIRD: 4000,        // 4 seconds (exponential backoff)
-    MAX: 10000,         // Maximum retry delay
+    FIRST: 1000, // 1 second
+    SECOND: 2000, // 2 seconds
+    THIRD: 4000, // 4 seconds (exponential backoff)
+    MAX: 10000, // Maximum retry delay
   },
 
   // Auto-save & Sync
   AUTO_SAVE: {
-    DRAFT: 30000,       // 30 seconds
-    FORM: 60000,        // 1 minute
+    DRAFT: 30000, // 30 seconds
+    FORM: 60000, // 1 minute
+  },
+
+  // Mock API Delays (for development/testing)
+  MOCK_API: {
+    FAST: 300, // Standard mock delay
+    NORMAL: 500, // Create/update operations
+    SLOW: 1000, // Generate operations
   },
 
   // Cache Expiry
   CACHE: {
-    SHORT: 60000,       // 1 minute
-    MEDIUM: 300000,     // 5 minutes
-    LONG: 3600000,      // 1 hour
-    DAY: 86400000,      // 24 hours
+    SHORT: 60000, // 1 minute
+    MEDIUM: 300000, // 5 minutes
+    LONG: 3600000, // 1 hour
+    DAY: 86400000, // 24 hours
+  },
+
+  // Time Units (in milliseconds)
+  MS_PER: {
+    SECOND: 1000,
+    MINUTE: 60000, // 1000 * 60
+    HOUR: 3600000, // 1000 * 60 * 60
+    DAY: 86400000, // 1000 * 60 * 60 * 24
+    WEEK: 604800000, // 1000 * 60 * 60 * 24 * 7
+  },
+
+  // Schedule Defaults (in days)
+  SCHEDULE: {
+    DEFAULT_ADVANCE_DAYS: 7, // Default days ahead for scheduling
+  },
+
+  // Time Thresholds for relative time
+  RELATIVE_TIME: {
+    MINUTES_THRESHOLD: 60, // Show minutes if < 60 minutes
+    HOURS_THRESHOLD: 24, // Show hours if < 24 hours
+    DAYS_THRESHOLD: 7, // Show days if < 7 days
   },
 } as const;
 
@@ -79,4 +107,3 @@ export const hours = (h: number): number => h * 60 * 60 * 1000;
 
 // Export type helpers
 export type TimingCategory = keyof typeof TIMING;
-

@@ -19,6 +19,8 @@ export const VALIDATION = {
   // WhatsApp Number
   WHATSAPP: {
     REGEX: /^\+?[1-9]\d{1,14}$/,
+    NORMALIZE_PATTERN: /[\s()-]/g,
+    STRIP_NON_DIGITS: /[^0-9]/g,
     MIN_LENGTH: 10,
     MAX_LENGTH: 15,
   },
@@ -72,7 +74,7 @@ export const DATE_VALIDATION = {
     US: /^\d{2}\/\d{2}\/\d{4}$/,
     DATETIME_ISO: /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?$/,
   },
-  
+
   MIN_YEAR: 1900,
   MAX_YEAR: 2100,
 } as const;
@@ -84,37 +86,37 @@ export const BUSINESS_RULES = {
   RETRY_BASE_DELAY_MS: 1000,
   RETRY_MAX_DELAY_MS: 30000,
   RETRY_BACKOFF_MULTIPLIER: 2,
-  
+
   // Circuit Breaker
   CIRCUIT_BREAKER_FAILURE_THRESHOLD: 5,
   CIRCUIT_BREAKER_SUCCESS_THRESHOLD: 2,
   CIRCUIT_BREAKER_TIMEOUT_MS: 60000,
   CIRCUIT_BREAKER_HALF_OPEN_MAX_CALLS: 3,
-  
+
   // HTTP Retryable Status Codes
   RETRYABLE_HTTP_STATUSES: [408, 429, 500, 502, 503, 504],
-  
+
   // Rate Limiting
   MAX_REQUESTS_PER_MINUTE: 60,
   MAX_LOGIN_ATTEMPTS: 5,
   LOGIN_LOCKOUT_DURATION_MINUTES: 15,
-  
+
   // Club Management
   MIN_CLUB_MEMBERS: 2,
   MAX_CLUB_MEMBERS: 100,
   DEFAULT_MATCH_DURATION_HOURS: 2,
   MIN_MATCH_PARTICIPANTS: 2,
   MAX_MATCH_PARTICIPANTS: 10,
-  
+
   // Payment & Fees
-  DEFAULT_MONTHLY_FEE: 20.00,
+  DEFAULT_MONTHLY_FEE: 20.0,
   LATE_PAYMENT_GRACE_DAYS: 7,
-  MAX_OUTSTANDING_BALANCE: 1000.00,
-  
+  MAX_OUTSTANDING_BALANCE: 1000.0,
+
   // Notifications
   MAX_UNREAD_NOTIFICATIONS: 99,
   NOTIFICATION_RETENTION_DAYS: 30,
-  
+
   // Session Management
   SESSION_TIMEOUT_MINUTES: 60,
   REFRESH_TOKEN_VALIDITY_DAYS: 30,
@@ -133,4 +135,3 @@ export const LIMITS = {
 export type ValidationKey = keyof typeof VALIDATION;
 export type BusinessRuleKey = keyof typeof BUSINESS_RULES;
 export type LimitKey = keyof typeof LIMITS;
-
