@@ -1,11 +1,13 @@
 import React, { memo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { Match, MatchStatus } from '../types';
 import { format } from 'date-fns';
-import { DesignConstants } from '../shared/theme/designConstants';
-import { mobileTypography, mobileIconSizes } from '../shared/theme';
-import { designTokens } from '../shared/theme/designTokens';
+import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../shared/theme';
+import { A11Y_ROLE, ICONS, TOUCH_OPACITY, COMPONENT_NAMES, DATE_FORMATS } from '../shared/constants';
+import { flexValues } from '../shared/constants/layoutConstants';
+import { formatMembersCount } from '../shared/utils/formatters';
 
 interface MatchCardProps {
   match: Match;
@@ -22,8 +24,10 @@ const MatchCardComponent: React.FC<MatchCardProps> = ({
   onSchedule,
   showActions = false,
 }) => {
+  const { t } = useTranslation();
+
   const getStatusConfig = (status: MatchStatus) => {
-    return DesignConstants.status[status] || DesignConstants.status.pending;
+    return designTokens.status[status] || designTokens.status.pending;
   };
 
   const statusConfig = getStatusConfig(match.status);
@@ -46,8 +50,8 @@ const MatchCardComponent: React.FC<MatchCardProps> = ({
         {/* Skip button for pending matches */}
         {showActions && match.status === MatchStatus.PENDING && onSkip && (
           <TouchableOpacity style={styles.skipButton} onPress={onSkip}>
-            <MaterialCommunityIcons name="close" size={mobileIconSizes.small} color={designTokens.colors.error} />
-            <Text style={styles.skipButtonText}>Skip</Text>
+            <MaterialCommunityIcons name={ICONS.CLOSE} size={mobileIconSizes.small} color={designTokens.colors.error} />
+            <Text style={styles.skipButtonText}>{t('components.matchCard.skip')}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -57,11 +61,11 @@ const MatchCardComponent: React.FC<MatchCardProps> = ({
         {/* Participants */}
         <View style={styles.infoRow}>
           <View style={styles.iconBox}>
-            <MaterialCommunityIcons name="account-group" size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+            <MaterialCommunityIcons name={ICONS.ACCOUNT_GROUP} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
           </View>
           <View style={styles.infoTextContainer}>
-            <Text style={styles.infoLabel}>Participants</Text>
-            <Text style={styles.infoValue}>{match.participants.length} members</Text>
+            <Text style={styles.infoLabel}>{t('components.matchCard.participants')}</Text>
+            <Text style={styles.infoValue}>{formatMembersCount(match.participants.length, t)}</Text>
           </View>
         </View>
 
@@ -69,12 +73,12 @@ const MatchCardComponent: React.FC<MatchCardProps> = ({
         {match.scheduledDate && (
           <View style={styles.infoRow}>
             <View style={styles.iconBox}>
-              <MaterialCommunityIcons name="calendar" size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+              <MaterialCommunityIcons name={ICONS.CALENDAR} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
             </View>
             <View style={styles.infoTextContainer}>
-              <Text style={styles.infoLabel}>Scheduled</Text>
+              <Text style={styles.infoLabel}>{t('components.matchCard.scheduled')}</Text>
               <Text style={styles.infoValue}>
-                {format(new Date(match.scheduledDate), 'MMM dd, yyyy · HH:mm')}
+                {format(new Date(match.scheduledDate), DATE_FORMATS.DATE_FNS_DATETIME_DISPLAY)}
               </Text>
             </View>
           </View>
@@ -83,12 +87,12 @@ const MatchCardComponent: React.FC<MatchCardProps> = ({
         {/* Created Date */}
         <View style={styles.infoRow}>
           <View style={styles.iconBox}>
-            <MaterialCommunityIcons name="clock-outline" size={mobileIconSizes.medium} color={designTokens.colors.textSecondary} />
+            <MaterialCommunityIcons name={ICONS.CLOCK_OUTLINE} size={mobileIconSizes.medium} color={designTokens.colors.textSecondary} />
           </View>
           <View style={styles.infoTextContainer}>
-            <Text style={styles.infoLabel}>Created</Text>
+            <Text style={styles.infoLabel}>{t('components.matchCard.created')}</Text>
             <Text style={styles.infoValue}>
-              {format(new Date(match.createdAt), 'MMM dd, yyyy')}
+              {format(new Date(match.createdAt), DATE_FORMATS.DATE_FNS_DATE_DISPLAY)}
             </Text>
           </View>
         </View>
@@ -97,8 +101,8 @@ const MatchCardComponent: React.FC<MatchCardProps> = ({
       {/* Actions */}
       {showActions && match.status === MatchStatus.PENDING && onSchedule && (
         <TouchableOpacity style={styles.scheduleButton} onPress={onSchedule}>
-          <MaterialCommunityIcons name="calendar-plus" size={mobileIconSizes.medium} color={designTokens.colors.textInverse} />
-          <Text style={styles.scheduleButtonText}>Schedule Meetup</Text>
+          <MaterialCommunityIcons name={ICONS.CALENDAR_PLUS} size={mobileIconSizes.medium} color={designTokens.colors.textInverse} />
+          <Text style={styles.scheduleButtonText}>{t('components.matchCard.scheduleMeetup')}</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -108,10 +112,10 @@ const MatchCardComponent: React.FC<MatchCardProps> = ({
     return (
       <TouchableOpacity
         onPress={onPress}
-        activeOpacity={0.7}
+        activeOpacity={TOUCH_OPACITY.default}
         accessible={true}
-        accessibilityRole="button"
-        accessibilityLabel="View activity details"
+        accessibilityRole={A11Y_ROLE.BUTTON}
+        accessibilityLabel={t('accessibility.viewActivityDetails')}
       >
         {CardContent}
       </TouchableOpacity>
@@ -131,81 +135,81 @@ export const MatchCard = memo(MatchCardComponent, (prevProps, nextProps) => {
   );
 });
 
-MatchCard.displayName = 'MatchCard';
+MatchCard.displayName = COMPONENT_NAMES.MATCH_CARD;
 
 const styles = StyleSheet.create({
   card: {
-    ...DesignConstants.card,
-    ...DesignConstants.card.shadow,
-    backgroundColor: DesignConstants.colors.background.primary,
+    ...designTokens.card,
+    ...designTokens.card.shadow,
+    backgroundColor: designTokens.colors.background.primary,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: DesignConstants.spacing.md,
+    flexDirection: layoutConstants.flexDirection.row,
+    justifyContent: layoutConstants.justifyContent.spaceBetween,
+    alignItems: layoutConstants.alignItems.center,
+    marginBottom: designTokens.spacing.md,
   },
   statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    paddingVertical: designTokens.spacing.sm,
+    paddingHorizontal: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.xl,
-    gap: 6,
+    gap: designTokens.spacing.sm,
   },
   statusText: {
     ...mobileTypography.labelBold,
   },
   skipButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    paddingHorizontal: designTokens.spacing.md,
+    paddingVertical: designTokens.spacing.sm,
     borderRadius: designTokens.borderRadius.md,
     backgroundColor: designTokens.colors.errorLight,
-    gap: 6,
+    gap: designTokens.spacing.sm,
   },
   skipButtonText: {
     ...mobileTypography.labelBold,
     color: designTokens.colors.error,
   },
   body: {
-    gap: DesignConstants.spacing.md,
+    gap: designTokens.spacing.md,
   },
   infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: DesignConstants.spacing.md,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    gap: designTokens.spacing.md,
   },
   iconBox: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
+    width: designTokens.componentSizes.iconContainer.md,
+    height: designTokens.componentSizes.iconContainer.md,
+    borderRadius: designTokens.borderRadius.xl,
     backgroundColor: designTokens.colors.primaryLight,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
   },
   infoTextContainer: {
-    flex: 1,
+    flex: flexValues.one,
   },
   infoLabel: {
     ...mobileTypography.caption,
-    color: DesignConstants.colors.text.tertiary,
-    marginBottom: 2,
+    color: designTokens.colors.text.tertiary,
+    marginBottom: designTokens.spacing.xxs,
   },
   infoValue: {
     ...mobileTypography.bodyMediumBold,
-    color: DesignConstants.colors.text.primary,
+    color: designTokens.colors.text.primary,
   },
   scheduleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: DesignConstants.colors.primary,
-    paddingVertical: 14,
-    borderRadius: 10,
-    marginTop: DesignConstants.spacing.md,
-    gap: 8,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
+    backgroundColor: designTokens.colors.primary,
+    paddingVertical: designTokens.spacing.md,
+    borderRadius: designTokens.borderRadius.xl,
+    marginTop: designTokens.spacing.md,
+    gap: designTokens.spacing.sm,
   },
   scheduleButtonText: {
     ...mobileTypography.button,

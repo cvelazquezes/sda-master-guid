@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, Alert, useWindowDimensions } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { PATHFINDER_CLASSES, PathfinderClass } from '../types';
-import { designTokens } from '../shared/theme/designTokens';
-import { mobileTypography, mobileFontSizes } from '../shared/theme/mobileTypography';
-import { MESSAGES } from '../shared/constants';
+import { mobileTypography, mobileFontSizes, designTokens, layoutConstants } from '../shared/theme';
+import { MESSAGES, ICONS, ANIMATION, A11Y_ROLE } from '../shared/constants';
+import { CLASS_SELECTION } from '../shared/constants/businessRules';
+import { flexValues } from '../shared/constants/layoutConstants';
 
 interface ClassSelectionModalProps {
   visible: boolean;
@@ -31,31 +33,31 @@ export const ClassSelectionModal: React.FC<ClassSelectionModalProps> = ({
 
   // Calculate responsive modal width
   const getModalWidth = () => {
-    if (windowWidth > 1200) {
-      return Math.min(600, windowWidth * 0.4);
-    } else if (windowWidth > 768) {
-      return Math.min(550, windowWidth * 0.65);
-    } else if (windowWidth > 480) {
-      return windowWidth * 0.85;
+    if (windowWidth > designTokens.breakpoints.desktop) {
+      return Math.min(designTokens.responsiveScale.maxWidth.modal, windowWidth * designTokens.responsiveScale.modal.desktop);
+    } else if (windowWidth > designTokens.breakpoints.tablet) {
+      return Math.min(designTokens.responsiveScale.maxWidth.modalSmall, windowWidth * designTokens.responsiveScale.modal.tablet);
+    } else if (windowWidth > designTokens.breakpoints.mobile) {
+      return windowWidth * designTokens.responsiveScale.modal.mobileLarge;
     } else {
-      return windowWidth * 0.9;
+      return windowWidth * designTokens.responsiveScale.modal.mobile;
     }
   };
 
   const modalWidth = getModalWidth();
-  const modalMaxHeight = windowHeight * 0.85;
+  const modalMaxHeight = windowHeight * designTokens.responsiveScale.maxHeight.modal;
 
   const toggleClass = (pathfinderClass: PathfinderClass) => {
     if (selectedClasses.includes(pathfinderClass)) {
       // Remove class - but ensure at least 1 remains
-      if (selectedClasses.length === 1) {
+      if (selectedClasses.length === CLASS_SELECTION.minimum) {
         Alert.alert(MESSAGES.TITLES.MINIMUM_REQUIRED, MESSAGES.ERRORS.MINIMUM_ONE_CLASS_REQUIRED);
         return;
       }
       setSelectedClasses(selectedClasses.filter((c) => c !== pathfinderClass));
     } else {
-      // Add class - but don't exceed 3
-      if (selectedClasses.length === 3) {
+      // Add class - but don't exceed maximum
+      if (selectedClasses.length === CLASS_SELECTION.maximum) {
         Alert.alert(MESSAGES.TITLES.MAXIMUM_REACHED, MESSAGES.ERRORS.MAXIMUM_CLASSES_REACHED);
         return;
       }
@@ -64,7 +66,7 @@ export const ClassSelectionModal: React.FC<ClassSelectionModalProps> = ({
   };
 
   const handleSave = () => {
-    if (selectedClasses.length === 0) {
+    if (selectedClasses.length === CLASS_SELECTION.empty) {
       Alert.alert(MESSAGES.TITLES.REQUIRED, MESSAGES.ERRORS.PLEASE_SELECT_ONE_CLASS);
       return;
     }
@@ -76,24 +78,26 @@ export const ClassSelectionModal: React.FC<ClassSelectionModalProps> = ({
     return selectedClasses.includes(pathfinderClass);
   };
 
+  const { t } = useTranslation();
+
   return (
-    <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
+    <Modal visible={visible} animationType={ANIMATION.SLIDE} transparent={true} onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
         <View style={[styles.modalContent, { width: modalWidth, maxHeight: modalMaxHeight }]}>
           <View style={styles.header}>
             <View style={styles.headerLeft}>
-              <MaterialCommunityIcons name="school" size={24} color={designTokens.colors.primary} />
-              <Text style={styles.title}>Select Classes</Text>
+              <MaterialCommunityIcons name={ICONS.SCHOOL} size={designTokens.iconSize.lg} color={designTokens.colors.primary} />
+              <Text style={styles.title}>{t('classes.selectClasses')}</Text>
             </View>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <MaterialCommunityIcons name="close" size={24} color={designTokens.colors.textSecondary} />
+            <TouchableOpacity onPress={onClose} style={styles.closeButton} accessibilityRole={A11Y_ROLE.BUTTON} accessibilityLabel={t('accessibility.closeModal')}>
+              <MaterialCommunityIcons name={ICONS.CLOSE} size={designTokens.iconSize.lg} color={designTokens.colors.textSecondary} />
             </TouchableOpacity>
           </View>
 
           <View style={styles.infoCard}>
-            <MaterialCommunityIcons name="information" size={20} color={designTokens.colors.primary} />
+            <MaterialCommunityIcons name={ICONS.INFORMATION} size={designTokens.iconSize.md} color={designTokens.colors.primary} />
             <Text style={styles.infoText}>
-              Select between 1 and 3 Pathfinder classes. Selected: {selectedClasses.length}/3
+              {t('classes.classInfo')} {selectedClasses.length}/{CLASS_SELECTION.maximum}
             </Text>
           </View>
 
@@ -115,7 +119,7 @@ export const ClassSelectionModal: React.FC<ClassSelectionModalProps> = ({
                     ]}
                   >
                     {isSelected(pathfinderClass) && (
-                      <MaterialCommunityIcons name="check" size={18} color={designTokens.colors.textInverse} />
+                      <MaterialCommunityIcons name={ICONS.CHECK} size={designTokens.iconSize.sm} color={designTokens.colors.textInverse} />
                     )}
                   </View>
                   <Text
@@ -139,12 +143,12 @@ export const ClassSelectionModal: React.FC<ClassSelectionModalProps> = ({
           </ScrollView>
 
           <View style={styles.footer}>
-            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-              <Text style={styles.cancelButtonText}>Cancel</Text>
+            <TouchableOpacity style={styles.cancelButton} onPress={onClose} accessibilityRole={A11Y_ROLE.BUTTON}>
+              <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-              <MaterialCommunityIcons name="check" size={20} color={designTokens.colors.textInverse} />
-              <Text style={styles.saveButtonText}>Save</Text>
+            <TouchableOpacity style={styles.saveButton} onPress={handleSave} accessibilityRole={A11Y_ROLE.BUTTON}>
+              <MaterialCommunityIcons name={ICONS.CHECK} size={designTokens.iconSize.md} color={designTokens.colors.textInverse} />
+              <Text style={styles.saveButtonText}>{t('common.save')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -155,86 +159,86 @@ export const ClassSelectionModal: React.FC<ClassSelectionModalProps> = ({
 
 const styles = StyleSheet.create({
   modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 20,
-    paddingHorizontal: 16,
+    flex: flexValues.one,
+    backgroundColor: designTokens.overlay.darkMedium,
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
+    paddingVertical: designTokens.spacing.xl,
+    paddingHorizontal: designTokens.spacing.lg,
   },
   modalContent: {
     backgroundColor: designTokens.colors.backgroundPrimary,
-    borderRadius: designTokens.borderRadius.xxl,
+    borderRadius: designTokens.borderRadius['2xl'],
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    justifyContent: layoutConstants.justifyContent.spaceBetween,
+    alignItems: layoutConstants.alignItems.center,
     padding: designTokens.spacing.xl,
-    borderBottomWidth: 1,
+    borderBottomWidth: designTokens.borderWidth.thin,
     borderBottomColor: designTokens.colors.borderLight,
   },
   headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    gap: designTokens.spacing.md,
   },
   title: {
     fontSize: mobileFontSizes.xl,
-    fontWeight: 'bold',
+    fontWeight: designTokens.fontWeight.bold,
     color: designTokens.colors.textPrimary,
   },
   closeButton: {
     padding: designTokens.spacing.xs,
   },
   infoCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     backgroundColor: designTokens.colors.primaryLight,
-    margin: 16,
+    margin: designTokens.spacing.lg,
     padding: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.lg,
-    gap: 10,
+    gap: designTokens.spacing.md,
   },
   infoText: {
-    flex: 1,
+    flex: flexValues.one,
     fontSize: mobileFontSizes.sm,
     color: designTokens.colors.primary,
-    lineHeight: 20,
+    lineHeight: designTokens.lineHeights.bodyLarge,
   },
   classList: {
-    flex: 1,
-    paddingHorizontal: 16,
-    marginBottom: 16,
+    flex: flexValues.one,
+    paddingHorizontal: designTokens.spacing.lg,
+    marginBottom: designTokens.spacing.lg,
   },
   classOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.spaceBetween,
     padding: designTokens.spacing.lg,
     borderRadius: designTokens.borderRadius.lg,
-    marginBottom: 12,
+    marginBottom: designTokens.spacing.md,
     backgroundColor: designTokens.colors.backgroundSecondary,
-    borderWidth: 2,
-    borderColor: 'transparent',
+    borderWidth: designTokens.borderWidth.medium,
+    borderColor: designTokens.colors.transparent,
   },
   classOptionSelected: {
     backgroundColor: designTokens.colors.primaryLight,
     borderColor: designTokens.colors.primary,
   },
   classOptionContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    gap: designTokens.spacing.md,
   },
   checkbox: {
-    width: 24,
-    height: 24,
+    width: designTokens.componentSizes.checkbox.md,
+    height: designTokens.componentSizes.checkbox.md,
     borderRadius: designTokens.borderRadius.sm,
-    borderWidth: 2,
+    borderWidth: designTokens.borderWidth.medium,
     borderColor: designTokens.colors.textTertiary,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
   },
   checkboxSelected: {
     backgroundColor: designTokens.colors.primary,
@@ -243,57 +247,57 @@ const styles = StyleSheet.create({
   classOptionText: {
     fontSize: mobileFontSizes.lg,
     color: designTokens.colors.textPrimary,
-    fontWeight: '500',
+    fontWeight: designTokens.fontWeight.medium,
   },
   classOptionTextSelected: {
     color: designTokens.colors.primary,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
   },
   selectedBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: designTokens.componentSizes.badge.md,
+    height: designTokens.componentSizes.badge.md,
+    borderRadius: designTokens.borderRadius['2xl'],
     backgroundColor: designTokens.colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
   },
   selectedBadgeText: {
     color: designTokens.colors.textInverse,
     fontSize: mobileFontSizes.sm,
-    fontWeight: 'bold',
+    fontWeight: designTokens.fontWeight.bold,
   },
   footer: {
-    flexDirection: 'row',
+    flexDirection: layoutConstants.flexDirection.row,
     padding: designTokens.spacing.lg,
-    gap: 12,
-    borderTopWidth: 1,
+    gap: designTokens.spacing.md,
+    borderTopWidth: designTokens.borderWidth.thin,
     borderTopColor: designTokens.colors.borderLight,
   },
   cancelButton: {
-    flex: 1,
-    paddingVertical: 14,
+    flex: flexValues.one,
+    paddingVertical: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.lg,
     backgroundColor: designTokens.colors.backgroundSecondary,
-    alignItems: 'center',
+    alignItems: layoutConstants.alignItems.center,
   },
   cancelButtonText: {
     fontSize: mobileFontSizes.lg,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
     color: designTokens.colors.textSecondary,
   },
   saveButton: {
-    flex: 1,
-    flexDirection: 'row',
-    paddingVertical: 14,
+    flex: flexValues.one,
+    flexDirection: layoutConstants.flexDirection.row,
+    paddingVertical: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.lg,
     backgroundColor: designTokens.colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
+    gap: designTokens.spacing.sm,
   },
   saveButtonText: {
     fontSize: mobileFontSizes.lg,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
     color: designTokens.colors.textInverse,
   },
 });

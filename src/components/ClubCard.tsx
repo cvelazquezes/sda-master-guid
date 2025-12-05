@@ -7,11 +7,14 @@
 import React, { memo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../contexts/ThemeContext';
 import { Club } from '../types';
-import { mobileTypography } from '../shared/theme';
-import { designTokens } from '../shared/theme/designTokens';
+import { mobileTypography, designTokens, layoutConstants } from '../shared/theme';
 import { StatusIndicator, IconButton } from '../shared/components';
+import { A11Y_ROLE, ICONS, TEXT_LINES, TOUCH_OPACITY, COMPONENT_SIZE, STATUS, COMPONENT_NAMES } from '../shared/constants';
+import { formatMatchFrequency, formatMembersCount, formatGroupSize, formatViewDetailsLabel, formatDeleteLabel } from '../shared/utils/formatters';
+import { flexValues } from '../shared/constants/layoutConstants';
 
 interface ClubCardProps {
   club: Club;
@@ -29,17 +32,18 @@ const ClubCardComponent: React.FC<ClubCardProps> = ({
   onDelete,
 }) => {
   const { colors, isDark } = useTheme();
+  const { t } = useTranslation();
 
   const CardContent = (
     <View style={[
       styles.card,
       { 
         backgroundColor: colors.surface,
-        shadowColor: '#000',
-        shadowOpacity: isDark ? 0.4 : 0.2,
-        elevation: isDark ? 8 : 5,
+        shadowColor: designTokens.colors.black,
+        shadowOpacity: isDark ? designTokens.shadowConfig.dark.opacity : designTokens.shadowConfig.light.opacity,
+        elevation: isDark ? designTokens.shadowConfig.dark.elevation : designTokens.shadowConfig.light.elevation,
       },
-      !club.isActive && { backgroundColor: colors.surfaceLight, opacity: 0.8 }
+      !club.isActive && { backgroundColor: colors.surfaceLight, opacity: designTokens.opacity.high }
     ]}>
       {/* Icon */}
       <View style={[
@@ -47,7 +51,7 @@ const ClubCardComponent: React.FC<ClubCardProps> = ({
         { backgroundColor: club.isActive ? colors.primaryAlpha10 : colors.surfaceLight }
       ]}>
         <MaterialCommunityIcons
-          name="account-group"
+          name={ICONS.ACCOUNT_GROUP}
           size={designTokens.icon.sizes.lg}
           color={club.isActive ? colors.primary : colors.textTertiary}
         />
@@ -61,12 +65,12 @@ const ClubCardComponent: React.FC<ClubCardProps> = ({
               styles.clubName, 
               { color: club.isActive ? colors.textPrimary : colors.textTertiary }
             ]} 
-            numberOfLines={1}
+            numberOfLines={TEXT_LINES.single}
           >
             {club.name}
           </Text>
           <StatusIndicator
-            status={club.isActive ? 'active' : 'inactive'}
+            status={club.isActive ? STATUS.active : STATUS.inactive}
             showIcon
           />
         </View>
@@ -76,7 +80,7 @@ const ClubCardComponent: React.FC<ClubCardProps> = ({
             styles.clubDescription, 
             { color: club.isActive ? colors.textSecondary : colors.textTertiary }
           ]} 
-          numberOfLines={1}
+          numberOfLines={TEXT_LINES.single}
         >
           {club.description}
         </Text>
@@ -86,7 +90,7 @@ const ClubCardComponent: React.FC<ClubCardProps> = ({
           {club.church && (
             <View style={styles.hierarchyItem}>
               <MaterialCommunityIcons
-                name="church"
+                name={ICONS.CHURCH}
                 size={designTokens.icon.sizes.xs}
                 color={club.isActive ? colors.primary : colors.textTertiary}
               />
@@ -95,7 +99,7 @@ const ClubCardComponent: React.FC<ClubCardProps> = ({
                   styles.hierarchyText, 
                   { color: club.isActive ? colors.textSecondary : colors.textTertiary }
                 ]} 
-                numberOfLines={1}
+                numberOfLines={TEXT_LINES.single}
               >
                 {club.church}
               </Text>
@@ -104,7 +108,7 @@ const ClubCardComponent: React.FC<ClubCardProps> = ({
           {club.association && (
             <View style={styles.hierarchyItem}>
               <MaterialCommunityIcons
-                name="office-building"
+                name={ICONS.OFFICE_BUILDING}
                 size={designTokens.icon.sizes.xs}
                 color={club.isActive ? colors.primary : colors.textTertiary}
               />
@@ -113,7 +117,7 @@ const ClubCardComponent: React.FC<ClubCardProps> = ({
                   styles.hierarchyText, 
                   { color: club.isActive ? colors.textSecondary : colors.textTertiary }
                 ]} 
-                numberOfLines={1}
+                numberOfLines={TEXT_LINES.single}
               >
                 {club.association}
               </Text>
@@ -125,33 +129,33 @@ const ClubCardComponent: React.FC<ClubCardProps> = ({
         <View style={styles.clubDetails}>
           <View style={styles.detailItem}>
             <MaterialCommunityIcons
-              name="calendar-clock"
+              name={ICONS.CALENDAR_CLOCK}
               size={designTokens.icon.sizes.xs}
               color={club.isActive ? colors.textSecondary : colors.textTertiary}
             />
             <Text style={[styles.detailText, { color: club.isActive ? colors.textSecondary : colors.textTertiary }]}>
-              {club.matchFrequency.replace('_', '-')}
+              {formatMatchFrequency(club.matchFrequency, t)}
             </Text>
           </View>
           <View style={styles.detailItem}>
             <MaterialCommunityIcons
-              name="account-multiple"
+              name={ICONS.ACCOUNT_MULTIPLE}
               size={designTokens.icon.sizes.xs}
               color={club.isActive ? colors.textSecondary : colors.textTertiary}
             />
             <Text style={[styles.detailText, { color: club.isActive ? colors.textSecondary : colors.textTertiary }]}>
-              {club.groupSize}/group
+              {formatGroupSize(club.groupSize, t)}
             </Text>
           </View>
           {club.memberCount !== undefined && (
             <View style={styles.detailItem}>
               <MaterialCommunityIcons
-                name="account-group"
+                name={ICONS.ACCOUNT_GROUP}
                 size={designTokens.icon.sizes.xs}
                 color={club.isActive ? colors.textSecondary : colors.textTertiary}
               />
               <Text style={[styles.detailText, { color: club.isActive ? colors.textSecondary : colors.textTertiary }]}>
-                {club.memberCount} members
+                {formatMembersCount(club.memberCount, t)}
               </Text>
             </View>
           )}
@@ -163,26 +167,26 @@ const ClubCardComponent: React.FC<ClubCardProps> = ({
         <View style={styles.actionsContainer}>
           {onToggleStatus && (
             <IconButton
-              icon={club.isActive ? 'cancel' : 'check-circle'}
+              icon={club.isActive ? ICONS.CANCEL : ICONS.CHECK_CIRCLE}
               onPress={onToggleStatus}
-              size="md"
+              size={COMPONENT_SIZE.md}
               color={club.isActive ? colors.error : colors.success}
-              accessibilityLabel={club.isActive ? 'Deactivate club' : 'Activate club'}
+              accessibilityLabel={club.isActive ? t('accessibility.deactivateClub') : t('accessibility.activateClub')}
             />
           )}
           {onDelete && (
             <IconButton
-              icon="delete-outline"
+              icon={ICONS.DELETE_OUTLINE}
               onPress={onDelete}
-              size="md"
+              size={COMPONENT_SIZE.md}
               color={colors.error}
-              accessibilityLabel={`Delete ${club.name}`}
+              accessibilityLabel={formatDeleteLabel(club.name, t)}
             />
           )}
         </View>
       ) : onPress ? (
         <MaterialCommunityIcons
-          name="chevron-right"
+          name={ICONS.CHEVRON_RIGHT}
           size={designTokens.icon.sizes.lg}
           color={colors.textTertiary}
           style={styles.chevron}
@@ -195,11 +199,11 @@ const ClubCardComponent: React.FC<ClubCardProps> = ({
     return (
       <TouchableOpacity
         onPress={onPress}
-        activeOpacity={0.7}
+        activeOpacity={TOUCH_OPACITY.default}
         accessible={true}
-        accessibilityRole="button"
-        accessibilityLabel={`View details for ${club.name}`}
-        accessibilityHint="Double tap to open club details"
+        accessibilityRole={A11Y_ROLE.BUTTON}
+        accessibilityLabel={formatViewDetailsLabel(club.name, t)}
+        accessibilityHint={t('accessibility.doubleTapToOpenClubDetails')}
         accessibilityState={{ disabled: !club.isActive }}
       >
         {CardContent}
@@ -226,83 +230,83 @@ export const ClubCard = memo(ClubCardComponent, (prevProps, nextProps) => {
   );
 });
 
-ClubCard.displayName = 'ClubCard';
+ClubCard.displayName = COMPONENT_NAMES.CLUB_CARD;
 
 const styles = StyleSheet.create({
   card: {
     borderRadius: designTokens.borderRadius.lg,
     marginBottom: designTokens.spacing.md,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
-    elevation: 3,
-    flexDirection: 'row',
-    alignItems: 'center',
+    shadowColor: designTokens.colors.black,
+    shadowOffset: { width: 0, height: designTokens.spacing.xxs },
+    shadowRadius: designTokens.shadows.md.shadowRadius,
+    elevation: designTokens.shadows.md.elevation,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     padding: designTokens.spacing.lg,
-    minHeight: 80,
+    minHeight: designTokens.componentSizes.cardMinHeight.md,
   },
   icon: {
-    width: 48,
-    height: 48,
+    width: designTokens.componentSizes.iconContainer.lg,
+    height: designTokens.componentSizes.iconContainer.lg,
     borderRadius: designTokens.borderRadius['3xl'],
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
     marginRight: designTokens.spacing.md,
-    flexShrink: 0,
+    flexShrink: flexValues.shrinkDisabled,
   },
   clubInfo: {
-    flex: 1,
+    flex: flexValues.one,
     marginRight: designTokens.spacing.md,
-    minWidth: 0,
+    minWidth: designTokens.spacing.none,
   },
   clubHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    marginBottom: designTokens.spacing.xs,
     gap: designTokens.spacing.sm,
   },
   clubName: {
     ...mobileTypography.bodyMediumBold,
-    flex: 1,
+    flex: flexValues.one,
   },
   clubDescription: {
     ...mobileTypography.bodySmall,
-    marginBottom: 4,
+    marginBottom: designTokens.spacing.xs,
   },
   hierarchyContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: layoutConstants.flexDirection.row,
+    flexWrap: layoutConstants.flexWrap.wrap,
     gap: designTokens.spacing.sm,
-    marginBottom: 4,
+    marginBottom: designTokens.spacing.xs,
   },
   hierarchyItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    gap: designTokens.spacing.xs,
   },
   hierarchyText: {
     ...mobileTypography.caption,
   },
   clubDetails: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: layoutConstants.flexDirection.row,
+    flexWrap: layoutConstants.flexWrap.wrap,
     gap: designTokens.spacing.sm,
   },
   detailItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    gap: designTokens.spacing.xs,
   },
   detailText: {
     ...mobileTypography.caption,
   },
   actionsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    flexShrink: 0,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    gap: designTokens.spacing.xs,
+    flexShrink: flexValues.shrinkDisabled,
   },
   chevron: {
-    flexShrink: 0,
+    flexShrink: flexValues.shrinkDisabled,
   },
 });

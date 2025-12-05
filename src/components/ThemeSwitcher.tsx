@@ -10,17 +10,18 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme, ThemeMode } from '../contexts/ThemeContext';
 import { SelectionModal, SelectionItem } from '../shared/components/SelectionModal';
-import { designTokens } from '../shared/theme/designTokens';
-import { mobileTypography } from '../shared/theme/mobileTypography';
+import { mobileTypography, designTokens, layoutConstants } from '../shared/theme';
+import { ICONS, A11Y_ROLE, THEME_MODE } from '../shared/constants';
+import { flexValues } from '../shared/constants/layoutConstants';
 
 interface ThemeSwitcherProps {
   showLabel?: boolean;
 }
 
-const THEME_OPTIONS: { mode: ThemeMode; icon: string; labelKey: string; subtitle: string }[] = [
-  { mode: 'light', icon: 'white-balance-sunny', labelKey: 'settings.lightMode', subtitle: 'Always use light colors' },
-  { mode: 'dark', icon: 'moon-waning-crescent', labelKey: 'settings.darkMode', subtitle: 'Always use dark colors' },
-  { mode: 'system', icon: 'theme-light-dark', labelKey: 'settings.systemDefault', subtitle: 'Follow device settings' },
+const THEME_OPTIONS: { mode: ThemeMode; icon: string; labelKey: string; subtitleKey: string }[] = [
+  { mode: THEME_MODE.LIGHT, icon: ICONS.WEATHER_SUNNY, labelKey: 'settings.lightMode', subtitleKey: 'components.themeSwitcher.lightSubtitle' },
+  { mode: THEME_MODE.DARK, icon: ICONS.WEATHER_NIGHT, labelKey: 'settings.darkMode', subtitleKey: 'components.themeSwitcher.darkSubtitle' },
+  { mode: THEME_MODE.SYSTEM, icon: ICONS.THEME_LIGHT_DARK, labelKey: 'settings.systemDefault', subtitleKey: 'components.themeSwitcher.systemSubtitle' },
 ];
 
 export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ showLabel = true }) => {
@@ -34,7 +35,7 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ showLabel = true }
   const selectionItems: SelectionItem[] = THEME_OPTIONS.map(option => ({
     id: option.mode,
     title: t(option.labelKey),
-    subtitle: option.subtitle,
+    subtitle: t(option.subtitleKey),
     icon: option.icon,
     iconColor: colors.primary,
   }));
@@ -49,13 +50,13 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ showLabel = true }
       <TouchableOpacity
         style={styles.button}
         onPress={() => setModalVisible(true)}
-        accessibilityLabel="Change theme"
-        accessibilityRole="button"
+        accessibilityLabel={t('accessibility.changeTheme')}
+        accessibilityRole={A11Y_ROLE.BUTTON}
       >
         <View style={[styles.iconContainer, { backgroundColor: colors.primary + '20' }]}>
           <MaterialCommunityIcons 
             name={currentOption.icon as any} 
-            size={20} 
+            size={designTokens.iconSize.md} 
             color={colors.primary} 
           />
         </View>
@@ -69,14 +70,14 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ showLabel = true }
             </Text>
           </View>
         )}
-        <MaterialCommunityIcons name="chevron-down" size={20} color={colors.textTertiary} />
+        <MaterialCommunityIcons name={ICONS.CHEVRON_DOWN} size={designTokens.iconSize.md} color={colors.textTertiary} />
       </TouchableOpacity>
 
       <SelectionModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         title={t('settings.theme')}
-        subtitle="Choose your preferred appearance"
+        subtitle={t('modals.chooseTheme')}
         items={selectionItems}
         onSelectItem={handleSelect}
         selectedItemId={mode}
@@ -87,24 +88,24 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ showLabel = true }
 
 const styles = StyleSheet.create({
   button: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     paddingVertical: designTokens.spacing.md,
     gap: designTokens.spacing.md,
   },
   iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: designTokens.componentSizes.iconContainer.md,
+    height: designTokens.componentSizes.iconContainer.md,
+    borderRadius: designTokens.borderRadius['3xl'],
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
   },
   textContainer: {
-    flex: 1,
+    flex: flexValues.one,
   },
   label: {
     ...mobileTypography.caption,
-    marginBottom: 2,
+    marginBottom: designTokens.spacing.xxs,
   },
   value: {
     ...mobileTypography.bodyLarge,

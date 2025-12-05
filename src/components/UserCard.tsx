@@ -1,11 +1,14 @@
 import React, { memo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../contexts/ThemeContext';
 import { User, UserRole, MemberBalance } from '../types';
-import { mobileTypography, mobileFontSizes } from '../shared/theme';
-import { designTokens } from '../shared/theme/designTokens';
+import { mobileTypography, mobileFontSizes, designTokens, layoutConstants } from '../shared/theme';
 import { Badge, StatusIndicator, IconButton } from '../shared/components';
+import { A11Y_ROLE, ICONS, TEXT_LINES, TOUCH_OPACITY, COMPONENT_SIZE, STATUS, COMPONENT_NAMES, COMPONENT_VARIANT } from '../shared/constants';
+import { formatViewDetailsLabel, formatDeleteLabel } from '../shared/utils/formatters';
+import { flexValues } from '../shared/constants/layoutConstants';
 
 interface UserCardProps {
   user: User;
@@ -27,15 +30,27 @@ const UserCardComponent: React.FC<UserCardProps> = ({
   onDelete,
 }) => {
   const { colors, isDark } = useTheme();
+  const { t } = useTranslation();
 
   const getRoleConfig = (role: UserRole) => {
     switch (role) {
-      case 'admin':
+      case UserRole.ADMIN:
         return { color: colors.error, bg: colors.errorLight };
-      case 'club_admin':
+      case UserRole.CLUB_ADMIN:
         return { color: colors.warning, bg: colors.warningLight };
       default:
         return { color: colors.info, bg: colors.infoLight };
+    }
+  };
+
+  const getRoleLabel = (role: UserRole): string => {
+    switch (role) {
+      case UserRole.ADMIN:
+        return t('components.userCard.roles.admin');
+      case UserRole.CLUB_ADMIN:
+        return t('components.userCard.roles.clubAdmin');
+      default:
+        return t('components.userCard.roles.user');
     }
   };
 
@@ -53,18 +68,18 @@ const UserCardComponent: React.FC<UserCardProps> = ({
       styles.card,
       { 
         backgroundColor: colors.surface, 
-        shadowColor: '#000',
-        shadowOpacity: isDark ? 0.4 : 0.2,
-        elevation: isDark ? 8 : 5,
+        shadowColor: designTokens.colors.black,
+        shadowOpacity: isDark ? designTokens.shadowConfig.dark.opacity : designTokens.shadowConfig.light.opacity,
+        elevation: isDark ? designTokens.shadowConfig.dark.elevation : designTokens.shadowConfig.light.elevation,
       },
-      !user.isActive && { backgroundColor: colors.surfaceLight, opacity: 0.8 }
+      !user.isActive && { backgroundColor: colors.surfaceLight, opacity: designTokens.opacity.disabled + designTokens.opacity.medium }
     ]}>
       {/* Avatar */}
       <View style={[
         styles.avatar,
         { backgroundColor: user.isActive ? roleConfig.color : colors.surfaceLight }
       ]}>
-        <Text style={[styles.avatarText, { color: '#fff' }, !user.isActive && { color: colors.textTertiary }]}>
+        <Text style={[styles.avatarText, { color: designTokens.colors.white }, !user.isActive && { color: colors.textTertiary }]}>
           {user.name.charAt(0).toUpperCase()}
         </Text>
       </View>
@@ -72,19 +87,19 @@ const UserCardComponent: React.FC<UserCardProps> = ({
       {/* User Info */}
       <View style={styles.userInfo}>
         <View style={styles.userHeader}>
-          <Text style={[styles.userName, { color: colors.textPrimary }, !user.isActive && { color: colors.textTertiary }]} numberOfLines={1}>
+          <Text style={[styles.userName, { color: colors.textPrimary }, !user.isActive && { color: colors.textTertiary }]} numberOfLines={TEXT_LINES.single}>
             {user.name}
           </Text>
           <Badge
-            label={user.role === 'club_admin' ? 'CLUB ADMIN' : user.role.toUpperCase()}
-            variant="neutral"
-            size="sm"
+            label={getRoleLabel(user.role)}
+            variant={COMPONENT_VARIANT.neutral}
+            size={COMPONENT_SIZE.sm}
             backgroundColor={user.isActive ? roleConfig.bg : colors.surfaceLight}
             textColor={user.isActive ? roleConfig.color : colors.textTertiary}
           />
         </View>
 
-        <Text style={[styles.userEmail, { color: colors.textSecondary }, !user.isActive && { color: colors.textTertiary }]} numberOfLines={1}>
+        <Text style={[styles.userEmail, { color: colors.textSecondary }, !user.isActive && { color: colors.textTertiary }]} numberOfLines={TEXT_LINES.single}>
           {user.email}
         </Text>
 
@@ -93,11 +108,11 @@ const UserCardComponent: React.FC<UserCardProps> = ({
           {clubName && (
             <View style={styles.metaItem}>
               <MaterialCommunityIcons
-                name="account-group"
+                name={ICONS.ACCOUNT_GROUP}
                 size={designTokens.icon.sizes.xs}
                 color={user.isActive ? colors.primary : colors.textTertiary}
               />
-              <Text style={[styles.metaText, { color: colors.textSecondary }, !user.isActive && { color: colors.textTertiary }]} numberOfLines={1}>
+              <Text style={[styles.metaText, { color: colors.textSecondary }, !user.isActive && { color: colors.textTertiary }]} numberOfLines={TEXT_LINES.single}>
                 {clubName}
               </Text>
             </View>
@@ -107,11 +122,11 @@ const UserCardComponent: React.FC<UserCardProps> = ({
           {user.whatsappNumber && (
             <View style={styles.metaItem}>
               <MaterialCommunityIcons
-                name="whatsapp"
+                name={ICONS.WHATSAPP}
                 size={designTokens.icon.sizes.xs}
                 color={user.isActive ? colors.success : colors.textTertiary}
               />
-              <Text style={[styles.metaText, { color: colors.textSecondary }, !user.isActive && { color: colors.textTertiary }]} numberOfLines={1}>
+              <Text style={[styles.metaText, { color: colors.textSecondary }, !user.isActive && { color: colors.textTertiary }]} numberOfLines={TEXT_LINES.single}>
                 {user.whatsappNumber}
               </Text>
             </View>
@@ -119,7 +134,7 @@ const UserCardComponent: React.FC<UserCardProps> = ({
 
           {/* Status Indicator */}
           <StatusIndicator
-            status={user.isActive ? 'active' : 'inactive'}
+            status={user.isActive ? STATUS.active : STATUS.inactive}
             showIcon
           />
         </View>
@@ -129,23 +144,23 @@ const UserCardComponent: React.FC<UserCardProps> = ({
           <View style={[styles.balanceSection, { borderTopColor: colors.border }]}>
             <View style={styles.balanceRow}>
               <MaterialCommunityIcons
-                name="wallet"
+                name={ICONS.WALLET}
                 size={designTokens.icon.sizes.sm}
                 color={getBalanceColor()}
               />
               <Text style={[styles.balanceText, { color: getBalanceColor() }]}>
-                Saldo: ${Math.abs(balance.balance).toFixed(2)} {balance.balance < 0 ? '(debe)' : ''}
+                {t('components.userCard.balance.label')}: ${Math.abs(balance.balance).toFixed(2)} {balance.balance < 0 ? t('components.userCard.balance.owes') : ''}
               </Text>
             </View>
             {balance.overdueCharges > 0 && (
               <View style={[styles.overdueWarning, { backgroundColor: colors.errorLight }]}>
                 <MaterialCommunityIcons
-                  name="alert-circle"
+                  name={ICONS.ALERT_CIRCLE}
                   size={designTokens.icon.sizes.xs}
                   color={colors.error}
                 />
                 <Text style={[styles.overdueWarningText, { color: colors.error }]}>
-                  ${balance.overdueCharges.toFixed(2)} vencidos
+                  ${balance.overdueCharges.toFixed(2)} {t('components.userCard.balance.overdue')}
                 </Text>
               </View>
             )}
@@ -158,26 +173,26 @@ const UserCardComponent: React.FC<UserCardProps> = ({
         <View style={styles.actionsContainer}>
           {onToggleStatus && (
             <IconButton
-              icon={user.isActive ? 'cancel' : 'check-circle'}
+              icon={user.isActive ? ICONS.CANCEL : ICONS.CHECK_CIRCLE}
               onPress={onToggleStatus}
-              size="md"
+              size={COMPONENT_SIZE.md}
               color={user.isActive ? colors.error : colors.success}
-              accessibilityLabel={user.isActive ? 'Deactivate user' : 'Activate user'}
+              accessibilityLabel={user.isActive ? t('accessibility.deactivateUser') : t('accessibility.activateUser')}
             />
           )}
           {onDelete && (
             <IconButton
-              icon="delete-outline"
+              icon={ICONS.DELETE_OUTLINE}
               onPress={onDelete}
-              size="md"
+              size={COMPONENT_SIZE.md}
               color={colors.error}
-              accessibilityLabel={`Delete ${user.name}`}
+              accessibilityLabel={formatDeleteLabel(user.name, t)}
             />
           )}
         </View>
       ) : onPress ? (
         <MaterialCommunityIcons
-          name="chevron-right"
+          name={ICONS.CHEVRON_RIGHT}
           size={designTokens.icon.sizes.lg}
           color={colors.textTertiary}
           style={styles.chevron}
@@ -190,11 +205,11 @@ const UserCardComponent: React.FC<UserCardProps> = ({
     return (
       <TouchableOpacity
         onPress={onPress}
-        activeOpacity={0.7}
+        activeOpacity={TOUCH_OPACITY.default}
         accessible={true}
-        accessibilityRole="button"
-        accessibilityLabel={`View details for ${user.name}`}
-        accessibilityHint="Double tap to open user details"
+        accessibilityRole={A11Y_ROLE.BUTTON}
+        accessibilityLabel={formatViewDetailsLabel(user.name, t)}
+        accessibilityHint={t('accessibility.doubleTapToOpenUserDetails')}
         accessibilityState={{ disabled: !user.isActive }}
       >
         {CardContent}
@@ -220,31 +235,31 @@ export const UserCard = memo(UserCardComponent, (prevProps, nextProps) => {
   );
 });
 
-UserCard.displayName = 'UserCard';
+UserCard.displayName = COMPONENT_NAMES.USER_CARD;
 
 const styles = StyleSheet.create({
   card: {
     borderRadius: designTokens.borderRadius.lg,
     marginBottom: designTokens.spacing.md,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
+    shadowOffset: { width: 0, height: designTokens.spacing.xxs },
+    shadowRadius: designTokens.shadows.md.shadowRadius,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     padding: designTokens.spacing.lg,
-    minHeight: 80,
+    minHeight: designTokens.componentSizes.cardMinHeight.md,
   },
   cardInactive: {
     backgroundColor: designTokens.colors.backgroundTertiary,
-    opacity: 0.8,
+    opacity: designTokens.opacity.high,
   },
   avatar: {
-    width: 48,
-    height: 48,
+    width: designTokens.avatarSize.lg,
+    height: designTokens.avatarSize.lg,
     borderRadius: designTokens.borderRadius['3xl'],
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
     marginRight: designTokens.spacing.md,
-    flexShrink: 0,
+    flexShrink: flexValues.shrinkDisabled,
   },
   avatarText: {
     ...mobileTypography.heading3,
@@ -254,20 +269,20 @@ const styles = StyleSheet.create({
     color: designTokens.colors.textQuaternary,
   },
   userInfo: {
-    flex: 1,
+    flex: flexValues.one,
     marginRight: designTokens.spacing.md,
-    minWidth: 0,
+    minWidth: designTokens.spacing.none,
   },
   userHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    marginBottom: designTokens.spacing.xs,
     gap: designTokens.spacing.sm,
   },
   userName: {
     ...mobileTypography.bodyMediumBold,
     color: designTokens.colors.textPrimary,
-    flex: 1,
+    flex: flexValues.one,
   },
   textInactive: {
     color: designTokens.colors.textQuaternary,
@@ -279,59 +294,59 @@ const styles = StyleSheet.create({
   userEmail: {
     ...mobileTypography.bodySmall,
     color: designTokens.colors.textSecondary,
-    marginBottom: 4,
+    marginBottom: designTokens.spacing.xs,
   },
   detailsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    flexWrap: layoutConstants.flexWrap.wrap,
+    alignItems: layoutConstants.alignItems.center,
     gap: designTokens.spacing.sm,
   },
   metaItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    gap: designTokens.spacing.xs,
   },
   metaText: {
     ...mobileTypography.caption,
     color: designTokens.colors.textSecondary,
   },
   actionsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    flexShrink: 0,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    gap: designTokens.spacing.xs,
+    flexShrink: flexValues.shrinkDisabled,
   },
   chevron: {
-    flexShrink: 0,
+    flexShrink: flexValues.shrinkDisabled,
   },
   balanceSection: {
     marginTop: designTokens.spacing.sm,
     paddingTop: designTokens.spacing.sm,
     borderTopWidth: designTokens.borderWidth.thin,
     borderTopColor: designTokens.colors.borderLight,
-    gap: 4,
+    gap: designTokens.spacing.xs,
   },
   balanceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    gap: designTokens.spacing.xs + designTokens.spacing.xxs,
   },
   balanceText: {
     ...mobileTypography.labelBold,
   },
   overdueWarning: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    gap: designTokens.spacing.xs,
     backgroundColor: designTokens.colors.errorLight,
     paddingHorizontal: designTokens.spacing.sm,
-    paddingVertical: 6,
+    paddingVertical: designTokens.spacing.xs + designTokens.spacing.xxs,
     borderRadius: designTokens.borderRadius.sm,
   },
   overdueWarningText: {
     ...mobileTypography.caption,
     color: designTokens.colors.error,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
   },
 });

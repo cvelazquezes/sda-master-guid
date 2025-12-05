@@ -28,6 +28,9 @@ import {
   ImageSourcePropType,
 } from 'react-native';
 import { designTokens } from '../shared/theme/designTokens';
+import { layoutConstants } from '../shared/theme';
+import { dimensionValues } from '../shared/constants/layoutConstants';
+import { ACTIVITY_INDICATOR_SIZE } from '../shared/constants';
 
 /**
  * Image loading priority
@@ -211,7 +214,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       {/* Loading indicator */}
       {loading && showLoading && (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="small" color={designTokens.colors.primary} />
+          <ActivityIndicator size={ACTIVITY_INDICATOR_SIZE.small} color={designTokens.colors.primary} />
         </View>
       )}
     </View>
@@ -220,28 +223,28 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    position: 'relative',
-    overflow: 'hidden',
+    position: layoutConstants.position.relative,
+    overflow: layoutConstants.overflow.hidden,
     backgroundColor: designTokens.colors.borderLight,
   },
   image: {
-    width: '100%',
-    height: '100%',
+    width: dimensionValues.width.full,
+    height: dimensionValues.width.full,
   },
   placeholder: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
+    position: layoutConstants.position.absolute,
+    width: dimensionValues.width.full,
+    height: dimensionValues.width.full,
   },
   loadingContainer: {
-    position: 'absolute',
+    position: layoutConstants.position.absolute,
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
+    backgroundColor: designTokens.overlay.lightStrong,
   },
 });
 

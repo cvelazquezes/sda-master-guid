@@ -8,8 +8,10 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
-import { mobileTypography, mobileIconSizes, mobileFontSizes } from '../shared/theme';
+import { mobileTypography, mobileIconSizes, mobileFontSizes, layoutConstants } from '../shared/theme';
 import { designTokens } from '../shared/theme/designTokens';
+import { ICONS, TOUCH_OPACITY } from '../shared/constants';
+import { flexValues } from '../shared/constants/layoutConstants';
 
 interface StatCardProps {
   icon: string;
@@ -35,9 +37,9 @@ export const StatCard: React.FC<StatCardProps> = ({
       styles.card, 
       { 
         backgroundColor: colors.surface,
-        shadowColor: '#000',
-        shadowOpacity: isDark ? 0.4 : 0.2,
-        elevation: isDark ? 8 : 5,
+        shadowColor: designTokens.colors.black,
+        shadowOpacity: isDark ? designTokens.shadowConfig.dark.opacity : designTokens.shadowConfig.light.opacity,
+        elevation: isDark ? designTokens.shadowConfig.dark.elevation : designTokens.shadowConfig.light.elevation,
       },
       onPress && styles.cardTouchable
     ]}>
@@ -50,7 +52,7 @@ export const StatCard: React.FC<StatCardProps> = ({
         {subtitle && <Text style={[styles.subtitle, { color: colors.textTertiary }]}>{subtitle}</Text>}
       </View>
       {onPress && (
-        <MaterialCommunityIcons name="chevron-right" size={mobileIconSizes.large} color={colors.textTertiary} />
+        <MaterialCommunityIcons name={ICONS.CHEVRON_RIGHT} size={mobileIconSizes.large} color={colors.textTertiary} />
       )}
     </View>
   );
@@ -59,7 +61,7 @@ export const StatCard: React.FC<StatCardProps> = ({
     return (
       <TouchableOpacity
         onPress={onPress}
-        activeOpacity={0.7}
+        activeOpacity={TOUCH_OPACITY.default}
         style={styles.touchable}
       >
         {CardContent}
@@ -72,41 +74,41 @@ export const StatCard: React.FC<StatCardProps> = ({
 
 const styles = StyleSheet.create({
   touchable: {
-    flex: 1,
+    flex: flexValues.one,
   },
   card: {
     padding: designTokens.spacing.lg,
     borderRadius: designTokens.borderRadius.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     gap: designTokens.spacing.md,
     // Shadow properties are applied via inline styles for theme-awareness
-    shadowOffset: { width: 0, height: 3 },
-    shadowRadius: 10,
+    shadowOffset: { width: 0, height: designTokens.spacing.xxs + 1 },
+    shadowRadius: designTokens.shadows.lg.shadowRadius,
   },
   cardTouchable: {
     // Add visual hint for touchable cards
   },
   iconContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: designTokens.componentSizes.iconContainer['2xl'],
+    height: designTokens.componentSizes.iconContainer['2xl'],
+    borderRadius: designTokens.borderRadius['5xl'],
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
   },
   content: {
-    flex: 1,
+    flex: flexValues.one,
   },
   value: {
     ...mobileTypography.displaySmall,
     fontSize: mobileFontSizes['3xl'],
-    marginBottom: 4,
+    marginBottom: designTokens.spacing.xs,
   },
   label: {
     ...mobileTypography.labelBold,
   },
   subtitle: {
     ...mobileTypography.caption,
-    marginTop: 4,
+    marginTop: designTokens.spacing.xs,
   },
 });

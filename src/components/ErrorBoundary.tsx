@@ -6,11 +6,13 @@
 import React, { Component, ReactNode } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { withTranslation, WithTranslation } from 'react-i18next';
 import { logger } from '../utils/logger';
 import { designTokens } from '../shared/theme/designTokens';
-import { mobileTypography, mobileFontSizes } from '../shared/theme/mobileTypography';
+import { mobileTypography, mobileFontSizes, designTokens, layoutConstants } from '../shared/theme';
+import { ICONS, flexValues, dimensionValues, shadowOffsetValues, fontFamilyValues, LOG_MESSAGES } from '../shared/constants';
 
-interface Props {
+interface Props extends WithTranslation {
   children: ReactNode;
   fallback?: ReactNode;
 }
@@ -21,7 +23,7 @@ interface State {
   errorInfo: React.ErrorInfo | null;
 }
 
-export class ErrorBoundary extends Component<Props, State> {
+class ErrorBoundaryClass extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -40,7 +42,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
     // Log error to logging service
-    logger.error('Error caught by boundary', error, {
+    logger.error(LOG_MESSAGES.ERROR_BOUNDARY.CAUGHT, error, {
       componentStack: errorInfo.componentStack,
     });
 
@@ -62,6 +64,8 @@ export class ErrorBoundary extends Component<Props, State> {
   };
 
   render(): ReactNode {
+    const { t } = this.props;
+    
     if (this.state.hasError) {
       // Use custom fallback if provided
       if (this.props.fallback) {
@@ -73,18 +77,18 @@ export class ErrorBoundary extends Component<Props, State> {
         <View style={styles.container}>
           <View style={styles.content}>
             <MaterialCommunityIcons
-              name="alert-circle-outline"
-              size={64}
+              name={ICONS.ALERT_CIRCLE_OUTLINE}
+              size={designTokens.iconSize['3xl']}
               color={designTokens.colors.error}
             />
-            <Text style={styles.title}>Something went wrong</Text>
+            <Text style={styles.title}>{t('components.errorBoundary.title')}</Text>
             <Text style={styles.message}>
-              We're sorry for the inconvenience. The app encountered an unexpected error.
+              {t('components.errorBoundary.message')}
             </Text>
 
             {__DEV__ && this.state.error && (
               <ScrollView style={styles.errorDetails}>
-                <Text style={styles.errorTitle}>Error Details (Dev Only):</Text>
+                <Text style={styles.errorTitle}>{t('components.errorBoundary.errorDetailsTitle')}</Text>
                 <Text style={styles.errorText}>
                   {this.state.error.toString()}
                 </Text>
@@ -100,7 +104,7 @@ export class ErrorBoundary extends Component<Props, State> {
               style={styles.button}
               onPress={this.handleReset}
             >
-              <Text style={styles.buttonText}>Try Again</Text>
+              <Text style={styles.buttonText}>{t('components.errorBoundary.tryAgain')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -111,71 +115,76 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 }
 
+// Wrap with withTranslation HOC for i18n support
+const ErrorBoundaryWithTranslation = withTranslation()(ErrorBoundaryClass);
+
+export { ErrorBoundaryWithTranslation as ErrorBoundary };
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: flexValues.one,
     backgroundColor: designTokens.colors.backgroundSecondary,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
     padding: designTokens.spacing.xl,
   },
   content: {
     backgroundColor: designTokens.colors.backgroundPrimary,
     borderRadius: designTokens.borderRadius.lg,
     padding: designTokens.spacing.xxl,
-    maxWidth: 400,
-    width: '100%',
-    alignItems: 'center',
+    maxWidth: dimensionValues.maxWidth.card,
+    width: dimensionValues.width.full,
+    alignItems: layoutConstants.alignItems.center,
     shadowColor: designTokens.colors.textPrimary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: shadowOffsetValues.md,
+    shadowOpacity: designTokens.shadows.md.shadowOpacity,
+    shadowRadius: designTokens.shadows.sm.shadowRadius,
+    elevation: designTokens.shadows.md.elevation,
   },
   title: {
     fontSize: mobileFontSizes['3xl'],
-    fontWeight: 'bold',
+    fontWeight: designTokens.fontWeight.bold,
     color: designTokens.colors.textPrimary,
-    marginTop: 16,
-    marginBottom: 8,
+    marginTop: designTokens.spacing.lg,
+    marginBottom: designTokens.spacing.sm,
   },
   message: {
     fontSize: mobileFontSizes.lg,
     color: designTokens.colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: 24,
+    textAlign: layoutConstants.textAlign.center,
+    marginBottom: designTokens.spacing.xxl,
   },
   errorDetails: {
-    width: '100%',
-    maxHeight: 200,
+    width: dimensionValues.width.full,
+    maxHeight: dimensionValues.maxHeight.errorDetails,
     backgroundColor: designTokens.colors.inputBackground,
     borderRadius: designTokens.borderRadius.md,
     padding: designTokens.spacing.md,
-    marginBottom: 16,
+    marginBottom: designTokens.spacing.lg,
   },
   errorTitle: {
     fontSize: mobileFontSizes.sm,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
     color: designTokens.colors.error,
-    marginBottom: 8,
+    marginBottom: designTokens.spacing.sm,
   },
   errorText: {
     fontSize: mobileFontSizes.xs,
     color: designTokens.colors.textSecondary,
-    fontFamily: 'monospace',
+    fontFamily: fontFamilyValues.mono,
   },
   button: {
     backgroundColor: designTokens.colors.primary,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
+    paddingVertical: designTokens.spacing.md,
+    paddingHorizontal: designTokens.spacing.xxl,
     borderRadius: designTokens.borderRadius.md,
-    minWidth: 150,
-    alignItems: 'center',
+    minWidth: dimensionValues.minWidth.button,
+    alignItems: layoutConstants.alignItems.center,
   },
   buttonText: {
     color: designTokens.colors.textInverse,
     fontSize: mobileFontSizes.lg,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
   },
 });
 

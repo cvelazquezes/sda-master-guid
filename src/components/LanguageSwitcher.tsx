@@ -11,8 +11,9 @@ import { useTranslation } from 'react-i18next';
 import { LANGUAGES, changeLanguage, Language } from '../i18n';
 import { useTheme } from '../contexts/ThemeContext';
 import { SelectionModal, SelectionItem } from '../shared/components/SelectionModal';
-import { designTokens } from '../shared/theme/designTokens';
-import { mobileTypography } from '../shared/theme/mobileTypography';
+import { mobileTypography, designTokens, layoutConstants } from '../shared/theme';
+import { ICONS, A11Y_ROLE } from '../shared/constants';
+import { flexValues } from '../shared/constants/layoutConstants';
 
 interface LanguageSwitcherProps {
   showLabel?: boolean;
@@ -50,11 +51,11 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ showLabel = 
       <TouchableOpacity
         style={styles.button}
         onPress={() => setModalVisible(true)}
-        accessibilityLabel="Change language"
-        accessibilityRole="button"
+        accessibilityLabel={t('accessibility.changeLanguage')}
+        accessibilityRole={A11Y_ROLE.BUTTON}
       >
         <View style={[styles.iconContainer, { backgroundColor: colors.info + '20' }]}>
-          <MaterialCommunityIcons name="translate" size={20} color={colors.info} />
+          <MaterialCommunityIcons name={ICONS.TRANSLATE} size={designTokens.iconSize.md} color={colors.info} />
         </View>
         {showLabel && (
           <View style={styles.textContainer}>
@@ -66,14 +67,14 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ showLabel = 
             </Text>
           </View>
         )}
-        <MaterialCommunityIcons name="chevron-down" size={20} color={colors.textTertiary} />
+        <MaterialCommunityIcons name={ICONS.CHEVRON_DOWN} size={designTokens.iconSize.md} color={colors.textTertiary} />
       </TouchableOpacity>
 
       <SelectionModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         title={t('settings.language')}
-        subtitle="Choose your preferred language"
+        subtitle={t('modals.chooseLanguage')}
         items={selectionItems}
         onSelectItem={handleSelect}
         selectedItemId={i18n.language}
@@ -84,24 +85,24 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ showLabel = 
 
 const styles = StyleSheet.create({
   button: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     paddingVertical: designTokens.spacing.md,
     gap: designTokens.spacing.md,
   },
   iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: designTokens.componentSizes.iconContainer.md,
+    height: designTokens.componentSizes.iconContainer.md,
+    borderRadius: designTokens.borderRadius['3xl'],
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
   },
   textContainer: {
-    flex: 1,
+    flex: flexValues.one,
   },
   label: {
     ...mobileTypography.caption,
-    marginBottom: 2,
+    marginBottom: designTokens.spacing.xxs,
   },
   value: {
     ...mobileTypography.bodyLarge,

@@ -1,11 +1,15 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { Club } from '../types';
 import { OrganizationHierarchy } from './OrganizationHierarchy';
 import { StandardModal } from '../shared/components/StandardModal';
-import { mobileTypography, mobileIconSizes } from '../shared/theme';
+import { mobileTypography, mobileIconSizes, layoutConstants } from '../shared/theme';
 import { designTokens } from '../shared/theme/designTokens';
+import { ICONS } from '../shared/constants';
+import { flexValues } from '../shared/constants/layoutConstants';
+import { formatMatchFrequency, formatMembersCount } from '../shared/utils/formatters';
 
 interface ClubDetailModalProps {
   visible: boolean;
@@ -14,6 +18,8 @@ interface ClubDetailModalProps {
 }
 
 export const ClubDetailModal: React.FC<ClubDetailModalProps> = ({ visible, club, onClose }) => {
+  const { t } = useTranslation();
+  
   if (!club) return null;
 
   return (
@@ -21,70 +27,70 @@ export const ClubDetailModal: React.FC<ClubDetailModalProps> = ({ visible, club,
       visible={visible}
       onClose={onClose}
       title={club.name}
-      subtitle="Club Details"
-      icon="account-group"
+      subtitle={t('components.clubDetail.subtitle')}
+      icon={ICONS.ACCOUNT_GROUP}
       iconColor={designTokens.colors.primary}
       iconBackgroundColor={designTokens.colors.primaryLight}
     >
         {/* Basic Information */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Basic Information</Text>
+          <Text style={styles.sectionTitle}>{t('components.clubDetail.basicInfo')}</Text>
 
           <View style={styles.infoRow}>
-            <MaterialCommunityIcons name="label" size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+            <MaterialCommunityIcons name={ICONS.LABEL} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
             <View style={styles.infoContent}>
-              <Text style={styles.infoLabel}>Name</Text>
+              <Text style={styles.infoLabel}>{t('components.clubDetail.name')}</Text>
               <Text style={styles.infoValue}>{club.name}</Text>
             </View>
           </View>
 
           <View style={styles.infoRow}>
-            <MaterialCommunityIcons name="text" size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+            <MaterialCommunityIcons name={ICONS.TEXT} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
             <View style={styles.infoContent}>
-              <Text style={styles.infoLabel}>Description</Text>
+              <Text style={styles.infoLabel}>{t('components.clubDetail.description')}</Text>
               <Text style={styles.infoValue}>{club.description}</Text>
             </View>
           </View>
 
           <View style={styles.infoRow}>
             <MaterialCommunityIcons
-              name={club.isActive ? 'check-circle' : 'cancel'}
+              name={club.isActive ? ICONS.CHECK_CIRCLE : ICONS.CANCEL}
               size={mobileIconSizes.medium}
               color={club.isActive ? designTokens.colors.success : designTokens.colors.error}
             />
             <View style={styles.infoContent}>
-              <Text style={styles.infoLabel}>Status</Text>
-              <Text style={styles.infoValue}>{club.isActive ? 'Active' : 'Inactive'}</Text>
+              <Text style={styles.infoLabel}>{t('components.clubDetail.status')}</Text>
+              <Text style={styles.infoValue}>{club.isActive ? t('components.clubDetail.active') : t('components.clubDetail.inactive')}</Text>
             </View>
           </View>
         </View>
 
         {/* Activity Settings */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Activity Settings</Text>
+          <Text style={styles.sectionTitle}>{t('components.clubDetail.activitySettings')}</Text>
 
           <View style={styles.infoRow}>
-            <MaterialCommunityIcons name="calendar-clock" size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+            <MaterialCommunityIcons name={ICONS.CALENDAR_CLOCK} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
             <View style={styles.infoContent}>
-              <Text style={styles.infoLabel}>Activity Frequency</Text>
-              <Text style={styles.infoValue}>{club.matchFrequency.replace('_', '-')}</Text>
+              <Text style={styles.infoLabel}>{t('components.clubDetail.activityFrequency')}</Text>
+              <Text style={styles.infoValue}>{formatMatchFrequency(club.matchFrequency, t)}</Text>
             </View>
           </View>
 
           <View style={styles.infoRow}>
-            <MaterialCommunityIcons name="account-multiple" size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+            <MaterialCommunityIcons name={ICONS.ACCOUNT_MULTIPLE} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
             <View style={styles.infoContent}>
-              <Text style={styles.infoLabel}>Group Size</Text>
-              <Text style={styles.infoValue}>{club.groupSize} people per activity</Text>
+              <Text style={styles.infoLabel}>{t('components.clubDetail.groupSize')}</Text>
+              <Text style={styles.infoValue}>{club.groupSize} {t('components.clubDetail.peoplePerActivity')}</Text>
             </View>
           </View>
 
           {club.memberCount !== undefined && (
             <View style={styles.infoRow}>
-              <MaterialCommunityIcons name="account-group" size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+              <MaterialCommunityIcons name={ICONS.ACCOUNT_GROUP} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
               <View style={styles.infoContent}>
-                <Text style={styles.infoLabel}>Members</Text>
-                <Text style={styles.infoValue}>{club.memberCount} members</Text>
+                <Text style={styles.infoLabel}>{t('components.clubDetail.members')}</Text>
+                <Text style={styles.infoValue}>{formatMembersCount(club.memberCount, t)}</Text>
               </View>
             </View>
           )}
@@ -92,7 +98,7 @@ export const ClubDetailModal: React.FC<ClubDetailModalProps> = ({ visible, club,
 
         {/* Organizational Hierarchy */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Organizational Hierarchy</Text>
+          <Text style={styles.sectionTitle}>{t('components.clubDetail.organizationalHierarchy')}</Text>
           <OrganizationHierarchy
             data={{
               division: club.division,
@@ -100,7 +106,7 @@ export const ClubDetailModal: React.FC<ClubDetailModalProps> = ({ visible, club,
               association: club.association,
               church: club.church,
             }}
-            title="Club Organization"
+            title={t('components.clubDetail.clubOrganization')}
             initialExpanded={true}
           />
         </View>
@@ -111,26 +117,26 @@ export const ClubDetailModal: React.FC<ClubDetailModalProps> = ({ visible, club,
 const styles = StyleSheet.create({
   section: {
     padding: designTokens.spacing.xl,
-    borderBottomWidth: 1,
+    borderBottomWidth: designTokens.borderWidth.thin,
     borderBottomColor: designTokens.colors.borderLight,
   },
   sectionTitle: {
     ...mobileTypography.heading4,
-    marginBottom: 16,
+    marginBottom: designTokens.spacing.lg,
   },
   infoRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 18,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.flexStart,
+    marginBottom: designTokens.spacing.lg,
   },
   infoContent: {
-    marginLeft: 14,
-    flex: 1,
+    marginLeft: designTokens.spacing.md,
+    flex: flexValues.one,
   },
   infoLabel: {
     ...mobileTypography.label,
     color: designTokens.colors.textSecondary,
-    marginBottom: 6,
+    marginBottom: designTokens.spacing.sm,
   },
   infoValue: {
     ...mobileTypography.bodyLargeBold,
