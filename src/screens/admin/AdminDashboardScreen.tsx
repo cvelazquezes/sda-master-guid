@@ -13,12 +13,19 @@ import { StatCard } from '../../components/StatCard';
 import { userService } from '../../services/userService';
 import { clubService } from '../../services/clubService';
 import { designTokens } from '../../shared/theme/designTokens';
+import { layoutConstants } from '../../shared/theme';
 import { ScreenHeader, SectionHeader, MenuCard } from '../../shared/components';
+import { ICONS, SCREENS, LOG_MESSAGES, MENU_ITEM_IDS } from '../../shared/constants';
+import { logger } from '../../shared/utils/logger';
+import { ApprovalStatus } from '../../types';
+import { flexValues } from '../../shared/constants/layoutConstants';
+import { useTranslation } from 'react-i18next';
 
 const AdminDashboardScreen = () => {
   const navigation = useNavigation();
   const { user } = useAuth();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const [stats, setStats] = useState({
     totalUsers: 0,
     activeUsers: 0,
@@ -43,20 +50,20 @@ const AdminDashboardScreen = () => {
         activeUsers: users.filter((u) => u.isActive).length,
         totalClubs: clubs.length,
         activeClubs: clubs.filter((c) => c.isActive).length,
-        pendingApprovals: users.filter((u) => u.approvalStatus === 'pending').length,
+        pendingApprovals: users.filter((u) => u.approvalStatus === ApprovalStatus.PENDING).length,
       });
     } catch (error) {
-      console.error('Failed to load stats:', error);
+      logger.error(LOG_MESSAGES.SCREENS.ADMIN_DASHBOARD.FAILED_TO_LOAD_STATS, error as Error);
     }
   };
 
   const menuItems = [
     {
-      id: 'organization',
-      title: 'Organization Structure',
-      description: 'Manage divisions, unions, associations, and churches',
-      icon: 'sitemap',
-      screen: 'OrganizationManagement',
+      id: MENU_ITEM_IDS.ORGANIZATION,
+      title: t('screens.adminDashboard.menuItems.organizationStructure'),
+      description: t('screens.adminDashboard.menuItems.organizationDescription'),
+      icon: ICONS.SITEMAP,
+      screen: SCREENS.ORGANIZATION_MANAGEMENT,
       color: colors.primary,
     },
   ];
@@ -64,37 +71,37 @@ const AdminDashboardScreen = () => {
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
       <ScreenHeader
-        title="Admin Dashboard"
-        subtitle={`Welcome, ${user?.name}`}
+        title={t('screens.adminDashboard.title')}
+        subtitle={t('screens.adminDashboard.welcomeSubtitle', { name: user?.name })}
       />
 
       {/* Statistics Section */}
       <View style={styles.statsSection}>
-        <SectionHeader title="Overview" />
+        <SectionHeader title={t('sections.overview')} />
         <View style={styles.statsGrid}>
           <StatCard
-            icon="account-group"
-            label="Total Users"
+            icon={ICONS.ACCOUNT_GROUP}
+            label={t('stats.totalUsers')}
             value={stats.totalUsers}
             color={colors.info}
-            subtitle={`${stats.activeUsers} active`}
+            subtitle={t('screens.adminDashboard.activeCount', { count: stats.activeUsers })}
           />
           <StatCard
-            icon="account-group"
-            label="Total Clubs"
+            icon={ICONS.ACCOUNT_GROUP}
+            label={t('stats.totalClubs')}
             value={stats.totalClubs}
             color={colors.success}
-            subtitle={`${stats.activeClubs} active`}
+            subtitle={t('screens.adminDashboard.activeCount', { count: stats.activeClubs })}
           />
         </View>
         {stats.pendingApprovals > 0 && (
           <View style={styles.statsRow}>
             <StatCard
-              icon="clock-alert-outline"
-              label="Pending Approvals"
+              icon={ICONS.CLOCK_ALERT_OUTLINE}
+              label={t('stats.pendingApprovals')}
               value={stats.pendingApprovals}
               color={colors.warning}
-              onPress={() => navigation.navigate('UsersManagement' as never)}
+              onPress={() => navigation.navigate(SCREENS.USERS_MANAGEMENT as never)}
             />
           </View>
         )}
@@ -102,7 +109,7 @@ const AdminDashboardScreen = () => {
 
       {/* Management Menu */}
       <View style={styles.content}>
-        <SectionHeader title="Management" />
+        <SectionHeader title={t('sections.management')} />
         {menuItems.map((item) => (
           <MenuCard
             key={item.id}
@@ -120,14 +127,14 @@ const AdminDashboardScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: flexValues.one,
   },
   statsSection: {
     padding: designTokens.spacing.lg,
-    paddingBottom: 0,
+    paddingBottom: designTokens.spacing.none,
   },
   statsGrid: {
-    flexDirection: 'row',
+    flexDirection: layoutConstants.flexDirection.row,
     gap: designTokens.spacing.md,
     marginBottom: designTokens.spacing.md,
   },
