@@ -5,14 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  RefreshControl,
-  Alert,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, Alert } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
@@ -24,10 +17,9 @@ import { ClubDetailModal } from '../../components/ClubDetailModal';
 import { ClubCard } from '../../components/ClubCard';
 import { StatCard } from '../../components/StatCard';
 import { mobileTypography, designTokens, layoutConstants } from '../../shared/theme';
-import { EmptyState, Card, SectionHeader, MenuCard } from '../../shared/components';
-import { MESSAGES, ICONS, COMPONENT_VARIANT, TABS } from '../../shared/constants';
-import { flexValues } from '../../shared/constants/layoutConstants';
+import { EmptyState, Card, SectionHeader } from '../../shared/components';
 import { useTranslation } from 'react-i18next';
+import { COMPONENT_VARIANT, ICONS, MESSAGES, TABS, flexValues } from '../../shared/constants';
 
 const HomeScreen = () => {
   const { user } = useAuth();
@@ -35,7 +27,7 @@ const HomeScreen = () => {
   const { t } = useTranslation();
   const navigation = useNavigation();
   const [club, setClub] = useState<Club | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [clubDetailVisible, setClubDetailVisible] = useState(false);
   const [stats, setStats] = useState({
@@ -59,23 +51,25 @@ const HomeScreen = () => {
         clubService.getClubMembers(user.clubId),
         matchService.getMyMatches(),
       ]);
-      
+
       setClub(clubData);
-      
+
       // Calculate stats
       const activeMembers = members.filter((m) => m.isActive);
-      const upcomingActivities = matches.filter((m) => m.status === MatchStatus.PENDING || m.status === MatchStatus.SCHEDULED);
-      
+      const upcomingActivities = matches.filter(
+        (m) => m.status === MatchStatus.PENDING || m.status === MatchStatus.SCHEDULED
+      );
+
       setStats({
         totalMembers: activeMembers.length,
         upcomingMeetings: 0, // This would come from a meeting service
         pendingFees: 0, // This would come from a fees service
         upcomingActivities: upcomingActivities.length,
       });
-      
+
       // Get most recent 3 members
-      const sortedMembers = [...activeMembers].sort((a, b) => 
-        new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+      const sortedMembers = [...activeMembers].sort(
+        (a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
       );
       setRecentMembers(sortedMembers.slice(0, 3));
     } catch (error) {
@@ -108,8 +102,8 @@ const HomeScreen = () => {
     <ScrollView
       style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}
       refreshControl={
-        <RefreshControl 
-          refreshing={refreshing} 
+        <RefreshControl
+          refreshing={refreshing}
           onRefresh={onRefresh}
           tintColor={colors.primary}
           colors={[colors.primary]}
@@ -117,7 +111,12 @@ const HomeScreen = () => {
       }
     >
       {/* Header with Welcome */}
-      <View style={[styles.header, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
+      <View
+        style={[
+          styles.header,
+          { backgroundColor: colors.background, borderBottomColor: colors.border },
+        ]}
+      >
         <Text style={[styles.welcomeText, { color: colors.textPrimary }]}>
           {t('screens.home.welcomeBack', { name: user.name })}
         </Text>
@@ -129,10 +128,7 @@ const HomeScreen = () => {
       {/* Club Card */}
       {club && (
         <View style={styles.clubSection}>
-          <ClubCard
-            club={club}
-            onPress={() => setClubDetailVisible(true)}
-          />
+          <ClubCard club={club} onPress={() => setClubDetailVisible(true)} />
         </View>
       )}
 
@@ -188,13 +184,17 @@ const HomeScreen = () => {
                   </Text>
                 </View>
                 <View style={styles.memberInfo}>
-                  <Text style={[styles.memberName, { color: colors.textPrimary }]}>{member.name}</Text>
-                  <Text style={[styles.memberEmail, { color: colors.textSecondary }]}>{member.email}</Text>
+                  <Text style={[styles.memberName, { color: colors.textPrimary }]}>
+                    {member.name}
+                  </Text>
+                  <Text style={[styles.memberEmail, { color: colors.textSecondary }]}>
+                    {member.email}
+                  </Text>
                 </View>
-                <MaterialCommunityIcons 
-                  name={ICONS.ACCOUNT_CHECK} 
-                  size={designTokens.iconSize.lg} 
-                  color={colors.success} 
+                <MaterialCommunityIcons
+                  name={ICONS.ACCOUNT_CHECK}
+                  size={designTokens.iconSize.lg}
+                  color={colors.success}
                 />
               </View>
             </Card>
@@ -204,15 +204,20 @@ const HomeScreen = () => {
 
       {/* Inactive Account Warning */}
       {!user.isActive && (
-        <Card variant={COMPONENT_VARIANT.outlined} style={[styles.inactiveBanner, { borderLeftColor: colors.error }]}>
+        <Card
+          variant={COMPONENT_VARIANT.outlined}
+          style={[styles.inactiveBanner, { borderLeftColor: colors.error }]}
+        >
           <View style={styles.inactiveBannerContent}>
-            <MaterialCommunityIcons 
-              name={ICONS.ALERT_CIRCLE} 
-              size={designTokens.icon.sizes.lg} 
-              color={colors.error} 
+            <MaterialCommunityIcons
+              name={ICONS.ALERT_CIRCLE}
+              size={designTokens.icon.sizes.lg}
+              color={colors.error}
             />
             <View style={styles.inactiveBannerText}>
-              <Text style={[styles.inactiveBannerTitle, { color: colors.error }]}>{t('screens.home.accountInactive')}</Text>
+              <Text style={[styles.inactiveBannerTitle, { color: colors.error }]}>
+                {t('screens.home.accountInactive')}
+              </Text>
               <Text style={[styles.inactiveBannerDescription, { color: colors.textSecondary }]}>
                 {t('screens.home.inactiveAccountDescription')}
               </Text>

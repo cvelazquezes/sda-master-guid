@@ -8,9 +8,15 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-nati
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { withTranslation, WithTranslation } from 'react-i18next';
 import { logger } from '../utils/logger';
-import { designTokens } from '../shared/theme/designTokens';
-import { mobileTypography, mobileFontSizes, designTokens, layoutConstants } from '../shared/theme';
-import { ICONS, flexValues, dimensionValues, shadowOffsetValues, fontFamilyValues, LOG_MESSAGES } from '../shared/constants';
+import { mobileFontSizes, designTokens, layoutConstants } from '../shared/theme';
+import {
+  ICONS,
+  flexValues,
+  dimensionValues,
+  shadowOffsetValues,
+  fontFamilyValues,
+  LOG_MESSAGES,
+} from '../shared/constants';
 
 interface Props extends WithTranslation {
   children: ReactNode;
@@ -65,7 +71,7 @@ class ErrorBoundaryClass extends Component<Props, State> {
 
   render(): ReactNode {
     const { t } = this.props;
-    
+
     if (this.state.hasError) {
       // Use custom fallback if provided
       if (this.props.fallback) {
@@ -82,28 +88,21 @@ class ErrorBoundaryClass extends Component<Props, State> {
               color={designTokens.colors.error}
             />
             <Text style={styles.title}>{t('components.errorBoundary.title')}</Text>
-            <Text style={styles.message}>
-              {t('components.errorBoundary.message')}
-            </Text>
+            <Text style={styles.message}>{t('components.errorBoundary.message')}</Text>
 
             {__DEV__ && this.state.error && (
               <ScrollView style={styles.errorDetails}>
-                <Text style={styles.errorTitle}>{t('components.errorBoundary.errorDetailsTitle')}</Text>
-                <Text style={styles.errorText}>
-                  {this.state.error.toString()}
+                <Text style={styles.errorTitle}>
+                  {t('components.errorBoundary.errorDetailsTitle')}
                 </Text>
+                <Text style={styles.errorText}>{this.state.error.toString()}</Text>
                 {this.state.errorInfo && (
-                  <Text style={styles.errorText}>
-                    {this.state.errorInfo.componentStack}
-                  </Text>
+                  <Text style={styles.errorText}>{this.state.errorInfo.componentStack}</Text>
                 )}
               </ScrollView>
             )}
 
-            <TouchableOpacity
-              style={styles.button}
-              onPress={this.handleReset}
-            >
+            <TouchableOpacity style={styles.button} onPress={this.handleReset}>
               <Text style={styles.buttonText}>{t('components.errorBoundary.tryAgain')}</Text>
             </TouchableOpacity>
           </View>
@@ -187,4 +186,3 @@ const styles = StyleSheet.create({
     fontWeight: designTokens.fontWeight.semibold,
   },
 });
-

@@ -15,11 +15,21 @@ import { userService } from '../../services/userService';
 import { User } from '../../types';
 import { mobileTypography, mobileIconSizes, layoutConstants } from '../../shared/theme';
 import { designTokens } from '../../shared/theme/designTokens';
-import { SelectionModal, SelectionItem } from '../../shared/components';
-import { MESSAGES, ICONS, ALERT_BUTTON_STYLE, LOG_MESSAGES, DIRECTIVE_POSITION_IDS } from '../../shared/constants';
-import { flexValues, shadowOffsetValues, typographyValues, dimensionValues, borderValues } from '../../shared/constants/layoutConstants';
+import { SelectionModal } from '../../shared/components';
 import { logger } from '../../shared/utils/logger';
 import { UserRole } from '../../types';
+import {
+  ALERT_BUTTON_STYLE,
+  DIRECTIVE_POSITION_IDS,
+  ICONS,
+  LOG_MESSAGES,
+  MESSAGES,
+  borderValues,
+  dimensionValues,
+  flexValues,
+  shadowOffsetValues,
+  typographyValues,
+} from '../../shared/constants';
 
 // Directive positions that can be assigned
 interface DirectivePosition {
@@ -84,7 +94,7 @@ const ClubDirectiveScreen = () => {
   const { user } = useAuth();
   const [positions, setPositions] = useState<DirectivePosition[]>([]);
   const [clubMembers, setClubMembers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectMemberModalVisible, setSelectMemberModalVisible] = useState(false);
   const [currentPosition, setCurrentPosition] = useState<DirectivePosition | null>(null);
@@ -96,16 +106,14 @@ const ClubDirectiveScreen = () => {
   const loadData = async () => {
     try {
       // Initialize positions
-      const initialPositions = DIRECTIVE_POSITION_CONFIG.map(pos => ({ ...pos }));
+      const initialPositions = DIRECTIVE_POSITION_CONFIG.map((pos) => ({ ...pos }));
       setPositions(initialPositions);
 
       // Load club members (exclude club_admin role as they're already directors)
       if (user?.clubId) {
         const members = await userService.getUsersByClub(user.clubId);
         // Filter active members who are not club admins
-        const eligibleMembers = members.filter(
-          m => m.isActive && m.role === UserRole.USER
-        );
+        const eligibleMembers = members.filter((m) => m.isActive && m.role === UserRole.USER);
         setClubMembers(eligibleMembers);
       }
     } catch (error) {
@@ -132,7 +140,7 @@ const ClubDirectiveScreen = () => {
 
     // Check if member is already assigned to another position
     const existingPosition = positions.find(
-      pos => pos.memberId === member.id && pos.id !== currentPosition.id
+      (pos) => pos.memberId === member.id && pos.id !== currentPosition.id
     );
 
     if (existingPosition) {
@@ -145,8 +153,8 @@ const ClubDirectiveScreen = () => {
             text: t('screens.clubDirective.reassign'),
             onPress: () => {
               // Remove from old position
-              setPositions(prev =>
-                prev.map(pos =>
+              setPositions((prev) =>
+                prev.map((pos) =>
                   pos.id === existingPosition.id
                     ? { ...pos, memberId: undefined, memberName: undefined, memberEmail: undefined }
                     : pos
@@ -167,8 +175,8 @@ const ClubDirectiveScreen = () => {
   const assignMemberToPosition = (member: User) => {
     if (!currentPosition) return;
 
-    setPositions(prev =>
-      prev.map(pos =>
+    setPositions((prev) =>
+      prev.map((pos) =>
         pos.id === currentPosition.id
           ? {
               ...pos,
@@ -192,37 +200,31 @@ const ClubDirectiveScreen = () => {
   };
 
   const handleRemoveMember = (position: DirectivePosition) => {
-    Alert.alert(
-      MESSAGES.TITLES.REMOVE_MEMBER,
-      MESSAGES.WARNINGS.CONFIRM_REMOVE_MEMBER,
-      [
-        { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
-        {
-          text: t('screens.clubDirective.remove'),
-          style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
-          onPress: () => {
-            setPositions(prev =>
-              prev.map(pos =>
-                pos.id === position.id
-                  ? { ...pos, memberId: undefined, memberName: undefined, memberEmail: undefined }
-                  : pos
-              )
-            );
-          },
+    Alert.alert(MESSAGES.TITLES.REMOVE_MEMBER, MESSAGES.WARNINGS.CONFIRM_REMOVE_MEMBER, [
+      { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
+      {
+        text: t('screens.clubDirective.remove'),
+        style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
+        onPress: () => {
+          setPositions((prev) =>
+            prev.map((pos) =>
+              pos.id === position.id
+                ? { ...pos, memberId: undefined, memberName: undefined, memberEmail: undefined }
+                : pos
+            )
+          );
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleSaveDirective = () => {
-    const assignedCount = positions.filter(pos => pos.memberId).length;
-    
+    const assignedCount = positions.filter((pos) => pos.memberId).length;
+
     if (assignedCount === 0) {
-      Alert.alert(
-        MESSAGES.TITLES.NO_ASSIGNMENTS,
-        t('screens.clubDirective.assignAtLeastOne'),
-        [{ text: MESSAGES.BUTTONS.OK }]
-      );
+      Alert.alert(MESSAGES.TITLES.NO_ASSIGNMENTS, t('screens.clubDirective.assignAtLeastOne'), [
+        { text: MESSAGES.BUTTONS.OK },
+      ]);
       return;
     }
 
@@ -233,8 +235,8 @@ const ClubDirectiveScreen = () => {
     );
   };
 
-  const getAssignedPositions = () => positions.filter(pos => pos.memberId);
-  const getUnassignedPositions = () => positions.filter(pos => !pos.memberId);
+  const getAssignedPositions = () => positions.filter((pos) => pos.memberId);
+  const getUnassignedPositions = () => positions.filter((pos) => !pos.memberId);
 
   return (
     <View style={styles.container}>
@@ -247,16 +249,26 @@ const ClubDirectiveScreen = () => {
       {/* Summary Banner */}
       <View style={styles.summaryBanner}>
         <View style={styles.summaryItem}>
-          <MaterialCommunityIcons name={ICONS.ACCOUNT_CHECK} size={mobileIconSizes.medium} color={designTokens.colors.success} />
+          <MaterialCommunityIcons
+            name={ICONS.ACCOUNT_CHECK}
+            size={mobileIconSizes.medium}
+            color={designTokens.colors.success}
+          />
           <Text style={styles.summaryText}>
-            <Text style={styles.summaryBold}>{getAssignedPositions().length}</Text> {t('screens.clubDirective.assigned')}
+            <Text style={styles.summaryBold}>{getAssignedPositions().length}</Text>{' '}
+            {t('screens.clubDirective.assigned')}
           </Text>
         </View>
         <View style={styles.summarySeparator} />
         <View style={styles.summaryItem}>
-          <MaterialCommunityIcons name={ICONS.ACCOUNT_CLOCK} size={mobileIconSizes.medium} color={designTokens.colors.warning} />
+          <MaterialCommunityIcons
+            name={ICONS.ACCOUNT_CLOCK}
+            size={mobileIconSizes.medium}
+            color={designTokens.colors.warning}
+          />
           <Text style={styles.summaryText}>
-            <Text style={styles.summaryBold}>{getUnassignedPositions().length}</Text> {t('screens.clubDirective.vacant')}
+            <Text style={styles.summaryBold}>{getUnassignedPositions().length}</Text>{' '}
+            {t('screens.clubDirective.vacant')}
           </Text>
         </View>
       </View>
@@ -269,12 +281,12 @@ const ClubDirectiveScreen = () => {
         {getAssignedPositions().length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{t('screens.clubDirective.assignedPositions')}</Text>
-            {getAssignedPositions().map(position => (
+            {getAssignedPositions().map((position) => (
               <View key={position.id} style={styles.positionCard}>
                 {/* Position Icon & Info */}
                 <View style={[styles.positionIcon, { backgroundColor: `${position.color}20` }]}>
                   <MaterialCommunityIcons
-                    name={position.icon as any}
+                    name={position.icon as typeof ICONS.CHECK}
                     size={mobileIconSizes.xlarge}
                     color={position.color}
                   />
@@ -317,12 +329,12 @@ const ClubDirectiveScreen = () => {
         {getUnassignedPositions().length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{t('screens.clubDirective.vacantPositions')}</Text>
-            {getUnassignedPositions().map(position => (
+            {getUnassignedPositions().map((position) => (
               <View key={position.id} style={styles.positionCard}>
                 {/* Position Icon & Info */}
                 <View style={[styles.positionIcon, { backgroundColor: `${position.color}20` }]}>
                   <MaterialCommunityIcons
-                    name={position.icon as any}
+                    name={position.icon as typeof ICONS.CHECK}
                     size={mobileIconSizes.xlarge}
                     color={position.color}
                   />
@@ -344,7 +356,9 @@ const ClubDirectiveScreen = () => {
                       size={mobileIconSizes.small}
                       color={designTokens.colors.primary}
                     />
-                    <Text style={styles.assignButtonText}>{t('screens.clubDirective.assignMember')}</Text>
+                    <Text style={styles.assignButtonText}>
+                      {t('screens.clubDirective.assignMember')}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -354,10 +368,12 @@ const ClubDirectiveScreen = () => {
 
         {/* Info Banner */}
         <View style={styles.infoBanner}>
-          <MaterialCommunityIcons name={ICONS.INFORMATION} size={mobileIconSizes.medium} color={designTokens.colors.info} />
-          <Text style={styles.infoText}>
-            {t('screens.clubDirective.infoText')}
-          </Text>
+          <MaterialCommunityIcons
+            name={ICONS.INFORMATION}
+            size={mobileIconSizes.medium}
+            color={designTokens.colors.info}
+          />
+          <Text style={styles.infoText}>{t('screens.clubDirective.infoText')}</Text>
         </View>
       </ScrollView>
 
@@ -365,7 +381,11 @@ const ClubDirectiveScreen = () => {
       {getAssignedPositions().length > 0 && (
         <View style={styles.footer}>
           <TouchableOpacity style={styles.saveButton} onPress={handleSaveDirective}>
-            <MaterialCommunityIcons name={ICONS.CONTENT_SAVE} size={mobileIconSizes.large} color={designTokens.colors.textInverse} />
+            <MaterialCommunityIcons
+              name={ICONS.CONTENT_SAVE}
+              size={mobileIconSizes.large}
+              color={designTokens.colors.textInverse}
+            />
             <Text style={styles.saveButtonText}>{t('screens.clubDirective.saveDirective')}</Text>
           </TouchableOpacity>
         </View>
@@ -377,8 +397,8 @@ const ClubDirectiveScreen = () => {
         onClose={() => setSelectMemberModalVisible(false)}
         title={t('screens.clubDirective.assignMember')}
         subtitle={currentPosition ? t(currentPosition.titleKey) : undefined}
-        items={clubMembers.map(member => {
-          const assignedPosition = positions.find(pos => pos.memberId === member.id);
+        items={clubMembers.map((member) => {
+          const assignedPosition = positions.find((pos) => pos.memberId === member.id);
           const isAssigned = !!assignedPosition;
           const isSamePosition = assignedPosition?.id === currentPosition?.id;
 
@@ -394,7 +414,7 @@ const ClubDirectiveScreen = () => {
           };
         })}
         onSelectItem={(item) => {
-          const member = clubMembers.find(m => m.id === item.id);
+          const member = clubMembers.find((m) => m.id === item.id);
           if (member) {
             handleSelectMember(member);
           }
@@ -587,4 +607,3 @@ const styles = StyleSheet.create({
 });
 
 export default ClubDirectiveScreen;
-

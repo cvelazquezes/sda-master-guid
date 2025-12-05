@@ -24,31 +24,25 @@ export interface Environment {
   };
 }
 
-const getEnvVar = (key: string, defaultValue?: string): string => {
-  const value = process.env[key] || defaultValue;
-  if (!value) {
-    throw new Error(`Missing required environment variable: ${key}`);
-  }
-  return value;
-};
-
-const getBoolEnvVar = (key: string, defaultValue: boolean): boolean => {
-  const value = process.env[key];
+const getBoolEnvVar = (value: string | undefined, defaultValue: boolean): boolean => {
   if (value === undefined) return defaultValue;
   return value === 'true';
 };
 
 export const environment: Environment = {
-  apiUrl: getEnvVar('EXPO_PUBLIC_API_URL', 'http://localhost:3000/api'),
-  wsUrl: getEnvVar('EXPO_PUBLIC_WS_URL', 'ws://localhost:3000'),
-  env: (getEnvVar('EXPO_PUBLIC_ENV', 'development') as Environment['env']),
-  useMockData: getBoolEnvVar('EXPO_PUBLIC_USE_MOCK_DATA', true),
+  apiUrl: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api',
+  wsUrl: process.env.EXPO_PUBLIC_WS_URL || 'ws://localhost:3000',
+  env: (process.env.EXPO_PUBLIC_ENV || 'development') as Environment['env'],
+  useMockData: getBoolEnvVar(process.env.EXPO_PUBLIC_USE_MOCK_DATA, true),
   features: {
-    enableBiometrics: getBoolEnvVar('EXPO_PUBLIC_ENABLE_BIOMETRICS', true),
-    enableOfflineMode: getBoolEnvVar('EXPO_PUBLIC_ENABLE_OFFLINE_MODE', true),
-    enablePushNotifications: getBoolEnvVar('EXPO_PUBLIC_ENABLE_PUSH_NOTIFICATIONS', false),
+    enableBiometrics: getBoolEnvVar(process.env.EXPO_PUBLIC_ENABLE_BIOMETRICS, true),
+    enableOfflineMode: getBoolEnvVar(process.env.EXPO_PUBLIC_ENABLE_OFFLINE_MODE, true),
+    enablePushNotifications: getBoolEnvVar(
+      process.env.EXPO_PUBLIC_ENABLE_PUSH_NOTIFICATIONS,
+      false
+    ),
     enablePerformanceMonitoring: getBoolEnvVar(
-      'EXPO_PUBLIC_ENABLE_PERFORMANCE_MONITORING',
+      process.env.EXPO_PUBLIC_ENABLE_PERFORMANCE_MONITORING,
       false
     ),
   },
@@ -68,13 +62,13 @@ export const environment: Environment = {
  */
 export const validateEnvironment = (): void => {
   const required = ['apiUrl', 'wsUrl', 'env'];
-  
+
   for (const key of required) {
     if (!environment[key as keyof Environment]) {
       throw new Error(`Missing required environment variable: ${key}`);
     }
   }
-  
+
   // Note: Mock data is allowed in production for standalone APK builds
   // that don't have a backend server. This is intentional for testing
   // and demonstration purposes.
@@ -90,4 +84,3 @@ try {
   console.error('Environment validation failed:', error);
   // Don't throw - allow app to start even with validation warnings
 }
-

@@ -3,22 +3,16 @@
  * Centralized HTTP client with retry logic, circuit breaker, and error handling
  */
 
-import axios, { AxiosInstance, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosError, AxiosRequestConfig } from 'axios';
 import { environment } from '../config/environment';
 import { secureStorage } from '../utils/secureStorage';
 import { logger } from '../utils/logger';
 import { retryPolicy } from './api/retryPolicy';
 import { apiCircuitBreaker } from './api/circuitBreaker';
-import {
-  NetworkError,
-  TimeoutError,
-  AuthenticationError,
-  toAppError,
-} from '../utils/errors';
+import { NetworkError, TimeoutError, AuthenticationError, toAppError } from '../utils/errors';
 
 // Constants
 const API_TIMEOUT_MS = 10000;
-const MAX_RETRY_ATTEMPTS = 3;
 
 /**
  * Creates configured axios instance
@@ -86,9 +80,7 @@ const api = createApiClient();
 /**
  * Makes HTTP request with retry logic and circuit breaker
  */
-async function makeRequest<T>(
-  requestFn: () => Promise<T>
-): Promise<T> {
+async function makeRequest<T>(requestFn: () => Promise<T>): Promise<T> {
   return await apiCircuitBreaker.execute(async () => {
     return await retryPolicy.execute(requestFn);
   });
@@ -101,7 +93,7 @@ export const apiService = {
   /**
    * GET request
    */
-  async get<T>(url: string, config?: any): Promise<T> {
+  async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
     logger.debug(`GET ${url}`);
     const response = await makeRequest(() => api.get<T>(url, config));
     return response.data;
@@ -110,7 +102,7 @@ export const apiService = {
   /**
    * POST request
    */
-  async post<T>(url: string, data?: any, config?: any): Promise<T> {
+  async post<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
     logger.debug(`POST ${url}`);
     const response = await makeRequest(() => api.post<T>(url, data, config));
     return response.data;
@@ -119,7 +111,7 @@ export const apiService = {
   /**
    * PUT request
    */
-  async put<T>(url: string, data?: any, config?: any): Promise<T> {
+  async put<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
     logger.debug(`PUT ${url}`);
     const response = await makeRequest(() => api.put<T>(url, data, config));
     return response.data;
@@ -128,7 +120,7 @@ export const apiService = {
   /**
    * PATCH request
    */
-  async patch<T>(url: string, data?: any, config?: any): Promise<T> {
+  async patch<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
     logger.debug(`PATCH ${url}`);
     const response = await makeRequest(() => api.patch<T>(url, data, config));
     return response.data;
@@ -137,7 +129,7 @@ export const apiService = {
   /**
    * DELETE request
    */
-  async delete<T>(url: string, config?: any): Promise<T> {
+  async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
     logger.debug(`DELETE ${url}`);
     const response = await makeRequest(() => api.delete<T>(url, config));
     return response.data;

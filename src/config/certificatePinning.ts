@@ -1,7 +1,7 @@
 /**
  * Certificate Pinning Configuration
  * Prevents man-in-the-middle attacks by pinning SSL certificates
- * 
+ *
  * Based on OWASP Mobile Security guidelines
  */
 
@@ -13,9 +13,12 @@ export interface CertificatePinConfig {
 
 /**
  * Certificate pins for production API
- * 
+ *
  * To generate certificate pins:
- * 1. openssl s_client -servername api.yourdomain.com -connect api.yourdomain.com:443 | openssl x509 -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | openssl enc -base64
+ * 1. Run the following command to generate a pin:
+ *    openssl s_client -servername api.yourdomain.com -connect api.yourdomain.com:443 \
+ *    | openssl x509 -pubkey -noout | openssl pkey -pubin -outform der \
+ *    | openssl dgst -sha256 -binary | openssl enc -base64
  * 2. Add backup pins (at least 2) for rotation
  */
 export const certificatePins: Record<string, CertificatePinConfig> = {
@@ -61,7 +64,7 @@ export function validateCertificatePin(
   if (hostname !== config.hostname && !config.includeSubdomains) {
     return false;
   }
-  
+
   return config.pins.includes(receivedPin);
 }
 
@@ -69,7 +72,10 @@ export function validateCertificatePin(
  * Certificate Pinning Error
  */
 export class CertificatePinningError extends Error {
-  constructor(message: string, public hostname: string) {
+  constructor(
+    message: string,
+    public hostname: string
+  ) {
     super(message);
     this.name = 'CertificatePinningError';
   }
@@ -77,14 +83,14 @@ export class CertificatePinningError extends Error {
 
 /**
  * Instructions for implementing certificate pinning:
- * 
+ *
  * For React Native (iOS/Android):
  * 1. Install: npm install react-native-ssl-pinning
  * 2. Configure pins in native code (iOS: Info.plist, Android: network_security_config.xml)
  * 3. Use fetch with pinning:
- * 
+ *
  * import { fetch as sslFetch } from 'react-native-ssl-pinning';
- * 
+ *
  * sslFetch('https://api.yourdomain.com', {
  *   method: 'GET',
  *   timeoutInterval: 10000,
@@ -92,8 +98,7 @@ export class CertificatePinningError extends Error {
  *     certs: ['cert1', 'cert2']
  *   }
  * });
- * 
+ *
  * For Web:
  * Certificate pinning is handled by the browser and HSTS headers
  */
-

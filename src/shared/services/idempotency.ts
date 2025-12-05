@@ -11,7 +11,7 @@ import { TIMING } from '../constants';
 // Types
 // ============================================================================
 
-interface IdempotencyRecord<T = any> {
+interface IdempotencyRecord<T = unknown> {
   key: string;
   result: T;
   timestamp: number;
@@ -35,7 +35,7 @@ class IdempotencyService {
 
   /**
    * Executes an operation with idempotency guarantee
-   * 
+   *
    * If the operation was already executed with this key within the TTL,
    * returns the cached result instead of executing again.
    */
@@ -58,7 +58,7 @@ class IdempotencyService {
 
     // Execute operation
     logger.debug(`Idempotency: Executing operation for key: ${idempotencyKey}`);
-    
+
     try {
       const result = await operation();
 
@@ -75,11 +75,7 @@ class IdempotencyService {
   /**
    * Stores a result with idempotency key
    */
-  private async set<T>(
-    key: string,
-    result: T,
-    ttlSeconds: number
-  ): Promise<void> {
+  private async set<T>(key: string, result: T, ttlSeconds: number): Promise<void> {
     const now = Date.now();
     const expiresAt = now + ttlSeconds * 1000;
 
@@ -100,10 +96,7 @@ class IdempotencyService {
 
     // Store in persistent storage
     try {
-      await AsyncStorage.setItem(
-        this.getStorageKey(key),
-        JSON.stringify(record)
-      );
+      await AsyncStorage.setItem(this.getStorageKey(key), JSON.stringify(record));
     } catch (error) {
       logger.warn('Failed to store idempotency key in persistent storage', error as Error);
       // Continue anyway - memory cache will work
@@ -132,7 +125,7 @@ class IdempotencyService {
       const stored = await AsyncStorage.getItem(this.getStorageKey(key));
       if (stored) {
         const record = JSON.parse(stored) as IdempotencyRecord<T>;
-        
+
         if (record.expiresAt > now) {
           // Still valid - add to memory cache
           this.memoryCache.set(key, record);
@@ -178,9 +171,7 @@ class IdempotencyService {
 
     try {
       const keys = await AsyncStorage.getAllKeys();
-      const idempotencyKeys = keys.filter((k) =>
-        k.startsWith(this.STORAGE_KEY_PREFIX)
-      );
+      const idempotencyKeys = keys.filter((k) => k.startsWith(this.STORAGE_KEY_PREFIX));
       await AsyncStorage.multiRemove(idempotencyKeys);
     } catch (error) {
       logger.warn('Failed to clear idempotency keys from persistent storage', error as Error);
@@ -192,7 +183,7 @@ class IdempotencyService {
    */
   private evictOldest(): void {
     const entries = Array.from(this.memoryCache.entries());
-    
+
     // Sort by timestamp (oldest first)
     entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
 
@@ -233,23 +224,11 @@ class IdempotencyService {
     // Clean persistent storage
     try {
       const keys = await AsyncStorage.getAllKeys();
-      const idempotencyKeys = keys.filter((k) =>
-        k.startsWith(this.STORAGE_KEY_PREFIX)
-      );
+      const idempotencyKeys = keys.filter((k) => k.startsWith(this.STORAGE_KEY_PREFIX));
 
       for (const storageKey of idempotencyKeys) {
-        try {
-          const stored = await AsyncStorage.getItem(storageKey);
-          if (stored) {
-            const record = JSON.parse(stored) as IdempotencyRecord;
-            if (record.expiresAt <= now) {
-              await AsyncStorage.removeItem(storageKey);
-              removedCount++;
-            }
-          }
-        } catch {
-          // Skip invalid entries
-        }
+        const removed = await this.cleanExpiredStorageKey(storageKey, now);
+        if (removed) removedCount++;
       }
     } catch (error) {
       logger.warn('Failed to cleanup expired idempotency keys', error as Error);
@@ -257,6 +236,25 @@ class IdempotencyService {
 
     if (removedCount > 0) {
       logger.debug(`Idempotency: Cleaned up ${removedCount} expired entries`);
+    }
+  }
+
+  /**
+   * Cleans an expired storage key if applicable
+   */
+  private async cleanExpiredStorageKey(storageKey: string, now: number): Promise<boolean> {
+    try {
+      const stored = await AsyncStorage.getItem(storageKey);
+      if (!stored) return false;
+
+      const record = JSON.parse(stored) as IdempotencyRecord;
+      if (record.expiresAt > now) return false;
+
+      await AsyncStorage.removeItem(storageKey);
+      return true;
+    } catch {
+      // Skip invalid entries
+      return false;
     }
   }
 
@@ -304,32 +302,25 @@ export const idempotencyService = new IdempotencyService();
 /**
  * Generates a unique idempotency key
  */
-export function generateIdempotencyKey(
-  operation: string,
-  ...params: any[]
-): string {
+export function generateIdempotencyKey(operation: string, ...params: unknown[]): string {
   const timestamp = Date.now();
   const randomSuffix = Math.random().toString(36).substring(2, 15);
   const paramString = params.map((p) => JSON.stringify(p)).join('-');
-  
+
   return `${operation}-${paramString}-${timestamp}-${randomSuffix}`;
 }
 
 /**
  * Creates an idempotent wrapper for a function
  */
-export function makeIdempotent<T extends (...args: any[]) => Promise<any>>(
+export function makeIdempotent<T extends (...args: unknown[]) => Promise<unknown>>(
   fn: T,
   keyGenerator: (...args: Parameters<T>) => string,
   ttlSeconds?: number
 ): T {
   return (async (...args: Parameters<T>) => {
     const key = keyGenerator(...args);
-    return await idempotencyService.execute(
-      key,
-      () => fn(...args),
-      ttlSeconds
-    );
+    return await idempotencyService.execute(key, () => fn(...args), ttlSeconds);
   }) as T;
 }
 
@@ -338,4 +329,3 @@ export function makeIdempotent<T extends (...args: any[]) => Promise<any>>(
 // ============================================================================
 
 export type { IdempotencyRecord };
-

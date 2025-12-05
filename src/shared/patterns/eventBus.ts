@@ -7,10 +7,16 @@ import { logger } from '../utils/logger';
 import { captureError, addBreadcrumb } from '../services/sentry';
 
 // ============================================================================
+// React Hook
+// ============================================================================
+
+import { useEffect } from 'react';
+
+// ============================================================================
 // Types
 // ============================================================================
 
-export interface DomainEvent<TPayload = any> {
+export interface DomainEvent<TPayload = unknown> {
   type: string;
   payload: TPayload;
   metadata: {
@@ -41,9 +47,7 @@ class EventBus {
   private subscriptions = new Map<string, Map<string, EventHandler>>();
   private eventHistory: DomainEvent[] = [];
   private readonly MAX_HISTORY_SIZE = 100;
-  private middleware: Array<
-    (event: DomainEvent, next: () => Promise<void>) => Promise<void>
-  > = [];
+  private middleware: ((event: DomainEvent, next: () => Promise<void>) => Promise<void>)[] = [];
 
   /**
    * Subscribes to an event type
@@ -175,9 +179,7 @@ class EventBus {
   /**
    * Adds middleware to the event pipeline
    */
-  use(
-    middleware: (event: DomainEvent, next: () => Promise<void>) => Promise<void>
-  ): void {
+  use(middleware: (event: DomainEvent, next: () => Promise<void>) => Promise<void>): void {
     this.middleware.push(middleware);
   }
 
@@ -217,11 +219,7 @@ class EventBus {
   /**
    * Gets event history
    */
-  getHistory(options?: {
-    eventType?: string;
-    limit?: number;
-    since?: number;
-  }): DomainEvent[] {
+  getHistory(options?: { eventType?: string; limit?: number; since?: number }): DomainEvent[] {
     let history = [...this.eventHistory];
 
     // Filter by event type
@@ -325,10 +323,7 @@ export const eventBus = new EventBus();
 /**
  * Logging middleware
  */
-export const eventLoggingMiddleware = async (
-  event: DomainEvent,
-  next: () => Promise<void>
-) => {
+export const eventLoggingMiddleware = async (event: DomainEvent, next: () => Promise<void>) => {
   logger.info('Event received', {
     type: event.type,
     eventId: event.metadata.eventId,
@@ -346,9 +341,7 @@ export const eventLoggingMiddleware = async (
 /**
  * Validation middleware
  */
-export function eventValidationMiddleware<T>(
-  validator: (event: DomainEvent<T>) => boolean
-) {
+export function eventValidationMiddleware<T>(validator: (event: DomainEvent<T>) => boolean) {
   return async (event: DomainEvent<T>, next: () => Promise<void>) => {
     if (!validator(event)) {
       throw new Error('Event validation failed');
@@ -385,13 +378,8 @@ export function createEvent<TPayload>(
 /**
  * Subscribes to multiple event types
  */
-export function subscribeToMany(
-  eventTypes: string[],
-  handler: EventHandler
-): () => void {
-  const unsubscribers = eventTypes.map((type) =>
-    eventBus.subscribe(type, handler)
-  );
+export function subscribeToMany(eventTypes: string[], handler: EventHandler): () => void {
+  const unsubscribers = eventTypes.map((type) => eventBus.subscribe(type, handler));
 
   // Return function to unsubscribe from all
   return () => {
@@ -429,28 +417,16 @@ export const DomainEvents = {
   NETWORK_OFFLINE: 'network.offline',
 } as const;
 
-// ============================================================================
-// React Hook
-// ============================================================================
-
-import { useEffect } from 'react';
-
 /**
  * React hook to subscribe to events
  */
-export function useEventSubscription(
-  eventType: string | string[],
-  handler: EventHandler
-): void {
+export function useEventSubscription(eventType: string | string[], handler: EventHandler): void {
   useEffect(() => {
     const types = Array.isArray(eventType) ? eventType : [eventType];
-    const unsubscribers = types.map((type) =>
-      eventBus.subscribe(type, handler)
-    );
+    const unsubscribers = types.map((type) => eventBus.subscribe(type, handler));
 
     return () => {
       unsubscribers.forEach((unsubscribe) => unsubscribe());
     };
   }, [eventType, handler]);
 }
-

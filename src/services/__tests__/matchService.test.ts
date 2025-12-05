@@ -7,8 +7,6 @@ import { matchService } from '../matchService';
 import { secureStorage } from '../../utils/secureStorage';
 import {
   mockMatches,
-  mockMatchRounds,
-  mockUsers,
   mockClubs,
   getMatchesByClub,
   getMatchesForUser,
@@ -104,9 +102,7 @@ describe('MatchService', () => {
     it('should throw error when match not found', async () => {
       (mockMatches.find as jest.Mock) = jest.fn().mockReturnValue(undefined);
 
-      await expect(matchService.getMatch('999')).rejects.toThrow(
-        'Match not found'
-      );
+      await expect(matchService.getMatch('999')).rejects.toThrow('Match not found');
     });
   });
 
@@ -124,10 +120,7 @@ describe('MatchService', () => {
       (mockMatches.findIndex as jest.Mock) = jest.fn().mockReturnValue(0);
       mockMatches[0] = mockMatch;
 
-      const result = await matchService.updateMatchStatus(
-        '1',
-        MatchStatus.COMPLETED
-      );
+      const result = await matchService.updateMatchStatus('1', MatchStatus.COMPLETED);
 
       expect(result.status).toBe(MatchStatus.COMPLETED);
     });
@@ -135,9 +128,9 @@ describe('MatchService', () => {
     it('should throw error when match not found', async () => {
       (mockMatches.findIndex as jest.Mock) = jest.fn().mockReturnValue(-1);
 
-      await expect(
-        matchService.updateMatchStatus('999', MatchStatus.COMPLETED)
-      ).rejects.toThrow('Match not found');
+      await expect(matchService.updateMatchStatus('999', MatchStatus.COMPLETED)).rejects.toThrow(
+        'Match not found'
+      );
     });
   });
 
@@ -239,9 +232,7 @@ describe('MatchService', () => {
     it('should throw error when club not found', async () => {
       (mockClubs.find as jest.Mock) = jest.fn().mockReturnValue(undefined);
 
-      await expect(matchService.generateMatches('999')).rejects.toThrow(
-        'Club not found'
-      );
+      await expect(matchService.generateMatches('999')).rejects.toThrow('Club not found');
     });
 
     it('should throw error when not enough members', async () => {
@@ -303,4 +294,3 @@ describe('MatchService', () => {
     });
   });
 });
-

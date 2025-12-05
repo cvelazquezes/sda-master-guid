@@ -9,8 +9,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-nativ
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { mobileTypography, mobileFontSizes, designTokens, layoutConstants } from '../theme';
-import { flexValues } from '../constants/layoutConstants';
-import { A11Y_ROLE } from '../constants';
+import { A11Y_ROLE, flexValues } from '../constants';
 
 export interface Tab {
   id: string;
@@ -26,19 +25,20 @@ interface TabBarProps {
   style?: ViewStyle;
 }
 
-export const TabBar: React.FC<TabBarProps> = ({
-  tabs,
-  activeTabId,
-  onTabChange,
-  style,
-}) => {
+export const TabBar: React.FC<TabBarProps> = ({ tabs, activeTabId, onTabChange, style }) => {
   const { colors } = useTheme();
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background, borderBottomColor: colors.border }, style]}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: colors.background, borderBottomColor: colors.border },
+        style,
+      ]}
+    >
       {tabs.map((tab) => {
         const isActive = tab.id === activeTabId;
-        
+
         return (
           <TouchableOpacity
             key={tab.id}
@@ -51,12 +51,18 @@ export const TabBar: React.FC<TabBarProps> = ({
           >
             {tab.icon && (
               <MaterialCommunityIcons
-                name={tab.icon as any}
+                name={tab.icon as typeof ICONS.CHECK}
                 size={designTokens.icon.sizes.md}
                 color={isActive ? colors.primary : colors.textTertiary}
               />
             )}
-            <Text style={[styles.tabText, { color: colors.textTertiary }, isActive && { color: colors.primary }]}>
+            <Text
+              style={[
+                styles.tabText,
+                { color: colors.textTertiary },
+                isActive && { color: colors.primary },
+              ]}
+            >
               {tab.label}
             </Text>
             {tab.badge !== undefined && tab.badge > 0 && (
@@ -109,4 +115,3 @@ const styles = StyleSheet.create({
 });
 
 export default TabBar;
-

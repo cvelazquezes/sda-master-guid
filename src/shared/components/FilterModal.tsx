@@ -5,13 +5,27 @@
  */
 
 import React, { ReactNode } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, useWindowDimensions } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Modal,
+  TouchableOpacity,
+  ScrollView,
+  useWindowDimensions,
+} from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { mobileTypography, designTokens, layoutConstants } from '../theme';
-import { ICONS, A11Y_ROLE, ANIMATION, TOUCH_OPACITY } from '../constants';
-import { flexValues, dimensionValues, borderValues } from '../constants/layoutConstants';
+import {
+  A11Y_ROLE,
+  ANIMATION,
+  ICONS,
+  borderValues,
+  dimensionValues,
+  flexValues,
+} from '../constants';
 
 export interface FilterOption {
   id: string;
@@ -61,9 +75,9 @@ export const FilterModal: React.FC<FilterModalProps> = ({
   const isMobile = windowWidth < designTokens.breakpoints.tablet;
 
   const isOptionSelected = (sectionId: string, value: string): boolean => {
-    const section = sections.find(s => s.id === sectionId);
+    const section = sections.find((s) => s.id === sectionId);
     if (!section) return false;
-    
+
     if (Array.isArray(section.selectedValue)) {
       return section.selectedValue.includes(value);
     }
@@ -78,11 +92,15 @@ export const FilterModal: React.FC<FilterModalProps> = ({
       onRequestClose={onClose}
     >
       <View style={[styles.overlay, isMobile && styles.overlayMobile]}>
-        <View style={[styles.content, { backgroundColor: colors.surface }, isMobile && styles.contentMobile]}>
+        <View
+          style={[
+            styles.content,
+            { backgroundColor: colors.surface },
+            isMobile && styles.contentMobile,
+          ]}
+        >
           {/* Drag Handle - Mobile Only */}
-          {isMobile && (
-            <View style={[styles.dragHandle, { backgroundColor: colors.border }]} />
-          )}
+          {isMobile && <View style={[styles.dragHandle, { backgroundColor: colors.border }]} />}
 
           {/* Header */}
           <View style={[styles.header, { borderBottomColor: colors.border }]}>
@@ -106,13 +124,15 @@ export const FilterModal: React.FC<FilterModalProps> = ({
           <ScrollView style={styles.body}>
             {sections.map((section) => (
               <View key={section.id} style={styles.section}>
-                <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>{section.title}</Text>
-                
+                <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
+                  {section.title}
+                </Text>
+
                 {/* Info Banner (optional) */}
                 {section.infoBanner && (
                   <View style={[styles.infoBanner, { backgroundColor: colors.primaryAlpha10 }]}>
                     <MaterialCommunityIcons
-                      name={section.infoBanner.icon as any}
+                      name={section.infoBanner.icon as typeof ICONS.CHECK}
                       size={designTokens.icon.sizes.sm}
                       color={colors.primary}
                     />
@@ -125,14 +145,18 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                 {/* Options */}
                 {section.options.map((option) => {
                   const isSelected = isOptionSelected(section.id, option.value.toString());
-                  
+
                   return (
                     <TouchableOpacity
                       key={option.id}
                       style={[
                         styles.option,
                         { backgroundColor: colors.surfaceLight },
-                        isSelected && { backgroundColor: colors.primaryAlpha10, borderWidth: designTokens.borderWidth.medium, borderColor: colors.primary },
+                        isSelected && {
+                          backgroundColor: colors.primaryAlpha10,
+                          borderWidth: designTokens.borderWidth.medium,
+                          borderColor: colors.primary,
+                        },
                       ]}
                       onPress={() => onSelectOption(section.id, option.value.toString())}
                       accessible={true}
@@ -143,16 +167,21 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                       <View style={styles.optionContent}>
                         {option.icon && (
                           <MaterialCommunityIcons
-                            name={option.icon as any}
+                            name={option.icon as typeof ICONS.CHECK}
                             size={designTokens.icon.sizes.md}
-                            color={isSelected ? colors.primary : (option.color || colors.textSecondary)}
+                            color={
+                              isSelected ? colors.primary : option.color || colors.textSecondary
+                            }
                           />
                         )}
                         <Text
                           style={[
                             styles.optionText,
                             { color: colors.textSecondary },
-                            isSelected && { color: colors.primary, fontWeight: designTokens.fontWeight.semibold },
+                            isSelected && {
+                              color: colors.primary,
+                              fontWeight: designTokens.fontWeight.semibold,
+                            },
                           ]}
                         >
                           {option.label}
@@ -170,7 +199,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                 })}
               </View>
             ))}
-            
+
             {/* Custom children content */}
             {children}
           </ScrollView>
@@ -184,8 +213,14 @@ export const FilterModal: React.FC<FilterModalProps> = ({
               accessibilityRole={A11Y_ROLE.BUTTON}
               accessibilityLabel={t('common.cancel')}
             >
-              <MaterialCommunityIcons name={ICONS.FILTER} size={designTokens.iconSize.md} color={colors.textSecondary} />
-              <Text style={[styles.clearButtonText, { color: colors.textSecondary }]}>{t('common.cancel')}</Text>
+              <MaterialCommunityIcons
+                name={ICONS.FILTER}
+                size={designTokens.iconSize.md}
+                color={colors.textSecondary}
+              />
+              <Text style={[styles.clearButtonText, { color: colors.textSecondary }]}>
+                {t('common.cancel')}
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.applyButton, { backgroundColor: colors.primary }]}
@@ -326,4 +361,3 @@ const styles = StyleSheet.create({
 });
 
 export default FilterModal;
-

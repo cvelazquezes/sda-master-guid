@@ -7,11 +7,24 @@ import React from 'react';
 import { TouchableOpacity, StyleSheet, ViewStyle, StyleProp } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { designTokens, layoutConstants } from '../theme';
-import { A11Y_ROLE, TOUCH_OPACITY, COMPONENT_VARIANT, COMPONENT_SIZE } from '../constants';
-import { dimensionValues } from '../constants/layoutConstants';
+import {
+  A11Y_ROLE,
+  COMPONENT_SIZE,
+  COMPONENT_VARIANT,
+  TOUCH_OPACITY,
+  dimensionValues,
+} from '../constants';
 
-type IconButtonVariant = typeof COMPONENT_VARIANT.primary | typeof COMPONENT_VARIANT.secondary | typeof COMPONENT_VARIANT.accent | typeof COMPONENT_VARIANT.danger | typeof COMPONENT_VARIANT.ghost;
-type IconButtonSize = typeof COMPONENT_SIZE.sm | typeof COMPONENT_SIZE.md | typeof COMPONENT_SIZE.lg;
+type IconButtonVariant =
+  | typeof COMPONENT_VARIANT.primary
+  | typeof COMPONENT_VARIANT.secondary
+  | typeof COMPONENT_VARIANT.accent
+  | typeof COMPONENT_VARIANT.danger
+  | typeof COMPONENT_VARIANT.ghost;
+type IconButtonSize =
+  | typeof COMPONENT_SIZE.sm
+  | typeof COMPONENT_SIZE.md
+  | typeof COMPONENT_SIZE.lg;
 
 interface IconButtonProps {
   icon: string;
@@ -119,7 +132,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
       accessibilityState={{ disabled }}
     >
       <MaterialCommunityIcons
-        name={icon as any}
+        name={icon as typeof ICONS.CHECK}
         size={sizeStyles.iconSize}
         color={disabled ? designTokens.colors.textDisabled : finalColor}
       />
@@ -139,4 +152,3 @@ const styles = StyleSheet.create({
 });
 
 export default IconButton;
-

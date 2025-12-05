@@ -1,43 +1,38 @@
 /**
- * UI Constants - Single Source of Truth for UI-related string values
+ * UI Constants - Single Source of Truth for UI behavior values
  *
  * ============================================================================
- * THIS IS THE SINGLE SOURCE OF TRUTH FOR ALL UI STRING VALUES
+ * THIS IS THE SINGLE SOURCE OF TRUTH FOR UI BEHAVIOR
  * ============================================================================
  *
- * All UI-related string values should be referenced from here.
- * This ensures type safety, consistency, and easier refactoring.
+ * Contains: Animation types, accessibility, input behavior, status values
  *
- * ⚠️ COMPLIANCE RULE:
- * ❌ NEVER write: animationType="slide", accessibilityRole="button"
- * ✅ ALWAYS use: animationType={ANIMATION.SLIDE}, accessibilityRole={A11Y_ROLE.BUTTON}
+ * NOTE: Component sizes/variants moved to components.ts
+ * NOTE: Layout values moved to layout.ts
+ * NOTE: App version moved to app.ts
  *
- * @version 1.0.0
+ * @version 2.0.0
  */
 
-/**
- * App Info - Version and metadata
- */
-export const APP_VERSION = '1.0.0' as const;
+// =============================================================================
+// ANIMATION
+// =============================================================================
 
 /**
  * Animation Types - Used for Modal and other animations
  */
-export const ANIMATION = {
+export const ANIMATION_TYPE = {
   SLIDE: 'slide',
   FADE: 'fade',
   NONE: 'none',
 } as const;
 
-/**
- * Animation Duration Constants - in milliseconds
- */
-export const ANIMATION_DURATION = {
-  FAST: 200,
-  NORMAL: 300,
-  MEDIUM: 400,
-  SLOW: 500,
-} as const;
+// Legacy alias
+export const ANIMATION = ANIMATION_TYPE;
+
+// =============================================================================
+// ACCESSIBILITY
+// =============================================================================
 
 /**
  * Accessibility Roles - Used for accessibilityRole prop
@@ -68,6 +63,10 @@ export const A11Y_ROLE = {
   LISTITEM: 'listitem',
   NONE: 'none',
 } as const;
+
+// =============================================================================
+// INPUT BEHAVIOR
+// =============================================================================
 
 /**
  * Keyboard Types - Used for TextInput keyboardType prop
@@ -131,6 +130,19 @@ export const AUTO_COMPLETE = {
 } as const;
 
 /**
+ * Keyboard Avoiding Behavior - Used for KeyboardAvoidingView
+ */
+export const KEYBOARD_BEHAVIOR = {
+  PADDING: 'padding',
+  HEIGHT: 'height',
+  POSITION: 'position',
+} as const;
+
+// =============================================================================
+// IMAGE & MEDIA
+// =============================================================================
+
+/**
  * Content Fit Types - Used for Image contentFit prop
  */
 export const CONTENT_FIT = {
@@ -141,6 +153,10 @@ export const CONTENT_FIT = {
   SCALE_DOWN: 'scale-down',
 } as const;
 
+// =============================================================================
+// STATUS BAR
+// =============================================================================
+
 /**
  * Status Bar Styles
  */
@@ -150,208 +166,126 @@ export const STATUS_BAR = {
   DEFAULT: 'default',
 } as const;
 
-/**
- * Text Line Limits - Used for numberOfLines prop
- */
-export const TEXT_LINES = {
-  single: 1,
-  double: 2,
-  triple: 3,
-  quad: 4,
-} as const;
+// =============================================================================
+// OPACITY VALUES
+// =============================================================================
 
 /**
- * Touch Opacity - Used for activeOpacity prop on TouchableOpacity
- */
-/**
  * Opacity Hex Values - For adding transparency to colors
- * Usage: `${color}${OPACITY.LIGHT}` → e.g., "#FF0000" + "20" = "#FF000020"
+ * Usage: `${color}${OPACITY_HEX.LIGHT}` → e.g., "#FF0000" + "20" = "#FF000020"
  */
-export const OPACITY = {
+export const OPACITY_HEX = {
   LIGHT: '20',
   MEDIUM: '50',
   STRONG: '80',
   FULL: 'FF',
 } as const;
 
-export const TOUCH_OPACITY = {
-  default: 0.7,
-  light: 0.8,
-  heavy: 0.5,
-  minimal: 0.9,
-} as const;
+// Legacy alias
+export const OPACITY = OPACITY_HEX;
+
+// =============================================================================
+// STATUS VALUES
+// =============================================================================
 
 /**
- * Component Size - Used for size prop on components
+ * Entity Status - Generic status values
  */
-export const COMPONENT_SIZE = {
-  xs: 'xs',
-  sm: 'sm',
-  md: 'md',
-  lg: 'lg',
-  xl: 'xl',
+export const ENTITY_STATUS = {
+  ACTIVE: 'active',
+  INACTIVE: 'inactive',
+  PENDING: 'pending',
+  PAUSED: 'paused',
 } as const;
 
-/**
- * Component Variant - Used for variant prop on components
- */
-export const COMPONENT_VARIANT = {
-  default: 'default',
-  primary: 'primary',
-  secondary: 'secondary',
-  accent: 'accent',
-  ghost: 'ghost',
-  danger: 'danger',
-  outline: 'outline',
-  outlined: 'outlined',
-  elevated: 'elevated',
-  flat: 'flat',
-  neutral: 'neutral',
-  success: 'success',
-  warning: 'warning',
-  error: 'error',
-  info: 'info',
-} as const;
-
-/**
- * Icon Position - Used for icon placement in buttons and other components
- */
-export const ICON_POSITION = {
-  LEFT: 'left',
-  RIGHT: 'right',
-} as const;
-
-/**
- * Orientation - Used for dividers and layouts
- */
-export const ORIENTATION = {
-  HORIZONTAL: 'horizontal',
-  VERTICAL: 'vertical',
-} as const;
-
-/**
- * List Thresholds - Used for optimized list configurations
- */
-export const LIST_THRESHOLDS = {
-  ON_END_REACHED: 0.5,
-  ITEM_VISIBLE_PERCENT: 50,
-  MINIMUM_VIEW_TIME: 300,
-} as const;
-
-/**
- * Spacing Keys - Used for referencing spacing values by name
- */
-export const SPACING_KEY = {
-  XXS: 'xxs',
-  XS: 'xs',
-  SM: 'sm',
-  MD: 'md',
-  LG: 'lg',
-  XL: 'xl',
-  XXL: 'xxl',
-} as const;
-
-/**
- * Modal Configuration - Used for modal size calculations
- */
-export const MODAL_CONFIG = {
-  PERCENTAGE_SYMBOL: '%',
-  MAX_HEIGHT_RATIO: 0.9,
-  PERCENTAGE_DIVISOR: 100,
-} as const;
-
-/**
- * Modal Width Breakpoints and Ratios - Used for responsive modal sizing
- */
-export const MODAL_WIDTH = {
-  BREAKPOINTS: {
-    LARGE: 1200,
-    MEDIUM: 768,
-    SMALL: 480,
-  },
-  MAX: {
-    LARGE: 700,
-    MEDIUM: 600,
-    SHARE: 500,
-  },
-  RATIO: {
-    HALF: 0.5,
-    SEVENTY: 0.7,
-    SEVENTY_FIVE: 0.75,
-    EIGHTY_FIVE: 0.85,
-    NINETY: 0.9,
-    NINETY_FIVE: 0.95,
-  },
-} as const;
-
-/**
- * Move Direction - Used for item reordering
- */
-export const MOVE_DIRECTION = {
-  UP: 'up',
-  DOWN: 'down',
-} as const;
-
-/**
- * ID Prefixes - Used for generating unique IDs
- */
-export const ID_PREFIX = {
-  ITEM: 'item',
-  PAYMENT: 'payment',
-  CHARGE: 'charge',
-  NOTIFICATION: 'notification',
-} as const;
-
-/**
- * Regex Patterns - Common regex patterns for validation and formatting
- */
-export const REGEX_PATTERN = {
-  /**
-   * Matches any character that is NOT a digit (0-9) or plus sign (+)
-   * Used for phone number cleaning
-   */
-  NON_PHONE_CHARS: /[^0-9+]/g,
-} as const;
-
-/**
- * Text Input Configuration
- */
-export const TEXT_INPUT = {
-  NUMBER_OF_LINES: {
-    SINGLE: 1,
-    DOUBLE: 2,
-    MULTI: 4,
-  },
-} as const;
-
-/**
- * Entity Status - Used for status prop on components
- */
+// Legacy alias with camelCase keys
 export const STATUS = {
-  active: 'active',
-  inactive: 'inactive',
-  pending: 'pending',
-  paused: 'paused',
+  active: ENTITY_STATUS.ACTIVE,
+  inactive: ENTITY_STATUS.INACTIVE,
+  pending: ENTITY_STATUS.PENDING,
+  paused: ENTITY_STATUS.PAUSED,
 } as const;
 
 /**
- * Activity Indicator Size - Used for ActivityIndicator size prop
- *
- * ⚠️ COMPLIANCE RULE:
- * ❌ NEVER write: size="large"
- * ✅ ALWAYS use: size={ACTIVITY_INDICATOR_SIZE.large}
+ * Payment Status - Status values for payments
  */
-export const ACTIVITY_INDICATOR_SIZE = {
-  small: 'small',
-  large: 'large',
+export const PAYMENT_STATUS = {
+  PAID: 'paid',
+  PENDING: 'pending',
+  OVERDUE: 'overdue',
 } as const;
+
+/**
+ * Balance Status - For financial balance states
+ */
+export const BALANCE_STATUS = {
+  GOOD: 'good',
+  OVERDUE: 'overdue',
+  PENDING: 'pending',
+  NEUTRAL: 'neutral',
+} as const;
+
+/**
+ * Round Status - Status values for match rounds
+ */
+export const ROUND_STATUS = {
+  ACTIVE: 'active',
+  COMPLETED: 'completed',
+  CANCELLED: 'cancelled',
+} as const;
+
+// Legacy alias (removed MATCH_ROUND_STATUS - use ROUND_STATUS instead)
+export const MATCH_ROUND_STATUS = ROUND_STATUS;
+
+/**
+ * Filter Status - Common filter status values
+ */
+export const FILTER_STATUS = {
+  ALL: 'all',
+  ACTIVE: 'active',
+  INACTIVE: 'inactive',
+} as const;
+
+// =============================================================================
+// PLATFORM
+// =============================================================================
+
+/**
+ * Platform identifiers
+ */
+export const PLATFORM = {
+  WEB: 'web',
+  IOS: 'ios',
+  ANDROID: 'android',
+} as const;
+
+/**
+ * Platform OS - Used for platform-specific behavior
+ */
+export const PLATFORM_OS = {
+  IOS: 'ios',
+  ANDROID: 'android',
+} as const;
+
+// =============================================================================
+// THEME
+// =============================================================================
+
+/**
+ * Theme Mode - Used for theme switching
+ */
+export const THEME_MODE = {
+  LIGHT: 'light',
+  DARK: 'dark',
+  SYSTEM: 'system',
+} as const;
+
+// =============================================================================
+// LANGUAGE & i18n
+// =============================================================================
 
 /**
  * Language - Used for i18n configuration
- *
- * ⚠️ COMPLIANCE RULE:
- * ❌ NEVER write: fallbackLng: 'en'
- * ✅ ALWAYS use: fallbackLng: LANGUAGE.ENGLISH
  */
 export const LANGUAGE = {
   ENGLISH: 'en',
@@ -378,60 +312,12 @@ export const LOCALE = {
   SPANISH_MX: 'es-MX',
 } as const;
 
-/**
- * Notification Type - Types of notifications
- */
-export const NOTIFICATION_CHANNEL = {
-  WHATSAPP: 'whatsapp',
-  PUSH: 'push',
-  BOTH: 'both',
-} as const;
-
-/**
- * Match Round Status
- */
-export const MATCH_ROUND_STATUS = {
-  ACTIVE: 'active',
-  COMPLETED: 'completed',
-  CANCELLED: 'cancelled',
-} as const;
-
-/**
- * URL Templates - External service URLs
- */
-export const URL_TEMPLATE = {
-  WHATSAPP_APP: 'whatsapp://send?phone={{phone}}&text={{message}}',
-  WHATSAPP_WEB: 'https://wa.me/{{phone}}?text={{message}}',
-} as const;
-
-/**
- * Platform identifiers
- */
-export const PLATFORM = {
-  WEB: 'web',
-  IOS: 'ios',
-  ANDROID: 'android',
-} as const;
-
-/**
- * Theme Mode - Used for theme switching
- *
- * ⚠️ COMPLIANCE RULE:
- * ❌ NEVER write: mode: 'light', mode: 'dark'
- * ✅ ALWAYS use: mode: THEME_MODE.LIGHT
- */
-export const THEME_MODE = {
-  LIGHT: 'light',
-  DARK: 'dark',
-  SYSTEM: 'system',
-} as const;
+// =============================================================================
+// PRESENTATION & NAVIGATION UI
+// =============================================================================
 
 /**
  * Screen Presentation - Used for navigation screen presentation options
- *
- * ⚠️ COMPLIANCE RULE:
- * ❌ NEVER write: presentation: 'modal'
- * ✅ ALWAYS use: presentation: PRESENTATION.MODAL
  */
 export const PRESENTATION = {
   CARD: 'card',
@@ -444,36 +330,7 @@ export const PRESENTATION = {
 } as const;
 
 /**
- * Badge Display - Used for notification badge display
- *
- * ⚠️ COMPLIANCE RULE:
- * ❌ NEVER write: count > 9 ? '9+' : count
- * ✅ ALWAYS use: count > BADGE.MAX_COUNT ? BADGE.OVERFLOW_TEXT : count
- */
-export const BADGE = {
-  MAX_COUNT: 9,
-  OVERFLOW_TEXT: '9+',
-} as const;
-
-/**
- * Button Size - Used for StandardButton size prop
- *
- * ⚠️ COMPLIANCE RULE:
- * ❌ NEVER write: size="large"
- * ✅ ALWAYS use: size={BUTTON_SIZE.large}
- */
-export const BUTTON_SIZE = {
-  small: 'small',
-  medium: 'medium',
-  large: 'large',
-} as const;
-
-/**
  * Alert Button Style - Used for Alert.alert button options
- *
- * ⚠️ COMPLIANCE RULE:
- * ❌ NEVER write: style: 'destructive'
- * ✅ ALWAYS use: style: ALERT_BUTTON_STYLE.DESTRUCTIVE
  */
 export const ALERT_BUTTON_STYLE = {
   DEFAULT: 'default',
@@ -482,66 +339,53 @@ export const ALERT_BUTTON_STYLE = {
 } as const;
 
 /**
- * Hierarchy Fields - Field names for organizational hierarchy
- *
- * ⚠️ COMPLIANCE RULE:
- * ❌ NEVER write: field === 'division'
- * ✅ ALWAYS use: field === HIERARCHY_FIELDS.DIVISION
+ * SafeAreaView Edges - Standard edge configurations
  */
-export const HIERARCHY_FIELDS = {
-  DIVISION: 'division',
-  UNION: 'union',
-  ASSOCIATION: 'association',
-  CHURCH: 'church',
-  CLUB: 'club',
-  CLUB_ID: 'clubId',
-  STATUS: 'status',
-  ROLE: 'role',
+export const SAFE_AREA_EDGES = {
+  TOP_LEFT_RIGHT: ['top', 'left', 'right'] as const,
+  ALL: ['top', 'bottom', 'left', 'right'] as const,
+  TOP_BOTTOM: ['top', 'bottom'] as const,
+  NONE: [] as const,
+} as const;
+
+// =============================================================================
+// NOTIFICATION
+// =============================================================================
+
+/**
+ * Notification Channel - Types of notification delivery
+ */
+export const NOTIFICATION_CHANNEL = {
+  WHATSAPP: 'whatsapp',
+  PUSH: 'push',
+  BOTH: 'both',
 } as const;
 
 /**
- * Filter Status - Common filter status values
- *
- * ⚠️ COMPLIANCE RULE:
- * ❌ NEVER write: status: 'all'
- * ✅ ALWAYS use: status: FILTER_STATUS.ALL
+ * Notification Types - For categorizing notifications
  */
-export const FILTER_STATUS: {
-  ALL: string;
-  ACTIVE: string;
-  INACTIVE: string;
-} = {
-  ALL: 'all',
-  ACTIVE: 'active',
-  INACTIVE: 'inactive',
-};
+export const NOTIFICATION_TYPE = {
+  ACTIVITY: 'activity',
+  FEE: 'fee',
+  CLUB: 'club',
+  SYSTEM: 'system',
+} as const;
+
+// =============================================================================
+// URL TEMPLATES
+// =============================================================================
 
 /**
- * Empty String - Use for initializing form fields and filters
- *
- * ⚠️ COMPLIANCE RULE:
- * ❌ NEVER write: name: ''  (when used as default/empty value)
- * ✅ ALWAYS use: name: EMPTY_VALUE
+ * URL Templates - External service URLs
  */
-export const EMPTY_VALUE: string = '';
+export const URL_TEMPLATE = {
+  WHATSAPP_APP: 'whatsapp://send?phone={{phone}}&text={{message}}',
+  WHATSAPP_WEB: 'https://wa.me/{{phone}}?text={{message}}',
+} as const;
 
-/**
- * Ellipsis - Used for text truncation
- *
- * ⚠️ COMPLIANCE RULE:
- * ❌ NEVER write: '...'
- * ✅ ALWAYS use: ELLIPSIS
- */
-export const ELLIPSIS = '...';
-
-/**
- * List Separator - Used for joining list items
- *
- * ⚠️ COMPLIANCE RULE:
- * ❌ NEVER write: array.join(', ')
- * ✅ ALWAYS use: array.join(LIST_SEPARATOR)
- */
-export const LIST_SEPARATOR = ', ';
+// =============================================================================
+// TABS
+// =============================================================================
 
 /**
  * Fee Screen Tabs - Used for tab navigation in ClubFeesScreen
@@ -562,49 +406,6 @@ export const MY_FEES_TAB = {
 } as const;
 
 /**
- * All Months - Array of all month numbers (1-12)
- * Used for "Select All" months functionality
- */
-export const ALL_MONTHS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
-
-/**
- * Round Status - Status values for match rounds
- */
-export const ROUND_STATUS = {
-  ACTIVE: 'active',
-  COMPLETED: 'completed',
-} as const;
-
-/**
- * Notification Types - For categorizing notifications
- */
-export const NOTIFICATION_TYPE = {
-  ACTIVITY: 'activity',
-  FEE: 'fee',
-  CLUB: 'club',
-  SYSTEM: 'system',
-} as const;
-
-/**
- * Payment Status - Status values for payment filters
- */
-export const PAYMENT_STATUS = {
-  PAID: 'paid',
-  PENDING: 'pending',
-  OVERDUE: 'overdue',
-} as const;
-
-/**
- * Balance Status - For financial balance states
- */
-export const BALANCE_STATUS = {
-  GOOD: 'good',
-  OVERDUE: 'overdue',
-  PENDING: 'pending',
-  NEUTRAL: 'neutral',
-} as const;
-
-/**
  * Member Tab IDs - Tab identifiers for member management
  */
 export const MEMBER_TAB = {
@@ -621,21 +422,30 @@ export const FILTER_SECTION = {
   CLASS: 'class',
 } as const;
 
+// =============================================================================
+// FORM FIELDS & TESTING
+// =============================================================================
+
 /**
- * Platform OS - Used for platform-specific behavior
+ * Hierarchy Fields - Field names for organizational hierarchy
  */
-export const PLATFORM_OS = {
-  IOS: 'ios',
-  ANDROID: 'android',
+export const HIERARCHY_FIELDS = {
+  DIVISION: 'division',
+  UNION: 'union',
+  ASSOCIATION: 'association',
+  CHURCH: 'church',
+  CLUB: 'club',
+  CLUB_ID: 'clubId',
+  STATUS: 'status',
+  ROLE: 'role',
 } as const;
 
 /**
- * Keyboard Avoiding Behavior - Used for KeyboardAvoidingView
+ * Form Field Names - Used for error field detection
  */
-export const KEYBOARD_BEHAVIOR = {
-  PADDING: 'padding',
-  HEIGHT: 'height',
-  POSITION: 'position',
+export const FORM_FIELDS = {
+  EMAIL: 'email',
+  PASSWORD: 'Password',
 } as const;
 
 /**
@@ -648,49 +458,106 @@ export const TEST_IDS = {
   REGISTER_BUTTON: 'register-button',
 } as const;
 
+// =============================================================================
+// MISC CONSTANTS
+// =============================================================================
+
 /**
- * Form Field Names - Used for error field detection
+ * Spacing Keys - Used for referencing spacing values by name
  */
-export const FORM_FIELDS = {
-  EMAIL: 'email',
-  PASSWORD: 'Password',
+export const SPACING_KEY = {
+  XXS: 'xxs',
+  XS: 'xs',
+  SM: 'sm',
+  MD: 'md',
+  LG: 'lg',
+  XL: 'xl',
+  XXL: 'xxl',
 } as const;
 
 /**
- * SafeAreaView Edges - Standard edge configurations
+ * Move Direction - Used for item reordering
  */
-export const SAFE_AREA_EDGES = {
-  TOP_LEFT_RIGHT: ['top', 'left', 'right'] as const,
-  ALL: ['top', 'bottom', 'left', 'right'] as const,
-  TOP_BOTTOM: ['top', 'bottom'] as const,
-  NONE: [] as const,
+export const MOVE_DIRECTION = {
+  UP: 'up',
+  DOWN: 'down',
 } as const;
+
+/**
+ * ID Prefixes - Used for generating unique IDs
+ */
+export const ID_PREFIX = {
+  ITEM: 'item',
+  PAYMENT: 'payment',
+  CHARGE: 'charge',
+  NOTIFICATION: 'notification',
+} as const;
+
+/**
+ * Regex Patterns - Common regex patterns for validation and formatting
+ */
+export const REGEX_PATTERN = {
+  /** Matches any character that is NOT a digit (0-9) or plus sign (+) */
+  NON_PHONE_CHARS: /[^0-9+]/g,
+} as const;
+
+/**
+ * Empty String - Use for initializing form fields and filters
+ * Note: Typed as string to allow use in state that accepts other string values
+ */
+export const EMPTY_VALUE: string = '';
+
+/**
+ * Ellipsis - Used for text truncation
+ */
+export const ELLIPSIS = '...' as const;
+
+/**
+ * List Separator - Used for joining list items
+ */
+export const LIST_SEPARATOR = ', ' as const;
+
+/**
+ * All Months - Array of all month numbers (1-12)
+ */
+export const ALL_MONTHS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
 
 /**
  * Organization Types Array - For iteration and type checking
  */
 export const ORGANIZATION_TYPES = ['division', 'union', 'association', 'church'] as const;
 
-export type OrganizationType = (typeof ORGANIZATION_TYPES)[number];
+// =============================================================================
+// LEGACY EXPORTS - For backward compatibility
+// =============================================================================
 
-// Type exports
-export type AnimationType = (typeof ANIMATION)[keyof typeof ANIMATION];
+// Note: COMPONENT_SIZE, COMPONENT_VARIANT, etc. are exported from components.ts
+// Note: MODAL_CONFIG, MODAL_WIDTH are exported from layout.ts
+// Note: APP_VERSION is exported from app.ts
+// Note: ANIMATION_DURATION is exported from timing.ts
+// All these are re-exported via index.ts - no need to duplicate here
+
+// Legacy constant (use LIST_CONFIG from components.ts instead)
+export const LIST_THRESHOLDS = {
+  ON_END_REACHED: 0.5,
+  ITEM_VISIBLE_PERCENT: 50,
+  MINIMUM_VIEW_TIME: 300,
+} as const;
+
+// =============================================================================
+// TYPE EXPORTS
+// =============================================================================
+
+export type AnimationType = (typeof ANIMATION_TYPE)[keyof typeof ANIMATION_TYPE];
 export type A11yRole = (typeof A11Y_ROLE)[keyof typeof A11Y_ROLE];
 export type KeyboardType = (typeof KEYBOARD_TYPE)[keyof typeof KEYBOARD_TYPE];
 export type ReturnKeyType = (typeof RETURN_KEY)[keyof typeof RETURN_KEY];
 export type AutoCapitalizeType = (typeof AUTO_CAPITALIZE)[keyof typeof AUTO_CAPITALIZE];
 export type ContentFitType = (typeof CONTENT_FIT)[keyof typeof CONTENT_FIT];
 export type StatusBarStyle = (typeof STATUS_BAR)[keyof typeof STATUS_BAR];
-export type TextLines = (typeof TEXT_LINES)[keyof typeof TEXT_LINES];
-export type TouchOpacity = (typeof TOUCH_OPACITY)[keyof typeof TOUCH_OPACITY];
-export type ComponentSize = (typeof COMPONENT_SIZE)[keyof typeof COMPONENT_SIZE];
-export type ComponentVariant = (typeof COMPONENT_VARIANT)[keyof typeof COMPONENT_VARIANT];
-export type EntityStatus = (typeof STATUS)[keyof typeof STATUS];
-export type ActivityIndicatorSize =
-  (typeof ACTIVITY_INDICATOR_SIZE)[keyof typeof ACTIVITY_INDICATOR_SIZE];
+export type EntityStatus = (typeof ENTITY_STATUS)[keyof typeof ENTITY_STATUS];
 export type ThemeModeValue = (typeof THEME_MODE)[keyof typeof THEME_MODE];
 export type PresentationType = (typeof PRESENTATION)[keyof typeof PRESENTATION];
-export type ButtonSize = (typeof BUTTON_SIZE)[keyof typeof BUTTON_SIZE];
 export type AlertButtonStyle = (typeof ALERT_BUTTON_STYLE)[keyof typeof ALERT_BUTTON_STYLE];
 export type HierarchyField = (typeof HIERARCHY_FIELDS)[keyof typeof HIERARCHY_FIELDS];
-export type FilterStatus = (typeof FILTER_STATUS)[keyof typeof FILTER_STATUS];
+export type OrganizationType = (typeof ORGANIZATION_TYPES)[number];

@@ -70,7 +70,7 @@ class UserService {
    */
   private async mockGetUser(userId: string): Promise<User> {
     await this.sleep(MOCK_API_DELAY_MS);
-    
+
     const user = mockUsers.find((u) => u.id === userId);
     if (!user) {
       logger.warn('Mock: User not found', { userId });
@@ -236,7 +236,7 @@ class UserService {
    */
   private async mockGetUsersByClub(clubId: string): Promise<User[]> {
     await this.sleep(MOCK_API_DELAY_MS);
-    
+
     const users = mockUsers.filter((u) => u.clubId === clubId);
     logger.debug('Mock: Users fetched for club', { clubId, count: users.length });
     return users;

@@ -14,18 +14,21 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { clubService } from '../../services/clubService';
 import { paymentService } from '../../services/paymentService';
-import {
-  Club,
-  MemberBalance,
-  MemberPayment,
-  CustomCharge,
-} from '../../types';
-import { mobileTypography, mobileFontSizes, designTokens, layoutConstants } from '../../shared/theme';
-import { ICONS, PAYMENT_STATUS, BALANCE_STATUS, MY_FEES_TAB, ANIMATION_DURATION } from '../../shared/constants';
-import { flexValues, dimensionValues, borderValues } from '../../shared/constants/layoutConstants';
+import { Club, MemberBalance, MemberPayment, CustomCharge } from '../../types';
+import { mobileFontSizes, designTokens, layoutConstants } from '../../shared/theme';
 import { DATE_LOCALE_OPTIONS } from '../../shared/constants/formats';
 import { LOG_MESSAGES } from '../../shared/constants/logMessages';
 import { logger } from '../../shared/utils/logger';
+import {
+  ANIMATION_DURATION,
+  BALANCE_STATUS,
+  ICONS,
+  MY_FEES_TAB,
+  PAYMENT_STATUS,
+  borderValues,
+  dimensionValues,
+  flexValues,
+} from '../../shared/constants';
 
 const MyFeesScreen = () => {
   const { t } = useTranslation();
@@ -37,8 +40,10 @@ const MyFeesScreen = () => {
   const [customCharges, setCustomCharges] = useState<CustomCharge[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [selectedTab, setSelectedTab] = useState<typeof MY_FEES_TAB.OVERVIEW | typeof MY_FEES_TAB.HISTORY | typeof MY_FEES_TAB.CHARGES>(MY_FEES_TAB.OVERVIEW);
-  
+  const [selectedTab, setSelectedTab] = useState<
+    typeof MY_FEES_TAB.OVERVIEW | typeof MY_FEES_TAB.HISTORY | typeof MY_FEES_TAB.CHARGES
+  >(MY_FEES_TAB.OVERVIEW);
+
   // Animation values
   const fadeAnim = useState(new Animated.Value(0))[0];
   const slideAnim = useState(new Animated.Value(30))[0];
@@ -79,11 +84,10 @@ const MyFeesScreen = () => {
       setClub(clubData);
       setBalance(balanceData);
       setPayments(paymentsData);
-      
+
       const userCharges = chargesData.filter(
         (charge) =>
-          charge.appliedToUserIds.length === 0 ||
-          charge.appliedToUserIds.includes(user.id)
+          charge.appliedToUserIds.length === 0 || charge.appliedToUserIds.includes(user.id)
       );
       setCustomCharges(userCharges);
     } catch (error) {
@@ -102,32 +106,32 @@ const MyFeesScreen = () => {
   const getStatusConfig = (status: string) => {
     switch (status) {
       case PAYMENT_STATUS.PAID:
-        return { 
-          color: colors.success, 
-          bg: colors.successLight || `${colors.success}15`, 
+        return {
+          color: colors.success,
+          bg: colors.successLight || `${colors.success}15`,
           icon: ICONS.CHECK_CIRCLE as const,
-          label: t('screens.myFees.statusPaid')
+          label: t('screens.myFees.statusPaid'),
         };
       case PAYMENT_STATUS.OVERDUE:
-        return { 
-          color: colors.error, 
-          bg: colors.errorLight || `${colors.error}15`, 
+        return {
+          color: colors.error,
+          bg: colors.errorLight || `${colors.error}15`,
           icon: ICONS.ALERT_CIRCLE as const,
-          label: t('screens.myFees.statusOverdue')
+          label: t('screens.myFees.statusOverdue'),
         };
       case PAYMENT_STATUS.PENDING:
-        return { 
-          color: colors.warning, 
-          bg: colors.warningLight || `${colors.warning}15`, 
+        return {
+          color: colors.warning,
+          bg: colors.warningLight || `${colors.warning}15`,
           icon: ICONS.CLOCK_OUTLINE as const,
-          label: t('screens.myFees.statusPending')
+          label: t('screens.myFees.statusPending'),
         };
       default:
-        return { 
-          color: colors.textSecondary, 
-          bg: `${colors.textSecondary}15`, 
+        return {
+          color: colors.textSecondary,
+          bg: `${colors.textSecondary}15`,
           icon: ICONS.HELP_CIRCLE as const,
-          label: t('screens.myFees.statusUnknown')
+          label: t('screens.myFees.statusUnknown'),
         };
     }
   };
@@ -139,7 +143,7 @@ const MyFeesScreen = () => {
     return { color: colors.warning, status: BALANCE_STATUS.PENDING };
   };
 
-  const paidPayments = payments.filter(p => p.status === PAYMENT_STATUS.PAID).length;
+  const paidPayments = payments.filter((p) => p.status === PAYMENT_STATUS.PAID).length;
   const totalPayments = payments.length;
   const paymentProgress = totalPayments > 0 ? (paidPayments / totalPayments) * 100 : 0;
 
@@ -149,13 +153,29 @@ const MyFeesScreen = () => {
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={[styles.headerGradient, { backgroundColor: colors.primary }]}>
           <View style={styles.skeletonHeader}>
-            <View style={[styles.skeleton, styles.skeletonTitle, { backgroundColor: `${colors.textInverse}30` }]} />
-            <View style={[styles.skeleton, styles.skeletonSubtitle, { backgroundColor: `${colors.textInverse}20` }]} />
+            <View
+              style={[
+                styles.skeleton,
+                styles.skeletonTitle,
+                { backgroundColor: `${colors.textInverse}30` },
+              ]}
+            />
+            <View
+              style={[
+                styles.skeleton,
+                styles.skeletonSubtitle,
+                { backgroundColor: `${colors.textInverse}20` },
+              ]}
+            />
           </View>
         </View>
         <View style={styles.skeletonContent}>
-          <View style={[styles.skeleton, styles.skeletonCard, { backgroundColor: colors.border }]} />
-          <View style={[styles.skeleton, styles.skeletonCard, { backgroundColor: colors.border }]} />
+          <View
+            style={[styles.skeleton, styles.skeletonCard, { backgroundColor: colors.border }]}
+          />
+          <View
+            style={[styles.skeleton, styles.skeletonCard, { backgroundColor: colors.border }]}
+          />
         </View>
       </View>
     );
@@ -167,8 +187,14 @@ const MyFeesScreen = () => {
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={[styles.headerGradient, { backgroundColor: colors.textTertiary }]}>
           <View style={styles.emptyHeader}>
-            <MaterialCommunityIcons name={ICONS.ACCOUNT_OFF_OUTLINE} size={designTokens.iconSize['3xl']} color={`${colors.textInverse}50`} />
-            <Text style={[styles.emptyHeaderTitle, { color: colors.textInverse }]}>{t('screens.myFees.notAClubMember')}</Text>
+            <MaterialCommunityIcons
+              name={ICONS.ACCOUNT_OFF_OUTLINE}
+              size={designTokens.iconSize['3xl']}
+              color={`${colors.textInverse}50`}
+            />
+            <Text style={[styles.emptyHeaderTitle, { color: colors.textInverse }]}>
+              {t('screens.myFees.notAClubMember')}
+            </Text>
             <Text style={[styles.emptyHeaderSubtitle, { color: `${colors.textInverse}80` }]}>
               {t('screens.myFees.joinClubToViewFees')}
             </Text>
@@ -183,66 +209,109 @@ const MyFeesScreen = () => {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header with Balance */}
-      <View style={[
-        styles.headerGradient, 
-        { backgroundColor: balanceStatus.status === BALANCE_STATUS.GOOD ? colors.success : 
-          balanceStatus.status === BALANCE_STATUS.OVERDUE ? colors.error : colors.primary }
-      ]}>
+      <View
+        style={[
+          styles.headerGradient,
+          {
+            backgroundColor:
+              balanceStatus.status === BALANCE_STATUS.GOOD
+                ? colors.success
+                : balanceStatus.status === BALANCE_STATUS.OVERDUE
+                  ? colors.error
+                  : colors.primary,
+          },
+        ]}
+      >
         <View style={styles.headerContent}>
           <View style={styles.headerTop}>
             <View>
-              <Text style={[styles.headerClubName, { color: `${colors.textInverse}CC` }]}>{club?.name}</Text>
-              <Text style={[styles.headerTitle, { color: colors.textInverse }]}>{t('screens.myFees.myFinances')}</Text>
+              <Text style={[styles.headerClubName, { color: `${colors.textInverse}CC` }]}>
+                {club?.name}
+              </Text>
+              <Text style={[styles.headerTitle, { color: colors.textInverse }]}>
+                {t('screens.myFees.myFinances')}
+              </Text>
             </View>
-            <TouchableOpacity style={[styles.headerAction, { backgroundColor: `${colors.textInverse}20` }]}>
-              <MaterialCommunityIcons name={ICONS.HISTORY} size={designTokens.iconSize.lg} color={colors.textInverse} />
+            <TouchableOpacity
+              style={[styles.headerAction, { backgroundColor: `${colors.textInverse}20` }]}
+            >
+              <MaterialCommunityIcons
+                name={ICONS.HISTORY}
+                size={designTokens.iconSize.lg}
+                color={colors.textInverse}
+              />
             </TouchableOpacity>
           </View>
 
           {/* Balance Card */}
           <View style={[styles.balanceCard, { backgroundColor: `${colors.textInverse}20` }]}>
             <View style={styles.balanceMain}>
-              <Text style={[styles.balanceLabel, { color: `${colors.textInverse}CC` }]}>{t('screens.myFees.currentBalance')}</Text>
+              <Text style={[styles.balanceLabel, { color: `${colors.textInverse}CC` }]}>
+                {t('screens.myFees.currentBalance')}
+              </Text>
               <Text style={[styles.balanceAmount, { color: colors.textInverse }]}>
-                ${balance ? Math.abs(balance.balance).toFixed(2) : t('screens.myFees.defaultAmount')}
+                $
+                {balance ? Math.abs(balance.balance).toFixed(2) : t('screens.myFees.defaultAmount')}
               </Text>
               {balance && balance.balance < 0 && (
                 <View style={[styles.balanceTag, { backgroundColor: `${colors.textInverse}25` }]}>
-                  <MaterialCommunityIcons 
-                    name={balance.overdueCharges > 0 ? ICONS.ALERT : ICONS.CLOCK_OUTLINE} 
-                    size={designTokens.iconSize.xs} 
-                    color={colors.textInverse} 
+                  <MaterialCommunityIcons
+                    name={balance.overdueCharges > 0 ? ICONS.ALERT : ICONS.CLOCK_OUTLINE}
+                    size={designTokens.iconSize.xs}
+                    color={colors.textInverse}
                   />
                   <Text style={[styles.balanceTagText, { color: colors.textInverse }]}>
-                    {balance.overdueCharges > 0 ? t('screens.myFees.paymentOverdue') : t('screens.myFees.paymentDue')}
+                    {balance.overdueCharges > 0
+                      ? t('screens.myFees.paymentOverdue')
+                      : t('screens.myFees.paymentDue')}
                   </Text>
                 </View>
               )}
               {balance && balance.balance >= 0 && (
                 <View style={[styles.balanceTag, { backgroundColor: `${colors.textInverse}25` }]}>
-                  <MaterialCommunityIcons name={ICONS.CHECK_CIRCLE} size={designTokens.iconSize.xs} color={colors.textInverse} />
+                  <MaterialCommunityIcons
+                    name={ICONS.CHECK_CIRCLE}
+                    size={designTokens.iconSize.xs}
+                    color={colors.textInverse}
+                  />
                   <Text style={[styles.balanceTagText, { color: colors.textInverse }]}>
                     {t('screens.myFees.allPaidUp')}
                   </Text>
                 </View>
               )}
             </View>
-            
+
             {/* Quick Stats */}
             <View style={[styles.quickStats, { borderTopColor: `${colors.textInverse}30` }]}>
               <View style={styles.quickStat}>
-                <Text style={[styles.quickStatValue, { color: colors.textInverse }]}>${balance?.totalPaid.toFixed(0) || '0'}</Text>
-                <Text style={[styles.quickStatLabel, { color: `${colors.textInverse}CC` }]}>{t('screens.myFees.totalPaid')}</Text>
+                <Text style={[styles.quickStatValue, { color: colors.textInverse }]}>
+                  ${balance?.totalPaid.toFixed(0) || '0'}
+                </Text>
+                <Text style={[styles.quickStatLabel, { color: `${colors.textInverse}CC` }]}>
+                  {t('screens.myFees.totalPaid')}
+                </Text>
               </View>
-              <View style={[styles.quickStatDivider, { backgroundColor: `${colors.textInverse}30` }]} />
+              <View
+                style={[styles.quickStatDivider, { backgroundColor: `${colors.textInverse}30` }]}
+              />
               <View style={styles.quickStat}>
-                <Text style={[styles.quickStatValue, { color: colors.textInverse }]}>{paidPayments}/{totalPayments}</Text>
-                <Text style={[styles.quickStatLabel, { color: `${colors.textInverse}CC` }]}>{t('screens.myFees.payments')}</Text>
+                <Text style={[styles.quickStatValue, { color: colors.textInverse }]}>
+                  {paidPayments}/{totalPayments}
+                </Text>
+                <Text style={[styles.quickStatLabel, { color: `${colors.textInverse}CC` }]}>
+                  {t('screens.myFees.payments')}
+                </Text>
               </View>
-              <View style={[styles.quickStatDivider, { backgroundColor: `${colors.textInverse}30` }]} />
+              <View
+                style={[styles.quickStatDivider, { backgroundColor: `${colors.textInverse}30` }]}
+              />
               <View style={styles.quickStat}>
-                <Text style={[styles.quickStatValue, { color: colors.textInverse }]}>{customCharges.length}</Text>
-                <Text style={[styles.quickStatLabel, { color: `${colors.textInverse}CC` }]}>{t('screens.myFees.charges')}</Text>
+                <Text style={[styles.quickStatValue, { color: colors.textInverse }]}>
+                  {customCharges.length}
+                </Text>
+                <Text style={[styles.quickStatLabel, { color: `${colors.textInverse}CC` }]}>
+                  {t('screens.myFees.charges')}
+                </Text>
               </View>
             </View>
           </View>
@@ -250,28 +319,38 @@ const MyFeesScreen = () => {
       </View>
 
       {/* Tab Navigation */}
-      <View style={[styles.tabContainer, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+      <View
+        style={[
+          styles.tabContainer,
+          { backgroundColor: colors.surface, borderBottomColor: colors.border },
+        ]}
+      >
         {([MY_FEES_TAB.OVERVIEW, MY_FEES_TAB.HISTORY, MY_FEES_TAB.CHARGES] as const).map((tab) => (
           <TouchableOpacity
             key={tab}
             style={[
               styles.tab,
-              selectedTab === tab && [styles.tabActive, { borderBottomColor: colors.primary }]
+              selectedTab === tab && [styles.tabActive, { borderBottomColor: colors.primary }],
             ]}
             onPress={() => setSelectedTab(tab)}
           >
             <MaterialCommunityIcons
               name={
-                tab === MY_FEES_TAB.OVERVIEW ? ICONS.VIEW_DASHBOARD_OUTLINE :
-                tab === MY_FEES_TAB.HISTORY ? ICONS.HISTORY : ICONS.RECEIPT
+                tab === MY_FEES_TAB.OVERVIEW
+                  ? ICONS.VIEW_DASHBOARD_OUTLINE
+                  : tab === MY_FEES_TAB.HISTORY
+                    ? ICONS.HISTORY
+                    : ICONS.RECEIPT
               }
               size={designTokens.iconSize.md}
               color={selectedTab === tab ? colors.primary : colors.textTertiary}
             />
-            <Text style={[
-              styles.tabText,
-              { color: selectedTab === tab ? colors.primary : colors.textTertiary }
-            ]}>
+            <Text
+              style={[
+                styles.tabText,
+                { color: selectedTab === tab ? colors.primary : colors.textTertiary },
+              ]}
+            >
               {t(`screens.myFees.${tab}`)}
             </Text>
           </TouchableOpacity>
@@ -281,8 +360,8 @@ const MyFeesScreen = () => {
       <ScrollView
         style={styles.content}
         refreshControl={
-          <RefreshControl 
-            refreshing={refreshing} 
+          <RefreshControl
+            refreshing={refreshing}
             onRefresh={onRefresh}
             tintColor={colors.primary}
           />
@@ -297,23 +376,30 @@ const MyFeesScreen = () => {
               <View style={[styles.card, { backgroundColor: colors.surface }]}>
                 <View style={styles.cardHeader}>
                   <View style={styles.cardTitleRow}>
-                    <MaterialCommunityIcons name={ICONS.CHART_DONUT} size={designTokens.iconSize.lg} color={colors.primary} />
+                    <MaterialCommunityIcons
+                      name={ICONS.CHART_DONUT}
+                      size={designTokens.iconSize.lg}
+                      color={colors.primary}
+                    />
                     <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>
                       {t('screens.myFees.paymentProgress')}
                     </Text>
                   </View>
                   <Text style={[styles.cardSubtitle, { color: colors.textTertiary }]}>
-                    {t('screens.myFees.paymentsCompleted', { paid: paidPayments, total: totalPayments })}
+                    {t('screens.myFees.paymentsCompleted', {
+                      paid: paidPayments,
+                      total: totalPayments,
+                    })}
                   </Text>
                 </View>
-                
+
                 <View style={styles.progressContainer}>
                   <View style={[styles.progressBar, { backgroundColor: colors.border }]}>
-                    <View 
+                    <View
                       style={[
-                        styles.progressFill, 
-                        { width: `${paymentProgress}%`, backgroundColor: colors.success }
-                      ]} 
+                        styles.progressFill,
+                        { width: `${paymentProgress}%`, backgroundColor: colors.success },
+                      ]}
                     />
                   </View>
                   <Text style={[styles.progressText, { color: colors.textSecondary }]}>
@@ -323,8 +409,17 @@ const MyFeesScreen = () => {
 
                 {/* Summary Stats */}
                 <View style={styles.summaryGrid}>
-                  <View style={[styles.summaryItem, { backgroundColor: colors.successLight || `${colors.success}15` }]}>
-                    <MaterialCommunityIcons name={ICONS.CHECK_CIRCLE} size={designTokens.iconSize.xl} color={colors.success} />
+                  <View
+                    style={[
+                      styles.summaryItem,
+                      { backgroundColor: colors.successLight || `${colors.success}15` },
+                    ]}
+                  >
+                    <MaterialCommunityIcons
+                      name={ICONS.CHECK_CIRCLE}
+                      size={designTokens.iconSize.xl}
+                      color={colors.success}
+                    />
                     <Text style={[styles.summaryValue, { color: colors.success }]}>
                       ${balance?.totalPaid.toFixed(2) || t('screens.myFees.defaultAmount')}
                     </Text>
@@ -332,8 +427,17 @@ const MyFeesScreen = () => {
                       {t('screens.myFees.totalPaid')}
                     </Text>
                   </View>
-                  <View style={[styles.summaryItem, { backgroundColor: colors.warningLight || `${colors.warning}15` }]}>
-                    <MaterialCommunityIcons name={ICONS.CLOCK_OUTLINE} size={designTokens.iconSize.xl} color={colors.warning} />
+                  <View
+                    style={[
+                      styles.summaryItem,
+                      { backgroundColor: colors.warningLight || `${colors.warning}15` },
+                    ]}
+                  >
+                    <MaterialCommunityIcons
+                      name={ICONS.CLOCK_OUTLINE}
+                      size={designTokens.iconSize.xl}
+                      color={colors.warning}
+                    />
                     <Text style={[styles.summaryValue, { color: colors.warning }]}>
                       ${balance?.pendingCharges.toFixed(2) || t('screens.myFees.defaultAmount')}
                     </Text>
@@ -341,8 +445,17 @@ const MyFeesScreen = () => {
                       {t('screens.myFees.statusPending')}
                     </Text>
                   </View>
-                  <View style={[styles.summaryItem, { backgroundColor: colors.errorLight || `${colors.error}15` }]}>
-                    <MaterialCommunityIcons name={ICONS.ALERT_CIRCLE} size={designTokens.iconSize.xl} color={colors.error} />
+                  <View
+                    style={[
+                      styles.summaryItem,
+                      { backgroundColor: colors.errorLight || `${colors.error}15` },
+                    ]}
+                  >
+                    <MaterialCommunityIcons
+                      name={ICONS.ALERT_CIRCLE}
+                      size={designTokens.iconSize.xl}
+                      color={colors.error}
+                    />
                     <Text style={[styles.summaryValue, { color: colors.error }]}>
                       ${balance?.overdueCharges.toFixed(2) || t('screens.myFees.defaultAmount')}
                     </Text>
@@ -355,10 +468,20 @@ const MyFeesScreen = () => {
 
               {/* Monthly Fee Info */}
               {club?.feeSettings && club.feeSettings.isActive && (
-                <View style={[styles.card, styles.infoCard, { backgroundColor: colors.infoLight || `${colors.info}15` }]}>
+                <View
+                  style={[
+                    styles.card,
+                    styles.infoCard,
+                    { backgroundColor: colors.infoLight || `${colors.info}15` },
+                  ]}
+                >
                   <View style={styles.infoCardContent}>
                     <View style={[styles.infoIconContainer, { backgroundColor: colors.info }]}>
-                      <MaterialCommunityIcons name={ICONS.CALENDAR_MONTH} size={designTokens.iconSize.lg} color={colors.textInverse} />
+                      <MaterialCommunityIcons
+                        name={ICONS.CALENDAR_MONTH}
+                        size={designTokens.iconSize.lg}
+                        color={colors.textInverse}
+                      />
                     </View>
                     <View style={styles.infoTextContainer}>
                       <Text style={[styles.infoTitle, { color: colors.textPrimary }]}>
@@ -368,7 +491,9 @@ const MyFeesScreen = () => {
                         ${club.feeSettings.monthlyFeeAmount.toFixed(2)} {club.feeSettings.currency}
                       </Text>
                       <Text style={[styles.infoSubtext, { color: colors.textTertiary }]}>
-                        {t('screens.myFees.activeMonths', { count: club.feeSettings.activeMonths.length })}
+                        {t('screens.myFees.activeMonths', {
+                          count: club.feeSettings.activeMonths.length,
+                        })}
                       </Text>
                     </View>
                   </View>
@@ -382,29 +507,45 @@ const MyFeesScreen = () => {
                     {t('screens.myFees.recentActivity')}
                   </Text>
                   <TouchableOpacity onPress={() => setSelectedTab(MY_FEES_TAB.HISTORY)}>
-                    <Text style={[styles.seeAllLink, { color: colors.primary }]}>{t('screens.myFees.seeAll')}</Text>
+                    <Text style={[styles.seeAllLink, { color: colors.primary }]}>
+                      {t('screens.myFees.seeAll')}
+                    </Text>
                   </TouchableOpacity>
                 </View>
-                
+
                 {payments.slice(0, 3).map((payment, index) => {
                   const config = getStatusConfig(payment.status);
                   return (
-                    <View 
-                      key={payment.id} 
+                    <View
+                      key={payment.id}
                       style={[
                         styles.activityItem,
-                        index < 2 && { borderBottomWidth: designTokens.borderWidth.thin, borderBottomColor: colors.border }
+                        index < 2 && {
+                          borderBottomWidth: designTokens.borderWidth.thin,
+                          borderBottomColor: colors.border,
+                        },
                       ]}
                     >
                       <View style={[styles.activityIcon, { backgroundColor: config.bg }]}>
-                        <MaterialCommunityIcons name={config.icon} size={designTokens.iconSize.md} color={config.color} />
+                        <MaterialCommunityIcons
+                          name={config.icon}
+                          size={designTokens.iconSize.md}
+                          color={config.color}
+                        />
                       </View>
                       <View style={styles.activityInfo}>
                         <Text style={[styles.activityTitle, { color: colors.textPrimary }]}>
-                          {payment.notes || t('screens.myFees.monthlyFeeNote', { month: payment.month, year: payment.year })}
+                          {payment.notes ||
+                            t('screens.myFees.monthlyFeeNote', {
+                              month: payment.month,
+                              year: payment.year,
+                            })}
                         </Text>
                         <Text style={[styles.activityDate, { color: colors.textTertiary }]}>
-                          {new Date(payment.dueDate).toLocaleDateString(undefined, DATE_LOCALE_OPTIONS.SHORT_DATE)}
+                          {new Date(payment.dueDate).toLocaleDateString(
+                            undefined,
+                            DATE_LOCALE_OPTIONS.SHORT_DATE
+                          )}
                         </Text>
                       </View>
                       <View style={styles.activityAmount}>
@@ -423,7 +564,11 @@ const MyFeesScreen = () => {
 
                 {payments.length === 0 && (
                   <View style={styles.emptyActivity}>
-                    <MaterialCommunityIcons name={ICONS.INBOX_OUTLINE} size={designTokens.iconSize['2xl']} color={colors.border} />
+                    <MaterialCommunityIcons
+                      name={ICONS.INBOX_OUTLINE}
+                      size={designTokens.iconSize['2xl']}
+                      color={colors.border}
+                    />
                     <Text style={[styles.emptyActivityText, { color: colors.textTertiary }]}>
                       {t('screens.myFees.noRecentActivity')}
                     </Text>
@@ -441,32 +586,47 @@ const MyFeesScreen = () => {
                   {t('screens.myFees.paymentHistory')}
                 </Text>
               </View>
-              
+
               {payments
                 .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
                 .map((payment, index) => {
                   const config = getStatusConfig(payment.status);
                   return (
-                    <View 
-                      key={payment.id} 
+                    <View
+                      key={payment.id}
                       style={[
                         styles.historyItem,
-                        index < payments.length - 1 && { borderBottomWidth: designTokens.borderWidth.thin, borderBottomColor: colors.border }
+                        index < payments.length - 1 && {
+                          borderBottomWidth: designTokens.borderWidth.thin,
+                          borderBottomColor: colors.border,
+                        },
                       ]}
                     >
                       <View style={[styles.historyIcon, { backgroundColor: config.bg }]}>
-                        <MaterialCommunityIcons name={config.icon} size={designTokens.iconSize.lg} color={config.color} />
+                        <MaterialCommunityIcons
+                          name={config.icon}
+                          size={designTokens.iconSize.lg}
+                          color={config.color}
+                        />
                       </View>
                       <View style={styles.historyInfo}>
                         <Text style={[styles.historyTitle, { color: colors.textPrimary }]}>
                           {payment.notes || t('screens.myFees.monthlyFeeDefault')}
                         </Text>
                         <Text style={[styles.historyMeta, { color: colors.textTertiary }]}>
-                          {new Date(payment.dueDate).toLocaleDateString(undefined, DATE_LOCALE_OPTIONS.MEDIUM_DATE)}
+                          {new Date(payment.dueDate).toLocaleDateString(
+                            undefined,
+                            DATE_LOCALE_OPTIONS.MEDIUM_DATE
+                          )}
                         </Text>
                         {payment.paidDate && (
                           <Text style={[styles.historyPaid, { color: colors.success }]}>
-                            {t('screens.myFees.paidOn', { date: new Date(payment.paidDate).toLocaleDateString(undefined, DATE_LOCALE_OPTIONS.MONTH_DAY) })}
+                            {t('screens.myFees.paidOn', {
+                              date: new Date(payment.paidDate).toLocaleDateString(
+                                undefined,
+                                DATE_LOCALE_OPTIONS.MONTH_DAY
+                              ),
+                            })}
                           </Text>
                         )}
                       </View>
@@ -486,7 +646,11 @@ const MyFeesScreen = () => {
 
               {payments.length === 0 && (
                 <View style={styles.emptyState}>
-                  <MaterialCommunityIcons name={ICONS.FILE_DOCUMENT_OUTLINE} size={designTokens.iconSize['3xl']} color={colors.border} />
+                  <MaterialCommunityIcons
+                    name={ICONS.FILE_DOCUMENT_OUTLINE}
+                    size={designTokens.iconSize['3xl']}
+                    color={colors.border}
+                  />
                   <Text style={[styles.emptyStateTitle, { color: colors.textPrimary }]}>
                     {t('screens.myFees.noPaymentHistory')}
                   </Text>
@@ -506,24 +670,36 @@ const MyFeesScreen = () => {
                   {t('screens.myFees.customCharges')}
                 </Text>
               </View>
-              
+
               {customCharges.map((charge, index) => (
-                <View 
-                  key={charge.id} 
+                <View
+                  key={charge.id}
                   style={[
                     styles.chargeItem,
-                    index < customCharges.length - 1 && { borderBottomWidth: designTokens.borderWidth.thin, borderBottomColor: colors.border }
+                    index < customCharges.length - 1 && {
+                      borderBottomWidth: designTokens.borderWidth.thin,
+                      borderBottomColor: colors.border,
+                    },
                   ]}
                 >
                   <View style={[styles.chargeIcon, { backgroundColor: `${colors.primary}15` }]}>
-                    <MaterialCommunityIcons name={ICONS.FILE_DOCUMENT_OUTLINE} size={designTokens.iconSize.lg} color={colors.primary} />
+                    <MaterialCommunityIcons
+                      name={ICONS.FILE_DOCUMENT_OUTLINE}
+                      size={designTokens.iconSize.lg}
+                      color={colors.primary}
+                    />
                   </View>
                   <View style={styles.chargeInfo}>
                     <Text style={[styles.chargeTitle, { color: colors.textPrimary }]}>
                       {charge.description}
                     </Text>
                     <Text style={[styles.chargeMeta, { color: colors.textTertiary }]}>
-                      {t('screens.myFees.due', { date: new Date(charge.dueDate).toLocaleDateString(undefined, DATE_LOCALE_OPTIONS.SHORT_DATE) })}
+                      {t('screens.myFees.due', {
+                        date: new Date(charge.dueDate).toLocaleDateString(
+                          undefined,
+                          DATE_LOCALE_OPTIONS.SHORT_DATE
+                        ),
+                      })}
                     </Text>
                   </View>
                   <Text style={[styles.chargeAmount, { color: colors.primary }]}>
@@ -534,7 +710,11 @@ const MyFeesScreen = () => {
 
               {customCharges.length === 0 && (
                 <View style={styles.emptyState}>
-                  <MaterialCommunityIcons name={ICONS.CHECK_CIRCLE_OUTLINE} size={designTokens.iconSize['3xl']} color={colors.success} />
+                  <MaterialCommunityIcons
+                    name={ICONS.CHECK_CIRCLE_OUTLINE}
+                    size={designTokens.iconSize['3xl']}
+                    color={colors.success}
+                  />
                   <Text style={[styles.emptyStateTitle, { color: colors.textPrimary }]}>
                     {t('screens.myFees.noCustomCharges')}
                   </Text>
@@ -548,7 +728,11 @@ const MyFeesScreen = () => {
 
           {/* Help Card */}
           <View style={[styles.helpCard, { backgroundColor: colors.surface }]}>
-            <MaterialCommunityIcons name={ICONS.LIFEBUOY} size={designTokens.iconSize.lg} color={colors.primary} />
+            <MaterialCommunityIcons
+              name={ICONS.LIFEBUOY}
+              size={designTokens.iconSize.lg}
+              color={colors.primary}
+            />
             <View style={styles.helpContent}>
               <Text style={[styles.helpTitle, { color: colors.textPrimary }]}>
                 {t('screens.myFees.needHelp')}
@@ -557,7 +741,11 @@ const MyFeesScreen = () => {
                 {t('screens.myFees.contactAdminForQuestions')}
               </Text>
             </View>
-            <MaterialCommunityIcons name={ICONS.CHEVRON_RIGHT} size={designTokens.iconSize.lg} color={colors.textTertiary} />
+            <MaterialCommunityIcons
+              name={ICONS.CHEVRON_RIGHT}
+              size={designTokens.iconSize.lg}
+              color={colors.textTertiary}
+            />
           </View>
 
           <View style={{ height: 40 }} />

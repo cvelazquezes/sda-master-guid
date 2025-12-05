@@ -10,7 +10,7 @@ import { captureError } from '../services/sentry';
 // Types
 // ============================================================================
 
-export interface Command<TPayload = any> {
+export interface Command<TPayload = unknown> {
   type: string;
   payload: TPayload;
   metadata?: {
@@ -20,7 +20,7 @@ export interface Command<TPayload = any> {
   };
 }
 
-export interface Query<TParams = any> {
+export interface Query<TParams = unknown> {
   type: string;
   params: TParams;
   metadata?: {
@@ -33,7 +33,7 @@ export type CommandHandler<TCommand extends Command, TResult = void> = (
   command: TCommand
 ) => Promise<TResult>;
 
-export type QueryHandler<TQuery extends Query, TResult = any> = (
+export type QueryHandler<TQuery extends Query, TResult = unknown> = (
   query: TQuery
 ) => Promise<TResult>;
 
@@ -42,10 +42,8 @@ export type QueryHandler<TQuery extends Query, TResult = any> = (
 // ============================================================================
 
 class CommandBus {
-  private handlers = new Map<string, CommandHandler<any, any>>();
-  private middleware: Array<
-    (command: Command, next: () => Promise<any>) => Promise<any>
-  > = [];
+  private handlers = new Map<string, CommandHandler<Command, unknown>>();
+  private middleware: ((command: Command, next: () => Promise<unknown>) => Promise<unknown>)[] = [];
 
   /**
    * Registers a command handler
@@ -65,18 +63,14 @@ class CommandBus {
   /**
    * Adds middleware to the command pipeline
    */
-  use(
-    middleware: (command: Command, next: () => Promise<any>) => Promise<any>
-  ): void {
+  use(middleware: (command: Command, next: () => Promise<unknown>) => Promise<unknown>): void {
     this.middleware.push(middleware);
   }
 
   /**
    * Executes a command
    */
-  async execute<TCommand extends Command, TResult>(
-    command: TCommand
-  ): Promise<TResult> {
+  async execute<TCommand extends Command, TResult>(command: TCommand): Promise<TResult> {
     const handler = this.handlers.get(command.type);
 
     if (!handler) {
@@ -87,9 +81,7 @@ class CommandBus {
     command.metadata = {
       ...command.metadata,
       timestamp: command.metadata?.timestamp || Date.now(),
-      correlationId:
-        command.metadata?.correlationId ||
-        this.generateCorrelationId(),
+      correlationId: command.metadata?.correlationId || this.generateCorrelationId(),
     };
 
     logger.debug('Executing command', {
@@ -130,11 +122,11 @@ class CommandBus {
    */
   private async executeWithMiddleware(
     command: Command,
-    handler: CommandHandler<any, any>
-  ): Promise<any> {
+    handler: CommandHandler<Command, unknown>
+  ): Promise<unknown> {
     let index = 0;
 
-    const next = async (): Promise<any> => {
+    const next = async (): Promise<unknown> => {
       if (index < this.middleware.length) {
         const middleware = this.middleware[index++];
         return await middleware(command, next);
@@ -173,8 +165,8 @@ class CommandBus {
 // ============================================================================
 
 class QueryBus {
-  private handlers = new Map<string, QueryHandler<any, any>>();
-  private cache = new Map<string, { result: any; timestamp: number }>();
+  private handlers = new Map<string, QueryHandler<Query, unknown>>();
+  private cache = new Map<string, { result: unknown; timestamp: number }>();
   private readonly CACHE_TTL = 60000; // 1 minute
 
   /**
@@ -328,10 +320,8 @@ export const queryBus = new QueryBus();
 /**
  * Validation middleware
  */
-export function validationMiddleware<T>(
-  validator: (command: Command<T>) => Promise<void>
-) {
-  return async (command: Command<T>, next: () => Promise<any>) => {
+export function validationMiddleware<T>(validator: (command: Command<T>) => Promise<void>) {
+  return async (command: Command<T>, next: () => Promise<unknown>) => {
     await validator(command);
     return await next();
   };
@@ -340,10 +330,7 @@ export function validationMiddleware<T>(
 /**
  * Logging middleware
  */
-export const loggingMiddleware = async (
-  command: Command,
-  next: () => Promise<any>
-) => {
+export const loggingMiddleware = async (command: Command, next: () => Promise<unknown>) => {
   const startTime = Date.now();
 
   logger.info('Command started', {
@@ -378,10 +365,8 @@ export const loggingMiddleware = async (
 /**
  * Authorization middleware
  */
-export function authorizationMiddleware(
-  authorizer: (command: Command) => Promise<boolean>
-) {
-  return async (command: Command, next: () => Promise<any>) => {
+export function authorizationMiddleware(authorizer: (command: Command) => Promise<boolean>) {
+  return async (command: Command, next: () => Promise<unknown>) => {
     const authorized = await authorizer(command);
 
     if (!authorized) {
@@ -400,17 +385,13 @@ export function authorizationMiddleware(
  * Decorator to mark a method as a command handler
  */
 export function CommandHandlerDecorator(commandType: string) {
-  return function (
-    target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor
-  ) {
+  return function (target: object, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
     // Register handler on first call
     let registered = false;
 
-    descriptor.value = function (...args: any[]) {
+    descriptor.value = function (...args: unknown[]) {
       if (!registered) {
         commandBus.register(commandType, originalMethod.bind(this));
         registered = true;
@@ -426,17 +407,13 @@ export function CommandHandlerDecorator(commandType: string) {
  * Decorator to mark a method as a query handler
  */
 export function QueryHandlerDecorator(queryType: string) {
-  return function (
-    target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor
-  ) {
+  return function (target: object, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
     // Register handler on first call
     let registered = false;
 
-    descriptor.value = function (...args: any[]) {
+    descriptor.value = function (...args: unknown[]) {
       if (!registered) {
         queryBus.register(queryType, originalMethod.bind(this));
         registered = true;
@@ -481,4 +458,3 @@ export function createQuery<TParams>(
     metadata,
   };
 }
-

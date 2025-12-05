@@ -8,10 +8,14 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
-import { mobileTypography, mobileIconSizes, mobileFontSizes, layoutConstants } from '../shared/theme';
+import {
+  mobileTypography,
+  mobileIconSizes,
+  mobileFontSizes,
+  layoutConstants,
+} from '../shared/theme';
 import { designTokens } from '../shared/theme/designTokens';
-import { ICONS, TOUCH_OPACITY } from '../shared/constants';
-import { flexValues } from '../shared/constants/layoutConstants';
+import { ICONS, TOUCH_OPACITY, flexValues } from '../shared/constants';
 
 interface StatCardProps {
   icon: string;
@@ -32,27 +36,37 @@ export const StatCard: React.FC<StatCardProps> = ({
 }) => {
   const { colors, isDark } = useTheme();
 
+  const shadowConfig = isDark ? designTokens.shadowConfig.dark : designTokens.shadowConfig.light;
+
   const CardContent = (
-    <View style={[
-      styles.card, 
-      { 
-        backgroundColor: colors.surface,
-        shadowColor: designTokens.colors.black,
-        shadowOpacity: isDark ? designTokens.shadowConfig.dark.opacity : designTokens.shadowConfig.light.opacity,
-        elevation: isDark ? designTokens.shadowConfig.dark.elevation : designTokens.shadowConfig.light.elevation,
-      },
-      onPress && styles.cardTouchable
-    ]}>
+    <View
+      style={[
+        styles.card,
+        {
+          backgroundColor: colors.surface,
+          shadowColor: designTokens.colors.black,
+          shadowOpacity: shadowConfig.opacity,
+          elevation: shadowConfig.elevation,
+        },
+        onPress && styles.cardTouchable,
+      ]}
+    >
       <View style={[styles.iconContainer, { backgroundColor: `${color}15` }]}>
-        <MaterialCommunityIcons name={icon as any} size={mobileIconSizes.xlarge} color={color} />
+        <MaterialCommunityIcons name={icon as string} size={mobileIconSizes.xlarge} color={color} />
       </View>
       <View style={styles.content}>
         <Text style={[styles.value, { color: colors.textPrimary }]}>{value}</Text>
         <Text style={[styles.label, { color: colors.textSecondary }]}>{label}</Text>
-        {subtitle && <Text style={[styles.subtitle, { color: colors.textTertiary }]}>{subtitle}</Text>}
+        {subtitle && (
+          <Text style={[styles.subtitle, { color: colors.textTertiary }]}>{subtitle}</Text>
+        )}
       </View>
       {onPress && (
-        <MaterialCommunityIcons name={ICONS.CHEVRON_RIGHT} size={mobileIconSizes.large} color={colors.textTertiary} />
+        <MaterialCommunityIcons
+          name={ICONS.CHEVRON_RIGHT}
+          size={mobileIconSizes.large}
+          color={colors.textTertiary}
+        />
       )}
     </View>
   );

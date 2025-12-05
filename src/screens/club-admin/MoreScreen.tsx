@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { ScreenHeader, MenuCard, SectionHeader } from '../../shared/components';
 import { designTokens } from '../../shared/theme/designTokens';
-import { ICONS, SCREENS, MENU_ITEM_IDS } from '../../shared/constants';
+import { ICONS, SCREENS, MENU_ITEM_IDS, flexValues } from '../../shared/constants';
 
 const MoreScreen = () => {
   const navigation = useNavigation();
@@ -64,11 +64,8 @@ const MoreScreen = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <ScreenHeader
-        title={t('screens.clubMore.title')}
-        subtitle={t('screens.clubMore.subtitle')}
-      />
-      
+      <ScreenHeader title={t('screens.clubMore.title')} subtitle={t('screens.clubMore.subtitle')} />
+
       <ScrollView style={styles.scrollView}>
         <View style={styles.content}>
           <SectionHeader title={t('screens.clubMore.activitiesSection')} />
@@ -131,4 +128,3 @@ const styles = StyleSheet.create({
 });
 
 export default MoreScreen;
-

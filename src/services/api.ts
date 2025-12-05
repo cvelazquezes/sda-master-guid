@@ -3,7 +3,7 @@
  * Centralized HTTP client with retry logic, circuit breaker, and error handling
  */
 
-import axios, { AxiosInstance, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosError, AxiosRequestConfig } from 'axios';
 import { environment } from '../config/environment';
 import { secureStorage } from '../utils/secureStorage';
 import { logger } from '../utils/logger';
@@ -20,7 +20,6 @@ import { apiRateLimiter } from '../shared/services/rateLimit';
 
 // Constants
 const API_TIMEOUT_MS = 10000;
-const MAX_RETRY_ATTEMPTS = 3;
 
 // Security headers following OWASP best practices
 const SECURITY_HEADERS = {
@@ -53,7 +52,7 @@ const createApiClient = (): AxiosInstance => {
         const userId = await secureStorage.getUserId();
         const rateLimitKey = userId || 'anonymous';
         const allowed = await apiRateLimiter.tryConsume(rateLimitKey);
-        
+
         if (!allowed) {
           logger.warn('Rate limit exceeded', { userId, endpoint: config.url });
           throw new RateLimitError('Too many requests. Please try again later.');
@@ -66,7 +65,10 @@ const createApiClient = (): AxiosInstance => {
         }
 
         // Add CSRF token for state-changing operations
-        if (config.method && ['post', 'put', 'patch', 'delete'].includes(config.method.toLowerCase())) {
+        if (
+          config.method &&
+          ['post', 'put', 'patch', 'delete'].includes(config.method.toLowerCase())
+        ) {
           const csrfToken = await secureStorage.getCsrfToken();
           if (csrfToken) {
             config.headers['X-CSRF-Token'] = csrfToken;
@@ -74,7 +76,8 @@ const createApiClient = (): AxiosInstance => {
         }
 
         // Add request ID for tracing
-        config.headers['X-Request-ID'] = `req_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+        config.headers['X-Request-ID'] =
+          `req_${Date.now()}_${Math.random().toString(36).substring(7)}`;
       } catch (error) {
         if (error instanceof RateLimitError) {
           throw error;
@@ -123,9 +126,7 @@ const api = createApiClient();
 /**
  * Makes HTTP request with retry logic and circuit breaker
  */
-async function makeRequest<T>(
-  requestFn: () => Promise<T>
-): Promise<T> {
+async function makeRequest<T>(requestFn: () => Promise<T>): Promise<T> {
   return await apiCircuitBreaker.execute(async () => {
     return await retryPolicy.execute(requestFn);
   });
@@ -138,7 +139,7 @@ export const apiService = {
   /**
    * GET request
    */
-  async get<T>(url: string, config?: any): Promise<T> {
+  async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
     logger.debug(`GET ${url}`);
     const response = await makeRequest(() => api.get<T>(url, config));
     return response.data;
@@ -147,7 +148,7 @@ export const apiService = {
   /**
    * POST request
    */
-  async post<T>(url: string, data?: any, config?: any): Promise<T> {
+  async post<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
     logger.debug(`POST ${url}`);
     const response = await makeRequest(() => api.post<T>(url, data, config));
     return response.data;
@@ -156,7 +157,7 @@ export const apiService = {
   /**
    * PUT request
    */
-  async put<T>(url: string, data?: any, config?: any): Promise<T> {
+  async put<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
     logger.debug(`PUT ${url}`);
     const response = await makeRequest(() => api.put<T>(url, data, config));
     return response.data;
@@ -165,7 +166,7 @@ export const apiService = {
   /**
    * PATCH request
    */
-  async patch<T>(url: string, data?: any, config?: any): Promise<T> {
+  async patch<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
     logger.debug(`PATCH ${url}`);
     const response = await makeRequest(() => api.patch<T>(url, data, config));
     return response.data;
@@ -174,7 +175,7 @@ export const apiService = {
   /**
    * DELETE request
    */
-  async delete<T>(url: string, config?: any): Promise<T> {
+  async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
     logger.debug(`DELETE ${url}`);
     const response = await makeRequest(() => api.delete<T>(url, config));
     return response.data;

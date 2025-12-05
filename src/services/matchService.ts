@@ -266,7 +266,10 @@ class MatchService {
         required: club.groupSize,
       });
       throw new ValidationError(
-        i18n.t('services.validation.notEnoughMembers', { required: club.groupSize, count: members.length })
+        i18n.t('services.validation.notEnoughMembers', {
+          required: club.groupSize,
+          count: members.length,
+        })
       );
     }
 

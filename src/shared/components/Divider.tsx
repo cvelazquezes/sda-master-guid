@@ -4,10 +4,9 @@
  */
 
 import React from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
+import { View, ViewStyle } from 'react-native';
 import { designTokens } from '../theme/designTokens';
-import { dimensionValues } from '../constants/layoutConstants';
-import { ORIENTATION, SPACING_KEY } from '../constants';
+import { ORIENTATION, SPACING_KEY, dimensionValues } from '../constants';
 
 type DividerOrientation = typeof ORIENTATION.HORIZONTAL | typeof ORIENTATION.VERTICAL;
 
@@ -30,28 +29,22 @@ export const Divider: React.FC<DividerProps> = ({
 }) => {
   const spacingValue = designTokens.spacing[spacing];
 
-  const dividerStyle: ViewStyle = orientation === ORIENTATION.HORIZONTAL
-    ? {
-        height: thickness,
-        width: dimensionValues.width.full,
-        marginVertical: spacingValue,
-        backgroundColor: color,
-      }
-    : {
-        width: thickness,
-        height: dimensionValues.width.full,
-        marginHorizontal: spacingValue,
-        backgroundColor: color,
-      };
+  const dividerStyle: ViewStyle =
+    orientation === ORIENTATION.HORIZONTAL
+      ? {
+          height: thickness,
+          width: dimensionValues.width.full,
+          marginVertical: spacingValue,
+          backgroundColor: color,
+        }
+      : {
+          width: thickness,
+          height: dimensionValues.width.full,
+          marginHorizontal: spacingValue,
+          backgroundColor: color,
+        };
 
-  return (
-    <View
-      style={[dividerStyle, style]}
-      testID={testID}
-      accessible={false}
-    />
-  );
+  return <View style={[dividerStyle, style]} testID={testID} accessible={false} />;
 };
 
 export default Divider;
-

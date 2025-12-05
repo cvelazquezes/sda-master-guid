@@ -1,6 +1,6 @@
 /**
  * Lazy Screen Loader
- * 
+ *
  * Wrapper for lazy-loaded screens with loading state and error boundary.
  * Improves initial bundle size and app startup time.
  */
@@ -11,10 +11,9 @@ import { useTranslation } from 'react-i18next';
 import { useTheme, layoutConstants } from '../theme';
 import { mobileFontSizes } from '../theme/mobileTypography';
 import { designTokens } from '../theme/designTokens';
-import { flexValues } from '../constants/layoutConstants';
-import { ACTIVITY_INDICATOR_SIZE, A11Y_ROLE, TOUCH_OPACITY } from '../constants';
 import { LOG_MESSAGES } from '../constants/logMessages';
-import { logger } from '../../services/logger';
+import { logger } from '../utils/logger';
+import { A11Y_ROLE, ACTIVITY_INDICATOR_SIZE, TOUCH_OPACITY, flexValues } from '../constants';
 
 /**
  * Loading fallback component
@@ -22,13 +21,11 @@ import { logger } from '../../services/logger';
 function LoadingFallback() {
   const { t } = useTranslation();
   const { theme } = useTheme();
-  
+
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <ActivityIndicator size={ACTIVITY_INDICATOR_SIZE.large} color={theme.colors.primary} />
-      <Text style={[styles.text, { color: theme.colors.onSurface }]}>
-        {t('common.loading')}
-      </Text>
+      <Text style={[styles.text, { color: theme.colors.onSurface }]}>{t('common.loading')}</Text>
     </View>
   );
 }
@@ -44,7 +41,7 @@ interface ErrorFallbackProps {
 function ErrorFallback({ error, retry }: ErrorFallbackProps) {
   const { t } = useTranslation();
   const { theme } = useTheme();
-  
+
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <Text style={[styles.errorTitle, { color: theme.colors.error }]}>
@@ -53,7 +50,7 @@ function ErrorFallback({ error, retry }: ErrorFallbackProps) {
       <Text style={[styles.errorMessage, { color: theme.colors.onSurfaceVariant }]}>
         {error.message}
       </Text>
-      <TouchableOpacity 
+      <TouchableOpacity
         onPress={retry}
         activeOpacity={TOUCH_OPACITY.default}
         accessibilityRole={A11Y_ROLE.BUTTON}
@@ -74,7 +71,10 @@ class LazyErrorBoundary extends React.Component<
   { children: React.ReactNode; fallback: (error: Error, retry: () => void) => React.ReactNode },
   { error: Error | null }
 > {
-  constructor(props: any) {
+  constructor(props: {
+    children: React.ReactNode;
+    fallback: (error: Error, retry: () => void) => React.ReactNode;
+  }) {
     super(props);
     this.state = { error: null };
   }
@@ -101,15 +101,15 @@ class LazyErrorBoundary extends React.Component<
 
 /**
  * Lazy screen wrapper with Suspense and error boundary
- * 
+ *
  * @param Component - Lazy-loaded component
  * @param options - Configuration options
  * @returns Wrapped component
- * 
+ *
  * @example
  * ```typescript
  * const LazyHomeScreen = lazyScreen(() => import('./screens/HomeScreen'));
- * 
+ *
  * // Use in navigation
  * <Stack.Screen name="Home" component={LazyHomeScreen} />
  * ```
@@ -122,10 +122,11 @@ export function lazyScreen<P extends Record<string, unknown>>(
   } = {}
 ): ComponentType<P> {
   const LazyComponent = React.lazy(importFn);
-  
+
   const fallback = options.fallback ?? <LoadingFallback />;
-  const errorFallback = options.errorFallback ?? ((error, retry) => <ErrorFallback error={error} retry={retry} />);
-  
+  const errorFallback =
+    options.errorFallback ?? ((error, retry) => <ErrorFallback error={error} retry={retry} />);
+
   return function LazyScreenWrapper(props: P) {
     return (
       <LazyErrorBoundary fallback={errorFallback}>
@@ -139,9 +140,9 @@ export function lazyScreen<P extends Record<string, unknown>>(
 
 /**
  * Preload a lazy screen
- * 
+ *
  * @param Component - Lazy component to preload
- * 
+ *
  * @example
  * ```typescript
  * // Preload on mount
@@ -188,4 +189,3 @@ const styles = StyleSheet.create({
     padding: designTokens.spacing.md,
   },
 });
-

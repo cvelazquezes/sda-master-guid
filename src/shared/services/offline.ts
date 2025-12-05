@@ -10,6 +10,12 @@ import { addBreadcrumb } from './sentry';
 import { TIMING } from '../constants';
 
 // ============================================================================
+// React Hooks
+// ============================================================================
+
+import { useState, useEffect } from 'react';
+
+// ============================================================================
 // Types
 // ============================================================================
 
@@ -17,7 +23,7 @@ export interface QueuedRequest {
   id: string;
   url: string;
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-  data?: any;
+  data?: unknown;
   headers?: Record<string, string>;
   timestamp: number;
   retryCount: number;
@@ -152,10 +158,10 @@ class OfflineService {
     for (const request of requestsToSync) {
       try {
         await this.executeRequest(request);
-        
+
         // Remove from queue on success
         this.queue = this.queue.filter((r) => r.id !== request.id);
-        
+
         logger.debug('Request synced successfully', { id: request.id });
       } catch (error) {
         logger.error('Failed to sync request', error as Error, { id: request.id });
@@ -222,7 +228,7 @@ class OfflineService {
    */
   subscribe(listener: (status: NetworkStatus) => void): () => void {
     this.listeners.add(listener);
-    
+
     // Return unsubscribe function
     return () => {
       this.listeners.delete(listener);
@@ -249,9 +255,8 @@ class OfflineService {
     return {
       totalQueued: this.queue.length,
       pendingSync: this.queue.filter((r) => r.retryCount < r.maxRetries).length,
-      lastSyncAttempt: this.queue.length > 0 
-        ? Math.max(...this.queue.map((r) => r.timestamp))
-        : null,
+      lastSyncAttempt:
+        this.queue.length > 0 ? Math.max(...this.queue.map((r) => r.timestamp)) : null,
       isOnline: this.isOnline,
     };
   }
@@ -317,12 +322,6 @@ class OfflineService {
 
 export const offlineService = new OfflineService();
 
-// ============================================================================
-// React Hooks
-// ============================================================================
-
-import { useState, useEffect } from 'react';
-
 /**
  * Hook to check if device is online
  */
@@ -367,9 +366,7 @@ export function useNetworkStatus(): NetworkStatus {
  * Hook to get offline queue stats
  */
 export function useOfflineStats(): OfflineQueueStats {
-  const [stats, setStats] = useState<OfflineQueueStats>(() =>
-    offlineService.getStats()
-  );
+  const [stats, setStats] = useState<OfflineQueueStats>(() => offlineService.getStats());
 
   useEffect(() => {
     // Update stats when network changes
@@ -408,7 +405,7 @@ export async function offlineFetch(
     // Queue for later
     await offlineService.enqueue({
       url,
-      method: (options.method as any) || 'GET',
+      method: (options.method as 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE') || 'GET',
       data: options.body ? JSON.parse(options.body as string) : undefined,
       headers: options.headers as Record<string, string>,
       maxRetries: options.maxRetries || 3,
@@ -425,16 +422,7 @@ export async function offlineFetch(
  * Checks if operation should work offline
  */
 export function shouldWorkOffline(operation: string): boolean {
-  const offlineOperations = [
-    'read',
-    'view',
-    'list',
-    'get',
-    'search',
-  ];
+  const offlineOperations = ['read', 'view', 'list', 'get', 'search'];
 
-  return offlineOperations.some((op) =>
-    operation.toLowerCase().includes(op)
-  );
+  return offlineOperations.some((op) => operation.toLowerCase().includes(op));
 }
-

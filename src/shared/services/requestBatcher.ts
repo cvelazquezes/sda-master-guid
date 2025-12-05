@@ -25,19 +25,16 @@ interface PendingRequest<V> {
 // Request Batcher (DataLoader Pattern)
 // ============================================================================
 
-export class RequestBatcher<K = string, V = any> {
+export class RequestBatcher<K = string, V = unknown> {
   private queue: K[] = [];
   private pending = new Map<K, PendingRequest<V>[]>();
   private batchTimeout: NodeJS.Timeout | null = null;
-  
+
   private readonly maxBatchSize: number;
   private readonly batchWindowMs: number;
   private readonly batchFn: BatchFunction<K, V>;
 
-  constructor(
-    batchFn: BatchFunction<K, V>,
-    config: BatchConfig = {}
-  ) {
+  constructor(batchFn: BatchFunction<K, V>, config: BatchConfig = {}) {
     this.batchFn = batchFn;
     this.maxBatchSize = config.maxBatchSize || 100;
     this.batchWindowMs = config.batchWindowMs || 10;
@@ -49,7 +46,7 @@ export class RequestBatcher<K = string, V = any> {
   async load(key: K): Promise<V> {
     // Check if already pending
     const existing = this.pending.get(key);
-    
+
     if (existing) {
       // Request already in flight, piggyback on it
       return new Promise<V>((resolve, reject) => {
@@ -162,16 +159,14 @@ export class RequestBatcher<K = string, V = any> {
       clearTimeout(this.batchTimeout);
       this.batchTimeout = null;
     }
-    
+
     this.queue = [];
-    
+
     // Reject all pending
     this.pending.forEach((requests) => {
-      requests.forEach((req) =>
-        req.reject(new Error('Batch cleared'))
-      );
+      requests.forEach((req) => req.reject(new Error('Batch cleared')));
     });
-    
+
     this.pending.clear();
   }
 
@@ -193,31 +188,27 @@ export class RequestBatcher<K = string, V = any> {
 // Request Deduplicator
 // ============================================================================
 
-export class RequestDeduplicator<T = any> {
+export class RequestDeduplicator<T = unknown> {
   private inFlight = new Map<string, Promise<T>>();
 
   /**
    * Deduplicates requests with the same key
    * If a request is already in flight, returns the existing promise
    */
-  async dedupe(
-    key: string,
-    requestFn: () => Promise<T>
-  ): Promise<T> {
+  async dedupe(key: string, requestFn: () => Promise<T>): Promise<T> {
     // Check if request already in flight
     const existing = this.inFlight.get(key);
-    
+
     if (existing) {
       logger.debug(`Request deduplicated: ${key}`);
       return existing;
     }
 
     // Execute new request
-    const promise = requestFn()
-      .finally(() => {
-        // Remove from in-flight once completed
-        this.inFlight.delete(key);
-      });
+    const promise = requestFn().finally(() => {
+      // Remove from in-flight once completed
+      this.inFlight.delete(key);
+    });
 
     this.inFlight.set(key, promise);
     return promise;
@@ -283,12 +274,12 @@ export function createBatchLoader<K, V>(
 /**
  * Creates a deduplicated function
  */
-export function createDedupedFunction<T extends (...args: any[]) => Promise<any>>(
+export function createDedupedFunction<T extends (...args: unknown[]) => Promise<unknown>>(
   fn: T,
   keyExtractor: (...args: Parameters<T>) => string
 ): T {
   const deduplicator = new RequestDeduplicator<ReturnType<T>>();
-  
+
   return ((...args: Parameters<T>) => {
     const key = keyExtractor(...args);
     return deduplicator.dedupe(key, () => fn(...args));
@@ -298,10 +289,7 @@ export function createDedupedFunction<T extends (...args: any[]) => Promise<any>
 /**
  * Wraps a function with deduplication
  */
-export function withDeduplication<T>(
-  fn: () => Promise<T>,
-  key: string
-): Promise<T> {
+export function withDeduplication<T>(fn: () => Promise<T>, key: string): Promise<T> {
   return requestDeduplicator.dedupe(key, fn);
 }
 
@@ -312,13 +300,13 @@ export function withDeduplication<T>(
 /**
  * Example: Batch load users by IDs
  */
-export function createUserBatchLoader(
-  fetchUsers: (ids: string[]) => Promise<any[]>
-): (id: string) => Promise<any> {
+export function createUserBatchLoader<T extends { id: string }>(
+  fetchUsers: (ids: string[]) => Promise<T[]>
+): (id: string) => Promise<T | undefined> {
   return createBatchLoader(
     async (ids: readonly string[]) => {
       const users = await fetchUsers([...ids]);
-      
+
       // Ensure order matches input
       const userMap = new Map(users.map((u) => [u.id, u]));
       return ids.map((id) => userMap.get(id)!);
@@ -333,13 +321,9 @@ export function createUserBatchLoader(
 /**
  * Example: Deduplicate API calls
  */
-export async function fetchUserWithDedup(
+export async function fetchUserWithDedup<T>(
   userId: string,
-  apiFn: (id: string) => Promise<any>
-): Promise<any> {
-  return withDeduplication(
-    () => apiFn(userId),
-    `user:${userId}`
-  );
+  apiFn: (id: string) => Promise<T>
+): Promise<T> {
+  return withDeduplication(() => apiFn(userId), `user:${userId}`);
 }
-

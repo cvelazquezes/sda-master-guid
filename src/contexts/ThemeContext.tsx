@@ -1,13 +1,13 @@
 /**
  * Theme Context
- * 
+ *
  * Provides theme switching and management integrated with the design token system.
  * This context is the central hub for theme state throughout the application.
- * 
+ *
  * BACKWARD COMPATIBILITY:
  * - `colors` property maintains the old flat structure for existing components
  * - Use `useDesignTokens()` hook for the new semantic token structure
- * 
+ *
  * MIGRATION PATH:
  * 1. Existing code continues to work with colors.primary, colors.surface, etc.
  * 2. New code should use useDesignTokens() for colors.brand.primary, colors.background.surface
@@ -31,7 +31,8 @@ interface LegacyThemeColors {
   [key: string]: string;
 }
 
-// Theme object structure for backward compatibility with components expecting { theme: { colors, ... } }
+// Theme object structure for backward compatibility
+// with components expecting { theme: { colors, ... } }
 interface ThemeObject {
   colors: LegacyThemeColors;
 }
@@ -39,28 +40,28 @@ interface ThemeObject {
 export interface ThemeContextType {
   /** User's theme preference (light, dark, or system) */
   mode: ThemeMode;
-  
+
   /** The resolved active theme (always light or dark) */
   activeTheme: ActiveTheme;
-  
-  /** 
+
+  /**
    * Legacy colors object (flat structure)
    * @deprecated For new code, use useDesignTokens() hook instead
    */
   colors: LegacyThemeColors;
-  
+
   /**
    * Theme object for backward compatibility
    * Components that do `const { theme } = useTheme()` can still access theme.colors
    */
   theme: ThemeObject;
-  
+
   /** Whether the current theme is dark */
   isDark: boolean;
-  
+
   /** Set the theme mode */
   setTheme: (mode: ThemeMode) => Promise<void>;
-  
+
   /** Toggle between light and dark mode */
   toggleTheme: () => Promise<void>;
 }
@@ -85,9 +86,12 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
   // Update active theme when mode or system theme changes
   useEffect(() => {
-    const theme: ActiveTheme = mode === THEME_MODE.SYSTEM 
-      ? (systemColorScheme === THEME_MODE.DARK ? THEME_MODE.DARK : THEME_MODE.LIGHT)
-      : mode as ActiveTheme;
+    const theme: ActiveTheme =
+      mode === THEME_MODE.SYSTEM
+        ? systemColorScheme === THEME_MODE.DARK
+          ? THEME_MODE.DARK
+          : THEME_MODE.LIGHT
+        : (mode as ActiveTheme);
     setActiveTheme(theme);
   }, [mode, systemColorScheme]);
 
@@ -125,9 +129,12 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const isDark = activeTheme === THEME_MODE.DARK;
 
   // Theme object for backward compatibility
-  const theme: ThemeObject = useMemo(() => ({
-    colors: colors as unknown as LegacyThemeColors,
-  }), [colors]);
+  const theme: ThemeObject = useMemo(
+    () => ({
+      colors: colors as unknown as LegacyThemeColors,
+    }),
+    [colors]
+  );
 
   const value: ThemeContextType = {
     mode,
@@ -139,25 +146,21 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     toggleTheme,
   };
 
-  return (
-    <ThemeContext.Provider value={value}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 };
 
 /**
  * Hook to access the theme context
- * 
+ *
  * NOTE: For new code using design tokens, prefer useDesignTokens() hook
  * which provides the semantic token structure (colors.background.surface, etc.)
- * 
+ *
  * @returns Theme context with mode, activeTheme, colors, isDark, setTheme, and toggleTheme
- * 
+ *
  * @example
  * // Legacy usage (still works)
  * const { colors, isDark, toggleTheme } = useTheme();
- * 
+ *
  * // New recommended usage
  * import { useDesignTokens } from '../shared/hooks';
  * const { colors } = useDesignTokens();
@@ -172,7 +175,7 @@ export const useTheme = (): ThemeContextType => {
 
 /**
  * Helper hook for easy color access
- * 
+ *
  * @deprecated For new code, use useTokenColors() from ../shared/hooks instead
  * @returns Legacy flat colors object for the current theme
  */
@@ -183,9 +186,9 @@ export const useThemeColors = () => {
 
 /**
  * Helper hook to check if dark mode is active
- * 
+ *
  * @returns True if dark mode is active
- * 
+ *
  * @example
  * const isDark = useIsDark();
  * const bgColor = isDark ? '#000' : '#FFF';
@@ -197,7 +200,7 @@ export const useIsDark = () => {
 
 /**
  * Helper hook to get the active theme
- * 
+ *
  * @returns 'light' or 'dark'
  */
 export const useActiveTheme = () => {

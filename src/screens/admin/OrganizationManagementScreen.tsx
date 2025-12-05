@@ -15,15 +15,33 @@ import { useTranslation } from 'react-i18next';
 import { clubService } from '../../services/clubService';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Club } from '../../types';
+import { ScreenHeader, SearchBar, EmptyState, StandardInput } from '../../shared/components';
 import {
-  ScreenHeader,
-  SearchBar,
-  EmptyState,
-  StandardButton,
-  StandardInput,
-} from '../../shared/components';
-import { mobileTypography, mobileFontSizes, mobileIconSizes, designTokens, layoutConstants } from '../../shared/theme';
-import { MESSAGES, dynamicMessages, A11Y_ROLE, ICONS, TOUCH_OPACITY, flexValues, dimensionValues, ALERT_BUTTON_STYLE, ANIMATION, textTransformValues, typographyValues, borderValues, SAFE_AREA_EDGES, ORGANIZATION_TYPES, OrganizationType, HIERARCHY_FIELDS, EMPTY_VALUE, BREAKPOINTS } from '../../shared/constants';
+  mobileFontSizes,
+  mobileIconSizes,
+  designTokens,
+  layoutConstants,
+} from '../../shared/theme';
+import {
+  MESSAGES,
+  dynamicMessages,
+  A11Y_ROLE,
+  ICONS,
+  TOUCH_OPACITY,
+  flexValues,
+  dimensionValues,
+  ALERT_BUTTON_STYLE,
+  ANIMATION,
+  textTransformValues,
+  typographyValues,
+  borderValues,
+  SAFE_AREA_EDGES,
+  ORGANIZATION_TYPES,
+  OrganizationType,
+  HIERARCHY_FIELDS,
+  EMPTY_VALUE,
+  BREAKPOINTS,
+} from '../../shared/constants';
 
 interface OrganizationItem {
   id: string;
@@ -38,23 +56,23 @@ export const OrganizationManagementScreen = () => {
   const { width: windowWidth } = useWindowDimensions();
   const { colors } = useTheme();
   const isMobile = windowWidth < BREAKPOINTS.MOBILE;
-  
+
   const [clubs, setClubs] = useState<Club[]>([]);
   const [organizations, setOrganizations] = useState<OrganizationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(EMPTY_VALUE);
   const [selectedType, setSelectedType] = useState<OrganizationType>(HIERARCHY_FIELDS.DIVISION);
-  
+
   // Modal states
   const [modalVisible, setModalVisible] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [selectedOrg, setSelectedOrg] = useState<OrganizationItem | null>(null);
-  
+  const [, setSelectedOrg] = useState<OrganizationItem | null>(null);
+
   // Parent search queries
   const [parentDivisionSearch, setParentDivisionSearch] = useState(EMPTY_VALUE);
   const [parentUnionSearch, setParentUnionSearch] = useState(EMPTY_VALUE);
   const [parentAssociationSearch, setParentAssociationSearch] = useState(EMPTY_VALUE);
-  
+
   // Form data
   const [formData, setFormData] = useState({
     name: EMPTY_VALUE,
@@ -200,9 +218,7 @@ export const OrganizationManagementScreen = () => {
   // Filter by search query
   const filterBySearch = (items: string[], searchQuery: string) => {
     if (!searchQuery.trim()) return items;
-    return items.filter((item) =>
-      item.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    return items.filter((item) => item.toLowerCase().includes(searchQuery.toLowerCase()));
   };
 
   // Legacy function for compatibility
@@ -236,11 +252,14 @@ export const OrganizationManagementScreen = () => {
   const handleEdit = (org: OrganizationItem) => {
     setEditMode(true);
     setSelectedOrg(org);
+    const isUnion = org.type === HIERARCHY_FIELDS.UNION;
+    const isAssociation = org.type === HIERARCHY_FIELDS.ASSOCIATION;
+    const isChurch = org.type === HIERARCHY_FIELDS.CHURCH;
     setFormData({
       name: org.name,
-      parentDivision: org.type === HIERARCHY_FIELDS.UNION ? org.parent || EMPTY_VALUE : EMPTY_VALUE,
-      parentUnion: org.type === HIERARCHY_FIELDS.ASSOCIATION ? org.parent || EMPTY_VALUE : EMPTY_VALUE,
-      parentAssociation: org.type === HIERARCHY_FIELDS.CHURCH ? org.parent || EMPTY_VALUE : EMPTY_VALUE,
+      parentDivision: isUnion ? org.parent || EMPTY_VALUE : EMPTY_VALUE,
+      parentUnion: isAssociation ? org.parent || EMPTY_VALUE : EMPTY_VALUE,
+      parentAssociation: isChurch ? org.parent || EMPTY_VALUE : EMPTY_VALUE,
     });
     setModalVisible(true);
   };
@@ -269,12 +288,18 @@ export const OrganizationManagementScreen = () => {
       // Note: This is a simplified implementation
       // In a real app, you would need backend endpoints to manage organizations
       // For now, we'll just show a success message
-      
+
       Alert.alert(
         MESSAGES.TITLES.SUCCESS,
         editMode
-          ? t('screens.organizationManagement.typeUpdated', { type: getTypeLabel(selectedType), name: formData.name })
-          : t('screens.organizationManagement.typeCreated', { type: getTypeLabel(selectedType), name: formData.name }),
+          ? t('screens.organizationManagement.typeUpdated', {
+              type: getTypeLabel(selectedType),
+              name: formData.name,
+            })
+          : t('screens.organizationManagement.typeCreated', {
+              type: getTypeLabel(selectedType),
+              name: formData.name,
+            }),
         [
           {
             text: MESSAGES.BUTTONS.OK,
@@ -293,7 +318,11 @@ export const OrganizationManagementScreen = () => {
   const handleDelete = (org: OrganizationItem) => {
     Alert.alert(
       t('screens.organizationManagement.deleteType', { type: getTypeLabel(org.type) }),
-      t('screens.organizationManagement.confirmDeleteMessage', { name: org.name, type: org.type, count: org.clubCount }),
+      t('screens.organizationManagement.confirmDeleteMessage', {
+        name: org.name,
+        type: org.type,
+        count: org.clubCount,
+      }),
       [
         { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
         {
@@ -301,7 +330,8 @@ export const OrganizationManagementScreen = () => {
           style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
           onPress: async () => {
             // Note: Backend implementation needed
-            Alert.alert(MESSAGES.TITLES.SUCCESS, dynamicMessages.organizationDeleted(getTypeLabel(org.type)));
+            const typeLabel = getTypeLabel(org.type);
+            Alert.alert(MESSAGES.TITLES.SUCCESS, dynamicMessages.organizationDeleted(typeLabel));
           },
         },
       ]
@@ -338,35 +368,49 @@ export const OrganizationManagementScreen = () => {
     return typeColors[type];
   };
 
+  const containerStyle = [styles.container, { backgroundColor: colors.backgroundSecondary }];
+  const subtitleType = getTypeLabel(selectedType).toLowerCase();
+
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.backgroundSecondary }]} edges={SAFE_AREA_EDGES.TOP_LEFT_RIGHT}>
+    <SafeAreaView style={containerStyle} edges={SAFE_AREA_EDGES.TOP_LEFT_RIGHT}>
       <ScreenHeader
         title={t('screens.organizationManagement.title')}
-        subtitle={t('screens.organizationManagement.subtitle', { type: getTypeLabel(selectedType).toLowerCase() })}
+        subtitle={t('screens.organizationManagement.subtitle', { type: subtitleType })}
       />
 
       {/* Type Selector */}
       <View style={styles.typeSelectorContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.typeSelector}>
-          {ORGANIZATION_TYPES.map((type) => (
-            <TouchableOpacity
-              key={type}
-              style={[styles.typeButton, selectedType === type && styles.typeButtonActive]}
-              onPress={() => setSelectedType(type)}
-              accessibilityRole={A11Y_ROLE.BUTTON}
-              accessibilityLabel={t('screens.organizationManagement.viewTypes', { type: getTypeLabel(type) })}
-              accessibilityState={{ selected: selectedType === type }}
-            >
-              <MaterialCommunityIcons
-                name={getTypeIcon(type) as any}
-                size={designTokens.iconSize.md}
-                color={selectedType === type ? colors.textInverse : getTypeColor(type)}
-              />
-              <Text style={[styles.typeButtonText, selectedType === type && styles.typeButtonTextActive]}>
-                {getTypeLabel(type)}s
-              </Text>
-            </TouchableOpacity>
-          ))}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.typeSelector}
+        >
+          {ORGANIZATION_TYPES.map((type) => {
+            const isSelected = selectedType === type;
+            const typeLabel = getTypeLabel(type);
+            const btnStyle = [styles.typeButton, isSelected && styles.typeButtonActive];
+            const iconColor = isSelected ? colors.textInverse : getTypeColor(type);
+            const textStyle = [styles.typeButtonText, isSelected && styles.typeButtonTextActive];
+            return (
+              <TouchableOpacity
+                key={type}
+                style={btnStyle}
+                onPress={() => setSelectedType(type)}
+                accessibilityRole={A11Y_ROLE.BUTTON}
+                accessibilityLabel={t('screens.organizationManagement.viewTypes', {
+                  type: typeLabel,
+                })}
+                accessibilityState={{ selected: isSelected }}
+              >
+                <MaterialCommunityIcons
+                  name={getTypeIcon(type) as typeof ICONS.CHECK}
+                  size={designTokens.iconSize.md}
+                  color={iconColor}
+                />
+                <Text style={textStyle}>{typeLabel}s</Text>
+              </TouchableOpacity>
+            );
+          })}
         </ScrollView>
       </View>
 
@@ -376,7 +420,9 @@ export const OrganizationManagementScreen = () => {
           <SearchBar
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholder={t('screens.organizationManagement.searchType', { type: getTypeLabel(selectedType).toLowerCase() })}
+            placeholder={t('screens.organizationManagement.searchType', {
+              type: getTypeLabel(selectedType).toLowerCase(),
+            })}
             style={{ flex: flexValues.one }}
           />
         </View>
@@ -384,9 +430,15 @@ export const OrganizationManagementScreen = () => {
           style={styles.createButton}
           onPress={handleCreate}
           accessibilityRole={A11Y_ROLE.BUTTON}
-          accessibilityLabel={t('screens.organizationManagement.createNewType', { type: getTypeLabel(selectedType).toLowerCase() })}
+          accessibilityLabel={t('screens.organizationManagement.createNewType', {
+            type: getTypeLabel(selectedType).toLowerCase(),
+          })}
         >
-          <MaterialCommunityIcons name={ICONS.PLUS} size={designTokens.iconSize.md} color={colors.textInverse} />
+          <MaterialCommunityIcons
+            name={ICONS.PLUS}
+            size={designTokens.iconSize.md}
+            color={colors.textInverse}
+          />
           <Text style={styles.createButtonText}>{t('screens.organizationManagement.new')}</Text>
         </TouchableOpacity>
       </View>
@@ -398,17 +450,21 @@ export const OrganizationManagementScreen = () => {
         ) : filteredOrganizations.length === 0 ? (
           <EmptyState
             icon={getTypeIcon(selectedType)}
-            title={t('screens.organizationManagement.noTypeFound', { type: getTypeLabel(selectedType) })}
+            title={t('screens.organizationManagement.noTypeFound', {
+              type: getTypeLabel(selectedType),
+            })}
             message={
               searchQuery
                 ? t('screens.organizationManagement.tryAdjustingSearch')
-                : t('screens.organizationManagement.addFirstType', { type: getTypeLabel(selectedType).toLowerCase() })
+                : t('screens.organizationManagement.addFirstType', {
+                    type: getTypeLabel(selectedType).toLowerCase(),
+                  })
             }
           />
         ) : (
           filteredOrganizations.map((org) => (
-            <TouchableOpacity 
-              key={org.id} 
+            <TouchableOpacity
+              key={org.id}
               style={[styles.orgCard, { backgroundColor: colors.surface }]}
               activeOpacity={TOUCH_OPACITY.default}
               onPress={() => handleEdit(org)}
@@ -416,7 +472,7 @@ export const OrganizationManagementScreen = () => {
               <View style={styles.orgCardHeader}>
                 <View style={styles.orgCardTitle}>
                   <MaterialCommunityIcons
-                    name={getTypeIcon(org.type) as any}
+                    name={getTypeIcon(org.type) as typeof ICONS.CHECK}
                     size={mobileIconSizes.medium}
                     color={getTypeColor(org.type)}
                   />
@@ -433,15 +489,25 @@ export const OrganizationManagementScreen = () => {
                   style={styles.deleteButton}
                   onPress={() => handleDelete(org)}
                   accessibilityRole={A11Y_ROLE.BUTTON}
-                  accessibilityLabel={t('screens.organizationManagement.deleteItem', { name: org.name })}
+                  accessibilityLabel={t('screens.organizationManagement.deleteItem', {
+                    name: org.name,
+                  })}
                 >
-                  <MaterialCommunityIcons name={ICONS.DELETE_OUTLINE} size={designTokens.iconSize.md} color={colors.error} />
+                  <MaterialCommunityIcons
+                    name={ICONS.DELETE_OUTLINE}
+                    size={designTokens.iconSize.md}
+                    color={colors.error}
+                  />
                 </TouchableOpacity>
               </View>
               <View style={[styles.orgCardFooter, { borderTopColor: colors.border }]}>
-                <MaterialCommunityIcons name={ICONS.ACCOUNT_GROUP} size={designTokens.iconSize.xs} color={colors.textTertiary} />
+                <MaterialCommunityIcons
+                  name={ICONS.ACCOUNT_GROUP}
+                  size={designTokens.iconSize.xs}
+                  color={colors.textTertiary}
+                />
                 <Text style={[styles.orgClubCount, { color: colors.textSecondary }]}>
-                  {org.clubCount === 1 
+                  {org.clubCount === 1
                     ? t('screens.organizationManagement.clubCount', { count: org.clubCount })
                     : t('screens.organizationManagement.clubCountPlural', { count: org.clubCount })}
                 </Text>
@@ -461,18 +527,34 @@ export const OrganizationManagementScreen = () => {
           resetForm();
         }}
       >
-        <View style={[styles.modalOverlay, { backgroundColor: colors.backdrop }, isMobile && styles.modalOverlayMobile]}>
-          <View style={[styles.modalContent, { backgroundColor: colors.surface }, isMobile && styles.modalContentMobile]}>
+        <View
+          style={[
+            styles.modalOverlay,
+            { backgroundColor: colors.backdrop },
+            isMobile && styles.modalOverlayMobile,
+          ]}
+        >
+          <View
+            style={[
+              styles.modalContent,
+              { backgroundColor: colors.surface },
+              isMobile && styles.modalContentMobile,
+            ]}
+          >
             {/* Modal Handle - Mobile Only */}
             {isMobile && (
               <View style={[styles.modalHandle, { backgroundColor: colors.borderLight }]} />
             )}
-            
+
             <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
               <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
-                {editMode 
-                  ? t('screens.organizationManagement.editType', { type: getTypeLabel(selectedType) })
-                  : t('screens.organizationManagement.createType', { type: getTypeLabel(selectedType) })}
+                {editMode
+                  ? t('screens.organizationManagement.editType', {
+                      type: getTypeLabel(selectedType),
+                    })
+                  : t('screens.organizationManagement.createType', {
+                      type: getTypeLabel(selectedType),
+                    })}
               </Text>
               <TouchableOpacity
                 onPress={() => {
@@ -483,22 +565,30 @@ export const OrganizationManagementScreen = () => {
                 accessibilityRole={A11Y_ROLE.BUTTON}
                 accessibilityLabel={t('screens.organizationManagement.closeModal')}
               >
-                <MaterialCommunityIcons name={ICONS.CLOSE} size={designTokens.iconSize.lg} color={colors.textSecondary} />
+                <MaterialCommunityIcons
+                  name={ICONS.CLOSE}
+                  size={designTokens.iconSize.lg}
+                  color={colors.textSecondary}
+                />
               </TouchableOpacity>
             </View>
 
             <ScrollView style={styles.modalBody}>
               {/* Info Banner */}
               <View style={[styles.hierarchyInfoBanner, { backgroundColor: colors.primaryLight }]}>
-                <MaterialCommunityIcons name={ICONS.INFORMATION} size={designTokens.iconSize.sm} color={colors.primary} />
+                <MaterialCommunityIcons
+                  name={ICONS.INFORMATION}
+                  size={designTokens.iconSize.sm}
+                  color={colors.primary}
+                />
                 <Text style={[styles.hierarchyInfoText, { color: colors.primary }]}>
-                  {selectedType === HIERARCHY_FIELDS.DIVISION 
+                  {selectedType === HIERARCHY_FIELDS.DIVISION
                     ? t('screens.organizationManagement.divisionInfo')
                     : selectedType === HIERARCHY_FIELDS.UNION
-                    ? t('screens.organizationManagement.unionInfo')
-                    : selectedType === HIERARCHY_FIELDS.ASSOCIATION
-                    ? t('screens.organizationManagement.associationInfo')
-                    : t('screens.organizationManagement.churchInfo')}
+                      ? t('screens.organizationManagement.unionInfo')
+                      : selectedType === HIERARCHY_FIELDS.ASSOCIATION
+                        ? t('screens.organizationManagement.associationInfo')
+                        : t('screens.organizationManagement.churchInfo')}
                 </Text>
               </View>
 
@@ -506,22 +596,35 @@ export const OrganizationManagementScreen = () => {
               {selectedType === HIERARCHY_FIELDS.UNION && getAvailableDivisions().length > 0 && (
                 <View style={styles.filterSection}>
                   <View style={styles.filterSectionHeader}>
-                    <Text style={styles.filterSectionTitle}>{t('screens.organizationManagement.parentDivision')}</Text>
+                    <Text style={styles.filterSectionTitle}>
+                      {t('screens.organizationManagement.parentDivision')}
+                    </Text>
                     {!formData.parentDivision && getAvailableDivisions().length > 1 && (
                       <Text style={styles.resultsCount}>
-                        {filterBySearch(getAvailableDivisions(), parentDivisionSearch).length} of {getAvailableDivisions().length}
+                        {filterBySearch(getAvailableDivisions(), parentDivisionSearch).length} of{' '}
+                        {getAvailableDivisions().length}
                       </Text>
                     )}
                   </View>
-                  
+
                   {getAvailableDivisions().length === 1 ? (
                     <View style={styles.hierarchyItem}>
-                      <MaterialCommunityIcons name={ICONS.EARTH} size={designTokens.iconSize.sm} color={colors.primary} />
+                      <MaterialCommunityIcons
+                        name={ICONS.EARTH}
+                        size={designTokens.iconSize.sm}
+                        color={colors.primary}
+                      />
                       <View style={styles.hierarchyInfo}>
-                        <Text style={styles.hierarchyLabel}>{t('components.organizationHierarchy.levels.division')}</Text>
+                        <Text style={styles.hierarchyLabel}>
+                          {t('components.organizationHierarchy.levels.division')}
+                        </Text>
                         <Text style={styles.hierarchyValue}>{getAvailableDivisions()[0]}</Text>
                       </View>
-                      <MaterialCommunityIcons name={ICONS.CHECK_CIRCLE} size={designTokens.iconSize.sm} color={colors.success} />
+                      <MaterialCommunityIcons
+                        name={ICONS.CHECK_CIRCLE}
+                        size={designTokens.iconSize.sm}
+                        color={colors.success}
+                      />
                     </View>
                   ) : formData.parentDivision ? (
                     <TouchableOpacity
@@ -529,10 +632,20 @@ export const OrganizationManagementScreen = () => {
                       onPress={() => setFormData({ ...formData, parentDivision: EMPTY_VALUE })}
                     >
                       <View style={styles.filterOptionContent}>
-                        <MaterialCommunityIcons name={ICONS.EARTH} size={designTokens.iconSize.md} color={colors.primary} />
-                        <Text style={[styles.filterOptionText, styles.filterOptionTextActive]}>{formData.parentDivision}</Text>
+                        <MaterialCommunityIcons
+                          name={ICONS.EARTH}
+                          size={designTokens.iconSize.md}
+                          color={colors.primary}
+                        />
+                        <Text style={[styles.filterOptionText, styles.filterOptionTextActive]}>
+                          {formData.parentDivision}
+                        </Text>
                       </View>
-                      <MaterialCommunityIcons name={ICONS.CLOSE_CIRCLE} size={designTokens.iconSize.md} color={colors.textTertiary} />
+                      <MaterialCommunityIcons
+                        name={ICONS.CLOSE_CIRCLE}
+                        size={designTokens.iconSize.md}
+                        color={colors.textTertiary}
+                      />
                     </TouchableOpacity>
                   ) : (
                     <>
@@ -542,21 +655,32 @@ export const OrganizationManagementScreen = () => {
                         value={parentDivisionSearch}
                         onChangeText={setParentDivisionSearch}
                       />
-                      {filterBySearch(getAvailableDivisions(), parentDivisionSearch).length === 0 ? (
-                        <Text style={styles.noResultsText}>{t('screens.organizationManagement.noDivisionsMatching', { query: parentDivisionSearch })}</Text>
+                      {filterBySearch(getAvailableDivisions(), parentDivisionSearch).length ===
+                      0 ? (
+                        <Text style={styles.noResultsText}>
+                          {t('screens.organizationManagement.noDivisionsMatching', {
+                            query: parentDivisionSearch,
+                          })}
+                        </Text>
                       ) : (
-                        filterBySearch(getAvailableDivisions(), parentDivisionSearch).map((division) => (
-                          <TouchableOpacity
-                            key={division}
-                            style={styles.filterOption}
-                            onPress={() => setFormData({ ...formData, parentDivision: division })}
-                          >
-                            <View style={styles.filterOptionContent}>
-                              <MaterialCommunityIcons name={ICONS.EARTH} size={designTokens.iconSize.md} color={colors.textTertiary} />
-                              <Text style={styles.filterOptionText}>{division}</Text>
-                            </View>
-                          </TouchableOpacity>
-                        ))
+                        filterBySearch(getAvailableDivisions(), parentDivisionSearch).map(
+                          (division) => (
+                            <TouchableOpacity
+                              key={division}
+                              style={styles.filterOption}
+                              onPress={() => setFormData({ ...formData, parentDivision: division })}
+                            >
+                              <View style={styles.filterOptionContent}>
+                                <MaterialCommunityIcons
+                                  name={ICONS.EARTH}
+                                  size={designTokens.iconSize.md}
+                                  color={colors.textTertiary}
+                                />
+                                <Text style={styles.filterOptionText}>{division}</Text>
+                              </View>
+                            </TouchableOpacity>
+                          )
+                        )
                       )}
                     </>
                   )}
@@ -564,123 +688,209 @@ export const OrganizationManagementScreen = () => {
               )}
 
               {/* Association: Cascading selection Division → Union */}
-              {selectedType === HIERARCHY_FIELDS.ASSOCIATION && getAvailableDivisions().length > 0 && (
-                <>
-                  {/* Step 1: Select Division */}
-                  <View style={styles.filterSection}>
-                    <View style={styles.filterSectionHeader}>
-                      <Text style={styles.filterSectionTitle}>{t('screens.organizationManagement.selectDivision')}</Text>
-                      {!formData.parentDivision && getAvailableDivisions().length > 1 && (
-                        <Text style={styles.resultsCount}>
-                          {filterBySearch(getAvailableDivisions(), parentDivisionSearch).length} of {getAvailableDivisions().length}
-                        </Text>
-                      )}
-                    </View>
-                    
-                    {getAvailableDivisions().length === 1 ? (
-                      <View style={styles.hierarchyItem}>
-                        <MaterialCommunityIcons name={ICONS.EARTH} size={designTokens.iconSize.sm} color={colors.primary} />
-                        <View style={styles.hierarchyInfo}>
-                          <Text style={styles.hierarchyLabel}>{t('components.organizationHierarchy.levels.division')}</Text>
-                          <Text style={styles.hierarchyValue}>{getAvailableDivisions()[0]}</Text>
-                        </View>
-                        <MaterialCommunityIcons name={ICONS.CHECK_CIRCLE} size={designTokens.iconSize.sm} color={colors.success} />
-                      </View>
-                    ) : formData.parentDivision ? (
-                      <TouchableOpacity
-                        style={[styles.filterOption, styles.filterOptionActive]}
-                        onPress={() => setFormData({ ...formData, parentDivision: EMPTY_VALUE, parentUnion: EMPTY_VALUE })}
-                      >
-                        <View style={styles.filterOptionContent}>
-                          <MaterialCommunityIcons name={ICONS.EARTH} size={designTokens.iconSize.md} color={colors.primary} />
-                          <Text style={[styles.filterOptionText, styles.filterOptionTextActive]}>{formData.parentDivision}</Text>
-                        </View>
-                        <MaterialCommunityIcons name={ICONS.CLOSE_CIRCLE} size={designTokens.iconSize.md} color={colors.textTertiary} />
-                      </TouchableOpacity>
-                    ) : (
-                      <>
-                        <StandardInput
-                          placeholder={t('screens.organizationManagement.searchDivisions')}
-                          icon={ICONS.MAGNIFY}
-                          value={parentDivisionSearch}
-                          onChangeText={setParentDivisionSearch}
-                        />
-                        {filterBySearch(getAvailableDivisions(), parentDivisionSearch).map((division) => (
-                          <TouchableOpacity
-                            key={division}
-                            style={styles.filterOption}
-                            onPress={() => setFormData({ ...formData, parentDivision: division, parentUnion: EMPTY_VALUE })}
-                          >
-                            <View style={styles.filterOptionContent}>
-                              <MaterialCommunityIcons name={ICONS.EARTH} size={designTokens.iconSize.md} color={colors.textTertiary} />
-                              <Text style={styles.filterOptionText}>{division}</Text>
-                            </View>
-                          </TouchableOpacity>
-                        ))}
-                      </>
-                    )}
-                  </View>
-
-                  {/* Step 2: Select Union (filtered by Division) */}
-                  {formData.parentDivision && (
+              {selectedType === HIERARCHY_FIELDS.ASSOCIATION &&
+                getAvailableDivisions().length > 0 && (
+                  <>
+                    {/* Step 1: Select Division */}
                     <View style={styles.filterSection}>
                       <View style={styles.filterSectionHeader}>
-                        <Text style={styles.filterSectionTitle}>{t('screens.organizationManagement.selectUnion')}</Text>
-                        {!formData.parentUnion && getAvailableUnions(formData.parentDivision).length > 1 && (
+                        <Text style={styles.filterSectionTitle}>
+                          {t('screens.organizationManagement.selectDivision')}
+                        </Text>
+                        {!formData.parentDivision && getAvailableDivisions().length > 1 && (
                           <Text style={styles.resultsCount}>
-                            {filterBySearch(getAvailableUnions(formData.parentDivision), parentUnionSearch).length} of {getAvailableUnions(formData.parentDivision).length}
+                            {filterBySearch(getAvailableDivisions(), parentDivisionSearch).length}{' '}
+                            of {getAvailableDivisions().length}
                           </Text>
                         )}
                       </View>
-                      
-                      {getAvailableUnions(formData.parentDivision).length === 0 ? (
-                        <Text style={styles.noResultsText}>{t('screens.organizationManagement.noUnionsIn', { division: formData.parentDivision })}</Text>
-                      ) : getAvailableUnions(formData.parentDivision).length === 1 ? (
+
+                      {getAvailableDivisions().length === 1 ? (
                         <View style={styles.hierarchyItem}>
-                          <MaterialCommunityIcons name={ICONS.DOMAIN} size={designTokens.iconSize.sm} color={colors.info} />
+                          <MaterialCommunityIcons
+                            name={ICONS.EARTH}
+                            size={designTokens.iconSize.sm}
+                            color={colors.primary}
+                          />
                           <View style={styles.hierarchyInfo}>
-                            <Text style={styles.hierarchyLabel}>{t('components.organizationHierarchy.levels.union')}</Text>
-                            <Text style={styles.hierarchyValue}>{getAvailableUnions(formData.parentDivision)[0]}</Text>
+                            <Text style={styles.hierarchyLabel}>
+                              {t('components.organizationHierarchy.levels.division')}
+                            </Text>
+                            <Text style={styles.hierarchyValue}>{getAvailableDivisions()[0]}</Text>
                           </View>
-                          <MaterialCommunityIcons name={ICONS.CHECK_CIRCLE} size={designTokens.iconSize.sm} color={colors.success} />
+                          <MaterialCommunityIcons
+                            name={ICONS.CHECK_CIRCLE}
+                            size={designTokens.iconSize.sm}
+                            color={colors.success}
+                          />
                         </View>
-                      ) : formData.parentUnion ? (
+                      ) : formData.parentDivision ? (
                         <TouchableOpacity
                           style={[styles.filterOption, styles.filterOptionActive]}
-                          onPress={() => setFormData({ ...formData, parentUnion: EMPTY_VALUE })}
+                          onPress={() =>
+                            setFormData({
+                              ...formData,
+                              parentDivision: EMPTY_VALUE,
+                              parentUnion: EMPTY_VALUE,
+                            })
+                          }
                         >
                           <View style={styles.filterOptionContent}>
-                            <MaterialCommunityIcons name={ICONS.DOMAIN} size={designTokens.iconSize.md} color={colors.primary} />
-                            <Text style={[styles.filterOptionText, styles.filterOptionTextActive]}>{formData.parentUnion}</Text>
+                            <MaterialCommunityIcons
+                              name={ICONS.EARTH}
+                              size={designTokens.iconSize.md}
+                              color={colors.primary}
+                            />
+                            <Text style={[styles.filterOptionText, styles.filterOptionTextActive]}>
+                              {formData.parentDivision}
+                            </Text>
                           </View>
-                          <MaterialCommunityIcons name={ICONS.CLOSE_CIRCLE} size={designTokens.iconSize.md} color={colors.textTertiary} />
+                          <MaterialCommunityIcons
+                            name={ICONS.CLOSE_CIRCLE}
+                            size={designTokens.iconSize.md}
+                            color={colors.textTertiary}
+                          />
                         </TouchableOpacity>
                       ) : (
                         <>
                           <StandardInput
-                            placeholder={t('screens.organizationManagement.searchUnions')}
+                            placeholder={t('screens.organizationManagement.searchDivisions')}
                             icon={ICONS.MAGNIFY}
-                            value={parentUnionSearch}
-                            onChangeText={setParentUnionSearch}
+                            value={parentDivisionSearch}
+                            onChangeText={setParentDivisionSearch}
                           />
-                          {filterBySearch(getAvailableUnions(formData.parentDivision), parentUnionSearch).map((union) => (
-                            <TouchableOpacity
-                              key={union}
-                              style={styles.filterOption}
-                              onPress={() => setFormData({ ...formData, parentUnion: union })}
-                            >
-                              <View style={styles.filterOptionContent}>
-                                <MaterialCommunityIcons name={ICONS.DOMAIN} size={designTokens.iconSize.md} color={colors.textTertiary} />
-                                <Text style={styles.filterOptionText}>{union}</Text>
-                              </View>
-                            </TouchableOpacity>
-                          ))}
+                          {filterBySearch(getAvailableDivisions(), parentDivisionSearch).map(
+                            (division) => (
+                              <TouchableOpacity
+                                key={division}
+                                style={styles.filterOption}
+                                onPress={() =>
+                                  setFormData({
+                                    ...formData,
+                                    parentDivision: division,
+                                    parentUnion: EMPTY_VALUE,
+                                  })
+                                }
+                              >
+                                <View style={styles.filterOptionContent}>
+                                  <MaterialCommunityIcons
+                                    name={ICONS.EARTH}
+                                    size={designTokens.iconSize.md}
+                                    color={colors.textTertiary}
+                                  />
+                                  <Text style={styles.filterOptionText}>{division}</Text>
+                                </View>
+                              </TouchableOpacity>
+                            )
+                          )}
                         </>
                       )}
                     </View>
-                  )}
-                </>
-              )}
+
+                    {/* Step 2: Select Union (filtered by Division) */}
+                    {formData.parentDivision && (
+                      <View style={styles.filterSection}>
+                        <View style={styles.filterSectionHeader}>
+                          <Text style={styles.filterSectionTitle}>
+                            {t('screens.organizationManagement.selectUnion')}
+                          </Text>
+                          {!formData.parentUnion &&
+                            getAvailableUnions(formData.parentDivision).length > 1 && (
+                              <Text style={styles.resultsCount}>
+                                {
+                                  filterBySearch(
+                                    getAvailableUnions(formData.parentDivision),
+                                    parentUnionSearch
+                                  ).length
+                                }{' '}
+                                of {getAvailableUnions(formData.parentDivision).length}
+                              </Text>
+                            )}
+                        </View>
+
+                        {getAvailableUnions(formData.parentDivision).length === 0 ? (
+                          <Text style={styles.noResultsText}>
+                            {t('screens.organizationManagement.noUnionsIn', {
+                              division: formData.parentDivision,
+                            })}
+                          </Text>
+                        ) : getAvailableUnions(formData.parentDivision).length === 1 ? (
+                          <View style={styles.hierarchyItem}>
+                            <MaterialCommunityIcons
+                              name={ICONS.DOMAIN}
+                              size={designTokens.iconSize.sm}
+                              color={colors.info}
+                            />
+                            <View style={styles.hierarchyInfo}>
+                              <Text style={styles.hierarchyLabel}>
+                                {t('components.organizationHierarchy.levels.union')}
+                              </Text>
+                              <Text style={styles.hierarchyValue}>
+                                {getAvailableUnions(formData.parentDivision)[0]}
+                              </Text>
+                            </View>
+                            <MaterialCommunityIcons
+                              name={ICONS.CHECK_CIRCLE}
+                              size={designTokens.iconSize.sm}
+                              color={colors.success}
+                            />
+                          </View>
+                        ) : formData.parentUnion ? (
+                          <TouchableOpacity
+                            style={[styles.filterOption, styles.filterOptionActive]}
+                            onPress={() => setFormData({ ...formData, parentUnion: EMPTY_VALUE })}
+                          >
+                            <View style={styles.filterOptionContent}>
+                              <MaterialCommunityIcons
+                                name={ICONS.DOMAIN}
+                                size={designTokens.iconSize.md}
+                                color={colors.primary}
+                              />
+                              <Text
+                                style={[styles.filterOptionText, styles.filterOptionTextActive]}
+                              >
+                                {formData.parentUnion}
+                              </Text>
+                            </View>
+                            <MaterialCommunityIcons
+                              name={ICONS.CLOSE_CIRCLE}
+                              size={designTokens.iconSize.md}
+                              color={colors.textTertiary}
+                            />
+                          </TouchableOpacity>
+                        ) : (
+                          <>
+                            <StandardInput
+                              placeholder={t('screens.organizationManagement.searchUnions')}
+                              icon={ICONS.MAGNIFY}
+                              value={parentUnionSearch}
+                              onChangeText={setParentUnionSearch}
+                            />
+                            {filterBySearch(
+                              getAvailableUnions(formData.parentDivision),
+                              parentUnionSearch
+                            ).map((union) => (
+                              <TouchableOpacity
+                                key={union}
+                                style={styles.filterOption}
+                                onPress={() => setFormData({ ...formData, parentUnion: union })}
+                              >
+                                <View style={styles.filterOptionContent}>
+                                  <MaterialCommunityIcons
+                                    name={ICONS.DOMAIN}
+                                    size={designTokens.iconSize.md}
+                                    color={colors.textTertiary}
+                                  />
+                                  <Text style={styles.filterOptionText}>{union}</Text>
+                                </View>
+                              </TouchableOpacity>
+                            ))}
+                          </>
+                        )}
+                      </View>
+                    )}
+                  </>
+                )}
 
               {/* Church: Cascading selection Division → Union → Association */}
               {selectedType === HIERARCHY_FIELDS.CHURCH && getAvailableDivisions().length > 0 && (
@@ -688,33 +898,63 @@ export const OrganizationManagementScreen = () => {
                   {/* Step 1: Select Division */}
                   <View style={styles.filterSection}>
                     <View style={styles.filterSectionHeader}>
-                      <Text style={styles.filterSectionTitle}>{t('screens.organizationManagement.selectDivision')}</Text>
+                      <Text style={styles.filterSectionTitle}>
+                        {t('screens.organizationManagement.selectDivision')}
+                      </Text>
                       {!formData.parentDivision && getAvailableDivisions().length > 1 && (
                         <Text style={styles.resultsCount}>
-                          {filterBySearch(getAvailableDivisions(), parentDivisionSearch).length} of {getAvailableDivisions().length}
+                          {filterBySearch(getAvailableDivisions(), parentDivisionSearch).length} of{' '}
+                          {getAvailableDivisions().length}
                         </Text>
                       )}
                     </View>
-                    
+
                     {getAvailableDivisions().length === 1 ? (
                       <View style={styles.hierarchyItem}>
-                        <MaterialCommunityIcons name={ICONS.EARTH} size={designTokens.iconSize.sm} color={colors.primary} />
+                        <MaterialCommunityIcons
+                          name={ICONS.EARTH}
+                          size={designTokens.iconSize.sm}
+                          color={colors.primary}
+                        />
                         <View style={styles.hierarchyInfo}>
-                          <Text style={styles.hierarchyLabel}>{t('components.organizationHierarchy.levels.division')}</Text>
+                          <Text style={styles.hierarchyLabel}>
+                            {t('components.organizationHierarchy.levels.division')}
+                          </Text>
                           <Text style={styles.hierarchyValue}>{getAvailableDivisions()[0]}</Text>
                         </View>
-                        <MaterialCommunityIcons name={ICONS.CHECK_CIRCLE} size={designTokens.iconSize.sm} color={colors.success} />
+                        <MaterialCommunityIcons
+                          name={ICONS.CHECK_CIRCLE}
+                          size={designTokens.iconSize.sm}
+                          color={colors.success}
+                        />
                       </View>
                     ) : formData.parentDivision ? (
                       <TouchableOpacity
                         style={[styles.filterOption, styles.filterOptionActive]}
-                        onPress={() => setFormData({ ...formData, parentDivision: EMPTY_VALUE, parentUnion: EMPTY_VALUE, parentAssociation: EMPTY_VALUE })}
+                        onPress={() =>
+                          setFormData({
+                            ...formData,
+                            parentDivision: EMPTY_VALUE,
+                            parentUnion: EMPTY_VALUE,
+                            parentAssociation: EMPTY_VALUE,
+                          })
+                        }
                       >
                         <View style={styles.filterOptionContent}>
-                          <MaterialCommunityIcons name={ICONS.EARTH} size={designTokens.iconSize.md} color={colors.primary} />
-                          <Text style={[styles.filterOptionText, styles.filterOptionTextActive]}>{formData.parentDivision}</Text>
+                          <MaterialCommunityIcons
+                            name={ICONS.EARTH}
+                            size={designTokens.iconSize.md}
+                            color={colors.primary}
+                          />
+                          <Text style={[styles.filterOptionText, styles.filterOptionTextActive]}>
+                            {formData.parentDivision}
+                          </Text>
                         </View>
-                        <MaterialCommunityIcons name={ICONS.CLOSE_CIRCLE} size={designTokens.iconSize.md} color={colors.textTertiary} />
+                        <MaterialCommunityIcons
+                          name={ICONS.CLOSE_CIRCLE}
+                          size={designTokens.iconSize.md}
+                          color={colors.textTertiary}
+                        />
                       </TouchableOpacity>
                     ) : (
                       <>
@@ -724,18 +964,31 @@ export const OrganizationManagementScreen = () => {
                           value={parentDivisionSearch}
                           onChangeText={setParentDivisionSearch}
                         />
-                        {filterBySearch(getAvailableDivisions(), parentDivisionSearch).map((division) => (
-                          <TouchableOpacity
-                            key={division}
-                            style={styles.filterOption}
-                            onPress={() => setFormData({ ...formData, parentDivision: division, parentUnion: EMPTY_VALUE, parentAssociation: EMPTY_VALUE })}
-                          >
-                            <View style={styles.filterOptionContent}>
-                              <MaterialCommunityIcons name={ICONS.EARTH} size={designTokens.iconSize.md} color={colors.textTertiary} />
-                              <Text style={styles.filterOptionText}>{division}</Text>
-                            </View>
-                          </TouchableOpacity>
-                        ))}
+                        {filterBySearch(getAvailableDivisions(), parentDivisionSearch).map(
+                          (division) => (
+                            <TouchableOpacity
+                              key={division}
+                              style={styles.filterOption}
+                              onPress={() =>
+                                setFormData({
+                                  ...formData,
+                                  parentDivision: division,
+                                  parentUnion: EMPTY_VALUE,
+                                  parentAssociation: EMPTY_VALUE,
+                                })
+                              }
+                            >
+                              <View style={styles.filterOptionContent}>
+                                <MaterialCommunityIcons
+                                  name={ICONS.EARTH}
+                                  size={designTokens.iconSize.md}
+                                  color={colors.textTertiary}
+                                />
+                                <Text style={styles.filterOptionText}>{division}</Text>
+                              </View>
+                            </TouchableOpacity>
+                          )
+                        )}
                       </>
                     )}
                   </View>
@@ -744,35 +997,76 @@ export const OrganizationManagementScreen = () => {
                   {formData.parentDivision && (
                     <View style={styles.filterSection}>
                       <View style={styles.filterSectionHeader}>
-                        <Text style={styles.filterSectionTitle}>{t('screens.organizationManagement.selectUnion')}</Text>
-                        {!formData.parentUnion && getAvailableUnions(formData.parentDivision).length > 1 && (
-                          <Text style={styles.resultsCount}>
-                            {filterBySearch(getAvailableUnions(formData.parentDivision), parentUnionSearch).length} of {getAvailableUnions(formData.parentDivision).length}
-                          </Text>
-                        )}
+                        <Text style={styles.filterSectionTitle}>
+                          {t('screens.organizationManagement.selectUnion')}
+                        </Text>
+                        {!formData.parentUnion &&
+                          getAvailableUnions(formData.parentDivision).length > 1 && (
+                            <Text style={styles.resultsCount}>
+                              {
+                                filterBySearch(
+                                  getAvailableUnions(formData.parentDivision),
+                                  parentUnionSearch
+                                ).length
+                              }{' '}
+                              of {getAvailableUnions(formData.parentDivision).length}
+                            </Text>
+                          )}
                       </View>
-                      
+
                       {getAvailableUnions(formData.parentDivision).length === 0 ? (
-                        <Text style={styles.noResultsText}>{t('screens.organizationManagement.noUnionsIn', { division: formData.parentDivision })}</Text>
+                        <Text style={styles.noResultsText}>
+                          {t('screens.organizationManagement.noUnionsIn', {
+                            division: formData.parentDivision,
+                          })}
+                        </Text>
                       ) : getAvailableUnions(formData.parentDivision).length === 1 ? (
                         <View style={styles.hierarchyItem}>
-                          <MaterialCommunityIcons name={ICONS.DOMAIN} size={designTokens.iconSize.sm} color={colors.info} />
+                          <MaterialCommunityIcons
+                            name={ICONS.DOMAIN}
+                            size={designTokens.iconSize.sm}
+                            color={colors.info}
+                          />
                           <View style={styles.hierarchyInfo}>
-                            <Text style={styles.hierarchyLabel}>{t('components.organizationHierarchy.levels.union')}</Text>
-                            <Text style={styles.hierarchyValue}>{getAvailableUnions(formData.parentDivision)[0]}</Text>
+                            <Text style={styles.hierarchyLabel}>
+                              {t('components.organizationHierarchy.levels.union')}
+                            </Text>
+                            <Text style={styles.hierarchyValue}>
+                              {getAvailableUnions(formData.parentDivision)[0]}
+                            </Text>
                           </View>
-                          <MaterialCommunityIcons name={ICONS.CHECK_CIRCLE} size={designTokens.iconSize.sm} color={colors.success} />
+                          <MaterialCommunityIcons
+                            name={ICONS.CHECK_CIRCLE}
+                            size={designTokens.iconSize.sm}
+                            color={colors.success}
+                          />
                         </View>
                       ) : formData.parentUnion ? (
                         <TouchableOpacity
                           style={[styles.filterOption, styles.filterOptionActive]}
-                          onPress={() => setFormData({ ...formData, parentUnion: EMPTY_VALUE, parentAssociation: EMPTY_VALUE })}
+                          onPress={() =>
+                            setFormData({
+                              ...formData,
+                              parentUnion: EMPTY_VALUE,
+                              parentAssociation: EMPTY_VALUE,
+                            })
+                          }
                         >
                           <View style={styles.filterOptionContent}>
-                            <MaterialCommunityIcons name={ICONS.DOMAIN} size={designTokens.iconSize.md} color={colors.primary} />
-                            <Text style={[styles.filterOptionText, styles.filterOptionTextActive]}>{formData.parentUnion}</Text>
+                            <MaterialCommunityIcons
+                              name={ICONS.DOMAIN}
+                              size={designTokens.iconSize.md}
+                              color={colors.primary}
+                            />
+                            <Text style={[styles.filterOptionText, styles.filterOptionTextActive]}>
+                              {formData.parentUnion}
+                            </Text>
                           </View>
-                          <MaterialCommunityIcons name={ICONS.CLOSE_CIRCLE} size={designTokens.iconSize.md} color={colors.textTertiary} />
+                          <MaterialCommunityIcons
+                            name={ICONS.CLOSE_CIRCLE}
+                            size={designTokens.iconSize.md}
+                            color={colors.textTertiary}
+                          />
                         </TouchableOpacity>
                       ) : (
                         <>
@@ -782,14 +1076,27 @@ export const OrganizationManagementScreen = () => {
                             value={parentUnionSearch}
                             onChangeText={setParentUnionSearch}
                           />
-                          {filterBySearch(getAvailableUnions(formData.parentDivision), parentUnionSearch).map((union) => (
+                          {filterBySearch(
+                            getAvailableUnions(formData.parentDivision),
+                            parentUnionSearch
+                          ).map((union) => (
                             <TouchableOpacity
                               key={union}
                               style={styles.filterOption}
-                              onPress={() => setFormData({ ...formData, parentUnion: union, parentAssociation: EMPTY_VALUE })}
+                              onPress={() =>
+                                setFormData({
+                                  ...formData,
+                                  parentUnion: union,
+                                  parentAssociation: EMPTY_VALUE,
+                                })
+                              }
                             >
                               <View style={styles.filterOptionContent}>
-                                <MaterialCommunityIcons name={ICONS.DOMAIN} size={designTokens.iconSize.md} color={colors.textTertiary} />
+                                <MaterialCommunityIcons
+                                  name={ICONS.DOMAIN}
+                                  size={designTokens.iconSize.md}
+                                  color={colors.textTertiary}
+                                />
                                 <Text style={styles.filterOptionText}>{union}</Text>
                               </View>
                             </TouchableOpacity>
@@ -803,35 +1110,72 @@ export const OrganizationManagementScreen = () => {
                   {formData.parentUnion && (
                     <View style={styles.filterSection}>
                       <View style={styles.filterSectionHeader}>
-                        <Text style={styles.filterSectionTitle}>{t('screens.organizationManagement.selectAssociation')}</Text>
-                        {!formData.parentAssociation && getAvailableAssociations(formData.parentUnion).length > 1 && (
-                          <Text style={styles.resultsCount}>
-                            {filterBySearch(getAvailableAssociations(formData.parentUnion), parentAssociationSearch).length} of {getAvailableAssociations(formData.parentUnion).length}
-                          </Text>
-                        )}
+                        <Text style={styles.filterSectionTitle}>
+                          {t('screens.organizationManagement.selectAssociation')}
+                        </Text>
+                        {!formData.parentAssociation &&
+                          getAvailableAssociations(formData.parentUnion).length > 1 && (
+                            <Text style={styles.resultsCount}>
+                              {
+                                filterBySearch(
+                                  getAvailableAssociations(formData.parentUnion),
+                                  parentAssociationSearch
+                                ).length
+                              }{' '}
+                              of {getAvailableAssociations(formData.parentUnion).length}
+                            </Text>
+                          )}
                       </View>
-                      
+
                       {getAvailableAssociations(formData.parentUnion).length === 0 ? (
-                        <Text style={styles.noResultsText}>{t('screens.organizationManagement.noAssociationsIn', { union: formData.parentUnion })}</Text>
+                        <Text style={styles.noResultsText}>
+                          {t('screens.organizationManagement.noAssociationsIn', {
+                            union: formData.parentUnion,
+                          })}
+                        </Text>
                       ) : getAvailableAssociations(formData.parentUnion).length === 1 ? (
                         <View style={styles.hierarchyItem}>
-                          <MaterialCommunityIcons name={ICONS.OFFICE_BUILDING} size={designTokens.iconSize.sm} color={colors.warning} />
+                          <MaterialCommunityIcons
+                            name={ICONS.OFFICE_BUILDING}
+                            size={designTokens.iconSize.sm}
+                            color={colors.warning}
+                          />
                           <View style={styles.hierarchyInfo}>
-                            <Text style={styles.hierarchyLabel}>{t('components.organizationHierarchy.levels.association')}</Text>
-                            <Text style={styles.hierarchyValue}>{getAvailableAssociations(formData.parentUnion)[0]}</Text>
+                            <Text style={styles.hierarchyLabel}>
+                              {t('components.organizationHierarchy.levels.association')}
+                            </Text>
+                            <Text style={styles.hierarchyValue}>
+                              {getAvailableAssociations(formData.parentUnion)[0]}
+                            </Text>
                           </View>
-                          <MaterialCommunityIcons name={ICONS.CHECK_CIRCLE} size={designTokens.iconSize.sm} color={colors.success} />
+                          <MaterialCommunityIcons
+                            name={ICONS.CHECK_CIRCLE}
+                            size={designTokens.iconSize.sm}
+                            color={colors.success}
+                          />
                         </View>
                       ) : formData.parentAssociation ? (
                         <TouchableOpacity
                           style={[styles.filterOption, styles.filterOptionActive]}
-                          onPress={() => setFormData({ ...formData, parentAssociation: EMPTY_VALUE })}
+                          onPress={() =>
+                            setFormData({ ...formData, parentAssociation: EMPTY_VALUE })
+                          }
                         >
                           <View style={styles.filterOptionContent}>
-                            <MaterialCommunityIcons name={ICONS.OFFICE_BUILDING} size={designTokens.iconSize.md} color={colors.primary} />
-                            <Text style={[styles.filterOptionText, styles.filterOptionTextActive]}>{formData.parentAssociation}</Text>
+                            <MaterialCommunityIcons
+                              name={ICONS.OFFICE_BUILDING}
+                              size={designTokens.iconSize.md}
+                              color={colors.primary}
+                            />
+                            <Text style={[styles.filterOptionText, styles.filterOptionTextActive]}>
+                              {formData.parentAssociation}
+                            </Text>
                           </View>
-                          <MaterialCommunityIcons name={ICONS.CLOSE_CIRCLE} size={designTokens.iconSize.md} color={colors.textTertiary} />
+                          <MaterialCommunityIcons
+                            name={ICONS.CLOSE_CIRCLE}
+                            size={designTokens.iconSize.md}
+                            color={colors.textTertiary}
+                          />
                         </TouchableOpacity>
                       ) : (
                         <>
@@ -841,14 +1185,23 @@ export const OrganizationManagementScreen = () => {
                             value={parentAssociationSearch}
                             onChangeText={setParentAssociationSearch}
                           />
-                          {filterBySearch(getAvailableAssociations(formData.parentUnion), parentAssociationSearch).map((association) => (
+                          {filterBySearch(
+                            getAvailableAssociations(formData.parentUnion),
+                            parentAssociationSearch
+                          ).map((association) => (
                             <TouchableOpacity
                               key={association}
                               style={styles.filterOption}
-                              onPress={() => setFormData({ ...formData, parentAssociation: association })}
+                              onPress={() =>
+                                setFormData({ ...formData, parentAssociation: association })
+                              }
                             >
                               <View style={styles.filterOptionContent}>
-                                <MaterialCommunityIcons name={ICONS.OFFICE_BUILDING} size={designTokens.iconSize.md} color={colors.textTertiary} />
+                                <MaterialCommunityIcons
+                                  name={ICONS.OFFICE_BUILDING}
+                                  size={designTokens.iconSize.md}
+                                  color={colors.textTertiary}
+                                />
                                 <Text style={styles.filterOptionText}>{association}</Text>
                               </View>
                             </TouchableOpacity>
@@ -862,12 +1215,20 @@ export const OrganizationManagementScreen = () => {
 
               {/* Name Input Section - AFTER parent selection */}
               <View style={styles.filterSection}>
-                <Text style={styles.filterSectionTitle}>{t('screens.organizationManagement.typeInformation', { type: getTypeLabel(selectedType) })}</Text>
-                
+                <Text style={styles.filterSectionTitle}>
+                  {t('screens.organizationManagement.typeInformation', {
+                    type: getTypeLabel(selectedType),
+                  })}
+                </Text>
+
                 <StandardInput
-                  label={t('screens.organizationManagement.typeName', { type: getTypeLabel(selectedType) })}
+                  label={t('screens.organizationManagement.typeName', {
+                    type: getTypeLabel(selectedType),
+                  })}
                   icon={getTypeIcon(selectedType)}
-                  placeholder={t('screens.organizationManagement.enterTypeName', { type: getTypeLabel(selectedType).toLowerCase() })}
+                  placeholder={t('screens.organizationManagement.enterTypeName', {
+                    type: getTypeLabel(selectedType).toLowerCase(),
+                  })}
                   value={formData.name}
                   onChangeText={(text) => setFormData({ ...formData, name: text })}
                   required
@@ -876,17 +1237,26 @@ export const OrganizationManagementScreen = () => {
 
               {/* Warning if no parents available */}
               {((selectedType === HIERARCHY_FIELDS.UNION && getAvailableParents().length === 0) ||
-                (selectedType === HIERARCHY_FIELDS.ASSOCIATION && getAvailableParents().length === 0) ||
-                (selectedType === HIERARCHY_FIELDS.CHURCH && getAvailableParents().length === 0)) && (
+                (selectedType === HIERARCHY_FIELDS.ASSOCIATION &&
+                  getAvailableParents().length === 0) ||
+                (selectedType === HIERARCHY_FIELDS.CHURCH &&
+                  getAvailableParents().length === 0)) && (
                 <View style={styles.warningBanner}>
-                  <MaterialCommunityIcons name={ICONS.ALERT} size={designTokens.iconSize.md} color={colors.warning} />
+                  <MaterialCommunityIcons
+                    name={ICONS.ALERT}
+                    size={designTokens.iconSize.md}
+                    color={colors.warning}
+                  />
                   <Text style={styles.warningText}>
-                    {t('screens.organizationManagement.noParentAvailable', { 
-                      parentType: selectedType === HIERARCHY_FIELDS.UNION 
-                        ? t('components.organizationHierarchy.levels.division').toLowerCase() 
-                        : selectedType === HIERARCHY_FIELDS.ASSOCIATION 
-                        ? t('components.organizationHierarchy.levels.union').toLowerCase() 
-                        : t('components.organizationHierarchy.levels.association').toLowerCase() 
+                    {t('screens.organizationManagement.noParentAvailable', {
+                      parentType:
+                        selectedType === HIERARCHY_FIELDS.UNION
+                          ? t('components.organizationHierarchy.levels.division').toLowerCase()
+                          : selectedType === HIERARCHY_FIELDS.ASSOCIATION
+                            ? t('components.organizationHierarchy.levels.union').toLowerCase()
+                            : t(
+                                'components.organizationHierarchy.levels.association'
+                              ).toLowerCase(),
                     })}
                   </Text>
                 </View>
@@ -903,21 +1273,33 @@ export const OrganizationManagementScreen = () => {
                 accessibilityRole={A11Y_ROLE.BUTTON}
                 accessibilityLabel={t('common.cancel')}
               >
-                <MaterialCommunityIcons name={ICONS.CLOSE_CIRCLE} size={designTokens.iconSize.sm} color={colors.textSecondary} />
+                <MaterialCommunityIcons
+                  name={ICONS.CLOSE_CIRCLE}
+                  size={designTokens.iconSize.sm}
+                  color={colors.textSecondary}
+                />
                 <Text style={styles.clearButtonText}>{t('common.cancel')}</Text>
               </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.applyButton} 
+              <TouchableOpacity
+                style={styles.applyButton}
                 onPress={handleSave}
                 accessibilityRole={A11Y_ROLE.BUTTON}
-                accessibilityLabel={editMode ? t('screens.organizationManagement.saveChanges') : t('screens.organizationManagement.createOrganization')}
+                accessibilityLabel={
+                  editMode
+                    ? t('screens.organizationManagement.saveChanges')
+                    : t('screens.organizationManagement.createOrganization')
+                }
               >
                 <MaterialCommunityIcons
                   name={editMode ? ICONS.CONTENT_SAVE : ICONS.PLUS_CIRCLE}
                   size={designTokens.iconSize.sm}
                   color={colors.textInverse}
                 />
-                <Text style={styles.applyButtonText}>{editMode ? t('screens.organizationManagement.save') : t('screens.organizationManagement.create')}</Text>
+                <Text style={styles.applyButtonText}>
+                  {editMode
+                    ? t('screens.organizationManagement.save')
+                    : t('screens.organizationManagement.create')}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1265,4 +1647,3 @@ const styles = StyleSheet.create({
     color: designTokens.colors.textInverse,
   },
 });
-

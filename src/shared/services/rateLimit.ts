@@ -44,7 +44,7 @@ export class RateLimiter {
    */
   async tryConsume(key: string, tokensNeeded: number = 1): Promise<boolean> {
     const bucket = this.getOrCreateBucket(key);
-    
+
     // Refill tokens based on time passed
     this.refillBucket(bucket);
 
@@ -66,7 +66,7 @@ export class RateLimiter {
       const bucket = this.buckets.get(key)!;
       const tokensNeededToRefill = tokensNeeded - bucket.tokens;
       const timeToWait = (tokensNeededToRefill / this.options.refillRate) * 1000;
-      
+
       logger.debug(`Rate limit: waiting ${timeToWait}ms for tokens`);
       await this.sleep(Math.min(timeToWait, this.options.interval));
     }
@@ -77,7 +77,7 @@ export class RateLimiter {
    */
   private getOrCreateBucket(key: string): RateLimitBucket {
     let bucket = this.buckets.get(key);
-    
+
     if (!bucket) {
       bucket = {
         tokens: this.options.maxTokens,
@@ -180,11 +180,7 @@ class RateLimitService {
   /**
    * Tries to consume from a named limiter
    */
-  async tryConsume(
-    limiterName: string,
-    key: string,
-    tokensNeeded: number = 1
-  ): Promise<boolean> {
+  async tryConsume(limiterName: string, key: string, tokensNeeded: number = 1): Promise<boolean> {
     const limiter = this.limiters.get(limiterName);
     if (!limiter) {
       logger.warn(`Rate limiter not found: ${limiterName}`);
@@ -252,16 +248,12 @@ export const heavyOperationsLimiter = rateLimitService.getLimiter('heavy', {
  */
 export function rateLimit(
   limiterName: string,
-  keyExtractor: (...args: any[]) => string = () => 'default'
+  keyExtractor: (...args: unknown[]) => string = () => 'default'
 ) {
-  return function (
-    target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor
-  ) {
+  return function (target: object, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
-    descriptor.value = async function (...args: any[]) {
+    descriptor.value = async function (...args: unknown[]) {
       const key = keyExtractor(...args);
       const allowed = await rateLimitService.tryConsume(limiterName, key);
 
@@ -294,7 +286,7 @@ export class RateLimitError extends Error {
 /**
  * Wraps a function with rate limiting
  */
-export function withRateLimit<T extends (...args: any[]) => Promise<any>>(
+export function withRateLimit<T extends (...args: unknown[]) => Promise<unknown>>(
   fn: T,
   limiter: RateLimiter,
   keyExtractor: (...args: Parameters<T>) => string = () => 'default'
@@ -342,4 +334,3 @@ export function createIPRateLimiter(
     return await limiter.tryConsume(ipAddress);
   };
 }
-

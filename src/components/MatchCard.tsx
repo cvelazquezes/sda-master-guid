@@ -5,9 +5,15 @@ import { useTranslation } from 'react-i18next';
 import { Match, MatchStatus } from '../types';
 import { format } from 'date-fns';
 import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../shared/theme';
-import { A11Y_ROLE, ICONS, TOUCH_OPACITY, COMPONENT_NAMES, DATE_FORMATS } from '../shared/constants';
-import { flexValues } from '../shared/constants/layoutConstants';
 import { formatMembersCount } from '../shared/utils/formatters';
+import {
+  A11Y_ROLE,
+  COMPONENT_NAMES,
+  DATE_FORMATS,
+  ICONS,
+  TOUCH_OPACITY,
+  flexValues,
+} from '../shared/constants';
 
 interface MatchCardProps {
   match: Match;
@@ -38,7 +44,7 @@ const MatchCardComponent: React.FC<MatchCardProps> = ({
       <View style={styles.header}>
         <View style={[styles.statusBadge, { backgroundColor: statusConfig.bg }]}>
           <MaterialCommunityIcons
-            name={statusConfig.icon as any}
+            name={statusConfig.icon as typeof ICONS.CHECK}
             size={mobileIconSizes.small}
             color={statusConfig.color}
           />
@@ -50,7 +56,11 @@ const MatchCardComponent: React.FC<MatchCardProps> = ({
         {/* Skip button for pending matches */}
         {showActions && match.status === MatchStatus.PENDING && onSkip && (
           <TouchableOpacity style={styles.skipButton} onPress={onSkip}>
-            <MaterialCommunityIcons name={ICONS.CLOSE} size={mobileIconSizes.small} color={designTokens.colors.error} />
+            <MaterialCommunityIcons
+              name={ICONS.CLOSE}
+              size={mobileIconSizes.small}
+              color={designTokens.colors.error}
+            />
             <Text style={styles.skipButtonText}>{t('components.matchCard.skip')}</Text>
           </TouchableOpacity>
         )}
@@ -61,7 +71,11 @@ const MatchCardComponent: React.FC<MatchCardProps> = ({
         {/* Participants */}
         <View style={styles.infoRow}>
           <View style={styles.iconBox}>
-            <MaterialCommunityIcons name={ICONS.ACCOUNT_GROUP} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+            <MaterialCommunityIcons
+              name={ICONS.ACCOUNT_GROUP}
+              size={mobileIconSizes.medium}
+              color={designTokens.colors.primary}
+            />
           </View>
           <View style={styles.infoTextContainer}>
             <Text style={styles.infoLabel}>{t('components.matchCard.participants')}</Text>
@@ -73,7 +87,11 @@ const MatchCardComponent: React.FC<MatchCardProps> = ({
         {match.scheduledDate && (
           <View style={styles.infoRow}>
             <View style={styles.iconBox}>
-              <MaterialCommunityIcons name={ICONS.CALENDAR} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+              <MaterialCommunityIcons
+                name={ICONS.CALENDAR}
+                size={mobileIconSizes.medium}
+                color={designTokens.colors.primary}
+              />
             </View>
             <View style={styles.infoTextContainer}>
               <Text style={styles.infoLabel}>{t('components.matchCard.scheduled')}</Text>
@@ -87,7 +105,11 @@ const MatchCardComponent: React.FC<MatchCardProps> = ({
         {/* Created Date */}
         <View style={styles.infoRow}>
           <View style={styles.iconBox}>
-            <MaterialCommunityIcons name={ICONS.CLOCK_OUTLINE} size={mobileIconSizes.medium} color={designTokens.colors.textSecondary} />
+            <MaterialCommunityIcons
+              name={ICONS.CLOCK_OUTLINE}
+              size={mobileIconSizes.medium}
+              color={designTokens.colors.textSecondary}
+            />
           </View>
           <View style={styles.infoTextContainer}>
             <Text style={styles.infoLabel}>{t('components.matchCard.created')}</Text>
@@ -101,7 +123,11 @@ const MatchCardComponent: React.FC<MatchCardProps> = ({
       {/* Actions */}
       {showActions && match.status === MatchStatus.PENDING && onSchedule && (
         <TouchableOpacity style={styles.scheduleButton} onPress={onSchedule}>
-          <MaterialCommunityIcons name={ICONS.CALENDAR_PLUS} size={mobileIconSizes.medium} color={designTokens.colors.textInverse} />
+          <MaterialCommunityIcons
+            name={ICONS.CALENDAR_PLUS}
+            size={mobileIconSizes.medium}
+            color={designTokens.colors.textInverse}
+          />
           <Text style={styles.scheduleButtonText}>{t('components.matchCard.scheduleMeetup')}</Text>
         </TouchableOpacity>
       )}
@@ -216,4 +242,3 @@ const styles = StyleSheet.create({
     color: designTokens.colors.textInverse,
   },
 });
-

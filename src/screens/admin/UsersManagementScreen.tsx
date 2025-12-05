@@ -15,23 +15,53 @@ import { useTranslation } from 'react-i18next';
 import { userService } from '../../services/userService';
 import { clubService } from '../../services/clubService';
 import { useTheme } from '../../contexts/ThemeContext';
-import { User, UserRole, ApprovalStatus, UserStatus } from '../../types';
+import { User, UserRole, ApprovalStatus, UserStatus, Club } from '../../types';
 import { UserCard } from '../../components/UserCard';
 import { UserDetailModal } from '../../components/UserDetailModal';
-import { ScreenHeader, SearchBar, EmptyState, TabBar, IconButton, type Tab } from '../../shared/components';
-import { mobileIconSizes, mobileTypography, mobileFontSizes, designTokens, layoutConstants } from '../../shared/theme';
-import { MESSAGES, dynamicMessages, ICONS, TEXT_LINES, COMPONENT_SIZE, ALERT_BUTTON_STYLE, FILTER_STATUS, EMPTY_VALUE, HIERARCHY_FIELDS, ANIMATION, SAFE_AREA_EDGES, ELLIPSIS, LIST_SEPARATOR } from '../../shared/constants';
-import { flexValues, dimensionValues, textTransformValues, typographyValues, borderValues, BREAKPOINTS } from '../../shared/constants/layoutConstants';
+import {
+  ScreenHeader,
+  SearchBar,
+  EmptyState,
+  TabBar,
+  IconButton,
+  type Tab,
+} from '../../shared/components';
+import {
+  mobileTypography,
+  mobileFontSizes,
+  designTokens,
+  layoutConstants,
+} from '../../shared/theme';
+import {
+  ALERT_BUTTON_STYLE,
+  ANIMATION,
+  BREAKPOINTS,
+  COMPONENT_SIZE,
+  ELLIPSIS,
+  EMPTY_VALUE,
+  FILTER_STATUS,
+  HIERARCHY_FIELDS,
+  ICONS,
+  LIST_SEPARATOR,
+  MESSAGES,
+  TEXT_LINES,
+  borderValues,
+  dimensionValues,
+  dynamicMessages,
+  flexValues,
+  textTransformValues,
+  typographyValues,
+} from '../../shared/constants';
 
 const UsersManagementScreen = () => {
   const { t } = useTranslation();
   const { width: windowWidth } = useWindowDimensions();
   const { colors } = useTheme();
   const isMobile = windowWidth < BREAKPOINTS.MOBILE;
-  
+
   const [users, setUsers] = useState<User[]>([]);
-  const [clubs, setClubs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [clubs, setClubs] = useState<Club[]>([]);
+  const [, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState(EMPTY_VALUE);
   const [filterVisible, setFilterVisible] = useState(false);
@@ -83,7 +113,10 @@ const UsersManagementScreen = () => {
   };
 
   const handleApproveUser = async (userId: string, userName: string, userRole: UserRole) => {
-    const roleLabel = userRole === UserRole.CLUB_ADMIN ? t('screens.usersManagement.roleClubAdmin') : t('screens.usersManagement.roleUser');
+    const roleLabel =
+      userRole === UserRole.CLUB_ADMIN
+        ? t('screens.usersManagement.roleClubAdmin')
+        : t('screens.usersManagement.roleUser');
     Alert.alert(
       MESSAGES.TITLES.APPROVE_USER,
       dynamicMessages.confirmApproveUser(userName, roleLabel),
@@ -106,48 +139,40 @@ const UsersManagementScreen = () => {
   };
 
   const handleRejectUser = (userId: string, userName: string) => {
-    Alert.alert(
-      MESSAGES.TITLES.REJECT_USER,
-      dynamicMessages.confirmRejectUser(userName),
-      [
-        { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
-        {
-          text: MESSAGES.BUTTONS.REJECT,
-          style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
-          onPress: async () => {
-            try {
-              await userService.rejectUser(userId);
-              Alert.alert(MESSAGES.TITLES.SUCCESS, dynamicMessages.userRejected(userName));
-              loadData();
-            } catch (error) {
-              Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_REJECT_USER);
-            }
-          },
+    Alert.alert(MESSAGES.TITLES.REJECT_USER, dynamicMessages.confirmRejectUser(userName), [
+      { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
+      {
+        text: MESSAGES.BUTTONS.REJECT,
+        style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
+        onPress: async () => {
+          try {
+            await userService.rejectUser(userId);
+            Alert.alert(MESSAGES.TITLES.SUCCESS, dynamicMessages.userRejected(userName));
+            loadData();
+          } catch (error) {
+            Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_REJECT_USER);
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleDeleteUser = (userId: string, userName: string) => {
-    Alert.alert(
-      MESSAGES.TITLES.DELETE_USER,
-      dynamicMessages.confirmDeleteUser(userName),
-      [
-        { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
-        {
-          text: MESSAGES.BUTTONS.DELETE,
-          style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
-          onPress: async () => {
-            try {
-              await userService.deleteUser(userId);
-              loadData();
-            } catch (error) {
-              Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_DELETE_USER);
-            }
-          },
+    Alert.alert(MESSAGES.TITLES.DELETE_USER, dynamicMessages.confirmDeleteUser(userName), [
+      { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
+      {
+        text: MESSAGES.BUTTONS.DELETE,
+        style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
+        onPress: async () => {
+          try {
+            await userService.deleteUser(userId);
+            loadData();
+          } catch (error) {
+            Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_DELETE_USER);
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const clearFilters = () => {
@@ -213,20 +238,22 @@ const UsersManagementScreen = () => {
   const availableUnions = getUniqueClubValues(HIERARCHY_FIELDS.UNION);
   const availableAssociations = getUniqueClubValues(HIERARCHY_FIELDS.ASSOCIATION);
   const availableChurches = getUniqueClubValues(HIERARCHY_FIELDS.CHURCH);
-  
+
   // Get available clubs based on the selected church
   const getAvailableClubs = () => {
     if (!filters.church) return [];
-    
-    return clubs.filter((club) => {
-      if (filters.division && club.division !== filters.division) return false;
-      if (filters.union && club.union !== filters.union) return false;
-      if (filters.association && club.association !== filters.association) return false;
-      if (club.church !== filters.church) return false;
-      return true;
-    }).sort((a, b) => a.name.localeCompare(b.name));
+
+    return clubs
+      .filter((club) => {
+        if (filters.division && club.division !== filters.division) return false;
+        if (filters.union && club.union !== filters.union) return false;
+        if (filters.association && club.association !== filters.association) return false;
+        if (club.church !== filters.church) return false;
+        return true;
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
   };
-  
+
   const availableClubs = getAvailableClubs();
 
   // Auto-select when only one option exists and filter modal opens
@@ -253,12 +280,20 @@ const UsersManagementScreen = () => {
         setFilters((prev) => ({ ...prev, clubId: availableClubs[0].id }));
       }
     }
-  }, [filterVisible, availableDivisions, availableUnions, availableAssociations, availableChurches, availableClubs, filters.church]);
+  }, [
+    filterVisible,
+    availableDivisions,
+    availableUnions,
+    availableAssociations,
+    availableChurches,
+    availableClubs,
+    filters.church,
+  ]);
 
   // Update filters with cascade logic
   const updateFilter = (field: string, value: string) => {
     const newFilters = { ...filters };
-    
+
     if (field === HIERARCHY_FIELDS.DIVISION) {
       newFilters.division = value;
       if (!value) {
@@ -305,7 +340,7 @@ const UsersManagementScreen = () => {
       } else {
         // Check if current clubId is valid for new church
         const validClubs = getAvailableClubsForChurch(value);
-        if (!validClubs.find(c => c.id === newFilters.clubId)) {
+        if (!validClubs.find((c) => c.id === newFilters.clubId)) {
           newFilters.clubId = EMPTY_VALUE;
         }
       }
@@ -316,7 +351,7 @@ const UsersManagementScreen = () => {
     } else if (field === HIERARCHY_FIELDS.STATUS) {
       newFilters.status = value;
     }
-    
+
     setFilters(newFilters);
   };
 
@@ -345,14 +380,16 @@ const UsersManagementScreen = () => {
     const values = filteredClubs.map((club) => club[field]).filter(Boolean);
     return Array.from(new Set(values));
   };
-  
+
   const getAvailableClubsForChurch = (church: string) => {
-    return clubs.filter((club) => {
-      if (filters.division && club.division !== filters.division) return false;
-      if (filters.union && club.union !== filters.union) return false;
-      if (filters.association && club.association !== filters.association) return false;
-      return club.church === church;
-    }).sort((a, b) => a.name.localeCompare(b.name));
+    return clubs
+      .filter((club) => {
+        if (filters.division && club.division !== filters.division) return false;
+        if (filters.union && club.union !== filters.union) return false;
+        if (filters.association && club.association !== filters.association) return false;
+        return club.church === church;
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
   };
 
   // Get user's club to derive hierarchy
@@ -366,15 +403,14 @@ const UsersManagementScreen = () => {
     const matchesApprovalStatus =
       (activeTab === ApprovalStatus.APPROVED && user.approvalStatus === ApprovalStatus.APPROVED) ||
       (activeTab === ApprovalStatus.PENDING && user.approvalStatus === ApprovalStatus.PENDING);
-    
+
     if (!matchesApprovalStatus) return false;
 
     // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       const matchesSearch =
-        user.name.toLowerCase().includes(query) ||
-        user.email.toLowerCase().includes(query);
+        user.name.toLowerCase().includes(query) || user.email.toLowerCase().includes(query);
       if (!matchesSearch) return false;
     }
 
@@ -382,9 +418,10 @@ const UsersManagementScreen = () => {
     const userClub = getUserClub(user);
     if (filters.division && (!userClub || userClub.division !== filters.division)) return false;
     if (filters.union && (!userClub || userClub.union !== filters.union)) return false;
-    if (filters.association && (!userClub || userClub.association !== filters.association)) return false;
+    if (filters.association && (!userClub || userClub.association !== filters.association))
+      return false;
     if (filters.church && (!userClub || userClub.church !== filters.church)) return false;
-    
+
     // Specific club filter (nested under church)
     if (filters.clubId && user.clubId !== filters.clubId) return false;
 
@@ -425,20 +462,27 @@ const UsersManagementScreen = () => {
     >
       <ScreenHeader
         title={t('screens.usersManagement.title')}
-        subtitle={t('screens.usersManagement.subtitle', { approved: approvedCount, pending: pendingCount })}
+        subtitle={t('screens.usersManagement.subtitle', {
+          approved: approvedCount,
+          pending: pendingCount,
+        })}
       />
 
       <TabBar
         tabs={tabs}
         activeTabId={activeTab}
-        onTabChange={(tabId) => setActiveTab(tabId as ApprovalStatus.APPROVED | ApprovalStatus.PENDING)}
+        onTabChange={(tabId) =>
+          setActiveTab(tabId as ApprovalStatus.APPROVED | ApprovalStatus.PENDING)
+        }
       />
 
       <SearchBar
         value={searchQuery}
         onChangeText={setSearchQuery}
         placeholder={t('screens.usersManagement.searchPlaceholder')}
-        onFilterPress={activeTab === ApprovalStatus.APPROVED ? () => setFilterVisible(true) : undefined}
+        onFilterPress={
+          activeTab === ApprovalStatus.APPROVED ? () => setFilterVisible(true) : undefined
+        }
         filterActive={getActiveFilterCount() > 0}
       />
 
@@ -446,90 +490,138 @@ const UsersManagementScreen = () => {
         {filteredUsers.length > 0 ? (
           activeTab === ApprovalStatus.PENDING ? (
             filteredUsers.map((user) => (
-            <View key={user.id} style={[styles.pendingUserCard, { backgroundColor: colors.warningAlpha10, borderColor: colors.warning }]}>
-              <View style={[styles.pendingAvatar, { backgroundColor: colors.warningAlpha20 }]}>
-                <Text style={[styles.pendingAvatarText, { color: colors.warning }]}>
-                  {user.name.charAt(0).toUpperCase()}
-                </Text>
-                <View style={[styles.pendingBadge, { backgroundColor: colors.warning }]}>
-                  <MaterialCommunityIcons name={ICONS.CLOCK} size={designTokens.iconSize.xxs} color={colors.textInverse} />
-                </View>
-              </View>
-
-              <View style={styles.pendingUserInfo}>
-                <View style={styles.pendingHeader}>
-                  <Text style={[styles.pendingUserName, { color: colors.textPrimary }]} numberOfLines={TEXT_LINES.single}>
-                    {user.name}
+              <View
+                key={user.id}
+                style={[
+                  styles.pendingUserCard,
+                  { backgroundColor: colors.warningAlpha10, borderColor: colors.warning },
+                ]}
+              >
+                <View style={[styles.pendingAvatar, { backgroundColor: colors.warningAlpha20 }]}>
+                  <Text style={[styles.pendingAvatarText, { color: colors.warning }]}>
+                    {user.name.charAt(0).toUpperCase()}
                   </Text>
-                  <View style={[
-                    styles.pendingStatusBadge,
-                    { backgroundColor: colors.warningLight },
-                    user.role === UserRole.CLUB_ADMIN && styles.clubAdminBadge
-                  ]}>
-                    <MaterialCommunityIcons 
-                      name={user.role === UserRole.CLUB_ADMIN ? ICONS.SHIELD_ACCOUNT : ICONS.CLOCK_ALERT_OUTLINE}
-                      size={designTokens.iconSize.xs} 
-                      color={colors.warning}
+                  <View style={[styles.pendingBadge, { backgroundColor: colors.warning }]}>
+                    <MaterialCommunityIcons
+                      name={ICONS.CLOCK}
+                      size={designTokens.iconSize.xxs}
+                      color={colors.textInverse}
                     />
-                    <Text style={[
-                      styles.pendingStatusText,
-                      user.role === UserRole.CLUB_ADMIN && styles.clubAdminText
-                    ]}>
-                      {user.role === UserRole.CLUB_ADMIN ? t('screens.usersManagement.clubAdminLabel') : t('screens.usersManagement.pendingLabel')}
-                    </Text>
                   </View>
                 </View>
 
-                <Text style={[styles.pendingUserEmail, { color: colors.textSecondary }]} numberOfLines={TEXT_LINES.single}>
-                  {user.email}
-                </Text>
-
-                <View style={styles.pendingDetailsRow}>
-                  <View style={styles.metaItem}>
-                    <MaterialCommunityIcons name={ICONS.DOMAIN} size={designTokens.iconSize.xs} color={colors.primary} />
-                    <Text style={[styles.metaText, { color: colors.textSecondary }]} numberOfLines={TEXT_LINES.single}>
-                      {getClubName(user.clubId)}
+                <View style={styles.pendingUserInfo}>
+                  <View style={styles.pendingHeader}>
+                    <Text
+                      style={[styles.pendingUserName, { color: colors.textPrimary }]}
+                      numberOfLines={TEXT_LINES.single}
+                    >
+                      {user.name}
                     </Text>
+                    <View
+                      style={[
+                        styles.pendingStatusBadge,
+                        { backgroundColor: colors.warningLight },
+                        user.role === UserRole.CLUB_ADMIN && styles.clubAdminBadge,
+                      ]}
+                    >
+                      <MaterialCommunityIcons
+                        name={
+                          user.role === UserRole.CLUB_ADMIN
+                            ? ICONS.SHIELD_ACCOUNT
+                            : ICONS.CLOCK_ALERT_OUTLINE
+                        }
+                        size={designTokens.iconSize.xs}
+                        color={colors.warning}
+                      />
+                      <Text
+                        style={[
+                          styles.pendingStatusText,
+                          user.role === UserRole.CLUB_ADMIN && styles.clubAdminText,
+                        ]}
+                      >
+                        {user.role === UserRole.CLUB_ADMIN
+                          ? t('screens.usersManagement.clubAdminLabel')
+                          : t('screens.usersManagement.pendingLabel')}
+                      </Text>
+                    </View>
                   </View>
-                  {user.whatsappNumber && (
+
+                  <Text
+                    style={[styles.pendingUserEmail, { color: colors.textSecondary }]}
+                    numberOfLines={TEXT_LINES.single}
+                  >
+                    {user.email}
+                  </Text>
+
+                  <View style={styles.pendingDetailsRow}>
                     <View style={styles.metaItem}>
-                      <MaterialCommunityIcons name={ICONS.WHATSAPP} size={designTokens.iconSize.xs} color={colors.success} />
-                      <Text style={[styles.metaText, { color: colors.textSecondary }]} numberOfLines={TEXT_LINES.single}>
-                        {user.whatsappNumber}
+                      <MaterialCommunityIcons
+                        name={ICONS.DOMAIN}
+                        size={designTokens.iconSize.xs}
+                        color={colors.primary}
+                      />
+                      <Text
+                        style={[styles.metaText, { color: colors.textSecondary }]}
+                        numberOfLines={TEXT_LINES.single}
+                      >
+                        {getClubName(user.clubId)}
                       </Text>
                     </View>
-                  )}
-                  {user.classes && user.classes.length > 0 && (
-                    <View style={styles.metaItem}>
-                      <MaterialCommunityIcons name={ICONS.SCHOOL} size={designTokens.iconSize.xs} color={colors.primary} />
-                      <Text style={[styles.metaText, { color: colors.textSecondary }]} numberOfLines={TEXT_LINES.single}>
-                        {user.classes.slice(0, 2).join(LIST_SEPARATOR)}{user.classes.length > 2 ? ELLIPSIS : EMPTY_VALUE}
-                      </Text>
-                    </View>
-                  )}
+                    {user.whatsappNumber && (
+                      <View style={styles.metaItem}>
+                        <MaterialCommunityIcons
+                          name={ICONS.WHATSAPP}
+                          size={designTokens.iconSize.xs}
+                          color={colors.success}
+                        />
+                        <Text
+                          style={[styles.metaText, { color: colors.textSecondary }]}
+                          numberOfLines={TEXT_LINES.single}
+                        >
+                          {user.whatsappNumber}
+                        </Text>
+                      </View>
+                    )}
+                    {user.classes && user.classes.length > 0 && (
+                      <View style={styles.metaItem}>
+                        <MaterialCommunityIcons
+                          name={ICONS.SCHOOL}
+                          size={designTokens.iconSize.xs}
+                          color={colors.primary}
+                        />
+                        <Text
+                          style={[styles.metaText, { color: colors.textSecondary }]}
+                          numberOfLines={TEXT_LINES.single}
+                        >
+                          {user.classes.slice(0, 2).join(LIST_SEPARATOR)}
+                          {user.classes.length > 2 ? ELLIPSIS : EMPTY_VALUE}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                </View>
+
+                <View style={styles.pendingActionsContainer}>
+                  <IconButton
+                    icon={ICONS.CLOSE_CIRCLE}
+                    onPress={() => handleRejectUser(user.id, user.name)}
+                    size={COMPONENT_SIZE.md}
+                    color={colors.textInverse}
+                    style={[styles.rejectButton, { backgroundColor: colors.error }]}
+                    accessibilityLabel={t('screens.usersManagement.rejectUser')}
+                  />
+                  <IconButton
+                    icon={ICONS.CHECK_CIRCLE}
+                    onPress={() => handleApproveUser(user.id, user.name, user.role)}
+                    size={COMPONENT_SIZE.md}
+                    color={colors.textInverse}
+                    style={styles.approveButton}
+                    accessibilityLabel={t('screens.usersManagement.approveUser')}
+                  />
                 </View>
               </View>
-
-              <View style={styles.pendingActionsContainer}>
-                <IconButton
-                  icon={ICONS.CLOSE_CIRCLE}
-                  onPress={() => handleRejectUser(user.id, user.name)}
-                  size={COMPONENT_SIZE.md}
-                  color={colors.textInverse}
-                  style={[styles.rejectButton, { backgroundColor: colors.error }]}
-                  accessibilityLabel={t('screens.usersManagement.rejectUser')}
-                />
-                <IconButton
-                  icon={ICONS.CHECK_CIRCLE}
-                  onPress={() => handleApproveUser(user.id, user.name, user.role)}
-                  size={COMPONENT_SIZE.md}
-                  color={colors.textInverse}
-                  style={styles.approveButton}
-                  accessibilityLabel={t('screens.usersManagement.approveUser')}
-                />
-              </View>
-            </View>
-          ))
+            ))
           ) : (
             // Approved users - show normal user cards
             filteredUsers.map((user) => (
@@ -549,14 +641,22 @@ const UsersManagementScreen = () => {
           )
         ) : (
           <EmptyState
-            icon={activeTab === ApprovalStatus.PENDING ? ICONS.ACCOUNT_CLOCK : ICONS.ACCOUNT_GROUP_OUTLINE}
-            title={activeTab === ApprovalStatus.PENDING ? t('screens.usersManagement.noPendingApprovals') : t('screens.usersManagement.noUsersFound')}
+            icon={
+              activeTab === ApprovalStatus.PENDING
+                ? ICONS.ACCOUNT_CLOCK
+                : ICONS.ACCOUNT_GROUP_OUTLINE
+            }
+            title={
+              activeTab === ApprovalStatus.PENDING
+                ? t('screens.usersManagement.noPendingApprovals')
+                : t('screens.usersManagement.noUsersFound')
+            }
             description={
               activeTab === ApprovalStatus.PENDING
                 ? t('screens.usersManagement.allApplicationsProcessed')
                 : users.length === 0
-                ? t('screens.usersManagement.noUsersRegistered')
-                : t('screens.usersManagement.noUsersMatchingFilters')
+                  ? t('screens.usersManagement.noUsersRegistered')
+                  : t('screens.usersManagement.noUsersMatchingFilters')
             }
           />
         )}
@@ -569,27 +669,46 @@ const UsersManagementScreen = () => {
         transparent={true}
         onRequestClose={() => setFilterVisible(false)}
       >
-        <View style={[styles.modalOverlay, { backgroundColor: colors.backdrop }, isMobile && styles.modalOverlayMobile]}>
-          <View style={[styles.modalContent, { backgroundColor: colors.surface }, isMobile && styles.modalContentMobile]}>
+        <View
+          style={[
+            styles.modalOverlay,
+            { backgroundColor: colors.backdrop },
+            isMobile && styles.modalOverlayMobile,
+          ]}
+        >
+          <View
+            style={[
+              styles.modalContent,
+              { backgroundColor: colors.surface },
+              isMobile && styles.modalContentMobile,
+            ]}
+          >
             {/* Drag Handle - Mobile Only */}
             {isMobile && (
               <View style={[styles.dragHandle, { backgroundColor: colors.borderLight }]} />
             )}
-            
+
             <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
-              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>{t('screens.usersManagement.filterUsers')}</Text>
-              <TouchableOpacity
-                onPress={() => setFilterVisible(false)}
-                style={styles.closeButton}
-              >
-                <MaterialCommunityIcons name={ICONS.CLOSE} size={designTokens.iconSize.lg} color={colors.textSecondary} />
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
+                {t('screens.usersManagement.filterUsers')}
+              </Text>
+              <TouchableOpacity onPress={() => setFilterVisible(false)} style={styles.closeButton}>
+                <MaterialCommunityIcons
+                  name={ICONS.CLOSE}
+                  size={designTokens.iconSize.lg}
+                  color={colors.textSecondary}
+                />
               </TouchableOpacity>
             </View>
 
             <ScrollView style={styles.modalBody}>
               {/* Hierarchical Filter Info */}
               <View style={[styles.hierarchyInfoBanner, { backgroundColor: colors.primaryLight }]}>
-                <MaterialCommunityIcons name={ICONS.INFORMATION} size={designTokens.iconSize.sm} color={colors.primary} />
+                <MaterialCommunityIcons
+                  name={ICONS.INFORMATION}
+                  size={designTokens.iconSize.sm}
+                  color={colors.primary}
+                />
                 <Text style={[styles.hierarchyInfoText, { color: colors.primary }]}>
                   {t('screens.usersManagement.filterDescription')}
                 </Text>
@@ -597,28 +716,47 @@ const UsersManagementScreen = () => {
 
               {/* Organization Section */}
               <View style={styles.filterSection}>
-                <Text style={[styles.filterSectionTitle, { color: colors.textPrimary }]}>{t('screens.usersManagement.organizationSection')}</Text>
+                <Text style={[styles.filterSectionTitle, { color: colors.textPrimary }]}>
+                  {t('screens.usersManagement.organizationSection')}
+                </Text>
 
                 {/* Division */}
                 {availableDivisions.length === 1 ? (
                   <View style={[styles.hierarchyItem, { backgroundColor: colors.surfaceLight }]}>
-                    <MaterialCommunityIcons name={ICONS.EARTH} size={designTokens.iconSize.sm} color={colors.primary} />
+                    <MaterialCommunityIcons
+                      name={ICONS.EARTH}
+                      size={designTokens.iconSize.sm}
+                      color={colors.primary}
+                    />
                     <View style={styles.hierarchyInfo}>
-                      <Text style={[styles.hierarchyLabel, { color: colors.textSecondary }]}>{t('components.organizationHierarchy.levels.division')}</Text>
-                      <Text style={[styles.hierarchyValue, { color: colors.textPrimary }]}>{availableDivisions[0]}</Text>
+                      <Text style={[styles.hierarchyLabel, { color: colors.textSecondary }]}>
+                        {t('components.organizationHierarchy.levels.division')}
+                      </Text>
+                      <Text style={[styles.hierarchyValue, { color: colors.textPrimary }]}>
+                        {availableDivisions[0]}
+                      </Text>
                     </View>
-                    <MaterialCommunityIcons name={ICONS.CHECK_CIRCLE} size={designTokens.iconSize.sm} color={colors.success} />
+                    <MaterialCommunityIcons
+                      name={ICONS.CHECK_CIRCLE}
+                      size={designTokens.iconSize.sm}
+                      color={colors.success}
+                    />
                   </View>
                 ) : (
                   <View>
-                    <Text style={[styles.hierarchyLabel, { color: colors.textSecondary }]}>{t('components.organizationHierarchy.levels.division')}</Text>
+                    <Text style={[styles.hierarchyLabel, { color: colors.textSecondary }]}>
+                      {t('components.organizationHierarchy.levels.division')}
+                    </Text>
                     {availableDivisions.map((division) => (
                       <TouchableOpacity
                         key={division}
                         style={[
                           styles.filterOption,
                           { backgroundColor: colors.surfaceLight },
-                          filters.division === division && [styles.filterOptionActive, { backgroundColor: colors.primaryLight, borderColor: colors.primary }],
+                          filters.division === division && [
+                            styles.filterOptionActive,
+                            { backgroundColor: colors.primaryLight, borderColor: colors.primary },
+                          ],
                         ]}
                         onPress={() => updateFilter(HIERARCHY_FIELDS.DIVISION, division)}
                       >
@@ -626,13 +764,20 @@ const UsersManagementScreen = () => {
                           style={[
                             styles.filterOptionText,
                             { color: colors.textSecondary },
-                            filters.division === division && [styles.filterOptionTextActive, { color: colors.primary }],
+                            filters.division === division && [
+                              styles.filterOptionTextActive,
+                              { color: colors.primary },
+                            ],
                           ]}
                         >
                           {division}
                         </Text>
                         {filters.division === division && (
-                          <MaterialCommunityIcons name={ICONS.CHECK} size={designTokens.iconSize.md} color={colors.primary} />
+                          <MaterialCommunityIcons
+                            name={ICONS.CHECK}
+                            size={designTokens.iconSize.md}
+                            color={colors.primary}
+                          />
                         )}
                       </TouchableOpacity>
                     ))}
@@ -642,16 +787,28 @@ const UsersManagementScreen = () => {
                 {/* Union */}
                 {availableUnions.length === 1 ? (
                   <View style={styles.hierarchyItem}>
-                    <MaterialCommunityIcons name={ICONS.DOMAIN} size={designTokens.iconSize.sm} color={colors.primary} />
+                    <MaterialCommunityIcons
+                      name={ICONS.DOMAIN}
+                      size={designTokens.iconSize.sm}
+                      color={colors.primary}
+                    />
                     <View style={styles.hierarchyInfo}>
-                      <Text style={styles.hierarchyLabel}>{t('components.organizationHierarchy.levels.union')}</Text>
+                      <Text style={styles.hierarchyLabel}>
+                        {t('components.organizationHierarchy.levels.union')}
+                      </Text>
                       <Text style={styles.hierarchyValue}>{availableUnions[0]}</Text>
                     </View>
-                    <MaterialCommunityIcons name={ICONS.CHECK_CIRCLE} size={designTokens.iconSize.sm} color={colors.success} />
+                    <MaterialCommunityIcons
+                      name={ICONS.CHECK_CIRCLE}
+                      size={designTokens.iconSize.sm}
+                      color={colors.success}
+                    />
                   </View>
                 ) : availableUnions.length > 1 ? (
                   <View>
-                    <Text style={styles.hierarchyLabel}>{t('components.organizationHierarchy.levels.union')}</Text>
+                    <Text style={styles.hierarchyLabel}>
+                      {t('components.organizationHierarchy.levels.union')}
+                    </Text>
                     {availableUnions.map((union) => (
                       <TouchableOpacity
                         key={union}
@@ -670,7 +827,11 @@ const UsersManagementScreen = () => {
                           {union}
                         </Text>
                         {filters.union === union && (
-                          <MaterialCommunityIcons name={ICONS.CHECK} size={designTokens.iconSize.md} color={colors.primary} />
+                          <MaterialCommunityIcons
+                            name={ICONS.CHECK}
+                            size={designTokens.iconSize.md}
+                            color={colors.primary}
+                          />
                         )}
                       </TouchableOpacity>
                     ))}
@@ -680,16 +841,28 @@ const UsersManagementScreen = () => {
                 {/* Association */}
                 {availableAssociations.length === 1 ? (
                   <View style={styles.hierarchyItem}>
-                    <MaterialCommunityIcons name={ICONS.OFFICE_BUILDING} size={designTokens.iconSize.sm} color={colors.primary} />
+                    <MaterialCommunityIcons
+                      name={ICONS.OFFICE_BUILDING}
+                      size={designTokens.iconSize.sm}
+                      color={colors.primary}
+                    />
                     <View style={styles.hierarchyInfo}>
-                      <Text style={styles.hierarchyLabel}>{t('components.organizationHierarchy.levels.association')}</Text>
+                      <Text style={styles.hierarchyLabel}>
+                        {t('components.organizationHierarchy.levels.association')}
+                      </Text>
                       <Text style={styles.hierarchyValue}>{availableAssociations[0]}</Text>
                     </View>
-                    <MaterialCommunityIcons name={ICONS.CHECK_CIRCLE} size={designTokens.iconSize.sm} color={colors.success} />
+                    <MaterialCommunityIcons
+                      name={ICONS.CHECK_CIRCLE}
+                      size={designTokens.iconSize.sm}
+                      color={colors.success}
+                    />
                   </View>
                 ) : availableAssociations.length > 1 ? (
                   <View>
-                    <Text style={styles.hierarchyLabel}>{t('components.organizationHierarchy.levels.association')}</Text>
+                    <Text style={styles.hierarchyLabel}>
+                      {t('components.organizationHierarchy.levels.association')}
+                    </Text>
                     {availableAssociations.map((association) => (
                       <TouchableOpacity
                         key={association}
@@ -708,7 +881,11 @@ const UsersManagementScreen = () => {
                           {association}
                         </Text>
                         {filters.association === association && (
-                          <MaterialCommunityIcons name={ICONS.CHECK} size={designTokens.iconSize.md} color={colors.primary} />
+                          <MaterialCommunityIcons
+                            name={ICONS.CHECK}
+                            size={designTokens.iconSize.md}
+                            color={colors.primary}
+                          />
                         )}
                       </TouchableOpacity>
                     ))}
@@ -718,16 +895,28 @@ const UsersManagementScreen = () => {
                 {/* Church */}
                 {availableChurches.length === 1 ? (
                   <View style={styles.hierarchyItem}>
-                    <MaterialCommunityIcons name={ICONS.CHURCH} size={designTokens.iconSize.sm} color={colors.primary} />
+                    <MaterialCommunityIcons
+                      name={ICONS.CHURCH}
+                      size={designTokens.iconSize.sm}
+                      color={colors.primary}
+                    />
                     <View style={styles.hierarchyInfo}>
-                      <Text style={styles.hierarchyLabel}>{t('components.organizationHierarchy.levels.church')}</Text>
+                      <Text style={styles.hierarchyLabel}>
+                        {t('components.organizationHierarchy.levels.church')}
+                      </Text>
                       <Text style={styles.hierarchyValue}>{availableChurches[0]}</Text>
                     </View>
-                    <MaterialCommunityIcons name={ICONS.CHECK_CIRCLE} size={designTokens.iconSize.sm} color={colors.success} />
+                    <MaterialCommunityIcons
+                      name={ICONS.CHECK_CIRCLE}
+                      size={designTokens.iconSize.sm}
+                      color={colors.success}
+                    />
                   </View>
                 ) : availableChurches.length > 1 ? (
                   <View>
-                    <Text style={styles.hierarchyLabel}>{t('components.organizationHierarchy.levels.church')}</Text>
+                    <Text style={styles.hierarchyLabel}>
+                      {t('components.organizationHierarchy.levels.church')}
+                    </Text>
                     {availableChurches.map((church) => (
                       <TouchableOpacity
                         key={church}
@@ -746,31 +935,44 @@ const UsersManagementScreen = () => {
                           {church}
                         </Text>
                         {filters.church === church && (
-                          <MaterialCommunityIcons name={ICONS.CHECK} size={designTokens.iconSize.md} color={colors.primary} />
+                          <MaterialCommunityIcons
+                            name={ICONS.CHECK}
+                            size={designTokens.iconSize.md}
+                            color={colors.primary}
+                          />
                         )}
                       </TouchableOpacity>
                     ))}
                   </View>
                 ) : null}
-                
+
                 {/* Clubs - Level 5 (nested under church) */}
                 {availableClubs.length === 1 ? (
                   <View style={styles.hierarchyItem}>
-                    <MaterialCommunityIcons name={ICONS.ACCOUNT_GROUP} size={designTokens.iconSize.sm} color={colors.primary} />
+                    <MaterialCommunityIcons
+                      name={ICONS.ACCOUNT_GROUP}
+                      size={designTokens.iconSize.sm}
+                      color={colors.primary}
+                    />
                     <View style={styles.hierarchyInfo}>
-                      <Text style={styles.hierarchyLabel}>{t('components.organizationHierarchy.levels.club')}</Text>
+                      <Text style={styles.hierarchyLabel}>
+                        {t('components.organizationHierarchy.levels.club')}
+                      </Text>
                       <Text style={styles.hierarchyValue}>{availableClubs[0].name}</Text>
                     </View>
-                    <MaterialCommunityIcons name={ICONS.CHECK_CIRCLE} size={designTokens.iconSize.sm} color={colors.success} />
+                    <MaterialCommunityIcons
+                      name={ICONS.CHECK_CIRCLE}
+                      size={designTokens.iconSize.sm}
+                      color={colors.success}
+                    />
                   </View>
                 ) : availableClubs.length > 1 ? (
                   <View>
-                    <Text style={styles.hierarchyLabel}>{t('screens.usersManagement.clubOptional')}</Text>
+                    <Text style={styles.hierarchyLabel}>
+                      {t('screens.usersManagement.clubOptional')}
+                    </Text>
                     <TouchableOpacity
-                      style={[
-                        styles.filterOption,
-                        !filters.clubId && styles.filterOptionActive,
-                      ]}
+                      style={[styles.filterOption, !filters.clubId && styles.filterOptionActive]}
                       onPress={() => updateFilter(HIERARCHY_FIELDS.CLUB_ID, EMPTY_VALUE)}
                     >
                       <Text
@@ -782,7 +984,11 @@ const UsersManagementScreen = () => {
                         {t('screens.usersManagement.allClubsIn', { church: filters.church })}
                       </Text>
                       {!filters.clubId && (
-                        <MaterialCommunityIcons name={ICONS.CHECK} size={designTokens.iconSize.md} color={colors.primary} />
+                        <MaterialCommunityIcons
+                          name={ICONS.CHECK}
+                          size={designTokens.iconSize.md}
+                          color={colors.primary}
+                        />
                       )}
                     </TouchableOpacity>
                     {availableClubs.map((club) => (
@@ -804,11 +1010,17 @@ const UsersManagementScreen = () => {
                             {club.name}
                           </Text>
                           {!club.isActive && (
-                            <Text style={styles.clubInactiveLabel}>{t('screens.usersManagement.inactive')}</Text>
+                            <Text style={styles.clubInactiveLabel}>
+                              {t('screens.usersManagement.inactive')}
+                            </Text>
                           )}
                         </View>
                         {filters.clubId === club.id && (
-                          <MaterialCommunityIcons name={ICONS.CHECK} size={designTokens.iconSize.md} color={colors.primary} />
+                          <MaterialCommunityIcons
+                            name={ICONS.CHECK}
+                            size={designTokens.iconSize.md}
+                            color={colors.primary}
+                          />
                         )}
                       </TouchableOpacity>
                     ))}
@@ -818,17 +1030,24 @@ const UsersManagementScreen = () => {
 
               {/* Role Filter Section */}
               <View style={styles.filterSection}>
-                <Text style={styles.filterSectionTitle}>{t('screens.usersManagement.roleSection')}</Text>
+                <Text style={styles.filterSectionTitle}>
+                  {t('screens.usersManagement.roleSection')}
+                </Text>
 
                 <TouchableOpacity
-                  style={[styles.filterOption, filters.role === FILTER_STATUS.ALL && styles.filterOptionActive]}
+                  style={[
+                    styles.filterOption,
+                    filters.role === FILTER_STATUS.ALL && styles.filterOptionActive,
+                  ]}
                   onPress={() => updateFilter(HIERARCHY_FIELDS.ROLE, FILTER_STATUS.ALL)}
                 >
                   <View style={styles.filterOptionContent}>
                     <MaterialCommunityIcons
                       name={ICONS.ACCOUNT_GROUP}
                       size={designTokens.iconSize.md}
-                      color={filters.role === FILTER_STATUS.ALL ? colors.primary : colors.textSecondary}
+                      color={
+                        filters.role === FILTER_STATUS.ALL ? colors.primary : colors.textSecondary
+                      }
                     />
                     <Text
                       style={[
@@ -840,12 +1059,19 @@ const UsersManagementScreen = () => {
                     </Text>
                   </View>
                   {filters.role === FILTER_STATUS.ALL && (
-                    <MaterialCommunityIcons name={ICONS.CHECK} size={designTokens.iconSize.md} color={colors.primary} />
+                    <MaterialCommunityIcons
+                      name={ICONS.CHECK}
+                      size={designTokens.iconSize.md}
+                      color={colors.primary}
+                    />
                   )}
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[styles.filterOption, filters.role === UserRole.ADMIN && styles.filterOptionActive]}
+                  style={[
+                    styles.filterOption,
+                    filters.role === UserRole.ADMIN && styles.filterOptionActive,
+                  ]}
                   onPress={() => updateFilter(HIERARCHY_FIELDS.ROLE, UserRole.ADMIN)}
                 >
                   <View style={styles.filterOptionContent}>
@@ -864,12 +1090,19 @@ const UsersManagementScreen = () => {
                     </Text>
                   </View>
                   {filters.role === UserRole.ADMIN && (
-                    <MaterialCommunityIcons name={ICONS.CHECK} size={designTokens.iconSize.md} color={colors.primary} />
+                    <MaterialCommunityIcons
+                      name={ICONS.CHECK}
+                      size={designTokens.iconSize.md}
+                      color={colors.primary}
+                    />
                   )}
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[styles.filterOption, filters.role === UserRole.CLUB_ADMIN && styles.filterOptionActive]}
+                  style={[
+                    styles.filterOption,
+                    filters.role === UserRole.CLUB_ADMIN && styles.filterOptionActive,
+                  ]}
                   onPress={() => updateFilter(HIERARCHY_FIELDS.ROLE, UserRole.CLUB_ADMIN)}
                 >
                   <View style={styles.filterOptionContent}>
@@ -888,12 +1121,19 @@ const UsersManagementScreen = () => {
                     </Text>
                   </View>
                   {filters.role === UserRole.CLUB_ADMIN && (
-                    <MaterialCommunityIcons name={ICONS.CHECK} size={designTokens.iconSize.md} color={colors.primary} />
+                    <MaterialCommunityIcons
+                      name={ICONS.CHECK}
+                      size={designTokens.iconSize.md}
+                      color={colors.primary}
+                    />
                   )}
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[styles.filterOption, filters.role === UserRole.USER && styles.filterOptionActive]}
+                  style={[
+                    styles.filterOption,
+                    filters.role === UserRole.USER && styles.filterOptionActive,
+                  ]}
                   onPress={() => updateFilter(HIERARCHY_FIELDS.ROLE, UserRole.USER)}
                 >
                   <View style={styles.filterOptionContent}>
@@ -912,24 +1152,35 @@ const UsersManagementScreen = () => {
                     </Text>
                   </View>
                   {filters.role === UserRole.USER && (
-                    <MaterialCommunityIcons name={ICONS.CHECK} size={designTokens.iconSize.md} color={colors.primary} />
+                    <MaterialCommunityIcons
+                      name={ICONS.CHECK}
+                      size={designTokens.iconSize.md}
+                      color={colors.primary}
+                    />
                   )}
                 </TouchableOpacity>
               </View>
 
               {/* Status Filter Section */}
               <View style={styles.filterSection}>
-                <Text style={styles.filterSectionTitle}>{t('screens.usersManagement.userStatusSection')}</Text>
+                <Text style={styles.filterSectionTitle}>
+                  {t('screens.usersManagement.userStatusSection')}
+                </Text>
 
                 <TouchableOpacity
-                  style={[styles.filterOption, filters.status === FILTER_STATUS.ALL && styles.filterOptionActive]}
+                  style={[
+                    styles.filterOption,
+                    filters.status === FILTER_STATUS.ALL && styles.filterOptionActive,
+                  ]}
                   onPress={() => updateFilter(HIERARCHY_FIELDS.STATUS, FILTER_STATUS.ALL)}
                 >
                   <View style={styles.filterOptionContent}>
                     <MaterialCommunityIcons
                       name={ICONS.ACCOUNT_GROUP}
                       size={designTokens.iconSize.md}
-                      color={filters.status === FILTER_STATUS.ALL ? colors.primary : colors.textSecondary}
+                      color={
+                        filters.status === FILTER_STATUS.ALL ? colors.primary : colors.textSecondary
+                      }
                     />
                     <Text
                       style={[
@@ -941,12 +1192,19 @@ const UsersManagementScreen = () => {
                     </Text>
                   </View>
                   {filters.status === FILTER_STATUS.ALL && (
-                    <MaterialCommunityIcons name={ICONS.CHECK} size={designTokens.iconSize.md} color={colors.primary} />
+                    <MaterialCommunityIcons
+                      name={ICONS.CHECK}
+                      size={designTokens.iconSize.md}
+                      color={colors.primary}
+                    />
                   )}
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[styles.filterOption, filters.status === UserStatus.ACTIVE && styles.filterOptionActive]}
+                  style={[
+                    styles.filterOption,
+                    filters.status === UserStatus.ACTIVE && styles.filterOptionActive,
+                  ]}
                   onPress={() => updateFilter(HIERARCHY_FIELDS.STATUS, FILTER_STATUS.ACTIVE)}
                 >
                   <View style={styles.filterOptionContent}>
@@ -965,12 +1223,19 @@ const UsersManagementScreen = () => {
                     </Text>
                   </View>
                   {filters.status === UserStatus.ACTIVE && (
-                    <MaterialCommunityIcons name={ICONS.CHECK} size={designTokens.iconSize.md} color={colors.primary} />
+                    <MaterialCommunityIcons
+                      name={ICONS.CHECK}
+                      size={designTokens.iconSize.md}
+                      color={colors.primary}
+                    />
                   )}
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[styles.filterOption, filters.status === UserStatus.INACTIVE && styles.filterOptionActive]}
+                  style={[
+                    styles.filterOption,
+                    filters.status === UserStatus.INACTIVE && styles.filterOptionActive,
+                  ]}
                   onPress={() => updateFilter(HIERARCHY_FIELDS.STATUS, FILTER_STATUS.INACTIVE)}
                 >
                   <View style={styles.filterOptionContent}>
@@ -989,7 +1254,11 @@ const UsersManagementScreen = () => {
                     </Text>
                   </View>
                   {filters.status === UserStatus.INACTIVE && (
-                    <MaterialCommunityIcons name={ICONS.CHECK} size={designTokens.iconSize.md} color={colors.primary} />
+                    <MaterialCommunityIcons
+                      name={ICONS.CHECK}
+                      size={designTokens.iconSize.md}
+                      color={colors.primary}
+                    />
                   )}
                 </TouchableOpacity>
               </View>
@@ -1003,14 +1272,17 @@ const UsersManagementScreen = () => {
                   setFilterVisible(false);
                 }}
               >
-                <MaterialCommunityIcons name={ICONS.FILTER_OFF} size={designTokens.iconSize.md} color={colors.textSecondary} />
+                <MaterialCommunityIcons
+                  name={ICONS.FILTER_OFF}
+                  size={designTokens.iconSize.md}
+                  color={colors.textSecondary}
+                />
                 <Text style={styles.clearButtonText}>{t('screens.usersManagement.clearAll')}</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.applyButton}
-                onPress={() => setFilterVisible(false)}
-              >
-                <Text style={styles.applyButtonText}>{t('screens.usersManagement.applyFilters')}</Text>
+              <TouchableOpacity style={styles.applyButton} onPress={() => setFilterVisible(false)}>
+                <Text style={styles.applyButtonText}>
+                  {t('screens.usersManagement.applyFilters')}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1380,4 +1652,3 @@ const styles = StyleSheet.create({
 });
 
 export default UsersManagementScreen;
-

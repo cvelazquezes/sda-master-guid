@@ -3,7 +3,7 @@
  * Optimized caching, retry, and state management following Tanstack best practices
  */
 
-import { QueryClient, DefaultOptions } from '@tanstack/react-query';
+import { QueryClient, DefaultOptions, MutationCache, QueryCache } from '@tanstack/react-query';
 import { logger } from '../utils/logger';
 import { captureError } from '../services/sentry';
 
@@ -27,9 +27,11 @@ const defaultOptions: DefaultOptions = {
     gcTime: CACHE_TIME_MS,
 
     // Retries
-    retry: (failureCount, error: any) => {
+    retry: (failureCount, error: unknown) => {
       // Don't retry on 4xx errors (client errors)
-      if (error?.response?.status >= 400 && error?.response?.status < 500) {
+      const axiosError = error as { response?: { status?: number } };
+      const status = axiosError?.response?.status;
+      if (status && status >= 400 && status < 500) {
         return false;
       }
 
@@ -63,9 +65,11 @@ const defaultOptions: DefaultOptions = {
 
   mutations: {
     // Retries (more conservative for mutations)
-    retry: (failureCount, error: any) => {
+    retry: (failureCount, error: unknown) => {
       // Never retry 4xx errors
-      if (error?.response?.status >= 400 && error?.response?.status < 500) {
+      const axiosError = error as { response?: { status?: number } };
+      const status = axiosError?.response?.status;
+      if (status && status >= 400 && status < 500) {
         return false;
       }
 
@@ -88,17 +92,17 @@ const defaultOptions: DefaultOptions = {
 
 export const queryClient = new QueryClient({
   defaultOptions,
-  
+
   // Global error handler
-  queryCache: {
-    onError: (error: unknown, query: { queryKey: unknown; queryHash: string }) => {
-      logger.error('Query error', error as Error, {
+  queryCache: new QueryCache({
+    onError: (error: Error, query) => {
+      logger.error('Query error', error, {
         queryKey: query.queryKey,
         queryHash: query.queryHash,
       });
 
       // Report to Sentry
-      captureError(error as Error, {
+      captureError(error, {
         level: 'error',
         tags: {
           errorType: 'query',
@@ -107,22 +111,22 @@ export const queryClient = new QueryClient({
       });
     },
 
-    onSuccess: (data: unknown, query: { queryKey: unknown; queryHash: string }) => {
+    onSuccess: (data: unknown, query) => {
       logger.debug('Query success', {
         queryKey: query.queryKey,
         queryHash: query.queryHash,
       });
     },
-  } as any,
+  }),
 
-  mutationCache: {
-    onError: (error: unknown, variables: unknown, context: unknown, mutation: { options: { mutationKey?: unknown } }) => {
-      logger.error('Mutation error', error as Error, {
+  mutationCache: new MutationCache({
+    onError: (error: Error, _variables, _context, mutation) => {
+      logger.error('Mutation error', error, {
         mutationKey: mutation.options.mutationKey,
       });
 
       // Report to Sentry
-      captureError(error as Error, {
+      captureError(error, {
         level: 'error',
         tags: {
           errorType: 'mutation',
@@ -131,12 +135,12 @@ export const queryClient = new QueryClient({
       });
     },
 
-    onSuccess: (data: unknown, variables: unknown, context: unknown, mutation: { options: { mutationKey?: unknown } }) => {
+    onSuccess: (_data, _variables, _context, mutation) => {
       logger.debug('Mutation success', {
         mutationKey: mutation.options.mutationKey,
       });
     },
-  } as any,
+  }),
 });
 
 // ============================================================================
@@ -159,7 +163,7 @@ export const queryKeys = {
   users: {
     all: ['users'] as const,
     lists: () => [...queryKeys.users.all, 'list'] as const,
-    list: (filters: any) => [...queryKeys.users.lists(), filters] as const,
+    list: (filters: Record<string, unknown>) => [...queryKeys.users.lists(), filters] as const,
     details: () => [...queryKeys.users.all, 'detail'] as const,
     detail: (id: string) => [...queryKeys.users.details(), id] as const,
   },
@@ -168,7 +172,7 @@ export const queryKeys = {
   clubs: {
     all: ['clubs'] as const,
     lists: () => [...queryKeys.clubs.all, 'list'] as const,
-    list: (filters: any) => [...queryKeys.clubs.lists(), filters] as const,
+    list: (filters: Record<string, unknown>) => [...queryKeys.clubs.lists(), filters] as const,
     details: () => [...queryKeys.clubs.all, 'detail'] as const,
     detail: (id: string) => [...queryKeys.clubs.details(), id] as const,
     stats: (id: string) => [...queryKeys.clubs.detail(id), 'stats'] as const,
@@ -178,11 +182,10 @@ export const queryKeys = {
   matches: {
     all: ['matches'] as const,
     lists: () => [...queryKeys.matches.all, 'list'] as const,
-    list: (filters: any) => [...queryKeys.matches.lists(), filters] as const,
+    list: (filters: Record<string, unknown>) => [...queryKeys.matches.lists(), filters] as const,
     details: () => [...queryKeys.matches.all, 'detail'] as const,
     detail: (id: string) => [...queryKeys.matches.details(), id] as const,
-    upcoming: (clubId: string) => 
-      [...queryKeys.matches.lists(), 'upcoming', clubId] as const,
+    upcoming: (clubId: string) => [...queryKeys.matches.lists(), 'upcoming', clubId] as const,
   },
 } as const;
 
@@ -323,7 +326,11 @@ export async function optimisticUpdate<TData, TVariables>({
 
       return { previousData };
     },
-    onError: (error: Error, variables: TVariables, context: any) => {
+    onError: (
+      error: Error,
+      _variables: TVariables,
+      context: { previousData?: TData } | undefined
+    ) => {
       // Rollback on error
       if (context?.previousData) {
         queryClient.setQueryData(queryKey, context.previousData);
@@ -359,4 +366,3 @@ export function getPreviousPageParam<T extends { hasPrevious: boolean; prevCurso
 // ============================================================================
 
 export type { QueryClient, DefaultOptions };
-

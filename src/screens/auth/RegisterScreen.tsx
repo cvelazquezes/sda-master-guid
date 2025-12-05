@@ -19,9 +19,31 @@ import { clubService } from '../../services/clubService';
 import { Club, PathfinderClass, PATHFINDER_CLASSES } from '../../types';
 import { ClassSelectionModal } from '../../components/ClassSelectionModal';
 import { StandardInput, StandardButton } from '../../shared/components';
-import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../../shared/theme';
-import { MESSAGES, VALIDATION, LIMITS, ICONS, ACTIVITY_INDICATOR_SIZE, SCREENS, KEYBOARD_TYPE, EMPTY_VALUE, SAFE_AREA_EDGES, PLATFORM_OS, KEYBOARD_BEHAVIOR, AUTO_CAPITALIZE, AUTO_COMPLETE, COMPONENT_VARIANT, LIST_SEPARATOR } from '../../shared/constants';
-import { flexValues, dimensionValues } from '../../shared/constants/layoutConstants';
+import {
+  mobileTypography,
+  mobileIconSizes,
+  designTokens,
+  layoutConstants,
+} from '../../shared/theme';
+import {
+  ACTIVITY_INDICATOR_SIZE,
+  AUTO_CAPITALIZE,
+  AUTO_COMPLETE,
+  COMPONENT_VARIANT,
+  EMPTY_VALUE,
+  ICONS,
+  KEYBOARD_BEHAVIOR,
+  KEYBOARD_TYPE,
+  LIMITS,
+  LIST_SEPARATOR,
+  MESSAGES,
+  PLATFORM_OS,
+  SAFE_AREA_EDGES,
+  SCREENS,
+  VALIDATION,
+  dimensionValues,
+  flexValues,
+} from '../../shared/constants';
 
 const RegisterScreen = () => {
   const { t } = useTranslation();
@@ -42,7 +64,9 @@ const RegisterScreen = () => {
   // Role selection
   const [isClubAdmin, setIsClubAdmin] = useState(false);
   // Class selection
-  const [selectedClasses, setSelectedClasses] = useState<PathfinderClass[]>([PATHFINDER_CLASSES[0]]);
+  const [selectedClasses, setSelectedClasses] = useState<PathfinderClass[]>([
+    PATHFINDER_CLASSES[0],
+  ]);
   const [classModalVisible, setClassModalVisible] = useState(false);
   const { register } = useAuth();
   const navigation = useNavigation();
@@ -241,11 +265,12 @@ const RegisterScreen = () => {
     }
 
     // Validate WhatsApp number format (basic validation)
-    if (!VALIDATION.WHATSAPP.REGEX.test(whatsappNumber.replace(VALIDATION.WHATSAPP.NORMALIZE_PATTERN, EMPTY_VALUE))) {
-      Alert.alert(
-        MESSAGES.TITLES.ERROR,
-        MESSAGES.ERRORS.INVALID_WHATSAPP
-      );
+    if (
+      !VALIDATION.WHATSAPP.REGEX.test(
+        whatsappNumber.replace(VALIDATION.WHATSAPP.NORMALIZE_PATTERN, EMPTY_VALUE)
+      )
+    ) {
+      Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.INVALID_WHATSAPP);
       return;
     }
 
@@ -283,7 +308,10 @@ const RegisterScreen = () => {
     return (
       <SafeAreaView style={styles.safeArea} edges={SAFE_AREA_EDGES.TOP_LEFT_RIGHT}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size={ACTIVITY_INDICATOR_SIZE.large} color={designTokens.colors.primary} />
+          <ActivityIndicator
+            size={ACTIVITY_INDICATOR_SIZE.large}
+            color={designTokens.colors.primary}
+          />
           <Text style={styles.loadingText}>{MESSAGES.INFO.LOADING_CLUBS}</Text>
         </View>
       </SafeAreaView>
@@ -294,273 +322,327 @@ const RegisterScreen = () => {
     <SafeAreaView style={styles.safeArea} edges={SAFE_AREA_EDGES.TOP_LEFT_RIGHT}>
       <KeyboardAvoidingView
         style={styles.container}
-        behavior={Platform.OS === PLATFORM_OS.IOS ? KEYBOARD_BEHAVIOR.PADDING : KEYBOARD_BEHAVIOR.HEIGHT}
+        behavior={
+          Platform.OS === PLATFORM_OS.IOS ? KEYBOARD_BEHAVIOR.PADDING : KEYBOARD_BEHAVIOR.HEIGHT
+        }
       >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <MaterialCommunityIcons name={ICONS.ACCOUNT_PLUS} size={designTokens.iconSize['3xl']} color={designTokens.colors.primary} />
-          <Text style={styles.title}>{t('screens.register.title')}</Text>
-          <Text style={styles.subtitle}>{t('screens.register.subtitle')}</Text>
-        </View>
-
-        <View style={styles.form}>
-          <StandardInput
-            label={t('screens.register.fullName')}
-            icon={ICONS.ACCOUNT}
-            placeholder={MESSAGES.PLACEHOLDERS.FULL_NAME}
-            value={name}
-            onChangeText={setName}
-            autoCapitalize={AUTO_CAPITALIZE.WORDS}
-            required
-          />
-
-          <StandardInput
-            label={t('screens.register.email')}
-            icon={ICONS.EMAIL}
-            placeholder={MESSAGES.PLACEHOLDERS.EMAIL}
-            value={email}
-            onChangeText={setEmail}
-            keyboardType={KEYBOARD_TYPE.EMAIL}
-            autoCapitalize={AUTO_CAPITALIZE.NONE}
-            autoComplete={AUTO_COMPLETE.EMAIL}
-            required
-          />
-
-          <StandardInput
-            label={t('screens.register.whatsAppNumber')}
-            icon={ICONS.WHATSAPP}
-            placeholder={MESSAGES.PLACEHOLDERS.WHATSAPP}
-            value={whatsappNumber}
-            onChangeText={setWhatsappNumber}
-            keyboardType={KEYBOARD_TYPE.PHONE}
-            autoCapitalize={AUTO_CAPITALIZE.NONE}
-            required
-          />
-
-          {/* Role Selection */}
-          <View style={styles.sectionHeader}>
-            <MaterialCommunityIcons name={ICONS.ACCOUNT_COG} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
-            <Text style={styles.sectionTitle}>{t('screens.register.accountType')}</Text>
-          </View>
-          <TouchableOpacity
-            style={styles.checkboxContainer}
-            onPress={() => setIsClubAdmin(!isClubAdmin)}
-          >
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <View style={styles.header}>
             <MaterialCommunityIcons
-              name={isClubAdmin ? ICONS.CHECKBOX_MARKED : ICONS.CHECKBOX_BLANK_OUTLINE}
-              size={mobileIconSizes.large}
+              name={ICONS.ACCOUNT_PLUS}
+              size={designTokens.iconSize['3xl']}
               color={designTokens.colors.primary}
             />
-            <Text style={styles.checkboxLabel}>{t('screens.register.iAmClubAdmin')}</Text>
-          </TouchableOpacity>
-          {isClubAdmin && (
-            <View style={styles.infoBox}>
-              <MaterialCommunityIcons name={ICONS.INFORMATION} size={mobileIconSizes.medium} color={designTokens.colors.info} />
-              <Text style={styles.infoText}>
-                {t('screens.register.clubAdminApprovalNote')}
-              </Text>
-            </View>
-          )}
-
-          {/* Club Selection via Organizational Hierarchy */}
-          <View style={styles.sectionHeader}>
-            <MaterialCommunityIcons name={ICONS.SITEMAP} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
-            <Text style={styles.sectionTitle}>{t('screens.register.findYourClub')}</Text>
-          </View>
-          <Text style={styles.sectionDescription}>
-            {t('screens.register.navigateOrganization')}
-          </Text>
-
-          {/* Division Selection */}
-          <View style={styles.pickerContainer}>
-            <Text style={styles.pickerLabel}>{t('screens.register.selectDivision')}</Text>
-            <ScrollView style={styles.optionsList}>
-              {getUniqueDivisions().map((div) => (
-                <TouchableOpacity
-                  key={div}
-                  style={[styles.option, division === div && styles.optionSelected]}
-                  onPress={() => handleDivisionChange(div)}
-                >
-                  <MaterialCommunityIcons
-                    name={division === div ? ICONS.RADIOBOX_MARKED : ICONS.RADIOBOX_BLANK}
-                    size={mobileIconSizes.medium}
-                    color={division === div ? designTokens.colors.primary : designTokens.colors.textSecondary}
-                  />
-                  <Text style={styles.optionText}>{div}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+            <Text style={styles.title}>{t('screens.register.title')}</Text>
+            <Text style={styles.subtitle}>{t('screens.register.subtitle')}</Text>
           </View>
 
-          {/* Union Selection */}
-          {division && (
-            <View style={styles.pickerContainer}>
-              <Text style={styles.pickerLabel}>{t('screens.register.selectUnion')}</Text>
-              <ScrollView style={styles.optionsList}>
-                {getUniqueUnions().map((uni) => (
-                  <TouchableOpacity
-                    key={uni}
-                    style={[styles.option, union === uni && styles.optionSelected]}
-                    onPress={() => handleUnionChange(uni)}
-                  >
-                    <MaterialCommunityIcons
-                      name={union === uni ? ICONS.RADIOBOX_MARKED : ICONS.RADIOBOX_BLANK}
-                      size={mobileIconSizes.medium}
-                      color={union === uni ? designTokens.colors.primary : designTokens.colors.textSecondary}
-                    />
-                    <Text style={styles.optionText}>{uni}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-          )}
+          <View style={styles.form}>
+            <StandardInput
+              label={t('screens.register.fullName')}
+              icon={ICONS.ACCOUNT}
+              placeholder={MESSAGES.PLACEHOLDERS.FULL_NAME}
+              value={name}
+              onChangeText={setName}
+              autoCapitalize={AUTO_CAPITALIZE.WORDS}
+              required
+            />
 
-          {/* Association Selection */}
-          {union && (
-            <View style={styles.pickerContainer}>
-              <Text style={styles.pickerLabel}>{t('screens.register.selectAssociation')}</Text>
-              <ScrollView style={styles.optionsList}>
-                {getUniqueAssociations().map((assoc) => (
-                  <TouchableOpacity
-                    key={assoc}
-                    style={[styles.option, association === assoc && styles.optionSelected]}
-                    onPress={() => handleAssociationChange(assoc)}
-                  >
-                    <MaterialCommunityIcons
-                      name={association === assoc ? ICONS.RADIOBOX_MARKED : ICONS.RADIOBOX_BLANK}
-                      size={mobileIconSizes.medium}
-                      color={association === assoc ? designTokens.colors.primary : designTokens.colors.textSecondary}
-                    />
-                    <Text style={styles.optionText}>{assoc}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-          )}
+            <StandardInput
+              label={t('screens.register.email')}
+              icon={ICONS.EMAIL}
+              placeholder={MESSAGES.PLACEHOLDERS.EMAIL}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType={KEYBOARD_TYPE.EMAIL}
+              autoCapitalize={AUTO_CAPITALIZE.NONE}
+              autoComplete={AUTO_COMPLETE.EMAIL}
+              required
+            />
 
-          {/* Church Selection */}
-          {association && (
-            <View style={styles.pickerContainer}>
-              <Text style={styles.pickerLabel}>{t('screens.register.selectChurch')}</Text>
-              <ScrollView style={styles.optionsList}>
-                {getUniqueChurches().map((ch) => (
-                  <TouchableOpacity
-                    key={ch}
-                    style={[styles.option, church === ch && styles.optionSelected]}
-                    onPress={() => handleChurchChange(ch)}
-                  >
-                    <MaterialCommunityIcons
-                      name={church === ch ? ICONS.RADIOBOX_MARKED : ICONS.RADIOBOX_BLANK}
-                      size={mobileIconSizes.medium}
-                      color={church === ch ? designTokens.colors.primary : designTokens.colors.textSecondary}
-                    />
-                    <Text style={styles.optionText}>{ch}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-          )}
+            <StandardInput
+              label={t('screens.register.whatsAppNumber')}
+              icon={ICONS.WHATSAPP}
+              placeholder={MESSAGES.PLACEHOLDERS.WHATSAPP}
+              value={whatsappNumber}
+              onChangeText={setWhatsappNumber}
+              keyboardType={KEYBOARD_TYPE.PHONE}
+              autoCapitalize={AUTO_CAPITALIZE.NONE}
+              required
+            />
 
-          {/* Club Selection */}
-          {church && getFilteredClubs().length > 0 && (
-            <View style={styles.pickerContainer}>
-              <Text style={styles.pickerLabel}>{t('screens.register.selectClub')}</Text>
-              <ScrollView style={styles.clubsList}>
-                {getFilteredClubs().map((club) => (
-                  <TouchableOpacity
-                    key={club.id}
-                    style={[styles.clubOption, clubId === club.id && styles.clubOptionSelected]}
-                    onPress={() => setClubId(club.id)}
-                  >
-                    <MaterialCommunityIcons
-                      name={clubId === club.id ? ICONS.RADIOBOX_MARKED : ICONS.RADIOBOX_BLANK}
-                      size={mobileIconSizes.medium}
-                      color={clubId === club.id ? designTokens.colors.primary : designTokens.colors.textSecondary}
-                    />
-                    <View style={styles.clubInfo}>
-                      <Text style={styles.clubName}>{club.name}</Text>
-                      <Text style={styles.clubDescription}>{club.description}</Text>
-                    </View>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
+            {/* Role Selection */}
+            <View style={styles.sectionHeader}>
+              <MaterialCommunityIcons
+                name={ICONS.ACCOUNT_COG}
+                size={mobileIconSizes.medium}
+                color={designTokens.colors.primary}
+              />
+              <Text style={styles.sectionTitle}>{t('screens.register.accountType')}</Text>
             </View>
-          )}
-
-          {/* Pathfinder Classes Selection - Only for regular users */}
-          {!isClubAdmin && (
-            <>
-              <View style={styles.sectionHeader}>
-                <MaterialCommunityIcons name={ICONS.SCHOOL} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
-                <Text style={styles.sectionTitle}>{t('screens.register.pathfinderClasses')}</Text>
+            <TouchableOpacity
+              style={styles.checkboxContainer}
+              onPress={() => setIsClubAdmin(!isClubAdmin)}
+            >
+              <MaterialCommunityIcons
+                name={isClubAdmin ? ICONS.CHECKBOX_MARKED : ICONS.CHECKBOX_BLANK_OUTLINE}
+                size={mobileIconSizes.large}
+                color={designTokens.colors.primary}
+              />
+              <Text style={styles.checkboxLabel}>{t('screens.register.iAmClubAdmin')}</Text>
+            </TouchableOpacity>
+            {isClubAdmin && (
+              <View style={styles.infoBox}>
+                <MaterialCommunityIcons
+                  name={ICONS.INFORMATION}
+                  size={mobileIconSizes.medium}
+                  color={designTokens.colors.info}
+                />
+                <Text style={styles.infoText}>{t('screens.register.clubAdminApprovalNote')}</Text>
               </View>
-              <Text style={styles.sectionDescription}>
-                {t('screens.register.selectClassesInstruction')}
-              </Text>
+            )}
 
-              <TouchableOpacity
-                style={styles.classSelectionButton}
-                onPress={() => setClassModalVisible(true)}
-              >
-                <View style={styles.classSelectionContent}>
-                  <MaterialCommunityIcons name={ICONS.SCHOOL} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
-                  <Text style={styles.classSelectionText}>
-                    {selectedClasses.length > 0
-                      ? t('screens.register.selectedClasses', { classes: selectedClasses.join(LIST_SEPARATOR) })
-                      : t('screens.register.selectClasses')}
-                  </Text>
+            {/* Club Selection via Organizational Hierarchy */}
+            <View style={styles.sectionHeader}>
+              <MaterialCommunityIcons
+                name={ICONS.SITEMAP}
+                size={mobileIconSizes.medium}
+                color={designTokens.colors.primary}
+              />
+              <Text style={styles.sectionTitle}>{t('screens.register.findYourClub')}</Text>
+            </View>
+            <Text style={styles.sectionDescription}>
+              {t('screens.register.navigateOrganization')}
+            </Text>
+
+            {/* Division Selection */}
+            <View style={styles.pickerContainer}>
+              <Text style={styles.pickerLabel}>{t('screens.register.selectDivision')}</Text>
+              <ScrollView style={styles.optionsList}>
+                {getUniqueDivisions().map((div) => (
+                  <TouchableOpacity
+                    key={div}
+                    style={[styles.option, division === div && styles.optionSelected]}
+                    onPress={() => handleDivisionChange(div)}
+                  >
+                    <MaterialCommunityIcons
+                      name={division === div ? ICONS.RADIOBOX_MARKED : ICONS.RADIOBOX_BLANK}
+                      size={mobileIconSizes.medium}
+                      color={
+                        division === div
+                          ? designTokens.colors.primary
+                          : designTokens.colors.textSecondary
+                      }
+                    />
+                    <Text style={styles.optionText}>{div}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+
+            {/* Union Selection */}
+            {division && (
+              <View style={styles.pickerContainer}>
+                <Text style={styles.pickerLabel}>{t('screens.register.selectUnion')}</Text>
+                <ScrollView style={styles.optionsList}>
+                  {getUniqueUnions().map((uni) => (
+                    <TouchableOpacity
+                      key={uni}
+                      style={[styles.option, union === uni && styles.optionSelected]}
+                      onPress={() => handleUnionChange(uni)}
+                    >
+                      <MaterialCommunityIcons
+                        name={union === uni ? ICONS.RADIOBOX_MARKED : ICONS.RADIOBOX_BLANK}
+                        size={mobileIconSizes.medium}
+                        color={
+                          union === uni
+                            ? designTokens.colors.primary
+                            : designTokens.colors.textSecondary
+                        }
+                      />
+                      <Text style={styles.optionText}>{uni}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+
+            {/* Association Selection */}
+            {union && (
+              <View style={styles.pickerContainer}>
+                <Text style={styles.pickerLabel}>{t('screens.register.selectAssociation')}</Text>
+                <ScrollView style={styles.optionsList}>
+                  {getUniqueAssociations().map((assoc) => (
+                    <TouchableOpacity
+                      key={assoc}
+                      style={[styles.option, association === assoc && styles.optionSelected]}
+                      onPress={() => handleAssociationChange(assoc)}
+                    >
+                      <MaterialCommunityIcons
+                        name={association === assoc ? ICONS.RADIOBOX_MARKED : ICONS.RADIOBOX_BLANK}
+                        size={mobileIconSizes.medium}
+                        color={
+                          association === assoc
+                            ? designTokens.colors.primary
+                            : designTokens.colors.textSecondary
+                        }
+                      />
+                      <Text style={styles.optionText}>{assoc}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+
+            {/* Church Selection */}
+            {association && (
+              <View style={styles.pickerContainer}>
+                <Text style={styles.pickerLabel}>{t('screens.register.selectChurch')}</Text>
+                <ScrollView style={styles.optionsList}>
+                  {getUniqueChurches().map((ch) => (
+                    <TouchableOpacity
+                      key={ch}
+                      style={[styles.option, church === ch && styles.optionSelected]}
+                      onPress={() => handleChurchChange(ch)}
+                    >
+                      <MaterialCommunityIcons
+                        name={church === ch ? ICONS.RADIOBOX_MARKED : ICONS.RADIOBOX_BLANK}
+                        size={mobileIconSizes.medium}
+                        color={
+                          church === ch
+                            ? designTokens.colors.primary
+                            : designTokens.colors.textSecondary
+                        }
+                      />
+                      <Text style={styles.optionText}>{ch}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+
+            {/* Club Selection */}
+            {church && getFilteredClubs().length > 0 && (
+              <View style={styles.pickerContainer}>
+                <Text style={styles.pickerLabel}>{t('screens.register.selectClub')}</Text>
+                <ScrollView style={styles.clubsList}>
+                  {getFilteredClubs().map((club) => (
+                    <TouchableOpacity
+                      key={club.id}
+                      style={[styles.clubOption, clubId === club.id && styles.clubOptionSelected]}
+                      onPress={() => setClubId(club.id)}
+                    >
+                      <MaterialCommunityIcons
+                        name={clubId === club.id ? ICONS.RADIOBOX_MARKED : ICONS.RADIOBOX_BLANK}
+                        size={mobileIconSizes.medium}
+                        color={
+                          clubId === club.id
+                            ? designTokens.colors.primary
+                            : designTokens.colors.textSecondary
+                        }
+                      />
+                      <View style={styles.clubInfo}>
+                        <Text style={styles.clubName}>{club.name}</Text>
+                        <Text style={styles.clubDescription}>{club.description}</Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+
+            {/* Pathfinder Classes Selection - Only for regular users */}
+            {!isClubAdmin && (
+              <>
+                <View style={styles.sectionHeader}>
+                  <MaterialCommunityIcons
+                    name={ICONS.SCHOOL}
+                    size={mobileIconSizes.medium}
+                    color={designTokens.colors.primary}
+                  />
+                  <Text style={styles.sectionTitle}>{t('screens.register.pathfinderClasses')}</Text>
                 </View>
-                <MaterialCommunityIcons name={ICONS.CHEVRON_RIGHT} size={mobileIconSizes.large} color={designTokens.colors.primary} />
-              </TouchableOpacity>
-            </>
-          )}
+                <Text style={styles.sectionDescription}>
+                  {t('screens.register.selectClassesInstruction')}
+                </Text>
 
-          <StandardInput
-            label={t('screens.register.password')}
-            icon={ICONS.LOCK}
-            placeholder={MESSAGES.PLACEHOLDERS.PASSWORD}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            autoCapitalize={AUTO_CAPITALIZE.NONE}
-            required
-          />
+                <TouchableOpacity
+                  style={styles.classSelectionButton}
+                  onPress={() => setClassModalVisible(true)}
+                >
+                  <View style={styles.classSelectionContent}>
+                    <MaterialCommunityIcons
+                      name={ICONS.SCHOOL}
+                      size={mobileIconSizes.medium}
+                      color={designTokens.colors.primary}
+                    />
+                    <Text style={styles.classSelectionText}>
+                      {selectedClasses.length > 0
+                        ? t('screens.register.selectedClasses', {
+                            classes: selectedClasses.join(LIST_SEPARATOR),
+                          })
+                        : t('screens.register.selectClasses')}
+                    </Text>
+                  </View>
+                  <MaterialCommunityIcons
+                    name={ICONS.CHEVRON_RIGHT}
+                    size={mobileIconSizes.large}
+                    color={designTokens.colors.primary}
+                  />
+                </TouchableOpacity>
+              </>
+            )}
 
-          <StandardInput
-            label={t('screens.register.confirmPassword')}
-            icon={ICONS.LOCK_CHECK}
-            placeholder={MESSAGES.PLACEHOLDERS.CONFIRM_PASSWORD}
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            secureTextEntry
-            autoCapitalize={AUTO_CAPITALIZE.NONE}
-            required
-          />
+            <StandardInput
+              label={t('screens.register.password')}
+              icon={ICONS.LOCK}
+              placeholder={MESSAGES.PLACEHOLDERS.PASSWORD}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              autoCapitalize={AUTO_CAPITALIZE.NONE}
+              required
+            />
 
-          <StandardButton
-            title={loading ? t('screens.register.creatingAccount') : t('screens.register.registerButton')}
-            onPress={handleRegister}
-            disabled={loading}
-            loading={loading}
-            icon={ICONS.ACCOUNT_PLUS}
-          />
+            <StandardInput
+              label={t('screens.register.confirmPassword')}
+              icon={ICONS.LOCK_CHECK}
+              placeholder={MESSAGES.PLACEHOLDERS.CONFIRM_PASSWORD}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry
+              autoCapitalize={AUTO_CAPITALIZE.NONE}
+              required
+            />
 
-          <StandardButton
-            title={t('screens.register.alreadyHaveAccount')}
-            variant={COMPONENT_VARIANT.ghost}
-            onPress={() => navigation.navigate(SCREENS.LOGIN as never)}
-          />
-        </View>
-      </ScrollView>
+            <StandardButton
+              title={
+                loading
+                  ? t('screens.register.creatingAccount')
+                  : t('screens.register.registerButton')
+              }
+              onPress={handleRegister}
+              disabled={loading}
+              loading={loading}
+              icon={ICONS.ACCOUNT_PLUS}
+            />
 
-      {/* Class Selection Modal */}
-      <ClassSelectionModal
-        visible={classModalVisible}
-        initialClasses={selectedClasses}
-        onSave={(classes) => setSelectedClasses(classes)}
-        onClose={() => setClassModalVisible(false)}
-      />
-    </KeyboardAvoidingView>
+            <StandardButton
+              title={t('screens.register.alreadyHaveAccount')}
+              variant={COMPONENT_VARIANT.ghost}
+              onPress={() => navigation.navigate(SCREENS.LOGIN as never)}
+            />
+          </View>
+        </ScrollView>
+
+        {/* Class Selection Modal */}
+        <ClassSelectionModal
+          visible={classModalVisible}
+          initialClasses={selectedClasses}
+          onSave={(classes) => setSelectedClasses(classes)}
+          onClose={() => setClassModalVisible(false)}
+        />
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };

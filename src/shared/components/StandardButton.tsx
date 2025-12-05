@@ -5,12 +5,34 @@
  */
 
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, View, ViewStyle, TextStyle } from 'react-native';
+import {
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  ActivityIndicator,
+  View,
+  ViewStyle,
+  TextStyle,
+} from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { mobileTypography, designTokens, layoutConstants } from '../theme';
-import { A11Y_ROLE, TOUCH_OPACITY, dimensionValues, ACTIVITY_INDICATOR_SIZE, COMPONENT_VARIANT, BUTTON_SIZE, ICON_POSITION } from '../constants';
+import {
+  A11Y_ROLE,
+  TOUCH_OPACITY,
+  dimensionValues,
+  ACTIVITY_INDICATOR_SIZE,
+  COMPONENT_VARIANT,
+  BUTTON_SIZE,
+  ICON_POSITION,
+} from '../constants';
 
-type ButtonVariant = typeof COMPONENT_VARIANT.primary | typeof COMPONENT_VARIANT.secondary | typeof COMPONENT_VARIANT.accent | typeof COMPONENT_VARIANT.danger | typeof COMPONENT_VARIANT.outline | typeof COMPONENT_VARIANT.ghost;
+type ButtonVariant =
+  | typeof COMPONENT_VARIANT.primary
+  | typeof COMPONENT_VARIANT.secondary
+  | typeof COMPONENT_VARIANT.accent
+  | typeof COMPONENT_VARIANT.danger
+  | typeof COMPONENT_VARIANT.outline
+  | typeof COMPONENT_VARIANT.ghost;
 type ButtonSize = typeof BUTTON_SIZE.small | typeof BUTTON_SIZE.medium | typeof BUTTON_SIZE.large;
 type IconPosition = typeof ICON_POSITION.LEFT | typeof ICON_POSITION.RIGHT;
 
@@ -47,7 +69,7 @@ export const StandardButton: React.FC<StandardButtonProps> = ({
 
   const getButtonStyle = (): ViewStyle[] => {
     const baseStyle: ViewStyle[] = [styles.button];
-    
+
     // Size styles
     switch (size) {
       case BUTTON_SIZE.small:
@@ -180,7 +202,7 @@ export const StandardButton: React.FC<StandardButtonProps> = ({
         <View style={styles.buttonContent}>
           {icon && iconPosition === ICON_POSITION.LEFT && (
             <MaterialCommunityIcons
-              name={icon as any}
+              name={icon as typeof ICONS.CHECK}
               size={getIconSize()}
               color={getIconColor()}
               style={styles.iconLeft}
@@ -189,7 +211,7 @@ export const StandardButton: React.FC<StandardButtonProps> = ({
           <Text style={getTextStyle()}>{title}</Text>
           {icon && iconPosition === ICON_POSITION.RIGHT && (
             <MaterialCommunityIcons
-              name={icon as any}
+              name={icon as typeof ICONS.CHECK}
               size={getIconSize()}
               color={getIconColor()}
               style={styles.iconRight}
@@ -294,4 +316,3 @@ const styles = StyleSheet.create({
     marginLeft: designTokens.spacing.sm,
   },
 });
-

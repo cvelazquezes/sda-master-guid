@@ -109,7 +109,10 @@ class AuthService {
     }
 
     try {
-      const response = await apiService.post<AuthResponse>('/auth/register', { ...data, isClubAdmin });
+      const response = await apiService.post<AuthResponse>('/auth/register', {
+        ...data,
+        isClubAdmin,
+      });
       await this.saveAuthData(response);
       logger.info('Registration successful', { userId: response.user.id });
       return response;
@@ -122,7 +125,11 @@ class AuthService {
   /**
    * Mock registration implementation
    */
-  private async mockRegister(data: RegisterData, classes?: string[], isClubAdmin?: boolean): Promise<AuthResponse> {
+  private async mockRegister(
+    data: RegisterData,
+    classes?: string[],
+    isClubAdmin?: boolean
+  ): Promise<AuthResponse> {
     await this.sleep(MOCK_API_DELAY_MS);
 
     // Check if user already exists
@@ -142,7 +149,8 @@ class AuthService {
       role: role,
       clubId: data.clubId, // User gets hierarchy from their club
       isActive: false, // Inactive until approved
-      approvalStatus: ApprovalStatus.PENDING, // Pending approval (admin for club_admin, club admin for regular users)
+      // Pending approval (admin for club_admin, club admin for regular users)
+      approvalStatus: ApprovalStatus.PENDING,
       classes: isClubAdmin ? [] : ((classes || ['Friend']) as PathfinderClass[]), // No classes for club admins
       timezone: 'America/New_York',
       language: 'en',

@@ -12,8 +12,7 @@ import { LANGUAGES, changeLanguage, Language } from '../i18n';
 import { useTheme } from '../contexts/ThemeContext';
 import { SelectionModal, SelectionItem } from '../shared/components/SelectionModal';
 import { mobileTypography, designTokens, layoutConstants } from '../shared/theme';
-import { ICONS, A11Y_ROLE } from '../shared/constants';
-import { flexValues } from '../shared/constants/layoutConstants';
+import { A11Y_ROLE, ICONS, flexValues } from '../shared/constants';
 
 interface LanguageSwitcherProps {
   showLabel?: boolean;
@@ -30,10 +29,10 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ showLabel = 
   const { colors } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
 
-  const currentLanguage = LANGUAGES.find(lang => lang.code === i18n.language) || LANGUAGES[0];
+  const currentLanguage = LANGUAGES.find((lang) => lang.code === i18n.language) || LANGUAGES[0];
 
   // Convert languages to SelectionItem format
-  const selectionItems: SelectionItem[] = LANGUAGES.map(lang => ({
+  const selectionItems: SelectionItem[] = LANGUAGES.map((lang) => ({
     id: lang.code,
     title: lang.nativeName,
     subtitle: lang.name,
@@ -55,7 +54,11 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ showLabel = 
         accessibilityRole={A11Y_ROLE.BUTTON}
       >
         <View style={[styles.iconContainer, { backgroundColor: colors.info + '20' }]}>
-          <MaterialCommunityIcons name={ICONS.TRANSLATE} size={designTokens.iconSize.md} color={colors.info} />
+          <MaterialCommunityIcons
+            name={ICONS.TRANSLATE}
+            size={designTokens.iconSize.md}
+            color={colors.info}
+          />
         </View>
         {showLabel && (
           <View style={styles.textContainer}>
@@ -67,7 +70,11 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ showLabel = 
             </Text>
           </View>
         )}
-        <MaterialCommunityIcons name={ICONS.CHEVRON_DOWN} size={designTokens.iconSize.md} color={colors.textTertiary} />
+        <MaterialCommunityIcons
+          name={ICONS.CHEVRON_DOWN}
+          size={designTokens.iconSize.md}
+          color={colors.textTertiary}
+        />
       </TouchableOpacity>
 
       <SelectionModal

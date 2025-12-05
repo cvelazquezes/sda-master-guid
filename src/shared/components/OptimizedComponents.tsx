@@ -1,17 +1,16 @@
 /**
  * Optimized Components
- * 
+ *
  * Examples of React.memo usage and performance best practices.
  * Use these patterns throughout the app for optimal performance.
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, ViewProps } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ViewProps } from 'react-native';
 import { useTheme, layoutConstants } from '../theme';
 import { mobileFontSizes } from '../theme/mobileTypography';
 import { designTokens } from '../theme/designTokens';
-import { flexValues } from '../constants/layoutConstants';
-import { COMPONENT_VARIANT } from '../constants';
+import { COMPONENT_VARIANT, flexValues } from '../constants';
 
 // ============================================================================
 // Basic React.memo Example
@@ -26,9 +25,9 @@ interface ButtonProps {
 
 /**
  * Optimized Button Component
- * 
+ *
  * Only re-renders when props actually change.
- * 
+ *
  * @example
  * ```typescript
  * <OptimizedButton
@@ -46,23 +45,16 @@ export const OptimizedButton = memo<ButtonProps>(function OptimizedButton({
 }) {
   const { theme } = useTheme();
 
-  const backgroundColor = variant === COMPONENT_VARIANT.primary 
-    ? theme.colors.primary 
-    : theme.colors.secondary;
+  const backgroundColor =
+    variant === COMPONENT_VARIANT.primary ? theme.colors.primary : theme.colors.secondary;
 
   return (
     <TouchableOpacity
-      style={[
-        styles.button,
-        { backgroundColor },
-        disabled && styles.disabled,
-      ]}
+      style={[styles.button, { backgroundColor }, disabled && styles.disabled]}
       onPress={onPress}
       disabled={disabled}
     >
-      <Text style={[styles.buttonText, { color: theme.colors.white }]}>
-        {title}
-      </Text>
+      <Text style={[styles.buttonText, { color: theme.colors.white }]}>{title}</Text>
     </TouchableOpacity>
   );
 });
@@ -81,7 +73,7 @@ interface CardProps {
 
 /**
  * Optimized Card Component with custom comparison
- * 
+ *
  * Only re-renders when specific props change (ignores onPress reference changes)
  */
 export const OptimizedCard = memo<CardProps>(
@@ -101,9 +93,7 @@ export const OptimizedCard = memo<CardProps>(
         style={[styles.card, { backgroundColor: theme.colors.surface }]}
         onPress={handlePress}
       >
-        <Text style={[styles.cardTitle, { color: theme.colors.onSurface }]}>
-          {title}
-        </Text>
+        <Text style={[styles.cardTitle, { color: theme.colors.onSurface }]}>{title}</Text>
         <Text style={[styles.cardDescription, { color: theme.colors.onSurfaceVariant }]}>
           {description}
         </Text>
@@ -140,7 +130,7 @@ interface ListItemProps {
 
 /**
  * Optimized List Item for use in FlatList
- * 
+ *
  * @example
  * ```typescript
  * <FlatList
@@ -171,19 +161,12 @@ export const OptimizedListItem = memo<ListItemProps>(function OptimizedListItem(
     onPress(id);
   }, [id, onPress]);
 
-  const backgroundColor = selected 
-    ? theme.colors.primaryLight 
-    : theme.colors.surface;
+  const backgroundColor = selected ? theme.colors.primaryLight : theme.colors.surface;
 
   return (
-    <TouchableOpacity
-      style={[styles.listItem, { backgroundColor }]}
-      onPress={handlePress}
-    >
+    <TouchableOpacity style={[styles.listItem, { backgroundColor }]} onPress={handlePress}>
       <View style={styles.listItemContent}>
-        <Text style={[styles.listItemName, { color: theme.colors.onSurface }]}>
-          {name}
-        </Text>
+        <Text style={[styles.listItemName, { color: theme.colors.onSurface }]}>{name}</Text>
         <Text style={[styles.listItemEmail, { color: theme.colors.onSurfaceVariant }]}>
           {email}
         </Text>
@@ -203,7 +186,7 @@ interface ContainerProps extends ViewProps {
 
 /**
  * Optimized Container Component
- * 
+ *
  * Memoizes container to prevent re-renders when parent updates
  * but container props haven't changed.
  */
@@ -218,7 +201,7 @@ export const OptimizedContainer = memo<ContainerProps>(function OptimizedContain
   return (
     <View
       style={[
-        { 
+        {
           backgroundColor: theme.colors.background,
           padding,
         },
@@ -237,45 +220,45 @@ export const OptimizedContainer = memo<ContainerProps>(function OptimizedContain
 
 /**
  * BEST PRACTICES:
- * 
+ *
  * 1. Use React.memo for components that:
  *    - Render often with same props
  *    - Are in lists (FlatList items)
  *    - Have expensive render logic
  *    - Receive stable props
- * 
+ *
  * 2. DON'T use React.memo for:
  *    - Components that rarely re-render
  *    - Components with always-changing props
  *    - Very simple components (overhead > benefit)
- * 
+ *
  * 3. Combine with useMemo and useCallback:
  *    - useMemo for expensive calculations
  *    - useCallback for stable function references
- * 
+ *
  * 4. Custom comparison functions:
  *    - Use when you want fine-grained control
  *    - Ignore props that don't affect render
  *    - Keep comparison logic simple
- * 
+ *
  * 5. List optimization:
  *    - Always use keyExtractor
  *    - Memoize list items
  *    - Use FlatList's built-in optimizations
  *    - Consider using FlashList for very large lists
- * 
+ *
  * @example
  * ```typescript
  * // Good: Stable callback
  * const handlePress = useCallback((id: string) => {
  *   console.log(id);
  * }, []); // Empty deps = stable reference
- * 
+ *
  * // Good: Memoized expensive calculation
  * const sortedData = useMemo(() => {
  *   return data.sort((a, b) => a.name.localeCompare(b.name));
  * }, [data]); // Only recalculate when data changes
- * 
+ *
  * // Good: Memoized component
  * const MemoizedItem = memo(Item);
  * ```
@@ -330,4 +313,3 @@ const styles = StyleSheet.create({
     fontSize: mobileFontSizes.sm,
   },
 });
-

@@ -1,9 +1,9 @@
 /**
  * Domain Configuration
- * 
+ *
  * Business rules, limits, thresholds, and domain-specific constants.
  * This is the SINGLE SOURCE OF TRUTH for all business logic values.
- * 
+ *
  * ❌ NEVER write: if (members > 100) { ... }
  * ✅ ALWAYS use: if (members > domainConfig.club.maxMembers) { ... }
  */
@@ -83,7 +83,7 @@ export const clubRules = {
 
   /** Club fees */
   fees: {
-    defaultMonthlyFee: 20.00,
+    defaultMonthlyFee: 20.0,
     minFee: 0,
     maxFee: 1000,
     currency: 'USD',
@@ -152,7 +152,7 @@ export const paymentRules = {
   amounts: {
     minAmount: 0.01,
     maxAmount: 999999.99,
-    maxOutstandingBalance: 1000.00,
+    maxOutstandingBalance: 1000.0,
   },
 
   /** Grace period for late payments (days) */
@@ -349,15 +349,16 @@ export type DomainConfig = typeof domainConfig;
 // TYPE EXPORTS
 // ============================================================================
 
-export type UserRole = typeof userRules.roles[keyof typeof userRules.roles];
-export type UserStatus = typeof userRules.status[keyof typeof userRules.status];
-export type ClubStatus = typeof clubRules.status[keyof typeof clubRules.status];
-export type MatchStatus = typeof matchRules.status[keyof typeof matchRules.status];
-export type PaymentStatus = typeof paymentRules.status[keyof typeof paymentRules.status];
-export type PaymentMethod = typeof paymentRules.methods[keyof typeof paymentRules.methods];
-export type PathfinderLevel = typeof pathfinderRules.levels[keyof typeof pathfinderRules.levels];
-export type OrganizationLevel = typeof organizationRules.levels[keyof typeof organizationRules.levels];
-export type NotificationType = typeof notificationRules.types[keyof typeof notificationRules.types];
-export type ApprovalStatus = typeof approvalRules.status[keyof typeof approvalRules.status];
-export type AttendanceStatus = typeof attendanceRules.status[keyof typeof attendanceRules.status];
-
+export type UserRole = (typeof userRules.roles)[keyof typeof userRules.roles];
+export type UserStatus = (typeof userRules.status)[keyof typeof userRules.status];
+export type ClubStatus = (typeof clubRules.status)[keyof typeof clubRules.status];
+export type MatchStatus = (typeof matchRules.status)[keyof typeof matchRules.status];
+export type PaymentStatus = (typeof paymentRules.status)[keyof typeof paymentRules.status];
+export type PaymentMethod = (typeof paymentRules.methods)[keyof typeof paymentRules.methods];
+export type PathfinderLevel = (typeof pathfinderRules.levels)[keyof typeof pathfinderRules.levels];
+export type OrganizationLevel =
+  (typeof organizationRules.levels)[keyof typeof organizationRules.levels];
+export type NotificationType =
+  (typeof notificationRules.types)[keyof typeof notificationRules.types];
+export type ApprovalStatus = (typeof approvalRules.status)[keyof typeof approvalRules.status];
+export type AttendanceStatus = (typeof attendanceRules.status)[keyof typeof attendanceRules.status];

@@ -12,13 +12,13 @@ import {
   StyleSheet,
   TouchableOpacity,
   TextInputProps,
+  ViewStyle,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../theme';
-import { A11Y_ROLE, ICONS, flexValues } from '../constants';
-import { dimensionValues } from '../constants/layoutConstants';
+import { A11Y_ROLE, ICONS, dimensionValues, flexValues } from '../constants';
 
 interface StandardInputProps extends TextInputProps {
   label?: string;
@@ -28,7 +28,7 @@ interface StandardInputProps extends TextInputProps {
   required?: boolean;
   secureTextEntry?: boolean;
   disabled?: boolean;
-  containerStyle?: any;
+  containerStyle?: ViewStyle;
 }
 
 export const StandardInput: React.FC<StandardInputProps> = ({
@@ -50,37 +50,37 @@ export const StandardInput: React.FC<StandardInputProps> = ({
 
   const hasError = !!error;
 
-  const getContainerStyle = () => {
-    const baseStyle: any[] = [
+  const getContainerStyle = (): ViewStyle[] => {
+    const baseStyle: ViewStyle[] = [
       styles.inputContainer,
-      { 
+      {
         borderColor: colors.border,
         backgroundColor: colors.surfaceLight,
       },
     ];
-    
+
     if (multiline) {
       baseStyle.push(styles.inputContainerMultiline);
     }
-    
+
     if (isFocused) {
-      baseStyle.push({ 
+      baseStyle.push({
         borderColor: colors.primary,
         backgroundColor: colors.surface,
       });
     }
-    
+
     if (hasError) {
       baseStyle.push({ borderColor: colors.error });
     }
-    
+
     if (disabled) {
-      baseStyle.push({ 
+      baseStyle.push({
         backgroundColor: colors.surfaceLight,
         opacity: designTokens.opacity.high,
       });
     }
-    
+
     return baseStyle;
   };
 
@@ -107,7 +107,7 @@ export const StandardInput: React.FC<StandardInputProps> = ({
         {/* Icon */}
         {icon && (
           <MaterialCommunityIcons
-            name={icon as any}
+            name={icon as typeof ICONS.CHECK}
             size={mobileIconSizes.medium}
             color={getIconColor()}
             style={[styles.icon, multiline && styles.iconMultiline]}
@@ -139,7 +139,9 @@ export const StandardInput: React.FC<StandardInputProps> = ({
             onPress={() => setIsSecureVisible(!isSecureVisible)}
             accessible={true}
             accessibilityRole={A11Y_ROLE.BUTTON}
-            accessibilityLabel={isSecureVisible ? t('accessibility.hidePassword') : t('accessibility.showPassword')}
+            accessibilityLabel={
+              isSecureVisible ? t('accessibility.hidePassword') : t('accessibility.showPassword')
+            }
           >
             <MaterialCommunityIcons
               name={isSecureVisible ? ICONS.EYE_OFF : ICONS.EYE}

@@ -1,28 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  RefreshControl,
-  Alert,
-  TextInput,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, Alert, TextInput } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { clubService } from '../../services/clubService';
 import { User } from '../../types';
-import { 
-  EmptyState, 
-  Card, 
-  ScreenHeader,
-  StandardButton 
-} from '../../shared/components';
+import { EmptyState, Card, ScreenHeader, StandardButton } from '../../shared/components';
 import { mobileTypography, designTokens, layoutConstants } from '../../shared/theme';
 import { Linking } from 'react-native';
-import { MESSAGES, EXTERNAL_URLS, ICONS, COMPONENT_VARIANT, BUTTON_SIZE, EMPTY_VALUE, VALIDATION } from '../../shared/constants';
-import { flexValues, dimensionValues } from '../../shared/constants/layoutConstants';
+import {
+  BUTTON_SIZE,
+  COMPONENT_VARIANT,
+  EMPTY_VALUE,
+  EXTERNAL_URLS,
+  ICONS,
+  MESSAGES,
+  VALIDATION,
+  dimensionValues,
+  flexValues,
+} from '../../shared/constants';
 
 const MembersScreen = () => {
   const { t } = useTranslation();
@@ -44,8 +40,7 @@ const MembersScreen = () => {
       const query = searchQuery.toLowerCase();
       const filtered = members.filter(
         (member) =>
-          member.name.toLowerCase().includes(query) ||
-          member.email.toLowerCase().includes(query)
+          member.name.toLowerCase().includes(query) || member.email.toLowerCase().includes(query)
       );
       setFilteredMembers(filtered);
     }
@@ -57,9 +52,9 @@ const MembersScreen = () => {
     try {
       const membersData = await clubService.getClubMembers(user.clubId);
       // Sort by name and filter only active members
-      const activeMembers = membersData.filter((m) => m.isActive).sort((a, b) => 
-        a.name.localeCompare(b.name)
-      );
+      const activeMembers = membersData
+        .filter((m) => m.isActive)
+        .sort((a, b) => a.name.localeCompare(b.name));
       setMembers(activeMembers);
       setFilteredMembers(activeMembers);
     } catch (error) {
@@ -106,7 +101,7 @@ const MembersScreen = () => {
         title={t('screens.members.title')}
         subtitle={`${filteredMembers.length} ${filteredMembers.length !== 1 ? t('screens.members.subtitle_plural', { count: filteredMembers.length }) : t('screens.members.subtitle', { count: filteredMembers.length })}`}
       />
-      
+
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <MaterialCommunityIcons
@@ -147,7 +142,11 @@ const MembersScreen = () => {
           ) : filteredMembers.length === 0 ? (
             <EmptyState
               icon={searchQuery ? ICONS.ACCOUNT_SEARCH : ICONS.ACCOUNT_GROUP}
-              title={searchQuery ? t('screens.members.noMembersFound') : t('screens.members.noMembersYet')}
+              title={
+                searchQuery
+                  ? t('screens.members.noMembersFound')
+                  : t('screens.members.noMembersYet')
+              }
               description={
                 searchQuery
                   ? t('screens.members.noMembersMatchSearch')
@@ -173,7 +172,9 @@ const MembersScreen = () => {
                           size={designTokens.iconSize.xs}
                           color={designTokens.colors.success}
                         />
-                        <Text style={styles.whatsappText}>{t('screens.members.availableOnWhatsApp')}</Text>
+                        <Text style={styles.whatsappText}>
+                          {t('screens.members.availableOnWhatsApp')}
+                        </Text>
                       </View>
                     )}
                   </View>
@@ -277,4 +278,3 @@ const styles = StyleSheet.create({
 });
 
 export default MembersScreen;
-

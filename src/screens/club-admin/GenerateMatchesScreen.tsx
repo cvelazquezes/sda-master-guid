@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Alert,
-  RefreshControl,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, RefreshControl } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -18,8 +11,16 @@ import { StandardButton } from '../../shared/components/StandardButton';
 import { mobileTypography, mobileIconSizes, layoutConstants } from '../../shared/theme';
 import { designTokens } from '../../shared/theme/designTokens';
 import { format } from 'date-fns';
-import { MESSAGES, ICONS, COMPONENT_VARIANT, BUTTON_SIZE, DATE_FORMATS, SCREENS, ALERT_BUTTON_STYLE } from '../../shared/constants';
-import { flexValues } from '../../shared/constants/layoutConstants';
+import {
+  ALERT_BUTTON_STYLE,
+  BUTTON_SIZE,
+  COMPONENT_VARIANT,
+  DATE_FORMATS,
+  ICONS,
+  MESSAGES,
+  SCREENS,
+  flexValues,
+} from '../../shared/constants';
 
 const GenerateMatchesScreen = () => {
   const { t } = useTranslation();
@@ -27,7 +28,7 @@ const GenerateMatchesScreen = () => {
   const navigation = useNavigation();
   const [club, setClub] = useState<Club | null>(null);
   const [matchRounds, setMatchRounds] = useState<MatchRound[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -46,9 +47,9 @@ const GenerateMatchesScreen = () => {
         matchService.getMatchRounds(user.clubId),
       ]);
       setClub(clubData);
-      setMatchRounds(roundsData.sort((a, b) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      ));
+      setMatchRounds(
+        roundsData.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      );
     } catch (error) {
       Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_LOAD_DATA);
     } finally {
@@ -65,31 +66,28 @@ const GenerateMatchesScreen = () => {
   const handleGenerateMatches = () => {
     if (!user?.clubId) return;
 
-    Alert.alert(
-      MESSAGES.TITLES.GENERATE_ACTIVITIES,
-      MESSAGES.WARNINGS.CONFIRM_GENERATE_MATCHES,
-      [
-        { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
-        {
-          text: t('screens.generateMatches.generateButton'),
-          onPress: async () => {
-            setGenerating(true);
-            try {
-              await matchService.generateMatches(user.clubId!);
-              Alert.alert(MESSAGES.TITLES.SUCCESS, MESSAGES.SUCCESS.ACTIVITIES_GENERATED);
-              loadData();
-            } catch (error: any) {
-              Alert.alert(
-                MESSAGES.TITLES.ERROR,
-                error.response?.data?.message || t('screens.generateMatches.failedToGenerate')
-              );
-            } finally {
-              setGenerating(false);
-            }
-          },
+    Alert.alert(MESSAGES.TITLES.GENERATE_ACTIVITIES, MESSAGES.WARNINGS.CONFIRM_GENERATE_MATCHES, [
+      { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
+      {
+        text: t('screens.generateMatches.generateButton'),
+        onPress: async () => {
+          setGenerating(true);
+          try {
+            await matchService.generateMatches(user.clubId!);
+            Alert.alert(MESSAGES.TITLES.SUCCESS, MESSAGES.SUCCESS.ACTIVITIES_GENERATED);
+            loadData();
+          } catch (error: unknown) {
+            const errorMessage =
+              error instanceof Error
+                ? error.message
+                : t('screens.generateMatches.failedToGenerate');
+            Alert.alert(MESSAGES.TITLES.ERROR, errorMessage);
+          } finally {
+            setGenerating(false);
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   return (
@@ -101,7 +99,10 @@ const GenerateMatchesScreen = () => {
         <Text style={styles.title}>{t('screens.generateMatches.title')}</Text>
         {club && (
           <Text style={styles.subtitle}>
-            {t('screens.generateMatches.clubActivities', { clubName: club.name, frequency: t(`club.matchFrequency.${club.matchFrequency}`) })}
+            {t('screens.generateMatches.clubActivities', {
+              clubName: club.name,
+              frequency: t(`club.matchFrequency.${club.matchFrequency}`),
+            })}
           </Text>
         )}
       </View>
@@ -110,7 +111,11 @@ const GenerateMatchesScreen = () => {
         {/* Action Buttons */}
         <View style={styles.actionsContainer}>
           <StandardButton
-            title={generating ? t('screens.generateMatches.generating') : t('screens.generateMatches.generateNewRound')}
+            title={
+              generating
+                ? t('screens.generateMatches.generating')
+                : t('screens.generateMatches.generateNewRound')
+            }
             icon={ICONS.ACCOUNT_HEART}
             variant={COMPONENT_VARIANT.primary}
             size={BUTTON_SIZE.large}
@@ -129,21 +134,29 @@ const GenerateMatchesScreen = () => {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('screens.generateMatches.activityRoundsHistory')}</Text>
+          <Text style={styles.sectionTitle}>
+            {t('screens.generateMatches.activityRoundsHistory')}
+          </Text>
           {matchRounds.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <MaterialCommunityIcons name={ICONS.ACCOUNT_HEART_OUTLINE} size={mobileIconSizes.xxlarge * 1.5} color={designTokens.colors.textTertiary} />
+              <MaterialCommunityIcons
+                name={ICONS.ACCOUNT_HEART_OUTLINE}
+                size={mobileIconSizes.xxlarge * 1.5}
+                color={designTokens.colors.textTertiary}
+              />
               <Text style={styles.emptyText}>{t('screens.generateMatches.noActivityRounds')}</Text>
-              <Text style={styles.emptySubtext}>
-                {t('screens.generateMatches.getStarted')}
-              </Text>
+              <Text style={styles.emptySubtext}>{t('screens.generateMatches.getStarted')}</Text>
             </View>
           ) : (
             matchRounds.slice(0, 5).map((round) => (
               <View key={round.id} style={styles.roundCard}>
                 <View style={styles.roundHeader}>
                   <View style={styles.roundInfo}>
-                    <MaterialCommunityIcons name={ICONS.CALENDAR_CLOCK} size={mobileIconSizes.large} color={designTokens.colors.primary} />
+                    <MaterialCommunityIcons
+                      name={ICONS.CALENDAR_CLOCK}
+                      size={mobileIconSizes.large}
+                      color={designTokens.colors.primary}
+                    />
                     <View style={styles.roundDetails}>
                       <Text style={styles.roundDate}>
                         {format(new Date(round.scheduledDate), DATE_FORMATS.DATE_FNS_DATE_DISPLAY)}
@@ -165,7 +178,7 @@ const GenerateMatchesScreen = () => {
               </View>
             ))
           )}
-          
+
           {matchRounds.length > 5 && (
             <StandardButton
               title={t('screens.generateMatches.viewAllMatchHistory')}
@@ -278,4 +291,3 @@ const styles = StyleSheet.create({
 });
 
 export default GenerateMatchesScreen;
-

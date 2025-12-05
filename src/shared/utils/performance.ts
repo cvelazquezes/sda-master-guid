@@ -1,9 +1,9 @@
 /**
  * Performance Utilities
- * 
+ *
  * Utilities for optimizing performance including debouncing, throttling,
  * and memoization helpers.
- * 
+ *
  * Based on best practices from:
  * - Lodash
  * - Underscore.js
@@ -13,25 +13,25 @@
 /**
  * Debounces a function, delaying its execution until after a wait period
  * has elapsed since the last time it was invoked.
- * 
+ *
  * Perfect for search inputs, resize handlers, etc.
- * 
+ *
  * @param func - Function to debounce
  * @param wait - Milliseconds to wait before executing
  * @param options - Configuration options
  * @returns Debounced function
- * 
+ *
  * @example
  * ```typescript
  * const searchAPI = debounce((query: string) => {
  *   fetch(`/api/search?q=${query}`);
  * }, 300);
- * 
+ *
  * // Called once after user stops typing for 300ms
  * searchAPI('hello');
  * ```
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number,
   options: {
@@ -41,10 +41,10 @@ export function debounce<T extends (...args: any[]) => any>(
   } = {}
 ): ((...args: Parameters<T>) => void) & { cancel: () => void } {
   const { leading = false, trailing = true, maxWait } = options;
-  
+
   let timeoutId: NodeJS.Timeout | null = null;
   let lastArgs: Parameters<T> | null = null;
-  let lastThis: any = null;
+  let lastThis: unknown = null;
   let lastCallTime: number | null = null;
   let lastInvokeTime = 0;
 
@@ -114,11 +114,12 @@ export function debounce<T extends (...args: any[]) => any>(
     timeoutId = null;
   }
 
-  function debounced(this: any, ...args: Parameters<T>) {
+  const debounced = function (this: unknown, ...args: Parameters<T>) {
     const time = Date.now();
     const isInvoking = shouldInvoke(time);
 
     lastArgs = args;
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- Required for debounce
     lastThis = this;
     lastCallTime = time;
 
@@ -135,7 +136,7 @@ export function debounce<T extends (...args: any[]) => any>(
     if (timeoutId === null) {
       timeoutId = setTimeout(timerExpired, wait);
     }
-  }
+  };
 
   debounced.cancel = cancel;
   return debounced;
@@ -143,25 +144,25 @@ export function debounce<T extends (...args: any[]) => any>(
 
 /**
  * Throttles a function, ensuring it's only called at most once per time period.
- * 
+ *
  * Perfect for scroll handlers, mouse move, etc.
- * 
+ *
  * @param func - Function to throttle
  * @param wait - Milliseconds between function calls
  * @param options - Configuration options
  * @returns Throttled function
- * 
+ *
  * @example
  * ```typescript
  * const onScroll = throttle(() => {
  *   console.log('Scrolled!');
  * }, 1000);
- * 
+ *
  * // Called at most once per second, no matter how fast user scrolls
  * window.addEventListener('scroll', onScroll);
  * ```
  */
-export function throttle<T extends (...args: any[]) => any>(
+export function throttle<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number,
   options: {
@@ -180,11 +181,11 @@ export function throttle<T extends (...args: any[]) => any>(
 
 /**
  * Creates a function that delays invoking func until after delay milliseconds have elapsed
- * 
+ *
  * @param func - Function to delay
  * @param delay - Milliseconds to delay
  * @returns Delayed function with cancel method
- * 
+ *
  * @example
  * ```typescript
  * const delayedSave = delay(() => saveData(), 2000);
@@ -192,7 +193,7 @@ export function throttle<T extends (...args: any[]) => any>(
  * delayedSave.cancel(); // Cancel if needed
  * ```
  */
-export function delay<T extends (...args: any[]) => any>(
+export function delay<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): ((...args: Parameters<T>) => void) & { cancel: () => void } {
@@ -219,23 +220,23 @@ export function delay<T extends (...args: any[]) => any>(
 
 /**
  * Memoizes a function, caching the result of function calls
- * 
+ *
  * @param func - Function to memoize
  * @param resolver - Custom key resolver (optional)
  * @returns Memoized function with cache access
- * 
+ *
  * @example
  * ```typescript
  * const expensive = memoize((n: number) => {
  *   // Expensive calculation
  *   return n * n;
  * });
- * 
+ *
  * expensive(5); // Calculated
  * expensive(5); // Returned from cache
  * ```
  */
-export function memoize<T extends (...args: any[]) => any>(
+export function memoize<T extends (...args: unknown[]) => unknown>(
   func: T,
   resolver?: (...args: Parameters<T>) => string
 ): T & { cache: Map<string, ReturnType<T>>; clear: () => void } {
@@ -247,7 +248,7 @@ export function memoize<T extends (...args: any[]) => any>(
 
   function memoized(...args: Parameters<T>): ReturnType<T> {
     const key = resolver ? resolver(...args) : JSON.stringify(args);
-    
+
     if (cache.has(key)) {
       return cache.get(key)!;
     }
@@ -266,24 +267,22 @@ export function memoize<T extends (...args: any[]) => any>(
 /**
  * Creates a function that is restricted to invoking func once.
  * Repeat calls return the value of the first invocation.
- * 
+ *
  * @param func - Function to restrict
  * @returns Function that can only be called once
- * 
+ *
  * @example
  * ```typescript
  * const initialize = once(() => {
  *   console.log('Initialized!');
  *   return { status: 'ready' };
  * });
- * 
+ *
  * initialize(); // Logs "Initialized!", returns { status: 'ready' }
  * initialize(); // Returns cached { status: 'ready' }, doesn't log
  * ```
  */
-export function once<T extends (...args: any[]) => any>(
-  func: T
-): T & { called: boolean } {
+export function once<T extends (...args: unknown[]) => unknown>(func: T): T & { called: boolean } {
   let called = false;
   let result: ReturnType<T>;
 
@@ -291,38 +290,38 @@ export function once<T extends (...args: any[]) => any>(
     if (!called) {
       called = true;
       result = func(...args);
-      (onced as any).called = true;
     }
     return result;
   }
 
-  (onced as any).called = false;
+  Object.defineProperty(onced, 'called', {
+    get: () => called,
+    enumerable: true,
+  });
+
   return onced as T & { called: boolean };
 }
 
 /**
  * Batches multiple synchronous calls into a single asynchronous execution
- * 
+ *
  * @param func - Function to batch
  * @param wait - Milliseconds to wait before executing batch
  * @returns Batched function
- * 
+ *
  * @example
  * ```typescript
  * const batchUpdate = batch((ids: string[]) => {
  *   api.updateMany(ids);
  * }, 100);
- * 
+ *
  * batchUpdate(['1']);
  * batchUpdate(['2']);
  * batchUpdate(['3']);
  * // After 100ms, calls api.updateMany(['1', '2', '3'])
  * ```
  */
-export function batch<T>(
-  func: (items: T[]) => void,
-  wait: number
-): (item: T) => void {
+export function batch<T>(func: (items: T[]) => void, wait: number): (item: T) => void {
   let items: T[] = [];
   let timeoutId: NodeJS.Timeout | null = null;
 
@@ -343,19 +342,19 @@ export function batch<T>(
 
 /**
  * Rate limiter - limits function calls to X per time period
- * 
+ *
  * @param func - Function to rate limit
  * @param limit - Maximum calls per period
  * @param period - Time period in milliseconds
  * @returns Rate limited function
- * 
+ *
  * @example
  * ```typescript
  * const rateLimitedAPI = rateLimit(callAPI, 10, 1000);
  * // Maximum 10 calls per second
  * ```
  */
-export function rateLimit<T extends (...args: any[]) => any>(
+export function rateLimit<T extends (...args: unknown[]) => unknown>(
   func: T,
   limit: number,
   period: number
@@ -387,16 +386,20 @@ export function rateLimit<T extends (...args: any[]) => any>(
     return undefined;
   }
 
-  (rateLimited as any).remaining = remaining;
+  Object.defineProperty(rateLimited, 'remaining', {
+    value: remaining,
+    writable: false,
+  });
+
   return rateLimited as T & { remaining: () => number };
 }
 
 /**
  * Performance measurement utility
- * 
+ *
  * @param label - Label for the measurement
  * @returns Object with mark and measure methods
- * 
+ *
  * @example
  * ```typescript
  * const perf = performance('API Call');
@@ -419,4 +422,3 @@ export function performanceMeasure(label: string) {
     },
   };
 }
-

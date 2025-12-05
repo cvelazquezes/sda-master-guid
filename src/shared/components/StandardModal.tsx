@@ -21,8 +21,17 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../theme';
-import { ICONS, A11Y_ROLE, ANIMATION, TOUCH_OPACITY, PLATFORM_OS, KEYBOARD_BEHAVIOR, MODAL_CONFIG } from '../constants';
-import { flexValues, dimensionValues, borderValues } from '../constants/layoutConstants';
+import {
+  A11Y_ROLE,
+  ANIMATION,
+  ICONS,
+  KEYBOARD_BEHAVIOR,
+  MODAL_CONFIG,
+  PLATFORM_OS,
+  borderValues,
+  dimensionValues,
+  flexValues,
+} from '../constants';
 
 // Type for animation
 type AnimationType = typeof ANIMATION.FADE | typeof ANIMATION.SLIDE | typeof ANIMATION.NONE;
@@ -65,21 +74,27 @@ export const StandardModal: React.FC<StandardModalProps> = ({
   const { t } = useTranslation();
   const { colors, isDark } = useTheme();
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
-  
+
   const finalIconColor = iconColor || colors.primary;
   const finalIconBackgroundColor = iconBackgroundColor || colors.primaryAlpha10;
-  
+
   // Determine if we should use bottom sheet (mobile) or centered modal (tablet/desktop)
   const isMobile = windowWidth < designTokens.breakpoints.tablet;
-  
+
   // Calculate responsive modal width
   const getModalWidth = () => {
     if (windowWidth > designTokens.breakpoints.desktop) {
       // Desktop large screens
-      return Math.min(designTokens.responsiveScale.maxWidth.modal, windowWidth * designTokens.responsiveScale.modal.desktop);
+      return Math.min(
+        designTokens.responsiveScale.maxWidth.modal,
+        windowWidth * designTokens.responsiveScale.modal.desktop
+      );
     } else if (windowWidth > designTokens.breakpoints.tablet) {
       // Tablets and small desktop
-      return Math.min(designTokens.responsiveScale.maxWidth.modalSmall, windowWidth * designTokens.responsiveScale.modal.tablet);
+      return Math.min(
+        designTokens.responsiveScale.maxWidth.modalSmall,
+        windowWidth * designTokens.responsiveScale.modal.tablet
+      );
     } else {
       // Mobile - full width for bottom sheet
       return dimensionValues.maxWidthPercent.full;
@@ -116,47 +131,48 @@ export const StandardModal: React.FC<StandardModalProps> = ({
     >
       <KeyboardAvoidingView
         style={[styles.modalOverlay, isMobile && styles.modalOverlayMobile]}
-        behavior={Platform.OS === PLATFORM_OS.IOS ? KEYBOARD_BEHAVIOR.PADDING : KEYBOARD_BEHAVIOR.HEIGHT}
+        behavior={
+          Platform.OS === PLATFORM_OS.IOS ? KEYBOARD_BEHAVIOR.PADDING : KEYBOARD_BEHAVIOR.HEIGHT
+        }
       >
         <TouchableOpacity
           style={[styles.backdrop, isMobile && styles.backdropMobile]}
           activeOpacity={1}
           onPress={onClose}
         >
-            <TouchableOpacity
-              activeOpacity={1}
-              onPress={(e) => e.stopPropagation()}
-              style={[
-                styles.modalContent,
-                { 
-                  backgroundColor: colors.surface,
-                  shadowOpacity: isDark ? designTokens.shadowConfig.dark.opacity : designTokens.shadowConfig.lightStrong.opacity,
-                },
-                isMobile ? styles.modalContentMobile : styles.modalContentDesktop,
-                { width: modalWidth, maxHeight: modalMaxHeight },
-              ]}
-            >
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={(e) => e.stopPropagation()}
+            style={[
+              styles.modalContent,
+              {
+                backgroundColor: colors.surface,
+                shadowOpacity: isDark
+                  ? designTokens.shadowConfig.dark.opacity
+                  : designTokens.shadowConfig.lightStrong.opacity,
+              },
+              isMobile ? styles.modalContentMobile : styles.modalContentDesktop,
+              { width: modalWidth, maxHeight: modalMaxHeight },
+            ]}
+          >
             {/* Drag Handle - Mobile Only */}
-            {isMobile && (
-              <View style={[styles.dragHandle, { backgroundColor: colors.border }]} />
-            )}
+            {isMobile && <View style={[styles.dragHandle, { backgroundColor: colors.border }]} />}
 
             {/* Header */}
-            <View style={[
-              styles.header, 
-              { borderBottomColor: colors.border },
-              headerColor ? { backgroundColor: headerColor } : undefined
-            ]}>
+            <View
+              style={[
+                styles.header,
+                { borderBottomColor: colors.border },
+                headerColor ? { backgroundColor: headerColor } : undefined,
+              ]}
+            >
               <View style={styles.headerLeft}>
                 {icon && (
                   <View
-                    style={[
-                      styles.iconContainer,
-                      { backgroundColor: finalIconBackgroundColor },
-                    ]}
+                    style={[styles.iconContainer, { backgroundColor: finalIconBackgroundColor }]}
                   >
                     <MaterialCommunityIcons
-                      name={icon as any}
+                      name={icon as typeof ICONS.CHECK}
                       size={isMobile ? mobileIconSizes.large : mobileIconSizes.xlarge}
                       color={finalIconColor}
                     />
@@ -165,7 +181,9 @@ export const StandardModal: React.FC<StandardModalProps> = ({
                 <View style={styles.headerInfo}>
                   <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>{title}</Text>
                   {subtitle && (
-                    <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>{subtitle}</Text>
+                    <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
+                      {subtitle}
+                    </Text>
                   )}
                 </View>
               </View>
@@ -196,9 +214,7 @@ export const StandardModal: React.FC<StandardModalProps> = ({
 
             {/* Footer */}
             {footer && (
-              <View style={[styles.footer, { borderTopColor: colors.border }]}>
-                {footer}
-              </View>
+              <View style={[styles.footer, { borderTopColor: colors.border }]}>{footer}</View>
             )}
           </TouchableOpacity>
         </TouchableOpacity>
@@ -212,7 +228,8 @@ const styles = StyleSheet.create({
     flex: flexValues.one,
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
-    paddingTop: Platform.OS === PLATFORM_OS.ANDROID ? StatusBar.currentHeight : designTokens.spacing.xl,
+    paddingTop:
+      Platform.OS === PLATFORM_OS.ANDROID ? StatusBar.currentHeight : designTokens.spacing.xl,
   },
   modalOverlayMobile: {
     justifyContent: layoutConstants.justifyContent.flexEnd,

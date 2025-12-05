@@ -1,12 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, Alert, useWindowDimensions } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Modal,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  useWindowDimensions,
+} from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { PATHFINDER_CLASSES, PathfinderClass } from '../types';
-import { mobileTypography, mobileFontSizes, designTokens, layoutConstants } from '../shared/theme';
-import { MESSAGES, ICONS, ANIMATION, A11Y_ROLE } from '../shared/constants';
-import { CLASS_SELECTION } from '../shared/constants/businessRules';
-import { flexValues } from '../shared/constants/layoutConstants';
+import { mobileFontSizes, designTokens, layoutConstants } from '../shared/theme';
+import {
+  A11Y_ROLE,
+  ANIMATION,
+  CLASS_SELECTION,
+  ICONS,
+  MESSAGES,
+  flexValues,
+} from '../shared/constants';
 
 interface ClassSelectionModalProps {
   visible: boolean;
@@ -32,16 +46,19 @@ export const ClassSelectionModal: React.FC<ClassSelectionModalProps> = ({
   }, [visible]); // Removed initialClasses from dependencies
 
   // Calculate responsive modal width
-  const getModalWidth = () => {
-    if (windowWidth > designTokens.breakpoints.desktop) {
-      return Math.min(designTokens.responsiveScale.maxWidth.modal, windowWidth * designTokens.responsiveScale.modal.desktop);
-    } else if (windowWidth > designTokens.breakpoints.tablet) {
-      return Math.min(designTokens.responsiveScale.maxWidth.modalSmall, windowWidth * designTokens.responsiveScale.modal.tablet);
-    } else if (windowWidth > designTokens.breakpoints.mobile) {
-      return windowWidth * designTokens.responsiveScale.modal.mobileLarge;
-    } else {
-      return windowWidth * designTokens.responsiveScale.modal.mobile;
+  const getModalWidth = (): number => {
+    const { breakpoints, responsiveScale } = designTokens;
+    if (windowWidth > breakpoints.desktop) {
+      return Math.min(responsiveScale.maxWidth.modal, windowWidth * responsiveScale.modal.desktop);
+    } else if (windowWidth > breakpoints.tablet) {
+      return Math.min(
+        responsiveScale.maxWidth.modalSmall,
+        windowWidth * responsiveScale.modal.tablet
+      );
+    } else if (windowWidth > breakpoints.mobile) {
+      return windowWidth * responsiveScale.modal.mobileLarge;
     }
+    return windowWidth * responsiveScale.modal.mobile;
   };
 
   const modalWidth = getModalWidth();
@@ -81,21 +98,43 @@ export const ClassSelectionModal: React.FC<ClassSelectionModalProps> = ({
   const { t } = useTranslation();
 
   return (
-    <Modal visible={visible} animationType={ANIMATION.SLIDE} transparent={true} onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      animationType={ANIMATION.SLIDE}
+      transparent={true}
+      onRequestClose={onClose}
+    >
       <View style={styles.modalOverlay}>
         <View style={[styles.modalContent, { width: modalWidth, maxHeight: modalMaxHeight }]}>
           <View style={styles.header}>
             <View style={styles.headerLeft}>
-              <MaterialCommunityIcons name={ICONS.SCHOOL} size={designTokens.iconSize.lg} color={designTokens.colors.primary} />
+              <MaterialCommunityIcons
+                name={ICONS.SCHOOL}
+                size={designTokens.iconSize.lg}
+                color={designTokens.colors.primary}
+              />
               <Text style={styles.title}>{t('classes.selectClasses')}</Text>
             </View>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton} accessibilityRole={A11Y_ROLE.BUTTON} accessibilityLabel={t('accessibility.closeModal')}>
-              <MaterialCommunityIcons name={ICONS.CLOSE} size={designTokens.iconSize.lg} color={designTokens.colors.textSecondary} />
+            <TouchableOpacity
+              onPress={onClose}
+              style={styles.closeButton}
+              accessibilityRole={A11Y_ROLE.BUTTON}
+              accessibilityLabel={t('accessibility.closeModal')}
+            >
+              <MaterialCommunityIcons
+                name={ICONS.CLOSE}
+                size={designTokens.iconSize.lg}
+                color={designTokens.colors.textSecondary}
+              />
             </TouchableOpacity>
           </View>
 
           <View style={styles.infoCard}>
-            <MaterialCommunityIcons name={ICONS.INFORMATION} size={designTokens.iconSize.md} color={designTokens.colors.primary} />
+            <MaterialCommunityIcons
+              name={ICONS.INFORMATION}
+              size={designTokens.iconSize.md}
+              color={designTokens.colors.primary}
+            />
             <Text style={styles.infoText}>
               {t('classes.classInfo')} {selectedClasses.length}/{CLASS_SELECTION.maximum}
             </Text>
@@ -119,7 +158,11 @@ export const ClassSelectionModal: React.FC<ClassSelectionModalProps> = ({
                     ]}
                   >
                     {isSelected(pathfinderClass) && (
-                      <MaterialCommunityIcons name={ICONS.CHECK} size={designTokens.iconSize.sm} color={designTokens.colors.textInverse} />
+                      <MaterialCommunityIcons
+                        name={ICONS.CHECK}
+                        size={designTokens.iconSize.sm}
+                        color={designTokens.colors.textInverse}
+                      />
                     )}
                   </View>
                   <Text
@@ -143,11 +186,23 @@ export const ClassSelectionModal: React.FC<ClassSelectionModalProps> = ({
           </ScrollView>
 
           <View style={styles.footer}>
-            <TouchableOpacity style={styles.cancelButton} onPress={onClose} accessibilityRole={A11Y_ROLE.BUTTON}>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={onClose}
+              accessibilityRole={A11Y_ROLE.BUTTON}
+            >
               <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.saveButton} onPress={handleSave} accessibilityRole={A11Y_ROLE.BUTTON}>
-              <MaterialCommunityIcons name={ICONS.CHECK} size={designTokens.iconSize.md} color={designTokens.colors.textInverse} />
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={handleSave}
+              accessibilityRole={A11Y_ROLE.BUTTON}
+            >
+              <MaterialCommunityIcons
+                name={ICONS.CHECK}
+                size={designTokens.iconSize.md}
+                color={designTokens.colors.textInverse}
+              />
               <Text style={styles.saveButtonText}>{t('common.save')}</Text>
             </TouchableOpacity>
           </View>

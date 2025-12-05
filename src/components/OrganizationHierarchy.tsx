@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { mobileTypography, mobileFontSizes, designTokens, layoutConstants } from '../shared/theme';
+import { mobileFontSizes, designTokens, layoutConstants } from '../shared/theme';
 import { ICONS, TOUCH_OPACITY, TEXT_LINES, dimensionValues } from '../shared/constants';
 
 interface HierarchyData {
@@ -41,7 +41,11 @@ export const OrganizationHierarchy: React.FC<OrganizationHierarchyProps> = ({
       <View style={styles.compactContainer}>
         {data.division && (
           <View style={styles.compactItem}>
-            <MaterialCommunityIcons name={ICONS.EARTH} size={designTokens.iconSize.xs} color={designTokens.colors.textSecondary} />
+            <MaterialCommunityIcons
+              name={ICONS.EARTH}
+              size={designTokens.iconSize.xs}
+              color={designTokens.colors.textSecondary}
+            />
             <Text style={styles.compactText} numberOfLines={TEXT_LINES.single}>
               {data.division}
             </Text>
@@ -49,7 +53,11 @@ export const OrganizationHierarchy: React.FC<OrganizationHierarchyProps> = ({
         )}
         {data.church && (
           <View style={styles.compactItem}>
-            <MaterialCommunityIcons name={ICONS.CHURCH} size={designTokens.iconSize.xs} color={designTokens.colors.textSecondary} />
+            <MaterialCommunityIcons
+              name={ICONS.CHURCH}
+              size={designTokens.iconSize.xs}
+              color={designTokens.colors.textSecondary}
+            />
             <Text style={styles.compactText} numberOfLines={TEXT_LINES.single}>
               {data.church}
             </Text>
@@ -57,7 +65,11 @@ export const OrganizationHierarchy: React.FC<OrganizationHierarchyProps> = ({
         )}
         {data.clubName && (
           <View style={styles.compactItem}>
-            <MaterialCommunityIcons name={ICONS.ACCOUNT_GROUP} size={designTokens.iconSize.xs} color={designTokens.colors.textSecondary} />
+            <MaterialCommunityIcons
+              name={ICONS.ACCOUNT_GROUP}
+              size={designTokens.iconSize.xs}
+              color={designTokens.colors.textSecondary}
+            />
             <Text style={styles.compactText} numberOfLines={TEXT_LINES.single}>
               {data.clubName}
             </Text>
@@ -75,7 +87,11 @@ export const OrganizationHierarchy: React.FC<OrganizationHierarchyProps> = ({
         activeOpacity={TOUCH_OPACITY.default}
       >
         <View style={styles.headerLeft}>
-          <MaterialCommunityIcons name={ICONS.SITEMAP} size={designTokens.iconSize.md} color={designTokens.colors.primary} />
+          <MaterialCommunityIcons
+            name={ICONS.SITEMAP}
+            size={designTokens.iconSize.md}
+            color={designTokens.colors.primary}
+          />
           <Text style={styles.title}>{displayTitle}</Text>
         </View>
         <MaterialCommunityIcons
@@ -90,10 +106,18 @@ export const OrganizationHierarchy: React.FC<OrganizationHierarchyProps> = ({
           {data.division && (
             <View style={styles.hierarchyItem}>
               <View style={styles.levelContainer}>
-                <MaterialCommunityIcons name={ICONS.EARTH} size={designTokens.iconSize.sm} color={designTokens.colors.textSecondary} />
-                <Text style={styles.levelLabel}>{t('components.organizationHierarchy.levels.division')}</Text>
+                <MaterialCommunityIcons
+                  name={ICONS.EARTH}
+                  size={designTokens.iconSize.sm}
+                  color={designTokens.colors.textSecondary}
+                />
+                <Text style={styles.levelLabel}>
+                  {t('components.organizationHierarchy.levels.division')}
+                </Text>
                 <View style={styles.levelBadge}>
-                  <Text style={styles.levelBadgeText}>{t('components.organizationHierarchy.levelBadges.level1')}</Text>
+                  <Text style={styles.levelBadgeText}>
+                    {t('components.organizationHierarchy.levelBadges.level1')}
+                  </Text>
                 </View>
               </View>
               <Text style={styles.hierarchyValue}>{data.division}</Text>
@@ -103,10 +127,18 @@ export const OrganizationHierarchy: React.FC<OrganizationHierarchyProps> = ({
           {data.union && (
             <View style={styles.hierarchyItem}>
               <View style={styles.levelContainer}>
-                <MaterialCommunityIcons name={ICONS.DOMAIN} size={designTokens.iconSize.sm} color={designTokens.colors.textSecondary} />
-                <Text style={styles.levelLabel}>{t('components.organizationHierarchy.levels.union')}</Text>
+                <MaterialCommunityIcons
+                  name={ICONS.DOMAIN}
+                  size={designTokens.iconSize.sm}
+                  color={designTokens.colors.textSecondary}
+                />
+                <Text style={styles.levelLabel}>
+                  {t('components.organizationHierarchy.levels.union')}
+                </Text>
                 <View style={styles.levelBadge}>
-                  <Text style={styles.levelBadgeText}>{t('components.organizationHierarchy.levelBadges.level2')}</Text>
+                  <Text style={styles.levelBadgeText}>
+                    {t('components.organizationHierarchy.levelBadges.level2')}
+                  </Text>
                 </View>
               </View>
               <Text style={styles.hierarchyValue}>{data.union}</Text>
@@ -116,10 +148,18 @@ export const OrganizationHierarchy: React.FC<OrganizationHierarchyProps> = ({
           {data.association && (
             <View style={styles.hierarchyItem}>
               <View style={styles.levelContainer}>
-                <MaterialCommunityIcons name={ICONS.OFFICE_BUILDING} size={designTokens.iconSize.sm} color={designTokens.colors.textSecondary} />
-                <Text style={styles.levelLabel}>{t('components.organizationHierarchy.levels.association')}</Text>
+                <MaterialCommunityIcons
+                  name={ICONS.OFFICE_BUILDING}
+                  size={designTokens.iconSize.sm}
+                  color={designTokens.colors.textSecondary}
+                />
+                <Text style={styles.levelLabel}>
+                  {t('components.organizationHierarchy.levels.association')}
+                </Text>
                 <View style={styles.levelBadge}>
-                  <Text style={styles.levelBadgeText}>{t('components.organizationHierarchy.levelBadges.level3')}</Text>
+                  <Text style={styles.levelBadgeText}>
+                    {t('components.organizationHierarchy.levelBadges.level3')}
+                  </Text>
                 </View>
               </View>
               <Text style={styles.hierarchyValue}>{data.association}</Text>
@@ -129,10 +169,18 @@ export const OrganizationHierarchy: React.FC<OrganizationHierarchyProps> = ({
           {data.church && (
             <View style={styles.hierarchyItem}>
               <View style={styles.levelContainer}>
-                <MaterialCommunityIcons name={ICONS.CHURCH} size={designTokens.iconSize.sm} color={designTokens.colors.textSecondary} />
-                <Text style={styles.levelLabel}>{t('components.organizationHierarchy.levels.church')}</Text>
+                <MaterialCommunityIcons
+                  name={ICONS.CHURCH}
+                  size={designTokens.iconSize.sm}
+                  color={designTokens.colors.textSecondary}
+                />
+                <Text style={styles.levelLabel}>
+                  {t('components.organizationHierarchy.levels.church')}
+                </Text>
                 <View style={styles.levelBadge}>
-                  <Text style={styles.levelBadgeText}>{t('components.organizationHierarchy.levelBadges.level4')}</Text>
+                  <Text style={styles.levelBadgeText}>
+                    {t('components.organizationHierarchy.levelBadges.level4')}
+                  </Text>
                 </View>
               </View>
               <Text style={styles.hierarchyValue}>{data.church}</Text>
@@ -142,10 +190,18 @@ export const OrganizationHierarchy: React.FC<OrganizationHierarchyProps> = ({
           {data.clubName && (
             <View style={styles.hierarchyItem}>
               <View style={styles.levelContainer}>
-                <MaterialCommunityIcons name={ICONS.ACCOUNT_GROUP} size={designTokens.iconSize.sm} color={designTokens.colors.textSecondary} />
-                <Text style={styles.levelLabel}>{t('components.organizationHierarchy.levels.club')}</Text>
+                <MaterialCommunityIcons
+                  name={ICONS.ACCOUNT_GROUP}
+                  size={designTokens.iconSize.sm}
+                  color={designTokens.colors.textSecondary}
+                />
+                <Text style={styles.levelLabel}>
+                  {t('components.organizationHierarchy.levels.club')}
+                </Text>
                 <View style={styles.levelBadge}>
-                  <Text style={styles.levelBadgeText}>{t('components.organizationHierarchy.levelBadges.level5')}</Text>
+                  <Text style={styles.levelBadgeText}>
+                    {t('components.organizationHierarchy.levelBadges.level5')}
+                  </Text>
                 </View>
               </View>
               <Text style={styles.hierarchyValue}>{data.clubName}</Text>
@@ -239,4 +295,3 @@ const styles = StyleSheet.create({
     maxWidth: dimensionValues.maxWidth.label,
   },
 });
-

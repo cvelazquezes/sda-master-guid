@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -20,7 +20,7 @@ interface StandardPickerProps {
   required?: boolean;
   disabled?: boolean;
   onPress: () => void;
-  containerStyle?: any;
+  containerStyle?: ViewStyle;
 }
 
 export const StandardPicker: React.FC<StandardPickerProps> = ({
@@ -69,7 +69,7 @@ export const StandardPicker: React.FC<StandardPickerProps> = ({
         {/* Icon */}
         {icon && (
           <MaterialCommunityIcons
-            name={icon as any}
+            name={icon as typeof ICONS.CHECK}
             size={mobileIconSizes.medium}
             color={hasError ? designTokens.colors.error : colors.textSecondary}
             style={styles.icon}
@@ -78,10 +78,7 @@ export const StandardPicker: React.FC<StandardPickerProps> = ({
 
         {/* Value/Placeholder */}
         <Text
-          style={[
-            styles.pickerText,
-            !hasValue && styles.pickerTextPlaceholder,
-          ]}
+          style={[styles.pickerText, !hasValue && styles.pickerTextPlaceholder]}
           numberOfLines={TEXT_LINES.single}
         >
           {hasValue ? value : displayPlaceholder}
@@ -168,4 +165,3 @@ const styles = StyleSheet.create({
     flex: flexValues.one,
   },
 });
-

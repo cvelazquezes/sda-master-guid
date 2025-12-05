@@ -106,11 +106,11 @@ export function createInputA11yProps(
   }
 ): AccessibilityProps {
   let hint = options?.placeholder;
-  
+
   if (options?.required) {
     hint = hint ? `${hint} (required)` : 'Required field';
   }
-  
+
   if (options?.error) {
     hint = options.error;
   }
@@ -195,10 +195,7 @@ export function createRadioA11yProps(
 /**
  * Creates accessibility props for a header
  */
-export function createHeaderA11yProps(
-  label: string,
-  level: number = 1
-): AccessibilityProps {
+export function createHeaderA11yProps(label: string, level: number = 1): AccessibilityProps {
   return {
     accessible: true,
     accessibilityRole: 'header',
@@ -232,9 +229,7 @@ export function createImageA11yProps(
 /**
  * Creates accessibility props for a loading indicator
  */
-export function createLoadingA11yProps(
-  message: string = 'Loading'
-): AccessibilityProps {
+export function createLoadingA11yProps(message: string = 'Loading'): AccessibilityProps {
   return {
     accessible: true,
     accessibilityRole: 'progressbar',
@@ -335,11 +330,7 @@ export function createListItemA11y(
   total: number,
   description?: string
 ): string {
-  const parts = [
-    title,
-    `item ${index + 1} of ${total}`,
-    description,
-  ];
+  const parts = [title, `item ${index + 1} of ${total}`, description];
   return combineA11yLabel(...parts);
 }
 
@@ -352,9 +343,10 @@ export const MINIMUM_TOUCH_TARGET = 44; // iOS HIG & Material Design minimum
 /**
  * Ensures minimum touch target size
  */
-export function getMinimumTouchTarget(
-  currentSize: number
-): { minWidth: number; minHeight: number } {
+export function getMinimumTouchTarget(currentSize: number): {
+  minWidth: number;
+  minHeight: number;
+} {
   const size = Math.max(currentSize, MINIMUM_TOUCH_TARGET);
   return {
     minWidth: size,
@@ -388,6 +380,7 @@ export function createHitSlop(size: number = 8): {
  */
 export function announceForAccessibility(message: string): void {
   if (Platform.OS === 'ios' || Platform.OS === 'android') {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const AccessibilityInfo = require('react-native').AccessibilityInfo;
     AccessibilityInfo.announceForAccessibility(message);
   }
@@ -400,7 +393,8 @@ export async function isScreenReaderEnabled(): Promise<boolean> {
   if (Platform.OS === 'web') {
     return false; // Not available on web
   }
-  
+
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const AccessibilityInfo = require('react-native').AccessibilityInfo;
   return await AccessibilityInfo.isScreenReaderEnabled();
 }
@@ -429,30 +423,24 @@ export function getContrastRatio(
 ): number {
   const l1 = getRelativeLuminance(color1.r, color1.g, color1.b);
   const l2 = getRelativeLuminance(color2.r, color2.g, color2.b);
-  
+
   const lighter = Math.max(l1, l2);
   const darker = Math.min(l1, l2);
-  
+
   return (lighter + 0.05) / (darker + 0.05);
 }
 
 /**
  * Checks if contrast ratio meets WCAG AA standard
  */
-export function meetsWCAGAA(
-  contrastRatio: number,
-  isLargeText: boolean = false
-): boolean {
+export function meetsWCAGAA(contrastRatio: number, isLargeText: boolean = false): boolean {
   return isLargeText ? contrastRatio >= 3 : contrastRatio >= 4.5;
 }
 
 /**
  * Checks if contrast ratio meets WCAG AAA standard
  */
-export function meetsWCAGAAA(
-  contrastRatio: number,
-  isLargeText: boolean = false
-): boolean {
+export function meetsWCAGAAA(contrastRatio: number, isLargeText: boolean = false): boolean {
   return isLargeText ? contrastRatio >= 4.5 : contrastRatio >= 7;
 }
 
@@ -479,4 +467,3 @@ export function createA11yProps(
     ...(testID ? { testID } : {}),
   };
 }
-

@@ -18,10 +18,9 @@ import { Club } from '../../types';
 import { designTokens } from '../../shared/theme/designTokens';
 import { layoutConstants } from '../../shared/theme';
 import { ScreenHeader, SectionHeader, MenuCard } from '../../shared/components';
-import { MESSAGES, ICONS, TABS, SCREENS, MENU_ITEM_IDS } from '../../shared/constants';
 import { ApprovalStatus, MatchStatus } from '../../types';
-import { flexValues } from '../../shared/constants/layoutConstants';
 import { useTranslation } from 'react-i18next';
+import { ICONS, MENU_ITEM_IDS, MESSAGES, SCREENS, TABS, flexValues } from '../../shared/constants';
 
 const ClubAdminDashboardScreen = () => {
   const navigation = useNavigation();
@@ -51,13 +50,15 @@ const ClubAdminDashboardScreen = () => {
         clubService.getClubMembers(user.clubId),
         matchService.getClubMatches(user.clubId),
       ]);
-      
+
       setClub(clubData);
       setStats({
         totalMembers: members.length,
         activeMembers: members.filter((m) => m.isActive).length,
         pendingApprovals: members.filter((m) => m.approvalStatus === ApprovalStatus.PENDING).length,
-        upcomingMatches: matches.filter((m) => m.status === MatchStatus.PENDING || m.status === MatchStatus.SCHEDULED).length,
+        upcomingMatches: matches.filter(
+          (m) => m.status === MatchStatus.PENDING || m.status === MatchStatus.SCHEDULED
+        ).length,
       });
     } catch (error) {
       Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_LOAD_CLUB_INFO);
@@ -100,10 +101,7 @@ const ClubAdminDashboardScreen = () => {
         {/* Show club card in header */}
         {club && (
           <View style={styles.clubCardContainer}>
-            <ClubCard
-              club={club}
-              onPress={() => setClubDetailVisible(true)}
-            />
+            <ClubCard club={club} onPress={() => setClubDetailVisible(true)} />
           </View>
         )}
       </ScreenHeader>

@@ -133,8 +133,8 @@ export const sdaSemanticColors = {
   primaryActive: sdaBrandColors.primary[700],
   primaryLight: sdaBrandColors.primary[50],
   primaryMedium: sdaBrandColors.primary[100],
-  primaryAlpha10: 'rgba(25, 118, 210, 0.1)',  // 10% opacity primary
-  primaryAlpha20: 'rgba(25, 118, 210, 0.2)',  // 20% opacity primary
+  primaryAlpha10: 'rgba(25, 118, 210, 0.1)', // 10% opacity primary
+  primaryAlpha20: 'rgba(25, 118, 210, 0.2)', // 20% opacity primary
 
   // Secondary actions and elements
   secondary: sdaBrandColors.secondary[500],
@@ -154,15 +154,15 @@ export const sdaSemanticColors = {
   success: sdaBrandColors.success[500],
   successLight: sdaBrandColors.success[50],
   successMedium: sdaBrandColors.success[100],
-  
+
   warning: sdaBrandColors.warning[500],
   warningLight: sdaBrandColors.warning[50],
   warningMedium: sdaBrandColors.warning[100],
-  
+
   error: sdaBrandColors.error[500],
   errorLight: sdaBrandColors.error[100], // Changed from [50] to [100] for better visibility
   errorMedium: sdaBrandColors.error[200], // Changed from [100] to [200]
-  
+
   info: sdaBrandColors.info[500],
   infoLight: sdaBrandColors.info[50],
   infoMedium: sdaBrandColors.info[100],
@@ -179,19 +179,20 @@ export const sdaSemanticColors = {
   textOnAccent: sdaBrandColors.neutral[900],
 
   // Background colors - matching dark theme structure
-  background: '#FFFFFF',            // Main background (alias)
+  background: '#FFFFFF', // Main background (alias)
   backgroundPrimary: '#FFFFFF',
-  backgroundSecondary: sdaBrandColors.neutral[100], // F5F5F5 - slightly darker for better card contrast
+  // F5F5F5 - slightly darker for better card contrast
+  backgroundSecondary: sdaBrandColors.neutral[100],
   backgroundTertiary: sdaBrandColors.neutral[200],
   backgroundElevated: '#FFFFFF',
   backgroundOverlay: 'rgba(0, 0, 0, 0.5)',
   backgroundModal: '#FFFFFF',
 
   // Input backgrounds
-  inputBackground: sdaBrandColors.neutral[50],  // #FAFAFA - very light gray for inputs
+  inputBackground: sdaBrandColors.neutral[50], // #FAFAFA - very light gray for inputs
 
   // Border colors - matching dark theme structure
-  border: sdaBrandColors.neutral[200],  // Default border (alias)
+  border: sdaBrandColors.neutral[200], // Default border (alias)
   borderLight: sdaBrandColors.neutral[200],
   borderMedium: sdaBrandColors.neutral[300],
   borderDark: sdaBrandColors.neutral[400],
@@ -204,9 +205,9 @@ export const sdaSemanticColors = {
   backdrop: 'rgba(0, 0, 0, 0.5)',
 
   // Surface colors - matching dark theme structure
-  surface: '#FFFFFF',              // Main surface color (cards)
-  surfaceLight: sdaBrandColors.neutral[50],  // Lighter surface
-  surfaceDark: sdaBrandColors.neutral[100],  // Darker surface
+  surface: '#FFFFFF', // Main surface color (cards)
+  surfaceLight: sdaBrandColors.neutral[50], // Lighter surface
+  surfaceDark: sdaBrandColors.neutral[100], // Darker surface
   surfaceDefault: '#FFFFFF',
   surfaceSubdued: sdaBrandColors.neutral[50],
   surfaceHovered: sdaBrandColors.neutral[100],
@@ -360,11 +361,11 @@ export const sdaColorUtils = {
     // Handle both #RGB and #RRGGBB
     const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
     const fullHex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
-    
+
     const r = parseInt(fullHex.slice(1, 3), 16);
     const g = parseInt(fullHex.slice(3, 5), 16);
     const b = parseInt(fullHex.slice(5, 7), 16);
-    
+
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   },
 
@@ -376,18 +377,21 @@ export const sdaColorUtils = {
     const r = parseInt(hex.slice(0, 2), 16);
     const g = parseInt(hex.slice(2, 4), 16);
     const b = parseInt(hex.slice(4, 6), 16);
-    
+
     // Calculate relative luminance
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-    
+
     return luminance > 0.5 ? sdaBrandColors.neutral[900] : '#FFFFFF';
   },
 
   /**
    * Check if color meets WCAG AA contrast ratio
    */
-  meetsContrastRatio(foreground: string, background: string, level: 'AA' | 'AAA' = 'AA'): boolean {
-    const minRatio = level === 'AAA' ? 7 : 4.5;
+  meetsContrastRatio(
+    _foreground: string,
+    _background: string,
+    _level: 'AA' | 'AAA' = 'AA'
+  ): boolean {
     // Simplified check - in production, use a proper contrast checker
     return true; // All our colors are pre-tested for WCAG AA
   },
@@ -401,4 +405,3 @@ export default {
   hierarchy: hierarchyColors,
   utils: sdaColorUtils,
 };
-

@@ -61,7 +61,8 @@ export interface User {
   role: UserRole;
   clubId: string | null; // Required for all users except admin (hierarchy comes from club)
   isActive: boolean; // Activity status: true = active, false = inactive
-  approvalStatus: ApprovalStatus; // Registration/approval status for club membership (independent from activity status)
+  // Registration/approval status for club membership (independent from activity status)
+  approvalStatus: ApprovalStatus;
   classes: PathfinderClass[]; // Pathfinder classes (min 1, max 3)
   timezone: string;
   language: string;

@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  RefreshControl,
-  Alert,
-  Linking,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, Alert, Linking } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -15,19 +7,23 @@ import { matchService } from '../../services/matchService';
 import { userService } from '../../services/userService';
 import { Match, MatchStatus, User } from '../../types';
 import { MatchCard } from '../../components/MatchCard';
-import { 
-  StandardModal, 
-  StandardButton, 
-  ScreenHeader, 
-  EmptyState 
-} from '../../shared/components';
+import { StandardModal, StandardButton, ScreenHeader, EmptyState } from '../../shared/components';
 import { designTokens } from '../../shared/theme/designTokens';
 import { mobileTypography } from '../../shared/theme/mobileTypography';
 import { layoutConstants } from '../../shared/theme';
-import { MESSAGES, EXTERNAL_URLS, ICONS, COMPONENT_VARIANT, BUTTON_SIZE, ALERT_BUTTON_STYLE, EMPTY_VALUE, VALIDATION } from '../../shared/constants';
-import { flexValues } from '../../shared/constants/layoutConstants';
 import { LOG_MESSAGES } from '../../shared/constants/logMessages';
-import { logger } from '../../services/logger';
+import { logger } from '../../shared/utils/logger';
+import {
+  ALERT_BUTTON_STYLE,
+  BUTTON_SIZE,
+  COMPONENT_VARIANT,
+  EMPTY_VALUE,
+  EXTERNAL_URLS,
+  ICONS,
+  MESSAGES,
+  VALIDATION,
+  flexValues,
+} from '../../shared/constants';
 
 const ActivitiesScreen = () => {
   const { t } = useTranslation();
@@ -61,34 +57,30 @@ const ActivitiesScreen = () => {
   };
 
   const handleSkipMatch = async (matchId: string) => {
-    Alert.alert(
-      MESSAGES.TITLES.SKIP_ACTIVITY,
-      MESSAGES.WARNINGS.CONFIRM_SKIP,
-      [
-        { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
-        {
-          text: MESSAGES.BUTTONS.SKIP,
-          style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
-          onPress: async () => {
-            try {
-              await matchService.skipMatch(matchId);
-              loadMatches();
-            } catch (error) {
-              Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_SKIP_ACTIVITY);
-            }
-          },
+    Alert.alert(MESSAGES.TITLES.SKIP_ACTIVITY, MESSAGES.WARNINGS.CONFIRM_SKIP, [
+      { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
+      {
+        text: MESSAGES.BUTTONS.SKIP,
+        style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
+        onPress: async () => {
+          try {
+            await matchService.skipMatch(matchId);
+            loadMatches();
+          } catch (error) {
+            Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_SKIP_ACTIVITY);
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleViewMatchDetails = async (match: Match) => {
     setSelectedMatch(match);
     setDetailModalVisible(true);
-    
+
     try {
       const participants = await Promise.all(
-        match.participants.map(userId => userService.getUser(userId))
+        match.participants.map((userId) => userService.getUser(userId))
       );
       setMatchParticipants(participants);
     } catch (error) {
@@ -108,12 +100,12 @@ const ActivitiesScreen = () => {
 
   const handleCreateGroupChat = () => {
     if (matchParticipants.length === 0) return;
-    
+
     const phoneNumbers = matchParticipants
-      .filter(p => p.whatsappNumber && p.id !== user?.id)
-      .map(p => p.whatsappNumber.replace(VALIDATION.WHATSAPP.STRIP_NON_DIGITS, EMPTY_VALUE))
+      .filter((p) => p.whatsappNumber && p.id !== user?.id)
+      .map((p) => p.whatsappNumber.replace(VALIDATION.WHATSAPP.STRIP_NON_DIGITS, EMPTY_VALUE))
       .join(',');
-    
+
     if (phoneNumbers) {
       const message = t('screens.activities.whatsappMessageGroup');
       const url = `${EXTERNAL_URLS.WHATSAPP_GROUP}?text=${encodeURIComponent(message)}&phone=${phoneNumbers}`;
@@ -167,18 +159,32 @@ const ActivitiesScreen = () => {
               {/* Filter badges (visual only for now) */}
               <View style={styles.filterContainer}>
                 <Text style={styles.filterLabel}>{t('screens.activities.filterByStatus')}</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={styles.filterScroll}
+                >
                   {[
                     { label: t('screens.activities.filterAll'), status: null },
                     { label: t('screens.activities.filterPending'), status: MatchStatus.PENDING },
-                    { label: t('screens.activities.filterScheduled'), status: MatchStatus.SCHEDULED },
-                    { label: t('screens.activities.filterCompleted'), status: MatchStatus.COMPLETED },
+                    {
+                      label: t('screens.activities.filterScheduled'),
+                      status: MatchStatus.SCHEDULED,
+                    },
+                    {
+                      label: t('screens.activities.filterCompleted'),
+                      status: MatchStatus.COMPLETED,
+                    },
                   ].map((filter) => (
                     <View key={filter.label} style={styles.filterBadge}>
                       <MaterialCommunityIcons
                         name={ICONS.CIRCLE}
                         size={designTokens.icon.sizes.xs}
-                        color={filter.status ? getStatusColor(filter.status) : designTokens.colors.textSecondary}
+                        color={
+                          filter.status
+                            ? getStatusColor(filter.status)
+                            : designTokens.colors.textSecondary
+                        }
                       />
                       <Text style={styles.filterText}>{filter.label}</Text>
                     </View>
@@ -221,9 +227,18 @@ const ActivitiesScreen = () => {
             {/* Activity Status */}
             <View style={styles.modalSection}>
               <Text style={styles.modalSectionTitle}>{t('screens.activities.status')}</Text>
-              <View style={[styles.statusBadge, { backgroundColor: `${getStatusColor(selectedMatch.status)}20` }]}>
+              <View
+                style={[
+                  styles.statusBadge,
+                  { backgroundColor: `${getStatusColor(selectedMatch.status)}20` },
+                ]}
+              >
                 <MaterialCommunityIcons
-                  name={selectedMatch.status === MatchStatus.COMPLETED ? ICONS.CHECK_CIRCLE : ICONS.CLOCK_OUTLINE}
+                  name={
+                    selectedMatch.status === MatchStatus.COMPLETED
+                      ? ICONS.CHECK_CIRCLE
+                      : ICONS.CLOCK_OUTLINE
+                  }
                   size={designTokens.icon.sizes.md}
                   color={getStatusColor(selectedMatch.status)}
                 />
@@ -380,4 +395,3 @@ const styles = StyleSheet.create({
 });
 
 export default ActivitiesScreen;
-

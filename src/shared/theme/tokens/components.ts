@@ -1,17 +1,23 @@
 /**
  * Component Design Tokens
- * 
+ *
  * Pre-composed tokens for specific UI components.
  * These tokens combine semantic tokens into ready-to-use component configurations.
- * 
+ *
  * USAGE:
  * const tokens = useDesignTokens();
  * const buttonStyle = tokens.components.button.primary;
  */
 
 import { TextStyle } from 'react-native';
-import { createSemanticColors, semanticSpacing, semanticTypography, semanticBorder, ThemeMode } from './semantic';
-import { spacingPrimitives, shadowPrimitives, opacityPrimitives, sizePrimitives, borderWidthPrimitives } from './primitives';
+import { createSemanticColors, semanticTypography, semanticBorder, ThemeMode } from './semantic';
+import {
+  spacingPrimitives,
+  shadowPrimitives,
+  opacityPrimitives,
+  sizePrimitives,
+  borderWidthPrimitives,
+} from './primitives';
 
 // ============================================================================
 // BUTTON TOKENS
@@ -563,4 +569,3 @@ export const createComponentTokens = (theme: ThemeMode) => ({
 });
 
 export type ComponentTokens = ReturnType<typeof createComponentTokens>;
-

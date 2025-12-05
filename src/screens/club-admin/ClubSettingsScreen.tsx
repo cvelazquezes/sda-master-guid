@@ -8,7 +8,7 @@ import {
   Alert,
   TextInput,
 } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+// MaterialCommunityIcons imported via OrganizationHierarchy
 import { useTranslation } from 'react-i18next';
 import { clubService } from '../../services/clubService';
 import { useAuth } from '../../context/AuthContext';
@@ -17,18 +17,23 @@ import { OrganizationHierarchy } from '../../components/OrganizationHierarchy';
 import { designTokens } from '../../shared/theme/designTokens';
 import { mobileTypography } from '../../shared/theme/mobileTypography';
 import { layoutConstants } from '../../shared/theme';
-import { MESSAGES, CLUB_SETTINGS, EMPTY_VALUE } from '../../shared/constants';
-import { flexValues, dimensionValues } from '../../shared/constants/layoutConstants';
 import { ThemeSwitcher } from '../../components/ThemeSwitcher';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 import { useTheme } from '../../contexts/ThemeContext';
+import {
+  CLUB_SETTINGS,
+  EMPTY_VALUE,
+  MESSAGES,
+  dimensionValues,
+  flexValues,
+} from '../../shared/constants';
 
 const ClubSettingsScreen = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { colors } = useTheme();
   const [club, setClub] = useState<Club | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: EMPTY_VALUE,
     description: EMPTY_VALUE,
@@ -79,15 +84,24 @@ const ClubSettingsScreen = () => {
   if (!club) {
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>{t('screens.clubSettings.loading')}</Text>
+        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
+          {t('screens.clubSettings.loading')}
+        </Text>
       </View>
     );
   }
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <Text style={[styles.title, { color: colors.textPrimary }]}>{t('screens.clubSettings.title')}</Text>
+      <View
+        style={[
+          styles.header,
+          { backgroundColor: colors.surface, borderBottomColor: colors.border },
+        ]}
+      >
+        <Text style={[styles.title, { color: colors.textPrimary }]}>
+          {t('screens.clubSettings.title')}
+        </Text>
       </View>
 
       <View style={styles.content}>
@@ -108,16 +122,33 @@ const ClubSettingsScreen = () => {
         )}
 
         <View style={[styles.section, { backgroundColor: colors.surface }]}>
-          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>{t('screens.clubSettings.basicInformation')}</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
+            {t('screens.clubSettings.basicInformation')}
+          </Text>
           <TextInput
-            style={[styles.input, { borderColor: colors.border, color: colors.textPrimary, backgroundColor: colors.inputBackground }]}
+            style={[
+              styles.input,
+              {
+                borderColor: colors.border,
+                color: colors.textPrimary,
+                backgroundColor: colors.inputBackground,
+              },
+            ]}
             placeholder={t('screens.clubSettings.clubNamePlaceholder')}
             placeholderTextColor={colors.textTertiary}
             value={formData.name}
             onChangeText={(text) => setFormData({ ...formData, name: text })}
           />
           <TextInput
-            style={[styles.input, styles.textArea, { borderColor: colors.border, color: colors.textPrimary, backgroundColor: colors.inputBackground }]}
+            style={[
+              styles.input,
+              styles.textArea,
+              {
+                borderColor: colors.border,
+                color: colors.textPrimary,
+                backgroundColor: colors.inputBackground,
+              },
+            ]}
             placeholder={t('screens.clubSettings.descriptionPlaceholder')}
             placeholderTextColor={colors.textTertiary}
             value={formData.description}
@@ -128,9 +159,13 @@ const ClubSettingsScreen = () => {
         </View>
 
         <View style={[styles.section, { backgroundColor: colors.surface }]}>
-          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>{t('screens.clubSettings.activitySettings')}</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
+            {t('screens.clubSettings.activitySettings')}
+          </Text>
           <View style={styles.selectContainer}>
-            <Text style={[styles.selectLabel, { color: colors.textPrimary }]}>{t('screens.clubSettings.activityFrequency')}</Text>
+            <Text style={[styles.selectLabel, { color: colors.textPrimary }]}>
+              {t('screens.clubSettings.activityFrequency')}
+            </Text>
             <View style={styles.selectOptions}>
               {Object.values(MatchFrequency).map((freq) => (
                 <TouchableOpacity
@@ -138,7 +173,10 @@ const ClubSettingsScreen = () => {
                   style={[
                     styles.selectOption,
                     { borderColor: colors.border, backgroundColor: colors.inputBackground },
-                    formData.matchFrequency === freq && { backgroundColor: colors.primary, borderColor: colors.primary },
+                    formData.matchFrequency === freq && {
+                      backgroundColor: colors.primary,
+                      borderColor: colors.primary,
+                    },
                   ]}
                   onPress={() => setFormData({ ...formData, matchFrequency: freq })}
                 >
@@ -146,7 +184,10 @@ const ClubSettingsScreen = () => {
                     style={[
                       styles.selectOptionText,
                       { color: colors.textSecondary },
-                      formData.matchFrequency === freq && { color: colors.textInverse, fontWeight: designTokens.fontWeight.semibold },
+                      formData.matchFrequency === freq && {
+                        color: colors.textInverse,
+                        fontWeight: designTokens.fontWeight.semibold,
+                      },
                     ]}
                   >
                     {t(`club.matchFrequency.${freq}`)}
@@ -157,7 +198,9 @@ const ClubSettingsScreen = () => {
           </View>
 
           <View style={styles.selectContainer}>
-            <Text style={[styles.selectLabel, { color: colors.textPrimary }]}>{t('screens.clubSettings.groupSize')}</Text>
+            <Text style={[styles.selectLabel, { color: colors.textPrimary }]}>
+              {t('screens.clubSettings.groupSize')}
+            </Text>
             <View style={styles.selectOptions}>
               {[2, 3].map((size) => (
                 <TouchableOpacity
@@ -165,7 +208,10 @@ const ClubSettingsScreen = () => {
                   style={[
                     styles.selectOption,
                     { borderColor: colors.border, backgroundColor: colors.inputBackground },
-                    formData.groupSize === size && { backgroundColor: colors.primary, borderColor: colors.primary },
+                    formData.groupSize === size && {
+                      backgroundColor: colors.primary,
+                      borderColor: colors.primary,
+                    },
                   ]}
                   onPress={() => setFormData({ ...formData, groupSize: size })}
                 >
@@ -173,7 +219,10 @@ const ClubSettingsScreen = () => {
                     style={[
                       styles.selectOptionText,
                       { color: colors.textSecondary },
-                      formData.groupSize === size && { color: colors.textInverse, fontWeight: designTokens.fontWeight.semibold },
+                      formData.groupSize === size && {
+                        color: colors.textInverse,
+                        fontWeight: designTokens.fontWeight.semibold,
+                      },
                     ]}
                   >
                     {size}
@@ -185,8 +234,10 @@ const ClubSettingsScreen = () => {
         </View>
 
         <View style={[styles.section, { backgroundColor: colors.surface }]}>
-          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>{t('screens.clubSettings.userPreferences')}</Text>
-          
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
+            {t('screens.clubSettings.userPreferences')}
+          </Text>
+
           {/* Theme Switcher */}
           <View style={styles.preferenceItem}>
             <ThemeSwitcher showLabel={true} />
@@ -198,8 +249,13 @@ const ClubSettingsScreen = () => {
           </View>
         </View>
 
-        <TouchableOpacity style={[styles.saveButton, { backgroundColor: colors.primary }]} onPress={handleSave}>
-          <Text style={[styles.saveButtonText, { color: colors.textInverse }]}>{t('screens.clubSettings.saveChanges')}</Text>
+        <TouchableOpacity
+          style={[styles.saveButton, { backgroundColor: colors.primary }]}
+          onPress={handleSave}
+        >
+          <Text style={[styles.saveButtonText, { color: colors.textInverse }]}>
+            {t('screens.clubSettings.saveChanges')}
+          </Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -284,4 +340,3 @@ const styles = StyleSheet.create({
 });
 
 export default ClubSettingsScreen;
-

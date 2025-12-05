@@ -1,22 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  RefreshControl,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { mobileTypography, mobileIconSizes, layoutConstants } from '../../shared/theme';
 import { designTokens } from '../../shared/theme/designTokens';
-import { ICONS, TOUCH_OPACITY, TEXT_LINES, NOTIFICATION_TYPE } from '../../shared/constants';
-import { flexValues, shadowOffsetValues, dimensionValues, borderValues } from '../../shared/constants/layoutConstants';
 import { TIMING } from '../../shared/constants/timing';
+import {
+  ICONS,
+  NOTIFICATION_TYPE,
+  TEXT_LINES,
+  TOUCH_OPACITY,
+  borderValues,
+  dimensionValues,
+  flexValues,
+  shadowOffsetValues,
+} from '../../shared/constants';
 
-type NotificationType = typeof NOTIFICATION_TYPE[keyof typeof NOTIFICATION_TYPE];
+type NotificationType = (typeof NOTIFICATION_TYPE)[keyof typeof NOTIFICATION_TYPE];
 
 interface Notification {
   id: string;
@@ -29,7 +30,7 @@ interface Notification {
 
 const NotificationsScreen = () => {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const {} = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -84,15 +85,13 @@ const NotificationsScreen = () => {
   };
 
   const markAsRead = (notificationId: string) => {
-    setNotifications(prev =>
-      prev.map(notif =>
-        notif.id === notificationId ? { ...notif, read: true } : notif
-      )
+    setNotifications((prev) =>
+      prev.map((notif) => (notif.id === notificationId ? { ...notif, read: true } : notif))
     );
   };
 
   const markAllAsRead = () => {
-    setNotifications(prev => prev.map(notif => ({ ...notif, read: true })));
+    setNotifications((prev) => prev.map((notif) => ({ ...notif, read: true })));
   };
 
   const getNotificationIcon = (type: NotificationType) => {
@@ -143,7 +142,7 @@ const NotificationsScreen = () => {
     }
   };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
     <View style={styles.container}>
@@ -160,7 +159,11 @@ const NotificationsScreen = () => {
       {/* Unread Count Banner */}
       {unreadCount > 0 && (
         <View style={styles.unreadBanner}>
-          <MaterialCommunityIcons name={ICONS.BELL_BADGE} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+          <MaterialCommunityIcons
+            name={ICONS.BELL_BADGE}
+            size={mobileIconSizes.medium}
+            color={designTokens.colors.primary}
+          />
           <Text style={styles.unreadText}>
             {t('screens.notifications.unreadCount', { count: unreadCount })}
           </Text>
@@ -173,13 +176,10 @@ const NotificationsScreen = () => {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         {notifications.length > 0 ? (
-          notifications.map(notification => (
+          notifications.map((notification) => (
             <TouchableOpacity
               key={notification.id}
-              style={[
-                styles.notificationCard,
-                !notification.read && styles.notificationCardUnread,
-              ]}
+              style={[styles.notificationCard, !notification.read && styles.notificationCardUnread]}
               onPress={() => markAsRead(notification.id)}
               activeOpacity={TOUCH_OPACITY.default}
             >
@@ -224,9 +224,7 @@ const NotificationsScreen = () => {
               color={designTokens.colors.borderMedium}
             />
             <Text style={styles.emptyText}>{t('screens.notifications.noNotifications')}</Text>
-            <Text style={styles.emptySubtext}>
-              {t('screens.notifications.allCaughtUp')}
-            </Text>
+            <Text style={styles.emptySubtext}>{t('screens.notifications.allCaughtUp')}</Text>
           </View>
         )}
       </ScrollView>
@@ -354,4 +352,3 @@ const styles = StyleSheet.create({
 });
 
 export default NotificationsScreen;
-

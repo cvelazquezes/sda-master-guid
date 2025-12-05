@@ -31,15 +31,16 @@ export function initializeSentry(): void {
     Sentry.init({
       dsn: environment.sentry.dsn,
       environment: environment.env,
-      
+
       // Performance Monitoring
       tracesSampleRate: environment.env === 'production' ? 0.2 : 1.0,
       enableTracing: true,
-      
+
       // Release tracking
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       release: `sda-master-guid@${require('../../../package.json').version}`,
       dist: '1',
-      
+
       // Filter sensitive data
       beforeSend(event) {
         // Remove sensitive headers
@@ -47,12 +48,12 @@ export function initializeSentry(): void {
           delete event.request.headers['Authorization'];
           delete event.request.headers['Cookie'];
         }
-        
+
         // Remove sensitive cookies
         if (event.request?.cookies) {
           delete event.request.cookies;
         }
-        
+
         // Sanitize user data
         if (event.user) {
           // Keep only non-sensitive fields
@@ -61,10 +62,10 @@ export function initializeSentry(): void {
             username: event.user.username,
           };
         }
-        
+
         return event;
       },
-      
+
       // Breadcrumb filtering
       beforeBreadcrumb(breadcrumb) {
         // Don't log sensitive navigation data
@@ -74,14 +75,14 @@ export function initializeSentry(): void {
           delete sanitized.password;
           breadcrumb.data = sanitized;
         }
-        
+
         return breadcrumb;
       },
-      
+
       // Enable automatic session tracking
       enableAutoSessionTracking: true,
       sessionTrackingIntervalMillis: 30000,
-      
+
       // Integrations
       integrations: [
         new Sentry.ReactNativeTracing({
@@ -93,10 +94,10 @@ export function initializeSentry(): void {
           ],
         }),
       ],
-      
+
       // Debug mode in development
       debug: environment.env === 'development',
-      
+
       // Attach stack traces
       attachStacktrace: true,
     });
@@ -120,7 +121,7 @@ export function captureError(
   context?: {
     level?: Sentry.SeverityLevel;
     tags?: Record<string, string>;
-    extra?: Record<string, any>;
+    extra?: Record<string, unknown>;
     user?: {
       id?: string;
       email?: string;
@@ -170,7 +171,7 @@ export function captureMessage(
   level: Sentry.SeverityLevel = 'info',
   context?: {
     tags?: Record<string, string>;
-    extra?: Record<string, any>;
+    extra?: Record<string, unknown>;
   }
 ): void {
   if (!isInitialized) {
@@ -207,7 +208,7 @@ export function captureMessage(
 export async function trackPerformance<T>(
   operation: string,
   fn: () => Promise<T>,
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ): Promise<T> {
   if (!isInitialized) {
     return await fn();
@@ -234,10 +235,7 @@ export async function trackPerformance<T>(
 /**
  * Creates a manual span for fine-grained performance tracking
  */
-export function createSpan(
-  name: string,
-  operation: string
-): Sentry.Span | undefined {
+export function createSpan(name: string, operation: string): Sentry.Span | undefined {
   if (!isInitialized) {
     return undefined;
   }
@@ -300,7 +298,7 @@ export function addBreadcrumb(
   message: string,
   category: string,
   level: Sentry.SeverityLevel = 'info',
-  data?: Record<string, any>
+  data?: Record<string, unknown>
 ): void {
   if (!isInitialized) {
     return;
@@ -354,10 +352,7 @@ export function trackSecurityEvent(
   );
 
   // Capture failed auth attempts as errors
-  if (
-    event === SecurityEvent.LOGIN_FAILURE ||
-    event === SecurityEvent.UNAUTHORIZED_ACCESS
-  ) {
+  if (event === SecurityEvent.LOGIN_FAILURE || event === SecurityEvent.UNAUTHORIZED_ACCESS) {
     captureMessage(`Security Event: ${event}`, 'warning', {
       tags: {
         event_type: event,
@@ -375,13 +370,9 @@ export function trackSecurityEvent(
 // Exports
 // ============================================================================
 
-export {
-  Sentry,
-  isInitialized as isSentryInitialized,
-};
+export { Sentry, isInitialized as isSentryInitialized };
 
 // Initialize on import if configured
 if (environment.sentry.enabled && environment.sentry.dsn) {
   initializeSentry();
 }
-

@@ -10,8 +10,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { mobileTypography, designTokens, layoutConstants } from '../theme';
-import { A11Y_ROLE, ICONS, EMPTY_VALUE } from '../constants';
-import { flexValues } from '../constants/layoutConstants';
+import { A11Y_ROLE, EMPTY_VALUE, ICONS, flexValues } from '../constants';
 
 interface SearchBarProps {
   value: string;
@@ -37,7 +36,14 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   const displayPlaceholder = placeholder || t('placeholders.search');
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background, borderBottomColor: colors.border }, style]} testID={testID}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: colors.background, borderBottomColor: colors.border },
+        style,
+      ]}
+      testID={testID}
+    >
       {/* Search Input */}
       <View style={[styles.searchContainer, { backgroundColor: colors.surfaceLight }]}>
         <MaterialCommunityIcons
@@ -86,7 +92,9 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             size={designTokens.icon.sizes.md}
             color={colors.primary}
           />
-          <Text style={[styles.filterButtonText, { color: colors.primary }]}>{t('accessibility.filter')}</Text>
+          <Text style={[styles.filterButtonText, { color: colors.primary }]}>
+            {t('accessibility.filter')}
+          </Text>
           {filterActive && <View style={[styles.filterBadge, { backgroundColor: colors.error }]} />}
         </TouchableOpacity>
       )}
@@ -138,4 +146,3 @@ const styles = StyleSheet.create({
 });
 
 export default SearchBar;
-

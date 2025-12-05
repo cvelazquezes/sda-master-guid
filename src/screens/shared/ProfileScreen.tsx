@@ -5,16 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Switch,
-  Alert,
-} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
@@ -24,12 +15,20 @@ import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 import { UserRole } from '../../types';
 import { designTokens, layoutConstants } from '../../shared/theme';
 import { mobileTypography } from '../../shared/theme/mobileTypography';
-import { MESSAGES, ICONS, TOUCH_OPACITY, flexValues, ALERT_BUTTON_STYLE, LIST_SEPARATOR, OPACITY, COMPONENT_VARIANT } from '../../shared/constants';
+import {
+  MESSAGES,
+  ICONS,
+  TOUCH_OPACITY,
+  flexValues,
+  ALERT_BUTTON_STYLE,
+  LIST_SEPARATOR,
+  OPACITY,
+  COMPONENT_VARIANT,
+} from '../../shared/constants';
 import { Card, SectionHeader } from '../../shared/components';
 
 const ProfileScreen = () => {
   const { t } = useTranslation();
-  const navigation = useNavigation();
   const { user, updateUser, logout } = useAuth();
   const { colors } = useTheme();
   const [isActive, setIsActive] = useState(user?.isActive !== false);
@@ -53,24 +52,20 @@ const ProfileScreen = () => {
   };
 
   const handleLogout = async () => {
-    Alert.alert(
-      MESSAGES.TITLES.LOGOUT,
-      MESSAGES.WARNINGS.CONFIRM_LOGOUT,
-      [
-        { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
-        {
-          text: MESSAGES.TITLES.LOGOUT,
-          style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
-          onPress: async () => {
-            try {
-              await logout();
-            } catch (error) {
-              Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_LOGOUT);
-            }
-          },
+    Alert.alert(MESSAGES.TITLES.LOGOUT, MESSAGES.WARNINGS.CONFIRM_LOGOUT, [
+      { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
+      {
+        text: MESSAGES.TITLES.LOGOUT,
+        style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
+        onPress: async () => {
+          try {
+            await logout();
+          } catch (error) {
+            Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_LOGOUT);
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const getRoleLabel = (role: UserRole | undefined): string => {
@@ -86,7 +81,9 @@ const ProfileScreen = () => {
     }
   };
 
-  const getRoleIcon = (role: UserRole | undefined): keyof typeof MaterialCommunityIcons.glyphMap => {
+  const getRoleIcon = (
+    role: UserRole | undefined
+  ): keyof typeof MaterialCommunityIcons.glyphMap => {
     switch (role) {
       case UserRole.ADMIN:
         return ICONS.SHIELD_CROWN;
@@ -96,19 +93,6 @@ const ProfileScreen = () => {
         return ICONS.ACCOUNT;
       default:
         return ICONS.ACCOUNT;
-    }
-  };
-
-  const getRoleColor = (role: UserRole | undefined): string => {
-    switch (role) {
-      case UserRole.ADMIN:
-        return designTokens.colors.error[500]; // Red for admin
-      case UserRole.CLUB_ADMIN:
-        return designTokens.colors.warning[500]; // Orange for club admin
-      case UserRole.USER:
-        return designTokens.colors.success[500]; // Green for user
-      default:
-        return colors.primary;
     }
   };
 
@@ -126,17 +110,25 @@ const ProfileScreen = () => {
   };
 
   return (
-    <ScrollView 
+    <ScrollView
       style={[styles.container, { backgroundColor: colors.background }]}
       showsVerticalScrollIndicator={false}
     >
       {/* Profile Header Card */}
       <View style={styles.headerSection}>
-        <Card variant={COMPONENT_VARIANT.elevated} style={[styles.profileCard, { backgroundColor: getRoleGradientStart(user?.role) }]}>
+        <Card
+          variant={COMPONENT_VARIANT.elevated}
+          style={[styles.profileCard, { backgroundColor: getRoleGradientStart(user?.role) }]}
+        >
           <View style={styles.profileHeader}>
             <View style={styles.avatarWrapper}>
               <View style={[styles.avatarOuter, { backgroundColor: designTokens.overlay.light }]}>
-                <View style={[styles.avatarInner, { backgroundColor: designTokens.overlay.lightOpaque }]}>
+                <View
+                  style={[
+                    styles.avatarInner,
+                    { backgroundColor: designTokens.overlay.lightOpaque },
+                  ]}
+                >
                   <MaterialCommunityIcons
                     name={getRoleIcon(user?.role)}
                     size={designTokens.iconSize['3xl']}
@@ -145,10 +137,10 @@ const ProfileScreen = () => {
                 </View>
               </View>
             </View>
-            
+
             <Text style={styles.userName}>{user?.name || t('roles.user')}</Text>
             <Text style={styles.userEmail}>{user?.email || t('screens.account.defaultEmail')}</Text>
-            
+
             <View style={styles.roleBadge}>
               <MaterialCommunityIcons
                 name={getRoleIcon(user?.role)}
@@ -162,16 +154,26 @@ const ProfileScreen = () => {
             {user?.role !== UserRole.ADMIN && (
               <View style={styles.statsRow}>
                 <View style={styles.statItem}>
-                  <MaterialCommunityIcons name={ICONS.CHECK_CIRCLE} size={designTokens.iconSize.md} color={designTokens.overlay.lightOpaque} />
-                  <Text style={styles.statText}>{isActive ? t('common.active') : t('screens.profile.inactive')}</Text>
+                  <MaterialCommunityIcons
+                    name={ICONS.CHECK_CIRCLE}
+                    size={designTokens.iconSize.md}
+                    color={designTokens.overlay.lightOpaque}
+                  />
+                  <Text style={styles.statText}>
+                    {isActive ? t('common.active') : t('screens.profile.inactive')}
+                  </Text>
                 </View>
-                {user?.classes && user.classes.length > 0 && (
-                  <View style={styles.statDivider} />
-                )}
+                {user?.classes && user.classes.length > 0 && <View style={styles.statDivider} />}
                 {user?.classes && user.classes.length > 0 && (
                   <View style={styles.statItem}>
-                    <MaterialCommunityIcons name={ICONS.SCHOOL} size={designTokens.iconSize.md} color={designTokens.overlay.lightOpaque} />
-                    <Text style={styles.statText}>{t('screens.profile.classCount', { count: user.classes.length })}</Text>
+                    <MaterialCommunityIcons
+                      name={ICONS.SCHOOL}
+                      size={designTokens.iconSize.md}
+                      color={designTokens.overlay.lightOpaque}
+                    />
+                    <Text style={styles.statText}>
+                      {t('screens.profile.classCount', { count: user.classes.length })}
+                    </Text>
                   </View>
                 )}
               </View>
@@ -200,15 +202,25 @@ const ProfileScreen = () => {
         <Card variant={COMPONENT_VARIANT.elevated}>
           <TouchableOpacity style={styles.menuItem} activeOpacity={TOUCH_OPACITY.default}>
             <View style={[styles.menuIconContainer, { backgroundColor: colors.info + '20' }]}>
-              <MaterialCommunityIcons name={ICONS.EARTH} size={designTokens.iconSize.lg} color={colors.info} />
+              <MaterialCommunityIcons
+                name={ICONS.EARTH}
+                size={designTokens.iconSize.lg}
+                color={colors.info}
+              />
             </View>
             <View style={styles.menuContent}>
-              <Text style={[styles.menuLabel, { color: colors.textSecondary }]}>{t('screens.profile.timezone')}</Text>
+              <Text style={[styles.menuLabel, { color: colors.textSecondary }]}>
+                {t('screens.profile.timezone')}
+              </Text>
               <Text style={[styles.menuValue, { color: colors.textPrimary }]}>
                 {user?.timezone || t('screens.profile.defaultTimezone')}
               </Text>
             </View>
-            <MaterialCommunityIcons name={ICONS.CHEVRON_RIGHT} size={designTokens.iconSize.lg} color={colors.textTertiary} />
+            <MaterialCommunityIcons
+              name={ICONS.CHEVRON_RIGHT}
+              size={designTokens.iconSize.lg}
+              color={colors.textTertiary}
+            />
           </TouchableOpacity>
         </Card>
       </View>
@@ -220,10 +232,16 @@ const ProfileScreen = () => {
           <Card variant={COMPONENT_VARIANT.elevated}>
             <View style={styles.statusContainer}>
               <View style={styles.statusInfo}>
-                <View style={[
-                  styles.statusIconContainer, 
-                  { backgroundColor: isActive ? `${colors.success}${OPACITY.LIGHT}` : `${colors.textTertiary}${OPACITY.LIGHT}` }
-                ]}>
+                <View
+                  style={[
+                    styles.statusIconContainer,
+                    {
+                      backgroundColor: isActive
+                        ? `${colors.success}${OPACITY.LIGHT}`
+                        : `${colors.textTertiary}${OPACITY.LIGHT}`,
+                    },
+                  ]}
+                >
                   <MaterialCommunityIcons
                     name={isActive ? ICONS.ACCOUNT_CHECK : ICONS.ACCOUNT_OFF}
                     size={designTokens.iconSize.lg}
@@ -232,10 +250,14 @@ const ProfileScreen = () => {
                 </View>
                 <View style={styles.statusText}>
                   <Text style={[styles.statusLabel, { color: colors.textPrimary }]}>
-                    {isActive ? t('screens.profile.participating') : t('screens.profile.notParticipating')}
+                    {isActive
+                      ? t('screens.profile.participating')
+                      : t('screens.profile.notParticipating')}
                   </Text>
                   <Text style={[styles.statusDescription, { color: colors.textSecondary }]}>
-                    {isActive ? t('screens.profile.activeInActivities') : t('screens.profile.notInActivities')}
+                    {isActive
+                      ? t('screens.profile.activeInActivities')
+                      : t('screens.profile.notInActivities')}
                   </Text>
                 </View>
               </View>
@@ -259,11 +281,22 @@ const ProfileScreen = () => {
             <View style={styles.detailsContainer}>
               {user?.whatsappNumber && (
                 <View style={[styles.detailRow, { borderBottomColor: colors.border }]}>
-                  <View style={[styles.detailIconContainer, { backgroundColor: designTokens.colors.social.whatsapp + '20' }]}>
-                    <MaterialCommunityIcons name={ICONS.WHATSAPP} size={designTokens.iconSize.lg} color={designTokens.colors.social.whatsapp} />
+                  <View
+                    style={[
+                      styles.detailIconContainer,
+                      { backgroundColor: designTokens.colors.social.whatsapp + '20' },
+                    ]}
+                  >
+                    <MaterialCommunityIcons
+                      name={ICONS.WHATSAPP}
+                      size={designTokens.iconSize.lg}
+                      color={designTokens.colors.social.whatsapp}
+                    />
                   </View>
                   <View style={styles.detailText}>
-                    <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>{t('screens.profile.whatsApp')}</Text>
+                    <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
+                      {t('screens.profile.whatsApp')}
+                    </Text>
                     <Text style={[styles.detailValue, { color: colors.textPrimary }]}>
                       {user.whatsappNumber}
                     </Text>
@@ -273,11 +306,19 @@ const ProfileScreen = () => {
 
               {user?.classes && user.classes.length > 0 && (
                 <View style={styles.detailRow}>
-                  <View style={[styles.detailIconContainer, { backgroundColor: colors.primary + '20' }]}>
-                    <MaterialCommunityIcons name={ICONS.SCHOOL} size={designTokens.iconSize.lg} color={colors.primary} />
+                  <View
+                    style={[styles.detailIconContainer, { backgroundColor: colors.primary + '20' }]}
+                  >
+                    <MaterialCommunityIcons
+                      name={ICONS.SCHOOL}
+                      size={designTokens.iconSize.lg}
+                      color={colors.primary}
+                    />
                   </View>
                   <View style={styles.detailText}>
-                    <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>{t('screens.profile.pathfinderClasses')}</Text>
+                    <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
+                      {t('screens.profile.pathfinderClasses')}
+                    </Text>
                     <Text style={[styles.detailValue, { color: colors.textPrimary }]}>
                       {user.classes.join(LIST_SEPARATOR)}
                     </Text>
@@ -292,11 +333,18 @@ const ProfileScreen = () => {
       {/* Logout Button */}
       <View style={styles.section}>
         <TouchableOpacity
-          style={[styles.logoutButton, { backgroundColor: colors.error + '12', borderColor: colors.error }]}
+          style={[
+            styles.logoutButton,
+            { backgroundColor: colors.error + '12', borderColor: colors.error },
+          ]}
           onPress={handleLogout}
           activeOpacity={TOUCH_OPACITY.default}
         >
-          <MaterialCommunityIcons name={ICONS.LOGOUT} size={designTokens.iconSize.lg} color={colors.error} />
+          <MaterialCommunityIcons
+            name={ICONS.LOGOUT}
+            size={designTokens.iconSize.lg}
+            color={colors.error}
+          />
           <Text style={[styles.logoutButtonText, { color: colors.error }]}>
             {t('screens.settings.signOut')}
           </Text>
@@ -333,14 +381,14 @@ const styles = StyleSheet.create({
     marginBottom: designTokens.spacing.md,
   },
   avatarOuter: {
-    width: designTokens.avatarSize['3xl'],          // 96 → closest token
+    width: designTokens.avatarSize['3xl'], // 96 → closest token
     height: designTokens.avatarSize['3xl'],
     borderRadius: designTokens.avatarSize['3xl'] / 2,
     alignItems: layoutConstants.alignItems.center,
     justifyContent: layoutConstants.justifyContent.center,
   },
   avatarInner: {
-    width: designTokens.avatarSize['2xl'],          // 80
+    width: designTokens.avatarSize['2xl'], // 80
     height: designTokens.avatarSize['2xl'],
     borderRadius: designTokens.avatarSize['2xl'] / 2,
     alignItems: layoutConstants.alignItems.center,
@@ -413,7 +461,7 @@ const styles = StyleSheet.create({
     gap: designTokens.spacing.md,
   },
   menuIconContainer: {
-    width: designTokens.touchTarget.minimum,        // 44
+    width: designTokens.touchTarget.minimum, // 44
     height: designTokens.touchTarget.minimum,
     borderRadius: designTokens.touchTarget.minimum / 2,
     alignItems: layoutConstants.alignItems.center,
@@ -441,7 +489,7 @@ const styles = StyleSheet.create({
     gap: designTokens.spacing.md,
   },
   statusIconContainer: {
-    width: designTokens.touchTarget.comfortable,    // 48
+    width: designTokens.touchTarget.comfortable, // 48
     height: designTokens.touchTarget.comfortable,
     borderRadius: designTokens.touchTarget.comfortable / 2,
     alignItems: layoutConstants.alignItems.center,

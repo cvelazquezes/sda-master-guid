@@ -11,7 +11,15 @@ import { statusColors, roleColors } from '../theme/sdaColors';
 import { mobileFontSizes, layoutConstants } from '../theme';
 import { TEXT_LINES, COMPONENT_VARIANT, COMPONENT_SIZE, A11Y_ROLE } from '../constants';
 
-type BadgeVariant = typeof COMPONENT_VARIANT.primary | typeof COMPONENT_VARIANT.secondary | typeof COMPONENT_VARIANT.accent | typeof COMPONENT_VARIANT.success | typeof COMPONENT_VARIANT.warning | typeof COMPONENT_VARIANT.error | typeof COMPONENT_VARIANT.info | typeof COMPONENT_VARIANT.neutral;
+type BadgeVariant =
+  | typeof COMPONENT_VARIANT.primary
+  | typeof COMPONENT_VARIANT.secondary
+  | typeof COMPONENT_VARIANT.accent
+  | typeof COMPONENT_VARIANT.success
+  | typeof COMPONENT_VARIANT.warning
+  | typeof COMPONENT_VARIANT.error
+  | typeof COMPONENT_VARIANT.info
+  | typeof COMPONENT_VARIANT.neutral;
 type BadgeSize = typeof COMPONENT_SIZE.sm | typeof COMPONENT_SIZE.md | typeof COMPONENT_SIZE.lg;
 type StatusType = keyof typeof statusColors;
 type RoleType = keyof typeof roleColors;
@@ -20,18 +28,18 @@ interface BadgeProps {
   // Content
   label: string;
   icon?: string;
-  
+
   // Styling
   variant?: BadgeVariant;
   size?: BadgeSize;
   status?: StatusType;
   role?: RoleType;
-  
+
   // Custom colors (overrides variant)
   backgroundColor?: string;
   textColor?: string;
   borderColor?: string;
-  
+
   // Layout
   style?: ViewStyle;
   testID?: string;
@@ -59,7 +67,7 @@ export const Badge: React.FC<BadgeProps> = ({
         border: statusColors[status].primary,
       };
     }
-    
+
     if (role) {
       return {
         bg: roleColors[role].light,
@@ -67,7 +75,7 @@ export const Badge: React.FC<BadgeProps> = ({
         border: roleColors[role].primary,
       };
     }
-    
+
     // Variant-based colors
     switch (variant) {
       case COMPONENT_VARIANT.primary:
@@ -122,7 +130,7 @@ export const Badge: React.FC<BadgeProps> = ({
   };
 
   const colors = getColors();
-  
+
   const finalBackgroundColor = backgroundColor || colors.bg;
   const finalTextColor = textColor || colors.text;
   const finalBorderColor = borderColor || colors.border;
@@ -189,18 +197,14 @@ export const Badge: React.FC<BadgeProps> = ({
     >
       {icon && (
         <MaterialCommunityIcons
-          name={icon as any}
+          name={icon as typeof ICONS.CHECK}
           size={sizeStyles.iconSize}
           color={finalTextColor}
           style={styles.icon}
         />
       )}
       <Text
-        style={[
-          styles.text,
-          sizeStyles.text,
-          { color: finalTextColor },
-        ]}
+        style={[styles.text, sizeStyles.text, { color: finalTextColor }]}
         numberOfLines={TEXT_LINES.single}
       >
         {label}
@@ -228,4 +232,3 @@ const styles = StyleSheet.create({
 });
 
 export default Badge;
-

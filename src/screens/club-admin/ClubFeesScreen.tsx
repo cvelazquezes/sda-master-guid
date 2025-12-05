@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { clubService } from '../../services/clubService';
-import { userService } from '../../services/userService';
+// userService unused - removed
 import { paymentService } from '../../services/paymentService';
 import {
   User,
@@ -28,8 +28,27 @@ import {
   CustomCharge,
   ApprovalStatus,
 } from '../../types';
-import { mobileTypography, mobileIconSizes, mobileFontSizes, designTokens, layoutConstants } from '../../shared/theme';
-import { ANIMATION, ICONS, MESSAGES, DATE_FORMATS, VALIDATION, FORMAT_REGEX, LIMITS, TOUCH_OPACITY, TEXT_LINES, flexValues, dimensionValues, shadowOffsetValues, ALERT_BUTTON_STYLE, KEYBOARD_TYPE, EMPTY_VALUE, FEE_TABS, LOG_MESSAGES, ALL_MONTHS } from '../../shared/constants';
+import { mobileFontSizes, designTokens, layoutConstants } from '../../shared/theme';
+import {
+  ANIMATION,
+  ICONS,
+  MESSAGES,
+  DATE_FORMATS,
+  VALIDATION,
+  FORMAT_REGEX,
+  LIMITS,
+  TOUCH_OPACITY,
+  TEXT_LINES,
+  flexValues,
+  dimensionValues,
+  shadowOffsetValues,
+  ALERT_BUTTON_STYLE,
+  KEYBOARD_TYPE,
+  EMPTY_VALUE,
+  FEE_TABS,
+  LOG_MESSAGES,
+  ALL_MONTHS,
+} from '../../shared/constants';
 import { logger } from '../../shared/utils/logger';
 
 // Use designTokens for all visual values - no magic numbers
@@ -85,7 +104,7 @@ const ClubFeesScreen = () => {
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
 
   // Current view
-  const [activeTab, setActiveTab] = useState<typeof FEE_TABS[keyof typeof FEE_TABS]>(
+  const [activeTab, setActiveTab] = useState<(typeof FEE_TABS)[keyof typeof FEE_TABS]>(
     FEE_TABS.SETTINGS
   );
 
@@ -261,9 +280,7 @@ const ClubFeesScreen = () => {
     }
 
     try {
-      const targetUserIds = chargeApplyToAll
-        ? members.map((m) => m.id)
-        : selectedMemberIds;
+      const targetUserIds = chargeApplyToAll ? members.map((m) => m.id) : selectedMemberIds;
 
       if (targetUserIds.length === 0) {
         Alert.alert(MESSAGES.TITLES.NO_MEMBERS_SELECTED, MESSAGES.ERRORS.NO_MEMBERS_SELECTED);
@@ -279,22 +296,22 @@ const ClubFeesScreen = () => {
         user.id
       );
 
-      const memberText = chargeApplyToAll 
-        ? t('screens.clubFees.allMembers') 
+      const memberText = chargeApplyToAll
+        ? t('screens.clubFees.allMembers')
         : t('screens.clubFees.memberCount', { count: targetUserIds.length });
-      
+
       Alert.alert(
-        MESSAGES.TITLES.SUCCESS, 
+        MESSAGES.TITLES.SUCCESS,
         t('screens.clubFees.chargeCreated', { amount: amount.toFixed(2), members: memberText })
       );
-      
+
       setChargeModalVisible(false);
       setChargeDescription(EMPTY_VALUE);
       setChargeAmount(EMPTY_VALUE);
       setChargeDueDate(EMPTY_VALUE);
       setChargeApplyToAll(true);
       setSelectedMemberIds([]);
-      
+
       loadData();
     } catch (error) {
       Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_CREATE_CHARGE);
@@ -308,58 +325,51 @@ const ClubFeesScreen = () => {
   const notifyAllMembers = async () => {
     if (!user?.clubId) return;
 
-    Alert.alert(
-      t('screens.clubFees.notifyAllMembers'),
-      t('screens.clubFees.notifyAllConfirm'),
-      [
-        { text: t('common.cancel'), style: ALERT_BUTTON_STYLE.CANCEL },
-        {
-          text: t('screens.clubFees.send'),
-          onPress: async () => {
-            try {
-              let notificationCount = 0;
+    Alert.alert(t('screens.clubFees.notifyAllMembers'), t('screens.clubFees.notifyAllConfirm'), [
+      { text: t('common.cancel'), style: ALERT_BUTTON_STYLE.CANCEL },
+      {
+        text: t('screens.clubFees.send'),
+        onPress: async () => {
+          try {
+            let notificationCount = 0;
 
-              for (const member of members) {
-                const balance = balances.find((b) => b.userId === member.id);
-                if (balance) {
-                  const message = await paymentService.getNotificationMessage(
-                    balance,
-                    member.name
-                  );
+            for (const member of members) {
+              const balance = balances.find((b) => b.userId === member.id);
+              if (balance) {
+                const message = await paymentService.getNotificationMessage(balance, member.name);
 
-                  // Here you would integrate with your notification service
-                  logger.debug(LOG_MESSAGES.SCREENS.CLUB_FEES.NOTIFICATION_TO_MEMBER, { 
-                    name: member.name, 
-                    whatsappNumber: member.whatsappNumber,
-                    message 
-                  });
-                  notificationCount++;
-                }
-              }
-
-              // Update last notification date
-              if (club && club.feeSettings) {
-                const updatedSettings = {
-                  ...club.feeSettings,
-                  lastNotificationDate: new Date().toISOString(),
-                };
-                await clubService.updateClub(club.id, {
-                  ...club,
-                  feeSettings: updatedSettings,
+                // Here you would integrate with your notification service
+                logger.debug(LOG_MESSAGES.SCREENS.CLUB_FEES.NOTIFICATION_TO_MEMBER, {
+                  name: member.name,
+                  whatsappNumber: member.whatsappNumber,
+                  message,
                 });
+                notificationCount++;
               }
-
-              Alert.alert(
-                MESSAGES.TITLES.SUCCESS,
-                t('screens.clubFees.notificationsSent', { count: notificationCount })
-              );
-            } catch (error) {
-              Alert.alert(MESSAGES.TITLES.ERROR, t('screens.clubFees.failedToSendNotifications'));
             }
-          },
+
+            // Update last notification date
+            if (club && club.feeSettings) {
+              const updatedSettings = {
+                ...club.feeSettings,
+                lastNotificationDate: new Date().toISOString(),
+              };
+              await clubService.updateClub(club.id, {
+                ...club,
+                feeSettings: updatedSettings,
+              });
+            }
+
+            Alert.alert(
+              MESSAGES.TITLES.SUCCESS,
+              t('screens.clubFees.notificationsSent', { count: notificationCount })
+            );
+          } catch (error) {
+            Alert.alert(MESSAGES.TITLES.ERROR, t('screens.clubFees.failedToSendNotifications'));
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const notifySingleMember = async (member: User, balance: MemberBalance) => {
@@ -372,16 +382,13 @@ const ClubFeesScreen = () => {
           text: t('screens.clubFees.send'),
           onPress: async () => {
             try {
-              const message = await paymentService.getNotificationMessage(
-                balance,
-                member.name
-              );
+              const message = await paymentService.getNotificationMessage(balance, member.name);
 
               // Here you would integrate with your notification service
-              logger.debug(LOG_MESSAGES.SCREENS.CLUB_FEES.NOTIFICATION_TO_MEMBER, { 
-                name: member.name, 
+              logger.debug(LOG_MESSAGES.SCREENS.CLUB_FEES.NOTIFICATION_TO_MEMBER, {
+                name: member.name,
                 whatsappNumber: member.whatsappNumber,
-                message 
+                message,
               });
 
               Alert.alert(MESSAGES.TITLES.SUCCESS, t('screens.clubFees.notificationSent'));
@@ -404,13 +411,15 @@ const ClubFeesScreen = () => {
         {/* Header Card */}
         <View style={styles.infoCard}>
           <View style={styles.infoIconContainer}>
-            <MaterialCommunityIcons name={ICONS.INFORMATION} size={designTokens.iconSize.md} color={colors.primary} />
+            <MaterialCommunityIcons
+              name={ICONS.INFORMATION}
+              size={designTokens.iconSize.md}
+              color={colors.primary}
+            />
           </View>
           <View style={styles.infoTextContainer}>
             <Text style={styles.infoTitle}>{t('screens.clubFees.configureMonthlyFees')}</Text>
-            <Text style={styles.infoText}>
-              {t('screens.clubFees.setupDescription')}
-            </Text>
+            <Text style={styles.infoText}>{t('screens.clubFees.setupDescription')}</Text>
           </View>
         </View>
 
@@ -427,7 +436,9 @@ const ClubFeesScreen = () => {
               value={feeSettingsActive}
               onValueChange={setFeeSettingsActive}
               trackColor={{ false: designTokens.colors.borderLight, true: colors.primary }}
-              thumbColor={feeSettingsActive ? colors.primary : designTokens.colors.backgroundSecondary}
+              thumbColor={
+                feeSettingsActive ? colors.primary : designTokens.colors.backgroundSecondary
+              }
             />
           </View>
         </View>
@@ -491,12 +502,7 @@ const ClubFeesScreen = () => {
                   onPress={() => toggleMonth(monthNumber)}
                   activeOpacity={TOUCH_OPACITY.default}
                 >
-                  <Text
-                    style={[
-                      styles.monthChipText,
-                      isSelected && styles.monthChipTextSelected,
-                    ]}
-                  >
+                  <Text style={[styles.monthChipText, isSelected && styles.monthChipTextSelected]}>
                     {monthName.substring(0, 3)}
                   </Text>
                 </TouchableOpacity>
@@ -507,12 +513,16 @@ const ClubFeesScreen = () => {
 
         {/* Action Buttons */}
         <View style={styles.actionButtonsContainer}>
-          <TouchableOpacity 
-            style={styles.primaryButton} 
+          <TouchableOpacity
+            style={styles.primaryButton}
             onPress={saveFeeSettings}
             activeOpacity={TOUCH_OPACITY.light}
           >
-            <MaterialCommunityIcons name={ICONS.CONTENT_SAVE} size={designTokens.iconSize.md} color={designTokens.colors.white} />
+            <MaterialCommunityIcons
+              name={ICONS.CONTENT_SAVE}
+              size={designTokens.iconSize.md}
+              color={designTokens.colors.white}
+            />
             <Text style={styles.primaryButtonText}>{t('screens.clubFees.saveSettings')}</Text>
           </TouchableOpacity>
 
@@ -522,7 +532,11 @@ const ClubFeesScreen = () => {
               onPress={generateFeesForYear}
               activeOpacity={TOUCH_OPACITY.light}
             >
-              <MaterialCommunityIcons name={ICONS.CALENDAR_PLUS} size={designTokens.iconSize.md} color={colors.primary} />
+              <MaterialCommunityIcons
+                name={ICONS.CALENDAR_PLUS}
+                size={designTokens.iconSize.md}
+                color={colors.primary}
+              />
               <Text style={styles.secondaryButtonText}>
                 {t('screens.clubFees.generateFeesCurrentYear')}
               </Text>
@@ -538,10 +552,16 @@ const ClubFeesScreen = () => {
       <View style={styles.balancesHeader}>
         <View>
           <Text style={styles.balancesTitle}>{t('screens.clubFees.memberBalances')}</Text>
-          <Text style={styles.balancesSubtitle}>{t('screens.clubFees.membersCount', { count: balances.length })}</Text>
+          <Text style={styles.balancesSubtitle}>
+            {t('screens.clubFees.membersCount', { count: balances.length })}
+          </Text>
         </View>
         <TouchableOpacity style={styles.notifyAllButton} onPress={notifyAllMembers}>
-          <MaterialCommunityIcons name={ICONS.BELL_RING_OUTLINE} size={designTokens.iconSize.md} color={designTokens.colors.white} />
+          <MaterialCommunityIcons
+            name={ICONS.BELL_RING_OUTLINE}
+            size={designTokens.iconSize.md}
+            color={designTokens.colors.white}
+          />
           <Text style={styles.notifyAllButtonText}>{t('screens.clubFees.notifyAll')}</Text>
         </TouchableOpacity>
       </View>
@@ -558,8 +578,8 @@ const ClubFeesScreen = () => {
             item.balance >= 0
               ? colors.success
               : item.overdueCharges > 0
-              ? colors.error
-              : colors.warning;
+                ? colors.error
+                : colors.warning;
 
           return (
             <View style={styles.balanceCard}>
@@ -580,16 +600,18 @@ const ClubFeesScreen = () => {
                   style={styles.notifyButton}
                   onPress={() => notifySingleMember(member, item)}
                 >
-                  <MaterialCommunityIcons name={ICONS.BELL_OUTLINE} size={designTokens.iconSize.lg} color={colors.primary} />
+                  <MaterialCommunityIcons
+                    name={ICONS.BELL_OUTLINE}
+                    size={designTokens.iconSize.lg}
+                    color={colors.primary}
+                  />
                 </TouchableOpacity>
               </View>
 
               <View style={styles.balanceDetails}>
                 <View style={styles.balanceRow}>
                   <Text style={styles.balanceLabel}>{t('screens.clubFees.totalOwed')}</Text>
-                  <Text style={styles.balanceValue}>
-                    ${item.totalOwed.toFixed(2)}
-                  </Text>
+                  <Text style={styles.balanceValue}>${item.totalOwed.toFixed(2)}</Text>
                 </View>
 
                 <View style={styles.balanceRow}>
@@ -600,10 +622,16 @@ const ClubFeesScreen = () => {
                 </View>
 
                 <View style={[styles.balanceRow, styles.balanceTotalRow]}>
-                  <Text style={styles.balanceTotalLabel}>{t('screens.clubFees.currentBalance')}</Text>
+                  <Text style={styles.balanceTotalLabel}>
+                    {t('screens.clubFees.currentBalance')}
+                  </Text>
                   <Text style={[styles.balanceTotalValue, { color: statusColor }]}>
                     ${Math.abs(item.balance).toFixed(2)}{' '}
-                    {item.balance < 0 ? t('screens.clubFees.owes') : item.balance > 0 ? t('screens.clubFees.credit') : EMPTY_VALUE}
+                    {item.balance < 0
+                      ? t('screens.clubFees.owes')
+                      : item.balance > 0
+                        ? t('screens.clubFees.credit')
+                        : EMPTY_VALUE}
                   </Text>
                 </View>
 
@@ -615,7 +643,9 @@ const ClubFeesScreen = () => {
                       color={colors.error}
                     />
                     <Text style={styles.overdueText}>
-                      {t('screens.clubFees.overdueAmount', { amount: item.overdueCharges.toFixed(2) })}
+                      {t('screens.clubFees.overdueAmount', {
+                        amount: item.overdueCharges.toFixed(2),
+                      })}
                     </Text>
                   </View>
                 )}
@@ -623,12 +653,14 @@ const ClubFeesScreen = () => {
             </View>
           );
         }}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <MaterialCommunityIcons name={ICONS.WALLET_OUTLINE} size={designTokens.iconSize['4xl']} color={designTokens.colors.borderLight} />
+            <MaterialCommunityIcons
+              name={ICONS.WALLET_OUTLINE}
+              size={designTokens.iconSize['4xl']}
+              color={designTokens.colors.borderLight}
+            />
             <Text style={styles.emptyStateText}>{t('screens.clubFees.noBalances')}</Text>
             <Text style={styles.emptyStateSubtext}>
               {t('screens.clubFees.generateFeesToSeeBalances')}
@@ -647,14 +679,22 @@ const ClubFeesScreen = () => {
           <Text style={styles.chargesSubtitle}>{customCharges.length} active charges</Text>
         </View>
         <TouchableOpacity style={styles.addChargeButton} onPress={openChargeModal}>
-          <MaterialCommunityIcons name={ICONS.PLUS} size={designTokens.iconSize.md} color={designTokens.colors.white} />
+          <MaterialCommunityIcons
+            name={ICONS.PLUS}
+            size={designTokens.iconSize.md}
+            color={designTokens.colors.white}
+          />
           <Text style={styles.addChargeButtonText}>{t('screens.clubFees.newCharge')}</Text>
         </TouchableOpacity>
       </View>
 
       {customCharges.length === 0 ? (
         <View style={styles.emptyState}>
-          <MaterialCommunityIcons name={ICONS.FILE_DOCUMENT_OUTLINE} size={designTokens.iconSize['4xl']} color={designTokens.colors.borderLight} />
+          <MaterialCommunityIcons
+            name={ICONS.FILE_DOCUMENT_OUTLINE}
+            size={designTokens.iconSize['4xl']}
+            color={designTokens.colors.borderLight}
+          />
           <Text style={styles.emptyStateText}>{t('screens.clubFees.noCustomCharges')}</Text>
           <Text style={styles.emptyStateSubtext}>
             {t('screens.clubFees.createChargesDescription')}
@@ -674,7 +714,11 @@ const ClubFeesScreen = () => {
 
               <View style={styles.chargeDetails}>
                 <View style={styles.chargeDetailRow}>
-                  <MaterialCommunityIcons name={ICONS.CALENDAR_OUTLINE} size={designTokens.iconSize.sm} color={colors.textSecondary} />
+                  <MaterialCommunityIcons
+                    name={ICONS.CALENDAR_OUTLINE}
+                    size={designTokens.iconSize.sm}
+                    color={colors.textSecondary}
+                  />
                   <Text style={styles.chargeDetailText}>
                     Due: {new Date(item.dueDate).toLocaleDateString()}
                   </Text>
@@ -695,9 +739,7 @@ const ClubFeesScreen = () => {
               </View>
             </View>
           )}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         />
       )}
     </View>
@@ -706,7 +748,11 @@ const ClubFeesScreen = () => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <MaterialCommunityIcons name={ICONS.LOADING} size={designTokens.iconSize['4xl']} color={colors.primary} />
+        <MaterialCommunityIcons
+          name={ICONS.LOADING}
+          size={designTokens.iconSize['4xl']}
+          color={colors.primary}
+        />
         <Text style={styles.loadingText}>{t('screens.clubFees.loading')}</Text>
       </View>
     );
@@ -734,12 +780,7 @@ const ClubFeesScreen = () => {
             size={designTokens.iconSize.md}
             color={activeTab === FEE_TABS.SETTINGS ? colors.primary : colors.textSecondary}
           />
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === FEE_TABS.SETTINGS && styles.tabTextActive,
-            ]}
-          >
+          <Text style={[styles.tabText, activeTab === FEE_TABS.SETTINGS && styles.tabTextActive]}>
             {t('screens.clubFees.tabs.settings')}
           </Text>
         </TouchableOpacity>
@@ -754,9 +795,7 @@ const ClubFeesScreen = () => {
             size={designTokens.iconSize.md}
             color={activeTab === FEE_TABS.BALANCES ? colors.primary : colors.textSecondary}
           />
-          <Text
-            style={[styles.tabText, activeTab === FEE_TABS.BALANCES && styles.tabTextActive]}
-          >
+          <Text style={[styles.tabText, activeTab === FEE_TABS.BALANCES && styles.tabTextActive]}>
             {t('screens.clubFees.tabs.balances')}
           </Text>
         </TouchableOpacity>
@@ -771,9 +810,7 @@ const ClubFeesScreen = () => {
             size={designTokens.iconSize.md}
             color={activeTab === FEE_TABS.CHARGES ? colors.primary : colors.textSecondary}
           />
-          <Text
-            style={[styles.tabText, activeTab === FEE_TABS.CHARGES && styles.tabTextActive]}
-          >
+          <Text style={[styles.tabText, activeTab === FEE_TABS.CHARGES && styles.tabTextActive]}>
             {t('screens.clubFees.tabs.charges')}
           </Text>
         </TouchableOpacity>
@@ -792,14 +829,20 @@ const ClubFeesScreen = () => {
         onRequestClose={() => setChargeModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { width: modalWidth, maxHeight: windowHeight * 0.85 }]}>
+          <View
+            style={[styles.modalContent, { width: modalWidth, maxHeight: windowHeight * 0.85 }]}
+          >
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{t('screens.clubFees.createCustomCharge')}</Text>
               <TouchableOpacity
                 onPress={() => setChargeModalVisible(false)}
                 style={styles.modalCloseButton}
               >
-                <MaterialCommunityIcons name={ICONS.CLOSE} size={designTokens.iconSize.lg} color={colors.textSecondary} />
+                <MaterialCommunityIcons
+                  name={ICONS.CLOSE}
+                  size={designTokens.iconSize.lg}
+                  color={colors.textSecondary}
+                />
               </TouchableOpacity>
             </View>
 
@@ -824,7 +867,7 @@ const ClubFeesScreen = () => {
                 <View style={styles.amountInputContainer}>
                   <Text style={styles.currencySymbol}>$</Text>
                   <TextInput
-                    style={[styles.amountInput, {paddingLeft: designTokens.spacing.none}]}
+                    style={[styles.amountInput, { paddingLeft: designTokens.spacing.none }]}
                     value={chargeAmount}
                     onChangeText={setChargeAmount}
                     keyboardType={KEYBOARD_TYPE.DECIMAL_PAD}
@@ -852,10 +895,7 @@ const ClubFeesScreen = () => {
                 <Text style={styles.modalLabel}>{t('screens.clubFees.applyTo')}</Text>
                 <View style={styles.applyToContainer}>
                   <TouchableOpacity
-                    style={[
-                      styles.applyToOption,
-                      chargeApplyToAll && styles.applyToOptionActive,
-                    ]}
+                    style={[styles.applyToOption, chargeApplyToAll && styles.applyToOptionActive]}
                     onPress={() => {
                       setChargeApplyToAll(true);
                       setSelectedMemberIds([]);
@@ -868,20 +908,14 @@ const ClubFeesScreen = () => {
                       color={chargeApplyToAll ? colors.primary : colors.textSecondary}
                     />
                     <Text
-                      style={[
-                        styles.applyToText,
-                        chargeApplyToAll && styles.applyToTextActive,
-                      ]}
+                      style={[styles.applyToText, chargeApplyToAll && styles.applyToTextActive]}
                     >
                       {t('screens.clubFees.allMembersOption')}
                     </Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    style={[
-                      styles.applyToOption,
-                      !chargeApplyToAll && styles.applyToOptionActive,
-                    ]}
+                    style={[styles.applyToOption, !chargeApplyToAll && styles.applyToOptionActive]}
                     onPress={() => setChargeApplyToAll(false)}
                     activeOpacity={TOUCH_OPACITY.default}
                   >
@@ -891,10 +925,7 @@ const ClubFeesScreen = () => {
                       color={!chargeApplyToAll ? colors.primary : colors.textSecondary}
                     />
                     <Text
-                      style={[
-                        styles.applyToText,
-                        !chargeApplyToAll && styles.applyToTextActive,
-                      ]}
+                      style={[styles.applyToText, !chargeApplyToAll && styles.applyToTextActive]}
                     >
                       {t('screens.clubFees.selectMembersOption')}
                     </Text>
@@ -906,20 +937,25 @@ const ClubFeesScreen = () => {
                   <View style={styles.memberSelectionContainer}>
                     <View style={styles.memberSelectionHeader}>
                       <Text style={styles.memberSelectionTitle}>
-                        {t('screens.clubFees.selectedOfTotal', { selected: selectedMemberIds.length, total: members.length })}
+                        {t('screens.clubFees.selectedOfTotal', {
+                          selected: selectedMemberIds.length,
+                          total: members.length,
+                        })}
                       </Text>
                       <TouchableOpacity
                         onPress={() => {
                           if (selectedMemberIds.length === members.length) {
                             setSelectedMemberIds([]);
                           } else {
-                            setSelectedMemberIds(members.map(m => m.id));
+                            setSelectedMemberIds(members.map((m) => m.id));
                           }
                         }}
                         style={styles.selectAllButton}
                       >
                         <Text style={styles.selectAllText}>
-                          {selectedMemberIds.length === members.length ? t('screens.clubFees.clearAll') : t('screens.clubFees.selectAll')}
+                          {selectedMemberIds.length === members.length
+                            ? t('screens.clubFees.clearAll')
+                            : t('screens.clubFees.selectAll')}
                         </Text>
                       </TouchableOpacity>
                     </View>
@@ -930,13 +966,12 @@ const ClubFeesScreen = () => {
                         return (
                           <TouchableOpacity
                             key={member.id}
-                            style={[
-                              styles.memberItem,
-                              isSelected && styles.memberItemSelected,
-                            ]}
+                            style={[styles.memberItem, isSelected && styles.memberItemSelected]}
                             onPress={() => {
                               if (isSelected) {
-                                setSelectedMemberIds(selectedMemberIds.filter(id => id !== member.id));
+                                setSelectedMemberIds(
+                                  selectedMemberIds.filter((id) => id !== member.id)
+                                );
                               } else {
                                 setSelectedMemberIds([...selectedMemberIds, member.id]);
                               }
@@ -944,12 +979,15 @@ const ClubFeesScreen = () => {
                             activeOpacity={TOUCH_OPACITY.default}
                           >
                             <View style={styles.memberItemLeft}>
-                              <View style={[
-                                styles.checkbox,
-                                isSelected && styles.checkboxSelected,
-                              ]}>
+                              <View
+                                style={[styles.checkbox, isSelected && styles.checkboxSelected]}
+                              >
                                 {isSelected && (
-                                  <MaterialCommunityIcons name={ICONS.CHECK} size={designTokens.iconSize.sm} color={designTokens.colors.white} />
+                                  <MaterialCommunityIcons
+                                    name={ICONS.CHECK}
+                                    size={designTokens.iconSize.sm}
+                                    color={designTokens.colors.white}
+                                  />
                                 )}
                               </View>
                               <View style={styles.memberItemInfo}>
@@ -980,7 +1018,11 @@ const ClubFeesScreen = () => {
                 onPress={createCustomCharge}
                 activeOpacity={TOUCH_OPACITY.light}
               >
-                <MaterialCommunityIcons name={ICONS.PLUS_CIRCLE} size={designTokens.iconSize.md} color={designTokens.colors.white} />
+                <MaterialCommunityIcons
+                  name={ICONS.PLUS_CIRCLE}
+                  size={designTokens.iconSize.md}
+                  color={designTokens.colors.white}
+                />
                 <Text style={styles.modalCreateText}>{t('screens.clubFees.createCharge')}</Text>
               </TouchableOpacity>
             </View>

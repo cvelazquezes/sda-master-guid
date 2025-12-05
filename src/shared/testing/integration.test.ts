@@ -33,10 +33,7 @@ describe('Integration Tests', () => {
   describe('Authentication Flow', () => {
     it('should complete full login flow with event emission', async () => {
       // Arrange
-      const testUser = aUser()
-        .withEmail('test@example.com')
-        .withName('Test User')
-        .build();
+      const testUser = aUser().withEmail('test@example.com').withName('Test User').build();
 
       const mockAuthResponse = {
         user: testUser,
@@ -66,14 +63,12 @@ describe('Integration Tests', () => {
 
     it('should handle login failure gracefully', async () => {
       // Arrange
-      mockedApiService.post.mockRejectedValueOnce(
-        new Error('Invalid credentials')
-      );
+      mockedApiService.post.mockRejectedValueOnce(new Error('Invalid credentials'));
 
       // Act & Assert
-      await expect(
-        authService.login('test@example.com', 'wrongpassword')
-      ).rejects.toThrow('Invalid credentials');
+      await expect(authService.login('test@example.com', 'wrongpassword')).rejects.toThrow(
+        'Invalid credentials'
+      );
     });
   });
 
@@ -106,7 +101,7 @@ describe('Integration Tests', () => {
     it('should handle command failure and emit error event', async () => {
       // Arrange
       const command = createCommand('INVALID_COMMAND', {});
-      const errorEvents: any[] = [];
+      const errorEvents: DomainEvent[] = [];
 
       eventBus.subscribe(DomainEvents.SYSTEM_ERROR, (event) => {
         errorEvents.push(event);
@@ -252,11 +247,9 @@ describe('Integration Tests', () => {
       });
 
       expect(result).toEqual(updatedUser);
-      expect(mockedApiService.put).toHaveBeenCalledWith(
-        `/users/${initialUser.id}`,
-        { name: 'Updated Name' }
-      );
+      expect(mockedApiService.put).toHaveBeenCalledWith(`/users/${initialUser.id}`, {
+        name: 'Updated Name',
+      });
     });
   });
 });
-

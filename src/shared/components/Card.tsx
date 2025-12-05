@@ -10,7 +10,11 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { designTokens } from '../theme';
 import { A11Y_ROLE, TOUCH_OPACITY, COMPONENT_VARIANT } from '../constants';
 
-type CardVariant = typeof COMPONENT_VARIANT.default | typeof COMPONENT_VARIANT.elevated | typeof COMPONENT_VARIANT.outlined | typeof COMPONENT_VARIANT.flat;
+type CardVariant =
+  | typeof COMPONENT_VARIANT.default
+  | typeof COMPONENT_VARIANT.elevated
+  | typeof COMPONENT_VARIANT.outlined
+  | typeof COMPONENT_VARIANT.flat;
 
 interface CardProps {
   children: ReactNode;
@@ -51,7 +55,9 @@ export const Card: React.FC<CardProps> = ({
           ...baseStyle,
           shadowColor: designTokens.colors.black,
           shadowOffset: { width: 0, height: designTokens.spacing.xs },
-          shadowOpacity: isDark ? designTokens.shadowConfig.darkStrong.opacity : designTokens.shadowConfig.light.opacity,
+          shadowOpacity: isDark
+            ? designTokens.shadowConfig.darkStrong.opacity
+            : designTokens.shadowConfig.light.opacity,
           shadowRadius: designTokens.spacing.md,
           elevation: isDark ? 10 : 8,
         };
@@ -62,7 +68,9 @@ export const Card: React.FC<CardProps> = ({
           borderColor: colors.border,
           shadowColor: designTokens.colors.black,
           shadowOffset: { width: 0, height: designTokens.borderWidth.thin },
-          shadowOpacity: isDark ? designTokens.shadowConfig.darkSubtle.opacity : designTokens.shadowConfig.lightSubtle.opacity,
+          shadowOpacity: isDark
+            ? designTokens.shadowConfig.darkSubtle.opacity
+            : designTokens.shadowConfig.lightSubtle.opacity,
           shadowRadius: designTokens.spacing.xs,
           elevation: isDark ? 3 : 2,
         };
@@ -76,18 +84,16 @@ export const Card: React.FC<CardProps> = ({
           ...baseStyle,
           shadowColor: designTokens.colors.black,
           shadowOffset: { width: 0, height: designTokens.borderWidth.thick },
-          shadowOpacity: isDark ? designTokens.shadowConfig.dark.opacity : designTokens.shadowConfig.lightSubtle.opacity + 0.06,
+          shadowOpacity: isDark
+            ? designTokens.shadowConfig.dark.opacity
+            : designTokens.shadowConfig.lightSubtle.opacity + 0.06,
           shadowRadius: designTokens.spacing.sm + designTokens.spacing.xxs,
           elevation: isDark ? 6 : 4,
         };
     }
   };
 
-  const cardStyle = [
-    getVariantStyle(),
-    disabled && styles.disabled,
-    style,
-  ];
+  const cardStyle = [getVariantStyle(), disabled && styles.disabled, style];
 
   if (onPress) {
     return (
@@ -103,9 +109,7 @@ export const Card: React.FC<CardProps> = ({
         accessibilityHint={accessibilityHint}
         accessibilityState={{ disabled }}
       >
-        <View style={[styles.content, contentStyle]}>
-          {children}
-        </View>
+        <View style={[styles.content, contentStyle]}>{children}</View>
       </TouchableOpacity>
     );
   }
@@ -117,9 +121,7 @@ export const Card: React.FC<CardProps> = ({
       accessible={true}
       accessibilityLabel={accessibilityLabel}
     >
-      <View style={[styles.content, contentStyle]}>
-        {children}
-      </View>
+      <View style={[styles.content, contentStyle]}>{children}</View>
     </View>
   );
 };

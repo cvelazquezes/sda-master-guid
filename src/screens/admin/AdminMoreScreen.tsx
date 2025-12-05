@@ -10,8 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { ScreenHeader, MenuCard, SectionHeader } from '../../shared/components';
 import { designTokens } from '../../shared/theme/designTokens';
-import { ICONS, SCREENS, MENU_ITEM_IDS } from '../../shared/constants';
-import { flexValues } from '../../shared/constants/layoutConstants';
+import { ICONS, MENU_ITEM_IDS, SCREENS, flexValues } from '../../shared/constants';
 
 const AdminMoreScreen = () => {
   const navigation = useNavigation();
@@ -56,7 +55,7 @@ const AdminMoreScreen = () => {
         title={t('screens.adminMore.title')}
         subtitle={t('screens.adminMore.subtitle')}
       />
-      
+
       <ScrollView style={styles.scrollView}>
         <View style={styles.content}>
           <SectionHeader title={t('screens.adminMore.managementSection')} />
@@ -105,4 +104,3 @@ const styles = StyleSheet.create({
 });
 
 export default AdminMoreScreen;
-

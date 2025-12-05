@@ -1,9 +1,9 @@
 /**
  * API Utility Functions
- * 
+ *
  * Utilities for API operations including pagination, filtering, sorting,
  * and request building following REST best practices.
- * 
+ *
  * Based on best practices from:
  * - Google API Design Guide
  * - Microsoft REST API Guidelines
@@ -43,7 +43,7 @@ export interface SortParams {
 /**
  * Filter parameters (generic)
  */
-export type FilterParams = Record<string, any>;
+export type FilterParams = Record<string, unknown>;
 
 /**
  * Paginated response structure
@@ -83,10 +83,10 @@ export interface QueryParams extends PaginationParams, SortParams, FilterParams 
 
 /**
  * Creates pagination query parameters
- * 
+ *
  * @param params - Pagination parameters
  * @returns URL query parameters object
- * 
+ *
  * @example
  * ```typescript
  * const params = createPaginationParams({ page: 2, pageSize: 20 });
@@ -109,10 +109,10 @@ export function createPaginationParams(params: PaginationParams): Record<string,
 
 /**
  * Creates cursor-based pagination parameters
- * 
+ *
  * @param params - Cursor pagination parameters
  * @returns URL query parameters object
- * 
+ *
  * @example
  * ```typescript
  * const params = createCursorPaginationParams({ cursor: 'abc123', limit: 50 });
@@ -137,12 +137,12 @@ export function createCursorPaginationParams(
 
 /**
  * Calculates pagination metadata
- * 
+ *
  * @param total - Total number of items
  * @param page - Current page number
  * @param pageSize - Items per page
  * @returns Pagination metadata
- * 
+ *
  * @example
  * ```typescript
  * const meta = calculatePaginationMeta(150, 3, 20);
@@ -153,7 +153,7 @@ export function calculatePaginationMeta(
   total: number,
   page: number,
   pageSize: number
-): PaginatedResponse<any>['pagination'] {
+): PaginatedResponse<unknown>['pagination'] {
   const totalPages = Math.ceil(total / pageSize);
 
   return {
@@ -172,11 +172,11 @@ export function calculatePaginationMeta(
 
 /**
  * Creates filter query parameters from object
- * 
+ *
  * @param filters - Filter object
  * @param options - Configuration options
  * @returns URL query parameters string
- * 
+ *
  * @example
  * ```typescript
  * const params = createFilterParams({
@@ -229,11 +229,11 @@ export function createFilterParams(
 
 /**
  * Creates sort query parameters
- * 
+ *
  * @param sortBy - Field to sort by
  * @param sortOrder - Sort order (asc or desc)
  * @returns URL query parameters object
- * 
+ *
  * @example
  * ```typescript
  * const params = createSortParams('createdAt', 'desc');
@@ -256,10 +256,10 @@ export function createSortParams(
 
 /**
  * Parses sort string into sortBy and sortOrder
- * 
+ *
  * @param sortString - Sort string (e.g., "createdAt:desc" or "-createdAt")
  * @returns Sort parameters
- * 
+ *
  * @example
  * ```typescript
  * parseSortString('createdAt:desc'); // { sortBy: 'createdAt', sortOrder: 'desc' }
@@ -302,10 +302,10 @@ export function parseSortString(sortString: string): SortParams {
 
 /**
  * Builds a complete query string from parameters
- * 
+ *
  * @param params - Query parameters
  * @returns URL query string (without leading ?)
- * 
+ *
  * @example
  * ```typescript
  * const query = buildQueryString({
@@ -317,7 +317,7 @@ export function parseSortString(sortString: string): SortParams {
  * // Returns: "page=1&pageSize=20&sortBy=name&status=active"
  * ```
  */
-export function buildQueryString(params: Record<string, any>): string {
+export function buildQueryString(params: Record<string, unknown>): string {
   const searchParams = new URLSearchParams();
 
   for (const [key, value] of Object.entries(params)) {
@@ -337,12 +337,12 @@ export function buildQueryString(params: Record<string, any>): string {
 
 /**
  * Combines multiple parameter objects into a single query string
- * 
+ *
  * @param pagination - Pagination parameters
  * @param sort - Sort parameters
  * @param filters - Filter parameters
  * @returns Complete query string
- * 
+ *
  * @example
  * ```typescript
  * const query = combineQueryParams(
@@ -372,11 +372,11 @@ export function combineQueryParams(
 
 /**
  * Creates a GET request URL with query parameters
- * 
+ *
  * @param baseUrl - Base URL
  * @param params - Query parameters
  * @returns Complete URL with query string
- * 
+ *
  * @example
  * ```typescript
  * const url = createGetUrl('/api/users', { page: 1, status: 'active' });
@@ -394,12 +394,12 @@ export function createGetUrl(baseUrl: string, params?: QueryParams): string {
 
 /**
  * Extracts pagination info from response headers
- * 
+ *
  * Common headers: X-Total-Count, X-Page, X-Page-Size, Link
- * 
+ *
  * @param headers - Response headers
  * @returns Pagination metadata
- * 
+ *
  * @example
  * ```typescript
  * const meta = extractPaginationFromHeaders(response.headers);
@@ -408,12 +408,12 @@ export function createGetUrl(baseUrl: string, params?: QueryParams): string {
  */
 export function extractPaginationFromHeaders(
   headers: Record<string, string>
-): Partial<PaginatedResponse<any>['pagination']> {
+): Partial<PaginatedResponse<unknown>['pagination']> {
   const total = headers['x-total-count'] || headers['X-Total-Count'];
   const page = headers['x-page'] || headers['X-Page'];
   const pageSize = headers['x-page-size'] || headers['X-Page-Size'];
 
-  const result: Partial<PaginatedResponse<any>['pagination']> = {};
+  const result: Partial<PaginatedResponse<unknown>['pagination']> = {};
 
   if (total) result.total = parseInt(total, 10);
   if (page) result.page = parseInt(page, 10);
@@ -434,15 +434,15 @@ export function extractPaginationFromHeaders(
 
 /**
  * Generates an idempotency key for requests
- * 
+ *
  * @param prefix - Optional prefix
  * @returns UUID-based idempotency key
- * 
+ *
  * @example
  * ```typescript
  * const key = generateIdempotencyKey('payment');
  * // Returns: "payment_1234567890abcdef"
- * 
+ *
  * // Usage in API call:
  * await api.post('/payments', data, {
  *   headers: { 'Idempotency-Key': key }
@@ -458,10 +458,10 @@ export function generateIdempotencyKey(prefix?: string): string {
 
 /**
  * Creates headers with idempotency key
- * 
+ *
  * @param key - Idempotency key
  * @returns Headers object
- * 
+ *
  * @example
  * ```typescript
  * const headers = createIdempotencyHeaders('abc123');
@@ -480,13 +480,13 @@ export function createIdempotencyHeaders(key: string): Record<string, string> {
 
 /**
  * Creates a paginated response object
- * 
+ *
  * @param data - Array of items
  * @param total - Total number of items
  * @param page - Current page
  * @param pageSize - Items per page
  * @returns Paginated response
- * 
+ *
  * @example
  * ```typescript
  * const response = createPaginatedResponse(users, 150, 2, 20);
@@ -506,12 +506,12 @@ export function createPaginatedResponse<T>(
 
 /**
  * Creates a cursor paginated response object
- * 
+ *
  * @param data - Array of items
  * @param nextCursor - Cursor for next page (null if no more)
  * @param limit - Items limit
  * @returns Cursor paginated response
- * 
+ *
  * @example
  * ```typescript
  * const response = createCursorPaginatedResponse(users, 'cursor_abc', 20);
@@ -531,4 +531,3 @@ export function createCursorPaginatedResponse<T>(
     },
   };
 }
-

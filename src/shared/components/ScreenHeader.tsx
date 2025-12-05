@@ -28,23 +28,21 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
   const { colors } = useTheme();
 
   return (
-    <View 
+    <View
       style={[
-        styles.container, 
-        { 
+        styles.container,
+        {
           backgroundColor: colors.background,
           borderBottomColor: colors.border,
         },
-        style
-      ]} 
+        style,
+      ]}
       testID={testID}
     >
       <View style={styles.textContainer}>
         <Text style={[styles.title, { color: colors.textPrimary }]}>{title}</Text>
         {subtitle && (
-          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-            {subtitle}
-          </Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{subtitle}</Text>
         )}
       </View>
       {children}

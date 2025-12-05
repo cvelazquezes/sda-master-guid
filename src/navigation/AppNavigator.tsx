@@ -9,7 +9,17 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { mobileFontSizes, designTokens, layoutConstants } from '../shared/theme';
 import { useTheme } from '../contexts/ThemeContext';
-import { SCREENS, TABS, SCREEN_TITLES, ICONS, A11Y_ROLE, dimensionValues, PRESENTATION, BADGE, NAV_KEYS } from '../shared/constants';
+import {
+  SCREENS,
+  TABS,
+  SCREEN_TITLES,
+  ICONS,
+  A11Y_ROLE,
+  dimensionValues,
+  PRESENTATION,
+  BADGE,
+  NAV_KEYS,
+} from '../shared/constants';
 
 // Auth Screens - Direct imports (lazy loading disabled to fix Metro bundler issue)
 import LoginScreen from '../screens/auth/LoginScreen';
@@ -50,7 +60,7 @@ const Tab = createBottomTabNavigator();
 
 // Profile Icon Component - opens Account modal
 const ProfileIcon = () => {
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation();
   const { colors } = useTheme();
 
   return (
@@ -61,7 +71,11 @@ const ProfileIcon = () => {
       accessibilityRole={A11Y_ROLE.BUTTON}
     >
       <View style={[headerIconStyles.avatarCircle, { backgroundColor: colors.primaryAlpha20 }]}>
-        <MaterialCommunityIcons name={ICONS.ACCOUNT} size={designTokens.iconSize.md} color={colors.primary} />
+        <MaterialCommunityIcons
+          name={ICONS.ACCOUNT}
+          size={designTokens.iconSize.md}
+          color={colors.primary}
+        />
       </View>
     </TouchableOpacity>
   );
@@ -80,10 +94,16 @@ const NotificationBell = () => {
       accessibilityLabel={SCREEN_TITLES.NOTIFICATIONS}
       accessibilityRole={A11Y_ROLE.BUTTON}
     >
-      <MaterialCommunityIcons name={ICONS.BELL} size={designTokens.iconSize.lg} color={colors.textPrimary} />
+      <MaterialCommunityIcons
+        name={ICONS.BELL}
+        size={designTokens.iconSize.lg}
+        color={colors.textPrimary}
+      />
       {unreadCount > 0 && (
         <View style={[headerIconStyles.badge, { backgroundColor: colors.error }]}>
-          <Text style={headerIconStyles.badgeText}>{unreadCount > BADGE.MAX_COUNT ? BADGE.OVERFLOW_TEXT : unreadCount}</Text>
+          <Text style={headerIconStyles.badgeText}>
+            {unreadCount > BADGE.MAX_COUNT ? BADGE.OVERFLOW_TEXT : unreadCount}
+          </Text>
         </View>
       )}
     </TouchableOpacity>
@@ -179,8 +199,9 @@ const MainTabs = () => {
     }
   };
 
-  // Get role-specific members screen
-  const getMembersScreen = () => {
+  // Get role-specific members screen (reserved for future use)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const getMembersScreen = (): React.ReactElement => {
     switch (user?.role) {
       case UserRole.CLUB_ADMIN:
         return <ClubMembersScreen />;
@@ -224,10 +245,7 @@ const MainTabs = () => {
       })}
     >
       {/* Tab 1: Home - Role-specific home screen */}
-      <Tab.Screen 
-        name={SCREENS.HOME} 
-        options={{ title: SCREEN_TITLES.HOME }}
-      >
+      <Tab.Screen name={SCREENS.HOME} options={{ title: SCREEN_TITLES.HOME }}>
         {() => getDashboardScreen()}
       </Tab.Screen>
 
@@ -292,8 +310,8 @@ const MainTabs = () => {
 
 const AuthStack = () => {
   return (
-    <Stack.Navigator 
-      screenOptions={{ 
+    <Stack.Navigator
+      screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: designTokens.colors.white },
       }}
@@ -308,16 +326,16 @@ const AppStack = () => {
   const { user } = useAuth();
 
   return (
-    <Stack.Navigator 
-      screenOptions={{ 
+    <Stack.Navigator
+      screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: designTokens.colors.white },
       }}
     >
       <Stack.Screen name={SCREENS.MAIN} component={MainTabs} />
       {/* Account - Available for all roles via header icon */}
-      <Stack.Screen 
-        name={SCREENS.ACCOUNT} 
+      <Stack.Screen
+        name={SCREENS.ACCOUNT}
         component={AccountScreen}
         options={{
           headerShown: true,
@@ -326,8 +344,8 @@ const AppStack = () => {
         }}
       />
       {/* Notifications - Available for all roles */}
-      <Stack.Screen 
-        name={SCREENS.NOTIFICATIONS} 
+      <Stack.Screen
+        name={SCREENS.NOTIFICATIONS}
         component={NotificationsScreen}
         options={{
           headerShown: true,
@@ -338,13 +356,22 @@ const AppStack = () => {
       {/* Admin-specific screens */}
       {user?.role === UserRole.ADMIN && (
         <>
-          <Stack.Screen name={SCREENS.USERS_MANAGEMENT} options={{ headerShown: true, title: SCREEN_TITLES.USER_MANAGEMENT }}>
+          <Stack.Screen
+            name={SCREENS.USERS_MANAGEMENT}
+            options={{ headerShown: true, title: SCREEN_TITLES.USER_MANAGEMENT }}
+          >
             {() => <UsersManagementScreen />}
           </Stack.Screen>
-          <Stack.Screen name={SCREENS.CLUBS_MANAGEMENT} options={{ headerShown: true, title: SCREEN_TITLES.CLUB_MANAGEMENT }}>
+          <Stack.Screen
+            name={SCREENS.CLUBS_MANAGEMENT}
+            options={{ headerShown: true, title: SCREEN_TITLES.CLUB_MANAGEMENT }}
+          >
             {() => <ClubsManagementScreen />}
           </Stack.Screen>
-          <Stack.Screen name={SCREENS.ORGANIZATION_MANAGEMENT} options={{ headerShown: true, title: SCREEN_TITLES.ORGANIZATION }}>
+          <Stack.Screen
+            name={SCREENS.ORGANIZATION_MANAGEMENT}
+            options={{ headerShown: true, title: SCREEN_TITLES.ORGANIZATION }}
+          >
             {() => <OrganizationManagementScreen />}
           </Stack.Screen>
         </>
@@ -352,23 +379,38 @@ const AppStack = () => {
       {/* Club Admin-specific screens */}
       {user?.role === UserRole.CLUB_ADMIN && (
         <>
-          <Stack.Screen name={SCREENS.CLUB_SETTINGS} options={{ headerShown: true, title: SCREEN_TITLES.CLUB_SETTINGS }}>
+          <Stack.Screen
+            name={SCREENS.CLUB_SETTINGS}
+            options={{ headerShown: true, title: SCREEN_TITLES.CLUB_SETTINGS }}
+          >
             {() => <ClubSettingsScreen />}
           </Stack.Screen>
-          <Stack.Screen name={SCREENS.CLUB_MATCHES} options={{ headerShown: true, title: SCREEN_TITLES.ACTIVITY_MANAGEMENT }}>
+          <Stack.Screen
+            name={SCREENS.CLUB_MATCHES}
+            options={{ headerShown: true, title: SCREEN_TITLES.ACTIVITY_MANAGEMENT }}
+          >
             {() => <ClubMatchesScreen />}
           </Stack.Screen>
-          <Stack.Screen name={SCREENS.GENERATE_MATCHES} options={{ headerShown: true, title: SCREEN_TITLES.GENERATE_ACTIVITIES }}>
+          <Stack.Screen
+            name={SCREENS.GENERATE_MATCHES}
+            options={{ headerShown: true, title: SCREEN_TITLES.GENERATE_ACTIVITIES }}
+          >
             {() => <GenerateMatchesScreen />}
           </Stack.Screen>
-          <Stack.Screen name={SCREENS.CLUB_DIRECTIVE} options={{ headerShown: true, title: SCREEN_TITLES.CLUB_DIRECTIVE }}>
+          <Stack.Screen
+            name={SCREENS.CLUB_DIRECTIVE}
+            options={{ headerShown: true, title: SCREEN_TITLES.CLUB_DIRECTIVE }}
+          >
             {() => <ClubDirectiveScreen />}
           </Stack.Screen>
         </>
       )}
       {/* User-specific screens (available to regular users and club admins) */}
       {(user?.role === UserRole.USER || user?.role === UserRole.CLUB_ADMIN) && (
-        <Stack.Screen name={SCREENS.MY_FEES} options={{ headerShown: true, title: SCREEN_TITLES.MY_FEES }}>
+        <Stack.Screen
+          name={SCREENS.MY_FEES}
+          options={{ headerShown: true, title: SCREEN_TITLES.MY_FEES }}
+        >
           {() => <MyFeesScreen />}
         </Stack.Screen>
       )}
@@ -378,8 +420,8 @@ const AppStack = () => {
 
 const PendingStack = () => {
   return (
-    <Stack.Navigator 
-      screenOptions={{ 
+    <Stack.Navigator
+      screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: designTokens.colors.white },
       }}

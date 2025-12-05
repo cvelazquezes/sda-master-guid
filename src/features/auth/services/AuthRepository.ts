@@ -1,6 +1,6 @@
 /**
  * Auth Repository Implementations
- * 
+ *
  * Provides both API-based and mock-based implementations of IAuthRepository.
  * This follows the Repository Pattern and Dependency Inversion Principle.
  */
@@ -24,13 +24,13 @@ import api from '../../../shared/api/api';
 
 /**
  * ApiAuthRepository - Production implementation using REST API
- * 
+ *
  * This adapter connects to the backend API for authentication operations.
  */
 export class ApiAuthRepository implements IAuthRepository {
   /**
    * Authenticate user via API
-   * 
+   *
    * @param credentials - User login credentials
    * @returns User data and authentication token
    * @throws AuthError if authentication fails
@@ -45,20 +45,21 @@ export class ApiAuthRepository implements IAuthRepository {
 
       logger.info(`User ${user.email} logged in successfully`);
       return { user, token };
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('API login error:', error);
-      
-      if (error.response?.status === 401) {
+
+      const axiosError = error as { response?: { status?: number } };
+      if (axiosError.response?.status === 401) {
         throw new AuthError('Invalid credentials', error);
       }
-      
+
       throw new AuthError('Login failed', error);
     }
   }
 
   /**
    * Register new user via API
-   * 
+   *
    * @param data - Registration data
    * @returns User data and authentication token
    * @throws AuthError if registration fails
@@ -73,13 +74,14 @@ export class ApiAuthRepository implements IAuthRepository {
 
       logger.info(`User ${user.email} registered successfully`);
       return { user, token };
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('API registration error:', error);
-      
-      if (error.response?.status === 409) {
+
+      const axiosError = error as { response?: { status?: number } };
+      if (axiosError.response?.status === 409) {
         throw new AuthError('User already exists', error);
       }
-      
+
       throw new AuthError('Registration failed', error);
     }
   }
@@ -99,14 +101,14 @@ export class ApiAuthRepository implements IAuthRepository {
 
   /**
    * Get current user from API
-   * 
+   *
    * @returns Current user or null if not authenticated
    */
   async getCurrentUser(): Promise<User | null> {
     try {
       const response = await api.get('/auth/me');
       const user = response.data.user;
-      
+
       logger.debug(`Fetched current user: ${user.email}`);
       return user;
     } catch (error) {
@@ -117,7 +119,7 @@ export class ApiAuthRepository implements IAuthRepository {
 
   /**
    * Update user profile via API
-   * 
+   *
    * @param userId - User identifier
    * @param data - User data to update
    * @returns Updated user data
@@ -130,7 +132,7 @@ export class ApiAuthRepository implements IAuthRepository {
     try {
       const response = await api.patch(`/auth/users/${userId}`, data);
       const user = response.data.user;
-      
+
       logger.info(`User ${userId} updated successfully`);
       return user;
     } catch (error) {
@@ -141,7 +143,7 @@ export class ApiAuthRepository implements IAuthRepository {
 
   /**
    * Refresh authentication token
-   * 
+   *
    * @param refreshToken - Refresh token
    * @returns New authentication token
    * @throws AuthError if refresh fails
@@ -150,7 +152,7 @@ export class ApiAuthRepository implements IAuthRepository {
     try {
       const response = await api.post('/auth/refresh', { refreshToken });
       const { token, refreshToken: newRefreshToken, expiresAt } = response.data;
-      
+
       logger.info('Token refreshed successfully');
       return { token, refreshToken: newRefreshToken, expiresAt };
     } catch (error) {
@@ -166,7 +168,7 @@ export class ApiAuthRepository implements IAuthRepository {
 
 /**
  * MockAuthRepository - Development implementation using local data
- * 
+ *
  * This adapter uses mock data for development and testing purposes.
  */
 export class MockAuthRepository implements IAuthRepository {
@@ -210,14 +212,14 @@ export class MockAuthRepository implements IAuthRepository {
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     const user = this.mockUsers.find((u) => u.email === credentials.email);
-    
+
     if (!user) {
       throw new AuthError('Invalid credentials');
     }
 
     const token = `mock_token_${user.id}_${Date.now()}`;
     logger.info(`Mock login: ${user.email}`);
-    
+
     return { user, token };
   }
 
@@ -252,7 +254,7 @@ export class MockAuthRepository implements IAuthRepository {
 
     this.mockUsers.push(newUser);
     const token = `mock_token_${newUser.id}_${Date.now()}`;
-    
+
     logger.info(`Mock registration: ${newUser.email}`);
     return { user: newUser, token };
   }
@@ -287,7 +289,7 @@ export class MockAuthRepository implements IAuthRepository {
     await new Promise((resolve) => setTimeout(resolve, 300));
 
     const userIndex = this.mockUsers.findIndex((u) => u.id === userId);
-    
+
     if (userIndex === -1) {
       throw new AppError('User not found', 'USER_NOT_FOUND', 404);
     }
@@ -305,12 +307,12 @@ export class MockAuthRepository implements IAuthRepository {
   /**
    * Mock token refresh
    */
-  async refreshToken(refreshToken: string): Promise<AuthToken> {
+  async refreshToken(_refreshToken: string): Promise<AuthToken> {
     await new Promise((resolve) => setTimeout(resolve, 200));
-    
+
     const token = `mock_token_refreshed_${Date.now()}`;
     logger.info('Mock token refreshed');
-    
+
     return {
       token,
       refreshToken: `mock_refresh_${Date.now()}`,
@@ -318,4 +320,3 @@ export class MockAuthRepository implements IAuthRepository {
     };
   }
 }
-

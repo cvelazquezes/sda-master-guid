@@ -12,8 +12,14 @@ import { mobileTypography } from '../theme/mobileTypography';
 import { designTokens } from '../theme/designTokens';
 import { layoutConstants } from '../theme';
 import { StandardButton } from './StandardButton';
-import { flexValues, dimensionValues } from '../constants/layoutConstants';
-import { COMPONENT_VARIANT, COMPONENT_SIZE, A11Y_ROLE, ICONS } from '../constants';
+import {
+  A11Y_ROLE,
+  COMPONENT_SIZE,
+  COMPONENT_VARIANT,
+  ICONS,
+  dimensionValues,
+  flexValues,
+} from '../constants';
 
 export interface EmptyStateProps {
   // Content
@@ -22,15 +28,15 @@ export interface EmptyStateProps {
   description?: string;
   /** @deprecated Use description instead */
   message?: string;
-  
+
   // Action
   actionLabel?: string;
   onAction?: () => void;
   actionIcon?: string;
-  
+
   // Custom content
   children?: ReactNode;
-  
+
   // Styling
   iconColor?: string;
   style?: ViewStyle;
@@ -66,7 +72,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       {/* Icon */}
       <View style={styles.iconContainer}>
         <MaterialCommunityIcons
-          name={icon as any}
+          name={icon as typeof ICONS.CHECK}
           size={designTokens.icon.sizes['4xl']}
           color={finalIconColor}
         />
@@ -130,4 +136,3 @@ const styles = StyleSheet.create({
 });
 
 export default EmptyState;
-

@@ -23,11 +23,28 @@ import { Match, MatchStatus, User, MatchRound } from '../../types';
 import { MatchCard } from '../../components/MatchCard';
 import { StandardModal } from '../../shared/components/StandardModal';
 import { StandardButton } from '../../shared/components/StandardButton';
-import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../../shared/theme';
+import {
+  mobileTypography,
+  mobileIconSizes,
+  designTokens,
+  layoutConstants,
+} from '../../shared/theme';
 import { format } from 'date-fns';
-import { MESSAGES, EXTERNAL_URLS, ICONS, COMPONENT_VARIANT, DATE_FORMATS, ALERT_BUTTON_STYLE, FILTER_STATUS, EMPTY_VALUE, VALIDATION, LOG_MESSAGES, ROUND_STATUS } from '../../shared/constants';
 import { logger } from '../../shared/utils/logger';
-import { flexValues } from '../../shared/constants/layoutConstants';
+import {
+  ALERT_BUTTON_STYLE,
+  COMPONENT_VARIANT,
+  DATE_FORMATS,
+  EMPTY_VALUE,
+  EXTERNAL_URLS,
+  FILTER_STATUS,
+  ICONS,
+  LOG_MESSAGES,
+  MESSAGES,
+  ROUND_STATUS,
+  VALIDATION,
+  flexValues,
+} from '../../shared/constants';
 
 const ClubMatchesScreen = () => {
   const { t } = useTranslation();
@@ -35,12 +52,14 @@ const ClubMatchesScreen = () => {
   const [matches, setMatches] = useState<Match[]>([]);
   const [matchRounds, setMatchRounds] = useState<MatchRound[]>([]);
   const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [matchParticipants, setMatchParticipants] = useState<User[]>([]);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
-  const [filterStatus, setFilterStatus] = useState<MatchStatus | typeof FILTER_STATUS.ALL>(FILTER_STATUS.ALL);
+  const [filterStatus, setFilterStatus] = useState<MatchStatus | typeof FILTER_STATUS.ALL>(
+    FILTER_STATUS.ALL
+  );
 
   useEffect(() => {
     if (user?.clubId) {
@@ -60,12 +79,14 @@ const ClubMatchesScreen = () => {
         matchService.getClubMatches(user.clubId),
         matchService.getMatchRounds(user.clubId),
       ]);
-      setMatches(matchesData.sort((a, b) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      ));
-      setMatchRounds(roundsData.sort((a, b) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      ));
+      setMatches(
+        matchesData.sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )
+      );
+      setMatchRounds(
+        roundsData.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      );
     } catch (error) {
       Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_LOAD_ACTIVITIES);
     } finally {
@@ -83,17 +104,17 @@ const ClubMatchesScreen = () => {
     if (filterStatus === FILTER_STATUS.ALL) {
       setFilteredMatches(matches);
     } else {
-      setFilteredMatches(matches.filter(m => m.status === filterStatus));
+      setFilteredMatches(matches.filter((m) => m.status === filterStatus));
     }
   };
 
   const handleViewMatchDetails = async (match: Match) => {
     setSelectedMatch(match);
     setDetailModalVisible(true);
-    
+
     try {
       const participants = await Promise.all(
-        match.participants.map(userId => userService.getUser(userId))
+        match.participants.map((userId) => userService.getUser(userId))
       );
       setMatchParticipants(participants);
     } catch (error) {
@@ -112,14 +133,16 @@ const ClubMatchesScreen = () => {
           onPress: async () => {
             try {
               const participants = await Promise.all(
-                match.participants.map(userId => userService.getUser(userId))
+                match.participants.map((userId) => userService.getUser(userId))
               );
-              
+
               const phoneNumbers = participants
-                .filter(p => p.whatsappNumber)
-                .map(p => p.whatsappNumber.replace(VALIDATION.WHATSAPP.STRIP_NON_DIGITS, EMPTY_VALUE))
+                .filter((p) => p.whatsappNumber)
+                .map((p) =>
+                  p.whatsappNumber.replace(VALIDATION.WHATSAPP.STRIP_NON_DIGITS, EMPTY_VALUE)
+                )
                 .join(',');
-              
+
               if (phoneNumbers) {
                 const message = t('screens.clubMatches.whatsappGroupMessage');
                 const url = `${EXTERNAL_URLS.WHATSAPP_GROUP}?text=${encodeURIComponent(message)}&phone=${phoneNumbers}`;
@@ -152,10 +175,10 @@ const ClubMatchesScreen = () => {
   const getStatusStats = () => {
     return {
       total: matches.length,
-      pending: matches.filter(m => m.status === MatchStatus.PENDING).length,
-      scheduled: matches.filter(m => m.status === MatchStatus.SCHEDULED).length,
-      completed: matches.filter(m => m.status === MatchStatus.COMPLETED).length,
-      skipped: matches.filter(m => m.status === MatchStatus.SKIPPED).length,
+      pending: matches.filter((m) => m.status === MatchStatus.PENDING).length,
+      scheduled: matches.filter((m) => m.status === MatchStatus.SCHEDULED).length,
+      completed: matches.filter((m) => m.status === MatchStatus.COMPLETED).length,
+      skipped: matches.filter((m) => m.status === MatchStatus.SKIPPED).length,
     };
   };
 
@@ -182,17 +205,23 @@ const ClubMatchesScreen = () => {
               <Text style={styles.statLabel}>{t('screens.clubMatches.totalMatches')}</Text>
             </View>
             <View style={styles.statCard}>
-              <Text style={[styles.statValue, { color: designTokens.colors.warning }]}>{stats.pending}</Text>
+              <Text style={[styles.statValue, { color: designTokens.colors.warning }]}>
+                {stats.pending}
+              </Text>
               <Text style={styles.statLabel}>{t('screens.clubMatches.pending')}</Text>
             </View>
           </View>
           <View style={styles.statsGrid}>
             <View style={styles.statCard}>
-              <Text style={[styles.statValue, { color: designTokens.colors.info }]}>{stats.scheduled}</Text>
+              <Text style={[styles.statValue, { color: designTokens.colors.info }]}>
+                {stats.scheduled}
+              </Text>
               <Text style={styles.statLabel}>{t('screens.clubMatches.scheduled')}</Text>
             </View>
             <View style={styles.statCard}>
-              <Text style={[styles.statValue, { color: designTokens.colors.success }]}>{stats.completed}</Text>
+              <Text style={[styles.statValue, { color: designTokens.colors.success }]}>
+                {stats.completed}
+              </Text>
               <Text style={styles.statLabel}>{t('screens.clubMatches.completed')}</Text>
             </View>
           </View>
@@ -208,15 +237,32 @@ const ClubMatchesScreen = () => {
                   <View>
                     <Text style={styles.roundTitle}>Round {round.id}</Text>
                     <Text style={styles.roundDate}>
-                      Created {format(new Date(round.createdAt), DATE_FORMATS.DATE_FNS_DATE_DISPLAY)}
+                      Created{' '}
+                      {format(new Date(round.createdAt), DATE_FORMATS.DATE_FNS_DATE_DISPLAY)}
                     </Text>
                   </View>
-                  <View style={[styles.roundStatusBadge, { 
-                    backgroundColor: round.status === ROUND_STATUS.ACTIVE ? designTokens.colors.successLight : designTokens.colors.backgroundSecondary 
-                  }]}>
-                    <Text style={[styles.roundStatusText, {
-                      color: round.status === ROUND_STATUS.ACTIVE ? designTokens.colors.success : designTokens.colors.textSecondary
-                    }]}>
+                  <View
+                    style={[
+                      styles.roundStatusBadge,
+                      {
+                        backgroundColor:
+                          round.status === ROUND_STATUS.ACTIVE
+                            ? designTokens.colors.successLight
+                            : designTokens.colors.backgroundSecondary,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.roundStatusText,
+                        {
+                          color:
+                            round.status === ROUND_STATUS.ACTIVE
+                              ? designTokens.colors.success
+                              : designTokens.colors.textSecondary,
+                        },
+                      ]}
+                    >
                       {round.status.toUpperCase()}
                     </Text>
                   </View>
@@ -244,12 +290,16 @@ const ClubMatchesScreen = () => {
                   styles.filterChip,
                   filterStatus === filter.value && styles.filterChipActive,
                 ]}
-                onPress={() => setFilterStatus(filter.value as any)}
+                onPress={() =>
+                  setFilterStatus(filter.value as MatchStatus | typeof FILTER_STATUS.ALL)
+                }
               >
-                <Text style={[
-                  styles.filterChipText,
-                  filterStatus === filter.value && styles.filterChipTextActive,
-                ]}>
+                <Text
+                  style={[
+                    styles.filterChipText,
+                    filterStatus === filter.value && styles.filterChipTextActive,
+                  ]}
+                >
                   {filter.label}
                 </Text>
               </TouchableOpacity>
@@ -261,10 +311,14 @@ const ClubMatchesScreen = () => {
         <View style={styles.content}>
           {filteredMatches.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <MaterialCommunityIcons name={ICONS.ACCOUNT_HEART_OUTLINE} size={mobileIconSizes.xxlarge * 2} color={designTokens.colors.textTertiary} />
+              <MaterialCommunityIcons
+                name={ICONS.ACCOUNT_HEART_OUTLINE}
+                size={mobileIconSizes.xxlarge * 2}
+                color={designTokens.colors.textTertiary}
+              />
               <Text style={styles.emptyText}>{t('screens.clubMatches.noActivitiesFound')}</Text>
               <Text style={styles.emptySubtext}>
-                {filterStatus === FILTER_STATUS.ALL 
+                {filterStatus === FILTER_STATUS.ALL
                   ? t('screens.clubMatches.generateFromDashboard')
                   : t('screens.clubMatches.noFilteredActivities', { status: filterStatus })}
               </Text>
@@ -272,10 +326,7 @@ const ClubMatchesScreen = () => {
           ) : (
             filteredMatches.map((match) => (
               <TouchableOpacity key={match.id} onPress={() => handleViewMatchDetails(match)}>
-                <MatchCard
-                  match={match}
-                  showActions={false}
-                />
+                <MatchCard match={match} showActions={false} />
               </TouchableOpacity>
             ))
           )}
@@ -301,17 +352,27 @@ const ClubMatchesScreen = () => {
             {/* Status */}
             <View style={styles.modalSection}>
               <Text style={styles.modalSectionTitle}>{t('screens.clubMatches.currentStatus')}</Text>
-              <View style={[styles.statusBadge, { 
-                backgroundColor: `${getStatusConfig(selectedMatch.status).color}20` 
-              }]}>
+              <View
+                style={[
+                  styles.statusBadge,
+                  {
+                    backgroundColor: `${getStatusConfig(selectedMatch.status).color}20`,
+                  },
+                ]}
+              >
                 <MaterialCommunityIcons
-                  name={getStatusConfig(selectedMatch.status).icon as any}
+                  name={getStatusConfig(selectedMatch.status).icon as typeof ICONS.CHECK}
                   size={mobileIconSizes.medium}
                   color={getStatusConfig(selectedMatch.status).color}
                 />
-                <Text style={[styles.statusText, { 
-                  color: getStatusConfig(selectedMatch.status).color 
-                }]}>
+                <Text
+                  style={[
+                    styles.statusText,
+                    {
+                      color: getStatusConfig(selectedMatch.status).color,
+                    },
+                  ]}
+                >
                   {selectedMatch.status.charAt(0).toUpperCase() + selectedMatch.status.slice(1)}
                 </Text>
               </View>
@@ -319,7 +380,9 @@ const ClubMatchesScreen = () => {
 
             {/* Participants */}
             <View style={styles.modalSection}>
-              <Text style={styles.modalSectionTitle}>Participants ({matchParticipants.length})</Text>
+              <Text style={styles.modalSectionTitle}>
+                Participants ({matchParticipants.length})
+              </Text>
               {matchParticipants.map((participant) => (
                 <View key={participant.id} style={styles.participantRow}>
                   <View style={styles.participantAvatar}>
@@ -331,9 +394,7 @@ const ClubMatchesScreen = () => {
                     <Text style={styles.participantName}>{participant.name}</Text>
                     <Text style={styles.participantEmail}>{participant.email}</Text>
                     {participant.whatsappNumber && (
-                      <Text style={styles.participantPhone}>
-                        📱 {participant.whatsappNumber}
-                      </Text>
+                      <Text style={styles.participantPhone}>📱 {participant.whatsappNumber}</Text>
                     )}
                   </View>
                 </View>
@@ -343,7 +404,7 @@ const ClubMatchesScreen = () => {
             {/* Admin Actions */}
             <View style={styles.modalSection}>
               <Text style={styles.modalSectionTitle}>{t('screens.clubMatches.adminActions')}</Text>
-              
+
               <StandardButton
                 title={t('screens.activities.notifyParticipants')}
                 icon={ICONS.WHATSAPP}
@@ -372,7 +433,8 @@ const ClubMatchesScreen = () => {
                 />
               )}
 
-              {(selectedMatch.status === MatchStatus.PENDING || selectedMatch.status === MatchStatus.SCHEDULED) && (
+              {(selectedMatch.status === MatchStatus.PENDING ||
+                selectedMatch.status === MatchStatus.SCHEDULED) && (
                 <StandardButton
                   title={t('screens.activities.cancelMatch')}
                   icon={ICONS.CLOSE_CIRCLE}
@@ -575,4 +637,3 @@ const styles = StyleSheet.create({
 });
 
 export default ClubMatchesScreen;
-

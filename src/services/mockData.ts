@@ -120,7 +120,7 @@ export const mockClubs: Club[] = [
     union: 'Unión Mexicana Central',
     division: 'División Interamericana',
     feeSettings: {
-      monthlyFeeAmount: 50.00,
+      monthlyFeeAmount: 50.0,
       currency: 'MXN',
       activeMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], // January to October
       isActive: true,
@@ -142,7 +142,7 @@ export const mockClubs: Club[] = [
     union: 'Unión Mexicana Central',
     division: 'División Interamericana',
     feeSettings: {
-      monthlyFeeAmount: 75.00,
+      monthlyFeeAmount: 75.0,
       currency: 'MXN',
       activeMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], // All year
       isActive: true,
@@ -151,7 +151,7 @@ export const mockClubs: Club[] = [
     updatedAt: new Date().toISOString(),
     memberCount: 1, // María López
   },
-  
+
   // División Interamericana > Unión Mexicana Central > Asociación del Bajío
   {
     id: '6',
@@ -166,7 +166,7 @@ export const mockClubs: Club[] = [
     union: 'Unión Mexicana Central',
     division: 'División Interamericana',
     feeSettings: {
-      monthlyFeeAmount: 60.00,
+      monthlyFeeAmount: 60.0,
       currency: 'MXN',
       activeMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       isActive: true,
@@ -188,7 +188,7 @@ export const mockClubs: Club[] = [
     union: 'Unión Mexicana Central',
     division: 'División Interamericana',
     feeSettings: {
-      monthlyFeeAmount: 55.00,
+      monthlyFeeAmount: 55.0,
       currency: 'MXN',
       activeMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       isActive: false,
@@ -212,7 +212,7 @@ export const mockClubs: Club[] = [
     union: 'Unión del Norte de México',
     division: 'División Interamericana',
     feeSettings: {
-      monthlyFeeAmount: 65.00,
+      monthlyFeeAmount: 65.0,
       currency: 'MXN',
       activeMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
       isActive: true,
@@ -234,7 +234,7 @@ export const mockClubs: Club[] = [
     union: 'Unión del Norte de México',
     division: 'División Interamericana',
     feeSettings: {
-      monthlyFeeAmount: 70.00,
+      monthlyFeeAmount: 70.0,
       currency: 'MXN',
       activeMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       isActive: true,
@@ -258,7 +258,7 @@ export const mockClubs: Club[] = [
     union: 'Unión Austral',
     division: 'División Sudamericana',
     feeSettings: {
-      monthlyFeeAmount: 1500.00,
+      monthlyFeeAmount: 1500.0,
       currency: 'ARS',
       activeMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
       isActive: true,
@@ -280,7 +280,7 @@ export const mockClubs: Club[] = [
     union: 'Unión Austral',
     division: 'División Sudamericana',
     feeSettings: {
-      monthlyFeeAmount: 1200.00,
+      monthlyFeeAmount: 1200.0,
       currency: 'ARS',
       activeMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       isActive: true,

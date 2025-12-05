@@ -9,8 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { ScreenHeader, MenuCard, SectionHeader } from '../../shared/components';
 import { designTokens } from '../../shared/theme/designTokens';
-import { flexValues } from '../../shared/constants/layoutConstants';
-import { ICONS, MENU_ITEM_IDS } from '../../shared/constants';
+import { ICONS, MENU_ITEM_IDS, flexValues } from '../../shared/constants';
 
 const UserMoreScreen = () => {
   const { colors } = useTheme();
@@ -60,11 +59,8 @@ const UserMoreScreen = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <ScreenHeader
-        title={t('screens.userMore.title')}
-        subtitle={t('screens.userMore.subtitle')}
-      />
-      
+      <ScreenHeader title={t('screens.userMore.title')} subtitle={t('screens.userMore.subtitle')} />
+
       <ScrollView style={styles.scrollView}>
         <View style={styles.content}>
           <SectionHeader title={t('screens.userMore.myClubSection')} />
@@ -114,4 +110,3 @@ const styles = StyleSheet.create({
 });
 
 export default UserMoreScreen;
-

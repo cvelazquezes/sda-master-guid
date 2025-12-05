@@ -1,109 +1,242 @@
 /**
- * Timing Constants
- * Centralized timing values for animations, debounce, timeouts, and polling
+ * Timing Constants - Single Source of Truth for ALL timing values
+ *
+ * ============================================================================
+ * THIS IS THE SINGLE SOURCE OF TRUTH FOR ALL TIMING VALUES
+ * ============================================================================
+ *
+ * Contains: Debounce, animation durations, timeouts, polling, cache expiry
+ *
+ * @version 2.0.0
  */
 
-export const TIMING = {
-  // Debounce Delays (user input)
-  DEBOUNCE: {
-    SEARCH: 300, // Search input debounce
-    INPUT: 300, // Generic input debounce
-    FAST: 150, // Quick debounce
-    NORMAL: 300, // Standard debounce
-    SLOW: 500, // Slower debounce
-    VALIDATION: 500, // Form validation debounce
-  },
+// =============================================================================
+// DEBOUNCE DELAYS
+// =============================================================================
 
-  // Animation Durations
-  ANIMATION: {
-    INSTANT: 0,
-    FAST: 200, // Quick animations
-    NORMAL: 300, // Standard animations
-    SLOW: 500, // Slower animations
-    MODAL: 300, // Modal open/close
-    FADE: 300, // Fade in/out
-    SLIDE: 300, // Slide transitions
-    SPINNER: 1000, // Loading spinner minimum display
-  },
-
-  // Timeouts
-  TIMEOUT: {
-    SHORT: 3000, // 3 seconds
-    MEDIUM: 5000, // 5 seconds
-    LONG: 10000, // 10 seconds
-    API_REQUEST: 30000, // 30 seconds for API calls
-    TOAST: 3000, // Toast notification display
-    ALERT: 5000, // Alert display duration
-  },
-
-  // Polling Intervals
-  POLLING: {
-    REALTIME: 1000, // 1 second (real-time updates)
-    FAST: 5000, // 5 seconds
-    NORMAL: 10000, // 10 seconds
-    SLOW: 30000, // 30 seconds
-    BACKGROUND: 60000, // 1 minute (background sync)
-  },
-
-  // Retry Delays
-  RETRY: {
-    FIRST: 1000, // 1 second
-    SECOND: 2000, // 2 seconds
-    THIRD: 4000, // 4 seconds (exponential backoff)
-    MAX: 10000, // Maximum retry delay
-  },
-
-  // Auto-save & Sync
-  AUTO_SAVE: {
-    DRAFT: 30000, // 30 seconds
-    FORM: 60000, // 1 minute
-  },
-
-  // Mock API Delays (for development/testing)
-  MOCK_API: {
-    FAST: 300, // Standard mock delay
-    NORMAL: 500, // Create/update operations
-    SLOW: 1000, // Generate operations
-  },
-
-  // Cache Expiry
-  CACHE: {
-    SHORT: 60000, // 1 minute
-    MEDIUM: 300000, // 5 minutes
-    LONG: 3600000, // 1 hour
-    DAY: 86400000, // 24 hours
-  },
-
-  // Time Units (in milliseconds)
-  MS_PER: {
-    SECOND: 1000,
-    MINUTE: 60000, // 1000 * 60
-    HOUR: 3600000, // 1000 * 60 * 60
-    DAY: 86400000, // 1000 * 60 * 60 * 24
-    WEEK: 604800000, // 1000 * 60 * 60 * 24 * 7
-  },
-
-  // Schedule Defaults (in days)
-  SCHEDULE: {
-    DEFAULT_ADVANCE_DAYS: 7, // Default days ahead for scheduling
-  },
-
-  // Time Thresholds for relative time
-  RELATIVE_TIME: {
-    MINUTES_THRESHOLD: 60, // Show minutes if < 60 minutes
-    HOURS_THRESHOLD: 24, // Show hours if < 24 hours
-    DAYS_THRESHOLD: 7, // Show days if < 7 days
-  },
+/**
+ * Debounce Delays - For user input throttling (in milliseconds)
+ */
+export const DEBOUNCE = {
+  FAST: 150,
+  NORMAL: 300,
+  SLOW: 500,
+  /** Search input debounce */
+  SEARCH: 300,
+  /** Form validation debounce */
+  VALIDATION: 500,
 } as const;
 
-// Helper to convert seconds to milliseconds
-export const seconds = (s: number): number => s * 1000;
+// =============================================================================
+// ANIMATION DURATIONS
+// =============================================================================
 
-// Helper to convert minutes to milliseconds
-export const minutes = (m: number): number => m * 60 * 1000;
+/**
+ * Animation Durations - For UI animations (in milliseconds)
+ */
+export const ANIMATION_DURATION = {
+  INSTANT: 0,
+  FAST: 200,
+  NORMAL: 300,
+  MEDIUM: 400,
+  SLOW: 500,
+  /** Modal open/close */
+  MODAL: 300,
+  /** Fade in/out */
+  FADE: 300,
+  /** Slide transitions */
+  SLIDE: 300,
+  /** Loading spinner minimum display */
+  SPINNER: 1000,
+} as const;
 
-// Helper to convert hours to milliseconds
-export const hours = (h: number): number => h * 60 * 60 * 1000;
+// =============================================================================
+// TIMEOUTS
+// =============================================================================
 
-// Export type helpers
-export type TimingCategory = keyof typeof TIMING;
+/**
+ * Timeouts - For operations and display durations (in milliseconds)
+ */
+export const TIMEOUT = {
+  SHORT: 3000,
+  MEDIUM: 5000,
+  LONG: 10000,
+  /** API request timeout */
+  API_REQUEST: 30000,
+  /** Toast notification display */
+  TOAST: 3000,
+  /** Alert display duration */
+  ALERT: 5000,
+} as const;
+
+// =============================================================================
+// POLLING INTERVALS
+// =============================================================================
+
+/**
+ * Polling Intervals - For periodic data fetching (in milliseconds)
+ */
+export const POLLING = {
+  /** Real-time updates (1 second) */
+  REALTIME: 1000,
+  /** Fast polling (5 seconds) */
+  FAST: 5000,
+  /** Normal polling (10 seconds) */
+  NORMAL: 10000,
+  /** Slow polling (30 seconds) */
+  SLOW: 30000,
+  /** Background sync (1 minute) */
+  BACKGROUND: 60000,
+} as const;
+
+// =============================================================================
+// RETRY DELAYS
+// =============================================================================
+
+/**
+ * Retry Delays - For exponential backoff (in milliseconds)
+ */
+export const RETRY_DELAY = {
+  FIRST: 1000,
+  SECOND: 2000,
+  THIRD: 4000,
+  MAX: 10000,
+} as const;
+
+// =============================================================================
+// AUTO-SAVE
+// =============================================================================
+
+/**
+ * Auto-save Intervals (in milliseconds)
+ */
+export const AUTO_SAVE = {
+  /** Draft save interval */
+  DRAFT: 30000,
+  /** Form save interval */
+  FORM: 60000,
+} as const;
+
+// =============================================================================
+// MOCK API DELAYS
+// =============================================================================
+
+/**
+ * Mock API Delays - For development/testing (in milliseconds)
+ */
+export const MOCK_API_DELAY = {
+  FAST: 300,
+  NORMAL: 500,
+  SLOW: 1000,
+} as const;
+
+// =============================================================================
+// CACHE EXPIRY
+// =============================================================================
+
+/**
+ * Cache Expiry Times (in milliseconds)
+ */
+export const CACHE_EXPIRY = {
+  /** 1 minute */
+  SHORT: 60000,
+  /** 5 minutes */
+  MEDIUM: 300000,
+  /** 1 hour */
+  LONG: 3600000,
+  /** 24 hours */
+  DAY: 86400000,
+} as const;
+
+// =============================================================================
+// TIME UNITS
+// =============================================================================
+
+/**
+ * Time Units - Conversion constants (in milliseconds)
+ */
+export const MS_PER = {
+  SECOND: 1000,
+  MINUTE: 60000,
+  HOUR: 3600000,
+  DAY: 86400000,
+  WEEK: 604800000,
+} as const;
+
+// =============================================================================
+// SCHEDULE DEFAULTS
+// =============================================================================
+
+/**
+ * Schedule Defaults
+ */
+export const SCHEDULE = {
+  /** Default days ahead for scheduling */
+  DEFAULT_ADVANCE_DAYS: 7,
+} as const;
+
+// =============================================================================
+// RELATIVE TIME THRESHOLDS
+// =============================================================================
+
+/**
+ * Relative Time Thresholds - For displaying relative time
+ */
+export const RELATIVE_TIME_THRESHOLD = {
+  /** Show minutes if < 60 minutes */
+  MINUTES: 60,
+  /** Show hours if < 24 hours */
+  HOURS: 24,
+  /** Show days if < 7 days */
+  DAYS: 7,
+} as const;
+
+// =============================================================================
+// LEGACY EXPORT - For backward compatibility
+// =============================================================================
+
+/**
+ * @deprecated Use individual exports instead (DEBOUNCE, ANIMATION_DURATION, etc.)
+ */
+export const TIMING = {
+  DEBOUNCE,
+  ANIMATION: ANIMATION_DURATION,
+  TIMEOUT,
+  POLLING,
+  RETRY: RETRY_DELAY,
+  AUTO_SAVE,
+  MOCK_API: MOCK_API_DELAY,
+  CACHE: CACHE_EXPIRY,
+  MS_PER,
+  SCHEDULE,
+  RELATIVE_TIME: RELATIVE_TIME_THRESHOLD,
+} as const;
+
+// =============================================================================
+// HELPER FUNCTIONS
+// =============================================================================
+
+/**
+ * Convert seconds to milliseconds
+ */
+export const seconds = (s: number): number => s * MS_PER.SECOND;
+
+/**
+ * Convert minutes to milliseconds
+ */
+export const minutes = (m: number): number => m * MS_PER.MINUTE;
+
+/**
+ * Convert hours to milliseconds
+ */
+export const hours = (h: number): number => h * MS_PER.HOUR;
+
+// =============================================================================
+// TYPE EXPORTS
+// =============================================================================
+
+export type DebounceKey = keyof typeof DEBOUNCE;
+export type AnimationDurationKey = keyof typeof ANIMATION_DURATION;
+export type TimeoutKey = keyof typeof TIMEOUT;
+export type PollingKey = keyof typeof POLLING;
+export type CacheExpiryKey = keyof typeof CACHE_EXPIRY;

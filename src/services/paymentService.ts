@@ -89,7 +89,11 @@ class PaymentService {
     feeSettings: ClubFeeSettings,
     year: number
   ): Promise<void> {
-    logger.info(LOG_MESSAGES.PAYMENT.GENERATING_FEES, { clubId, year, memberCount: members.length });
+    logger.info(LOG_MESSAGES.PAYMENT.GENERATING_FEES, {
+      clubId,
+      year,
+      memberCount: members.length,
+    });
 
     if (this.useMockData) {
       return this.mockGenerateMonthlyFees(clubId, members, feeSettings, year);
@@ -133,15 +137,13 @@ class PaymentService {
         // Check if payment already exists
         const existingPayment = payments.find(
           (p) =>
-            p.userId === member.id &&
-            p.clubId === clubId &&
-            p.year === year &&
-            p.month === month
+            p.userId === member.id && p.clubId === clubId && p.year === year && p.month === month
         );
 
         if (!existingPayment) {
           // Create due date (last day of the month)
-          const dueDate = new Date(year, month, 0); // 0 = last day of previous month, so month gives us last day of that month
+          // 0 = last day of previous month, so month gives us last day of that month
+          const dueDate = new Date(year, month, 0);
 
           const newPayment: MemberPayment = {
             id: `${ID_PREFIX.PAYMENT}_${clubId}_${member.id}_${year}_${month}_${Date.now()}`,
@@ -162,7 +164,11 @@ class PaymentService {
     }
 
     await this.savePayments(payments);
-    logger.info(LOG_MESSAGES.PAYMENT.MOCK_FEES_GENERATED, { clubId, year, paymentsCreated: payments.length });
+    logger.info(LOG_MESSAGES.PAYMENT.MOCK_FEES_GENERATED, {
+      clubId,
+      year,
+      paymentsCreated: payments.length,
+    });
   }
 
   async getClubPayments(clubId: string, year?: number): Promise<MemberPayment[]> {
@@ -173,14 +179,19 @@ class PaymentService {
     }
 
     try {
-      const url = year
-        ? `/payments?clubId=${clubId}&year=${year}`
-        : `/payments?clubId=${clubId}`;
+      const url = year ? `/payments?clubId=${clubId}&year=${year}` : `/payments?clubId=${clubId}`;
       const payments = await apiService.get<MemberPayment[]>(url);
-      logger.debug(LOG_MESSAGES.PAYMENT.CLUB_PAYMENTS_FETCHED, { clubId, year, count: payments.length });
+      logger.debug(LOG_MESSAGES.PAYMENT.CLUB_PAYMENTS_FETCHED, {
+        clubId,
+        year,
+        count: payments.length,
+      });
       return payments;
     } catch (error) {
-      logger.error(LOG_MESSAGES.PAYMENT.FETCH_CLUB_PAYMENTS_FAILED, error as Error, { clubId, year });
+      logger.error(LOG_MESSAGES.PAYMENT.FETCH_CLUB_PAYMENTS_FAILED, error as Error, {
+        clubId,
+        year,
+      });
       throw error;
     }
   }
@@ -196,7 +207,11 @@ class PaymentService {
       return true;
     });
 
-    logger.debug(LOG_MESSAGES.PAYMENT.MOCK_CLUB_PAYMENTS_FETCHED, { clubId, year, count: filtered.length });
+    logger.debug(LOG_MESSAGES.PAYMENT.MOCK_CLUB_PAYMENTS_FETCHED, {
+      clubId,
+      year,
+      count: filtered.length,
+    });
     return filtered;
   }
 
@@ -211,10 +226,17 @@ class PaymentService {
       const payments = await apiService.get<MemberPayment[]>(
         `/payments/member/${userId}?clubId=${clubId}`
       );
-      logger.debug(LOG_MESSAGES.PAYMENT.MEMBER_PAYMENTS_FETCHED, { userId, clubId, count: payments.length });
+      logger.debug(LOG_MESSAGES.PAYMENT.MEMBER_PAYMENTS_FETCHED, {
+        userId,
+        clubId,
+        count: payments.length,
+      });
       return payments;
     } catch (error) {
-      logger.error(LOG_MESSAGES.PAYMENT.FETCH_MEMBER_PAYMENTS_FAILED, error as Error, { userId, clubId });
+      logger.error(LOG_MESSAGES.PAYMENT.FETCH_MEMBER_PAYMENTS_FAILED, error as Error, {
+        userId,
+        clubId,
+      });
       throw error;
     }
   }
@@ -226,7 +248,11 @@ class PaymentService {
     const payments = await this.getPayments();
     const filtered = payments.filter((p) => p.userId === userId && p.clubId === clubId);
 
-    logger.debug(LOG_MESSAGES.PAYMENT.MOCK_MEMBER_PAYMENTS_FETCHED, { userId, clubId, count: filtered.length });
+    logger.debug(LOG_MESSAGES.PAYMENT.MOCK_MEMBER_PAYMENTS_FETCHED, {
+      userId,
+      clubId,
+      count: filtered.length,
+    });
     return filtered;
   }
 
@@ -250,7 +276,10 @@ class PaymentService {
       });
       logger.info(LOG_MESSAGES.PAYMENT.STATUS_UPDATED, { paymentId, status });
     } catch (error) {
-      logger.error(LOG_MESSAGES.PAYMENT.STATUS_UPDATE_FAILED, error as Error, { paymentId, status });
+      logger.error(LOG_MESSAGES.PAYMENT.STATUS_UPDATE_FAILED, error as Error, {
+        paymentId,
+        status,
+      });
       throw error;
     }
   }
@@ -322,7 +351,10 @@ class PaymentService {
       logger.info(LOG_MESSAGES.PAYMENT.CUSTOM_CHARGE_CREATED, { chargeId: charge.id, clubId });
       return charge;
     } catch (error) {
-      logger.error(LOG_MESSAGES.PAYMENT.CREATE_CUSTOM_CHARGE_FAILED, error as Error, { clubId, description });
+      logger.error(LOG_MESSAGES.PAYMENT.CREATE_CUSTOM_CHARGE_FAILED, error as Error, {
+        clubId,
+        description,
+      });
       throw error;
     }
   }
@@ -361,14 +393,14 @@ class PaymentService {
     // Create payment records for this charge
     await this.applyCustomChargeToMembers(newCharge, appliedToUserIds);
 
-    logger.info(LOG_MESSAGES.PAYMENT.MOCK_CUSTOM_CHARGE_CREATED, { chargeId: newCharge.id, clubId });
+    logger.info(LOG_MESSAGES.PAYMENT.MOCK_CUSTOM_CHARGE_CREATED, {
+      chargeId: newCharge.id,
+      clubId,
+    });
     return newCharge;
   }
 
-  private async applyCustomChargeToMembers(
-    charge: CustomCharge,
-    userIds: string[]
-  ): Promise<void> {
+  private async applyCustomChargeToMembers(charge: CustomCharge, userIds: string[]): Promise<void> {
     const payments = await this.getPayments();
     const now = new Date().toISOString();
     const dueDate = new Date(charge.dueDate);
@@ -390,9 +422,9 @@ class PaymentService {
       };
 
       payments.push(newPayment);
-      
+
       // Small delay to ensure unique IDs
-      await new Promise(resolve => setTimeout(resolve, 5)); // Minimal delay for unique IDs
+      await new Promise((resolve) => setTimeout(resolve, 5)); // Minimal delay for unique IDs
     }
 
     await this.savePayments(payments);
@@ -406,9 +438,7 @@ class PaymentService {
     }
 
     try {
-      const charges = await apiService.get<CustomCharge[]>(
-        `/charges/custom?clubId=${clubId}`
-      );
+      const charges = await apiService.get<CustomCharge[]>(`/charges/custom?clubId=${clubId}`);
       logger.debug(LOG_MESSAGES.PAYMENT.CUSTOM_CHARGES_FETCHED, { clubId, count: charges.length });
       return charges;
     } catch (error) {
@@ -424,7 +454,10 @@ class PaymentService {
     const charges = await this.getCustomCharges();
     const filtered = charges.filter((c) => c.clubId === clubId && c.isActive);
 
-    logger.debug(LOG_MESSAGES.PAYMENT.MOCK_CUSTOM_CHARGES_FETCHED, { clubId, count: filtered.length });
+    logger.debug(LOG_MESSAGES.PAYMENT.MOCK_CUSTOM_CHARGES_FETCHED, {
+      clubId,
+      count: filtered.length,
+    });
     return filtered;
   }
 
@@ -475,7 +508,11 @@ class PaymentService {
       const balance = await apiService.get<MemberBalance>(
         `/payments/balance/${userId}?clubId=${clubId}`
       );
-      logger.debug(LOG_MESSAGES.PAYMENT.BALANCE_FETCHED, { userId, clubId, balance: balance.balance });
+      logger.debug(LOG_MESSAGES.PAYMENT.BALANCE_FETCHED, {
+        userId,
+        clubId,
+        balance: balance.balance,
+      });
       return balance;
     } catch (error) {
       logger.error(LOG_MESSAGES.PAYMENT.FETCH_BALANCE_FAILED, error as Error, { userId, clubId });
@@ -535,10 +572,7 @@ class PaymentService {
     return balance;
   }
 
-  async getAllMembersBalances(
-    clubId: string,
-    memberIds: string[]
-  ): Promise<MemberBalance[]> {
+  async getAllMembersBalances(clubId: string, memberIds: string[]): Promise<MemberBalance[]> {
     const balances: MemberBalance[] = [];
 
     for (const memberId of memberIds) {
@@ -585,28 +619,48 @@ class PaymentService {
 
     messages.push(t('services.notification.paymentReminder.greetingSimple', { userName }));
     messages.push(t('services.notification.paymentReminder.accountStatusHeader'));
-    messages.push(t('services.notification.paymentReminder.totalOwed', { amount: balance.totalOwed.toFixed(2) }));
-    messages.push(t('services.notification.paymentReminder.totalPaid', { amount: balance.totalPaid.toFixed(2) }));
+    messages.push(
+      t('services.notification.paymentReminder.totalOwed', { amount: balance.totalOwed.toFixed(2) })
+    );
+    messages.push(
+      t('services.notification.paymentReminder.totalPaid', { amount: balance.totalPaid.toFixed(2) })
+    );
 
     const balanceAmount = Math.abs(balance.balance).toFixed(2);
     if (balance.balance < 0) {
-      messages.push(t('services.notification.paymentReminder.currentBalanceOwes', { amount: balanceAmount }));
+      messages.push(
+        t('services.notification.paymentReminder.currentBalanceOwes', { amount: balanceAmount })
+      );
     } else if (balance.balance > 0) {
-      messages.push(t('services.notification.paymentReminder.currentBalanceCredit', { amount: balanceAmount }));
+      messages.push(
+        t('services.notification.paymentReminder.currentBalanceCredit', { amount: balanceAmount })
+      );
     } else {
       messages.push(t('services.notification.paymentReminder.currentBalancePaidUp'));
     }
 
     if (balance.overdueCharges > 0) {
-      messages.push(t('services.notification.paymentReminder.overdueCharges', { amount: balance.overdueCharges.toFixed(2) }));
+      messages.push(
+        t('services.notification.paymentReminder.overdueCharges', {
+          amount: balance.overdueCharges.toFixed(2),
+        })
+      );
       messages.push(t('services.notification.paymentReminder.overdueWarningLateFees'));
     } else if (balance.pendingCharges > 0) {
-      messages.push(t('services.notification.paymentReminder.pendingCharges', { amount: balance.pendingCharges.toFixed(2) }));
+      messages.push(
+        t('services.notification.paymentReminder.pendingCharges', {
+          amount: balance.pendingCharges.toFixed(2),
+        })
+      );
     }
 
     if (balance.lastPaymentDate) {
       const lastPayment = new Date(balance.lastPaymentDate);
-      messages.push(t('services.notification.paymentReminder.lastPayment', { date: lastPayment.toLocaleDateString(locale) }));
+      messages.push(
+        t('services.notification.paymentReminder.lastPayment', {
+          date: lastPayment.toLocaleDateString(locale),
+        })
+      );
     }
 
     messages.push(t('services.notification.paymentReminder.thankYou'));
@@ -631,4 +685,3 @@ class PaymentService {
 }
 
 export const paymentService = new PaymentService();
-

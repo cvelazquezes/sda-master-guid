@@ -6,7 +6,6 @@
 import { authService } from '../authService';
 import { secureStorage } from '../../utils/secureStorage';
 import { mockUsers, getUserByEmail } from '../mockData';
-import { Platform} from 'react-native';
 
 // Mock dependencies
 jest.mock('../../utils/secureStorage');
@@ -53,9 +52,9 @@ describe('AuthService', () => {
     it('should throw error with invalid credentials', async () => {
       (getUserByEmail as jest.Mock).mockReturnValue(null);
 
-      await expect(
-        authService.login('wrong@example.com', 'password123')
-      ).rejects.toThrow('Invalid credentials');
+      await expect(authService.login('wrong@example.com', 'password123')).rejects.toThrow(
+        'Invalid credentials'
+      );
     });
 
     it('should throw error when storage fails', async () => {
@@ -74,13 +73,9 @@ describe('AuthService', () => {
       };
 
       (getUserByEmail as jest.Mock).mockReturnValue(mockUser);
-      (secureStorage.saveTokens as jest.Mock).mockRejectedValue(
-        new Error('Storage error')
-      );
+      (secureStorage.saveTokens as jest.Mock).mockRejectedValue(new Error('Storage error'));
 
-      await expect(
-        authService.login('test@example.com', 'password123')
-      ).rejects.toThrow();
+      await expect(authService.login('test@example.com', 'password123')).rejects.toThrow();
     });
   });
 
@@ -142,9 +137,7 @@ describe('AuthService', () => {
     });
 
     it('should not throw even if storage clear fails', async () => {
-      (secureStorage.clearAuth as jest.Mock).mockRejectedValue(
-        new Error('Storage error')
-      );
+      (secureStorage.clearAuth as jest.Mock).mockRejectedValue(new Error('Storage error'));
 
       // Should not throw
       await expect(authService.logout()).resolves.not.toThrow();
@@ -208,8 +201,8 @@ describe('AuthService', () => {
         timezone: 'UTC',
         language: 'en',
         whatsappNumber: '+1234567890',
-        approvalStatus: 'approved' as any,
-        classes: ['Friend'] as any,
+        approvalStatus: 'approved' as const,
+        classes: ['Friend'] as const,
         createdAt: '2024-01-01',
         updatedAt: '2024-01-01',
       };
@@ -226,10 +219,9 @@ describe('AuthService', () => {
     it('should throw error when user not found', async () => {
       (secureStorage.getUserId as jest.Mock).mockResolvedValue(null);
 
-      await expect(
-        authService.updateUser({ name: 'Updated Name' })
-      ).rejects.toThrow('User not found');
+      await expect(authService.updateUser({ name: 'Updated Name' })).rejects.toThrow(
+        'User not found'
+      );
     });
   });
 });
-

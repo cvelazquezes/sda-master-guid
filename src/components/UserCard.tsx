@@ -6,9 +6,18 @@ import { useTheme } from '../contexts/ThemeContext';
 import { User, UserRole, MemberBalance } from '../types';
 import { mobileTypography, mobileFontSizes, designTokens, layoutConstants } from '../shared/theme';
 import { Badge, StatusIndicator, IconButton } from '../shared/components';
-import { A11Y_ROLE, ICONS, TEXT_LINES, TOUCH_OPACITY, COMPONENT_SIZE, STATUS, COMPONENT_NAMES, COMPONENT_VARIANT } from '../shared/constants';
 import { formatViewDetailsLabel, formatDeleteLabel } from '../shared/utils/formatters';
-import { flexValues } from '../shared/constants/layoutConstants';
+import {
+  A11Y_ROLE,
+  COMPONENT_NAMES,
+  COMPONENT_SIZE,
+  COMPONENT_VARIANT,
+  ICONS,
+  STATUS,
+  TEXT_LINES,
+  TOUCH_OPACITY,
+  flexValues,
+} from '../shared/constants';
 
 interface UserCardProps {
   user: User;
@@ -63,23 +72,42 @@ const UserCardComponent: React.FC<UserCardProps> = ({
 
   const roleConfig = getRoleConfig(user.role);
 
+  const shadowConfig = isDark ? designTokens.shadowConfig.dark : designTokens.shadowConfig.light;
+
+  const inactiveOpacity = designTokens.opacity.disabled + designTokens.opacity.medium;
+
   const CardContent = (
-    <View style={[
-      styles.card,
-      { 
-        backgroundColor: colors.surface, 
-        shadowColor: designTokens.colors.black,
-        shadowOpacity: isDark ? designTokens.shadowConfig.dark.opacity : designTokens.shadowConfig.light.opacity,
-        elevation: isDark ? designTokens.shadowConfig.dark.elevation : designTokens.shadowConfig.light.elevation,
-      },
-      !user.isActive && { backgroundColor: colors.surfaceLight, opacity: designTokens.opacity.disabled + designTokens.opacity.medium }
-    ]}>
+    <View
+      style={[
+        styles.card,
+        {
+          backgroundColor: colors.surface,
+          shadowColor: designTokens.colors.black,
+          shadowOpacity: shadowConfig.opacity,
+          elevation: shadowConfig.elevation,
+        },
+        !user.isActive && {
+          backgroundColor: colors.surfaceLight,
+          opacity: inactiveOpacity,
+        },
+      ]}
+    >
       {/* Avatar */}
-      <View style={[
-        styles.avatar,
-        { backgroundColor: user.isActive ? roleConfig.color : colors.surfaceLight }
-      ]}>
-        <Text style={[styles.avatarText, { color: designTokens.colors.white }, !user.isActive && { color: colors.textTertiary }]}>
+      <View
+        style={[
+          styles.avatar,
+          {
+            backgroundColor: user.isActive ? roleConfig.color : colors.surfaceLight,
+          },
+        ]}
+      >
+        <Text
+          style={[
+            styles.avatarText,
+            { color: designTokens.colors.white },
+            !user.isActive && { color: colors.textTertiary },
+          ]}
+        >
           {user.name.charAt(0).toUpperCase()}
         </Text>
       </View>
@@ -87,7 +115,14 @@ const UserCardComponent: React.FC<UserCardProps> = ({
       {/* User Info */}
       <View style={styles.userInfo}>
         <View style={styles.userHeader}>
-          <Text style={[styles.userName, { color: colors.textPrimary }, !user.isActive && { color: colors.textTertiary }]} numberOfLines={TEXT_LINES.single}>
+          <Text
+            style={[
+              styles.userName,
+              { color: colors.textPrimary },
+              !user.isActive && { color: colors.textTertiary },
+            ]}
+            numberOfLines={TEXT_LINES.single}
+          >
             {user.name}
           </Text>
           <Badge
@@ -99,7 +134,14 @@ const UserCardComponent: React.FC<UserCardProps> = ({
           />
         </View>
 
-        <Text style={[styles.userEmail, { color: colors.textSecondary }, !user.isActive && { color: colors.textTertiary }]} numberOfLines={TEXT_LINES.single}>
+        <Text
+          style={[
+            styles.userEmail,
+            { color: colors.textSecondary },
+            !user.isActive && { color: colors.textTertiary },
+          ]}
+          numberOfLines={TEXT_LINES.single}
+        >
           {user.email}
         </Text>
 
@@ -112,7 +154,14 @@ const UserCardComponent: React.FC<UserCardProps> = ({
                 size={designTokens.icon.sizes.xs}
                 color={user.isActive ? colors.primary : colors.textTertiary}
               />
-              <Text style={[styles.metaText, { color: colors.textSecondary }, !user.isActive && { color: colors.textTertiary }]} numberOfLines={TEXT_LINES.single}>
+              <Text
+                style={[
+                  styles.metaText,
+                  { color: colors.textSecondary },
+                  !user.isActive && { color: colors.textTertiary },
+                ]}
+                numberOfLines={TEXT_LINES.single}
+              >
                 {clubName}
               </Text>
             </View>
@@ -126,17 +175,21 @@ const UserCardComponent: React.FC<UserCardProps> = ({
                 size={designTokens.icon.sizes.xs}
                 color={user.isActive ? colors.success : colors.textTertiary}
               />
-              <Text style={[styles.metaText, { color: colors.textSecondary }, !user.isActive && { color: colors.textTertiary }]} numberOfLines={TEXT_LINES.single}>
+              <Text
+                style={[
+                  styles.metaText,
+                  { color: colors.textSecondary },
+                  !user.isActive && { color: colors.textTertiary },
+                ]}
+                numberOfLines={TEXT_LINES.single}
+              >
                 {user.whatsappNumber}
               </Text>
             </View>
           )}
 
           {/* Status Indicator */}
-          <StatusIndicator
-            status={user.isActive ? STATUS.active : STATUS.inactive}
-            showIcon
-          />
+          <StatusIndicator status={user.isActive ? STATUS.active : STATUS.inactive} showIcon />
         </View>
 
         {/* Payment Balance */}
@@ -149,7 +202,8 @@ const UserCardComponent: React.FC<UserCardProps> = ({
                 color={getBalanceColor()}
               />
               <Text style={[styles.balanceText, { color: getBalanceColor() }]}>
-                {t('components.userCard.balance.label')}: ${Math.abs(balance.balance).toFixed(2)} {balance.balance < 0 ? t('components.userCard.balance.owes') : ''}
+                {t('components.userCard.balance.label')}: ${Math.abs(balance.balance).toFixed(2)}{' '}
+                {balance.balance < 0 ? t('components.userCard.balance.owes') : ''}
               </Text>
             </View>
             {balance.overdueCharges > 0 && (
@@ -177,7 +231,9 @@ const UserCardComponent: React.FC<UserCardProps> = ({
               onPress={onToggleStatus}
               size={COMPONENT_SIZE.md}
               color={user.isActive ? colors.error : colors.success}
-              accessibilityLabel={user.isActive ? t('accessibility.deactivateUser') : t('accessibility.activateUser')}
+              accessibilityLabel={
+                user.isActive ? t('accessibility.deactivateUser') : t('accessibility.activateUser')
+              }
             />
           )}
           {onDelete && (

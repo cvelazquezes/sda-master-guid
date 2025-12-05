@@ -10,10 +10,17 @@ import { logger } from '../utils/logger';
 import { MemberBalance, User } from '../types';
 import { TIMING, ALERT_BUTTON_STYLE, EMPTY_VALUE } from '../shared/constants';
 import { LOG_MESSAGES } from '../shared/constants/logMessages';
-import { NOTIFICATION_CHANNEL, LOCALE, LANGUAGE, PLATFORM, ID_PREFIX, REGEX_PATTERN } from '../shared/constants/ui';
+import {
+  NOTIFICATION_CHANNEL,
+  LOCALE,
+  LANGUAGE,
+  PLATFORM,
+  ID_PREFIX,
+  REGEX_PATTERN,
+} from '../shared/constants/ui';
 import i18n from '../i18n';
 
-type NotificationChannelType = typeof NOTIFICATION_CHANNEL[keyof typeof NOTIFICATION_CHANNEL];
+type NotificationChannelType = (typeof NOTIFICATION_CHANNEL)[keyof typeof NOTIFICATION_CHANNEL];
 
 interface SendNotificationRequest {
   userId: string;
@@ -43,7 +50,10 @@ class NotificationService {
    * In backend mode: Sends via backend API (which can use WhatsApp Business API)
    */
   async sendWhatsAppNotification(user: User, message: string): Promise<boolean> {
-    logger.info(LOG_MESSAGES.NOTIFICATION.SENDING_WHATSAPP, { userId: user.id, userName: user.name });
+    logger.info(LOG_MESSAGES.NOTIFICATION.SENDING_WHATSAPP, {
+      userId: user.id,
+      userName: user.name,
+    });
 
     if (this.useMockData) {
       return this.mockSendWhatsAppNotification(user, message);
@@ -73,7 +83,10 @@ class NotificationService {
   private async mockSendWhatsAppNotification(user: User, message: string): Promise<boolean> {
     try {
       if (!user.whatsappNumber) {
-        logger.warn(LOG_MESSAGES.NOTIFICATION.NO_WHATSAPP_NUMBER, { userId: user.id, userName: user.name });
+        logger.warn(LOG_MESSAGES.NOTIFICATION.NO_WHATSAPP_NUMBER, {
+          userId: user.id,
+          userName: user.name,
+        });
         return false;
       }
 
@@ -111,11 +124,7 @@ class NotificationService {
   /**
    * Format payment reminder message
    */
-  formatPaymentReminder(
-    user: User,
-    balance: MemberBalance,
-    clubName: string
-  ): string {
+  formatPaymentReminder(user: User, balance: MemberBalance, clubName: string): string {
     const t = i18n.t.bind(i18n);
     const locale = i18n.language === LANGUAGE.SPANISH ? LOCALE.SPANISH_MX : LOCALE.ENGLISH_US;
     const messages: string[] = [];
@@ -123,26 +132,46 @@ class NotificationService {
     messages.push(t('services.notification.paymentReminder.clubHeader', { clubName }));
     messages.push(t('services.notification.paymentReminder.greeting', { userName: user.name }));
     messages.push(t('services.notification.paymentReminder.accountStatusHeader'));
-    messages.push(t('services.notification.paymentReminder.totalOwed', { amount: balance.totalOwed.toFixed(2) }));
-    messages.push(t('services.notification.paymentReminder.totalPaid', { amount: balance.totalPaid.toFixed(2) }));
+    messages.push(
+      t('services.notification.paymentReminder.totalOwed', { amount: balance.totalOwed.toFixed(2) })
+    );
+    messages.push(
+      t('services.notification.paymentReminder.totalPaid', { amount: balance.totalPaid.toFixed(2) })
+    );
 
     const balanceAmount = Math.abs(balance.balance).toFixed(2);
     if (balance.balance < 0) {
-      messages.push(t('services.notification.paymentReminder.pendingBalance', { amount: balanceAmount }));
+      messages.push(
+        t('services.notification.paymentReminder.pendingBalance', { amount: balanceAmount })
+      );
     } else {
-      messages.push(t('services.notification.paymentReminder.creditBalance', { amount: balanceAmount }));
+      messages.push(
+        t('services.notification.paymentReminder.creditBalance', { amount: balanceAmount })
+      );
     }
 
     if (balance.overdueCharges > 0) {
-      messages.push(t('services.notification.paymentReminder.overdueCharges', { amount: balance.overdueCharges.toFixed(2) }));
+      messages.push(
+        t('services.notification.paymentReminder.overdueCharges', {
+          amount: balance.overdueCharges.toFixed(2),
+        })
+      );
       messages.push(t('services.notification.paymentReminder.overdueWarning'));
     } else if (balance.pendingCharges > 0) {
-      messages.push(t('services.notification.paymentReminder.pendingCharges', { amount: balance.pendingCharges.toFixed(2) }));
+      messages.push(
+        t('services.notification.paymentReminder.pendingCharges', {
+          amount: balance.pendingCharges.toFixed(2),
+        })
+      );
     }
 
     if (balance.lastPaymentDate) {
       const lastPayment = new Date(balance.lastPaymentDate);
-      messages.push(t('services.notification.paymentReminder.lastPayment', { date: lastPayment.toLocaleDateString(locale) }));
+      messages.push(
+        t('services.notification.paymentReminder.lastPayment', {
+          date: lastPayment.toLocaleDateString(locale),
+        })
+      );
     }
 
     messages.push(t('services.notification.paymentReminder.thankYou'));
@@ -171,7 +200,9 @@ class NotificationService {
     messages.push(t('services.notification.customCharge.newChargeHeader'));
     messages.push(t('services.notification.customCharge.description', { description }));
     messages.push(t('services.notification.customCharge.amount', { amount: amount.toFixed(2) }));
-    messages.push(t('services.notification.customCharge.dueDate', { date: due.toLocaleDateString(locale) }));
+    messages.push(
+      t('services.notification.customCharge.dueDate', { date: due.toLocaleDateString(locale) })
+    );
     messages.push(t('services.notification.customCharge.reminder'));
     messages.push(t('services.notification.customCharge.thankYou'));
     messages.push(t('services.notification.customCharge.automatedMessage'));
@@ -234,7 +265,7 @@ class NotificationService {
     onError?: () => void
   ): Promise<void> {
     const t = i18n.t.bind(i18n);
-    
+
     Alert.alert(
       t('services.notification.alerts.sendNotification'),
       t('services.notification.alerts.sendWhatsAppConfirm', { userName: user.name }),
@@ -247,7 +278,7 @@ class NotificationService {
           text: t('services.notification.alerts.send'),
           onPress: async () => {
             const success = await this.sendWhatsAppNotification(user, message);
-            
+
             if (success) {
               Alert.alert(t('common.success'), t('services.notification.alerts.notificationSent'));
               onSuccess?.();
@@ -390,7 +421,11 @@ class NotificationService {
   ): Promise<string> {
     // TODO: Implement with expo-notifications
     const notificationId = `${ID_PREFIX.NOTIFICATION}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    logger.info(LOG_MESSAGES.NOTIFICATION.MOCK_SCHEDULED, { userId, notificationId, scheduledDate });
+    logger.info(LOG_MESSAGES.NOTIFICATION.MOCK_SCHEDULED, {
+      userId,
+      notificationId,
+      scheduledDate,
+    });
     return notificationId;
   }
 
@@ -426,4 +461,3 @@ class NotificationService {
 }
 
 export const notificationService = new NotificationService();
-

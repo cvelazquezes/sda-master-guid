@@ -14,36 +14,78 @@ import { paymentService } from '../../services/paymentService';
 import { useAuth } from '../../context/AuthContext';
 import { UserDetailModal } from '../../components/UserDetailModal';
 import { useTranslation } from 'react-i18next';
-import { User, PathfinderClass, Club, PATHFINDER_CLASSES, MemberBalance, UserRole, ApprovalStatus } from '../../types';
+import {
+  User,
+  PathfinderClass,
+  Club,
+  PATHFINDER_CLASSES,
+  MemberBalance,
+  UserRole,
+  ApprovalStatus,
+} from '../../types';
 import { ClassSelectionModal } from '../../components/ClassSelectionModal';
-import { 
-  ScreenHeader, 
-  SearchBar, 
-  TabBar, 
-  FilterModal, 
+import {
+  ScreenHeader,
+  SearchBar,
+  TabBar,
+  FilterModal,
   EmptyState,
   IconButton,
   type FilterSection,
-  type Tab 
+  type Tab,
 } from '../../shared/components';
 import { Text } from 'react-native';
-import { mobileTypography, mobileFontSizes, designTokens, layoutConstants } from '../../shared/theme';
-import { MESSAGES, dynamicMessages, ICONS, TOUCH_OPACITY, TEXT_LINES, COMPONENT_SIZE, flexValues, ALERT_BUTTON_STYLE, FILTER_STATUS, EMPTY_VALUE, textTransformValues, typographyValues, dimensionValues, ELLIPSIS, LIST_SEPARATOR, PAYMENT_STATUS, MEMBER_TAB, FILTER_SECTION, STATUS } from '../../shared/constants';
+import {
+  mobileTypography,
+  mobileFontSizes,
+  designTokens,
+  layoutConstants,
+} from '../../shared/theme';
+import {
+  MESSAGES,
+  dynamicMessages,
+  ICONS,
+  TOUCH_OPACITY,
+  TEXT_LINES,
+  COMPONENT_SIZE,
+  flexValues,
+  ALERT_BUTTON_STYLE,
+  FILTER_STATUS,
+  EMPTY_VALUE,
+  textTransformValues,
+  typographyValues,
+  dimensionValues,
+  ELLIPSIS,
+  LIST_SEPARATOR,
+  PAYMENT_STATUS,
+  MEMBER_TAB,
+  FILTER_SECTION,
+  STATUS,
+} from '../../shared/constants';
 
 const ClubMembersScreen = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [members, setMembers] = useState<User[]>([]);
-  const [club, setClub] = useState<Club | null>(null);
+  const [, setClub] = useState<Club | null>(null);
   const [balances, setBalances] = useState<MemberBalance[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedMember, setSelectedMember] = useState<User | null>(null);
   const [detailVisible, setDetailVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState(EMPTY_VALUE);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<typeof FILTER_STATUS.ALL | typeof STATUS.active | typeof STATUS.inactive>(FILTER_STATUS.ALL);
-  const [paymentFilter, setPaymentFilter] = useState<typeof FILTER_STATUS.ALL | typeof PAYMENT_STATUS.PAID | typeof PAYMENT_STATUS.PENDING | typeof PAYMENT_STATUS.OVERDUE>(FILTER_STATUS.ALL);
-  const [activeTab, setActiveTab] = useState<typeof MEMBER_TAB.APPROVED | typeof MEMBER_TAB.PENDING>(MEMBER_TAB.APPROVED);
+  const [statusFilter, setStatusFilter] = useState<
+    typeof FILTER_STATUS.ALL | typeof STATUS.active | typeof STATUS.inactive
+  >(FILTER_STATUS.ALL);
+  const [paymentFilter, setPaymentFilter] = useState<
+    | typeof FILTER_STATUS.ALL
+    | typeof PAYMENT_STATUS.PAID
+    | typeof PAYMENT_STATUS.PENDING
+    | typeof PAYMENT_STATUS.OVERDUE
+  >(FILTER_STATUS.ALL);
+  const [activeTab, setActiveTab] = useState<
+    typeof MEMBER_TAB.APPROVED | typeof MEMBER_TAB.PENDING
+  >(MEMBER_TAB.APPROVED);
   const [classFilter, setClassFilter] = useState<PathfinderClass[]>([]);
   const [classEditModalVisible, setClassEditModalVisible] = useState(false);
   const [memberToEdit, setMemberToEdit] = useState<User | null>(null);
@@ -68,7 +110,7 @@ const ClubMembersScreen = () => {
       const approvedMemberIds = membersData
         .filter((m) => m.approvalStatus === ApprovalStatus.APPROVED)
         .map((m) => m.id);
-      
+
       if (approvedMemberIds.length > 0) {
         const balancesData = await paymentService.getAllMembersBalances(
           user.clubId,
@@ -214,7 +256,9 @@ const ClubMembersScreen = () => {
 
   const pendingCount = useMemo(() => {
     // Only count regular users pending approval, not club admins
-    return members.filter((m) => m.approvalStatus === ApprovalStatus.PENDING && m.role !== UserRole.CLUB_ADMIN).length;
+    return members.filter(
+      (m) => m.approvalStatus === ApprovalStatus.PENDING && m.role !== UserRole.CLUB_ADMIN
+    ).length;
   }, [members]);
 
   const approvedCount = useMemo(() => {
@@ -232,7 +276,10 @@ const ClubMembersScreen = () => {
   }, [members]);
 
   // Filter active count
-  const hasActiveFilters = statusFilter !== FILTER_STATUS.ALL || classFilter.length > 0 || paymentFilter !== FILTER_STATUS.ALL;
+  const hasActiveFilters =
+    statusFilter !== FILTER_STATUS.ALL ||
+    classFilter.length > 0 ||
+    paymentFilter !== FILTER_STATUS.ALL;
 
   // Tab configuration
   const tabs: Tab[] = [
@@ -256,9 +303,26 @@ const ClubMembersScreen = () => {
       title: t('screens.clubMembers.memberStatus'),
       selectedValue: statusFilter,
       options: [
-        { id: FILTER_STATUS.ALL, label: t('screens.clubMembers.allMembers'), value: FILTER_STATUS.ALL, icon: ICONS.ACCOUNT_GROUP },
-        { id: STATUS.active, label: t('screens.clubMembers.activeOnly'), value: STATUS.active, icon: ICONS.CHECK_CIRCLE, color: designTokens.colors.success },
-        { id: STATUS.inactive, label: t('screens.clubMembers.inactiveOnly'), value: STATUS.inactive, icon: ICONS.CANCEL, color: designTokens.colors.error },
+        {
+          id: FILTER_STATUS.ALL,
+          label: t('screens.clubMembers.allMembers'),
+          value: FILTER_STATUS.ALL,
+          icon: ICONS.ACCOUNT_GROUP,
+        },
+        {
+          id: STATUS.active,
+          label: t('screens.clubMembers.activeOnly'),
+          value: STATUS.active,
+          icon: ICONS.CHECK_CIRCLE,
+          color: designTokens.colors.success,
+        },
+        {
+          id: STATUS.inactive,
+          label: t('screens.clubMembers.inactiveOnly'),
+          value: STATUS.inactive,
+          icon: ICONS.CANCEL,
+          color: designTokens.colors.error,
+        },
       ],
     },
     {
@@ -266,10 +330,33 @@ const ClubMembersScreen = () => {
       title: t('screens.clubMembers.paymentStatus'),
       selectedValue: paymentFilter,
       options: [
-        { id: FILTER_STATUS.ALL, label: t('screens.clubMembers.allPayments'), value: FILTER_STATUS.ALL, icon: ICONS.CASH_MULTIPLE },
-        { id: PAYMENT_STATUS.PAID, label: t('screens.clubMembers.paidUpFilter'), value: PAYMENT_STATUS.PAID, icon: ICONS.CHECK_CIRCLE, color: designTokens.colors.success },
-        { id: PAYMENT_STATUS.PENDING, label: t('screens.clubMembers.pendingPayments'), value: PAYMENT_STATUS.PENDING, icon: ICONS.CLOCK_ALERT_OUTLINE, color: designTokens.colors.warning },
-        { id: PAYMENT_STATUS.OVERDUE, label: t('screens.clubMembers.overduePayments'), value: PAYMENT_STATUS.OVERDUE, icon: ICONS.ALERT_CIRCLE, color: designTokens.colors.error },
+        {
+          id: FILTER_STATUS.ALL,
+          label: t('screens.clubMembers.allPayments'),
+          value: FILTER_STATUS.ALL,
+          icon: ICONS.CASH_MULTIPLE,
+        },
+        {
+          id: PAYMENT_STATUS.PAID,
+          label: t('screens.clubMembers.paidUpFilter'),
+          value: PAYMENT_STATUS.PAID,
+          icon: ICONS.CHECK_CIRCLE,
+          color: designTokens.colors.success,
+        },
+        {
+          id: PAYMENT_STATUS.PENDING,
+          label: t('screens.clubMembers.pendingPayments'),
+          value: PAYMENT_STATUS.PENDING,
+          icon: ICONS.CLOCK_ALERT_OUTLINE,
+          color: designTokens.colors.warning,
+        },
+        {
+          id: PAYMENT_STATUS.OVERDUE,
+          label: t('screens.clubMembers.overduePayments'),
+          value: PAYMENT_STATUS.OVERDUE,
+          icon: ICONS.ALERT_CIRCLE,
+          color: designTokens.colors.error,
+        },
       ],
     },
   ];
@@ -284,20 +371,30 @@ const ClubMembersScreen = () => {
         icon: ICONS.INFORMATION,
         text: t('screens.clubMembers.classFilterInfo'),
       },
-      options: PATHFINDER_CLASSES.filter((c) => availableClasses.includes(c)).map((pathfinderClass) => ({
-        id: pathfinderClass,
-        label: pathfinderClass,
-        value: pathfinderClass,
-        icon: ICONS.SCHOOL_OUTLINE,
-      })),
+      options: PATHFINDER_CLASSES.filter((c) => availableClasses.includes(c)).map(
+        (pathfinderClass) => ({
+          id: pathfinderClass,
+          label: pathfinderClass,
+          value: pathfinderClass,
+          icon: ICONS.SCHOOL_OUTLINE,
+        })
+      ),
     });
   }
 
-  const handleFilterSelect = (sectionId: string, value: string) => {
+  const handleFilterSelect = (sectionId: string, value: string): void => {
     if (sectionId === FILTER_SECTION.STATUS) {
-      setStatusFilter(value as any);
+      setStatusFilter(
+        value as typeof FILTER_STATUS.ALL | typeof STATUS.active | typeof STATUS.inactive
+      );
     } else if (sectionId === FILTER_SECTION.PAYMENT) {
-      setPaymentFilter(value as any);
+      setPaymentFilter(
+        value as
+          | typeof FILTER_STATUS.ALL
+          | typeof PAYMENT_STATUS.PAID
+          | typeof PAYMENT_STATUS.PENDING
+          | typeof PAYMENT_STATUS.OVERDUE
+      );
     } else if (sectionId === FILTER_SECTION.CLASS) {
       if (classFilter.includes(value as PathfinderClass)) {
         setClassFilter(classFilter.filter((c) => c !== value));
@@ -314,20 +411,27 @@ const ClubMembersScreen = () => {
     >
       <ScreenHeader
         title={t('screens.clubMembers.title')}
-        subtitle={t('screens.clubMembers.subtitle', { approved: approvedCount, pending: pendingCount })}
+        subtitle={t('screens.clubMembers.subtitle', {
+          approved: approvedCount,
+          pending: pendingCount,
+        })}
       />
 
       <TabBar
         tabs={tabs}
         activeTabId={activeTab}
-        onTabChange={(tabId) => setActiveTab(tabId as typeof MEMBER_TAB.APPROVED | typeof MEMBER_TAB.PENDING)}
+        onTabChange={(tabId) =>
+          setActiveTab(tabId as typeof MEMBER_TAB.APPROVED | typeof MEMBER_TAB.PENDING)
+        }
       />
 
       <SearchBar
         value={searchQuery}
         onChangeText={setSearchQuery}
         placeholder={t('placeholders.searchMembers')}
-        onFilterPress={activeTab === MEMBER_TAB.APPROVED ? () => setFilterModalVisible(true) : undefined}
+        onFilterPress={
+          activeTab === MEMBER_TAB.APPROVED ? () => setFilterModalVisible(true) : undefined
+        }
         filterActive={hasActiveFilters}
       />
 
@@ -341,7 +445,11 @@ const ClubMembersScreen = () => {
                     {member.name.charAt(0).toUpperCase()}
                   </Text>
                   <View style={styles.pendingBadge}>
-                    <MaterialCommunityIcons name={ICONS.CLOCK} size={designTokens.iconSize.xxs} color={designTokens.colors.warning} />
+                    <MaterialCommunityIcons
+                      name={ICONS.CLOCK}
+                      size={designTokens.iconSize.xxs}
+                      color={designTokens.colors.warning}
+                    />
                   </View>
                 </View>
 
@@ -351,8 +459,14 @@ const ClubMembersScreen = () => {
                       {member.name}
                     </Text>
                     <View style={styles.pendingStatusBadge}>
-                      <MaterialCommunityIcons name={ICONS.CLOCK_ALERT_OUTLINE} size={designTokens.iconSize.xs} color={designTokens.colors.warning} />
-                      <Text style={styles.pendingStatusText}>{t('screens.usersManagement.pendingLabel')}</Text>
+                      <MaterialCommunityIcons
+                        name={ICONS.CLOCK_ALERT_OUTLINE}
+                        size={designTokens.iconSize.xs}
+                        color={designTokens.colors.warning}
+                      />
+                      <Text style={styles.pendingStatusText}>
+                        {t('screens.usersManagement.pendingLabel')}
+                      </Text>
                     </View>
                   </View>
 
@@ -363,7 +477,11 @@ const ClubMembersScreen = () => {
                   <View style={styles.pendingDetailsRow}>
                     {member.whatsappNumber && (
                       <View style={styles.metaItem}>
-                        <MaterialCommunityIcons name={ICONS.WHATSAPP} size={designTokens.iconSize.xs} color={designTokens.colors.success} />
+                        <MaterialCommunityIcons
+                          name={ICONS.WHATSAPP}
+                          size={designTokens.iconSize.xs}
+                          color={designTokens.colors.success}
+                        />
                         <Text style={styles.metaText} numberOfLines={TEXT_LINES.single}>
                           {member.whatsappNumber}
                         </Text>
@@ -371,9 +489,14 @@ const ClubMembersScreen = () => {
                     )}
                     {member.classes && member.classes.length > 0 && (
                       <View style={styles.metaItem}>
-                        <MaterialCommunityIcons name={ICONS.SCHOOL} size={designTokens.iconSize.xs} color={designTokens.colors.primary} />
+                        <MaterialCommunityIcons
+                          name={ICONS.SCHOOL}
+                          size={designTokens.iconSize.xs}
+                          color={designTokens.colors.primary}
+                        />
                         <Text style={styles.metaText} numberOfLines={TEXT_LINES.single}>
-                          {member.classes.slice(0, 2).join(LIST_SEPARATOR)}{member.classes.length > 2 ? ELLIPSIS : EMPTY_VALUE}
+                          {member.classes.slice(0, 2).join(LIST_SEPARATOR)}
+                          {member.classes.length > 2 ? ELLIPSIS : EMPTY_VALUE}
                         </Text>
                       </View>
                     )}
@@ -403,12 +526,12 @@ const ClubMembersScreen = () => {
           ) : (
             filteredMembers.map((member) => {
               const memberBalance = balances.find((b) => b.userId === member.id);
-              const balanceColor = memberBalance 
-                ? (memberBalance.balance >= 0 
-                    ? designTokens.colors.success 
-                    : memberBalance.overdueCharges > 0 
-                      ? designTokens.colors.error 
-                      : designTokens.colors.warning)
+              const balanceColor = memberBalance
+                ? memberBalance.balance >= 0
+                  ? designTokens.colors.success
+                  : memberBalance.overdueCharges > 0
+                    ? designTokens.colors.error
+                    : designTokens.colors.warning
                 : designTokens.colors.textSecondary;
 
               return (
@@ -421,50 +544,86 @@ const ClubMembersScreen = () => {
                   }}
                   activeOpacity={TOUCH_OPACITY.default}
                 >
-                  <View style={[styles.avatar, { backgroundColor: member.isActive ? balanceColor : designTokens.colors.backgroundTertiary }]}>
-                    <Text style={[styles.avatarText, !member.isActive && styles.avatarTextInactive]}>
+                  <View
+                    style={[
+                      styles.avatar,
+                      {
+                        backgroundColor: member.isActive
+                          ? balanceColor
+                          : designTokens.colors.backgroundTertiary,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[styles.avatarText, !member.isActive && styles.avatarTextInactive]}
+                    >
                       {member.name.charAt(0).toUpperCase()}
                     </Text>
                   </View>
 
                   <View style={styles.memberInfo}>
                     <View style={styles.memberHeader}>
-                      <Text style={[styles.memberName, !member.isActive && styles.textInactive]} numberOfLines={TEXT_LINES.single}>
+                      <Text
+                        style={[styles.memberName, !member.isActive && styles.textInactive]}
+                        numberOfLines={TEXT_LINES.single}
+                      >
                         {member.name}
                       </Text>
                       <View style={styles.roleBadge}>
-                        <Text style={[styles.roleText, !member.isActive && styles.roleTextInactive]}>
-                          {member.role === UserRole.CLUB_ADMIN ? t('components.userCard.roles.clubAdmin') : t('components.userCard.roles.user')}
+                        <Text
+                          style={[styles.roleText, !member.isActive && styles.roleTextInactive]}
+                        >
+                          {member.role === UserRole.CLUB_ADMIN
+                            ? t('components.userCard.roles.clubAdmin')
+                            : t('components.userCard.roles.user')}
                         </Text>
                       </View>
                     </View>
 
-                    <Text style={[styles.memberEmail, !member.isActive && styles.textInactive]} numberOfLines={TEXT_LINES.single}>
+                    <Text
+                      style={[styles.memberEmail, !member.isActive && styles.textInactive]}
+                      numberOfLines={TEXT_LINES.single}
+                    >
                       {member.email}
                     </Text>
 
                     <View style={styles.detailsRow}>
                       {member.classes && member.classes.length > 0 && (
                         <View style={styles.metaItem}>
-                          <MaterialCommunityIcons 
-                            name={ICONS.SCHOOL} 
-                            size={designTokens.iconSize.xs} 
-                            color={member.isActive ? designTokens.colors.primary : designTokens.colors.textQuaternary} 
+                          <MaterialCommunityIcons
+                            name={ICONS.SCHOOL}
+                            size={designTokens.iconSize.xs}
+                            color={
+                              member.isActive
+                                ? designTokens.colors.primary
+                                : designTokens.colors.textQuaternary
+                            }
                           />
-                          <Text style={[styles.metaText, !member.isActive && styles.textInactive]} numberOfLines={TEXT_LINES.single}>
-                            {member.classes.slice(0, 2).join(LIST_SEPARATOR)}{member.classes.length > 2 ? ELLIPSIS : EMPTY_VALUE}
+                          <Text
+                            style={[styles.metaText, !member.isActive && styles.textInactive]}
+                            numberOfLines={TEXT_LINES.single}
+                          >
+                            {member.classes.slice(0, 2).join(LIST_SEPARATOR)}
+                            {member.classes.length > 2 ? ELLIPSIS : EMPTY_VALUE}
                           </Text>
                         </View>
                       )}
 
                       {member.whatsappNumber && (
                         <View style={styles.metaItem}>
-                          <MaterialCommunityIcons 
-                            name={ICONS.WHATSAPP} 
-                            size={designTokens.iconSize.xs} 
-                            color={member.isActive ? designTokens.colors.success : designTokens.colors.textQuaternary} 
+                          <MaterialCommunityIcons
+                            name={ICONS.WHATSAPP}
+                            size={designTokens.iconSize.xs}
+                            color={
+                              member.isActive
+                                ? designTokens.colors.success
+                                : designTokens.colors.textQuaternary
+                            }
                           />
-                          <Text style={[styles.metaText, !member.isActive && styles.textInactive]} numberOfLines={TEXT_LINES.single}>
+                          <Text
+                            style={[styles.metaText, !member.isActive && styles.textInactive]}
+                            numberOfLines={TEXT_LINES.single}
+                          >
                             {member.whatsappNumber}
                           </Text>
                         </View>
@@ -474,10 +633,16 @@ const ClubMembersScreen = () => {
                         <MaterialCommunityIcons
                           name={member.isActive ? ICONS.CHECK_CIRCLE : ICONS.CANCEL}
                           size={designTokens.iconSize.xs}
-                          color={member.isActive ? designTokens.colors.success : designTokens.colors.error}
+                          color={
+                            member.isActive
+                              ? designTokens.colors.success
+                              : designTokens.colors.error
+                          }
                         />
                         <Text style={styles.statusText}>
-                          {member.isActive ? t('screens.clubMembers.active') : t('screens.clubMembers.inactive')}
+                          {member.isActive
+                            ? t('screens.clubMembers.active')
+                            : t('screens.clubMembers.inactive')}
                         </Text>
                       </View>
                     </View>
@@ -485,13 +650,19 @@ const ClubMembersScreen = () => {
                     {memberBalance && (
                       <View style={styles.balanceRow}>
                         <View style={[styles.balanceIndicator, { backgroundColor: balanceColor }]}>
-                          <MaterialCommunityIcons name={ICONS.CASH} size={designTokens.iconSize.xs} color={designTokens.colors.textInverse} />
+                          <MaterialCommunityIcons
+                            name={ICONS.CASH}
+                            size={designTokens.iconSize.xs}
+                            color={designTokens.colors.textInverse}
+                          />
                           <Text style={styles.balanceText}>
                             ${Math.abs(memberBalance.balance).toFixed(2)}
                           </Text>
                           {memberBalance.balance < 0 && (
                             <Text style={styles.balanceLabel}>
-                              {memberBalance.overdueCharges > 0 ? t('screens.clubMembers.overdue') : t('screens.clubMembers.pendingStatus')}
+                              {memberBalance.overdueCharges > 0
+                                ? t('screens.clubMembers.overdue')
+                                : t('screens.clubMembers.pendingStatus')}
                             </Text>
                           )}
                           {memberBalance.balance >= 0 && (
@@ -514,8 +685,14 @@ const ClubMembersScreen = () => {
                       icon={member.isActive ? ICONS.CANCEL : ICONS.CHECK_CIRCLE}
                       onPress={() => handleToggleMemberStatus(member.id, member.isActive)}
                       size={COMPONENT_SIZE.md}
-                      color={member.isActive ? designTokens.colors.error : designTokens.colors.success}
-                      accessibilityLabel={member.isActive ? t('screens.clubMembers.deactivateMember') : t('screens.clubMembers.activateMember')}
+                      color={
+                        member.isActive ? designTokens.colors.error : designTokens.colors.success
+                      }
+                      accessibilityLabel={
+                        member.isActive
+                          ? t('screens.clubMembers.deactivateMember')
+                          : t('screens.clubMembers.activateMember')
+                      }
                     />
                     <IconButton
                       icon={ICONS.DELETE_OUTLINE}
@@ -531,8 +708,14 @@ const ClubMembersScreen = () => {
           )
         ) : (
           <EmptyState
-            icon={activeTab === MEMBER_TAB.PENDING ? ICONS.CLOCK_CHECK_OUTLINE : ICONS.ACCOUNT_SEARCH}
-            title={activeTab === MEMBER_TAB.PENDING ? t('screens.clubMembers.noPendingApprovals') : t('screens.clubMembers.noMembersFound')}
+            icon={
+              activeTab === MEMBER_TAB.PENDING ? ICONS.CLOCK_CHECK_OUTLINE : ICONS.ACCOUNT_SEARCH
+            }
+            title={
+              activeTab === MEMBER_TAB.PENDING
+                ? t('screens.clubMembers.noPendingApprovals')
+                : t('screens.clubMembers.noMembersFound')
+            }
             description={
               activeTab === MEMBER_TAB.PENDING
                 ? t('screens.clubMembers.allRegistrationsProcessed')

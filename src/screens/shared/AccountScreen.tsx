@@ -5,15 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Switch,
-  Alert,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
@@ -22,7 +14,16 @@ import { ThemeSwitcher } from '../../components/ThemeSwitcher';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 import { UserRole, Club, ApprovalStatus } from '../../types';
 import { mobileTypography, designTokens, layoutConstants } from '../../shared/theme';
-import { MESSAGES, ICONS, TOUCH_OPACITY, flexValues, ALERT_BUTTON_STYLE, APP_VERSION, borderValues, DATE_LOCALE_OPTIONS } from '../../shared/constants';
+import {
+  MESSAGES,
+  ICONS,
+  TOUCH_OPACITY,
+  flexValues,
+  ALERT_BUTTON_STYLE,
+  APP_VERSION,
+  borderValues,
+  DATE_LOCALE_OPTIONS,
+} from '../../shared/constants';
 import { LOG_MESSAGES } from '../../shared/constants/logMessages';
 import { ScreenHeader, SectionHeader, Card } from '../../shared/components';
 import { clubService } from '../../services/clubService';
@@ -44,7 +45,10 @@ const AccountScreen = () => {
           const clubData = await clubService.getClubById(user.clubId);
           setClub(clubData);
         } catch (error) {
-          logger.error(LOG_MESSAGES.COMPONENTS.USER_DETAIL_MODAL.FAILED_TO_LOAD_CLUB, error as Error);
+          logger.error(
+            LOG_MESSAGES.COMPONENTS.USER_DETAIL_MODAL.FAILED_TO_LOAD_CLUB,
+            error as Error
+          );
         }
       }
     };
@@ -69,24 +73,20 @@ const AccountScreen = () => {
   };
 
   const handleLogout = async () => {
-    Alert.alert(
-      MESSAGES.TITLES.LOGOUT,
-      MESSAGES.WARNINGS.CONFIRM_LOGOUT,
-      [
-        { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
-        {
-          text: MESSAGES.TITLES.LOGOUT,
-          style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
-          onPress: async () => {
-            try {
-              await logout();
-            } catch (error) {
-              Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_LOGOUT);
-            }
-          },
+    Alert.alert(MESSAGES.TITLES.LOGOUT, MESSAGES.WARNINGS.CONFIRM_LOGOUT, [
+      { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
+      {
+        text: MESSAGES.TITLES.LOGOUT,
+        style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
+        onPress: async () => {
+          try {
+            await logout();
+          } catch (error) {
+            Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_LOGOUT);
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const getRoleLabel = (role: UserRole | undefined): string => {
@@ -102,7 +102,9 @@ const AccountScreen = () => {
     }
   };
 
-  const getRoleIcon = (role: UserRole | undefined): keyof typeof MaterialCommunityIcons.glyphMap => {
+  const getRoleIcon = (
+    role: UserRole | undefined
+  ): keyof typeof MaterialCommunityIcons.glyphMap => {
     switch (role) {
       case UserRole.ADMIN:
         return ICONS.SHIELD_CROWN;
@@ -149,17 +151,19 @@ const AccountScreen = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <ScreenHeader
-        title={t('screens.account.title')}
-        subtitle={t('screens.account.subtitle')}
-      />
+      <ScreenHeader title={t('screens.account.title')} subtitle={t('screens.account.subtitle')} />
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Profile Header Card */}
         <View style={styles.section}>
           <Card variant="elevated" style={styles.profileCard}>
             <View style={styles.profileHeader}>
-              <View style={[styles.avatarContainer, { backgroundColor: getRoleColor(user?.role) + '20' }]}>
+              <View
+                style={[
+                  styles.avatarContainer,
+                  { backgroundColor: getRoleColor(user?.role) + '20' },
+                ]}
+              >
                 <MaterialCommunityIcons
                   name={getRoleIcon(user?.role)}
                   size={designTokens.iconSize.xxl}
@@ -172,7 +176,9 @@ const AccountScreen = () => {
               <Text style={[styles.profileEmail, { color: colors.textSecondary }]}>
                 {user?.email || t('screens.account.defaultEmail')}
               </Text>
-              <View style={[styles.roleBadge, { backgroundColor: getRoleColor(user?.role) + '15' }]}>
+              <View
+                style={[styles.roleBadge, { backgroundColor: getRoleColor(user?.role) + '15' }]}
+              >
                 <MaterialCommunityIcons
                   name={getRoleIcon(user?.role)}
                   size={designTokens.iconSize.sm}
@@ -194,11 +200,19 @@ const AccountScreen = () => {
               <View style={styles.detailsContainer}>
                 {/* Email */}
                 <View style={[styles.detailRow, { borderBottomColor: colors.border }]}>
-                  <View style={[styles.detailIconContainer, { backgroundColor: colors.primary + '20' }]}>
-                    <MaterialCommunityIcons name={ICONS.EMAIL_OUTLINE} size={designTokens.iconSize.md} color={colors.primary} />
+                  <View
+                    style={[styles.detailIconContainer, { backgroundColor: colors.primary + '20' }]}
+                  >
+                    <MaterialCommunityIcons
+                      name={ICONS.EMAIL_OUTLINE}
+                      size={designTokens.iconSize.md}
+                      color={colors.primary}
+                    />
                   </View>
                   <View style={styles.detailText}>
-                    <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>{t('screens.account.emailAddress')}</Text>
+                    <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
+                      {t('screens.account.emailAddress')}
+                    </Text>
                     <Text style={[styles.detailValue, { color: colors.textPrimary }]}>
                       {user?.email || t('common.notSet')}
                     </Text>
@@ -207,11 +221,19 @@ const AccountScreen = () => {
 
                 {/* WhatsApp */}
                 <View style={styles.detailRow}>
-                  <View style={[styles.detailIconContainer, { backgroundColor: colors.success + '20' }]}>
-                    <MaterialCommunityIcons name={ICONS.WHATSAPP} size={designTokens.iconSize.md} color={colors.success} />
+                  <View
+                    style={[styles.detailIconContainer, { backgroundColor: colors.success + '20' }]}
+                  >
+                    <MaterialCommunityIcons
+                      name={ICONS.WHATSAPP}
+                      size={designTokens.iconSize.md}
+                      color={colors.success}
+                    />
                   </View>
                   <View style={styles.detailText}>
-                    <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>{t('screens.account.whatsAppNumber')}</Text>
+                    <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
+                      {t('screens.account.whatsAppNumber')}
+                    </Text>
                     <Text style={[styles.detailValue, { color: colors.textPrimary }]}>
                       {user?.whatsappNumber || t('common.notSet')}
                     </Text>
@@ -230,11 +252,19 @@ const AccountScreen = () => {
               <View style={styles.detailsContainer}>
                 {/* Club Name */}
                 <View style={[styles.detailRow, { borderBottomColor: colors.border }]}>
-                  <View style={[styles.detailIconContainer, { backgroundColor: colors.primary + '20' }]}>
-                    <MaterialCommunityIcons name={ICONS.ACCOUNT_GROUP} size={designTokens.iconSize.md} color={colors.primary} />
+                  <View
+                    style={[styles.detailIconContainer, { backgroundColor: colors.primary + '20' }]}
+                  >
+                    <MaterialCommunityIcons
+                      name={ICONS.ACCOUNT_GROUP}
+                      size={designTokens.iconSize.md}
+                      color={colors.primary}
+                    />
                   </View>
                   <View style={styles.detailText}>
-                    <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>{t('screens.account.club')}</Text>
+                    <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
+                      {t('screens.account.club')}
+                    </Text>
                     <Text style={[styles.detailValue, { color: colors.textPrimary }]}>
                       {club?.name || t('common.loading')}
                     </Text>
@@ -244,15 +274,28 @@ const AccountScreen = () => {
                 {/* Pathfinder Classes */}
                 {user?.classes && user.classes.length > 0 && (
                   <View style={[styles.detailRow, { borderBottomColor: colors.border }]}>
-                    <View style={[styles.detailIconContainer, { backgroundColor: colors.info + '20' }]}>
-                      <MaterialCommunityIcons name={ICONS.SCHOOL} size={designTokens.iconSize.md} color={colors.info} />
+                    <View
+                      style={[styles.detailIconContainer, { backgroundColor: colors.info + '20' }]}
+                    >
+                      <MaterialCommunityIcons
+                        name={ICONS.SCHOOL}
+                        size={designTokens.iconSize.md}
+                        color={colors.info}
+                      />
                     </View>
                     <View style={styles.detailText}>
-                      <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>{t('screens.account.pathfinderClasses')}</Text>
+                      <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
+                        {t('screens.account.pathfinderClasses')}
+                      </Text>
                       <View style={styles.classesContainer}>
                         {user.classes.map((cls, index) => (
-                          <View key={index} style={[styles.classBadge, { backgroundColor: colors.primary + '15' }]}>
-                            <Text style={[styles.classBadgeText, { color: colors.primary }]}>{cls}</Text>
+                          <View
+                            key={index}
+                            style={[styles.classBadge, { backgroundColor: colors.primary + '15' }]}
+                          >
+                            <Text style={[styles.classBadgeText, { color: colors.primary }]}>
+                              {cls}
+                            </Text>
                           </View>
                         ))}
                       </View>
@@ -262,11 +305,22 @@ const AccountScreen = () => {
 
                 {/* Member Since */}
                 <View style={[styles.detailRow, { borderBottomColor: colors.border }]}>
-                  <View style={[styles.detailIconContainer, { backgroundColor: colors.textTertiary + '20' }]}>
-                    <MaterialCommunityIcons name={ICONS.CALENDAR_ACCOUNT} size={designTokens.iconSize.md} color={colors.textTertiary} />
+                  <View
+                    style={[
+                      styles.detailIconContainer,
+                      { backgroundColor: colors.textTertiary + '20' },
+                    ]}
+                  >
+                    <MaterialCommunityIcons
+                      name={ICONS.CALENDAR_ACCOUNT}
+                      size={designTokens.iconSize.md}
+                      color={colors.textTertiary}
+                    />
                   </View>
                   <View style={styles.detailText}>
-                    <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>{t('screens.account.memberSince')}</Text>
+                    <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
+                      {t('screens.account.memberSince')}
+                    </Text>
                     <Text style={[styles.detailValue, { color: colors.textPrimary }]}>
                       {formatDate(user?.createdAt)}
                     </Text>
@@ -275,16 +329,36 @@ const AccountScreen = () => {
 
                 {/* Membership Status */}
                 <View style={styles.detailRow}>
-                  <View style={[styles.detailIconContainer, { backgroundColor: getApprovalStatusLabel(user?.approvalStatus).color + '20' }]}>
-                    <MaterialCommunityIcons 
-                      name={user?.approvalStatus === ApprovalStatus.APPROVED ? ICONS.CHECK_CIRCLE : user?.approvalStatus === ApprovalStatus.PENDING ? ICONS.CLOCK_OUTLINE : ICONS.CLOSE_CIRCLE} 
-                      size={designTokens.iconSize.md} 
-                      color={getApprovalStatusLabel(user?.approvalStatus).color} 
+                  <View
+                    style={[
+                      styles.detailIconContainer,
+                      {
+                        backgroundColor: getApprovalStatusLabel(user?.approvalStatus).color + '20',
+                      },
+                    ]}
+                  >
+                    <MaterialCommunityIcons
+                      name={
+                        user?.approvalStatus === ApprovalStatus.APPROVED
+                          ? ICONS.CHECK_CIRCLE
+                          : user?.approvalStatus === ApprovalStatus.PENDING
+                            ? ICONS.CLOCK_OUTLINE
+                            : ICONS.CLOSE_CIRCLE
+                      }
+                      size={designTokens.iconSize.md}
+                      color={getApprovalStatusLabel(user?.approvalStatus).color}
                     />
                   </View>
                   <View style={styles.detailText}>
-                    <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>{t('screens.account.membershipStatus')}</Text>
-                    <Text style={[styles.detailValue, { color: getApprovalStatusLabel(user?.approvalStatus).color }]}>
+                    <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
+                      {t('screens.account.membershipStatus')}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.detailValue,
+                        { color: getApprovalStatusLabel(user?.approvalStatus).color },
+                      ]}
+                    >
                       {getApprovalStatusLabel(user?.approvalStatus).label}
                     </Text>
                   </View>
@@ -301,7 +375,16 @@ const AccountScreen = () => {
             <Card variant="elevated">
               <View style={styles.statusContainer}>
                 <View style={styles.statusInfo}>
-                  <View style={[styles.statusIconContainer, { backgroundColor: isActive ? colors.success + '20' : colors.textTertiary + '20' }]}>
+                  <View
+                    style={[
+                      styles.statusIconContainer,
+                      {
+                        backgroundColor: isActive
+                          ? colors.success + '20'
+                          : colors.textTertiary + '20',
+                      },
+                    ]}
+                  >
                     <MaterialCommunityIcons
                       name={isActive ? ICONS.ACCOUNT_CHECK : ICONS.ACCOUNT_OFF}
                       size={designTokens.iconSize.lg}
@@ -313,7 +396,9 @@ const AccountScreen = () => {
                       {isActive ? t('common.active') : t('screens.profile.inactive')}
                     </Text>
                     <Text style={[styles.statusDescription, { color: colors.textSecondary }]}>
-                      {isActive ? t('screens.profile.activeInActivities') : t('screens.profile.notInActivities')}
+                      {isActive
+                        ? t('screens.profile.activeInActivities')
+                        : t('screens.profile.notInActivities')}
                     </Text>
                   </View>
                 </View>
@@ -337,10 +422,16 @@ const AccountScreen = () => {
               {/* Timezone */}
               <View style={[styles.detailRow, { borderBottomColor: colors.border }]}>
                 <View style={[styles.detailIconContainer, { backgroundColor: colors.info + '20' }]}>
-                  <MaterialCommunityIcons name={ICONS.EARTH} size={designTokens.iconSize.md} color={colors.info} />
+                  <MaterialCommunityIcons
+                    name={ICONS.EARTH}
+                    size={designTokens.iconSize.md}
+                    color={colors.info}
+                  />
                 </View>
                 <View style={styles.detailText}>
-                  <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>{t('screens.account.timezone')}</Text>
+                  <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
+                    {t('screens.account.timezone')}
+                  </Text>
                   <Text style={[styles.detailValue, { color: colors.textPrimary }]}>
                     {user?.timezone || t('screens.profile.defaultTimezone')}
                   </Text>
@@ -366,24 +457,51 @@ const AccountScreen = () => {
           <Card variant="elevated">
             <View style={styles.detailsContainer}>
               <View style={[styles.detailRow, { borderBottomColor: colors.border }]}>
-                <View style={[styles.detailIconContainer, { backgroundColor: colors.textTertiary + '20' }]}>
-                  <MaterialCommunityIcons name={ICONS.INFORMATION_OUTLINE} size={designTokens.iconSize.md} color={colors.textTertiary} />
+                <View
+                  style={[
+                    styles.detailIconContainer,
+                    { backgroundColor: colors.textTertiary + '20' },
+                  ]}
+                >
+                  <MaterialCommunityIcons
+                    name={ICONS.INFORMATION_OUTLINE}
+                    size={designTokens.iconSize.md}
+                    color={colors.textTertiary}
+                  />
                 </View>
                 <View style={styles.detailText}>
-                  <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>{t('screens.account.appVersion')}</Text>
-                  <Text style={[styles.detailValue, { color: colors.textPrimary }]}>{APP_VERSION}</Text>
+                  <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
+                    {t('screens.account.appVersion')}
+                  </Text>
+                  <Text style={[styles.detailValue, { color: colors.textPrimary }]}>
+                    {APP_VERSION}
+                  </Text>
                 </View>
               </View>
 
               <TouchableOpacity style={styles.detailRow} activeOpacity={TOUCH_OPACITY.default}>
-                <View style={[styles.detailIconContainer, { backgroundColor: colors.primary + '20' }]}>
-                  <MaterialCommunityIcons name={ICONS.SHIELD_CHECK_OUTLINE} size={designTokens.iconSize.md} color={colors.primary} />
+                <View
+                  style={[styles.detailIconContainer, { backgroundColor: colors.primary + '20' }]}
+                >
+                  <MaterialCommunityIcons
+                    name={ICONS.SHIELD_CHECK_OUTLINE}
+                    size={designTokens.iconSize.md}
+                    color={colors.primary}
+                  />
                 </View>
                 <View style={styles.detailText}>
-                  <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>{t('screens.account.privacy')}</Text>
-                  <Text style={[styles.detailValue, { color: colors.textPrimary }]}>{t('screens.account.privacyPolicy')}</Text>
+                  <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
+                    {t('screens.account.privacy')}
+                  </Text>
+                  <Text style={[styles.detailValue, { color: colors.textPrimary }]}>
+                    {t('screens.account.privacyPolicy')}
+                  </Text>
                 </View>
-                <MaterialCommunityIcons name={ICONS.CHEVRON_RIGHT} size={designTokens.iconSize.md} color={colors.textTertiary} />
+                <MaterialCommunityIcons
+                  name={ICONS.CHEVRON_RIGHT}
+                  size={designTokens.iconSize.md}
+                  color={colors.textTertiary}
+                />
               </TouchableOpacity>
             </View>
           </Card>
@@ -392,11 +510,18 @@ const AccountScreen = () => {
         {/* Logout Section */}
         <View style={styles.section}>
           <TouchableOpacity
-            style={[styles.logoutButton, { backgroundColor: colors.error + '15', borderColor: colors.error }]}
+            style={[
+              styles.logoutButton,
+              { backgroundColor: colors.error + '15', borderColor: colors.error },
+            ]}
             onPress={handleLogout}
             activeOpacity={TOUCH_OPACITY.default}
           >
-            <MaterialCommunityIcons name={ICONS.LOGOUT} size={designTokens.iconSize.md} color={colors.error} />
+            <MaterialCommunityIcons
+              name={ICONS.LOGOUT}
+              size={designTokens.iconSize.md}
+              color={colors.error}
+            />
             <Text style={[styles.logoutButtonText, { color: colors.error }]}>
               {t('auth.logout')}
             </Text>

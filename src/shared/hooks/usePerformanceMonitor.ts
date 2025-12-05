@@ -65,11 +65,11 @@ export interface PerformanceMeasurement {
 
 /**
  * Monitors component performance and reports violations
- * 
+ *
  * @param componentName - Name of the component being monitored
  * @param budget - Performance budget thresholds
  * @returns Performance metrics
- * 
+ *
  * @example
  * ```typescript
  * const MyComponent = () => {
@@ -79,7 +79,7 @@ export interface PerformanceMeasurement {
  *     maxRenderTime: 16,
  *     componentName: 'MyComponent',
  *   });
- *   
+ *
  *   return <View>...</View>;
  * };
  * ```
@@ -106,7 +106,7 @@ export function usePerformanceMonitor(
     // Measure time to interactive
     const interactionHandle = InteractionManager.runAfterInteractions(() => {
       const tti = performance.now() - startTime;
-      
+
       setMetrics((prev) => ({
         ...prev,
         tti,
@@ -142,9 +142,9 @@ export function usePerformanceMonitor(
     const renderStart = lastRenderTimeRef.current;
     const renderEnd = performance.now();
     const renderTime = renderStart > 0 ? renderEnd - renderStart : 0;
-    
+
     renderCountRef.current += 1;
-    
+
     setMetrics((prev) => ({
       ...prev,
       renderCount: renderCountRef.current,
@@ -174,13 +174,13 @@ export function usePerformanceMonitor(
 
 /**
  * Measures performance of async operations
- * 
+ *
  * @returns Measurement utilities
- * 
+ *
  * @example
  * ```typescript
  * const { measure, measurements } = usePerformanceMeasure();
- * 
+ *
  * const loadData = async () => {
  *   await measure('loadUsers', async () => {
  *     return await fetchUsers();
@@ -191,70 +191,72 @@ export function usePerformanceMonitor(
 export function usePerformanceMeasure() {
   const [measurements, setMeasurements] = useState<PerformanceMeasurement[]>([]);
 
-  const measure = useCallback(async <T,>(
-    name: string,
-    fn: () => Promise<T>,
-    options?: { budget?: number }
-  ): Promise<T> => {
-    const startTime = performance.now();
-    
-    try {
-      const result = await fn();
-      const endTime = performance.now();
-      const duration = endTime - startTime;
-      const exceeded = options?.budget ? duration > options.budget : false;
+  const measure = useCallback(
+    async <T>(name: string, fn: () => Promise<T>, options?: { budget?: number }): Promise<T> => {
+      const startTime = performance.now();
 
-      const measurement: PerformanceMeasurement = {
-        name,
-        duration,
-        startTime,
-        endTime,
-        exceeded,
-        budget: options?.budget,
-      };
+      try {
+        const result = await fn();
+        const endTime = performance.now();
+        const duration = endTime - startTime;
+        const exceeded = options?.budget ? duration > options.budget : false;
 
-      setMeasurements((prev) => [...prev, measurement]);
-
-      // Log if budget exceeded
-      if (exceeded) {
-        logger.warn('Performance budget exceeded', {
-          operation: name,
+        const measurement: PerformanceMeasurement = {
+          name,
           duration,
+          startTime,
+          endTime,
+          exceeded,
           budget: options?.budget,
-          exceeded: duration - (options?.budget || 0),
-        });
-      } else {
-        logger.debug('Performance measurement', {
+        };
+
+        setMeasurements((prev) => [...prev, measurement]);
+
+        // Log if budget exceeded
+        if (exceeded) {
+          logger.warn('Performance budget exceeded', {
+            operation: name,
+            duration,
+            budget: options?.budget,
+            exceeded: duration - (options?.budget || 0),
+          });
+        } else {
+          logger.debug('Performance measurement', {
+            operation: name,
+            duration,
+          });
+        }
+
+        return result;
+      } catch (error) {
+        const endTime = performance.now();
+        const duration = endTime - startTime;
+
+        logger.error('Performance measurement failed', error as Error, {
           operation: name,
           duration,
         });
+
+        throw error;
       }
-
-      return result;
-    } catch (error) {
-      const endTime = performance.now();
-      const duration = endTime - startTime;
-
-      logger.error('Performance measurement failed', error as Error, {
-        operation: name,
-        duration,
-      });
-
-      throw error;
-    }
-  }, []);
+    },
+    []
+  );
 
   const clearMeasurements = useCallback(() => {
     setMeasurements([]);
   }, []);
 
-  const getAverageDuration = useCallback((operationName: string): number => {
-    const filtered = measurements.filter((m) => m.name === operationName);
-    if (filtered.length === 0) return 0;
-    
-    const sum = filtered.reduce((acc, m) => acc + m.duration, 0);
-    return sum / filtered.length;
-  }, [measurements]);
+  const getAverageDuration = useCallback(
+    (operationName: string): number => {
+      const filtered = measurements.filter((m) => m.name === operationName);
+      if (filtered.length === 0) return 0;
+
+      const sum = filtered.reduce((acc, m) => acc + m.duration, 0);
+      return sum / filtered.length;
+    },
+    [measurements]
+  );
 
   return {
     measure,
@@ -270,14 +272,14 @@ export function usePerformanceMeasure() {
 
 /**
  * Monitors frames per second
- * 
+ *
  * @param sampleInterval - Interval to sample FPS (ms)
  * @returns Current FPS
- * 
+ *
  * @example
  * ```typescript
  * const fps = useFPSMonitor(1000);
- * 
+ *
  * if (fps < 30) {
  *   console.warn('Low FPS detected:', fps);
  * }
@@ -290,8 +292,6 @@ export function useFPSMonitor(sampleInterval: number = 1000): number {
 
   useEffect(() => {
     let animationFrameId: number;
-    let intervalId: NodeJS.Timeout;
-
     const measureFPS = () => {
       frameCountRef.current++;
       animationFrameId = requestAnimationFrame(measureFPS);
@@ -303,7 +303,7 @@ export function useFPSMonitor(sampleInterval: number = 1000): number {
       const currentFPS = Math.round((frameCountRef.current * 1000) / elapsed);
 
       setFPS(currentFPS);
-      
+
       // Warn if FPS is low
       if (currentFPS < 55) {
         logger.warn('Low FPS detected', {
@@ -317,7 +317,7 @@ export function useFPSMonitor(sampleInterval: number = 1000): number {
     };
 
     animationFrameId = requestAnimationFrame(measureFPS);
-    intervalId = setInterval(calculateFPS, sampleInterval);
+    const intervalId = setInterval(calculateFPS, sampleInterval);
 
     return () => {
       cancelAnimationFrame(animationFrameId);
@@ -334,14 +334,14 @@ export function useFPSMonitor(sampleInterval: number = 1000): number {
 
 /**
  * Monitors memory usage (if available)
- * 
+ *
  * @param interval - Interval to check memory (ms)
  * @returns Memory usage information
- * 
+ *
  * @example
  * ```typescript
  * const memory = useMemoryMonitor(5000);
- * 
+ *
  * if (memory && memory.usedJSHeapSize > memory.jsHeapSizeLimit * 0.9) {
  *   console.warn('High memory usage');
  * }
@@ -356,11 +356,11 @@ export function useMemoryMonitor(interval: number = 5000) {
 
   useEffect(() => {
     const checkMemory = () => {
-      // @ts-ignore - performance.memory is not standard but available in some environments
+      // @ts-expect-error - performance.memory is not standard but available in some environments
       if (performance.memory) {
-        // @ts-ignore
+        // @ts-expect-error - performance.memory is not standard
         const { usedJSHeapSize, totalJSHeapSize, jsHeapSizeLimit } = performance.memory;
-        
+
         setMemory({
           usedJSHeapSize,
           totalJSHeapSize,
@@ -393,20 +393,20 @@ export function useMemoryMonitor(interval: number = 5000) {
 
 /**
  * Tracks unnecessary re-renders
- * 
+ *
  * @param componentName - Name of component
  * @param props - Component props to track
- * 
+ *
  * @example
  * ```typescript
  * const MyComponent = ({ user, onPress }) => {
  *   useRenderTracker('MyComponent', { user, onPress });
- *   
+ *
  *   return <View>...</View>;
  * };
  * ```
  */
-export function useRenderTracker<T extends Record<string, any>>(
+export function useRenderTracker<T extends Record<string, unknown>>(
   componentName: string,
   props: T
 ): void {
@@ -419,7 +419,7 @@ export function useRenderTracker<T extends Record<string, any>>(
     // On development, log re-renders with changed props
     if (__DEV__) {
       const changedProps: string[] = [];
-      
+
       for (const key in props) {
         if (props[key] !== prevProps.current[key]) {
           changedProps.push(key);
@@ -453,13 +453,13 @@ export function useRenderTracker<T extends Record<string, any>>(
 
 /**
  * Monitors network request performance
- * 
+ *
  * @returns Network monitoring utilities
- * 
+ *
  * @example
  * ```typescript
  * const { trackRequest, metrics } = useNetworkMonitor();
- * 
+ *
  * const fetchData = async () => {
  *   await trackRequest('fetchUsers', async () => {
  *     return await api.get('/users');
@@ -482,51 +482,50 @@ export function useNetworkMonitor() {
 
   const durations = useRef<{ name: string; duration: number }[]>([]);
 
-  const trackRequest = useCallback(async <T,>(
-    name: string,
-    fn: () => Promise<T>,
-    options?: { budget?: number }
-  ): Promise<T> => {
-    const startTime = performance.now();
-    
-    try {
-      const result = await fn();
-      const duration = performance.now() - startTime;
+  const trackRequest = useCallback(
+    async <T>(name: string, fn: () => Promise<T>, options?: { budget?: number }): Promise<T> => {
+      const startTime = performance.now();
 
-      durations.current.push({ name, duration });
+      try {
+        const result = await fn();
+        const duration = performance.now() - startTime;
 
-      // Update metrics
-      const totalDuration = durations.current.reduce((sum, d) => sum + d.duration, 0);
-      const avgDuration = totalDuration / durations.current.length;
-      const slowest = durations.current.reduce((prev, current) =>
-        current.duration > prev.duration ? current : prev
-      );
+        durations.current.push({ name, duration });
 
-      setMetrics({
-        requestCount: durations.current.length,
-        averageDuration: avgDuration,
-        slowestRequest: slowest.name,
-        slowestDuration: slowest.duration,
-      });
+        // Update metrics
+        const totalDuration = durations.current.reduce((sum, d) => sum + d.duration, 0);
+        const avgDuration = totalDuration / durations.current.length;
+        const slowest = durations.current.reduce((prev, current) =>
+          current.duration > prev.duration ? current : prev
+        );
 
-      // Check budget
-      if (options?.budget && duration > options.budget) {
-        logger.warn('Network request exceeded budget', {
-          request: name,
-          duration,
-          budget: options.budget,
-          exceeded: duration - options.budget,
+        setMetrics({
+          requestCount: durations.current.length,
+          averageDuration: avgDuration,
+          slowestRequest: slowest.name,
+          slowestDuration: slowest.duration,
         });
-      }
 
-      return result;
-    } catch (error) {
-      logger.error('Network request failed', error as Error, {
-        request: name,
-      });
-      throw error;
-    }
-  }, []);
+        // Check budget
+        if (options?.budget && duration > options.budget) {
+          logger.warn('Network request exceeded budget', {
+            request: name,
+            duration,
+            budget: options.budget,
+            exceeded: duration - options.budget,
+          });
+        }
+
+        return result;
+      } catch (error) {
+        logger.error('Network request failed', error as Error, {
+          request: name,
+        });
+        throw error;
+      }
+    },
+    []
+  );
 
   return {
     trackRequest,
@@ -540,13 +539,11 @@ export function useNetworkMonitor() {
 
 /**
  * Generates a comprehensive performance report
- * 
+ *
  * @param measurements - Array of performance measurements
  * @returns Performance report
  */
-export function generatePerformanceReport(
-  measurements: PerformanceMeasurement[]
-): {
+export function generatePerformanceReport(measurements: PerformanceMeasurement[]): {
   totalMeasurements: number;
   averageDuration: number;
   slowestOperation: string | null;
@@ -567,7 +564,7 @@ export function generatePerformanceReport(
 
   const totalDuration = measurements.reduce((sum, m) => sum + m.duration, 0);
   const averageDuration = totalDuration / measurements.length;
-  
+
   const slowest = measurements.reduce((prev, current) =>
     current.duration > prev.duration ? current : prev
   );
@@ -583,4 +580,3 @@ export function generatePerformanceReport(
     violatedOperations: violated.map((m) => m.name),
   };
 }
-

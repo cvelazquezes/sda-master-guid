@@ -1,21 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { User, Club, UserRole } from '../types';
 import { OrganizationHierarchy } from './OrganizationHierarchy';
 import { clubService } from '../services/clubService';
 import { StandardModal } from '../shared/components/StandardModal';
-import { mobileTypography, mobileIconSizes, mobileFontSizes, layoutConstants } from '../shared/theme';
+import {
+  mobileTypography,
+  mobileIconSizes,
+  mobileFontSizes,
+  layoutConstants,
+} from '../shared/theme';
 import { designTokens } from '../shared/theme/designTokens';
-import { ICONS, ACTIVITY_INDICATOR_SIZE, LOG_MESSAGES } from '../shared/constants';
 import { logger } from '../shared/utils/logger';
-import { flexValues } from '../shared/constants/layoutConstants';
+import { ACTIVITY_INDICATOR_SIZE, ICONS, LOG_MESSAGES, flexValues } from '../shared/constants';
 
 interface UserDetailModalProps {
   visible: boolean;
@@ -49,17 +48,6 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ visible, user,
 
   if (!user) return null;
 
-  const getRoleColor = (role: UserRole) => {
-    switch (role) {
-      case UserRole.ADMIN:
-        return designTokens.colors.error;
-      case UserRole.CLUB_ADMIN:
-        return designTokens.colors.warning;
-      default:
-        return designTokens.colors.info;
-    }
-  };
-
   const getRoleLabel = (role: UserRole): string => {
     switch (role) {
       case UserRole.ADMIN:
@@ -71,12 +59,6 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ visible, user,
     }
   };
 
-  const avatarIcon = (
-    <View style={[styles.avatarIcon, { backgroundColor: getRoleColor(user.role) }]}>
-      <Text style={styles.avatarText}>{user.name.charAt(0).toUpperCase()}</Text>
-    </View>
-  );
-
   return (
     <StandardModal
       visible={visible}
@@ -84,98 +66,131 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ visible, user,
       title={user.name}
       subtitle={t('components.userDetailModal.subtitle')}
     >
-        {/* Personal Information */}
-        <View style={styles.section}>
-              <Text style={styles.sectionTitle}>{t('components.userDetailModal.personalInformation')}</Text>
+      {/* Personal Information */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>
+          {t('components.userDetailModal.personalInformation')}
+        </Text>
 
-              <View style={styles.infoRow}>
-                <MaterialCommunityIcons name={ICONS.ACCOUNT} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
-                <View style={styles.infoContent}>
-                  <Text style={styles.infoLabel}>{t('components.userDetailModal.name')}</Text>
-                  <Text style={styles.infoValue}>{user.name}</Text>
-                </View>
-              </View>
+        <View style={styles.infoRow}>
+          <MaterialCommunityIcons
+            name={ICONS.ACCOUNT}
+            size={mobileIconSizes.medium}
+            color={designTokens.colors.primary}
+          />
+          <View style={styles.infoContent}>
+            <Text style={styles.infoLabel}>{t('components.userDetailModal.name')}</Text>
+            <Text style={styles.infoValue}>{user.name}</Text>
+          </View>
+        </View>
 
-              <View style={styles.infoRow}>
-                <MaterialCommunityIcons name={ICONS.EMAIL} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
-                <View style={styles.infoContent}>
-                  <Text style={styles.infoLabel}>{t('components.userDetailModal.email')}</Text>
-                  <Text style={styles.infoValue}>{user.email}</Text>
-                </View>
-              </View>
+        <View style={styles.infoRow}>
+          <MaterialCommunityIcons
+            name={ICONS.EMAIL}
+            size={mobileIconSizes.medium}
+            color={designTokens.colors.primary}
+          />
+          <View style={styles.infoContent}>
+            <Text style={styles.infoLabel}>{t('components.userDetailModal.email')}</Text>
+            <Text style={styles.infoValue}>{user.email}</Text>
+          </View>
+        </View>
 
-              {user.whatsappNumber && (
-                <View style={styles.infoRow}>
-                  <MaterialCommunityIcons name={ICONS.WHATSAPP} size={mobileIconSizes.medium} color={designTokens.colors.success} />
-                  <View style={styles.infoContent}>
-                    <Text style={styles.infoLabel}>{t('components.userDetailModal.whatsApp')}</Text>
-                    <Text style={styles.infoValue}>{user.whatsappNumber}</Text>
-                  </View>
-                </View>
-              )}
-
-              <View style={styles.infoRow}>
-                <MaterialCommunityIcons name={ICONS.SHIELD_ACCOUNT} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
-                <View style={styles.infoContent}>
-                  <Text style={styles.infoLabel}>{t('components.userDetailModal.role')}</Text>
-                  <Text style={styles.infoValue}>{getRoleLabel(user.role)}</Text>
-                </View>
-              </View>
+        {user.whatsappNumber && (
+          <View style={styles.infoRow}>
+            <MaterialCommunityIcons
+              name={ICONS.WHATSAPP}
+              size={mobileIconSizes.medium}
+              color={designTokens.colors.success}
+            />
+            <View style={styles.infoContent}>
+              <Text style={styles.infoLabel}>{t('components.userDetailModal.whatsApp')}</Text>
+              <Text style={styles.infoValue}>{user.whatsappNumber}</Text>
             </View>
-
-            {/* Pathfinder Classes */}
-            {user.role !== UserRole.ADMIN && user.classes && user.classes.length > 0 && (
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>{t('components.userDetailModal.pathfinderClasses')}</Text>
-                <View style={styles.classesContainer}>
-                  {user.classes.map((pathfinderClass, index) => (
-                    <View key={index} style={styles.classBadge}>
-                      <MaterialCommunityIcons name={ICONS.SCHOOL} size={mobileIconSizes.small} color={designTokens.colors.primary} />
-                      <Text style={styles.classBadgeText}>{pathfinderClass}</Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
-            )}
-
-            {/* Status */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>{t('components.userDetailModal.status')}</Text>
-
-              <View style={styles.statusRow}>
-                <MaterialCommunityIcons
-                  name={user.isActive ? ICONS.CHECK_CIRCLE : ICONS.CANCEL}
-                  size={mobileIconSizes.medium}
-                  color={user.isActive ? designTokens.colors.success : designTokens.colors.error}
-                />
-                <Text style={styles.statusText}>{user.isActive ? t('components.userDetailModal.active') : t('components.userDetailModal.inactive')}</Text>
-              </View>
-            </View>
-
-            {/* Organizational Hierarchy */}
-            {user.role !== UserRole.ADMIN && club && (
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>{t('components.userDetailModal.organizationAndClub')}</Text>
-                <OrganizationHierarchy
-                  data={{
-                    division: club.division,
-                    union: club.union,
-                    association: club.association,
-                    church: club.church,
-                    clubName: club.name,
-                  }}
-                  title={t('components.userDetailModal.organizationalHierarchy')}
-                  initialExpanded={true}
-                />
-              </View>
-            )}
-
-        {loading && (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size={ACTIVITY_INDICATOR_SIZE.small} color={designTokens.colors.primary} />
-            <Text style={styles.loadingText}>{t('components.userDetailModal.loadingClubInfo')}</Text>
           </View>
         )}
+
+        <View style={styles.infoRow}>
+          <MaterialCommunityIcons
+            name={ICONS.SHIELD_ACCOUNT}
+            size={mobileIconSizes.medium}
+            color={designTokens.colors.primary}
+          />
+          <View style={styles.infoContent}>
+            <Text style={styles.infoLabel}>{t('components.userDetailModal.role')}</Text>
+            <Text style={styles.infoValue}>{getRoleLabel(user.role)}</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Pathfinder Classes */}
+      {user.role !== UserRole.ADMIN && user.classes && user.classes.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            {t('components.userDetailModal.pathfinderClasses')}
+          </Text>
+          <View style={styles.classesContainer}>
+            {user.classes.map((pathfinderClass, index) => (
+              <View key={index} style={styles.classBadge}>
+                <MaterialCommunityIcons
+                  name={ICONS.SCHOOL}
+                  size={mobileIconSizes.small}
+                  color={designTokens.colors.primary}
+                />
+                <Text style={styles.classBadgeText}>{pathfinderClass}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      )}
+
+      {/* Status */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t('components.userDetailModal.status')}</Text>
+
+        <View style={styles.statusRow}>
+          <MaterialCommunityIcons
+            name={user.isActive ? ICONS.CHECK_CIRCLE : ICONS.CANCEL}
+            size={mobileIconSizes.medium}
+            color={user.isActive ? designTokens.colors.success : designTokens.colors.error}
+          />
+          <Text style={styles.statusText}>
+            {user.isActive
+              ? t('components.userDetailModal.active')
+              : t('components.userDetailModal.inactive')}
+          </Text>
+        </View>
+      </View>
+
+      {/* Organizational Hierarchy */}
+      {user.role !== UserRole.ADMIN && club && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            {t('components.userDetailModal.organizationAndClub')}
+          </Text>
+          <OrganizationHierarchy
+            data={{
+              division: club.division,
+              union: club.union,
+              association: club.association,
+              church: club.church,
+              clubName: club.name,
+            }}
+            title={t('components.userDetailModal.organizationalHierarchy')}
+            initialExpanded={true}
+          />
+        </View>
+      )}
+
+      {loading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator
+            size={ACTIVITY_INDICATOR_SIZE.small}
+            color={designTokens.colors.primary}
+          />
+          <Text style={styles.loadingText}>{t('components.userDetailModal.loadingClubInfo')}</Text>
+        </View>
+      )}
     </StandardModal>
   );
 };

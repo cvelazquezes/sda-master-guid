@@ -1,6 +1,6 @@
 /**
  * Typography System
- * 
+ *
  * Type scale following Material Design and iOS HIG principles.
  * Ensures consistent, accessible, and responsive typography.
  */
@@ -270,7 +270,7 @@ export const typography = {
 export const typographyUtils = {
   /**
    * Get responsive font size based on screen size
-   * 
+   *
    * @param baseSize - Base font size
    * @param scale - Scale factor (default: 1)
    * @returns Scaled font size
@@ -281,7 +281,7 @@ export const typographyUtils = {
 
   /**
    * Calculate optimal line height for font size
-   * 
+   *
    * @param fontSize - Font size in pixels
    * @returns Calculated line height
    */
@@ -291,16 +291,15 @@ export const typographyUtils = {
 
   /**
    * Truncate text with ellipsis
-   * 
+   *
    * @param maxLines - Maximum number of lines
    * @returns Text style with truncation
    */
   truncate(maxLines: number = 1): TextStyle {
     return {
       numberOfLines: maxLines,
-    } as any; // numberOfLines is not in TextStyle but works in Text component
+    } as TextStyle; // numberOfLines is used by Text component
   },
 };
 
 export type TypographyStyle = keyof typeof typography;
-

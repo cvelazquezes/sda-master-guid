@@ -12,9 +12,23 @@ import { useTheme } from '../contexts/ThemeContext';
 import { Club } from '../types';
 import { mobileTypography, designTokens, layoutConstants } from '../shared/theme';
 import { StatusIndicator, IconButton } from '../shared/components';
-import { A11Y_ROLE, ICONS, TEXT_LINES, TOUCH_OPACITY, COMPONENT_SIZE, STATUS, COMPONENT_NAMES } from '../shared/constants';
-import { formatMatchFrequency, formatMembersCount, formatGroupSize, formatViewDetailsLabel, formatDeleteLabel } from '../shared/utils/formatters';
-import { flexValues } from '../shared/constants/layoutConstants';
+import {
+  formatMatchFrequency,
+  formatMembersCount,
+  formatGroupSize,
+  formatViewDetailsLabel,
+  formatDeleteLabel,
+} from '../shared/utils/formatters';
+import {
+  A11Y_ROLE,
+  COMPONENT_NAMES,
+  COMPONENT_SIZE,
+  ICONS,
+  STATUS,
+  TEXT_LINES,
+  TOUCH_OPACITY,
+  flexValues,
+} from '../shared/constants';
 
 interface ClubCardProps {
   club: Club;
@@ -34,22 +48,31 @@ const ClubCardComponent: React.FC<ClubCardProps> = ({
   const { colors, isDark } = useTheme();
   const { t } = useTranslation();
 
+  const shadowConfig = isDark ? designTokens.shadowConfig.dark : designTokens.shadowConfig.light;
+
   const CardContent = (
-    <View style={[
-      styles.card,
-      { 
-        backgroundColor: colors.surface,
-        shadowColor: designTokens.colors.black,
-        shadowOpacity: isDark ? designTokens.shadowConfig.dark.opacity : designTokens.shadowConfig.light.opacity,
-        elevation: isDark ? designTokens.shadowConfig.dark.elevation : designTokens.shadowConfig.light.elevation,
-      },
-      !club.isActive && { backgroundColor: colors.surfaceLight, opacity: designTokens.opacity.high }
-    ]}>
+    <View
+      style={[
+        styles.card,
+        {
+          backgroundColor: colors.surface,
+          shadowColor: designTokens.colors.black,
+          shadowOpacity: shadowConfig.opacity,
+          elevation: shadowConfig.elevation,
+        },
+        !club.isActive && {
+          backgroundColor: colors.surfaceLight,
+          opacity: designTokens.opacity.high,
+        },
+      ]}
+    >
       {/* Icon */}
-      <View style={[
-        styles.icon,
-        { backgroundColor: club.isActive ? colors.primaryAlpha10 : colors.surfaceLight }
-      ]}>
+      <View
+        style={[
+          styles.icon,
+          { backgroundColor: club.isActive ? colors.primaryAlpha10 : colors.surfaceLight },
+        ]}
+      >
         <MaterialCommunityIcons
           name={ICONS.ACCOUNT_GROUP}
           size={designTokens.icon.sizes.lg}
@@ -60,26 +83,23 @@ const ClubCardComponent: React.FC<ClubCardProps> = ({
       {/* Club Info */}
       <View style={styles.clubInfo}>
         <View style={styles.clubHeader}>
-          <Text 
+          <Text
             style={[
-              styles.clubName, 
-              { color: club.isActive ? colors.textPrimary : colors.textTertiary }
-            ]} 
+              styles.clubName,
+              { color: club.isActive ? colors.textPrimary : colors.textTertiary },
+            ]}
             numberOfLines={TEXT_LINES.single}
           >
             {club.name}
           </Text>
-          <StatusIndicator
-            status={club.isActive ? STATUS.active : STATUS.inactive}
-            showIcon
-          />
+          <StatusIndicator status={club.isActive ? STATUS.active : STATUS.inactive} showIcon />
         </View>
 
-        <Text 
+        <Text
           style={[
-            styles.clubDescription, 
-            { color: club.isActive ? colors.textSecondary : colors.textTertiary }
-          ]} 
+            styles.clubDescription,
+            { color: club.isActive ? colors.textSecondary : colors.textTertiary },
+          ]}
           numberOfLines={TEXT_LINES.single}
         >
           {club.description}
@@ -94,11 +114,11 @@ const ClubCardComponent: React.FC<ClubCardProps> = ({
                 size={designTokens.icon.sizes.xs}
                 color={club.isActive ? colors.primary : colors.textTertiary}
               />
-              <Text 
+              <Text
                 style={[
-                  styles.hierarchyText, 
-                  { color: club.isActive ? colors.textSecondary : colors.textTertiary }
-                ]} 
+                  styles.hierarchyText,
+                  { color: club.isActive ? colors.textSecondary : colors.textTertiary },
+                ]}
                 numberOfLines={TEXT_LINES.single}
               >
                 {club.church}
@@ -112,11 +132,11 @@ const ClubCardComponent: React.FC<ClubCardProps> = ({
                 size={designTokens.icon.sizes.xs}
                 color={club.isActive ? colors.primary : colors.textTertiary}
               />
-              <Text 
+              <Text
                 style={[
-                  styles.hierarchyText, 
-                  { color: club.isActive ? colors.textSecondary : colors.textTertiary }
-                ]} 
+                  styles.hierarchyText,
+                  { color: club.isActive ? colors.textSecondary : colors.textTertiary },
+                ]}
                 numberOfLines={TEXT_LINES.single}
               >
                 {club.association}
@@ -133,7 +153,12 @@ const ClubCardComponent: React.FC<ClubCardProps> = ({
               size={designTokens.icon.sizes.xs}
               color={club.isActive ? colors.textSecondary : colors.textTertiary}
             />
-            <Text style={[styles.detailText, { color: club.isActive ? colors.textSecondary : colors.textTertiary }]}>
+            <Text
+              style={[
+                styles.detailText,
+                { color: club.isActive ? colors.textSecondary : colors.textTertiary },
+              ]}
+            >
               {formatMatchFrequency(club.matchFrequency, t)}
             </Text>
           </View>
@@ -143,7 +168,12 @@ const ClubCardComponent: React.FC<ClubCardProps> = ({
               size={designTokens.icon.sizes.xs}
               color={club.isActive ? colors.textSecondary : colors.textTertiary}
             />
-            <Text style={[styles.detailText, { color: club.isActive ? colors.textSecondary : colors.textTertiary }]}>
+            <Text
+              style={[
+                styles.detailText,
+                { color: club.isActive ? colors.textSecondary : colors.textTertiary },
+              ]}
+            >
               {formatGroupSize(club.groupSize, t)}
             </Text>
           </View>
@@ -154,7 +184,12 @@ const ClubCardComponent: React.FC<ClubCardProps> = ({
                 size={designTokens.icon.sizes.xs}
                 color={club.isActive ? colors.textSecondary : colors.textTertiary}
               />
-              <Text style={[styles.detailText, { color: club.isActive ? colors.textSecondary : colors.textTertiary }]}>
+              <Text
+                style={[
+                  styles.detailText,
+                  { color: club.isActive ? colors.textSecondary : colors.textTertiary },
+                ]}
+              >
                 {formatMembersCount(club.memberCount, t)}
               </Text>
             </View>
@@ -171,7 +206,9 @@ const ClubCardComponent: React.FC<ClubCardProps> = ({
               onPress={onToggleStatus}
               size={COMPONENT_SIZE.md}
               color={club.isActive ? colors.error : colors.success}
-              accessibilityLabel={club.isActive ? t('accessibility.deactivateClub') : t('accessibility.activateClub')}
+              accessibilityLabel={
+                club.isActive ? t('accessibility.deactivateClub') : t('accessibility.activateClub')
+              }
             />
           )}
           {onDelete && (

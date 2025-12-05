@@ -5,20 +5,13 @@
  */
 
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  FlatList,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { StandardModal } from './StandardModal';
 import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../theme';
-import { A11Y_ROLE, ICONS, TOUCH_OPACITY } from '../constants';
-import { flexValues, dimensionValues } from '../constants/layoutConstants';
+import { A11Y_ROLE, ICONS, TOUCH_OPACITY, dimensionValues, flexValues } from '../constants';
 
 export interface SelectionItem {
   id: string;
@@ -54,8 +47,8 @@ export const SelectionModal: React.FC<SelectionModalProps> = ({
   onSelectItem,
   selectedItemId,
   emptyMessage,
-  searchable = false,
-  multiSelect = false,
+  searchable: _searchable = false,
+  multiSelect: _multiSelect = false,
 }) => {
   const { t } = useTranslation();
   const { colors } = useTheme();
@@ -71,7 +64,11 @@ export const SelectionModal: React.FC<SelectionModalProps> = ({
         style={[
           styles.item,
           { backgroundColor: colors.surfaceLight },
-          isSelected && { backgroundColor: colors.successLight, borderWidth: designTokens.borderWidth.medium, borderColor: colors.success },
+          isSelected && {
+            backgroundColor: colors.successLight,
+            borderWidth: designTokens.borderWidth.medium,
+            borderColor: colors.success,
+          },
           isDisabled && styles.itemDisabled,
         ]}
         onPress={() => !isDisabled && onSelectItem(item)}
@@ -85,7 +82,7 @@ export const SelectionModal: React.FC<SelectionModalProps> = ({
         {item.icon && (
           <View style={[styles.iconContainer, { backgroundColor: `${iconColor}20` }]}>
             <MaterialCommunityIcons
-              name={item.icon as any}
+              name={item.icon as typeof ICONS.CHECK}
               size={mobileIconSizes.medium}
               color={iconColor}
             />
@@ -100,24 +97,30 @@ export const SelectionModal: React.FC<SelectionModalProps> = ({
 
         {/* Content */}
         <View style={styles.itemContent}>
-          <Text style={[
-            styles.itemTitle, 
-            { color: colors.textPrimary },
-            isDisabled && { color: colors.textTertiary }
-          ]}>
+          <Text
+            style={[
+              styles.itemTitle,
+              { color: colors.textPrimary },
+              isDisabled && { color: colors.textTertiary },
+            ]}
+          >
             {item.title}
           </Text>
           {item.subtitle && (
-            <Text style={[
-              styles.itemSubtitle, 
-              { color: colors.textSecondary },
-              isDisabled && { color: colors.textTertiary }
-            ]}>
+            <Text
+              style={[
+                styles.itemSubtitle,
+                { color: colors.textSecondary },
+                isDisabled && { color: colors.textTertiary },
+              ]}
+            >
               {item.subtitle}
             </Text>
           )}
           {item.badge && (
-            <View style={[styles.badge, { backgroundColor: `${item.badgeColor || colors.primary}20` }]}>
+            <View
+              style={[styles.badge, { backgroundColor: `${item.badgeColor || colors.primary}20` }]}
+            >
               <MaterialCommunityIcons
                 name={ICONS.CHECK_CIRCLE}
                 size={mobileIconSizes.tiny}
@@ -151,8 +154,14 @@ export const SelectionModal: React.FC<SelectionModalProps> = ({
     >
       {items.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <MaterialCommunityIcons name={ICONS.INBOX} size={designTokens.iconSize['3xl']} color={colors.textTertiary} />
-          <Text style={[styles.emptyText, { color: colors.textTertiary }]}>{displayEmptyMessage}</Text>
+          <MaterialCommunityIcons
+            name={ICONS.INBOX}
+            size={designTokens.iconSize['3xl']}
+            color={colors.textTertiary}
+          />
+          <Text style={[styles.emptyText, { color: colors.textTertiary }]}>
+            {displayEmptyMessage}
+          </Text>
         </View>
       ) : (
         <FlatList

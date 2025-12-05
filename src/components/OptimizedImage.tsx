@@ -1,15 +1,15 @@
 /**
  * Optimized Image Component
- * 
+ *
  * Wrapper around React Native FastImage for optimized image loading
- * 
+ *
  * Features:
  * - Progressive loading with blur
  * - Caching (memory + disk)
  * - Priority loading
  * - Error handling with fallbacks
  * - Placeholder support
- * 
+ *
  * Based on best practices from:
  * - Airbnb
  * - Instagram
@@ -29,8 +29,7 @@ import {
 } from 'react-native';
 import { designTokens } from '../shared/theme/designTokens';
 import { layoutConstants } from '../shared/theme';
-import { dimensionValues } from '../shared/constants/layoutConstants';
-import { ACTIVITY_INDICATOR_SIZE } from '../shared/constants';
+import { ACTIVITY_INDICATOR_SIZE, dimensionValues } from '../shared/constants';
 
 /**
  * Image loading priority
@@ -49,17 +48,17 @@ export enum CacheControl {
    * Cache image in memory and on disk
    */
   IMMUTABLE = 'immutable',
-  
+
   /**
    * Cache in memory, use disk as fallback
    */
   WEB = 'web',
-  
+
   /**
    * Cache only in memory
    */
   CACHE_ONLY = 'cacheOnly',
-  
+
   /**
    * Always reload from network
    */
@@ -71,62 +70,62 @@ interface OptimizedImageProps {
    * Image source (URL or local)
    */
   source: ImageSourcePropType | { uri: string };
-  
+
   /**
    * Fallback image when main image fails to load
    */
   fallbackSource?: ImageSourcePropType;
-  
+
   /**
    * Placeholder while loading
    */
   placeholderSource?: ImageSourcePropType;
-  
+
   /**
    * Style for the image
    */
   style?: StyleProp<ImageStyle>;
-  
+
   /**
    * Container style
    */
   containerStyle?: StyleProp<ViewStyle>;
-  
+
   /**
    * Resize mode
    */
   resizeMode?: 'contain' | 'cover' | 'stretch' | 'center';
-  
+
   /**
    * Loading priority
    */
   priority?: ImagePriority;
-  
+
   /**
    * Cache control
    */
   cache?: CacheControl;
-  
+
   /**
    * Called when image loads successfully
    */
   onLoad?: () => void;
-  
+
   /**
    * Called when image fails to load
    */
   onError?: () => void;
-  
+
   /**
    * Show loading indicator
    */
   showLoading?: boolean;
-  
+
   /**
    * Show blur effect while loading (progressive loading)
    */
   blurRadius?: number;
-  
+
   /**
    * Accessibility label
    */
@@ -135,7 +134,7 @@ interface OptimizedImageProps {
 
 /**
  * Optimized Image Component
- * 
+ *
  * @example
  * ```tsx
  * <OptimizedImage
@@ -156,8 +155,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   style,
   containerStyle,
   resizeMode = 'cover',
-  priority = ImagePriority.NORMAL,
-  cache = CacheControl.IMMUTABLE,
+  priority: _priority = ImagePriority.NORMAL,
+  cache: _cache = CacheControl.IMMUTABLE,
   onLoad,
   onError,
   showLoading = true,
@@ -197,11 +196,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       {/* Main image */}
       <Image
         source={imageSource}
-        style={[
-          styles.image,
-          style,
-          { opacity: imageOpacity },
-        ]}
+        style={[styles.image, style, { opacity: imageOpacity }]}
         blurRadius={loading && blurRadius ? blurRadius : undefined}
         resizeMode={resizeMode}
         onLoad={handleLoad}
@@ -214,7 +209,10 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       {/* Loading indicator */}
       {loading && showLoading && (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size={ACTIVITY_INDICATOR_SIZE.small} color={designTokens.colors.primary} />
+          <ActivityIndicator
+            size={ACTIVITY_INDICATOR_SIZE.small}
+            color={designTokens.colors.primary}
+          />
         </View>
       )}
     </View>
@@ -250,21 +248,21 @@ const styles = StyleSheet.create({
 
 /**
  * Usage Notes:
- * 
+ *
  * 1. For production, consider using `react-native-fast-image`:
  *    ```bash
  *    npm install react-native-fast-image
  *    ```
- * 
+ *
  * 2. FastImage provides better caching and performance:
  *    - Disk and memory caching
  *    - Priority loading
  *    - Request authorization headers
- * 
+ *
  * 3. Replace this component with FastImage:
  *    ```tsx
  *    import FastImage from 'react-native-fast-image';
- *    
+ *
  *    <FastImage
  *      source={{
  *        uri: 'https://example.com/image.jpg',
@@ -275,7 +273,7 @@ const styles = StyleSheet.create({
  *      resizeMode={FastImage.resizeMode.cover}
  *    />
  *    ```
- * 
+ *
  * 4. Image optimization checklist:
  *    - Use WebP format when possible
  *    - Compress images (target < 200KB per image)
@@ -287,28 +285,28 @@ const styles = StyleSheet.create({
 
 /**
  * Preload images for faster display
- * 
+ *
  * @example
  * ```tsx
  * import { Image } from 'react-native';
- * 
+ *
  * const imageSources = [
  *   { uri: 'https://example.com/image1.jpg' },
  *   { uri: 'https://example.com/image2.jpg' },
  * ];
- * 
+ *
  * Image.prefetch(imageSources[0].uri);
- * 
+ *
  * // For FastImage:
  * import FastImage from 'react-native-fast-image';
- * 
+ *
  * FastImage.preload([
  *   { uri: 'https://example.com/image1.jpg', priority: FastImage.priority.high },
  *   { uri: 'https://example.com/image2.jpg' },
  * ]);
  * ```
  */
-export function preloadImages(sources: Array<{ uri: string }>): void {
+export function preloadImages(sources: { uri: string }[]): void {
   sources.forEach((source) => {
     Image.prefetch(source.uri);
   });
@@ -316,14 +314,14 @@ export function preloadImages(sources: Array<{ uri: string }>): void {
 
 /**
  * Clear image cache (when using FastImage)
- * 
+ *
  * @example
  * ```tsx
  * import FastImage from 'react-native-fast-image';
- * 
+ *
  * // Clear memory cache
  * FastImage.clearMemoryCache();
- * 
+ *
  * // Clear disk cache
  * FastImage.clearDiskCache();
  * ```
@@ -332,6 +330,6 @@ export function clearImageCache(): void {
   // For FastImage, use:
   // FastImage.clearMemoryCache();
   // FastImage.clearDiskCache();
-  console.log('Image cache clearing (implement with FastImage in production)');
+  // eslint-disable-next-line no-console
+  console.log('Image cache clearing (implement with FastImage)');
 }
-

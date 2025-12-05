@@ -37,7 +37,7 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
 }) => {
   const { t } = useTranslation();
   const statusConfig = statusColors[status];
-  
+
   const displayLabel = label || status.charAt(0).toUpperCase() + status.slice(1);
 
   const getSizeStyles = () => {
@@ -67,11 +67,7 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
 
   return (
     <View
-      style={[
-        styles.container,
-        { gap: sizeStyles.gap },
-        style,
-      ]}
+      style={[styles.container, { gap: sizeStyles.gap }, style]}
       testID={testID}
       accessible={true}
       accessibilityRole={A11Y_ROLE.TEXT}
@@ -79,7 +75,7 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
     >
       {showIcon && (
         <MaterialCommunityIcons
-          name={statusConfig.icon as any}
+          name={statusConfig.icon as typeof ICONS.CHECK}
           size={sizeStyles.iconSize}
           color={statusConfig.primary}
         />
@@ -114,4 +110,3 @@ const styles = StyleSheet.create({
 });
 
 export default StatusIndicator;
-

@@ -9,8 +9,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-nativ
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { mobileTypography, mobileFontSizes, designTokens, layoutConstants } from '../theme';
-import { A11Y_ROLE, ICONS, TOUCH_OPACITY, TEXT_LINES } from '../constants';
-import { flexValues } from '../constants/layoutConstants';
+import { A11Y_ROLE, ICONS, TEXT_LINES, TOUCH_OPACITY, flexValues } from '../constants';
 
 interface MenuCardProps {
   title: string;
@@ -41,14 +40,18 @@ export const MenuCard: React.FC<MenuCardProps> = ({
   return (
     <TouchableOpacity
       style={[
-        styles.container, 
-        { 
+        styles.container,
+        {
           backgroundColor: colors.surface,
           shadowColor: designTokens.colors.black,
-          shadowOpacity: isDark ? designTokens.shadowConfig.dark.opacity : designTokens.shadowConfig.light.opacity,
-          elevation: isDark ? designTokens.shadowConfig.dark.elevation : designTokens.shadowConfig.light.elevation,
+          shadowOpacity: isDark
+            ? designTokens.shadowConfig.dark.opacity
+            : designTokens.shadowConfig.light.opacity,
+          elevation: isDark
+            ? designTokens.shadowConfig.dark.elevation
+            : designTokens.shadowConfig.light.elevation,
         },
-        style
+        style,
       ]}
       onPress={onPress}
       disabled={disabled}
@@ -63,7 +66,7 @@ export const MenuCard: React.FC<MenuCardProps> = ({
       {/* Icon Container */}
       <View style={[styles.iconContainer, { backgroundColor: `${iconColor}15` }]}>
         <MaterialCommunityIcons
-          name={icon as any}
+          name={icon as typeof ICONS.CHECK}
           size={designTokens.icon.sizes.xxl}
           color={iconColor}
         />
@@ -72,7 +75,10 @@ export const MenuCard: React.FC<MenuCardProps> = ({
       {/* Content */}
       <View style={styles.content}>
         <View style={styles.titleRow}>
-          <Text style={[styles.title, { color: colors.textPrimary }]} numberOfLines={TEXT_LINES.single}>
+          <Text
+            style={[styles.title, { color: colors.textPrimary }]}
+            numberOfLines={TEXT_LINES.single}
+          >
             {title}
           </Text>
           {badge !== undefined && (
@@ -81,7 +87,10 @@ export const MenuCard: React.FC<MenuCardProps> = ({
             </View>
           )}
         </View>
-        <Text style={[styles.description, { color: colors.textSecondary }]} numberOfLines={TEXT_LINES.double}>
+        <Text
+          style={[styles.description, { color: colors.textSecondary }]}
+          numberOfLines={TEXT_LINES.double}
+        >
           {description}
         </Text>
       </View>

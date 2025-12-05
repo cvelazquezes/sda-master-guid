@@ -1,19 +1,23 @@
 /**
- * Navigation Constants - Single Source of Truth for all screen and tab names
+ * Navigation Constants - Single Source of Truth for navigation values
  *
  * ============================================================================
- * THIS IS THE SINGLE SOURCE OF TRUTH FOR ALL NAVIGATION STRING VALUES
+ * THIS IS THE SINGLE SOURCE OF TRUTH FOR ALL NAVIGATION VALUES
  * ============================================================================
  *
- * All navigation-related string values should be referenced from here.
- * This ensures type safety, consistency, and easier refactoring.
+ * Contains: Screen names, tab names, titles, menu item IDs
+ * Consolidated from: navigation.ts + menuItemIds.ts
  *
  * ⚠️ COMPLIANCE RULE:
  * ❌ NEVER write: name="Login", name="Home"
  * ✅ ALWAYS use: name={SCREENS.LOGIN}, name={SCREENS.HOME}
  *
- * @version 1.0.0
+ * @version 2.0.0
  */
+
+// =============================================================================
+// SCREEN NAMES
+// =============================================================================
 
 /**
  * Screen Names - Used in Stack.Screen components
@@ -46,6 +50,10 @@ export const SCREENS = {
   MY_FEES: 'MyFees',
 } as const;
 
+// =============================================================================
+// TAB NAMES
+// =============================================================================
+
 /**
  * Tab Names - Used in Tab.Screen components
  */
@@ -60,6 +68,10 @@ export const TABS = {
   FINANCES: 'Finances',
   MORE: 'More',
 } as const;
+
+// =============================================================================
+// SCREEN TITLES
+// =============================================================================
 
 /**
  * Screen Titles - Display titles for navigation headers
@@ -95,6 +107,10 @@ export const SCREEN_TITLES = {
   MY_FEES: 'My Fees',
 } as const;
 
+// =============================================================================
+// NAVIGATION KEYS
+// =============================================================================
+
 /**
  * Navigation Keys - Used for navigation state keys
  */
@@ -102,7 +118,59 @@ export const NAV_KEYS = {
   UNAUTHENTICATED: 'unauthenticated',
 } as const;
 
-// Type exports
+// =============================================================================
+// MENU ITEM IDS
+// =============================================================================
+
+/**
+ * Menu Item IDs - Unique identifiers for menu items
+ * Used as React keys and for tracking/analytics purposes.
+ */
+export const MENU_ITEM_IDS = {
+  // Admin Dashboard & More
+  ORGANIZATION: 'organization',
+  REPORTS: 'reports',
+  NOTIFICATIONS: 'notifications',
+
+  // Club Admin Dashboard & More
+  ACTIVITIES: 'activities',
+  GENERATE_MATCHES: 'generate-matches',
+  MATCH_MANAGEMENT: 'match-management',
+  DIRECTIVE: 'directive',
+  SETTINGS: 'settings',
+
+  // User More
+  CLUB_INFO: 'club-info',
+  CONTACT_ADMIN: 'contact-admin',
+  FEEDBACK: 'feedback',
+
+  // Common
+  HELP: 'help',
+} as const;
+
+// =============================================================================
+// DIRECTIVE POSITION IDS
+// =============================================================================
+
+/**
+ * Directive Position IDs - Unique identifiers for club directive positions
+ */
+export const DIRECTIVE_POSITION_IDS = {
+  VICE_DIRECTOR: 'vice-director',
+  ASSOCIATE_DIRECTOR: 'associate-director',
+  TREASURER: 'treasurer',
+  COUNSELOR: 'counselor',
+  SECRETARY: 'secretary',
+  EVENTS_COORDINATOR: 'events-coordinator',
+} as const;
+
+// =============================================================================
+// TYPE EXPORTS
+// =============================================================================
+
 export type ScreenName = (typeof SCREENS)[keyof typeof SCREENS];
 export type TabName = (typeof TABS)[keyof typeof TABS];
 export type ScreenTitle = (typeof SCREEN_TITLES)[keyof typeof SCREEN_TITLES];
+export type MenuItemId = (typeof MENU_ITEM_IDS)[keyof typeof MENU_ITEM_IDS];
+export type DirectivePositionId =
+  (typeof DIRECTIVE_POSITION_IDS)[keyof typeof DIRECTIVE_POSITION_IDS];

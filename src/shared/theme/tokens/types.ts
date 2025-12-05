@@ -1,12 +1,18 @@
 /**
  * Design Token Type Definitions
- * 
+ *
  * Comprehensive TypeScript types for the design token system.
  * Use these types to ensure type-safe token consumption throughout the app.
  */
 
-import { TextStyle, ViewStyle } from 'react-native';
-import { PrimitiveTokens, colorPrimitives, spacingPrimitives, radiusPrimitives, typographyPrimitives } from './primitives';
+import { TextStyle } from 'react-native';
+import {
+  PrimitiveTokens,
+  colorPrimitives,
+  spacingPrimitives,
+  radiusPrimitives,
+  typographyPrimitives,
+} from './primitives';
 import { SemanticTokens, SemanticColors, ThemeMode } from './semantic';
 import { ComponentTokens } from './components';
 import { MotionTokens } from './motion';
@@ -17,7 +23,7 @@ import { BehaviorTokens } from './behavior';
 // THEME TYPES
 // ============================================================================
 
-export type { ThemeMode };
+// ThemeMode is exported from semantic.ts to avoid duplicate exports
 
 export type ActiveTheme = 'light' | 'dark';
 
@@ -32,82 +38,82 @@ export interface ThemeConfig {
 
 export type ColorScale = keyof typeof colorPrimitives.blue;
 
-export type BrandColorKey = 
-  | 'primary' 
-  | 'primaryHover' 
-  | 'primaryActive' 
-  | 'primarySubtle' 
+export type BrandColorKey =
+  | 'primary'
+  | 'primaryHover'
+  | 'primaryActive'
+  | 'primarySubtle'
   | 'primaryMuted'
-  | 'secondary' 
-  | 'secondaryHover' 
-  | 'secondaryActive' 
-  | 'secondarySubtle' 
+  | 'secondary'
+  | 'secondaryHover'
+  | 'secondaryActive'
+  | 'secondarySubtle'
   | 'secondaryMuted'
-  | 'accent' 
-  | 'accentHover' 
-  | 'accentActive' 
-  | 'accentSubtle' 
+  | 'accent'
+  | 'accentHover'
+  | 'accentActive'
+  | 'accentSubtle'
   | 'accentMuted';
 
-export type FeedbackColorKey = 
-  | 'success' 
-  | 'successSubtle' 
-  | 'successMuted' 
+export type FeedbackColorKey =
+  | 'success'
+  | 'successSubtle'
+  | 'successMuted'
   | 'successText'
-  | 'warning' 
-  | 'warningSubtle' 
-  | 'warningMuted' 
+  | 'warning'
+  | 'warningSubtle'
+  | 'warningMuted'
   | 'warningText'
-  | 'error' 
-  | 'errorSubtle' 
-  | 'errorMuted' 
+  | 'error'
+  | 'errorSubtle'
+  | 'errorMuted'
   | 'errorText'
-  | 'info' 
-  | 'infoSubtle' 
-  | 'infoMuted' 
+  | 'info'
+  | 'infoSubtle'
+  | 'infoMuted'
   | 'infoText';
 
-export type TextColorKey = 
-  | 'primary' 
-  | 'secondary' 
-  | 'tertiary' 
-  | 'quaternary' 
-  | 'disabled' 
-  | 'placeholder' 
+export type TextColorKey =
+  | 'primary'
+  | 'secondary'
+  | 'tertiary'
+  | 'quaternary'
+  | 'disabled'
+  | 'placeholder'
   | 'inverse'
-  | 'onPrimary' 
-  | 'onSecondary' 
-  | 'onAccent' 
+  | 'onPrimary'
+  | 'onSecondary'
+  | 'onAccent'
   | 'onSurface'
-  | 'link' 
+  | 'link'
   | 'linkHover';
 
-export type BackgroundColorKey = 
-  | 'primary' 
-  | 'secondary' 
+export type BackgroundColorKey =
+  | 'primary'
+  | 'secondary'
   | 'tertiary'
-  | 'surface' 
-  | 'surfaceElevated' 
+  | 'surface'
+  | 'surfaceElevated'
   | 'surfaceSubdued'
-  | 'hover' 
-  | 'pressed' 
-  | 'selected' 
+  | 'hover'
+  | 'pressed'
+  | 'selected'
   | 'disabled'
-  | 'input' 
+  | 'input'
   | 'inputFocused'
-  | 'overlay' 
-  | 'backdrop' 
+  | 'overlay'
+  | 'backdrop'
   | 'scrim';
 
-export type BorderColorKey = 
-  | 'default' 
-  | 'subtle' 
-  | 'muted' 
+export type BorderColorKey =
+  | 'default'
+  | 'subtle'
+  | 'muted'
   | 'strong'
-  | 'focus' 
-  | 'error' 
-  | 'success' 
-  | 'warning' 
+  | 'focus'
+  | 'error'
+  | 'success'
+  | 'warning'
   | 'disabled';
 
 // ============================================================================
@@ -116,20 +122,20 @@ export type BorderColorKey =
 
 export type SpacingKey = keyof typeof spacingPrimitives.px;
 
-export type SemanticSpacingKey = 
-  | 'none' 
-  | 'xxs' 
-  | 'xs' 
-  | 'sm' 
-  | 'md' 
-  | 'lg' 
-  | 'xl' 
-  | '2xl' 
-  | '3xl' 
-  | '4xl' 
-  | '5xl' 
-  | '6xl' 
-  | '7xl' 
+export type SemanticSpacingKey =
+  | 'none'
+  | 'xxs'
+  | 'xs'
+  | 'sm'
+  | 'md'
+  | 'lg'
+  | 'xl'
+  | '2xl'
+  | '3xl'
+  | '4xl'
+  | '5xl'
+  | '6xl'
+  | '7xl'
   | '8xl';
 
 // ============================================================================
@@ -182,13 +188,27 @@ export type ShadowKey = 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl
 // COMPONENT TYPES
 // ============================================================================
 
-export type ButtonVariant = 'primary' | 'secondary' | 'accent' | 'danger' | 'success' | 'outline' | 'ghost';
+export type ButtonVariant =
+  | 'primary'
+  | 'secondary'
+  | 'accent'
+  | 'danger'
+  | 'success'
+  | 'outline'
+  | 'ghost';
 
 export type ButtonSize = 'small' | 'medium' | 'large';
 
 export type CardVariant = 'default' | 'elevated' | 'outlined' | 'flat';
 
-export type BadgeVariant = 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info';
+export type BadgeVariant =
+  | 'default'
+  | 'primary'
+  | 'secondary'
+  | 'success'
+  | 'warning'
+  | 'error'
+  | 'info';
 
 export type BadgeSize = 'small' | 'medium' | 'large';
 
@@ -200,33 +220,33 @@ export type ToastVariant = 'default' | 'success' | 'warning' | 'error' | 'info';
 // MOTION TYPES
 // ============================================================================
 
-export type DurationKey = 
-  | 'instant' 
-  | 'ultraFast' 
-  | 'fast' 
-  | 'normal' 
-  | 'slow' 
-  | 'slower' 
+export type DurationKey =
+  | 'instant'
+  | 'ultraFast'
+  | 'fast'
+  | 'normal'
+  | 'slow'
+  | 'slower'
   | 'slowest'
-  | 'micro' 
-  | 'short' 
-  | 'medium' 
+  | 'micro'
+  | 'short'
+  | 'medium'
   | 'long';
 
-export type EasingKey = 
-  | 'linear' 
-  | 'ease' 
-  | 'easeIn' 
-  | 'easeOut' 
+export type EasingKey =
+  | 'linear'
+  | 'ease'
+  | 'easeIn'
+  | 'easeOut'
   | 'easeInOut'
-  | 'standard' 
-  | 'decelerate' 
-  | 'accelerate' 
+  | 'standard'
+  | 'decelerate'
+  | 'accelerate'
   | 'sharp'
-  | 'overshoot' 
-  | 'bounce' 
-  | 'elastic' 
-  | 'spring' 
+  | 'overshoot'
+  | 'bounce'
+  | 'elastic'
+  | 'spring'
   | 'iosSpring';
 
 export type SpringPreset = 'gentle' | 'default' | 'stiff' | 'bouncy' | 'modal' | 'press';
@@ -246,14 +266,14 @@ export interface SpringConfig {
 
 export type UserRole = 'admin' | 'clubAdmin' | 'user';
 
-export type Status = 
-  | 'active' 
-  | 'inactive' 
-  | 'pending' 
-  | 'paused' 
-  | 'completed' 
-  | 'scheduled' 
-  | 'skipped' 
+export type Status =
+  | 'active'
+  | 'inactive'
+  | 'pending'
+  | 'paused'
+  | 'completed'
+  | 'scheduled'
+  | 'skipped'
   | 'cancelled';
 
 export type HierarchyLevel = 'division' | 'union' | 'association' | 'church' | 'club';
@@ -272,7 +292,7 @@ export interface ResolvedDesignTokens {
   // Theme info
   theme: ActiveTheme;
   isDark: boolean;
-  
+
   // Token categories
   primitives: PrimitiveTokens;
   semantic: SemanticTokens;
@@ -280,7 +300,7 @@ export interface ResolvedDesignTokens {
   motion: MotionTokens;
   layout: LayoutTokens;
   behavior: BehaviorTokens;
-  
+
   // Convenience accessors
   colors: SemanticColors;
 }
@@ -321,8 +341,5 @@ export type DeepReadonly<T> = {
  * Helper type to extract keys from nested objects
  */
 export type NestedKeyOf<T> = {
-  [K in keyof T & string]: T[K] extends object
-    ? `${K}` | `${K}.${NestedKeyOf<T[K]>}`
-    : `${K}`;
+  [K in keyof T & string]: T[K] extends object ? `${K}` | `${K}.${NestedKeyOf<T[K]>}` : `${K}`;
 }[keyof T & string];
-

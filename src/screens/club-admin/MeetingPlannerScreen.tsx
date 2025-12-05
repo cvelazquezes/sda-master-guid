@@ -15,11 +15,35 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { userService } from '../../services/userService';
 import { User } from '../../types';
-import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../../shared/theme';
-import { MESSAGES, ANIMATION, ICONS, TEXT_LINES, ALERT_BUTTON_STYLE, KEYBOARD_TYPE, EMPTY_VALUE, MODAL_WIDTH, MOVE_DIRECTION, ID_PREFIX, TEXT_INPUT, DATE_LOCALE_OPTIONS, MEETING_AGENDA, DAY_OF_WEEK } from '../../shared/constants';
-import { flexValues, shadowOffsetValues, dimensionValues, textAlignVertical, borderValues } from '../../shared/constants/layoutConstants';
+import {
+  mobileTypography,
+  mobileIconSizes,
+  designTokens,
+  layoutConstants,
+} from '../../shared/theme';
 import { LOG_MESSAGES } from '../../shared/constants/logMessages';
-import { logger } from '../../services/logger';
+import { logger } from '../../shared/utils/logger';
+import {
+  ALERT_BUTTON_STYLE,
+  ANIMATION,
+  DATE_LOCALE_OPTIONS,
+  DAY_OF_WEEK,
+  EMPTY_VALUE,
+  ICONS,
+  ID_PREFIX,
+  KEYBOARD_TYPE,
+  MEETING_AGENDA,
+  MESSAGES,
+  MODAL_WIDTH,
+  MOVE_DIRECTION,
+  TEXT_INPUT,
+  TEXT_LINES,
+  borderValues,
+  dimensionValues,
+  flexValues,
+  shadowOffsetValues,
+  textAlignVertical,
+} from '../../shared/constants';
 
 interface AgendaItem {
   id: string;
@@ -31,6 +55,8 @@ interface AgendaItem {
   order: number;
 }
 
+// Reserved for future use
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface MeetingPlan {
   id: string;
   date: Date;
@@ -57,7 +83,7 @@ const MeetingPlannerScreen = () => {
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
   const [clubMembers, setClubMembers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [selectMemberModalVisible, setSelectMemberModalVisible] = useState(false);
   const [shareModalVisible, setShareModalVisible] = useState(false);
@@ -71,15 +97,20 @@ const MeetingPlannerScreen = () => {
 
   // Calculate responsive modal widths
   const getModalWidth = () => {
-    if (windowWidth > MODAL_WIDTH.BREAKPOINTS.LARGE) return Math.min(MODAL_WIDTH.MAX.LARGE, windowWidth * MODAL_WIDTH.RATIO.HALF);
-    if (windowWidth > MODAL_WIDTH.BREAKPOINTS.MEDIUM) return Math.min(MODAL_WIDTH.MAX.MEDIUM, windowWidth * MODAL_WIDTH.RATIO.SEVENTY);
-    if (windowWidth > MODAL_WIDTH.BREAKPOINTS.SMALL) return windowWidth * MODAL_WIDTH.RATIO.EIGHTY_FIVE;
+    if (windowWidth > MODAL_WIDTH.BREAKPOINTS.LARGE)
+      return Math.min(MODAL_WIDTH.MAX.LARGE, windowWidth * MODAL_WIDTH.RATIO.HALF);
+    if (windowWidth > MODAL_WIDTH.BREAKPOINTS.MEDIUM)
+      return Math.min(MODAL_WIDTH.MAX.MEDIUM, windowWidth * MODAL_WIDTH.RATIO.SEVENTY);
+    if (windowWidth > MODAL_WIDTH.BREAKPOINTS.SMALL)
+      return windowWidth * MODAL_WIDTH.RATIO.EIGHTY_FIVE;
     return windowWidth * MODAL_WIDTH.RATIO.NINETY_FIVE;
   };
 
   const getShareModalWidth = () => {
-    if (windowWidth > MODAL_WIDTH.BREAKPOINTS.MEDIUM) return Math.min(MODAL_WIDTH.MAX.SHARE, windowWidth * MODAL_WIDTH.RATIO.HALF);
-    if (windowWidth > MODAL_WIDTH.BREAKPOINTS.SMALL) return windowWidth * MODAL_WIDTH.RATIO.SEVENTY_FIVE;
+    if (windowWidth > MODAL_WIDTH.BREAKPOINTS.MEDIUM)
+      return Math.min(MODAL_WIDTH.MAX.SHARE, windowWidth * MODAL_WIDTH.RATIO.HALF);
+    if (windowWidth > MODAL_WIDTH.BREAKPOINTS.SMALL)
+      return windowWidth * MODAL_WIDTH.RATIO.SEVENTY_FIVE;
     return windowWidth * MODAL_WIDTH.RATIO.NINETY;
   };
 
@@ -103,7 +134,7 @@ const MeetingPlannerScreen = () => {
       // Load club members
       if (user?.clubId) {
         const members = await userService.getUsersByClub(user.clubId);
-        setClubMembers(members.filter(m => m.isActive));
+        setClubMembers(members.filter((m) => m.isActive));
       }
     } catch (error) {
       logger.error(LOG_MESSAGES.MEETING_PLANNER.FAILED_TO_LOAD_DATA, error as Error);
@@ -153,12 +184,12 @@ const MeetingPlannerScreen = () => {
       description: editedDescription.trim(),
     };
 
-    if (agendaItems.find(i => i.id === currentItem.id)) {
+    if (agendaItems.find((i) => i.id === currentItem.id)) {
       // Update existing item
-      setAgendaItems(prev => prev.map(i => i.id === updatedItem.id ? updatedItem : i));
+      setAgendaItems((prev) => prev.map((i) => (i.id === updatedItem.id ? updatedItem : i)));
     } else {
       // Add new item
-      setAgendaItems(prev => [...prev, updatedItem]);
+      setAgendaItems((prev) => [...prev, updatedItem]);
     }
 
     setEditModalVisible(false);
@@ -166,20 +197,16 @@ const MeetingPlannerScreen = () => {
   };
 
   const handleDeleteItem = (itemId: string) => {
-    Alert.alert(
-      MESSAGES.TITLES.DELETE_ACTIVITY,
-      MESSAGES.WARNINGS.CONFIRM_DELETE_ACTIVITY,
-      [
-        { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
-        {
-          text: MESSAGES.BUTTONS.DELETE,
-          style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
-          onPress: () => {
-            setAgendaItems(prev => prev.filter(i => i.id !== itemId));
-          },
+    Alert.alert(MESSAGES.TITLES.DELETE_ACTIVITY, MESSAGES.WARNINGS.CONFIRM_DELETE_ACTIVITY, [
+      { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
+      {
+        text: MESSAGES.BUTTONS.DELETE,
+        style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
+        onPress: () => {
+          setAgendaItems((prev) => prev.filter((i) => i.id !== itemId));
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleAssignMember = (item: AgendaItem) => {
@@ -190,8 +217,8 @@ const MeetingPlannerScreen = () => {
   const handleSelectMember = (member: User) => {
     if (!currentItem) return;
 
-    setAgendaItems(prev =>
-      prev.map(i =>
+    setAgendaItems((prev) =>
+      prev.map((i) =>
         i.id === currentItem.id
           ? { ...i, responsibleMemberId: member.id, responsibleMemberName: member.name }
           : i
@@ -202,8 +229,8 @@ const MeetingPlannerScreen = () => {
   };
 
   const handleRemoveMember = (itemId: string) => {
-    setAgendaItems(prev =>
-      prev.map(i =>
+    setAgendaItems((prev) =>
+      prev.map((i) =>
         i.id === itemId
           ? { ...i, responsibleMemberId: undefined, responsibleMemberName: undefined }
           : i
@@ -211,7 +238,10 @@ const MeetingPlannerScreen = () => {
     );
   };
 
-  const handleMoveItem = (index: number, direction: typeof MOVE_DIRECTION.UP | typeof MOVE_DIRECTION.DOWN) => {
+  const handleMoveItem = (
+    index: number,
+    direction: typeof MOVE_DIRECTION.UP | typeof MOVE_DIRECTION.DOWN
+  ) => {
     const newItems = [...agendaItems];
     const targetIndex = direction === MOVE_DIRECTION.UP ? index - 1 : index + 1;
 
@@ -227,8 +257,8 @@ const MeetingPlannerScreen = () => {
 
   const handleSaveMeeting = () => {
     // Validate that all activities have responsible members
-    const unassignedItems = agendaItems.filter(item => !item.responsibleMemberId);
-    
+    const unassignedItems = agendaItems.filter((item) => !item.responsibleMemberId);
+
     if (unassignedItems.length > 0) {
       Alert.alert(
         MESSAGES.TITLES.MISSING_ASSIGNMENTS,
@@ -241,10 +271,10 @@ const MeetingPlannerScreen = () => {
     setIsSaved(true);
     Alert.alert(
       MESSAGES.TITLES.MEETING_SAVED_TITLE,
-      t('screens.meetingPlanner.meetingSavedSuccess', { date: meetingDate.toLocaleDateString(undefined, DATE_LOCALE_OPTIONS.DATE_WITHOUT_YEAR) }),
-      [
-        { text: MESSAGES.BUTTONS.OK, onPress: () => setShareModalVisible(true) }
-      ]
+      t('screens.meetingPlanner.meetingSavedSuccess', {
+        date: meetingDate.toLocaleDateString(undefined, DATE_LOCALE_OPTIONS.DATE_WITHOUT_YEAR),
+      }),
+      [{ text: MESSAGES.BUTTONS.OK, onPress: () => setShareModalVisible(true) }]
     );
   };
 
@@ -262,63 +292,63 @@ const MeetingPlannerScreen = () => {
   };
 
   const handleResetToDefault = () => {
-    Alert.alert(
-      MESSAGES.TITLES.RESET_TO_DEFAULT_TITLE,
-      MESSAGES.WARNINGS.CONFIRM_RESET_MEETING,
-      [
-        { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
-        {
-          text: t('screens.meetingPlanner.reset'),
-          style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
-          onPress: () => {
-            const defaultAgenda = getDefaultAgenda().map((item, index) => ({
-              ...item,
-              id: `${ID_PREFIX.ITEM}-${Date.now()}-${index}`,
-              order: index,
-            }));
-            setAgendaItems(defaultAgenda);
-            setIsSaved(false);
-          },
+    Alert.alert(MESSAGES.TITLES.RESET_TO_DEFAULT_TITLE, MESSAGES.WARNINGS.CONFIRM_RESET_MEETING, [
+      { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
+      {
+        text: t('screens.meetingPlanner.reset'),
+        style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
+        onPress: () => {
+          const defaultAgenda = getDefaultAgenda().map((item, index) => ({
+            ...item,
+            id: `${ID_PREFIX.ITEM}-${Date.now()}-${index}`,
+            order: index,
+          }));
+          setAgendaItems(defaultAgenda);
+          setIsSaved(false);
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleNewMeeting = () => {
-    Alert.alert(
-      MESSAGES.TITLES.CREATE_NEW_MEETING,
-      MESSAGES.WARNINGS.CONFIRM_NEW_MEETING,
-      [
-        { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
-        {
-          text: t('screens.meetingPlanner.createNew'),
-          onPress: () => {
-            const defaultAgenda = getDefaultAgenda().map((item, index) => ({
-              ...item,
-              id: `${ID_PREFIX.ITEM}-${Date.now()}-${index}`,
-              order: index,
-            }));
-            setAgendaItems(defaultAgenda);
-            setMeetingDate(new Date());
-            setMeetingTitle(t('screens.meetingPlanner.defaultMeetingTitle'));
-            setIsSaved(false);
-          },
+    Alert.alert(MESSAGES.TITLES.CREATE_NEW_MEETING, MESSAGES.WARNINGS.CONFIRM_NEW_MEETING, [
+      { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
+      {
+        text: t('screens.meetingPlanner.createNew'),
+        onPress: () => {
+          const defaultAgenda = getDefaultAgenda().map((item, index) => ({
+            ...item,
+            id: `${ID_PREFIX.ITEM}-${Date.now()}-${index}`,
+            order: index,
+          }));
+          setAgendaItems(defaultAgenda);
+          setMeetingDate(new Date());
+          setMeetingTitle(t('screens.meetingPlanner.defaultMeetingTitle'));
+          setIsSaved(false);
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const getNextSaturday = () => {
     const today = new Date();
     const nextSaturday = new Date(today);
-    nextSaturday.setDate(today.getDate() + ((DAY_OF_WEEK.SATURDAY - today.getDay() + DAY_OF_WEEK.DAYS_IN_WEEK) % DAY_OF_WEEK.DAYS_IN_WEEK || DAY_OF_WEEK.DAYS_IN_WEEK));
+    nextSaturday.setDate(
+      today.getDate() +
+        ((DAY_OF_WEEK.SATURDAY - today.getDay() + DAY_OF_WEEK.DAYS_IN_WEEK) %
+          DAY_OF_WEEK.DAYS_IN_WEEK || DAY_OF_WEEK.DAYS_IN_WEEK)
+    );
     return nextSaturday;
   };
 
   const getNextSunday = () => {
     const today = new Date();
     const nextSunday = new Date(today);
-    nextSunday.setDate(today.getDate() + ((DAY_OF_WEEK.DAYS_IN_WEEK - today.getDay()) % DAY_OF_WEEK.DAYS_IN_WEEK || DAY_OF_WEEK.DAYS_IN_WEEK));
+    nextSunday.setDate(
+      today.getDate() +
+        ((DAY_OF_WEEK.DAYS_IN_WEEK - today.getDay()) % DAY_OF_WEEK.DAYS_IN_WEEK ||
+          DAY_OF_WEEK.DAYS_IN_WEEK)
+    );
     return nextSunday;
   };
 
@@ -329,13 +359,25 @@ const MeetingPlannerScreen = () => {
         <Text style={styles.headerTitle}>{t('screens.meetingPlanner.title')}</Text>
         <View style={styles.headerActions}>
           <TouchableOpacity onPress={handleNewMeeting} style={styles.headerButton}>
-            <MaterialCommunityIcons name={ICONS.FILE_DOCUMENT_OUTLINE} size={mobileIconSizes.large} color={designTokens.colors.textSecondary} />
+            <MaterialCommunityIcons
+              name={ICONS.FILE_DOCUMENT_OUTLINE}
+              size={mobileIconSizes.large}
+              color={designTokens.colors.textSecondary}
+            />
           </TouchableOpacity>
           <TouchableOpacity onPress={handleResetToDefault} style={styles.headerButton}>
-            <MaterialCommunityIcons name={ICONS.REFRESH} size={mobileIconSizes.large} color={designTokens.colors.textSecondary} />
+            <MaterialCommunityIcons
+              name={ICONS.REFRESH}
+              size={mobileIconSizes.large}
+              color={designTokens.colors.textSecondary}
+            />
           </TouchableOpacity>
           <TouchableOpacity onPress={handleAddItem} style={styles.headerButton}>
-            <MaterialCommunityIcons name={ICONS.PLUS} size={mobileIconSizes.large} color={designTokens.colors.primary} />
+            <MaterialCommunityIcons
+              name={ICONS.PLUS}
+              size={mobileIconSizes.large}
+              color={designTokens.colors.primary}
+            />
           </TouchableOpacity>
         </View>
       </View>
@@ -343,22 +385,26 @@ const MeetingPlannerScreen = () => {
       {/* Meeting Info */}
       <View style={styles.meetingInfoSection}>
         <View style={styles.meetingInfoRow}>
-          <MaterialCommunityIcons name={ICONS.CALENDAR} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+          <MaterialCommunityIcons
+            name={ICONS.CALENDAR}
+            size={mobileIconSizes.medium}
+            color={designTokens.colors.primary}
+          />
           <Text style={styles.meetingInfoLabel}>{t('screens.meetingPlanner.meetingDate')}</Text>
           <Text style={styles.meetingDate}>
             {meetingDate.toLocaleDateString(undefined, DATE_LOCALE_OPTIONS.FULL_DATE)}
           </Text>
         </View>
-        
+
         <View style={styles.quickDateButtons}>
-          <TouchableOpacity 
-            style={styles.quickDateButton} 
+          <TouchableOpacity
+            style={styles.quickDateButton}
             onPress={() => setMeetingDate(getNextSaturday())}
           >
             <Text style={styles.quickDateText}>{t('screens.meetingPlanner.nextSaturday')}</Text>
           </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.quickDateButton} 
+          <TouchableOpacity
+            style={styles.quickDateButton}
             onPress={() => setMeetingDate(getNextSunday())}
           >
             <Text style={styles.quickDateText}>{t('screens.meetingPlanner.nextSunday')}</Text>
@@ -375,7 +421,11 @@ const MeetingPlannerScreen = () => {
 
       {/* Total Time Banner */}
       <View style={styles.totalTimeBanner}>
-        <MaterialCommunityIcons name={ICONS.CLOCK_OUTLINE} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+        <MaterialCommunityIcons
+          name={ICONS.CLOCK_OUTLINE}
+          size={mobileIconSizes.medium}
+          color={designTokens.colors.primary}
+        />
         <Text style={styles.totalTimeText}>
           Total Meeting Time: <Text style={styles.totalTimeBold}>{getTotalTime()} minutes</Text>
         </Text>
@@ -385,7 +435,11 @@ const MeetingPlannerScreen = () => {
       <ScrollView style={styles.content}>
         {agendaItems.length === 0 ? (
           <View style={styles.emptyState}>
-            <MaterialCommunityIcons name={ICONS.CALENDAR_BLANK} size={designTokens.iconSize['3xl']} color={designTokens.colors.borderLight} />
+            <MaterialCommunityIcons
+              name={ICONS.CALENDAR_BLANK}
+              size={designTokens.iconSize['3xl']}
+              color={designTokens.colors.borderLight}
+            />
             <Text style={styles.emptyText}>{t('screens.meetingPlanner.noActivities')}</Text>
             <Text style={styles.emptySubtext}>{t('screens.meetingPlanner.tapToAdd')}</Text>
           </View>
@@ -404,7 +458,11 @@ const MeetingPlannerScreen = () => {
                     {item.title}
                   </Text>
                   <View style={styles.timeChip}>
-                    <MaterialCommunityIcons name={ICONS.CLOCK_OUTLINE} size={mobileIconSizes.tiny} color={designTokens.colors.textSecondary} />
+                    <MaterialCommunityIcons
+                      name={ICONS.CLOCK_OUTLINE}
+                      size={mobileIconSizes.tiny}
+                      color={designTokens.colors.textSecondary}
+                    />
                     <Text style={styles.timeText}>{item.estimatedMinutes}m</Text>
                   </View>
                 </View>
@@ -419,12 +477,20 @@ const MeetingPlannerScreen = () => {
                 <View style={styles.responsibleSection}>
                   {item.responsibleMemberId ? (
                     <View style={styles.memberChip}>
-                      <MaterialCommunityIcons name={ICONS.ACCOUNT} size={mobileIconSizes.small} color={designTokens.colors.primary} />
+                      <MaterialCommunityIcons
+                        name={ICONS.ACCOUNT}
+                        size={mobileIconSizes.small}
+                        color={designTokens.colors.primary}
+                      />
                       <Text style={styles.memberName} numberOfLines={TEXT_LINES.single}>
                         {item.responsibleMemberName}
                       </Text>
                       <TouchableOpacity onPress={() => handleRemoveMember(item.id)}>
-                        <MaterialCommunityIcons name={ICONS.CLOSE_CIRCLE} size={mobileIconSizes.small} color={designTokens.colors.textTertiary} />
+                        <MaterialCommunityIcons
+                          name={ICONS.CLOSE_CIRCLE}
+                          size={mobileIconSizes.small}
+                          color={designTokens.colors.textTertiary}
+                        />
                       </TouchableOpacity>
                     </View>
                   ) : (
@@ -432,8 +498,14 @@ const MeetingPlannerScreen = () => {
                       style={styles.assignButton}
                       onPress={() => handleAssignMember(item)}
                     >
-                      <MaterialCommunityIcons name={ICONS.ACCOUNT_PLUS} size={mobileIconSizes.small} color={designTokens.colors.primary} />
-                      <Text style={styles.assignText}>{t('screens.meetingPlanner.assignMember')}</Text>
+                      <MaterialCommunityIcons
+                        name={ICONS.ACCOUNT_PLUS}
+                        size={mobileIconSizes.small}
+                        color={designTokens.colors.primary}
+                      />
+                      <Text style={styles.assignText}>
+                        {t('screens.meetingPlanner.assignMember')}
+                      </Text>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -451,28 +523,50 @@ const MeetingPlannerScreen = () => {
                     <MaterialCommunityIcons
                       name={ICONS.CHEVRON_UP}
                       size={mobileIconSizes.medium}
-                      color={index === 0 ? designTokens.colors.borderLight : designTokens.colors.textSecondary}
+                      color={
+                        index === 0
+                          ? designTokens.colors.borderLight
+                          : designTokens.colors.textSecondary
+                      }
                     />
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={[styles.moveButton, index === agendaItems.length - 1 && styles.moveButtonDisabled]}
+                    style={[
+                      styles.moveButton,
+                      index === agendaItems.length - 1 && styles.moveButtonDisabled,
+                    ]}
                     onPress={() => handleMoveItem(index, MOVE_DIRECTION.DOWN)}
                     disabled={index === agendaItems.length - 1}
                   >
                     <MaterialCommunityIcons
                       name={ICONS.CHEVRON_DOWN}
                       size={mobileIconSizes.medium}
-                      color={index === agendaItems.length - 1 ? designTokens.colors.borderLight : designTokens.colors.textSecondary}
+                      color={
+                        index === agendaItems.length - 1
+                          ? designTokens.colors.borderLight
+                          : designTokens.colors.textSecondary
+                      }
                     />
                   </TouchableOpacity>
                 </View>
 
                 {/* Edit/Delete */}
                 <TouchableOpacity style={styles.actionButton} onPress={() => handleEditItem(item)}>
-                  <MaterialCommunityIcons name={ICONS.PENCIL} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+                  <MaterialCommunityIcons
+                    name={ICONS.PENCIL}
+                    size={mobileIconSizes.medium}
+                    color={designTokens.colors.primary}
+                  />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.actionButton} onPress={() => handleDeleteItem(item.id)}>
-                  <MaterialCommunityIcons name={ICONS.DELETE} size={mobileIconSizes.medium} color={designTokens.colors.error} />
+                <TouchableOpacity
+                  style={styles.actionButton}
+                  onPress={() => handleDeleteItem(item.id)}
+                >
+                  <MaterialCommunityIcons
+                    name={ICONS.DELETE}
+                    size={mobileIconSizes.medium}
+                    color={designTokens.colors.error}
+                  />
                 </TouchableOpacity>
               </View>
             </View>
@@ -485,18 +579,34 @@ const MeetingPlannerScreen = () => {
         <View style={styles.footer}>
           {!isSaved ? (
             <TouchableOpacity style={styles.saveButton} onPress={handleSaveMeeting}>
-              <MaterialCommunityIcons name={ICONS.CONTENT_SAVE} size={mobileIconSizes.large} color={designTokens.colors.textInverse} />
-              <Text style={styles.saveButtonText}>{t('screens.meetingPlanner.saveMeetingPlan')}</Text>
+              <MaterialCommunityIcons
+                name={ICONS.CONTENT_SAVE}
+                size={mobileIconSizes.large}
+                color={designTokens.colors.textInverse}
+              />
+              <Text style={styles.saveButtonText}>
+                {t('screens.meetingPlanner.saveMeetingPlan')}
+              </Text>
             </TouchableOpacity>
           ) : (
             <View style={styles.footerButtons}>
               <TouchableOpacity style={styles.editButton} onPress={() => setIsSaved(false)}>
-                <MaterialCommunityIcons name={ICONS.PENCIL} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+                <MaterialCommunityIcons
+                  name={ICONS.PENCIL}
+                  size={mobileIconSizes.medium}
+                  color={designTokens.colors.primary}
+                />
                 <Text style={styles.editButtonText}>{t('screens.meetingPlanner.edit')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.shareButton} onPress={handleShareMeeting}>
-                <MaterialCommunityIcons name={ICONS.SHARE_VARIANT} size={mobileIconSizes.large} color={designTokens.colors.textInverse} />
-                <Text style={styles.shareButtonText}>{t('screens.meetingPlanner.shareWithMembers')}</Text>
+                <MaterialCommunityIcons
+                  name={ICONS.SHARE_VARIANT}
+                  size={mobileIconSizes.large}
+                  color={designTokens.colors.textInverse}
+                />
+                <Text style={styles.shareButtonText}>
+                  {t('screens.meetingPlanner.shareWithMembers')}
+                </Text>
               </TouchableOpacity>
             </View>
           )}
@@ -511,18 +621,35 @@ const MeetingPlannerScreen = () => {
         onRequestClose={() => setEditModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { width: modalWidth, maxHeight: windowHeight * 0.85, alignSelf: layoutConstants.alignSelf.center }]}>
+          <View
+            style={[
+              styles.modalContent,
+              {
+                width: modalWidth,
+                maxHeight: windowHeight * 0.85,
+                alignSelf: layoutConstants.alignSelf.center,
+              },
+            ]}
+          >
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>
-                {currentItem && agendaItems.find(i => i.id === currentItem.id) ? t('screens.meetingPlanner.editActivity') : t('screens.meetingPlanner.addActivity')}
+                {currentItem && agendaItems.find((i) => i.id === currentItem.id)
+                  ? t('screens.meetingPlanner.editActivity')
+                  : t('screens.meetingPlanner.addActivity')}
               </Text>
               <TouchableOpacity onPress={() => setEditModalVisible(false)}>
-                <MaterialCommunityIcons name={ICONS.CLOSE} size={mobileIconSizes.large} color={designTokens.colors.textSecondary} />
+                <MaterialCommunityIcons
+                  name={ICONS.CLOSE}
+                  size={mobileIconSizes.large}
+                  color={designTokens.colors.textSecondary}
+                />
               </TouchableOpacity>
             </View>
 
             <ScrollView style={styles.modalBody}>
-              <Text style={styles.inputLabel}>{t('screens.meetingPlanner.activityTitleLabel')}</Text>
+              <Text style={styles.inputLabel}>
+                {t('screens.meetingPlanner.activityTitleLabel')}
+              </Text>
               <TextInput
                 style={styles.input}
                 value={editedTitle}
@@ -539,7 +666,9 @@ const MeetingPlannerScreen = () => {
                 keyboardType={KEYBOARD_TYPE.NUMERIC}
               />
 
-              <Text style={styles.inputLabel}>{t('screens.meetingPlanner.descriptionOptional')}</Text>
+              <Text style={styles.inputLabel}>
+                {t('screens.meetingPlanner.descriptionOptional')}
+              </Text>
               <TextInput
                 style={[styles.input, styles.textArea]}
                 value={editedDescription}
@@ -557,7 +686,10 @@ const MeetingPlannerScreen = () => {
               >
                 <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.modalButton, styles.confirmButton]} onPress={handleSaveItem}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.confirmButton]}
+                onPress={handleSaveItem}
+              >
                 <Text style={styles.confirmButtonText}>{t('common.save')}</Text>
               </TouchableOpacity>
             </View>
@@ -573,32 +705,53 @@ const MeetingPlannerScreen = () => {
         onRequestClose={() => setSelectMemberModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { width: modalWidth, maxHeight: windowHeight * 0.85, alignSelf: layoutConstants.alignSelf.center }]}>
+          <View
+            style={[
+              styles.modalContent,
+              {
+                width: modalWidth,
+                maxHeight: windowHeight * 0.85,
+                alignSelf: layoutConstants.alignSelf.center,
+              },
+            ]}
+          >
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{t('screens.meetingPlanner.assignResponsible')}</Text>
               <TouchableOpacity onPress={() => setSelectMemberModalVisible(false)}>
-                <MaterialCommunityIcons name={ICONS.CLOSE} size={mobileIconSizes.large} color={designTokens.colors.textSecondary} />
+                <MaterialCommunityIcons
+                  name={ICONS.CLOSE}
+                  size={mobileIconSizes.large}
+                  color={designTokens.colors.textSecondary}
+                />
               </TouchableOpacity>
             </View>
 
             <ScrollView style={styles.modalBody}>
               {clubMembers.length === 0 ? (
-                <Text style={styles.noMembersText}>{t('screens.meetingPlanner.noMembersAvailable')}</Text>
+                <Text style={styles.noMembersText}>
+                  {t('screens.meetingPlanner.noMembersAvailable')}
+                </Text>
               ) : (
-                clubMembers.map(member => (
+                clubMembers.map((member) => (
                   <TouchableOpacity
                     key={member.id}
                     style={styles.memberOption}
                     onPress={() => handleSelectMember(member)}
                   >
                     <View style={styles.memberAvatar}>
-                      <Text style={styles.memberAvatarText}>{member.name.charAt(0).toUpperCase()}</Text>
+                      <Text style={styles.memberAvatarText}>
+                        {member.name.charAt(0).toUpperCase()}
+                      </Text>
                     </View>
                     <View style={styles.memberInfo}>
                       <Text style={styles.memberOptionName}>{member.name}</Text>
                       <Text style={styles.memberOptionEmail}>{member.email}</Text>
                     </View>
-                    <MaterialCommunityIcons name={ICONS.CHEVRON_RIGHT} size={mobileIconSizes.medium} color={designTokens.colors.borderLight} />
+                    <MaterialCommunityIcons
+                      name={ICONS.CHEVRON_RIGHT}
+                      size={mobileIconSizes.medium}
+                      color={designTokens.colors.borderLight}
+                    />
                   </TouchableOpacity>
                 ))
               )}
@@ -614,11 +767,17 @@ const MeetingPlannerScreen = () => {
         transparent={true}
         onRequestClose={() => setShareModalVisible(false)}
       >
-        <View style={[styles.modalOverlay, { justifyContent: layoutConstants.justifyContent.center }]}>
+        <View
+          style={[styles.modalOverlay, { justifyContent: layoutConstants.justifyContent.center }]}
+        >
           <View style={[styles.shareModalContent, { width: shareModalWidth }]}>
             <View style={styles.shareHeader}>
               <View style={styles.shareIconContainer}>
-                <MaterialCommunityIcons name={ICONS.SHARE_VARIANT} size={designTokens.iconSize['2xl']} color={designTokens.colors.primary} />
+                <MaterialCommunityIcons
+                  name={ICONS.SHARE_VARIANT}
+                  size={designTokens.iconSize['2xl']}
+                  color={designTokens.colors.primary}
+                />
               </View>
               <Text style={styles.shareTitle}>{t('screens.meetingPlanner.shareMeetingPlan')}</Text>
               <Text style={styles.shareSubtitle}>
@@ -628,27 +787,48 @@ const MeetingPlannerScreen = () => {
 
             <View style={styles.shareInfo}>
               <View style={styles.shareInfoRow}>
-                <MaterialCommunityIcons name={ICONS.CALENDAR} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+                <MaterialCommunityIcons
+                  name={ICONS.CALENDAR}
+                  size={mobileIconSizes.medium}
+                  color={designTokens.colors.primary}
+                />
                 <View style={styles.shareInfoText}>
-                  <Text style={styles.shareInfoLabel}>{t('screens.meetingPlanner.meetingDate')}</Text>
+                  <Text style={styles.shareInfoLabel}>
+                    {t('screens.meetingPlanner.meetingDate')}
+                  </Text>
                   <Text style={styles.shareInfoValue}>
-                    {meetingDate.toLocaleDateString(undefined, DATE_LOCALE_OPTIONS.DATE_WITHOUT_YEAR)}
+                    {meetingDate.toLocaleDateString(
+                      undefined,
+                      DATE_LOCALE_OPTIONS.DATE_WITHOUT_YEAR
+                    )}
                   </Text>
                 </View>
               </View>
 
               <View style={styles.shareInfoRow}>
-                <MaterialCommunityIcons name={ICONS.CLOCK_OUTLINE} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+                <MaterialCommunityIcons
+                  name={ICONS.CLOCK_OUTLINE}
+                  size={mobileIconSizes.medium}
+                  color={designTokens.colors.primary}
+                />
                 <View style={styles.shareInfoText}>
-                  <Text style={styles.shareInfoLabel}>{t('screens.meetingPlanner.totalDuration')}</Text>
+                  <Text style={styles.shareInfoLabel}>
+                    {t('screens.meetingPlanner.totalDuration')}
+                  </Text>
                   <Text style={styles.shareInfoValue}>{getTotalTime()} minutes</Text>
                 </View>
               </View>
 
               <View style={styles.shareInfoRow}>
-                <MaterialCommunityIcons name={ICONS.FORMAT_LIST_NUMBERED} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+                <MaterialCommunityIcons
+                  name={ICONS.FORMAT_LIST_NUMBERED}
+                  size={mobileIconSizes.medium}
+                  color={designTokens.colors.primary}
+                />
                 <View style={styles.shareInfoText}>
-                  <Text style={styles.shareInfoLabel}>{t('screens.meetingPlanner.activities')}</Text>
+                  <Text style={styles.shareInfoLabel}>
+                    {t('screens.meetingPlanner.activities')}
+                  </Text>
                   <Text style={styles.shareInfoValue}>{agendaItems.length} items</Text>
                 </View>
               </View>
@@ -665,8 +845,14 @@ const MeetingPlannerScreen = () => {
                 style={[styles.modalButton, styles.confirmButton, styles.shareConfirmButton]}
                 onPress={confirmShareMeeting}
               >
-                <MaterialCommunityIcons name={ICONS.SEND} size={mobileIconSizes.medium} color={designTokens.colors.textInverse} />
-                <Text style={styles.confirmButtonText}>{t('screens.meetingPlanner.sendToAll')}</Text>
+                <MaterialCommunityIcons
+                  name={ICONS.SEND}
+                  size={mobileIconSizes.medium}
+                  color={designTokens.colors.textInverse}
+                />
+                <Text style={styles.confirmButtonText}>
+                  {t('screens.meetingPlanner.sendToAll')}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1120,4 +1306,3 @@ const styles = StyleSheet.create({
 });
 
 export default MeetingPlannerScreen;
-

@@ -46,7 +46,7 @@ class HealthCheckService {
     if (this.dependencies.has(name)) {
       logger.warn(`Health check ${name} already registered, overwriting`);
     }
-    
+
     this.dependencies.set(name, check);
     logger.debug(`Registered health check: ${name}`);
   }
@@ -65,7 +65,7 @@ class HealthCheckService {
    */
   async checkHealth(): Promise<HealthStatus> {
     const checks = Array.from(this.dependencies.entries());
-    
+
     const results = await Promise.all(
       checks.map(([name, check]) => this.executeCheck(name, check))
     );
@@ -78,7 +78,7 @@ class HealthCheckService {
     // Determine overall status
     const allHealthy = results.every((r) => r.isHealthy);
     const someUnhealthy = results.some((r) => !r.isHealthy);
-    
+
     let status: 'healthy' | 'degraded' | 'unhealthy';
     if (allHealthy) {
       status = 'healthy';
@@ -93,6 +93,7 @@ class HealthCheckService {
       timestamp: new Date().toISOString(),
       checks: results,
       uptime: Date.now() - this.startTime,
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       version: require('../../../package.json').version,
     };
   }
@@ -100,18 +101,15 @@ class HealthCheckService {
   /**
    * Executes a single health check
    */
-  private async executeCheck(
-    name: string,
-    check: HealthCheckFunction
-  ): Promise<HealthCheckResult> {
+  private async executeCheck(name: string, check: HealthCheckFunction): Promise<HealthCheckResult> {
     const startTime = Date.now();
-    
+
     try {
       const isHealthy = await Promise.race([
         check(),
         this.timeout(5000), // 5 second timeout
       ]);
-      
+
       const responseTime = Date.now() - startTime;
 
       return {
@@ -123,9 +121,9 @@ class HealthCheckService {
       };
     } catch (error) {
       const responseTime = Date.now() - startTime;
-      
+
       logger.error(`Health check failed: ${name}`, error as Error);
-      
+
       return {
         name,
         status: 'unhealthy',
@@ -142,25 +140,27 @@ class HealthCheckService {
    */
   getLastStatus(): HealthStatus {
     const results = Array.from(this.lastResults.values());
-    
+
     if (results.length === 0) {
       return {
         status: 'healthy',
         timestamp: new Date().toISOString(),
         checks: [],
         uptime: Date.now() - this.startTime,
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
         version: require('../../../package.json').version,
       };
     }
 
     const allHealthy = results.every((r) => r.isHealthy);
     const someUnhealthy = results.some((r) => !r.isHealthy);
-    
+
     return {
       status: allHealthy ? 'healthy' : someUnhealthy ? 'degraded' : 'unhealthy',
       timestamp: new Date().toISOString(),
       checks: results,
       uptime: Date.now() - this.startTime,
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       version: require('../../../package.json').version,
     };
   }
@@ -186,7 +186,7 @@ class HealthCheckService {
    */
   async checkDependency(name: string): Promise<HealthCheckResult | null> {
     const check = this.dependencies.get(name);
-    
+
     if (!check) {
       return null;
     }
@@ -237,10 +237,13 @@ export function registerDefaultHealthChecks(): void {
   // API health check
   healthCheckService.register('api', async () => {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
       const response = await fetch(`${environment.apiUrl}/health`, {
         method: 'GET',
-        timeout: 3000,
-      } as any);
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
       return response.ok;
     } catch {
       return false;
@@ -263,11 +266,7 @@ export function registerDefaultHealthChecks(): void {
   healthCheckService.register('config', async () => {
     try {
       // Verify critical config is present
-      return !!(
-        environment.apiUrl &&
-        environment.wsUrl &&
-        environment.env
-      );
+      return !!(environment.apiUrl && environment.wsUrl && environment.env);
     } catch {
       return false;
     }
@@ -283,10 +282,7 @@ export function registerDefaultHealthChecks(): void {
 /**
  * Creates a simple HTTP health check
  */
-export function createHttpHealthCheck(
-  url: string,
-  timeoutMs: number = 3000
-): HealthCheckFunction {
+export function createHttpHealthCheck(url: string, timeoutMs: number = 3000): HealthCheckFunction {
   return async () => {
     try {
       const controller = new AbortController();
@@ -317,7 +313,7 @@ export function createHealthCheckWithRetry(
       try {
         const result = await check();
         if (result) return true;
-        
+
         if (i < maxRetries) {
           await new Promise((resolve) => setTimeout(resolve, TIMING.RETRY.FIRST));
         }
@@ -333,4 +329,3 @@ export function createHealthCheckWithRetry(
 if (environment.apiUrl) {
   registerDefaultHealthChecks();
 }
-

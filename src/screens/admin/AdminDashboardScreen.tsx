@@ -15,11 +15,10 @@ import { clubService } from '../../services/clubService';
 import { designTokens } from '../../shared/theme/designTokens';
 import { layoutConstants } from '../../shared/theme';
 import { ScreenHeader, SectionHeader, MenuCard } from '../../shared/components';
-import { ICONS, SCREENS, LOG_MESSAGES, MENU_ITEM_IDS } from '../../shared/constants';
 import { logger } from '../../shared/utils/logger';
 import { ApprovalStatus } from '../../types';
-import { flexValues } from '../../shared/constants/layoutConstants';
 import { useTranslation } from 'react-i18next';
+import { ICONS, LOG_MESSAGES, MENU_ITEM_IDS, SCREENS, flexValues } from '../../shared/constants';
 
 const AdminDashboardScreen = () => {
   const navigation = useNavigation();
@@ -44,7 +43,7 @@ const AdminDashboardScreen = () => {
         userService.getAllUsers(),
         clubService.getAllClubs(),
       ]);
-      
+
       setStats({
         totalUsers: users.length,
         activeUsers: users.filter((u) => u.isActive).length,

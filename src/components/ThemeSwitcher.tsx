@@ -11,17 +11,31 @@ import { useTranslation } from 'react-i18next';
 import { useTheme, ThemeMode } from '../contexts/ThemeContext';
 import { SelectionModal, SelectionItem } from '../shared/components/SelectionModal';
 import { mobileTypography, designTokens, layoutConstants } from '../shared/theme';
-import { ICONS, A11Y_ROLE, THEME_MODE } from '../shared/constants';
-import { flexValues } from '../shared/constants/layoutConstants';
+import { A11Y_ROLE, ICONS, THEME_MODE, flexValues } from '../shared/constants';
 
 interface ThemeSwitcherProps {
   showLabel?: boolean;
 }
 
 const THEME_OPTIONS: { mode: ThemeMode; icon: string; labelKey: string; subtitleKey: string }[] = [
-  { mode: THEME_MODE.LIGHT, icon: ICONS.WEATHER_SUNNY, labelKey: 'settings.lightMode', subtitleKey: 'components.themeSwitcher.lightSubtitle' },
-  { mode: THEME_MODE.DARK, icon: ICONS.WEATHER_NIGHT, labelKey: 'settings.darkMode', subtitleKey: 'components.themeSwitcher.darkSubtitle' },
-  { mode: THEME_MODE.SYSTEM, icon: ICONS.THEME_LIGHT_DARK, labelKey: 'settings.systemDefault', subtitleKey: 'components.themeSwitcher.systemSubtitle' },
+  {
+    mode: THEME_MODE.LIGHT,
+    icon: ICONS.WEATHER_SUNNY,
+    labelKey: 'settings.lightMode',
+    subtitleKey: 'components.themeSwitcher.lightSubtitle',
+  },
+  {
+    mode: THEME_MODE.DARK,
+    icon: ICONS.WEATHER_NIGHT,
+    labelKey: 'settings.darkMode',
+    subtitleKey: 'components.themeSwitcher.darkSubtitle',
+  },
+  {
+    mode: THEME_MODE.SYSTEM,
+    icon: ICONS.THEME_LIGHT_DARK,
+    labelKey: 'settings.systemDefault',
+    subtitleKey: 'components.themeSwitcher.systemSubtitle',
+  },
 ];
 
 export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ showLabel = true }) => {
@@ -29,10 +43,10 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ showLabel = true }
   const { mode, colors, setTheme } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
 
-  const currentOption = THEME_OPTIONS.find(opt => opt.mode === mode) || THEME_OPTIONS[2];
+  const currentOption = THEME_OPTIONS.find((opt) => opt.mode === mode) || THEME_OPTIONS[2];
 
   // Convert theme options to SelectionItem format
-  const selectionItems: SelectionItem[] = THEME_OPTIONS.map(option => ({
+  const selectionItems: SelectionItem[] = THEME_OPTIONS.map((option) => ({
     id: option.mode,
     title: t(option.labelKey),
     subtitle: t(option.subtitleKey),
@@ -54,10 +68,10 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ showLabel = true }
         accessibilityRole={A11Y_ROLE.BUTTON}
       >
         <View style={[styles.iconContainer, { backgroundColor: colors.primary + '20' }]}>
-          <MaterialCommunityIcons 
-            name={currentOption.icon as any} 
-            size={designTokens.iconSize.md} 
-            color={colors.primary} 
+          <MaterialCommunityIcons
+            name={currentOption.icon as typeof ICONS.CHECK}
+            size={designTokens.iconSize.md}
+            color={colors.primary}
           />
         </View>
         {showLabel && (
@@ -70,7 +84,11 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ showLabel = true }
             </Text>
           </View>
         )}
-        <MaterialCommunityIcons name={ICONS.CHEVRON_DOWN} size={designTokens.iconSize.md} color={colors.textTertiary} />
+        <MaterialCommunityIcons
+          name={ICONS.CHEVRON_DOWN}
+          size={designTokens.iconSize.md}
+          color={colors.textTertiary}
+        />
       </TouchableOpacity>
 
       <SelectionModal
