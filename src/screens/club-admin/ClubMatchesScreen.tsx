@@ -15,6 +15,7 @@ import {
   Linking,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { matchService } from '../../services/matchService';
 import { userService } from '../../services/userService';
@@ -22,13 +23,14 @@ import { Match, MatchStatus, User, MatchRound } from '../../types';
 import { MatchCard } from '../../components/MatchCard';
 import { StandardModal } from '../../shared/components/StandardModal';
 import { StandardButton } from '../../shared/components/StandardButton';
-import { mobileTypography, mobileIconSizes } from '../../shared/theme';
-import { designTokens } from '../../shared/theme/designTokens';
-import { DesignConstants } from '../../shared/theme/designConstants';
+import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../../shared/theme';
 import { format } from 'date-fns';
-import { MESSAGES, EXTERNAL_URLS } from '../../shared/constants';
+import { MESSAGES, EXTERNAL_URLS, ICONS, COMPONENT_VARIANT, DATE_FORMATS, ALERT_BUTTON_STYLE, FILTER_STATUS, EMPTY_VALUE, VALIDATION, LOG_MESSAGES, ROUND_STATUS } from '../../shared/constants';
+import { logger } from '../../shared/utils/logger';
+import { flexValues } from '../../shared/constants/layoutConstants';
 
 const ClubMatchesScreen = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [matches, setMatches] = useState<Match[]>([]);
   const [matchRounds, setMatchRounds] = useState<MatchRound[]>([]);
@@ -38,7 +40,7 @@ const ClubMatchesScreen = () => {
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [matchParticipants, setMatchParticipants] = useState<User[]>([]);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
-  const [filterStatus, setFilterStatus] = useState<MatchStatus | 'all'>('all');
+  const [filterStatus, setFilterStatus] = useState<MatchStatus | typeof FILTER_STATUS.ALL>(FILTER_STATUS.ALL);
 
   useEffect(() => {
     if (user?.clubId) {
@@ -78,7 +80,7 @@ const ClubMatchesScreen = () => {
   };
 
   const applyFilter = () => {
-    if (filterStatus === 'all') {
+    if (filterStatus === FILTER_STATUS.ALL) {
       setFilteredMatches(matches);
     } else {
       setFilteredMatches(matches.filter(m => m.status === filterStatus));
@@ -95,7 +97,7 @@ const ClubMatchesScreen = () => {
       );
       setMatchParticipants(participants);
     } catch (error) {
-      console.error('Failed to load participants:', error);
+      logger.error(LOG_MESSAGES.SCREENS.CLUB_MATCHES.FAILED_TO_LOAD_PARTICIPANTS, error as Error);
     }
   };
 
@@ -104,7 +106,7 @@ const ClubMatchesScreen = () => {
       MESSAGES.TITLES.NOTIFY_PARTICIPANTS,
       MESSAGES.WARNINGS.NOTIFY_PARTICIPANTS_MESSAGE,
       [
-        { text: MESSAGES.BUTTONS.CANCEL, style: 'cancel' },
+        { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
         {
           text: 'Send',
           onPress: async () => {
@@ -115,11 +117,11 @@ const ClubMatchesScreen = () => {
               
               const phoneNumbers = participants
                 .filter(p => p.whatsappNumber)
-                .map(p => p.whatsappNumber.replace(/[^0-9]/g, ''))
+                .map(p => p.whatsappNumber.replace(VALIDATION.WHATSAPP.STRIP_NON_DIGITS, EMPTY_VALUE))
                 .join(',');
               
               if (phoneNumbers) {
-                const message = `Hello! You have a new social activity scheduled. Please coordinate with your group to set up a meetup this week.`;
+                const message = t('screens.clubMatches.whatsappGroupMessage');
                 const url = `${EXTERNAL_URLS.WHATSAPP_GROUP}?text=${encodeURIComponent(message)}&phone=${phoneNumbers}`;
                 Linking.openURL(url);
               }
@@ -144,7 +146,7 @@ const ClubMatchesScreen = () => {
   };
 
   const getStatusConfig = (status: MatchStatus) => {
-    return DesignConstants.status[status] || DesignConstants.status.pending;
+    return designTokens.status[status] || designTokens.status.pending;
   };
 
   const getStatusStats = () => {
@@ -167,31 +169,31 @@ const ClubMatchesScreen = () => {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Activity Management</Text>
-          <Text style={styles.subtitle}>Manage all club social activities</Text>
+          <Text style={styles.title}>{t('screens.clubMatches.title')}</Text>
+          <Text style={styles.subtitle}>{t('screens.clubMatches.subtitle')}</Text>
         </View>
 
         {/* Stats Section */}
         <View style={styles.statsSection}>
-          <Text style={styles.sectionTitle}>Overview</Text>
+          <Text style={styles.sectionTitle}>{t('screens.clubMatches.overview')}</Text>
           <View style={styles.statsGrid}>
             <View style={styles.statCard}>
               <Text style={styles.statValue}>{stats.total}</Text>
-              <Text style={styles.statLabel}>Total Matches</Text>
+              <Text style={styles.statLabel}>{t('screens.clubMatches.totalMatches')}</Text>
             </View>
             <View style={styles.statCard}>
               <Text style={[styles.statValue, { color: designTokens.colors.warning }]}>{stats.pending}</Text>
-              <Text style={styles.statLabel}>Pending</Text>
+              <Text style={styles.statLabel}>{t('screens.clubMatches.pending')}</Text>
             </View>
           </View>
           <View style={styles.statsGrid}>
             <View style={styles.statCard}>
               <Text style={[styles.statValue, { color: designTokens.colors.info }]}>{stats.scheduled}</Text>
-              <Text style={styles.statLabel}>Scheduled</Text>
+              <Text style={styles.statLabel}>{t('screens.clubMatches.scheduled')}</Text>
             </View>
             <View style={styles.statCard}>
               <Text style={[styles.statValue, { color: designTokens.colors.success }]}>{stats.completed}</Text>
-              <Text style={styles.statLabel}>Completed</Text>
+              <Text style={styles.statLabel}>{t('screens.clubMatches.completed')}</Text>
             </View>
           </View>
         </View>
@@ -199,21 +201,21 @@ const ClubMatchesScreen = () => {
         {/* Match Rounds */}
         {matchRounds.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Recent Match Rounds</Text>
+            <Text style={styles.sectionTitle}>{t('screens.clubMatches.recentMatchRounds')}</Text>
             {matchRounds.slice(0, 3).map((round) => (
               <View key={round.id} style={styles.roundCard}>
                 <View style={styles.roundHeader}>
                   <View>
                     <Text style={styles.roundTitle}>Round {round.id}</Text>
                     <Text style={styles.roundDate}>
-                      Created {format(new Date(round.createdAt), 'MMM dd, yyyy')}
+                      Created {format(new Date(round.createdAt), DATE_FORMATS.DATE_FNS_DATE_DISPLAY)}
                     </Text>
                   </View>
                   <View style={[styles.roundStatusBadge, { 
-                    backgroundColor: round.status === 'active' ? designTokens.colors.successLight : designTokens.colors.backgroundSecondary 
+                    backgroundColor: round.status === ROUND_STATUS.ACTIVE ? designTokens.colors.successLight : designTokens.colors.backgroundSecondary 
                   }]}>
                     <Text style={[styles.roundStatusText, {
-                      color: round.status === 'active' ? designTokens.colors.success : designTokens.colors.textSecondary
+                      color: round.status === ROUND_STATUS.ACTIVE ? designTokens.colors.success : designTokens.colors.textSecondary
                     }]}>
                       {round.status.toUpperCase()}
                     </Text>
@@ -227,14 +229,14 @@ const ClubMatchesScreen = () => {
 
         {/* Filter Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Matches</Text>
+          <Text style={styles.sectionTitle}>{t('screens.clubMatches.matches')}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
             {[
-              { label: 'All', value: 'all' },
-              { label: 'Pending', value: MatchStatus.PENDING },
-              { label: 'Scheduled', value: MatchStatus.SCHEDULED },
-              { label: 'Completed', value: MatchStatus.COMPLETED },
-              { label: 'Skipped', value: MatchStatus.SKIPPED },
+              { label: t('screens.clubMatches.filterAll'), value: FILTER_STATUS.ALL },
+              { label: t('screens.clubMatches.filterPending'), value: MatchStatus.PENDING },
+              { label: t('screens.clubMatches.filterScheduled'), value: MatchStatus.SCHEDULED },
+              { label: t('screens.clubMatches.filterCompleted'), value: MatchStatus.COMPLETED },
+              { label: t('screens.clubMatches.filterSkipped'), value: MatchStatus.SKIPPED },
             ].map((filter) => (
               <TouchableOpacity
                 key={filter.value}
@@ -259,12 +261,12 @@ const ClubMatchesScreen = () => {
         <View style={styles.content}>
           {filteredMatches.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <MaterialCommunityIcons name="account-heart-outline" size={mobileIconSizes.xxlarge * 2} color={designTokens.colors.textTertiary} />
-              <Text style={styles.emptyText}>No activities found</Text>
+              <MaterialCommunityIcons name={ICONS.ACCOUNT_HEART_OUTLINE} size={mobileIconSizes.xxlarge * 2} color={designTokens.colors.textTertiary} />
+              <Text style={styles.emptyText}>{t('screens.clubMatches.noActivitiesFound')}</Text>
               <Text style={styles.emptySubtext}>
-                {filterStatus === 'all' 
-                  ? 'Generate activities from the dashboard'
-                  : `No ${filterStatus} activities`}
+                {filterStatus === FILTER_STATUS.ALL 
+                  ? t('screens.clubMatches.generateFromDashboard')
+                  : t('screens.clubMatches.noFilteredActivities', { status: filterStatus })}
               </Text>
             </View>
           ) : (
@@ -289,16 +291,16 @@ const ClubMatchesScreen = () => {
             setSelectedMatch(null);
             setMatchParticipants([]);
           }}
-          title="Activity Details"
-          subtitle="Manage this social activity"
-          icon="account-heart"
+          title={t('screens.activities.activityDetails')}
+          subtitle={t('screens.activities.manageActivity')}
+          icon={ICONS.ACCOUNT_HEART}
           iconColor={designTokens.colors.primary}
           iconBackgroundColor={designTokens.colors.primaryLight}
         >
           <View style={styles.modalContent}>
             {/* Status */}
             <View style={styles.modalSection}>
-              <Text style={styles.modalSectionTitle}>Current Status</Text>
+              <Text style={styles.modalSectionTitle}>{t('screens.clubMatches.currentStatus')}</Text>
               <View style={[styles.statusBadge, { 
                 backgroundColor: `${getStatusConfig(selectedMatch.status).color}20` 
               }]}>
@@ -340,21 +342,21 @@ const ClubMatchesScreen = () => {
 
             {/* Admin Actions */}
             <View style={styles.modalSection}>
-              <Text style={styles.modalSectionTitle}>Admin Actions</Text>
+              <Text style={styles.modalSectionTitle}>{t('screens.clubMatches.adminActions')}</Text>
               
               <StandardButton
-                title="Notify Participants"
-                icon="whatsapp"
-                variant="secondary"
+                title={t('screens.activities.notifyParticipants')}
+                icon={ICONS.WHATSAPP}
+                variant={COMPONENT_VARIANT.secondary}
                 fullWidth
                 onPress={() => handleNotifyMatch(selectedMatch)}
               />
 
               {selectedMatch.status === MatchStatus.PENDING && (
                 <StandardButton
-                  title="Mark as Scheduled"
-                  icon="calendar-check"
-                  variant="primary"
+                  title={t('screens.activities.markAsScheduled')}
+                  icon={ICONS.CALENDAR_CHECK}
+                  variant={COMPONENT_VARIANT.primary}
                   fullWidth
                   onPress={() => handleUpdateMatchStatus(selectedMatch.id, MatchStatus.SCHEDULED)}
                 />
@@ -362,9 +364,9 @@ const ClubMatchesScreen = () => {
 
               {selectedMatch.status === MatchStatus.SCHEDULED && (
                 <StandardButton
-                  title="Mark as Completed"
-                  icon="check-circle"
-                  variant="primary"
+                  title={t('screens.activities.markAsCompleted')}
+                  icon={ICONS.CHECK_CIRCLE}
+                  variant={COMPONENT_VARIANT.primary}
                   fullWidth
                   onPress={() => handleUpdateMatchStatus(selectedMatch.id, MatchStatus.COMPLETED)}
                 />
@@ -372,9 +374,9 @@ const ClubMatchesScreen = () => {
 
               {(selectedMatch.status === MatchStatus.PENDING || selectedMatch.status === MatchStatus.SCHEDULED) && (
                 <StandardButton
-                  title="Cancel Match"
-                  icon="close-circle"
-                  variant="danger"
+                  title={t('screens.activities.cancelMatch')}
+                  icon={ICONS.CLOSE_CIRCLE}
+                  variant={COMPONENT_VARIANT.danger}
                   fullWidth
                   onPress={() => handleUpdateMatchStatus(selectedMatch.id, MatchStatus.CANCELLED)}
                 />
@@ -389,13 +391,13 @@ const ClubMatchesScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: flexValues.one,
     backgroundColor: designTokens.colors.backgroundSecondary,
   },
   header: {
     backgroundColor: designTokens.colors.backgroundPrimary,
     padding: designTokens.spacing.xl,
-    borderBottomWidth: 1,
+    borderBottomWidth: designTokens.borderWidth.thin,
     borderBottomColor: designTokens.colors.borderLight,
   },
   title: {
@@ -404,33 +406,33 @@ const styles = StyleSheet.create({
   subtitle: {
     ...mobileTypography.bodySmall,
     color: designTokens.colors.textSecondary,
-    marginTop: 4,
+    marginTop: designTokens.spacing.xs,
   },
   statsSection: {
     padding: designTokens.spacing.lg,
     backgroundColor: designTokens.colors.backgroundPrimary,
-    marginTop: 8,
+    marginTop: designTokens.spacing.sm,
   },
   sectionTitle: {
     ...mobileTypography.heading3,
-    marginBottom: 16,
+    marginBottom: designTokens.spacing.lg,
   },
   statsGrid: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 12,
+    flexDirection: layoutConstants.flexDirection.row,
+    gap: designTokens.spacing.md,
+    marginBottom: designTokens.spacing.md,
   },
   statCard: {
-    flex: 1,
+    flex: flexValues.one,
     backgroundColor: designTokens.colors.inputBackground,
     padding: designTokens.spacing.lg,
     borderRadius: designTokens.borderRadius.lg,
-    alignItems: 'center',
+    alignItems: layoutConstants.alignItems.center,
   },
   statValue: {
     ...mobileTypography.displaySmall,
     color: designTokens.colors.primary,
-    marginBottom: 4,
+    marginBottom: designTokens.spacing.xs,
   },
   statLabel: {
     ...mobileTypography.caption,
@@ -439,19 +441,19 @@ const styles = StyleSheet.create({
   section: {
     padding: designTokens.spacing.lg,
     backgroundColor: designTokens.colors.backgroundPrimary,
-    marginTop: 8,
+    marginTop: designTokens.spacing.sm,
   },
   roundCard: {
     backgroundColor: designTokens.colors.inputBackground,
     padding: designTokens.spacing.lg,
     borderRadius: designTokens.borderRadius.lg,
-    marginBottom: 12,
+    marginBottom: designTokens.spacing.md,
   },
   roundHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
+    flexDirection: layoutConstants.flexDirection.row,
+    justifyContent: layoutConstants.justifyContent.spaceBetween,
+    alignItems: layoutConstants.alignItems.center,
+    marginBottom: designTokens.spacing.sm,
   },
   roundTitle: {
     ...mobileTypography.bodyLargeBold,
@@ -459,11 +461,11 @@ const styles = StyleSheet.create({
   roundDate: {
     ...mobileTypography.caption,
     color: designTokens.colors.textSecondary,
-    marginTop: 2,
+    marginTop: designTokens.spacing.xxs,
   },
   roundStatusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: designTokens.spacing.md,
+    paddingVertical: designTokens.spacing.sm,
     borderRadius: designTokens.borderRadius.lg,
   },
   roundStatusText: {
@@ -474,14 +476,14 @@ const styles = StyleSheet.create({
     color: designTokens.colors.textSecondary,
   },
   filterScroll: {
-    flexDirection: 'row',
+    flexDirection: layoutConstants.flexDirection.row,
   },
   filterChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: designTokens.spacing.lg,
+    paddingVertical: designTokens.spacing.sm,
     backgroundColor: designTokens.colors.backgroundSecondary,
     borderRadius: designTokens.borderRadius.xxl,
-    marginRight: 8,
+    marginRight: designTokens.spacing.sm,
   },
   filterChipActive: {
     backgroundColor: designTokens.colors.primary,
@@ -497,65 +499,65 @@ const styles = StyleSheet.create({
     padding: designTokens.spacing.lg,
   },
   emptyContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
     padding: designTokens.spacing['4xl'],
-    marginTop: 40,
+    marginTop: designTokens.spacing['4xl'],
   },
   emptyText: {
     ...mobileTypography.heading3,
-    marginTop: 16,
+    marginTop: designTokens.spacing.lg,
   },
   emptySubtext: {
     ...mobileTypography.bodySmall,
     color: designTokens.colors.textSecondary,
-    marginTop: 8,
-    textAlign: 'center',
+    marginTop: designTokens.spacing.sm,
+    textAlign: layoutConstants.textAlign.center,
   },
   modalContent: {
     padding: designTokens.spacing.xl,
   },
   modalSection: {
-    marginBottom: 24,
+    marginBottom: designTokens.spacing.xxl,
   },
   modalSectionTitle: {
     ...mobileTypography.heading4,
-    marginBottom: 12,
+    marginBottom: designTokens.spacing.md,
   },
   statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    paddingVertical: designTokens.spacing.md,
+    paddingHorizontal: designTokens.spacing.lg,
     borderRadius: designTokens.borderRadius.lg,
-    gap: 8,
+    gap: designTokens.spacing.sm,
   },
   statusText: {
     ...mobileTypography.bodyLargeBold,
   },
   participantRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     padding: designTokens.spacing.md,
     backgroundColor: designTokens.colors.inputBackground,
     borderRadius: designTokens.borderRadius.lg,
-    marginBottom: 8,
-    gap: 12,
+    marginBottom: designTokens.spacing.sm,
+    gap: designTokens.spacing.md,
   },
   participantAvatar: {
-    width: 48,
-    height: 48,
+    width: designTokens.componentSizes.iconContainer.lg,
+    height: designTokens.componentSizes.iconContainer.lg,
     borderRadius: designTokens.borderRadius['3xl'],
     backgroundColor: designTokens.colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
   },
   participantAvatarText: {
     ...mobileTypography.heading3,
     color: designTokens.colors.textInverse,
   },
   participantInfo: {
-    flex: 1,
+    flex: flexValues.one,
   },
   participantName: {
     ...mobileTypography.bodyLargeBold,
@@ -563,12 +565,12 @@ const styles = StyleSheet.create({
   participantEmail: {
     ...mobileTypography.caption,
     color: designTokens.colors.textSecondary,
-    marginTop: 2,
+    marginTop: designTokens.spacing.xxs,
   },
   participantPhone: {
     ...mobileTypography.caption,
     color: designTokens.colors.success,
-    marginTop: 2,
+    marginTop: designTokens.spacing.xxs,
   },
 });
 

@@ -9,79 +9,78 @@ import {
   RefreshControl,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { userService } from '../../services/userService';
 import { User } from '../../types';
-import { mobileTypography, mobileIconSizes } from '../../shared/theme';
+import { mobileTypography, mobileIconSizes, layoutConstants } from '../../shared/theme';
 import { designTokens } from '../../shared/theme/designTokens';
 import { SelectionModal, SelectionItem } from '../../shared/components';
-import { MESSAGES } from '../../shared/constants';
+import { MESSAGES, ICONS, ALERT_BUTTON_STYLE, LOG_MESSAGES, DIRECTIVE_POSITION_IDS } from '../../shared/constants';
+import { flexValues, shadowOffsetValues, typographyValues, dimensionValues, borderValues } from '../../shared/constants/layoutConstants';
+import { logger } from '../../shared/utils/logger';
+import { UserRole } from '../../types';
 
 // Directive positions that can be assigned
 interface DirectivePosition {
   id: string;
-  title: string;
-  titleSpanish: string;
+  titleKey: string;
+  descriptionKey: string;
   icon: string;
   color: string;
-  description: string;
   memberId?: string;
   memberName?: string;
   memberEmail?: string;
 }
 
-const DIRECTIVE_POSITIONS: Omit<DirectivePosition, 'memberId' | 'memberName' | 'memberEmail'>[] = [
+// Position configuration with i18n keys
+const DIRECTIVE_POSITION_CONFIG = [
   {
-    id: 'vice-director',
-    title: 'Vice Director',
-    titleSpanish: 'Subdirector',
-    icon: 'account-star',
+    id: DIRECTIVE_POSITION_IDS.VICE_DIRECTOR,
+    titleKey: 'screens.clubDirective.positions.viceDirector',
+    descriptionKey: 'screens.clubDirective.positions.viceDirectorDesc',
+    icon: ICONS.ACCOUNT_STAR,
     color: designTokens.colors.warning,
-    description: 'Assists the director and leads in their absence',
   },
   {
-    id: 'associate-director',
-    title: 'Associate Director',
-    titleSpanish: 'Director Asociado',
-    icon: 'account-supervisor',
+    id: DIRECTIVE_POSITION_IDS.ASSOCIATE_DIRECTOR,
+    titleKey: 'screens.clubDirective.positions.associateDirector',
+    descriptionKey: 'screens.clubDirective.positions.associateDirectorDesc',
+    icon: ICONS.ACCOUNT_SUPERVISOR,
     color: designTokens.colors.info,
-    description: 'Supports club operations and special projects',
   },
   {
-    id: 'treasurer',
-    title: 'Treasurer',
-    titleSpanish: 'Tesorero',
-    icon: 'cash-multiple',
+    id: DIRECTIVE_POSITION_IDS.TREASURER,
+    titleKey: 'screens.clubDirective.positions.treasurer',
+    descriptionKey: 'screens.clubDirective.positions.treasurerDesc',
+    icon: ICONS.CASH_MULTIPLE,
     color: designTokens.colors.success,
-    description: 'Manages club finances and fees',
   },
   {
-    id: 'counselor',
-    title: 'Counselor',
-    titleSpanish: 'Consejero',
-    icon: 'account-heart',
+    id: DIRECTIVE_POSITION_IDS.COUNSELOR,
+    titleKey: 'screens.clubDirective.positions.counselor',
+    descriptionKey: 'screens.clubDirective.positions.counselorDesc',
+    icon: ICONS.ACCOUNT_HEART,
     color: designTokens.colors.primary,
-    description: 'Provides guidance and mentorship to members',
   },
   {
-    id: 'secretary',
-    title: 'Secretary',
-    titleSpanish: 'Secretario',
-    icon: 'clipboard-text',
+    id: DIRECTIVE_POSITION_IDS.SECRETARY,
+    titleKey: 'screens.clubDirective.positions.secretary',
+    descriptionKey: 'screens.clubDirective.positions.secretaryDesc',
+    icon: ICONS.CLIPBOARD_TEXT,
     color: designTokens.colors.info,
-    description: 'Maintains records and meeting minutes',
   },
   {
-    id: 'events-coordinator',
-    title: 'Events Coordinator',
-    titleSpanish: 'Coordinador de Eventos',
-    icon: 'calendar-star',
+    id: DIRECTIVE_POSITION_IDS.EVENTS_COORDINATOR,
+    titleKey: 'screens.clubDirective.positions.eventsCoordinator',
+    descriptionKey: 'screens.clubDirective.positions.eventsCoordinatorDesc',
+    icon: ICONS.CALENDAR_STAR,
     color: designTokens.colors.error,
-    description: 'Organizes club activities and special events',
   },
-];
+] as const;
 
 const ClubDirectiveScreen = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [positions, setPositions] = useState<DirectivePosition[]>([]);
   const [clubMembers, setClubMembers] = useState<User[]>([]);
@@ -97,7 +96,7 @@ const ClubDirectiveScreen = () => {
   const loadData = async () => {
     try {
       // Initialize positions
-      const initialPositions = DIRECTIVE_POSITIONS.map(pos => ({ ...pos }));
+      const initialPositions = DIRECTIVE_POSITION_CONFIG.map(pos => ({ ...pos }));
       setPositions(initialPositions);
 
       // Load club members (exclude club_admin role as they're already directors)
@@ -105,12 +104,12 @@ const ClubDirectiveScreen = () => {
         const members = await userService.getUsersByClub(user.clubId);
         // Filter active members who are not club admins
         const eligibleMembers = members.filter(
-          m => m.isActive && m.role === 'user'
+          m => m.isActive && m.role === UserRole.USER
         );
         setClubMembers(eligibleMembers);
       }
     } catch (error) {
-      console.error('Failed to load data:', error);
+      logger.error(LOG_MESSAGES.SCREENS.CLUB_DIRECTIVE.FAILED_TO_LOAD_DATA, error as Error);
       Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_LOAD_DIRECTIVE);
     } finally {
       setLoading(false);
@@ -141,9 +140,9 @@ const ClubDirectiveScreen = () => {
         MESSAGES.TITLES.MEMBER_ALREADY_ASSIGNED,
         MESSAGES.WARNINGS.MEMBER_ALREADY_IN_POSITION,
         [
-          { text: MESSAGES.BUTTONS.CANCEL, style: 'cancel' },
+          { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
           {
-            text: 'Reassign',
+            text: t('screens.clubDirective.reassign'),
             onPress: () => {
               // Remove from old position
               setPositions(prev =>
@@ -187,7 +186,7 @@ const ClubDirectiveScreen = () => {
     // Show success message
     Alert.alert(
       MESSAGES.TITLES.MEMBER_ASSIGNED_TO_POSITION,
-      `${member.name} has been assigned as ${currentPosition.title}.`,
+      `${member.name} has been assigned as ${t(currentPosition.titleKey)}.`,
       [{ text: MESSAGES.BUTTONS.OK }]
     );
   };
@@ -197,10 +196,10 @@ const ClubDirectiveScreen = () => {
       MESSAGES.TITLES.REMOVE_MEMBER,
       MESSAGES.WARNINGS.CONFIRM_REMOVE_MEMBER,
       [
-        { text: MESSAGES.BUTTONS.CANCEL, style: 'cancel' },
+        { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
         {
-          text: 'Remove',
-          style: 'destructive',
+          text: t('screens.clubDirective.remove'),
+          style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
           onPress: () => {
             setPositions(prev =>
               prev.map(pos =>
@@ -221,7 +220,7 @@ const ClubDirectiveScreen = () => {
     if (assignedCount === 0) {
       Alert.alert(
         MESSAGES.TITLES.NO_ASSIGNMENTS,
-        'Please assign at least one member to a directive position before saving.',
+        t('screens.clubDirective.assignAtLeastOne'),
         [{ text: MESSAGES.BUTTONS.OK }]
       );
       return;
@@ -229,7 +228,7 @@ const ClubDirectiveScreen = () => {
 
     Alert.alert(
       MESSAGES.TITLES.DIRECTIVE_SAVED_TITLE,
-      `Club directive with ${assignedCount} member${assignedCount !== 1 ? 's' : ''} has been saved successfully. All club members will be notified of the directive structure.`,
+      t('screens.clubDirective.saveSuccess', { count: assignedCount }),
       [{ text: MESSAGES.BUTTONS.OK }]
     );
   };
@@ -241,23 +240,23 @@ const ClubDirectiveScreen = () => {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Club Directive</Text>
-        <Text style={styles.headerSubtitle}>Assign leadership positions to members</Text>
+        <Text style={styles.headerTitle}>{t('screens.clubDirective.title')}</Text>
+        <Text style={styles.headerSubtitle}>{t('screens.clubDirective.subtitle')}</Text>
       </View>
 
       {/* Summary Banner */}
       <View style={styles.summaryBanner}>
         <View style={styles.summaryItem}>
-          <MaterialCommunityIcons name="account-check" size={mobileIconSizes.medium} color={designTokens.colors.success} />
+          <MaterialCommunityIcons name={ICONS.ACCOUNT_CHECK} size={mobileIconSizes.medium} color={designTokens.colors.success} />
           <Text style={styles.summaryText}>
-            <Text style={styles.summaryBold}>{getAssignedPositions().length}</Text> Assigned
+            <Text style={styles.summaryBold}>{getAssignedPositions().length}</Text> {t('screens.clubDirective.assigned')}
           </Text>
         </View>
         <View style={styles.summarySeparator} />
         <View style={styles.summaryItem}>
-          <MaterialCommunityIcons name="account-clock" size={mobileIconSizes.medium} color={designTokens.colors.warning} />
+          <MaterialCommunityIcons name={ICONS.ACCOUNT_CLOCK} size={mobileIconSizes.medium} color={designTokens.colors.warning} />
           <Text style={styles.summaryText}>
-            <Text style={styles.summaryBold}>{getUnassignedPositions().length}</Text> Vacant
+            <Text style={styles.summaryBold}>{getUnassignedPositions().length}</Text> {t('screens.clubDirective.vacant')}
           </Text>
         </View>
       </View>
@@ -269,7 +268,7 @@ const ClubDirectiveScreen = () => {
         {/* Assigned Positions Section */}
         {getAssignedPositions().length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Assigned Positions</Text>
+            <Text style={styles.sectionTitle}>{t('screens.clubDirective.assignedPositions')}</Text>
             {getAssignedPositions().map(position => (
               <View key={position.id} style={styles.positionCard}>
                 {/* Position Icon & Info */}
@@ -283,8 +282,7 @@ const ClubDirectiveScreen = () => {
 
                 <View style={styles.positionContent}>
                   <View style={styles.positionHeader}>
-                    <Text style={styles.positionTitle}>{position.title}</Text>
-                    <Text style={styles.positionSpanish}>{position.titleSpanish}</Text>
+                    <Text style={styles.positionTitle}>{t(position.titleKey)}</Text>
                   </View>
 
                   {/* Assigned Member */}
@@ -303,7 +301,7 @@ const ClubDirectiveScreen = () => {
                       onPress={() => handleRemoveMember(position)}
                     >
                       <MaterialCommunityIcons
-                        name="close-circle"
+                        name={ICONS.CLOSE_CIRCLE}
                         size={mobileIconSizes.medium}
                         color={designTokens.colors.error}
                       />
@@ -318,7 +316,7 @@ const ClubDirectiveScreen = () => {
         {/* Vacant Positions Section */}
         {getUnassignedPositions().length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Vacant Positions</Text>
+            <Text style={styles.sectionTitle}>{t('screens.clubDirective.vacantPositions')}</Text>
             {getUnassignedPositions().map(position => (
               <View key={position.id} style={styles.positionCard}>
                 {/* Position Icon & Info */}
@@ -332,10 +330,9 @@ const ClubDirectiveScreen = () => {
 
                 <View style={styles.positionContent}>
                   <View style={styles.positionHeader}>
-                    <Text style={styles.positionTitle}>{position.title}</Text>
-                    <Text style={styles.positionSpanish}>{position.titleSpanish}</Text>
+                    <Text style={styles.positionTitle}>{t(position.titleKey)}</Text>
                   </View>
-                  <Text style={styles.positionDescription}>{position.description}</Text>
+                  <Text style={styles.positionDescription}>{t(position.descriptionKey)}</Text>
 
                   {/* Assign Button */}
                   <TouchableOpacity
@@ -343,11 +340,11 @@ const ClubDirectiveScreen = () => {
                     onPress={() => handleAssignMember(position)}
                   >
                     <MaterialCommunityIcons
-                      name="account-plus"
+                      name={ICONS.ACCOUNT_PLUS}
                       size={mobileIconSizes.small}
                       color={designTokens.colors.primary}
                     />
-                    <Text style={styles.assignButtonText}>Assign Member</Text>
+                    <Text style={styles.assignButtonText}>{t('screens.clubDirective.assignMember')}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -357,9 +354,9 @@ const ClubDirectiveScreen = () => {
 
         {/* Info Banner */}
         <View style={styles.infoBanner}>
-          <MaterialCommunityIcons name="information" size={mobileIconSizes.medium} color={designTokens.colors.info} />
+          <MaterialCommunityIcons name={ICONS.INFORMATION} size={mobileIconSizes.medium} color={designTokens.colors.info} />
           <Text style={styles.infoText}>
-            Club directive members help organize and lead club activities. Assign members to build a strong leadership team.
+            {t('screens.clubDirective.infoText')}
           </Text>
         </View>
       </ScrollView>
@@ -368,8 +365,8 @@ const ClubDirectiveScreen = () => {
       {getAssignedPositions().length > 0 && (
         <View style={styles.footer}>
           <TouchableOpacity style={styles.saveButton} onPress={handleSaveDirective}>
-            <MaterialCommunityIcons name="content-save" size={mobileIconSizes.large} color={designTokens.colors.textInverse} />
-            <Text style={styles.saveButtonText}>Save Directive</Text>
+            <MaterialCommunityIcons name={ICONS.CONTENT_SAVE} size={mobileIconSizes.large} color={designTokens.colors.textInverse} />
+            <Text style={styles.saveButtonText}>{t('screens.clubDirective.saveDirective')}</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -378,8 +375,8 @@ const ClubDirectiveScreen = () => {
       <SelectionModal
         visible={selectMemberModalVisible}
         onClose={() => setSelectMemberModalVisible(false)}
-        title="Assign Member"
-        subtitle={currentPosition ? `${currentPosition.title} - ${currentPosition.titleSpanish}` : undefined}
+        title={t('screens.clubDirective.assignMember')}
+        subtitle={currentPosition ? t(currentPosition.titleKey) : undefined}
         items={clubMembers.map(member => {
           const assignedPosition = positions.find(pos => pos.memberId === member.id);
           const isAssigned = !!assignedPosition;
@@ -391,7 +388,7 @@ const ClubDirectiveScreen = () => {
             subtitle: member.email,
             avatar: member.name.charAt(0).toUpperCase(),
             iconColor: assignedPosition?.color || designTokens.colors.primary,
-            badge: isAssigned ? assignedPosition.title : undefined,
+            badge: isAssigned ? t(assignedPosition.titleKey) : undefined,
             badgeColor: assignedPosition?.color,
             disabled: isAssigned && isSamePosition,
           };
@@ -402,7 +399,7 @@ const ClubDirectiveScreen = () => {
             handleSelectMember(member);
           }
         }}
-        emptyMessage="No available members. All eligible members have been assigned or are inactive."
+        emptyMessage={t('screens.clubDirective.noAvailableMembers')}
       />
     </View>
   );
@@ -410,15 +407,15 @@ const ClubDirectiveScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: flexValues.one,
     backgroundColor: designTokens.colors.backgroundSecondary,
   },
   header: {
     backgroundColor: designTokens.colors.backgroundPrimary,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
+    paddingHorizontal: designTokens.spacing.xl,
+    paddingTop: designTokens.spacing.xl,
+    paddingBottom: designTokens.spacing.lg,
+    borderBottomWidth: designTokens.borderWidth.thin,
     borderBottomColor: designTokens.colors.borderLight,
   },
   headerTitle: {
@@ -427,21 +424,21 @@ const styles = StyleSheet.create({
   headerSubtitle: {
     ...mobileTypography.bodySmall,
     color: designTokens.colors.textSecondary,
-    marginTop: 4,
+    marginTop: designTokens.spacing.xs,
   },
   summaryBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.spaceAround,
     backgroundColor: designTokens.colors.backgroundPrimary,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
+    paddingVertical: designTokens.spacing.lg,
+    borderBottomWidth: designTokens.borderWidth.thin,
     borderBottomColor: designTokens.colors.borderLight,
   },
   summaryItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    gap: designTokens.spacing.sm,
   },
   summaryText: {
     ...mobileTypography.bodySmall,
@@ -452,82 +449,77 @@ const styles = StyleSheet.create({
     color: designTokens.colors.textPrimary,
   },
   summarySeparator: {
-    width: 1,
-    height: 30,
+    width: borderValues.width.thin,
+    height: dimensionValues.height.divider,
     backgroundColor: designTokens.colors.borderLight,
   },
   content: {
-    flex: 1,
+    flex: flexValues.one,
   },
   section: {
     padding: designTokens.spacing.xl,
   },
   sectionTitle: {
     ...mobileTypography.heading3,
-    marginBottom: 16,
+    marginBottom: designTokens.spacing.lg,
   },
   positionCard: {
-    flexDirection: 'row',
+    flexDirection: layoutConstants.flexDirection.row,
     backgroundColor: designTokens.colors.backgroundPrimary,
     padding: designTokens.spacing.lg,
-    marginBottom: 12,
+    marginBottom: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.lg,
     shadowColor: designTokens.colors.textPrimary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: shadowOffsetValues.md,
+    shadowOpacity: designTokens.shadows.sm.shadowOpacity,
+    shadowRadius: designTokens.shadows.sm.shadowRadius,
+    elevation: designTokens.shadows.sm.elevation,
   },
   positionIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 14,
+    width: dimensionValues.size.avatarMedium,
+    height: dimensionValues.size.avatarMedium,
+    borderRadius: designTokens.borderRadius['4xl'],
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
+    marginRight: designTokens.spacing.md,
   },
   positionContent: {
-    flex: 1,
+    flex: flexValues.one,
   },
   positionHeader: {
-    marginBottom: 6,
+    marginBottom: designTokens.spacing.sm,
   },
   positionTitle: {
     ...mobileTypography.bodyLargeBold,
   },
-  positionSpanish: {
-    ...mobileTypography.label,
-    color: designTokens.colors.textSecondary,
-    fontStyle: 'italic',
-  },
   positionDescription: {
     ...mobileTypography.bodySmall,
     color: designTokens.colors.textSecondary,
-    marginBottom: 12,
+    marginBottom: designTokens.spacing.md,
   },
   memberCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     backgroundColor: designTokens.colors.inputBackground,
-    padding: 10, // Custom spacing
-    borderRadius: 10,
-    marginTop: 8,
+    padding: designTokens.spacing.md,
+    borderRadius: designTokens.borderRadius.xl,
+    marginTop: designTokens.spacing.sm,
   },
   memberAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: dimensionValues.size.iconButtonSmall,
+    height: dimensionValues.size.iconButtonSmall,
+    borderRadius: designTokens.borderRadius['3xl'],
     backgroundColor: designTokens.colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
+    marginRight: designTokens.spacing.md,
   },
   memberAvatarText: {
     ...mobileTypography.bodyMediumBold,
     color: designTokens.colors.textInverse,
   },
   memberInfo: {
-    flex: 1,
+    flex: flexValues.one,
   },
   memberName: {
     ...mobileTypography.bodyMediumBold,
@@ -535,58 +527,58 @@ const styles = StyleSheet.create({
   memberEmail: {
     ...mobileTypography.caption,
     color: designTokens.colors.textSecondary,
-    marginTop: 2,
+    marginTop: designTokens.spacing.xxs,
   },
   removeButton: {
-    padding: 6, // Custom spacing
+    padding: designTokens.spacing.sm,
   },
   assignButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
+    paddingVertical: designTokens.spacing.md,
+    paddingHorizontal: designTokens.spacing.lg,
     borderRadius: designTokens.borderRadius.md,
-    borderWidth: 1,
+    borderWidth: designTokens.borderWidth.thin,
     borderColor: designTokens.colors.primary,
-    borderStyle: 'dashed',
-    gap: 8,
-    marginTop: 8,
+    borderStyle: borderValues.style.dashed,
+    gap: designTokens.spacing.sm,
+    marginTop: designTokens.spacing.sm,
   },
   assignButtonText: {
     ...mobileTypography.labelBold,
     color: designTokens.colors.primary,
   },
   infoBanner: {
-    flexDirection: 'row',
+    flexDirection: layoutConstants.flexDirection.row,
     backgroundColor: designTokens.colors.infoLight,
     padding: designTokens.spacing.lg,
     margin: designTokens.spacing.xl,
-    borderRadius: 10,
-    gap: 12,
-    borderLeftWidth: 4,
+    borderRadius: designTokens.borderRadius.xl,
+    gap: designTokens.spacing.md,
+    borderLeftWidth: borderValues.width.medium,
     borderLeftColor: designTokens.colors.info,
   },
   infoText: {
     ...mobileTypography.bodySmall,
     color: designTokens.colors.info,
-    flex: 1,
-    lineHeight: 20,
+    flex: flexValues.one,
+    lineHeight: typographyValues.lineHeight.lg,
   },
   footer: {
     padding: designTokens.spacing.xl,
     backgroundColor: designTokens.colors.backgroundPrimary,
-    borderTopWidth: 1,
+    borderTopWidth: designTokens.borderWidth.thin,
     borderTopColor: designTokens.colors.borderLight,
   },
   saveButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
     backgroundColor: designTokens.colors.primary,
-    paddingVertical: 14,
-    borderRadius: 10,
-    gap: 10,
+    paddingVertical: designTokens.spacing.md,
+    borderRadius: designTokens.borderRadius.xl,
+    gap: designTokens.spacing.md,
   },
   saveButtonText: {
     ...mobileTypography.button,

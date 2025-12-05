@@ -14,6 +14,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { clubService } from '../../services/clubService';
@@ -25,27 +26,32 @@ import {
   ClubFeeSettings,
   MemberBalance,
   CustomCharge,
+  ApprovalStatus,
 } from '../../types';
-import { mobileTypography, mobileIconSizes, mobileFontSizes } from '../../shared/theme';
-import { designTokens } from '../../shared/theme/designTokens';
-import { MESSAGES, DATE_FORMATS, VALIDATION, FORMAT_REGEX, LIMITS } from '../../shared/constants';
+import { mobileTypography, mobileIconSizes, mobileFontSizes, designTokens, layoutConstants } from '../../shared/theme';
+import { ANIMATION, ICONS, MESSAGES, DATE_FORMATS, VALIDATION, FORMAT_REGEX, LIMITS, TOUCH_OPACITY, TEXT_LINES, flexValues, dimensionValues, shadowOffsetValues, ALERT_BUTTON_STYLE, KEYBOARD_TYPE, EMPTY_VALUE, FEE_TABS, LOG_MESSAGES, ALL_MONTHS } from '../../shared/constants';
+import { logger } from '../../shared/utils/logger';
 
-const MONTHS = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
+// Use designTokens for all visual values - no magic numbers
+
+// Month keys for i18n translation
+const MONTH_KEYS = [
+  'screens.clubFees.months.january',
+  'screens.clubFees.months.february',
+  'screens.clubFees.months.march',
+  'screens.clubFees.months.april',
+  'screens.clubFees.months.may',
+  'screens.clubFees.months.june',
+  'screens.clubFees.months.july',
+  'screens.clubFees.months.august',
+  'screens.clubFees.months.september',
+  'screens.clubFees.months.october',
+  'screens.clubFees.months.november',
+  'screens.clubFees.months.december',
+] as const;
 
 const ClubFeesScreen = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { colors } = useTheme();
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
@@ -65,22 +71,22 @@ const ClubFeesScreen = () => {
   const modalWidth = getModalWidth();
 
   // Fee Settings State
-  const [feeAmount, setFeeAmount] = useState('0');
-  const [currency, setCurrency] = useState('USD');
+  const [feeAmount, setFeeAmount] = useState(t('screens.clubFees.defaultAmount'));
+  const [currency, setCurrency] = useState(t('screens.clubFees.defaultCurrency'));
   const [selectedMonths, setSelectedMonths] = useState<number[]>([]);
   const [feeSettingsActive, setFeeSettingsActive] = useState(false);
 
   // Custom Charge Modal State
   const [chargeModalVisible, setChargeModalVisible] = useState(false);
-  const [chargeDescription, setChargeDescription] = useState('');
-  const [chargeAmount, setChargeAmount] = useState('');
-  const [chargeDueDate, setChargeDueDate] = useState('');
+  const [chargeDescription, setChargeDescription] = useState(EMPTY_VALUE);
+  const [chargeAmount, setChargeAmount] = useState(EMPTY_VALUE);
+  const [chargeDueDate, setChargeDueDate] = useState(EMPTY_VALUE);
   const [chargeApplyToAll, setChargeApplyToAll] = useState(true);
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
 
   // Current view
-  const [activeTab, setActiveTab] = useState<'settings' | 'balances' | 'charges'>(
-    'settings'
+  const [activeTab, setActiveTab] = useState<typeof FEE_TABS[keyof typeof FEE_TABS]>(
+    FEE_TABS.SETTINGS
   );
 
   useEffect(() => {
@@ -99,7 +105,7 @@ const ClubFeesScreen = () => {
       ]);
 
       setClub(clubData);
-      setMembers(membersData.filter((m) => m.approvalStatus === 'approved'));
+      setMembers(membersData.filter((m) => m.approvalStatus === ApprovalStatus.APPROVED));
       setCustomCharges(chargesData);
 
       // Load fee settings
@@ -112,7 +118,7 @@ const ClubFeesScreen = () => {
 
       // Load member balances
       const approvedMemberIds = membersData
-        .filter((m) => m.approvalStatus === 'approved')
+        .filter((m) => m.approvalStatus === ApprovalStatus.APPROVED)
         .map((m) => m.id);
       const balancesData = await paymentService.getAllMembersBalances(
         user.clubId,
@@ -120,7 +126,7 @@ const ClubFeesScreen = () => {
       );
       setBalances(balancesData);
     } catch (error) {
-      Alert.alert(MESSAGES.TITLES.ERROR, 'Failed to load fee data');
+      Alert.alert(MESSAGES.TITLES.ERROR, t('screens.clubFees.failedToLoad'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -145,7 +151,7 @@ const ClubFeesScreen = () => {
   };
 
   const selectAllMonths = () => {
-    setSelectedMonths([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+    setSelectedMonths([...ALL_MONTHS]);
   };
 
   const clearAllMonths = () => {
@@ -157,7 +163,7 @@ const ClubFeesScreen = () => {
 
     const amount = parseFloat(feeAmount);
     if (isNaN(amount) || amount < VALIDATION.NUMBERS.MIN_AMOUNT) {
-      Alert.alert(MESSAGES.TITLES.INVALID_AMOUNT, 'Please enter a valid fee amount');
+      Alert.alert(MESSAGES.TITLES.INVALID_AMOUNT, t('screens.clubFees.invalidFeeAmount'));
       return;
     }
 
@@ -178,9 +184,9 @@ const ClubFeesScreen = () => {
       await clubService.updateClub(club.id, updatedClub);
 
       setClub(updatedClub);
-      Alert.alert(MESSAGES.TITLES.SUCCESS, 'Fee settings saved successfully');
+      Alert.alert(MESSAGES.TITLES.SUCCESS, t('screens.clubFees.settingsSaved'));
     } catch (error) {
-      Alert.alert(MESSAGES.TITLES.ERROR, 'Failed to save fee settings');
+      Alert.alert(MESSAGES.TITLES.ERROR, t('screens.clubFees.failedToSave'));
     }
   };
 
@@ -190,12 +196,12 @@ const ClubFeesScreen = () => {
     const currentYear = new Date().getFullYear();
 
     Alert.alert(
-      'Generate Fees',
-      `Generate monthly fees for all members for ${currentYear}?`,
+      t('screens.clubFees.generateFees'),
+      t('screens.clubFees.generateFeesConfirm', { year: currentYear }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: ALERT_BUTTON_STYLE.CANCEL },
         {
-          text: 'Generate',
+          text: t('screens.clubFees.generate'),
           onPress: async () => {
             try {
               await paymentService.generateMonthlyFees(
@@ -205,10 +211,10 @@ const ClubFeesScreen = () => {
                 currentYear
               );
 
-              Alert.alert(MESSAGES.TITLES.SUCCESS, 'Fees generated successfully');
+              Alert.alert(MESSAGES.TITLES.SUCCESS, t('screens.clubFees.feesGenerated'));
               loadData(); // Reload balances
             } catch (error) {
-              Alert.alert(MESSAGES.TITLES.ERROR, 'Failed to generate fees');
+              Alert.alert(MESSAGES.TITLES.ERROR, t('screens.clubFees.failedToGenerate'));
             }
           },
         },
@@ -221,9 +227,9 @@ const ClubFeesScreen = () => {
   // ============================================
 
   const openChargeModal = () => {
-    setChargeDescription('');
-    setChargeAmount('');
-    setChargeDueDate('');
+    setChargeDescription(EMPTY_VALUE);
+    setChargeAmount(EMPTY_VALUE);
+    setChargeDueDate(EMPTY_VALUE);
     setChargeApplyToAll(true);
     setSelectedMemberIds([]);
     setChargeModalVisible(true);
@@ -274,18 +280,18 @@ const ClubFeesScreen = () => {
       );
 
       const memberText = chargeApplyToAll 
-        ? 'all members' 
-        : `${targetUserIds.length} member${targetUserIds.length > 1 ? 's' : ''}`;
+        ? t('screens.clubFees.allMembers') 
+        : t('screens.clubFees.memberCount', { count: targetUserIds.length });
       
       Alert.alert(
         MESSAGES.TITLES.SUCCESS, 
-        `Custom charge of $${amount.toFixed(2)} created for ${memberText}`
+        t('screens.clubFees.chargeCreated', { amount: amount.toFixed(2), members: memberText })
       );
       
       setChargeModalVisible(false);
-      setChargeDescription('');
-      setChargeAmount('');
-      setChargeDueDate('');
+      setChargeDescription(EMPTY_VALUE);
+      setChargeAmount(EMPTY_VALUE);
+      setChargeDueDate(EMPTY_VALUE);
       setChargeApplyToAll(true);
       setSelectedMemberIds([]);
       
@@ -303,12 +309,12 @@ const ClubFeesScreen = () => {
     if (!user?.clubId) return;
 
     Alert.alert(
-      'Notify All Members',
-      'Send balance notification to all members via WhatsApp?',
+      t('screens.clubFees.notifyAllMembers'),
+      t('screens.clubFees.notifyAllConfirm'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: ALERT_BUTTON_STYLE.CANCEL },
         {
-          text: 'Send',
+          text: t('screens.clubFees.send'),
           onPress: async () => {
             try {
               let notificationCount = 0;
@@ -322,10 +328,11 @@ const ClubFeesScreen = () => {
                   );
 
                   // Here you would integrate with your notification service
-                  console.log(
-                    `Notification to ${member.name} (${member.whatsappNumber}):`
-                  );
-                  console.log(message);
+                  logger.debug(LOG_MESSAGES.SCREENS.CLUB_FEES.NOTIFICATION_TO_MEMBER, { 
+                    name: member.name, 
+                    whatsappNumber: member.whatsappNumber,
+                    message 
+                  });
                   notificationCount++;
                 }
               }
@@ -343,11 +350,11 @@ const ClubFeesScreen = () => {
               }
 
               Alert.alert(
-                'Success',
-                `Notifications sent to ${notificationCount} members`
+                MESSAGES.TITLES.SUCCESS,
+                t('screens.clubFees.notificationsSent', { count: notificationCount })
               );
             } catch (error) {
-              Alert.alert(MESSAGES.TITLES.ERROR, 'Failed to send notifications');
+              Alert.alert(MESSAGES.TITLES.ERROR, t('screens.clubFees.failedToSendNotifications'));
             }
           },
         },
@@ -357,12 +364,12 @@ const ClubFeesScreen = () => {
 
   const notifySingleMember = async (member: User, balance: MemberBalance) => {
     Alert.alert(
-      'Notify Member',
-      `Send balance notification to ${member.name}?`,
+      t('screens.clubFees.notifyMember'),
+      t('screens.clubFees.notifyMemberConfirm', { name: member.name }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: ALERT_BUTTON_STYLE.CANCEL },
         {
-          text: 'Send',
+          text: t('screens.clubFees.send'),
           onPress: async () => {
             try {
               const message = await paymentService.getNotificationMessage(
@@ -371,14 +378,15 @@ const ClubFeesScreen = () => {
               );
 
               // Here you would integrate with your notification service
-              console.log(
-                `Notification to ${member.name} (${member.whatsappNumber}):`
-              );
-              console.log(message);
+              logger.debug(LOG_MESSAGES.SCREENS.CLUB_FEES.NOTIFICATION_TO_MEMBER, { 
+                name: member.name, 
+                whatsappNumber: member.whatsappNumber,
+                message 
+              });
 
-              Alert.alert(MESSAGES.TITLES.SUCCESS, 'Notification sent');
+              Alert.alert(MESSAGES.TITLES.SUCCESS, t('screens.clubFees.notificationSent'));
             } catch (error) {
-              Alert.alert(MESSAGES.TITLES.ERROR, 'Failed to send notification');
+              Alert.alert(MESSAGES.TITLES.ERROR, t('screens.clubFees.failedToSendNotification'));
             }
           },
         },
@@ -396,12 +404,12 @@ const ClubFeesScreen = () => {
         {/* Header Card */}
         <View style={styles.infoCard}>
           <View style={styles.infoIconContainer}>
-            <MaterialCommunityIcons name="information" size={20} color="{colors.primary}" />
+            <MaterialCommunityIcons name={ICONS.INFORMATION} size={designTokens.iconSize.md} color={colors.primary} />
           </View>
           <View style={styles.infoTextContainer}>
-            <Text style={styles.infoTitle}>Configure Monthly Fees</Text>
+            <Text style={styles.infoTitle}>{t('screens.clubFees.configureMonthlyFees')}</Text>
             <Text style={styles.infoText}>
-              Set up recurring monthly fees for your club members. Choose the months that require payment and the amount.
+              {t('screens.clubFees.setupDescription')}
             </Text>
           </View>
         </View>
@@ -410,9 +418,9 @@ const ClubFeesScreen = () => {
         <View style={styles.settingCard}>
           <View style={styles.settingRow}>
             <View style={styles.settingLabelContainer}>
-              <Text style={styles.settingLabel}>Enable Monthly Fees</Text>
+              <Text style={styles.settingLabel}>{t('screens.clubFees.enableMonthlyFees')}</Text>
               <Text style={styles.settingSubtext}>
-                Turn on to activate monthly fee collection
+                {t('screens.clubFees.activateFeeCollection')}
               </Text>
             </View>
             <Switch
@@ -426,8 +434,8 @@ const ClubFeesScreen = () => {
 
         {/* Amount Configuration */}
         <View style={styles.inputCard}>
-          <Text style={styles.inputLabel}>Monthly Fee Amount</Text>
-          <Text style={styles.inputSubtext}>Set the recurring monthly amount</Text>
+          <Text style={styles.inputLabel}>{t('screens.clubFees.monthlyFeeAmount')}</Text>
+          <Text style={styles.inputSubtext}>{t('screens.clubFees.setRecurringAmount')}</Text>
           <View style={styles.amountRow}>
             <View style={styles.amountInputContainer}>
               <Text style={styles.currencySymbol}>$</Text>
@@ -435,8 +443,8 @@ const ClubFeesScreen = () => {
                 style={styles.amountInput}
                 value={feeAmount}
                 onChangeText={setFeeAmount}
-                keyboardType="decimal-pad"
-                placeholder="0.00"
+                keyboardType={KEYBOARD_TYPE.DECIMAL_PAD}
+                placeholder={t('screens.clubFees.amountPlaceholder')}
                 placeholderTextColor={colors.textTertiary}
               />
             </View>
@@ -445,7 +453,7 @@ const ClubFeesScreen = () => {
                 style={styles.currencyInput}
                 value={currency}
                 onChangeText={setCurrency}
-                placeholder="USD"
+                placeholder={t('screens.clubFees.currencyPlaceholder')}
                 placeholderTextColor={colors.textTertiary}
                 maxLength={3}
               />
@@ -457,30 +465,31 @@ const ClubFeesScreen = () => {
         <View style={styles.inputCard}>
           <View style={styles.monthHeaderRow}>
             <View>
-              <Text style={styles.inputLabel}>Active Months</Text>
-              <Text style={styles.inputSubtext}>Select months that require payment</Text>
+              <Text style={styles.inputLabel}>{t('screens.clubFees.activeMonths')}</Text>
+              <Text style={styles.inputSubtext}>{t('screens.clubFees.selectMonthsPayment')}</Text>
             </View>
             <View style={styles.monthActions}>
               <TouchableOpacity onPress={selectAllMonths} style={styles.monthActionBtn}>
-                <Text style={styles.monthActionText}>All</Text>
+                <Text style={styles.monthActionText}>{t('screens.clubFees.all')}</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={clearAllMonths} style={styles.monthActionBtn}>
-                <Text style={styles.monthActionText}>None</Text>
+                <Text style={styles.monthActionText}>{t('screens.clubFees.none')}</Text>
               </TouchableOpacity>
             </View>
           </View>
 
           <View style={styles.monthGrid}>
-            {MONTHS.map((month, index) => {
+            {MONTH_KEYS.map((monthKey, index) => {
               const monthNumber = index + 1;
               const isSelected = selectedMonths.includes(monthNumber);
+              const monthName = t(monthKey);
 
               return (
                 <TouchableOpacity
                   key={monthNumber}
                   style={[styles.monthChip, isSelected && styles.monthChipSelected]}
                   onPress={() => toggleMonth(monthNumber)}
-                  activeOpacity={0.7}
+                  activeOpacity={TOUCH_OPACITY.default}
                 >
                   <Text
                     style={[
@@ -488,7 +497,7 @@ const ClubFeesScreen = () => {
                       isSelected && styles.monthChipTextSelected,
                     ]}
                   >
-                    {month.substring(0, 3)}
+                    {monthName.substring(0, 3)}
                   </Text>
                 </TouchableOpacity>
               );
@@ -501,21 +510,21 @@ const ClubFeesScreen = () => {
           <TouchableOpacity 
             style={styles.primaryButton} 
             onPress={saveFeeSettings}
-            activeOpacity={0.8}
+            activeOpacity={TOUCH_OPACITY.light}
           >
-            <MaterialCommunityIcons name="content-save" size={20} color="white" />
-            <Text style={styles.primaryButtonText}>Save Settings</Text>
+            <MaterialCommunityIcons name={ICONS.CONTENT_SAVE} size={designTokens.iconSize.md} color={designTokens.colors.white} />
+            <Text style={styles.primaryButtonText}>{t('screens.clubFees.saveSettings')}</Text>
           </TouchableOpacity>
 
           {feeSettingsActive && (
             <TouchableOpacity
               style={styles.secondaryButton}
               onPress={generateFeesForYear}
-              activeOpacity={0.8}
+              activeOpacity={TOUCH_OPACITY.light}
             >
-              <MaterialCommunityIcons name="calendar-plus" size={20} color="{colors.primary}" />
+              <MaterialCommunityIcons name={ICONS.CALENDAR_PLUS} size={designTokens.iconSize.md} color={colors.primary} />
               <Text style={styles.secondaryButtonText}>
-                Generate Fees for Current Year
+                {t('screens.clubFees.generateFeesCurrentYear')}
               </Text>
             </TouchableOpacity>
           )}
@@ -528,12 +537,12 @@ const ClubFeesScreen = () => {
     <View style={styles.tabContent}>
       <View style={styles.balancesHeader}>
         <View>
-          <Text style={styles.balancesTitle}>Member Balances</Text>
-          <Text style={styles.balancesSubtitle}>{balances.length} members</Text>
+          <Text style={styles.balancesTitle}>{t('screens.clubFees.memberBalances')}</Text>
+          <Text style={styles.balancesSubtitle}>{t('screens.clubFees.membersCount', { count: balances.length })}</Text>
         </View>
         <TouchableOpacity style={styles.notifyAllButton} onPress={notifyAllMembers}>
-          <MaterialCommunityIcons name="bell-ring-outline" size={18} color="white" />
-          <Text style={styles.notifyAllButtonText}>Notify All</Text>
+          <MaterialCommunityIcons name={ICONS.BELL_RING_OUTLINE} size={designTokens.iconSize.md} color={designTokens.colors.white} />
+          <Text style={styles.notifyAllButtonText}>{t('screens.clubFees.notifyAll')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -571,42 +580,42 @@ const ClubFeesScreen = () => {
                   style={styles.notifyButton}
                   onPress={() => notifySingleMember(member, item)}
                 >
-                  <MaterialCommunityIcons name="bell-outline" size={22} color="{colors.primary}" />
+                  <MaterialCommunityIcons name={ICONS.BELL_OUTLINE} size={designTokens.iconSize.lg} color={colors.primary} />
                 </TouchableOpacity>
               </View>
 
               <View style={styles.balanceDetails}>
                 <View style={styles.balanceRow}>
-                  <Text style={styles.balanceLabel}>Total Owed:</Text>
+                  <Text style={styles.balanceLabel}>{t('screens.clubFees.totalOwed')}</Text>
                   <Text style={styles.balanceValue}>
                     ${item.totalOwed.toFixed(2)}
                   </Text>
                 </View>
 
                 <View style={styles.balanceRow}>
-                  <Text style={styles.balanceLabel}>Total Paid:</Text>
+                  <Text style={styles.balanceLabel}>{t('screens.clubFees.totalPaid')}</Text>
                   <Text style={[styles.balanceValue, { color: colors.success }]}>
                     ${item.totalPaid.toFixed(2)}
                   </Text>
                 </View>
 
                 <View style={[styles.balanceRow, styles.balanceTotalRow]}>
-                  <Text style={styles.balanceTotalLabel}>Current Balance:</Text>
+                  <Text style={styles.balanceTotalLabel}>{t('screens.clubFees.currentBalance')}</Text>
                   <Text style={[styles.balanceTotalValue, { color: statusColor }]}>
                     ${Math.abs(item.balance).toFixed(2)}{' '}
-                    {item.balance < 0 ? '(owes)' : item.balance > 0 ? '(credit)' : ''}
+                    {item.balance < 0 ? t('screens.clubFees.owes') : item.balance > 0 ? t('screens.clubFees.credit') : EMPTY_VALUE}
                   </Text>
                 </View>
 
                 {item.overdueCharges > 0 && (
                   <View style={styles.overdueNotice}>
                     <MaterialCommunityIcons
-                      name="alert-circle"
-                      size={16}
-                      color="{colors.error}"
+                      name={ICONS.ALERT_CIRCLE}
+                      size={designTokens.iconSize.sm}
+                      color={colors.error}
                     />
                     <Text style={styles.overdueText}>
-                      ${item.overdueCharges.toFixed(2)} overdue
+                      {t('screens.clubFees.overdueAmount', { amount: item.overdueCharges.toFixed(2) })}
                     </Text>
                   </View>
                 )}
@@ -619,10 +628,10 @@ const ClubFeesScreen = () => {
         }
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <MaterialCommunityIcons name="wallet-outline" size={64} color={designTokens.colors.borderLight} />
-            <Text style={styles.emptyStateText}>No balances to display</Text>
+            <MaterialCommunityIcons name={ICONS.WALLET_OUTLINE} size={designTokens.iconSize['4xl']} color={designTokens.colors.borderLight} />
+            <Text style={styles.emptyStateText}>{t('screens.clubFees.noBalances')}</Text>
             <Text style={styles.emptyStateSubtext}>
-              Generate fees to see member balances
+              {t('screens.clubFees.generateFeesToSeeBalances')}
             </Text>
           </View>
         }
@@ -634,21 +643,21 @@ const ClubFeesScreen = () => {
     <View style={styles.tabContent}>
       <View style={styles.chargesHeader}>
         <View>
-          <Text style={styles.chargesTitle}>Custom Charges</Text>
+          <Text style={styles.chargesTitle}>{t('screens.clubFees.customCharges')}</Text>
           <Text style={styles.chargesSubtitle}>{customCharges.length} active charges</Text>
         </View>
         <TouchableOpacity style={styles.addChargeButton} onPress={openChargeModal}>
-          <MaterialCommunityIcons name="plus" size={18} color="white" />
-          <Text style={styles.addChargeButtonText}>New Charge</Text>
+          <MaterialCommunityIcons name={ICONS.PLUS} size={designTokens.iconSize.md} color={designTokens.colors.white} />
+          <Text style={styles.addChargeButtonText}>{t('screens.clubFees.newCharge')}</Text>
         </TouchableOpacity>
       </View>
 
       {customCharges.length === 0 ? (
         <View style={styles.emptyState}>
-          <MaterialCommunityIcons name="file-document-outline" size={64} color={designTokens.colors.borderLight} />
-          <Text style={styles.emptyStateText}>No custom charges</Text>
+          <MaterialCommunityIcons name={ICONS.FILE_DOCUMENT_OUTLINE} size={designTokens.iconSize['4xl']} color={designTokens.colors.borderLight} />
+          <Text style={styles.emptyStateText}>{t('screens.clubFees.noCustomCharges')}</Text>
           <Text style={styles.emptyStateSubtext}>
-            Create charges for special events or one-time fees
+            {t('screens.clubFees.createChargesDescription')}
           </Text>
         </View>
       ) : (
@@ -665,7 +674,7 @@ const ClubFeesScreen = () => {
 
               <View style={styles.chargeDetails}>
                 <View style={styles.chargeDetailRow}>
-                  <MaterialCommunityIcons name="calendar-outline" size={16} color={colors.textSecondary} />
+                  <MaterialCommunityIcons name={ICONS.CALENDAR_OUTLINE} size={designTokens.iconSize.sm} color={colors.textSecondary} />
                   <Text style={styles.chargeDetailText}>
                     Due: {new Date(item.dueDate).toLocaleDateString()}
                   </Text>
@@ -673,14 +682,14 @@ const ClubFeesScreen = () => {
 
                 <View style={styles.chargeDetailRow}>
                   <MaterialCommunityIcons
-                    name="account-group-outline"
-                    size={16}
+                    name={ICONS.ACCOUNT_GROUP_OUTLINE}
+                    size={designTokens.iconSize.sm}
                     color={colors.textSecondary}
                   />
                   <Text style={styles.chargeDetailText}>
                     {item.appliedToUserIds.length === 0
-                      ? 'All members'
-                      : `${item.appliedToUserIds.length} member${item.appliedToUserIds.length > 1 ? 's' : ''}`}
+                      ? t('screens.clubFees.allMembers')
+                      : t('screens.clubFees.memberCount', { count: item.appliedToUserIds.length })}
                   </Text>
                 </View>
               </View>
@@ -697,8 +706,8 @@ const ClubFeesScreen = () => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <MaterialCommunityIcons name="loading" size={48} color="{colors.primary}" />
-        <Text style={styles.loadingText}>Loading...</Text>
+        <MaterialCommunityIcons name={ICONS.LOADING} size={designTokens.iconSize['4xl']} color={colors.primary} />
+        <Text style={styles.loadingText}>{t('screens.clubFees.loading')}</Text>
       </View>
     );
   }
@@ -708,7 +717,7 @@ const ClubFeesScreen = () => {
       {/* Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerTitle}>Fee Management</Text>
+          <Text style={styles.headerTitle}>{t('screens.clubFees.title')}</Text>
           <Text style={styles.headerSubtitle}>{club?.name}</Text>
         </View>
       </View>
@@ -716,110 +725,110 @@ const ClubFeesScreen = () => {
       {/* Tabs */}
       <View style={styles.tabs}>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'settings' && styles.tabActive]}
-          onPress={() => setActiveTab('settings')}
-          activeOpacity={0.7}
+          style={[styles.tab, activeTab === FEE_TABS.SETTINGS && styles.tabActive]}
+          onPress={() => setActiveTab(FEE_TABS.SETTINGS)}
+          activeOpacity={TOUCH_OPACITY.default}
         >
           <MaterialCommunityIcons
-            name="cog-outline"
-            size={20}
-            color={activeTab === 'settings' ? colors.primary : colors.textSecondary}
+            name={ICONS.COG_OUTLINE}
+            size={designTokens.iconSize.md}
+            color={activeTab === FEE_TABS.SETTINGS ? colors.primary : colors.textSecondary}
           />
           <Text
             style={[
               styles.tabText,
-              activeTab === 'settings' && styles.tabTextActive,
+              activeTab === FEE_TABS.SETTINGS && styles.tabTextActive,
             ]}
           >
-            Settings
+            {t('screens.clubFees.tabs.settings')}
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'balances' && styles.tabActive]}
-          onPress={() => setActiveTab('balances')}
-          activeOpacity={0.7}
+          style={[styles.tab, activeTab === FEE_TABS.BALANCES && styles.tabActive]}
+          onPress={() => setActiveTab(FEE_TABS.BALANCES)}
+          activeOpacity={TOUCH_OPACITY.default}
         >
           <MaterialCommunityIcons
-            name="wallet-outline"
-            size={20}
-            color={activeTab === 'balances' ? colors.primary : colors.textSecondary}
+            name={ICONS.WALLET_OUTLINE}
+            size={designTokens.iconSize.md}
+            color={activeTab === FEE_TABS.BALANCES ? colors.primary : colors.textSecondary}
           />
           <Text
-            style={[styles.tabText, activeTab === 'balances' && styles.tabTextActive]}
+            style={[styles.tabText, activeTab === FEE_TABS.BALANCES && styles.tabTextActive]}
           >
-            Balances
+            {t('screens.clubFees.tabs.balances')}
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'charges' && styles.tabActive]}
-          onPress={() => setActiveTab('charges')}
-          activeOpacity={0.7}
+          style={[styles.tab, activeTab === FEE_TABS.CHARGES && styles.tabActive]}
+          onPress={() => setActiveTab(FEE_TABS.CHARGES)}
+          activeOpacity={TOUCH_OPACITY.default}
         >
           <MaterialCommunityIcons
-            name="file-document-outline"
-            size={20}
-            color={activeTab === 'charges' ? colors.primary : colors.textSecondary}
+            name={ICONS.FILE_DOCUMENT_OUTLINE}
+            size={designTokens.iconSize.md}
+            color={activeTab === FEE_TABS.CHARGES ? colors.primary : colors.textSecondary}
           />
           <Text
-            style={[styles.tabText, activeTab === 'charges' && styles.tabTextActive]}
+            style={[styles.tabText, activeTab === FEE_TABS.CHARGES && styles.tabTextActive]}
           >
-            Charges
+            {t('screens.clubFees.tabs.charges')}
           </Text>
         </TouchableOpacity>
       </View>
 
       {/* Content */}
-      {activeTab === 'settings' && renderSettingsTab()}
-      {activeTab === 'balances' && renderBalancesTab()}
-      {activeTab === 'charges' && renderChargesTab()}
+      {activeTab === FEE_TABS.SETTINGS && renderSettingsTab()}
+      {activeTab === FEE_TABS.BALANCES && renderBalancesTab()}
+      {activeTab === FEE_TABS.CHARGES && renderChargesTab()}
 
       {/* Custom Charge Modal */}
       <Modal
         visible={chargeModalVisible}
-        animationType="fade"
+        animationType={ANIMATION.FADE}
         transparent={true}
         onRequestClose={() => setChargeModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { width: modalWidth, maxHeight: windowHeight * 0.85 }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Create Custom Charge</Text>
+              <Text style={styles.modalTitle}>{t('screens.clubFees.createCustomCharge')}</Text>
               <TouchableOpacity
                 onPress={() => setChargeModalVisible(false)}
                 style={styles.modalCloseButton}
               >
-                <MaterialCommunityIcons name="close" size={24} color={colors.textSecondary} />
+                <MaterialCommunityIcons name={ICONS.CLOSE} size={designTokens.iconSize.lg} color={colors.textSecondary} />
               </TouchableOpacity>
             </View>
 
             <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
               {/* Description */}
               <View style={styles.modalInputGroup}>
-                <Text style={styles.modalLabel}>Description *</Text>
+                <Text style={styles.modalLabel}>{t('screens.clubFees.description')}</Text>
                 <TextInput
                   style={styles.modalInput}
                   value={chargeDescription}
                   onChangeText={setChargeDescription}
-                  placeholder="e.g., Summer Camp, Special Event"
+                  placeholder={t('screens.clubFees.descriptionPlaceholder')}
                   placeholderTextColor={colors.textTertiary}
                   multiline
-                  numberOfLines={2}
+                  numberOfLines={TEXT_LINES.double}
                 />
               </View>
 
               {/* Amount */}
               <View style={styles.modalInputGroup}>
-                <Text style={styles.modalLabel}>Amount *</Text>
+                <Text style={styles.modalLabel}>{t('screens.clubFees.amount')}</Text>
                 <View style={styles.amountInputContainer}>
                   <Text style={styles.currencySymbol}>$</Text>
                   <TextInput
-                    style={[styles.amountInput, {paddingLeft: 0}]}
+                    style={[styles.amountInput, {paddingLeft: designTokens.spacing.none}]}
                     value={chargeAmount}
                     onChangeText={setChargeAmount}
-                    keyboardType="decimal-pad"
-                    placeholder="0.00"
+                    keyboardType={KEYBOARD_TYPE.DECIMAL_PAD}
+                    placeholder={t('screens.clubFees.amountPlaceholder')}
                     placeholderTextColor={colors.textTertiary}
                   />
                 </View>
@@ -827,7 +836,7 @@ const ClubFeesScreen = () => {
 
               {/* Due Date */}
               <View style={styles.modalInputGroup}>
-                <Text style={styles.modalLabel}>Due Date *</Text>
+                <Text style={styles.modalLabel}>{t('screens.clubFees.dueDateLabel')}</Text>
                 <TextInput
                   style={styles.modalInput}
                   value={chargeDueDate}
@@ -835,12 +844,12 @@ const ClubFeesScreen = () => {
                   placeholder={DATE_FORMATS.ISO_DATE}
                   placeholderTextColor={colors.textTertiary}
                 />
-                <Text style={styles.modalHint}>Format: 2025-12-31</Text>
+                <Text style={styles.modalHint}>{t('screens.clubFees.dueDateFormat')}</Text>
               </View>
 
               {/* Apply To */}
               <View style={styles.modalInputGroup}>
-                <Text style={styles.modalLabel}>Apply To</Text>
+                <Text style={styles.modalLabel}>{t('screens.clubFees.applyTo')}</Text>
                 <View style={styles.applyToContainer}>
                   <TouchableOpacity
                     style={[
@@ -851,11 +860,11 @@ const ClubFeesScreen = () => {
                       setChargeApplyToAll(true);
                       setSelectedMemberIds([]);
                     }}
-                    activeOpacity={0.7}
+                    activeOpacity={TOUCH_OPACITY.default}
                   >
                     <MaterialCommunityIcons
-                      name="account-group"
-                      size={20}
+                      name={ICONS.ACCOUNT_GROUP}
+                      size={designTokens.iconSize.md}
                       color={chargeApplyToAll ? colors.primary : colors.textSecondary}
                     />
                     <Text
@@ -864,7 +873,7 @@ const ClubFeesScreen = () => {
                         chargeApplyToAll && styles.applyToTextActive,
                       ]}
                     >
-                      All Members
+                      {t('screens.clubFees.allMembersOption')}
                     </Text>
                   </TouchableOpacity>
 
@@ -874,11 +883,11 @@ const ClubFeesScreen = () => {
                       !chargeApplyToAll && styles.applyToOptionActive,
                     ]}
                     onPress={() => setChargeApplyToAll(false)}
-                    activeOpacity={0.7}
+                    activeOpacity={TOUCH_OPACITY.default}
                   >
                     <MaterialCommunityIcons
-                      name="account-multiple-check"
-                      size={20}
+                      name={ICONS.ACCOUNT_MULTIPLE_CHECK}
+                      size={designTokens.iconSize.md}
                       color={!chargeApplyToAll ? colors.primary : colors.textSecondary}
                     />
                     <Text
@@ -887,7 +896,7 @@ const ClubFeesScreen = () => {
                         !chargeApplyToAll && styles.applyToTextActive,
                       ]}
                     >
-                      Select Members
+                      {t('screens.clubFees.selectMembersOption')}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -897,7 +906,7 @@ const ClubFeesScreen = () => {
                   <View style={styles.memberSelectionContainer}>
                     <View style={styles.memberSelectionHeader}>
                       <Text style={styles.memberSelectionTitle}>
-                        {selectedMemberIds.length} of {members.length} selected
+                        {t('screens.clubFees.selectedOfTotal', { selected: selectedMemberIds.length, total: members.length })}
                       </Text>
                       <TouchableOpacity
                         onPress={() => {
@@ -910,7 +919,7 @@ const ClubFeesScreen = () => {
                         style={styles.selectAllButton}
                       >
                         <Text style={styles.selectAllText}>
-                          {selectedMemberIds.length === members.length ? 'Clear All' : 'Select All'}
+                          {selectedMemberIds.length === members.length ? t('screens.clubFees.clearAll') : t('screens.clubFees.selectAll')}
                         </Text>
                       </TouchableOpacity>
                     </View>
@@ -932,7 +941,7 @@ const ClubFeesScreen = () => {
                                 setSelectedMemberIds([...selectedMemberIds, member.id]);
                               }
                             }}
-                            activeOpacity={0.7}
+                            activeOpacity={TOUCH_OPACITY.default}
                           >
                             <View style={styles.memberItemLeft}>
                               <View style={[
@@ -940,7 +949,7 @@ const ClubFeesScreen = () => {
                                 isSelected && styles.checkboxSelected,
                               ]}>
                                 {isSelected && (
-                                  <MaterialCommunityIcons name="check" size={16} color="white" />
+                                  <MaterialCommunityIcons name={ICONS.CHECK} size={designTokens.iconSize.sm} color={designTokens.colors.white} />
                                 )}
                               </View>
                               <View style={styles.memberItemInfo}>
@@ -961,18 +970,18 @@ const ClubFeesScreen = () => {
               <TouchableOpacity
                 style={styles.modalCancelButton}
                 onPress={() => setChargeModalVisible(false)}
-                activeOpacity={0.7}
+                activeOpacity={TOUCH_OPACITY.default}
               >
-                <Text style={styles.modalCancelText}>Cancel</Text>
+                <Text style={styles.modalCancelText}>{t('common.cancel')}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.modalCreateButton}
                 onPress={createCustomCharge}
-                activeOpacity={0.8}
+                activeOpacity={TOUCH_OPACITY.light}
               >
-                <MaterialCommunityIcons name="plus-circle" size={20} color="white" />
-                <Text style={styles.modalCreateText}>Create Charge</Text>
+                <MaterialCommunityIcons name={ICONS.PLUS_CIRCLE} size={designTokens.iconSize.md} color={designTokens.colors.white} />
+                <Text style={styles.modalCreateText}>{t('screens.clubFees.createCharge')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -984,56 +993,56 @@ const ClubFeesScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: flexValues.one,
     backgroundColor: designTokens.colors.backgroundSecondary,
   },
   loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    flex: flexValues.one,
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
     backgroundColor: designTokens.colors.backgroundSecondary,
   },
   loadingText: {
-    marginTop: 16,
+    marginTop: designTokens.spacing.lg,
     fontSize: mobileFontSizes.lg,
     color: designTokens.colors.textSecondary,
   },
   header: {
     backgroundColor: designTokens.colors.primary,
     padding: designTokens.spacing.xl,
-    paddingTop: 60,
-    paddingBottom: 24,
+    paddingTop: designTokens.spacing['6xl'],
+    paddingBottom: designTokens.spacing['2xl'],
   },
   headerTitle: {
     fontSize: mobileFontSizes['4xl'],
-    fontWeight: 'bold',
-    color: 'white',
-    marginBottom: 4,
+    fontWeight: designTokens.fontWeight.bold,
+    color: designTokens.colors.white,
+    marginBottom: designTokens.spacing.xs,
   },
   headerSubtitle: {
     fontSize: mobileFontSizes.sm,
-    color: 'rgba(255, 255, 255, 0.85)',
+    color: designTokens.overlay.lightOpaque,
   },
   tabs: {
-    flexDirection: 'row',
+    flexDirection: layoutConstants.flexDirection.row,
     backgroundColor: designTokens.colors.backgroundPrimary,
-    borderBottomWidth: 1,
+    borderBottomWidth: designTokens.borderWidth.thin,
     borderBottomColor: designTokens.colors.borderLight,
-    elevation: 2,
+    elevation: designTokens.shadows.sm.elevation,
     shadowColor: designTokens.colors.textPrimary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
+    shadowOffset: shadowOffsetValues.md,
+    shadowOpacity: designTokens.shadows.sm.shadowOpacity,
+    shadowRadius: designTokens.shadows.sm.shadowRadius,
   },
   tab: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    gap: 8,
-    borderBottomWidth: 3,
-    borderBottomColor: 'transparent',
+    flex: flexValues.one,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
+    paddingVertical: designTokens.spacing.lg,
+    gap: designTokens.spacing.sm,
+    borderBottomWidth: designTokens.borderWidth.thick,
+    borderBottomColor: designTokens.colors.transparent,
   },
   tabActive: {
     borderBottomColor: designTokens.colors.primary,
@@ -1041,70 +1050,66 @@ const styles = StyleSheet.create({
   tabText: {
     fontSize: mobileFontSizes.sm,
     color: designTokens.colors.textSecondary,
-    fontWeight: '500',
+    fontWeight: designTokens.fontWeight.medium,
   },
   tabTextActive: {
     color: designTokens.colors.primary,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
   },
   tabContent: {
-    flex: 1,
+    flex: flexValues.one,
   },
   section: {
     padding: designTokens.spacing.lg,
   },
   infoCard: {
-    flexDirection: 'row',
+    flexDirection: layoutConstants.flexDirection.row,
     backgroundColor: designTokens.colors.primaryLight,
     borderRadius: designTokens.borderRadius.lg,
     padding: designTokens.spacing.lg,
-    marginBottom: 20,
-    borderLeftWidth: 4,
+    marginBottom: designTokens.spacing.xl,
+    borderLeftWidth: designTokens.borderWidth.heavy,
     borderLeftColor: designTokens.colors.primary,
   },
   infoIconContainer: {
-    marginRight: 12,
-    marginTop: 2,
+    marginRight: designTokens.spacing.md,
+    marginTop: designTokens.spacing.xxs,
   },
   infoTextContainer: {
-    flex: 1,
+    flex: flexValues.one,
   },
   infoTitle: {
     fontSize: mobileFontSizes.md,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
     color: designTokens.colors.primary,
-    marginBottom: 4,
+    marginBottom: designTokens.spacing.xs,
   },
   infoText: {
     fontSize: mobileFontSizes.xs,
     color: designTokens.colors.primary,
-    lineHeight: 18,
+    lineHeight: designTokens.spacing.lg + designTokens.spacing.xxs,
   },
   settingCard: {
     backgroundColor: designTokens.colors.backgroundPrimary,
     borderRadius: designTokens.borderRadius.lg,
     padding: designTokens.spacing.lg,
-    marginBottom: 16,
-    elevation: 2,
-    shadowColor: designTokens.colors.textPrimary,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
+    marginBottom: designTokens.spacing.lg,
+    ...designTokens.shadow.sm,
   },
   settingRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    justifyContent: layoutConstants.justifyContent.spaceBetween,
+    alignItems: layoutConstants.alignItems.center,
   },
   settingLabelContainer: {
-    flex: 1,
-    marginRight: 16,
+    flex: flexValues.one,
+    marginRight: designTokens.spacing.lg,
   },
   settingLabel: {
     fontSize: mobileFontSizes.lg,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
     color: designTokens.colors.textPrimary,
-    marginBottom: 4,
+    marginBottom: designTokens.spacing.xs,
   },
   settingSubtext: {
     fontSize: mobileFontSizes.xs,
@@ -1114,100 +1119,96 @@ const styles = StyleSheet.create({
     backgroundColor: designTokens.colors.backgroundPrimary,
     borderRadius: designTokens.borderRadius.lg,
     padding: designTokens.spacing.lg,
-    marginBottom: 16,
-    elevation: 2,
-    shadowColor: designTokens.colors.textPrimary,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
+    marginBottom: designTokens.spacing.lg,
+    ...designTokens.shadow.sm,
   },
   inputLabel: {
     fontSize: mobileFontSizes.md,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
     color: designTokens.colors.textPrimary,
-    marginBottom: 4,
+    marginBottom: designTokens.spacing.xs,
   },
   inputSubtext: {
     fontSize: mobileFontSizes.xs,
     color: designTokens.colors.textSecondary,
-    marginBottom: 12,
+    marginBottom: designTokens.spacing.md,
   },
   amountRow: {
-    flexDirection: 'row',
-    gap: 12,
+    flexDirection: layoutConstants.flexDirection.row,
+    gap: designTokens.spacing.md,
   },
   amountInputContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flex: flexValues.one,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     backgroundColor: designTokens.colors.backgroundSecondary,
-    borderWidth: 1,
+    borderWidth: designTokens.borderWidth.thin,
     borderColor: designTokens.colors.borderLight,
-    borderRadius: 10,
-    paddingHorizontal: 16,
+    borderRadius: designTokens.radius.lg,
+    paddingHorizontal: designTokens.spacing.lg,
   },
   currencySymbol: {
     fontSize: mobileFontSizes.xl,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
     color: designTokens.colors.primary,
-    marginRight: 8,
+    marginRight: designTokens.spacing.sm,
   },
   amountInput: {
-    flex: 1,
-    padding: 14, // Custom spacing
+    flex: flexValues.one,
+    padding: designTokens.spacing.md + designTokens.spacing.xxs,
     fontSize: mobileFontSizes.lg,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
     color: designTokens.colors.textPrimary,
   },
   currencyInputContainer: {
-    width: 100,
+    width: designTokens.spacing['8xl'] + designTokens.spacing.xs,
     backgroundColor: designTokens.colors.backgroundSecondary,
-    borderWidth: 1,
+    borderWidth: designTokens.borderWidth.thin,
     borderColor: designTokens.colors.borderLight,
-    borderRadius: 10,
+    borderRadius: designTokens.radius.lg,
   },
   currencyInput: {
-    padding: 14, // Custom spacing
+    padding: designTokens.spacing.md + designTokens.spacing.xxs,
     fontSize: mobileFontSizes.lg,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
     color: designTokens.colors.textPrimary,
-    textAlign: 'center',
+    textAlign: layoutConstants.textAlign.center,
   },
   monthHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 16,
+    flexDirection: layoutConstants.flexDirection.row,
+    justifyContent: layoutConstants.justifyContent.spaceBetween,
+    alignItems: layoutConstants.alignItems.flexStart,
+    marginBottom: designTokens.spacing.lg,
   },
   monthActions: {
-    flexDirection: 'row',
-    gap: 12,
+    flexDirection: layoutConstants.flexDirection.row,
+    gap: designTokens.spacing.md,
   },
   monthActionBtn: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingVertical: designTokens.spacing.xs + designTokens.spacing.xxs,
+    paddingHorizontal: designTokens.spacing.md,
     backgroundColor: designTokens.colors.borderLight,
     borderRadius: designTokens.borderRadius.sm,
   },
   monthActionText: {
     fontSize: mobileFontSizes.xs,
     color: designTokens.colors.primary,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
   },
   monthGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
+    flexDirection: layoutConstants.flexDirection.row,
+    flexWrap: layoutConstants.flexWrap.wrap,
+    gap: designTokens.spacing.sm + designTokens.spacing.xxs,
   },
   monthChip: {
-    paddingVertical: 10,
-    paddingHorizontal: 18,
+    paddingVertical: designTokens.spacing.sm + designTokens.spacing.xxs,
+    paddingHorizontal: designTokens.spacing.lg + designTokens.spacing.xxs,
     borderRadius: designTokens.borderRadius.md,
     backgroundColor: designTokens.colors.backgroundSecondary,
-    borderWidth: 1.5,
+    borderWidth: designTokens.borderWidth.medium,
     borderColor: designTokens.colors.borderLight,
-    minWidth: 70,
-    alignItems: 'center',
+    minWidth: designTokens.spacing['6xl'] + designTokens.spacing.xs,
+    alignItems: layoutConstants.alignItems.center,
   },
   monthChipSelected: {
     backgroundColor: designTokens.colors.primary,
@@ -1216,98 +1217,90 @@ const styles = StyleSheet.create({
   monthChipText: {
     fontSize: mobileFontSizes.xs,
     color: designTokens.colors.textSecondary,
-    fontWeight: '500',
+    fontWeight: designTokens.fontWeight.medium,
   },
   monthChipTextSelected: {
-    color: 'white',
-    fontWeight: '600',
+    color: designTokens.colors.white,
+    fontWeight: designTokens.fontWeight.semibold,
   },
   actionButtonsContainer: {
-    gap: 12,
-    marginTop: 8,
+    gap: designTokens.spacing.md,
+    marginTop: designTokens.spacing.sm,
   },
   primaryButton: {
     backgroundColor: designTokens.colors.primary,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    borderRadius: 10,
-    gap: 10,
-    elevation: 3,
-    shadowColor: designTokens.colors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
+    paddingVertical: designTokens.spacing.lg,
+    borderRadius: designTokens.radius.lg,
+    gap: designTokens.spacing.sm + designTokens.spacing.xxs,
+    ...designTokens.shadow.md,
   },
   primaryButtonText: {
-    color: 'white',
+    color: designTokens.colors.white,
     fontSize: mobileFontSizes.lg,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
   },
   secondaryButton: {
     backgroundColor: designTokens.colors.backgroundPrimary,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    borderRadius: 10,
-    gap: 10,
-    borderWidth: 2,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
+    paddingVertical: designTokens.spacing.lg,
+    borderRadius: designTokens.radius.lg,
+    gap: designTokens.spacing.sm + designTokens.spacing.xxs,
+    borderWidth: designTokens.borderWidth.medium,
     borderColor: designTokens.colors.primary,
   },
   secondaryButtonText: {
     color: designTokens.colors.primary,
     fontSize: mobileFontSizes.lg,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
   },
   balancesHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    justifyContent: layoutConstants.justifyContent.spaceBetween,
+    alignItems: layoutConstants.alignItems.center,
     padding: designTokens.spacing.lg,
     backgroundColor: designTokens.colors.backgroundPrimary,
-    borderBottomWidth: 1,
+    borderBottomWidth: designTokens.borderWidth.thin,
     borderBottomColor: designTokens.colors.borderLight,
   },
   balancesTitle: {
     fontSize: mobileFontSizes.xl,
-    fontWeight: '700',
+    fontWeight: designTokens.fontWeight.bold,
     color: designTokens.colors.textPrimary,
   },
   balancesSubtitle: {
     fontSize: mobileFontSizes.xs,
     color: designTokens.colors.textSecondary,
-    marginTop: 2,
+    marginTop: designTokens.spacing.xxs,
   },
   chargesTitle: {
     fontSize: mobileFontSizes.xl,
-    fontWeight: '700',
+    fontWeight: designTokens.fontWeight.bold,
     color: designTokens.colors.textPrimary,
   },
   chargesSubtitle: {
     fontSize: mobileFontSizes.xs,
     color: designTokens.colors.textSecondary,
-    marginTop: 2,
+    marginTop: designTokens.spacing.xxs,
   },
   notifyAllButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     backgroundColor: designTokens.colors.primary,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingVertical: designTokens.spacing.sm + designTokens.spacing.xxs,
+    paddingHorizontal: designTokens.spacing.lg,
     borderRadius: designTokens.borderRadius.md,
-    gap: 8,
-    elevation: 2,
-    shadowColor: designTokens.colors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
+    gap: designTokens.spacing.sm,
+    ...designTokens.shadow.sm,
   },
   notifyAllButtonText: {
-    color: 'white',
+    color: designTokens.colors.white,
     fontSize: mobileFontSizes.sm,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
   },
   listContainer: {
     padding: designTokens.spacing.lg,
@@ -1316,45 +1309,41 @@ const styles = StyleSheet.create({
     backgroundColor: designTokens.colors.backgroundPrimary,
     borderRadius: designTokens.borderRadius.lg,
     padding: designTokens.spacing.lg,
-    marginBottom: 12,
-    elevation: 2,
-    shadowColor: designTokens.colors.textPrimary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
+    marginBottom: designTokens.spacing.md,
+    ...designTokens.shadow.sm,
   },
   balanceHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
+    flexDirection: layoutConstants.flexDirection.row,
+    justifyContent: layoutConstants.justifyContent.spaceBetween,
+    alignItems: layoutConstants.alignItems.center,
+    marginBottom: designTokens.spacing.lg,
   },
   memberInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    flex: 1,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    gap: designTokens.spacing.md,
+    flex: flexValues.one,
   },
   balanceAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: designTokens.touchTarget.minimum,
+    height: designTokens.touchTarget.minimum,
+    borderRadius: designTokens.touchTarget.minimum / 2,
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
   },
   balanceAvatarText: {
-    color: 'white',
+    color: designTokens.colors.white,
     fontSize: mobileFontSizes.xl,
-    fontWeight: 'bold',
+    fontWeight: designTokens.fontWeight.bold,
   },
   memberTextInfo: {
-    flex: 1,
+    flex: flexValues.one,
   },
   balanceName: {
     fontSize: mobileFontSizes.lg,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
     color: designTokens.colors.textPrimary,
-    marginBottom: 2,
+    marginBottom: designTokens.spacing.xxs,
   },
   balanceEmail: {
     fontSize: mobileFontSizes.xs,
@@ -1364,12 +1353,12 @@ const styles = StyleSheet.create({
     padding: designTokens.spacing.sm,
   },
   balanceDetails: {
-    gap: 10,
+    gap: designTokens.spacing.sm + designTokens.spacing.xxs,
   },
   balanceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    justifyContent: layoutConstants.justifyContent.spaceBetween,
+    alignItems: layoutConstants.alignItems.center,
   },
   balanceLabel: {
     fontSize: mobileFontSizes.sm,
@@ -1377,160 +1366,148 @@ const styles = StyleSheet.create({
   },
   balanceValue: {
     fontSize: mobileFontSizes.md,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
     color: designTokens.colors.textPrimary,
   },
   balanceTotalRow: {
-    marginTop: 8,
-    paddingTop: 12,
-    borderTopWidth: 1,
+    marginTop: designTokens.spacing.sm,
+    paddingTop: designTokens.spacing.md,
+    borderTopWidth: designTokens.borderWidth.thin,
     borderTopColor: designTokens.colors.borderLight,
   },
   balanceTotalLabel: {
     fontSize: mobileFontSizes.md,
-    fontWeight: '700',
+    fontWeight: designTokens.fontWeight.bold,
     color: designTokens.colors.textPrimary,
   },
   balanceTotalValue: {
     fontSize: mobileFontSizes.xl,
-    fontWeight: 'bold',
+    fontWeight: designTokens.fontWeight.bold,
   },
   overdueNotice: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     backgroundColor: designTokens.colors.errorLight,
-    padding: 10, // Custom spacing
+    padding: designTokens.spacing.sm + designTokens.spacing.xxs,
     borderRadius: designTokens.borderRadius.md,
-    gap: 8,
-    marginTop: 8,
-    borderLeftWidth: 3,
+    gap: designTokens.spacing.sm,
+    marginTop: designTokens.spacing.sm,
+    borderLeftWidth: designTokens.borderWidth.thick,
     borderLeftColor: designTokens.colors.error,
   },
   overdueText: {
     fontSize: mobileFontSizes.xs,
     color: designTokens.colors.error,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
   },
   chargesHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    justifyContent: layoutConstants.justifyContent.spaceBetween,
+    alignItems: layoutConstants.alignItems.center,
     padding: designTokens.spacing.lg,
     backgroundColor: designTokens.colors.backgroundPrimary,
-    borderBottomWidth: 1,
+    borderBottomWidth: designTokens.borderWidth.thin,
     borderBottomColor: designTokens.colors.borderLight,
   },
   addChargeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     backgroundColor: designTokens.colors.primary,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingVertical: designTokens.spacing.sm + designTokens.spacing.xxs,
+    paddingHorizontal: designTokens.spacing.lg,
     borderRadius: designTokens.borderRadius.md,
-    gap: 6,
-    elevation: 2,
-    shadowColor: designTokens.colors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
+    gap: designTokens.spacing.xs + designTokens.spacing.xxs,
+    ...designTokens.shadow.sm,
   },
   addChargeButtonText: {
-    color: 'white',
+    color: designTokens.colors.white,
     fontSize: mobileFontSizes.sm,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
   },
   chargeCard: {
     backgroundColor: designTokens.colors.backgroundPrimary,
     borderRadius: designTokens.borderRadius.lg,
     padding: designTokens.spacing.lg,
-    marginBottom: 12,
-    elevation: 2,
-    shadowColor: designTokens.colors.textPrimary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    borderLeftWidth: 4,
+    marginBottom: designTokens.spacing.md,
+    ...designTokens.shadow.sm,
+    borderLeftWidth: designTokens.borderWidth.heavy,
     borderLeftColor: designTokens.colors.primary,
   },
   chargeHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
+    flexDirection: layoutConstants.flexDirection.row,
+    justifyContent: layoutConstants.justifyContent.spaceBetween,
+    alignItems: layoutConstants.alignItems.flexStart,
+    marginBottom: designTokens.spacing.md,
   },
   chargeDescription: {
     fontSize: mobileFontSizes.lg,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
     color: designTokens.colors.textPrimary,
-    flex: 1,
-    marginRight: 12,
+    flex: flexValues.one,
+    marginRight: designTokens.spacing.md,
   },
   chargeAmount: {
     fontSize: mobileFontSizes['2xl'],
-    fontWeight: 'bold',
+    fontWeight: designTokens.fontWeight.bold,
     color: designTokens.colors.primary,
   },
   chargeDetails: {
-    gap: 8,
+    gap: designTokens.spacing.sm,
   },
   chargeDetailRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    gap: designTokens.spacing.sm,
   },
   chargeDetailText: {
     fontSize: mobileFontSizes.sm,
     color: designTokens.colors.textSecondary,
   },
   emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 60,
-    paddingHorizontal: 40,
+    flex: flexValues.one,
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
+    paddingVertical: designTokens.spacing['6xl'],
+    paddingHorizontal: designTokens.spacing['4xl'],
   },
   emptyStateText: {
-    fontSize: mobileFontSizes.lg, // Using design token
-    fontWeight: '600',
+    fontSize: mobileFontSizes.lg,
+    fontWeight: designTokens.fontWeight.semibold,
     color: designTokens.colors.textTertiary,
-    marginTop: 16,
-    textAlign: 'center',
+    marginTop: designTokens.spacing.lg,
+    textAlign: layoutConstants.textAlign.center,
   },
   emptyStateSubtext: {
     fontSize: mobileFontSizes.sm,
     color: designTokens.colors.borderLight,
-    marginTop: 8,
-    textAlign: 'center',
-    lineHeight: 20,
+    marginTop: designTokens.spacing.sm,
+    textAlign: layoutConstants.textAlign.center,
+    lineHeight: designTokens.spacing.xl,
   },
   // Modal styles
   modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flex: flexValues.one,
+    backgroundColor: designTokens.overlay.darkMedium,
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
     padding: designTokens.spacing.xl,
   },
   modalContent: {
     backgroundColor: designTokens.colors.backgroundPrimary,
     borderRadius: designTokens.borderRadius.xxl,
-    elevation: 5,
-    shadowColor: designTokens.colors.textPrimary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
+    ...designTokens.shadow['2xl'],
   },
   modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    justifyContent: layoutConstants.justifyContent.spaceBetween,
+    alignItems: layoutConstants.alignItems.center,
     padding: designTokens.spacing.xl,
-    borderBottomWidth: 1,
+    borderBottomWidth: designTokens.borderWidth.thin,
     borderBottomColor: designTokens.colors.borderLight,
   },
   modalTitle: {
     fontSize: mobileFontSizes['2xl'],
-    fontWeight: '700',
+    fontWeight: designTokens.fontWeight.bold,
     color: designTokens.colors.textPrimary,
   },
   modalCloseButton: {
@@ -1538,47 +1515,47 @@ const styles = StyleSheet.create({
   },
   modalBody: {
     padding: designTokens.spacing.xl,
-    maxHeight: 600,
+    maxHeight: dimensionValues.maxHeight.modalBodyLarge,
   },
   modalInputGroup: {
-    marginBottom: 24,
+    marginBottom: designTokens.spacing['2xl'],
   },
   modalLabel: {
     fontSize: mobileFontSizes.md,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
     color: designTokens.colors.textPrimary,
-    marginBottom: 8,
+    marginBottom: designTokens.spacing.sm,
   },
   modalInput: {
     backgroundColor: designTokens.colors.backgroundSecondary,
-    borderWidth: 1,
+    borderWidth: designTokens.borderWidth.thin,
     borderColor: designTokens.colors.borderLight,
-    borderRadius: 10,
-    padding: 14, // Custom spacing
+    borderRadius: designTokens.radius.lg,
+    padding: designTokens.spacing.md + designTokens.spacing.xxs,
     fontSize: mobileFontSizes.lg,
     color: designTokens.colors.textPrimary,
   },
   modalHint: {
-    fontSize: mobileFontSizes.xs, // Using design token (minimum readable)
+    fontSize: mobileFontSizes.xs,
     color: designTokens.colors.textTertiary,
-    marginTop: 6,
+    marginTop: designTokens.spacing.xs + designTokens.spacing.xxs,
   },
   applyToContainer: {
-    flexDirection: 'row',
-    gap: 12,
+    flexDirection: layoutConstants.flexDirection.row,
+    gap: designTokens.spacing.md,
   },
   applyToOption: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 14,
-    paddingHorizontal: 12,
+    flex: flexValues.one,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
+    gap: designTokens.spacing.sm,
+    paddingVertical: designTokens.spacing.md + designTokens.spacing.xxs,
+    paddingHorizontal: designTokens.spacing.md,
     backgroundColor: designTokens.colors.backgroundSecondary,
-    borderWidth: 2,
+    borderWidth: designTokens.borderWidth.medium,
     borderColor: designTokens.colors.borderLight,
-    borderRadius: 10,
+    borderRadius: designTokens.radius.lg,
   },
   applyToOptionActive: {
     backgroundColor: designTokens.colors.primaryLight,
@@ -1586,55 +1563,55 @@ const styles = StyleSheet.create({
   },
   applyToText: {
     fontSize: mobileFontSizes.sm,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
     color: designTokens.colors.textSecondary,
   },
   applyToTextActive: {
     color: designTokens.colors.primary,
   },
   memberSelectionContainer: {
-    marginTop: 16,
+    marginTop: designTokens.spacing.lg,
     backgroundColor: designTokens.colors.backgroundSecondary,
     borderRadius: designTokens.borderRadius.lg,
     padding: designTokens.spacing.md,
-    maxHeight: 250,
+    maxHeight: designTokens.spacing['8xl'] * 2 + designTokens.spacing['6xl'],
   },
   memberSelectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
+    flexDirection: layoutConstants.flexDirection.row,
+    justifyContent: layoutConstants.justifyContent.spaceBetween,
+    alignItems: layoutConstants.alignItems.center,
+    marginBottom: designTokens.spacing.md,
+    paddingBottom: designTokens.spacing.md,
+    borderBottomWidth: designTokens.borderWidth.thin,
     borderBottomColor: designTokens.colors.borderLight,
   },
   memberSelectionTitle: {
     fontSize: mobileFontSizes.sm,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
     color: designTokens.colors.textPrimary,
   },
   selectAllButton: {
-    paddingVertical: 4,
-    paddingHorizontal: 12,
+    paddingVertical: designTokens.spacing.xs,
+    paddingHorizontal: designTokens.spacing.md,
     backgroundColor: designTokens.colors.infoLight,
     borderRadius: designTokens.borderRadius.sm,
   },
   selectAllText: {
     fontSize: mobileFontSizes.xs,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
     color: designTokens.colors.info,
   },
   membersList: {
-    gap: 8,
+    gap: designTokens.spacing.sm,
   },
   memberItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.spaceBetween,
     padding: designTokens.spacing.md,
     backgroundColor: designTokens.colors.backgroundPrimary,
-    borderRadius: 10,
-    borderWidth: 1.5,
+    borderRadius: designTokens.radius.lg,
+    borderWidth: designTokens.borderWidth.medium,
     borderColor: designTokens.colors.borderLight,
   },
   memberItemSelected: {
@@ -1642,19 +1619,19 @@ const styles = StyleSheet.create({
     borderColor: designTokens.colors.primary,
   },
   memberItemLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    flex: 1,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    gap: designTokens.spacing.md,
+    flex: flexValues.one,
   },
   checkbox: {
-    width: 24,
-    height: 24,
+    width: designTokens.spacing['2xl'],
+    height: designTokens.spacing['2xl'],
     borderRadius: designTokens.borderRadius.sm,
-    borderWidth: 2,
+    borderWidth: designTokens.borderWidth.medium,
     borderColor: designTokens.colors.borderLight,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
     backgroundColor: designTokens.colors.backgroundPrimary,
   },
   checkboxSelected: {
@@ -1662,58 +1639,54 @@ const styles = StyleSheet.create({
     borderColor: designTokens.colors.primary,
   },
   memberItemInfo: {
-    flex: 1,
+    flex: flexValues.one,
   },
   memberItemName: {
     fontSize: mobileFontSizes.md,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
     color: designTokens.colors.textPrimary,
-    marginBottom: 2,
+    marginBottom: designTokens.spacing.xxs,
   },
   memberItemEmail: {
     fontSize: mobileFontSizes.xs, // Using design token (minimum readable)
     color: designTokens.colors.textSecondary,
   },
   modalFooter: {
-    flexDirection: 'row',
-    gap: 12,
+    flexDirection: layoutConstants.flexDirection.row,
+    gap: designTokens.spacing.md,
     padding: designTokens.spacing.xl,
-    borderTopWidth: 1,
+    borderTopWidth: designTokens.borderWidth.thin,
     borderTopColor: designTokens.colors.borderLight,
   },
   modalCancelButton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 10,
-    borderWidth: 2,
+    flex: flexValues.one,
+    paddingVertical: designTokens.spacing.md + designTokens.spacing.xxs,
+    borderRadius: designTokens.radius.lg,
+    borderWidth: designTokens.borderWidth.medium,
     borderColor: designTokens.colors.borderLight,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
   },
   modalCancelText: {
     fontSize: mobileFontSizes.lg,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
     color: designTokens.colors.textSecondary,
   },
   modalCreateButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 14,
-    borderRadius: 10,
+    flex: flexValues.one,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
+    gap: designTokens.spacing.sm,
+    paddingVertical: designTokens.spacing.md + designTokens.spacing.xxs,
+    borderRadius: designTokens.radius.lg,
     backgroundColor: designTokens.colors.primary,
-    elevation: 2,
-    shadowColor: designTokens.colors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    ...designTokens.shadow.sm,
   },
   modalCreateText: {
     fontSize: mobileFontSizes.lg,
-    fontWeight: '600',
-    color: 'white',
+    fontWeight: designTokens.fontWeight.semibold,
+    color: designTokens.colors.white,
   },
 });
 

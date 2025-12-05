@@ -1,58 +1,61 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { ScreenHeader, MenuCard, SectionHeader } from '../../shared/components';
 import { designTokens } from '../../shared/theme/designTokens';
+import { ICONS, SCREENS, MENU_ITEM_IDS } from '../../shared/constants';
 
 const MoreScreen = () => {
   const navigation = useNavigation();
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   const activityItems = [
     {
-      id: 'generate-matches',
-      title: 'Generate Activities',
-      description: 'Create new social activity rounds for your club',
-      icon: 'account-heart',
-      screen: 'GenerateMatches',
+      id: MENU_ITEM_IDS.GENERATE_MATCHES,
+      title: t('screens.clubDashboard.menuItems.generateActivities'),
+      description: t('screens.clubMore.generateActivitiesDescription'),
+      icon: ICONS.ACCOUNT_HEART,
+      screen: SCREENS.GENERATE_MATCHES,
       color: colors.success,
     },
     {
-      id: 'match-management',
-      title: 'Activity Management',
-      description: 'View and manage all social activities',
-      icon: 'account-heart-outline',
-      screen: 'ClubMatches',
+      id: MENU_ITEM_IDS.MATCH_MANAGEMENT,
+      title: t('screens.clubMore.activityManagement'),
+      description: t('screens.clubMore.activityManagementDescription'),
+      icon: ICONS.ACCOUNT_HEART_OUTLINE,
+      screen: SCREENS.CLUB_MATCHES,
       color: colors.primary,
     },
   ];
 
   const managementItems = [
     {
-      id: 'directive',
-      title: 'Club Directive',
-      description: 'Assign leadership positions to members',
-      icon: 'account-star',
-      screen: 'ClubDirective',
+      id: MENU_ITEM_IDS.DIRECTIVE,
+      title: t('screens.clubDashboard.menuItems.clubDirective'),
+      description: t('screens.clubMore.clubDirectiveDescription'),
+      icon: ICONS.ACCOUNT_STAR,
+      screen: SCREENS.CLUB_DIRECTIVE,
       color: colors.warning,
     },
     {
-      id: 'settings',
-      title: 'Club Settings',
-      description: 'Configure club preferences and hierarchy',
-      icon: 'cog',
-      screen: 'ClubSettings',
+      id: MENU_ITEM_IDS.SETTINGS,
+      title: t('screens.clubDashboard.menuItems.clubSettings'),
+      description: t('screens.clubMore.clubSettingsDescription'),
+      icon: ICONS.COG,
+      screen: SCREENS.CLUB_SETTINGS,
       color: colors.info,
     },
   ];
 
   const helpItems = [
     {
-      id: 'help',
-      title: 'Help & Support',
-      description: 'Get help using the app',
-      icon: 'help-circle',
+      id: MENU_ITEM_IDS.HELP,
+      title: t('screens.clubMore.helpAndSupport'),
+      description: t('screens.clubMore.helpAndSupportDescription'),
+      icon: ICONS.HELP_CIRCLE,
       screen: null,
       color: colors.textSecondary,
       disabled: true,
@@ -62,13 +65,13 @@ const MoreScreen = () => {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScreenHeader
-        title="More Options"
-        subtitle="Additional club management features"
+        title={t('screens.clubMore.title')}
+        subtitle={t('screens.clubMore.subtitle')}
       />
       
       <ScrollView style={styles.scrollView}>
         <View style={styles.content}>
-          <SectionHeader title="Activities" />
+          <SectionHeader title={t('screens.clubMore.activitiesSection')} />
           {activityItems.map((item) => (
             <MenuCard
               key={item.id}
@@ -82,7 +85,7 @@ const MoreScreen = () => {
         </View>
 
         <View style={styles.content}>
-          <SectionHeader title="Club Management" />
+          <SectionHeader title={t('screens.clubMore.clubManagementSection')} />
           {managementItems.map((item) => (
             <MenuCard
               key={item.id}
@@ -96,12 +99,12 @@ const MoreScreen = () => {
         </View>
 
         <View style={styles.content}>
-          <SectionHeader title="Help" />
+          <SectionHeader title={t('screens.clubMore.helpSection')} />
           {helpItems.map((item) => (
             <MenuCard
               key={item.id}
               title={item.title}
-              description={item.disabled ? 'Coming soon' : item.description}
+              description={item.disabled ? t('common.comingSoon') : item.description}
               icon={item.icon}
               color={item.disabled ? colors.textTertiary : item.color}
               onPress={() => {}}
@@ -116,10 +119,10 @@ const MoreScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: flexValues.one,
   },
   scrollView: {
-    flex: 1,
+    flex: flexValues.one,
   },
   content: {
     padding: designTokens.spacing.lg,

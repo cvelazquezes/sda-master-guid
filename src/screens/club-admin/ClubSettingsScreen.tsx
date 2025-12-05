@@ -9,27 +9,31 @@ import {
   TextInput,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { clubService } from '../../services/clubService';
 import { useAuth } from '../../context/AuthContext';
 import { Club, MatchFrequency } from '../../types';
 import { OrganizationHierarchy } from '../../components/OrganizationHierarchy';
 import { designTokens } from '../../shared/theme/designTokens';
 import { mobileTypography } from '../../shared/theme/mobileTypography';
-import { MESSAGES } from '../../shared/constants';
+import { layoutConstants } from '../../shared/theme';
+import { MESSAGES, CLUB_SETTINGS, EMPTY_VALUE } from '../../shared/constants';
+import { flexValues, dimensionValues } from '../../shared/constants/layoutConstants';
 import { ThemeSwitcher } from '../../components/ThemeSwitcher';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 import { useTheme } from '../../contexts/ThemeContext';
 
 const ClubSettingsScreen = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { colors } = useTheme();
   const [club, setClub] = useState<Club | null>(null);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
+    name: EMPTY_VALUE,
+    description: EMPTY_VALUE,
     matchFrequency: MatchFrequency.WEEKLY,
-    groupSize: 2,
+    groupSize: CLUB_SETTINGS.defaultGroupSize,
   });
 
   useEffect(() => {
@@ -75,7 +79,7 @@ const ClubSettingsScreen = () => {
   if (!club) {
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading...</Text>
+        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>{t('screens.clubSettings.loading')}</Text>
       </View>
     );
   }
@@ -83,7 +87,7 @@ const ClubSettingsScreen = () => {
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <Text style={[styles.title, { color: colors.textPrimary }]}>Club Settings</Text>
+        <Text style={[styles.title, { color: colors.textPrimary }]}>{t('screens.clubSettings.title')}</Text>
       </View>
 
       <View style={styles.content}>
@@ -97,24 +101,24 @@ const ClubSettingsScreen = () => {
                 association: club.association,
                 church: club.church,
               }}
-              title="Club Organization"
+              title={t('screens.clubSettings.clubOrganization')}
               initialExpanded={true}
             />
           </View>
         )}
 
         <View style={[styles.section, { backgroundColor: colors.surface }]}>
-          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Basic Information</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>{t('screens.clubSettings.basicInformation')}</Text>
           <TextInput
             style={[styles.input, { borderColor: colors.border, color: colors.textPrimary, backgroundColor: colors.inputBackground }]}
-            placeholder="Club Name"
+            placeholder={t('screens.clubSettings.clubNamePlaceholder')}
             placeholderTextColor={colors.textTertiary}
             value={formData.name}
             onChangeText={(text) => setFormData({ ...formData, name: text })}
           />
           <TextInput
             style={[styles.input, styles.textArea, { borderColor: colors.border, color: colors.textPrimary, backgroundColor: colors.inputBackground }]}
-            placeholder="Description"
+            placeholder={t('screens.clubSettings.descriptionPlaceholder')}
             placeholderTextColor={colors.textTertiary}
             value={formData.description}
             onChangeText={(text) => setFormData({ ...formData, description: text })}
@@ -124,9 +128,9 @@ const ClubSettingsScreen = () => {
         </View>
 
         <View style={[styles.section, { backgroundColor: colors.surface }]}>
-          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Activity Settings</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>{t('screens.clubSettings.activitySettings')}</Text>
           <View style={styles.selectContainer}>
-            <Text style={[styles.selectLabel, { color: colors.textPrimary }]}>Activity Frequency</Text>
+            <Text style={[styles.selectLabel, { color: colors.textPrimary }]}>{t('screens.clubSettings.activityFrequency')}</Text>
             <View style={styles.selectOptions}>
               {Object.values(MatchFrequency).map((freq) => (
                 <TouchableOpacity
@@ -142,10 +146,10 @@ const ClubSettingsScreen = () => {
                     style={[
                       styles.selectOptionText,
                       { color: colors.textSecondary },
-                      formData.matchFrequency === freq && { color: colors.textInverse, fontWeight: '600' },
+                      formData.matchFrequency === freq && { color: colors.textInverse, fontWeight: designTokens.fontWeight.semibold },
                     ]}
                   >
-                    {freq.replace('_', '-')}
+                    {t(`club.matchFrequency.${freq}`)}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -153,7 +157,7 @@ const ClubSettingsScreen = () => {
           </View>
 
           <View style={styles.selectContainer}>
-            <Text style={[styles.selectLabel, { color: colors.textPrimary }]}>Group Size</Text>
+            <Text style={[styles.selectLabel, { color: colors.textPrimary }]}>{t('screens.clubSettings.groupSize')}</Text>
             <View style={styles.selectOptions}>
               {[2, 3].map((size) => (
                 <TouchableOpacity
@@ -169,7 +173,7 @@ const ClubSettingsScreen = () => {
                     style={[
                       styles.selectOptionText,
                       { color: colors.textSecondary },
-                      formData.groupSize === size && { color: colors.textInverse, fontWeight: '600' },
+                      formData.groupSize === size && { color: colors.textInverse, fontWeight: designTokens.fontWeight.semibold },
                     ]}
                   >
                     {size}
@@ -181,7 +185,7 @@ const ClubSettingsScreen = () => {
         </View>
 
         <View style={[styles.section, { backgroundColor: colors.surface }]}>
-          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>User Preferences</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>{t('screens.clubSettings.userPreferences')}</Text>
           
           {/* Theme Switcher */}
           <View style={styles.preferenceItem}>
@@ -195,7 +199,7 @@ const ClubSettingsScreen = () => {
         </View>
 
         <TouchableOpacity style={[styles.saveButton, { backgroundColor: colors.primary }]} onPress={handleSave}>
-          <Text style={[styles.saveButtonText, { color: colors.textInverse }]}>Save Changes</Text>
+          <Text style={[styles.saveButtonText, { color: colors.textInverse }]}>{t('screens.clubSettings.saveChanges')}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -204,7 +208,7 @@ const ClubSettingsScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: flexValues.one,
   },
   header: {
     padding: designTokens.spacing.lg,
@@ -236,8 +240,8 @@ const styles = StyleSheet.create({
     ...mobileTypography.bodyLarge,
   },
   textArea: {
-    height: 100,
-    textAlignVertical: 'top',
+    minHeight: dimensionValues.minHeight.textarea,
+    textAlignVertical: layoutConstants.textAlignVertical.top,
   },
   selectContainer: {
     marginBottom: designTokens.spacing.lg,
@@ -247,15 +251,15 @@ const styles = StyleSheet.create({
     marginBottom: designTokens.spacing.md,
   },
   selectOptions: {
-    flexDirection: 'row',
+    flexDirection: layoutConstants.flexDirection.row,
     gap: designTokens.spacing.md,
   },
   selectOption: {
-    flex: 1,
+    flex: flexValues.one,
     padding: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.md,
     borderWidth: designTokens.borderWidth.thin,
-    alignItems: 'center',
+    alignItems: layoutConstants.alignItems.center,
   },
   selectOptionText: {
     ...mobileTypography.body,
@@ -263,14 +267,14 @@ const styles = StyleSheet.create({
   saveButton: {
     padding: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.md,
-    alignItems: 'center',
+    alignItems: layoutConstants.alignItems.center,
     marginTop: designTokens.spacing.sm,
   },
   saveButtonText: {
     ...mobileTypography.buttonMedium,
   },
   loadingText: {
-    textAlign: 'center',
+    textAlign: layoutConstants.textAlign.center,
     marginTop: designTokens.spacing['3xl'],
     ...mobileTypography.bodyLarge,
   },

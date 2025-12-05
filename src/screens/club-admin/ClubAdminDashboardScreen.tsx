@@ -16,13 +16,18 @@ import { clubService } from '../../services/clubService';
 import { matchService } from '../../services/matchService';
 import { Club } from '../../types';
 import { designTokens } from '../../shared/theme/designTokens';
+import { layoutConstants } from '../../shared/theme';
 import { ScreenHeader, SectionHeader, MenuCard } from '../../shared/components';
-import { MESSAGES } from '../../shared/constants';
+import { MESSAGES, ICONS, TABS, SCREENS, MENU_ITEM_IDS } from '../../shared/constants';
+import { ApprovalStatus, MatchStatus } from '../../types';
+import { flexValues } from '../../shared/constants/layoutConstants';
+import { useTranslation } from 'react-i18next';
 
 const ClubAdminDashboardScreen = () => {
   const navigation = useNavigation();
   const { user } = useAuth();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const [club, setClub] = useState<Club | null>(null);
   const [clubDetailVisible, setClubDetailVisible] = useState(false);
   const [stats, setStats] = useState({
@@ -51,8 +56,8 @@ const ClubAdminDashboardScreen = () => {
       setStats({
         totalMembers: members.length,
         activeMembers: members.filter((m) => m.isActive).length,
-        pendingApprovals: members.filter((m) => m.approvalStatus === 'pending').length,
-        upcomingMatches: matches.filter((m) => m.status === 'pending' || m.status === 'scheduled').length,
+        pendingApprovals: members.filter((m) => m.approvalStatus === ApprovalStatus.PENDING).length,
+        upcomingMatches: matches.filter((m) => m.status === MatchStatus.PENDING || m.status === MatchStatus.SCHEDULED).length,
       });
     } catch (error) {
       Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_LOAD_CLUB_INFO);
@@ -61,27 +66,27 @@ const ClubAdminDashboardScreen = () => {
 
   const quickActions = [
     {
-      id: 'activities',
-      title: 'Generate Activities',
-      description: 'Create new social activity rounds',
-      icon: 'account-heart',
-      screen: 'GenerateMatches',
+      id: MENU_ITEM_IDS.ACTIVITIES,
+      title: t('screens.clubDashboard.menuItems.generateActivities'),
+      description: t('screens.clubDashboard.menuItems.generateActivitiesDescription'),
+      icon: ICONS.ACCOUNT_HEART,
+      screen: SCREENS.GENERATE_MATCHES,
       color: colors.success,
     },
     {
-      id: 'directive',
-      title: 'Club Directive',
-      description: 'Assign leadership positions',
-      icon: 'account-star',
-      screen: 'ClubDirective',
+      id: MENU_ITEM_IDS.DIRECTIVE,
+      title: t('screens.clubDashboard.menuItems.clubDirective'),
+      description: t('screens.clubDashboard.menuItems.clubDirectiveDescription'),
+      icon: ICONS.SHIELD_ACCOUNT,
+      screen: SCREENS.CLUB_DIRECTIVE,
       color: colors.warning,
     },
     {
-      id: 'settings',
-      title: 'Club Settings',
-      description: 'Configure club preferences',
-      icon: 'cog',
-      screen: 'ClubSettings',
+      id: MENU_ITEM_IDS.SETTINGS,
+      title: t('screens.clubDashboard.menuItems.clubSettings'),
+      description: t('screens.clubDashboard.menuItems.clubSettingsDescription'),
+      icon: ICONS.COG,
+      screen: SCREENS.CLUB_SETTINGS,
       color: colors.info,
     },
   ];
@@ -89,8 +94,8 @@ const ClubAdminDashboardScreen = () => {
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
       <ScreenHeader
-        title="Club Dashboard"
-        subtitle={`Manage your club effectively`}
+        title={t('screens.clubDashboard.title')}
+        subtitle={t('screens.clubDashboard.subtitle')}
       >
         {/* Show club card in header */}
         {club && (
@@ -105,34 +110,34 @@ const ClubAdminDashboardScreen = () => {
 
       {/* Statistics Section */}
       <View style={styles.statsSection}>
-        <SectionHeader title="Club Overview" />
+        <SectionHeader title={t('sections.clubOverview')} />
         <View style={styles.statsGrid}>
           <StatCard
-            icon="account-group"
-            label="Members"
+            icon={ICONS.ACCOUNT_GROUP}
+            label={t('stats.members')}
             value={stats.totalMembers}
             color={colors.info}
-            subtitle={`${stats.activeMembers} active`}
-            onPress={() => navigation.navigate('Members' as never)}
+            subtitle={t('screens.clubAdminDashboard.activeCount', { count: stats.activeMembers })}
+            onPress={() => navigation.navigate(TABS.MEMBERS as never)}
           />
           <StatCard
-            icon="account-heart"
-            label="Activities"
+            icon={ICONS.ACCOUNT_HEART}
+            label={t('stats.activities')}
             value={stats.upcomingMatches}
             color={colors.success}
-            subtitle="upcoming"
-            onPress={() => navigation.navigate('More' as never)}
+            subtitle={t('screens.clubAdminDashboard.upcoming')}
+            onPress={() => navigation.navigate(TABS.MORE as never)}
           />
         </View>
         {stats.pendingApprovals > 0 && (
           <View style={styles.statsRow}>
             <StatCard
-              icon="clock-alert-outline"
-              label="Pending Approvals"
+              icon={ICONS.CLOCK_ALERT_OUTLINE}
+              label={t('stats.pendingApprovals')}
               value={stats.pendingApprovals}
               color={colors.warning}
-              subtitle="members awaiting approval"
-              onPress={() => navigation.navigate('Members' as never)}
+              subtitle={t('screens.clubAdminDashboard.membersAwaitingApproval')}
+              onPress={() => navigation.navigate(TABS.MEMBERS as never)}
             />
           </View>
         )}
@@ -140,7 +145,7 @@ const ClubAdminDashboardScreen = () => {
 
       {/* Quick Actions Menu */}
       <View style={styles.content}>
-        <SectionHeader title="Quick Actions" />
+        <SectionHeader title={t('sections.quickActions')} />
         {quickActions.map((item) => (
           <MenuCard
             key={item.id}
@@ -166,17 +171,17 @@ const ClubAdminDashboardScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: flexValues.one,
   },
   clubCardContainer: {
     marginTop: designTokens.spacing.lg,
   },
   statsSection: {
     padding: designTokens.spacing.lg,
-    paddingBottom: 0,
+    paddingBottom: designTokens.spacing.none,
   },
   statsGrid: {
-    flexDirection: 'row',
+    flexDirection: layoutConstants.flexDirection.row,
     gap: designTokens.spacing.md,
     marginBottom: designTokens.spacing.md,
   },

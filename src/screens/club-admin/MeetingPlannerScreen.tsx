@@ -11,12 +11,15 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { userService } from '../../services/userService';
 import { User } from '../../types';
-import { mobileTypography, mobileIconSizes } from '../../shared/theme';
-import { designTokens } from '../../shared/theme/designTokens';
-import { MESSAGES } from '../../shared/constants';
+import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../../shared/theme';
+import { MESSAGES, ANIMATION, ICONS, TEXT_LINES, ALERT_BUTTON_STYLE, KEYBOARD_TYPE, EMPTY_VALUE, MODAL_WIDTH, MOVE_DIRECTION, ID_PREFIX, TEXT_INPUT, DATE_LOCALE_OPTIONS, MEETING_AGENDA, DAY_OF_WEEK } from '../../shared/constants';
+import { flexValues, shadowOffsetValues, dimensionValues, textAlignVertical, borderValues } from '../../shared/constants/layoutConstants';
+import { LOG_MESSAGES } from '../../shared/constants/logMessages';
+import { logger } from '../../services/logger';
 
 interface AgendaItem {
   id: string;
@@ -37,17 +40,19 @@ interface MeetingPlan {
   createdAt: Date;
 }
 
-const DEFAULT_AGENDA: Omit<AgendaItem, 'id' | 'order'>[] = [
-  { title: 'Welcome and Honors', estimatedMinutes: 10 },
-  { title: 'Opening Prayer', estimatedMinutes: 5 },
-  { title: 'Reflection/Devotional', estimatedMinutes: 15 },
-  { title: 'Pathfinder Classes', estimatedMinutes: 45 },
-  { title: 'Announcements', estimatedMinutes: 10 },
-  { title: 'Closing Prayer', estimatedMinutes: 5 },
-  { title: 'Farewell', estimatedMinutes: 5 },
-];
-
 const MeetingPlannerScreen = () => {
+  const { t } = useTranslation();
+
+  // Default agenda items with translations
+  const getDefaultAgenda = (): Omit<AgendaItem, 'id' | 'order'>[] => [
+    { title: t('screens.meetingPlanner.defaultAgenda.welcomeAndHonors'), estimatedMinutes: 10 },
+    { title: t('screens.meetingPlanner.defaultAgenda.openingPrayer'), estimatedMinutes: 5 },
+    { title: t('screens.meetingPlanner.defaultAgenda.reflectionDevotional'), estimatedMinutes: 15 },
+    { title: t('screens.meetingPlanner.defaultAgenda.pathfinderClasses'), estimatedMinutes: 45 },
+    { title: t('screens.meetingPlanner.defaultAgenda.announcements'), estimatedMinutes: 10 },
+    { title: t('screens.meetingPlanner.defaultAgenda.closingPrayer'), estimatedMinutes: 5 },
+    { title: t('screens.meetingPlanner.defaultAgenda.farewell'), estimatedMinutes: 5 },
+  ];
   const { user } = useAuth();
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
@@ -57,25 +62,25 @@ const MeetingPlannerScreen = () => {
   const [selectMemberModalVisible, setSelectMemberModalVisible] = useState(false);
   const [shareModalVisible, setShareModalVisible] = useState(false);
   const [currentItem, setCurrentItem] = useState<AgendaItem | null>(null);
-  const [editedTitle, setEditedTitle] = useState('');
-  const [editedMinutes, setEditedMinutes] = useState('');
-  const [editedDescription, setEditedDescription] = useState('');
+  const [editedTitle, setEditedTitle] = useState(EMPTY_VALUE);
+  const [editedMinutes, setEditedMinutes] = useState(EMPTY_VALUE);
+  const [editedDescription, setEditedDescription] = useState(EMPTY_VALUE);
   const [meetingDate, setMeetingDate] = useState(new Date());
-  const [meetingTitle, setMeetingTitle] = useState('Club Meeting');
+  const [meetingTitle, setMeetingTitle] = useState(t('screens.meetingPlanner.defaultMeetingTitle'));
   const [isSaved, setIsSaved] = useState(false);
 
   // Calculate responsive modal widths
   const getModalWidth = () => {
-    if (windowWidth > 1200) return Math.min(700, windowWidth * 0.5);
-    if (windowWidth > 768) return Math.min(600, windowWidth * 0.7);
-    if (windowWidth > 480) return windowWidth * 0.85;
-    return windowWidth * 0.95;
+    if (windowWidth > MODAL_WIDTH.BREAKPOINTS.LARGE) return Math.min(MODAL_WIDTH.MAX.LARGE, windowWidth * MODAL_WIDTH.RATIO.HALF);
+    if (windowWidth > MODAL_WIDTH.BREAKPOINTS.MEDIUM) return Math.min(MODAL_WIDTH.MAX.MEDIUM, windowWidth * MODAL_WIDTH.RATIO.SEVENTY);
+    if (windowWidth > MODAL_WIDTH.BREAKPOINTS.SMALL) return windowWidth * MODAL_WIDTH.RATIO.EIGHTY_FIVE;
+    return windowWidth * MODAL_WIDTH.RATIO.NINETY_FIVE;
   };
 
   const getShareModalWidth = () => {
-    if (windowWidth > 768) return Math.min(500, windowWidth * 0.5);
-    if (windowWidth > 480) return windowWidth * 0.75;
-    return windowWidth * 0.9;
+    if (windowWidth > MODAL_WIDTH.BREAKPOINTS.MEDIUM) return Math.min(MODAL_WIDTH.MAX.SHARE, windowWidth * MODAL_WIDTH.RATIO.HALF);
+    if (windowWidth > MODAL_WIDTH.BREAKPOINTS.SMALL) return windowWidth * MODAL_WIDTH.RATIO.SEVENTY_FIVE;
+    return windowWidth * MODAL_WIDTH.RATIO.NINETY;
   };
 
   const modalWidth = getModalWidth();
@@ -88,9 +93,9 @@ const MeetingPlannerScreen = () => {
   const loadData = async () => {
     try {
       // Load default agenda
-      const defaultAgenda = DEFAULT_AGENDA.map((item, index) => ({
+      const defaultAgenda = getDefaultAgenda().map((item, index) => ({
         ...item,
-        id: `item-${index}`,
+        id: `${ID_PREFIX.ITEM}-${index}`,
         order: index,
       }));
       setAgendaItems(defaultAgenda);
@@ -101,7 +106,7 @@ const MeetingPlannerScreen = () => {
         setClubMembers(members.filter(m => m.isActive));
       }
     } catch (error) {
-      console.error('Failed to load data:', error);
+      logger.error(LOG_MESSAGES.MEETING_PLANNER.FAILED_TO_LOAD_DATA, error as Error);
       Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_LOAD_MEETING_DATA);
     } finally {
       setLoading(false);
@@ -114,15 +119,15 @@ const MeetingPlannerScreen = () => {
 
   const handleAddItem = () => {
     const newItem: AgendaItem = {
-      id: `item-${Date.now()}`,
-      title: 'New Activity',
-      estimatedMinutes: 10,
+      id: `${ID_PREFIX.ITEM}-${Date.now()}`,
+      title: t('screens.meetingPlanner.newActivity'),
+      estimatedMinutes: MEETING_AGENDA.defaultMinutes,
       order: agendaItems.length,
     };
     setCurrentItem(newItem);
     setEditedTitle(newItem.title);
     setEditedMinutes(newItem.estimatedMinutes.toString());
-    setEditedDescription('');
+    setEditedDescription(EMPTY_VALUE);
     setEditModalVisible(true);
   };
 
@@ -130,7 +135,7 @@ const MeetingPlannerScreen = () => {
     setCurrentItem(item);
     setEditedTitle(item.title);
     setEditedMinutes(item.estimatedMinutes.toString());
-    setEditedDescription(item.description || '');
+    setEditedDescription(item.description || EMPTY_VALUE);
     setEditModalVisible(true);
   };
 
@@ -140,7 +145,7 @@ const MeetingPlannerScreen = () => {
       return;
     }
 
-    const minutes = parseInt(editedMinutes) || 10;
+    const minutes = parseInt(editedMinutes) || MEETING_AGENDA.defaultMinutes;
     const updatedItem = {
       ...currentItem,
       title: editedTitle.trim(),
@@ -165,10 +170,10 @@ const MeetingPlannerScreen = () => {
       MESSAGES.TITLES.DELETE_ACTIVITY,
       MESSAGES.WARNINGS.CONFIRM_DELETE_ACTIVITY,
       [
-        { text: MESSAGES.BUTTONS.CANCEL, style: 'cancel' },
+        { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
         {
           text: MESSAGES.BUTTONS.DELETE,
-          style: 'destructive',
+          style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
           onPress: () => {
             setAgendaItems(prev => prev.filter(i => i.id !== itemId));
           },
@@ -206,9 +211,9 @@ const MeetingPlannerScreen = () => {
     );
   };
 
-  const handleMoveItem = (index: number, direction: 'up' | 'down') => {
+  const handleMoveItem = (index: number, direction: typeof MOVE_DIRECTION.UP | typeof MOVE_DIRECTION.DOWN) => {
     const newItems = [...agendaItems];
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    const targetIndex = direction === MOVE_DIRECTION.UP ? index - 1 : index + 1;
 
     if (targetIndex < 0 || targetIndex >= newItems.length) return;
 
@@ -236,7 +241,7 @@ const MeetingPlannerScreen = () => {
     setIsSaved(true);
     Alert.alert(
       MESSAGES.TITLES.MEETING_SAVED_TITLE,
-      `Meeting plan for ${meetingDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} has been saved successfully!`,
+      t('screens.meetingPlanner.meetingSavedSuccess', { date: meetingDate.toLocaleDateString(undefined, DATE_LOCALE_OPTIONS.DATE_WITHOUT_YEAR) }),
       [
         { text: MESSAGES.BUTTONS.OK, onPress: () => setShareModalVisible(true) }
       ]
@@ -251,7 +256,7 @@ const MeetingPlannerScreen = () => {
     // In a real app, this would send notifications/emails to all members
     Alert.alert(
       MESSAGES.TITLES.MEETING_SHARED_TITLE,
-      `The meeting plan has been shared with all ${clubMembers.length} club members. They will receive a notification with the complete agenda and their responsibilities.`,
+      t('screens.meetingPlanner.meetingSharedSuccess', { count: clubMembers.length }),
       [{ text: MESSAGES.BUTTONS.OK, onPress: () => setShareModalVisible(false) }]
     );
   };
@@ -261,14 +266,14 @@ const MeetingPlannerScreen = () => {
       MESSAGES.TITLES.RESET_TO_DEFAULT_TITLE,
       MESSAGES.WARNINGS.CONFIRM_RESET_MEETING,
       [
-        { text: MESSAGES.BUTTONS.CANCEL, style: 'cancel' },
+        { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
         {
-          text: 'Reset',
-          style: 'destructive',
+          text: t('screens.meetingPlanner.reset'),
+          style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
           onPress: () => {
-            const defaultAgenda = DEFAULT_AGENDA.map((item, index) => ({
+            const defaultAgenda = getDefaultAgenda().map((item, index) => ({
               ...item,
-              id: `item-${Date.now()}-${index}`,
+              id: `${ID_PREFIX.ITEM}-${Date.now()}-${index}`,
               order: index,
             }));
             setAgendaItems(defaultAgenda);
@@ -284,18 +289,18 @@ const MeetingPlannerScreen = () => {
       MESSAGES.TITLES.CREATE_NEW_MEETING,
       MESSAGES.WARNINGS.CONFIRM_NEW_MEETING,
       [
-        { text: MESSAGES.BUTTONS.CANCEL, style: 'cancel' },
+        { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
         {
-          text: 'Create New',
+          text: t('screens.meetingPlanner.createNew'),
           onPress: () => {
-            const defaultAgenda = DEFAULT_AGENDA.map((item, index) => ({
+            const defaultAgenda = getDefaultAgenda().map((item, index) => ({
               ...item,
-              id: `item-${Date.now()}-${index}`,
+              id: `${ID_PREFIX.ITEM}-${Date.now()}-${index}`,
               order: index,
             }));
             setAgendaItems(defaultAgenda);
             setMeetingDate(new Date());
-            setMeetingTitle('Club Meeting');
+            setMeetingTitle(t('screens.meetingPlanner.defaultMeetingTitle'));
             setIsSaved(false);
           },
         },
@@ -306,14 +311,14 @@ const MeetingPlannerScreen = () => {
   const getNextSaturday = () => {
     const today = new Date();
     const nextSaturday = new Date(today);
-    nextSaturday.setDate(today.getDate() + ((6 - today.getDay() + 7) % 7 || 7));
+    nextSaturday.setDate(today.getDate() + ((DAY_OF_WEEK.SATURDAY - today.getDay() + DAY_OF_WEEK.DAYS_IN_WEEK) % DAY_OF_WEEK.DAYS_IN_WEEK || DAY_OF_WEEK.DAYS_IN_WEEK));
     return nextSaturday;
   };
 
   const getNextSunday = () => {
     const today = new Date();
     const nextSunday = new Date(today);
-    nextSunday.setDate(today.getDate() + ((7 - today.getDay()) % 7 || 7));
+    nextSunday.setDate(today.getDate() + ((DAY_OF_WEEK.DAYS_IN_WEEK - today.getDay()) % DAY_OF_WEEK.DAYS_IN_WEEK || DAY_OF_WEEK.DAYS_IN_WEEK));
     return nextSunday;
   };
 
@@ -321,16 +326,16 @@ const MeetingPlannerScreen = () => {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Meeting Planner</Text>
+        <Text style={styles.headerTitle}>{t('screens.meetingPlanner.title')}</Text>
         <View style={styles.headerActions}>
           <TouchableOpacity onPress={handleNewMeeting} style={styles.headerButton}>
-            <MaterialCommunityIcons name="file-document-outline" size={mobileIconSizes.large} color={designTokens.colors.textSecondary} />
+            <MaterialCommunityIcons name={ICONS.FILE_DOCUMENT_OUTLINE} size={mobileIconSizes.large} color={designTokens.colors.textSecondary} />
           </TouchableOpacity>
           <TouchableOpacity onPress={handleResetToDefault} style={styles.headerButton}>
-            <MaterialCommunityIcons name="refresh" size={mobileIconSizes.large} color={designTokens.colors.textSecondary} />
+            <MaterialCommunityIcons name={ICONS.REFRESH} size={mobileIconSizes.large} color={designTokens.colors.textSecondary} />
           </TouchableOpacity>
           <TouchableOpacity onPress={handleAddItem} style={styles.headerButton}>
-            <MaterialCommunityIcons name="plus" size={mobileIconSizes.large} color={designTokens.colors.primary} />
+            <MaterialCommunityIcons name={ICONS.PLUS} size={mobileIconSizes.large} color={designTokens.colors.primary} />
           </TouchableOpacity>
         </View>
       </View>
@@ -338,10 +343,10 @@ const MeetingPlannerScreen = () => {
       {/* Meeting Info */}
       <View style={styles.meetingInfoSection}>
         <View style={styles.meetingInfoRow}>
-          <MaterialCommunityIcons name="calendar" size={mobileIconSizes.medium} color={designTokens.colors.primary} />
-          <Text style={styles.meetingInfoLabel}>Meeting Date:</Text>
+          <MaterialCommunityIcons name={ICONS.CALENDAR} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+          <Text style={styles.meetingInfoLabel}>{t('screens.meetingPlanner.meetingDate')}</Text>
           <Text style={styles.meetingDate}>
-            {meetingDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+            {meetingDate.toLocaleDateString(undefined, DATE_LOCALE_OPTIONS.FULL_DATE)}
           </Text>
         </View>
         
@@ -350,13 +355,13 @@ const MeetingPlannerScreen = () => {
             style={styles.quickDateButton} 
             onPress={() => setMeetingDate(getNextSaturday())}
           >
-            <Text style={styles.quickDateText}>Next Saturday</Text>
+            <Text style={styles.quickDateText}>{t('screens.meetingPlanner.nextSaturday')}</Text>
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.quickDateButton} 
             onPress={() => setMeetingDate(getNextSunday())}
           >
-            <Text style={styles.quickDateText}>Next Sunday</Text>
+            <Text style={styles.quickDateText}>{t('screens.meetingPlanner.nextSunday')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -364,13 +369,13 @@ const MeetingPlannerScreen = () => {
           style={styles.meetingTitleInput}
           value={meetingTitle}
           onChangeText={setMeetingTitle}
-          placeholder="Enter meeting title"
+          placeholder={t('screens.meetingPlanner.titlePlaceholder')}
         />
       </View>
 
       {/* Total Time Banner */}
       <View style={styles.totalTimeBanner}>
-        <MaterialCommunityIcons name="clock-outline" size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+        <MaterialCommunityIcons name={ICONS.CLOCK_OUTLINE} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
         <Text style={styles.totalTimeText}>
           Total Meeting Time: <Text style={styles.totalTimeBold}>{getTotalTime()} minutes</Text>
         </Text>
@@ -380,9 +385,9 @@ const MeetingPlannerScreen = () => {
       <ScrollView style={styles.content}>
         {agendaItems.length === 0 ? (
           <View style={styles.emptyState}>
-            <MaterialCommunityIcons name="calendar-blank" size={64} color={designTokens.colors.borderLight} />
-            <Text style={styles.emptyText}>No activities yet</Text>
-            <Text style={styles.emptySubtext}>Tap the + button to add activities</Text>
+            <MaterialCommunityIcons name={ICONS.CALENDAR_BLANK} size={designTokens.iconSize['3xl']} color={designTokens.colors.borderLight} />
+            <Text style={styles.emptyText}>{t('screens.meetingPlanner.noActivities')}</Text>
+            <Text style={styles.emptySubtext}>{t('screens.meetingPlanner.tapToAdd')}</Text>
           </View>
         ) : (
           agendaItems.map((item, index) => (
@@ -395,17 +400,17 @@ const MeetingPlannerScreen = () => {
               {/* Content */}
               <View style={styles.agendaContent}>
                 <View style={styles.agendaHeader}>
-                  <Text style={styles.agendaTitle} numberOfLines={2}>
+                  <Text style={styles.agendaTitle} numberOfLines={TEXT_LINES.double}>
                     {item.title}
                   </Text>
                   <View style={styles.timeChip}>
-                    <MaterialCommunityIcons name="clock-outline" size={mobileIconSizes.tiny} color={designTokens.colors.textSecondary} />
+                    <MaterialCommunityIcons name={ICONS.CLOCK_OUTLINE} size={mobileIconSizes.tiny} color={designTokens.colors.textSecondary} />
                     <Text style={styles.timeText}>{item.estimatedMinutes}m</Text>
                   </View>
                 </View>
 
                 {item.description && (
-                  <Text style={styles.agendaDescription} numberOfLines={2}>
+                  <Text style={styles.agendaDescription} numberOfLines={TEXT_LINES.double}>
                     {item.description}
                   </Text>
                 )}
@@ -414,12 +419,12 @@ const MeetingPlannerScreen = () => {
                 <View style={styles.responsibleSection}>
                   {item.responsibleMemberId ? (
                     <View style={styles.memberChip}>
-                      <MaterialCommunityIcons name="account" size={mobileIconSizes.small} color={designTokens.colors.primary} />
-                      <Text style={styles.memberName} numberOfLines={1}>
+                      <MaterialCommunityIcons name={ICONS.ACCOUNT} size={mobileIconSizes.small} color={designTokens.colors.primary} />
+                      <Text style={styles.memberName} numberOfLines={TEXT_LINES.single}>
                         {item.responsibleMemberName}
                       </Text>
                       <TouchableOpacity onPress={() => handleRemoveMember(item.id)}>
-                        <MaterialCommunityIcons name="close-circle" size={mobileIconSizes.small} color={designTokens.colors.textTertiary} />
+                        <MaterialCommunityIcons name={ICONS.CLOSE_CIRCLE} size={mobileIconSizes.small} color={designTokens.colors.textTertiary} />
                       </TouchableOpacity>
                     </View>
                   ) : (
@@ -427,8 +432,8 @@ const MeetingPlannerScreen = () => {
                       style={styles.assignButton}
                       onPress={() => handleAssignMember(item)}
                     >
-                      <MaterialCommunityIcons name="account-plus" size={mobileIconSizes.small} color={designTokens.colors.primary} />
-                      <Text style={styles.assignText}>Assign Member</Text>
+                      <MaterialCommunityIcons name={ICONS.ACCOUNT_PLUS} size={mobileIconSizes.small} color={designTokens.colors.primary} />
+                      <Text style={styles.assignText}>{t('screens.meetingPlanner.assignMember')}</Text>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -440,22 +445,22 @@ const MeetingPlannerScreen = () => {
                 <View style={styles.moveButtons}>
                   <TouchableOpacity
                     style={[styles.moveButton, index === 0 && styles.moveButtonDisabled]}
-                    onPress={() => handleMoveItem(index, 'up')}
+                    onPress={() => handleMoveItem(index, MOVE_DIRECTION.UP)}
                     disabled={index === 0}
                   >
                     <MaterialCommunityIcons
-                      name="chevron-up"
+                      name={ICONS.CHEVRON_UP}
                       size={mobileIconSizes.medium}
                       color={index === 0 ? designTokens.colors.borderLight : designTokens.colors.textSecondary}
                     />
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.moveButton, index === agendaItems.length - 1 && styles.moveButtonDisabled]}
-                    onPress={() => handleMoveItem(index, 'down')}
+                    onPress={() => handleMoveItem(index, MOVE_DIRECTION.DOWN)}
                     disabled={index === agendaItems.length - 1}
                   >
                     <MaterialCommunityIcons
-                      name="chevron-down"
+                      name={ICONS.CHEVRON_DOWN}
                       size={mobileIconSizes.medium}
                       color={index === agendaItems.length - 1 ? designTokens.colors.borderLight : designTokens.colors.textSecondary}
                     />
@@ -464,10 +469,10 @@ const MeetingPlannerScreen = () => {
 
                 {/* Edit/Delete */}
                 <TouchableOpacity style={styles.actionButton} onPress={() => handleEditItem(item)}>
-                  <MaterialCommunityIcons name="pencil" size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+                  <MaterialCommunityIcons name={ICONS.PENCIL} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.actionButton} onPress={() => handleDeleteItem(item.id)}>
-                  <MaterialCommunityIcons name="delete" size={mobileIconSizes.medium} color={designTokens.colors.error} />
+                  <MaterialCommunityIcons name={ICONS.DELETE} size={mobileIconSizes.medium} color={designTokens.colors.error} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -480,18 +485,18 @@ const MeetingPlannerScreen = () => {
         <View style={styles.footer}>
           {!isSaved ? (
             <TouchableOpacity style={styles.saveButton} onPress={handleSaveMeeting}>
-              <MaterialCommunityIcons name="content-save" size={mobileIconSizes.large} color={designTokens.colors.textInverse} />
-              <Text style={styles.saveButtonText}>Save Meeting Plan</Text>
+              <MaterialCommunityIcons name={ICONS.CONTENT_SAVE} size={mobileIconSizes.large} color={designTokens.colors.textInverse} />
+              <Text style={styles.saveButtonText}>{t('screens.meetingPlanner.saveMeetingPlan')}</Text>
             </TouchableOpacity>
           ) : (
             <View style={styles.footerButtons}>
               <TouchableOpacity style={styles.editButton} onPress={() => setIsSaved(false)}>
-                <MaterialCommunityIcons name="pencil" size={mobileIconSizes.medium} color={designTokens.colors.primary} />
-                <Text style={styles.editButtonText}>Edit</Text>
+                <MaterialCommunityIcons name={ICONS.PENCIL} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+                <Text style={styles.editButtonText}>{t('screens.meetingPlanner.edit')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.shareButton} onPress={handleShareMeeting}>
-                <MaterialCommunityIcons name="share-variant" size={mobileIconSizes.large} color={designTokens.colors.textInverse} />
-                <Text style={styles.shareButtonText}>Share with Members</Text>
+                <MaterialCommunityIcons name={ICONS.SHARE_VARIANT} size={mobileIconSizes.large} color={designTokens.colors.textInverse} />
+                <Text style={styles.shareButtonText}>{t('screens.meetingPlanner.shareWithMembers')}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -501,47 +506,47 @@ const MeetingPlannerScreen = () => {
       {/* Edit Item Modal */}
       <Modal
         visible={editModalVisible}
-        animationType="slide"
+        animationType={ANIMATION.SLIDE}
         transparent={true}
         onRequestClose={() => setEditModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { width: modalWidth, maxHeight: windowHeight * 0.85, alignSelf: 'center' }]}>
+          <View style={[styles.modalContent, { width: modalWidth, maxHeight: windowHeight * 0.85, alignSelf: layoutConstants.alignSelf.center }]}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>
-                {currentItem && agendaItems.find(i => i.id === currentItem.id) ? 'Edit' : 'Add'} Activity
+                {currentItem && agendaItems.find(i => i.id === currentItem.id) ? t('screens.meetingPlanner.editActivity') : t('screens.meetingPlanner.addActivity')}
               </Text>
               <TouchableOpacity onPress={() => setEditModalVisible(false)}>
-                <MaterialCommunityIcons name="close" size={mobileIconSizes.large} color={designTokens.colors.textSecondary} />
+                <MaterialCommunityIcons name={ICONS.CLOSE} size={mobileIconSizes.large} color={designTokens.colors.textSecondary} />
               </TouchableOpacity>
             </View>
 
             <ScrollView style={styles.modalBody}>
-              <Text style={styles.inputLabel}>Activity Title *</Text>
+              <Text style={styles.inputLabel}>{t('screens.meetingPlanner.activityTitleLabel')}</Text>
               <TextInput
                 style={styles.input}
                 value={editedTitle}
                 onChangeText={setEditedTitle}
-                placeholder="e.g., Welcome and Honors"
+                placeholder={t('screens.meetingPlanner.activityTitlePlaceholder')}
               />
 
-              <Text style={styles.inputLabel}>Estimated Time (minutes) *</Text>
+              <Text style={styles.inputLabel}>{t('screens.meetingPlanner.estimatedTime')}</Text>
               <TextInput
                 style={styles.input}
                 value={editedMinutes}
                 onChangeText={setEditedMinutes}
-                placeholder="10"
-                keyboardType="numeric"
+                placeholder={t('screens.meetingPlanner.minutesPlaceholder')}
+                keyboardType={KEYBOARD_TYPE.NUMERIC}
               />
 
-              <Text style={styles.inputLabel}>Description (Optional)</Text>
+              <Text style={styles.inputLabel}>{t('screens.meetingPlanner.descriptionOptional')}</Text>
               <TextInput
                 style={[styles.input, styles.textArea]}
                 value={editedDescription}
                 onChangeText={setEditedDescription}
-                placeholder="Add notes or instructions..."
+                placeholder={t('screens.meetingPlanner.notesPlaceholder')}
                 multiline
-                numberOfLines={4}
+                numberOfLines={TEXT_INPUT.NUMBER_OF_LINES.MULTI}
               />
             </ScrollView>
 
@@ -550,10 +555,10 @@ const MeetingPlannerScreen = () => {
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => setEditModalVisible(false)}
               >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
+                <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.modalButton, styles.confirmButton]} onPress={handleSaveItem}>
-                <Text style={styles.confirmButtonText}>Save</Text>
+                <Text style={styles.confirmButtonText}>{t('common.save')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -563,22 +568,22 @@ const MeetingPlannerScreen = () => {
       {/* Select Member Modal */}
       <Modal
         visible={selectMemberModalVisible}
-        animationType="slide"
+        animationType={ANIMATION.SLIDE}
         transparent={true}
         onRequestClose={() => setSelectMemberModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { width: modalWidth, maxHeight: windowHeight * 0.85, alignSelf: 'center' }]}>
+          <View style={[styles.modalContent, { width: modalWidth, maxHeight: windowHeight * 0.85, alignSelf: layoutConstants.alignSelf.center }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Assign Responsible Member</Text>
+              <Text style={styles.modalTitle}>{t('screens.meetingPlanner.assignResponsible')}</Text>
               <TouchableOpacity onPress={() => setSelectMemberModalVisible(false)}>
-                <MaterialCommunityIcons name="close" size={mobileIconSizes.large} color={designTokens.colors.textSecondary} />
+                <MaterialCommunityIcons name={ICONS.CLOSE} size={mobileIconSizes.large} color={designTokens.colors.textSecondary} />
               </TouchableOpacity>
             </View>
 
             <ScrollView style={styles.modalBody}>
               {clubMembers.length === 0 ? (
-                <Text style={styles.noMembersText}>No active members available</Text>
+                <Text style={styles.noMembersText}>{t('screens.meetingPlanner.noMembersAvailable')}</Text>
               ) : (
                 clubMembers.map(member => (
                   <TouchableOpacity
@@ -593,7 +598,7 @@ const MeetingPlannerScreen = () => {
                       <Text style={styles.memberOptionName}>{member.name}</Text>
                       <Text style={styles.memberOptionEmail}>{member.email}</Text>
                     </View>
-                    <MaterialCommunityIcons name="chevron-right" size={mobileIconSizes.medium} color={designTokens.colors.borderLight} />
+                    <MaterialCommunityIcons name={ICONS.CHEVRON_RIGHT} size={mobileIconSizes.medium} color={designTokens.colors.borderLight} />
                   </TouchableOpacity>
                 ))
               )}
@@ -605,45 +610,45 @@ const MeetingPlannerScreen = () => {
       {/* Share Meeting Modal */}
       <Modal
         visible={shareModalVisible}
-        animationType="fade"
+        animationType={ANIMATION.FADE}
         transparent={true}
         onRequestClose={() => setShareModalVisible(false)}
       >
-        <View style={[styles.modalOverlay, { justifyContent: 'center' }]}>
+        <View style={[styles.modalOverlay, { justifyContent: layoutConstants.justifyContent.center }]}>
           <View style={[styles.shareModalContent, { width: shareModalWidth }]}>
             <View style={styles.shareHeader}>
               <View style={styles.shareIconContainer}>
-                <MaterialCommunityIcons name="share-variant" size={40} color={designTokens.colors.primary} />
+                <MaterialCommunityIcons name={ICONS.SHARE_VARIANT} size={designTokens.iconSize['2xl']} color={designTokens.colors.primary} />
               </View>
-              <Text style={styles.shareTitle}>Share Meeting Plan</Text>
+              <Text style={styles.shareTitle}>{t('screens.meetingPlanner.shareMeetingPlan')}</Text>
               <Text style={styles.shareSubtitle}>
-                Send this meeting agenda to all {clubMembers.length} club members
+                {t('screens.meetingPlanner.sendAgendaToMembers', { count: clubMembers.length })}
               </Text>
             </View>
 
             <View style={styles.shareInfo}>
               <View style={styles.shareInfoRow}>
-                <MaterialCommunityIcons name="calendar" size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+                <MaterialCommunityIcons name={ICONS.CALENDAR} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
                 <View style={styles.shareInfoText}>
-                  <Text style={styles.shareInfoLabel}>Meeting Date</Text>
+                  <Text style={styles.shareInfoLabel}>{t('screens.meetingPlanner.meetingDate')}</Text>
                   <Text style={styles.shareInfoValue}>
-                    {meetingDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                    {meetingDate.toLocaleDateString(undefined, DATE_LOCALE_OPTIONS.DATE_WITHOUT_YEAR)}
                   </Text>
                 </View>
               </View>
 
               <View style={styles.shareInfoRow}>
-                <MaterialCommunityIcons name="clock-outline" size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+                <MaterialCommunityIcons name={ICONS.CLOCK_OUTLINE} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
                 <View style={styles.shareInfoText}>
-                  <Text style={styles.shareInfoLabel}>Total Duration</Text>
+                  <Text style={styles.shareInfoLabel}>{t('screens.meetingPlanner.totalDuration')}</Text>
                   <Text style={styles.shareInfoValue}>{getTotalTime()} minutes</Text>
                 </View>
               </View>
 
               <View style={styles.shareInfoRow}>
-                <MaterialCommunityIcons name="format-list-numbered" size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+                <MaterialCommunityIcons name={ICONS.FORMAT_LIST_NUMBERED} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
                 <View style={styles.shareInfoText}>
-                  <Text style={styles.shareInfoLabel}>Activities</Text>
+                  <Text style={styles.shareInfoLabel}>{t('screens.meetingPlanner.activities')}</Text>
                   <Text style={styles.shareInfoValue}>{agendaItems.length} items</Text>
                 </View>
               </View>
@@ -654,14 +659,14 @@ const MeetingPlannerScreen = () => {
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => setShareModalVisible(false)}
               >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
+                <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalButton, styles.confirmButton, styles.shareConfirmButton]}
                 onPress={confirmShareMeeting}
               >
-                <MaterialCommunityIcons name="send" size={mobileIconSizes.medium} color={designTokens.colors.textInverse} />
-                <Text style={styles.confirmButtonText}>Send to All Members</Text>
+                <MaterialCommunityIcons name={ICONS.SEND} size={mobileIconSizes.medium} color={designTokens.colors.textInverse} />
+                <Text style={styles.confirmButtonText}>{t('screens.meetingPlanner.sendToAll')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -673,41 +678,41 @@ const MeetingPlannerScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: flexValues.one,
     backgroundColor: designTokens.colors.backgroundSecondary,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    justifyContent: layoutConstants.justifyContent.spaceBetween,
+    alignItems: layoutConstants.alignItems.center,
     backgroundColor: designTokens.colors.backgroundPrimary,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
+    paddingHorizontal: designTokens.spacing.xl,
+    paddingVertical: designTokens.spacing.lg,
+    borderBottomWidth: designTokens.borderWidth.thin,
     borderBottomColor: designTokens.colors.borderLight,
   },
   headerTitle: {
     ...mobileTypography.heading1,
   },
   headerActions: {
-    flexDirection: 'row',
-    gap: 12,
+    flexDirection: layoutConstants.flexDirection.row,
+    gap: designTokens.spacing.md,
   },
   headerButton: {
     padding: designTokens.spacing.sm,
   },
   meetingInfoSection: {
     backgroundColor: designTokens.colors.backgroundPrimary,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
+    paddingHorizontal: designTokens.spacing.xl,
+    paddingVertical: designTokens.spacing.lg,
+    borderBottomWidth: designTokens.borderWidth.thin,
     borderBottomColor: designTokens.colors.borderLight,
-    gap: 12,
+    gap: designTokens.spacing.md,
   },
   meetingInfoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    gap: designTokens.spacing.md,
   },
   meetingInfoLabel: {
     ...mobileTypography.labelBold,
@@ -716,19 +721,19 @@ const styles = StyleSheet.create({
   meetingDate: {
     ...mobileTypography.bodyMediumBold,
     color: designTokens.colors.textPrimary,
-    flex: 1,
+    flex: flexValues.one,
   },
   quickDateButtons: {
-    flexDirection: 'row',
-    gap: 10,
+    flexDirection: layoutConstants.flexDirection.row,
+    gap: designTokens.spacing.md,
   },
   quickDateButton: {
-    flex: 1,
+    flex: flexValues.one,
     backgroundColor: designTokens.colors.primaryLight,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingVertical: designTokens.spacing.md,
+    paddingHorizontal: designTokens.spacing.lg,
     borderRadius: designTokens.borderRadius.md,
-    alignItems: 'center',
+    alignItems: layoutConstants.alignItems.center,
   },
   quickDateText: {
     ...mobileTypography.labelBold,
@@ -736,20 +741,20 @@ const styles = StyleSheet.create({
   },
   meetingTitleInput: {
     ...mobileTypography.bodyLarge,
-    borderWidth: 1,
+    borderWidth: designTokens.borderWidth.thin,
     borderColor: designTokens.colors.borderLight,
     borderRadius: designTokens.borderRadius.md,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingHorizontal: designTokens.spacing.md,
+    paddingVertical: designTokens.spacing.md,
     backgroundColor: designTokens.colors.inputBackground,
   },
   totalTimeBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     backgroundColor: designTokens.colors.primaryLight,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    gap: 10,
+    paddingHorizontal: designTokens.spacing.xl,
+    paddingVertical: designTokens.spacing.md,
+    gap: designTokens.spacing.md,
   },
   totalTimeText: {
     ...mobileTypography.bodySmall,
@@ -760,183 +765,183 @@ const styles = StyleSheet.create({
     color: designTokens.colors.primary,
   },
   content: {
-    flex: 1,
+    flex: flexValues.one,
   },
   agendaCard: {
-    flexDirection: 'row',
+    flexDirection: layoutConstants.flexDirection.row,
     backgroundColor: designTokens.colors.backgroundPrimary,
     padding: designTokens.spacing.lg,
-    marginHorizontal: 16,
-    marginTop: 12,
+    marginHorizontal: designTokens.spacing.lg,
+    marginTop: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.lg,
     shadowColor: designTokens.colors.textPrimary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: shadowOffsetValues.md,
+    shadowOpacity: designTokens.shadows.sm.shadowOpacity,
+    shadowRadius: designTokens.shadows.sm.shadowRadius,
+    elevation: designTokens.shadows.sm.elevation,
   },
   orderBadge: {
-    width: 32,
-    height: 32,
+    width: dimensionValues.size.orderBadge,
+    height: dimensionValues.size.orderBadge,
     borderRadius: designTokens.borderRadius.xl,
     backgroundColor: designTokens.colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
+    marginRight: designTokens.spacing.md,
   },
   orderText: {
     ...mobileTypography.labelBold,
     color: designTokens.colors.textInverse,
   },
   agendaContent: {
-    flex: 1,
+    flex: flexValues.one,
   },
   agendaHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 8,
-    gap: 8,
+    flexDirection: layoutConstants.flexDirection.row,
+    justifyContent: layoutConstants.justifyContent.spaceBetween,
+    alignItems: layoutConstants.alignItems.flexStart,
+    marginBottom: designTokens.spacing.sm,
+    gap: designTokens.spacing.sm,
   },
   agendaTitle: {
     ...mobileTypography.bodyMediumBold,
-    flex: 1,
+    flex: flexValues.one,
   },
   timeChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     backgroundColor: designTokens.colors.backgroundSecondary,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: designTokens.spacing.sm,
+    paddingVertical: designTokens.spacing.xs,
     borderRadius: designTokens.borderRadius.lg,
-    gap: 4,
+    gap: designTokens.spacing.xs,
   },
   timeText: {
     ...mobileTypography.caption,
     color: designTokens.colors.textSecondary,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
   },
   agendaDescription: {
     ...mobileTypography.bodySmall,
     color: designTokens.colors.textSecondary,
-    marginBottom: 8,
+    marginBottom: designTokens.spacing.sm,
   },
   responsibleSection: {
-    marginTop: 8,
+    marginTop: designTokens.spacing.sm,
   },
   memberChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     backgroundColor: designTokens.colors.primaryLight,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
+    paddingVertical: designTokens.spacing.sm,
+    paddingHorizontal: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.xl,
-    alignSelf: 'flex-start',
-    gap: 6,
+    alignSelf: layoutConstants.alignSelf.flexStart,
+    gap: designTokens.spacing.sm,
   },
   memberName: {
     ...mobileTypography.label,
     color: designTokens.colors.primary,
-    fontWeight: '600',
-    flex: 1,
+    fontWeight: designTokens.fontWeight.semibold,
+    flex: flexValues.one,
   },
   assignButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 10,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    paddingVertical: designTokens.spacing.sm,
+    paddingHorizontal: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.md,
-    borderWidth: 1,
+    borderWidth: designTokens.borderWidth.thin,
     borderColor: designTokens.colors.primary,
-    borderStyle: 'dashed',
-    alignSelf: 'flex-start',
-    gap: 6,
+    borderStyle: borderValues.style.dashed,
+    alignSelf: layoutConstants.alignSelf.flexStart,
+    gap: designTokens.spacing.sm,
   },
   assignText: {
     ...mobileTypography.label,
     color: designTokens.colors.primary,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
   },
   agendaActions: {
-    marginLeft: 12,
-    gap: 8,
+    marginLeft: designTokens.spacing.md,
+    gap: designTokens.spacing.sm,
   },
   moveButtons: {
-    gap: 4,
+    gap: designTokens.spacing.xs,
   },
   moveButton: {
     padding: designTokens.spacing.xs,
   },
   moveButtonDisabled: {
-    opacity: 0.3,
+    opacity: designTokens.opacity.low,
   },
   actionButton: {
     padding: designTokens.spacing.xs,
   },
   emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 80,
-    paddingHorizontal: 40,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
+    paddingVertical: designTokens.spacing['7xl'],
+    paddingHorizontal: designTokens.spacing['4xl'],
   },
   emptyText: {
     ...mobileTypography.heading3,
     color: designTokens.colors.textSecondary,
-    marginTop: 16,
+    marginTop: designTokens.spacing.lg,
   },
   emptySubtext: {
     ...mobileTypography.bodySmall,
     color: designTokens.colors.textTertiary,
-    textAlign: 'center',
-    marginTop: 8,
+    textAlign: layoutConstants.textAlign.center,
+    marginTop: designTokens.spacing.sm,
   },
   footer: {
     padding: designTokens.spacing.xl,
     backgroundColor: designTokens.colors.backgroundPrimary,
-    borderTopWidth: 1,
+    borderTopWidth: designTokens.borderWidth.thin,
     borderTopColor: designTokens.colors.borderLight,
   },
   saveButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
     backgroundColor: designTokens.colors.primary,
-    paddingVertical: 14,
-    borderRadius: 10,
-    gap: 10,
+    paddingVertical: designTokens.spacing.md,
+    borderRadius: designTokens.borderRadius.xl,
+    gap: designTokens.spacing.md,
   },
   saveButtonText: {
     ...mobileTypography.button,
     color: designTokens.colors.textInverse,
   },
   footerButtons: {
-    flexDirection: 'row',
-    gap: 12,
+    flexDirection: layoutConstants.flexDirection.row,
+    gap: designTokens.spacing.md,
   },
   editButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
     backgroundColor: designTokens.colors.backgroundSecondary,
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    gap: 8,
+    paddingVertical: designTokens.spacing.md,
+    paddingHorizontal: designTokens.spacing.xl,
+    borderRadius: designTokens.borderRadius.xl,
+    gap: designTokens.spacing.sm,
   },
   editButtonText: {
     ...mobileTypography.button,
     color: designTokens.colors.primary,
   },
   shareButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
     backgroundColor: designTokens.colors.success,
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    gap: 10,
-    flex: 1,
+    paddingVertical: designTokens.spacing.md,
+    paddingHorizontal: designTokens.spacing.xl,
+    borderRadius: designTokens.borderRadius.xl,
+    gap: designTokens.spacing.md,
+    flex: flexValues.one,
   },
   shareButtonText: {
     ...mobileTypography.button,
@@ -946,81 +951,81 @@ const styles = StyleSheet.create({
     backgroundColor: designTokens.colors.backgroundPrimary,
     borderRadius: designTokens.borderRadius.xxl,
     padding: designTokens.spacing.xxl,
-    alignSelf: 'center',
+    alignSelf: layoutConstants.alignSelf.center,
   },
   shareHeader: {
-    alignItems: 'center',
-    marginBottom: 24,
+    alignItems: layoutConstants.alignItems.center,
+    marginBottom: designTokens.spacing.xxl,
   },
   shareIconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: dimensionValues.size.shareIconLarge,
+    height: dimensionValues.size.shareIconLarge,
+    borderRadius: designTokens.borderRadius.full,
     backgroundColor: designTokens.colors.primaryLight,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
+    marginBottom: designTokens.spacing.lg,
   },
   shareTitle: {
     ...mobileTypography.heading2,
-    textAlign: 'center',
-    marginBottom: 8,
+    textAlign: layoutConstants.textAlign.center,
+    marginBottom: designTokens.spacing.sm,
   },
   shareSubtitle: {
     ...mobileTypography.bodySmall,
     color: designTokens.colors.textSecondary,
-    textAlign: 'center',
+    textAlign: layoutConstants.textAlign.center,
   },
   shareInfo: {
     backgroundColor: designTokens.colors.inputBackground,
     borderRadius: designTokens.borderRadius.lg,
     padding: designTokens.spacing.lg,
-    gap: 16,
-    marginBottom: 24,
+    gap: designTokens.spacing.lg,
+    marginBottom: designTokens.spacing.xxl,
   },
   shareInfoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    gap: designTokens.spacing.md,
   },
   shareInfoText: {
-    flex: 1,
+    flex: flexValues.one,
   },
   shareInfoLabel: {
     ...mobileTypography.label,
     color: designTokens.colors.textSecondary,
-    marginBottom: 4,
+    marginBottom: designTokens.spacing.xs,
   },
   shareInfoValue: {
     ...mobileTypography.bodyMediumBold,
     color: designTokens.colors.textPrimary,
   },
   shareActions: {
-    flexDirection: 'row',
-    gap: 12,
+    flexDirection: layoutConstants.flexDirection.row,
+    gap: designTokens.spacing.md,
   },
   shareConfirmButton: {
-    flex: 1.5,
-    flexDirection: 'row',
-    gap: 8,
+    flex: flexValues.oneAndHalf,
+    flexDirection: layoutConstants.flexDirection.row,
+    gap: designTokens.spacing.sm,
     backgroundColor: designTokens.colors.success,
   },
   modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+    flex: flexValues.one,
+    backgroundColor: designTokens.overlay.darkMedium,
+    justifyContent: layoutConstants.justifyContent.flexEnd,
   },
   modalContent: {
     backgroundColor: designTokens.colors.backgroundPrimary,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: designTokens.borderRadius.xl,
+    borderTopRightRadius: designTokens.borderRadius.xl,
   },
   modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    justifyContent: layoutConstants.justifyContent.spaceBetween,
+    alignItems: layoutConstants.alignItems.center,
     padding: designTokens.spacing.xl,
-    borderBottomWidth: 1,
+    borderBottomWidth: designTokens.borderWidth.thin,
     borderBottomColor: designTokens.colors.borderLight,
   },
   modalTitle: {
@@ -1032,34 +1037,34 @@ const styles = StyleSheet.create({
   inputLabel: {
     ...mobileTypography.labelBold,
     color: designTokens.colors.textPrimary,
-    marginBottom: 8,
-    marginTop: 12,
+    marginBottom: designTokens.spacing.sm,
+    marginTop: designTokens.spacing.md,
   },
   input: {
     ...mobileTypography.bodyLarge,
-    borderWidth: 1,
+    borderWidth: designTokens.borderWidth.thin,
     borderColor: designTokens.colors.borderLight,
     borderRadius: designTokens.borderRadius.md,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingHorizontal: designTokens.spacing.md,
+    paddingVertical: designTokens.spacing.md,
     backgroundColor: designTokens.colors.inputBackground,
   },
   textArea: {
-    minHeight: 100,
-    textAlignVertical: 'top',
+    minHeight: dimensionValues.minHeight.textarea,
+    textAlignVertical: textAlignVertical.top,
   },
   modalFooter: {
-    flexDirection: 'row',
-    gap: 12,
+    flexDirection: layoutConstants.flexDirection.row,
+    gap: designTokens.spacing.md,
     padding: designTokens.spacing.xl,
-    borderTopWidth: 1,
+    borderTopWidth: designTokens.borderWidth.thin,
     borderTopColor: designTokens.colors.borderLight,
   },
   modalButton: {
-    flex: 1,
-    paddingVertical: 12,
+    flex: flexValues.one,
+    paddingVertical: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.md,
-    alignItems: 'center',
+    alignItems: layoutConstants.alignItems.center,
   },
   cancelButton: {
     backgroundColor: designTokens.colors.backgroundSecondary,
@@ -1076,28 +1081,28 @@ const styles = StyleSheet.create({
     color: designTokens.colors.textInverse,
   },
   memberOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     padding: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.md,
     backgroundColor: designTokens.colors.inputBackground,
-    marginBottom: 8,
+    marginBottom: designTokens.spacing.sm,
   },
   memberAvatar: {
-    width: 40,
-    height: 40,
+    width: designTokens.componentSizes.iconContainer.md,
+    height: designTokens.componentSizes.iconContainer.md,
     borderRadius: designTokens.borderRadius.xxl,
     backgroundColor: designTokens.colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
+    marginRight: designTokens.spacing.md,
   },
   memberAvatarText: {
     ...mobileTypography.bodyMediumBold,
     color: designTokens.colors.textInverse,
   },
   memberInfo: {
-    flex: 1,
+    flex: flexValues.one,
   },
   memberOptionName: {
     ...mobileTypography.bodyMediumBold,
@@ -1109,8 +1114,8 @@ const styles = StyleSheet.create({
   noMembersText: {
     ...mobileTypography.bodySmall,
     color: designTokens.colors.textTertiary,
-    textAlign: 'center',
-    paddingVertical: 40,
+    textAlign: layoutConstants.textAlign.center,
+    paddingVertical: designTokens.spacing['4xl'],
   },
 });
 
