@@ -2,12 +2,16 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { UserRole } from '../../types';
-import { designTokens } from '../../shared/theme/designTokens';
-import { mobileTypography, mobileFontSizes } from '../../shared/theme/mobileTypography';
+import { mobileTypography, mobileFontSizes, designTokens, layoutConstants } from '../../shared/theme';
+import { ICONS, SAFE_AREA_EDGES, LOG_MESSAGES } from '../../shared/constants';
+import { flexValues, shadowOffsetValues, typographyValues } from '../../shared/constants/layoutConstants';
+import { logger } from '../../shared/utils/logger';
 
 const PendingApprovalScreen = () => {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   
   const isClubAdmin = user?.role === UserRole.CLUB_ADMIN;
@@ -16,39 +20,39 @@ const PendingApprovalScreen = () => {
     try {
       await logout();
     } catch (error) {
-      console.error('Logout error:', error);
+      logger.error(LOG_MESSAGES.AUTH.LOGOUT_ERROR, error as Error);
     }
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={styles.safeArea} edges={SAFE_AREA_EDGES.TOP_LEFT_RIGHT}>
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.content}>
         <View style={styles.iconContainer}>
-          <MaterialCommunityIcons name="clock-alert-outline" size={100} color={designTokens.colors.warning} />
+          <MaterialCommunityIcons name={ICONS.CLOCK_ALERT_OUTLINE} size={designTokens.iconSize['4xl']} color={designTokens.colors.warning} />
         </View>
 
-        <Text style={styles.title}>Account Pending Approval</Text>
+        <Text style={styles.title}>{t('screens.pendingApproval.title')}</Text>
 
         <Text style={styles.message}>
-          Thank you for registering, <Text style={styles.userName}>{user?.name}</Text>!
+          {t('screens.pendingApproval.thankYouMessage', { name: user?.name })}
         </Text>
 
         <View style={styles.infoCard}>
           <View style={styles.infoRow}>
-            <MaterialCommunityIcons name="email" size={20} color={designTokens.colors.textSecondary} />
+            <MaterialCommunityIcons name={ICONS.EMAIL} size={designTokens.iconSize.md} color={designTokens.colors.textSecondary} />
             <Text style={styles.infoText}>{user?.email}</Text>
           </View>
           <View style={styles.infoRow}>
-            <MaterialCommunityIcons name="whatsapp" size={20} color={designTokens.colors.textSecondary} />
+            <MaterialCommunityIcons name={ICONS.WHATSAPP} size={designTokens.iconSize.md} color={designTokens.colors.textSecondary} />
             <Text style={styles.infoText}>{user?.whatsappNumber}</Text>
           </View>
         </View>
 
         <View style={styles.statusCard}>
           <View style={styles.statusHeader}>
-            <MaterialCommunityIcons name="information" size={24} color={designTokens.colors.primary} />
-            <Text style={styles.statusTitle}>What happens next?</Text>
+            <MaterialCommunityIcons name={ICONS.INFORMATION} size={designTokens.iconSize.lg} color={designTokens.colors.primary} />
+            <Text style={styles.statusTitle}>{t('screens.pendingApproval.whatHappensNext')}</Text>
           </View>
 
           {isClubAdmin ? (
@@ -58,7 +62,7 @@ const PendingApprovalScreen = () => {
                   <Text style={styles.stepNumberText}>1</Text>
                 </View>
                 <Text style={styles.stepText}>
-                  A system administrator will review your club admin registration
+                  {t('screens.pendingApproval.adminStep1')}
                 </Text>
               </View>
 
@@ -67,7 +71,7 @@ const PendingApprovalScreen = () => {
                   <Text style={styles.stepNumberText}>2</Text>
                 </View>
                 <Text style={styles.stepText}>
-                  Once approved, you&apos;ll receive a notification via WhatsApp
+                  {t('screens.pendingApproval.adminStep2')}
                 </Text>
               </View>
 
@@ -76,7 +80,7 @@ const PendingApprovalScreen = () => {
                   <Text style={styles.stepNumberText}>3</Text>
                 </View>
                 <Text style={styles.stepText}>
-                  You can then log in and manage your club
+                  {t('screens.pendingApproval.adminStep3')}
                 </Text>
               </View>
             </>
@@ -87,7 +91,7 @@ const PendingApprovalScreen = () => {
                   <Text style={styles.stepNumberText}>1</Text>
                 </View>
                 <Text style={styles.stepText}>
-                  Your club administrator will review your registration
+                  {t('screens.pendingApproval.userStep1')}
                 </Text>
               </View>
 
@@ -96,7 +100,7 @@ const PendingApprovalScreen = () => {
                   <Text style={styles.stepNumberText}>2</Text>
                 </View>
                 <Text style={styles.stepText}>
-                  Once approved, you&apos;ll receive a notification via WhatsApp
+                  {t('screens.pendingApproval.userStep2')}
                 </Text>
               </View>
 
@@ -105,7 +109,7 @@ const PendingApprovalScreen = () => {
                   <Text style={styles.stepNumberText}>3</Text>
                 </View>
                 <Text style={styles.stepText}>
-                  You can then log in and start participating in club activities
+                  {t('screens.pendingApproval.userStep3')}
                 </Text>
               </View>
             </>
@@ -113,16 +117,17 @@ const PendingApprovalScreen = () => {
         </View>
 
         <View style={styles.noteCard}>
-          <MaterialCommunityIcons name="alert-circle" size={20} color={designTokens.colors.warning} />
+          <MaterialCommunityIcons name={ICONS.ALERT_CIRCLE} size={designTokens.iconSize.md} color={designTokens.colors.warning} />
           <Text style={styles.noteText}>
-            This approval process typically takes 1-2 business days. If you have any questions,
-            please contact your {isClubAdmin ? 'system administrator' : 'club administrator'}.
+            {t('screens.pendingApproval.noteText', { 
+              admin: isClubAdmin ? t('screens.pendingApproval.systemAdmin') : t('screens.pendingApproval.clubAdmin') 
+            })}
           </Text>
         </View>
 
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <MaterialCommunityIcons name="logout" size={20} color={designTokens.colors.textInverse} />
-          <Text style={styles.logoutButtonText}>Logout</Text>
+          <MaterialCommunityIcons name={ICONS.LOGOUT} size={designTokens.iconSize.md} color={designTokens.colors.textInverse} />
+          <Text style={styles.logoutButtonText}>{t('screens.pendingApproval.logout')}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -132,7 +137,7 @@ const PendingApprovalScreen = () => {
 
 const styles = StyleSheet.create({
   safeArea: {
-    flex: 1,
+    flex: flexValues.one,
     backgroundColor: designTokens.colors.backgroundSecondary,
   },
   container: {
@@ -140,130 +145,130 @@ const styles = StyleSheet.create({
     backgroundColor: designTokens.colors.backgroundSecondary,
   },
   content: {
-    flex: 1,
+    flex: flexValues.one,
     padding: designTokens.spacing.xl,
-    paddingTop: 60,
+    paddingTop: designTokens.spacing['6xl'],
   },
   iconContainer: {
-    alignItems: 'center',
-    marginBottom: 24,
+    alignItems: layoutConstants.alignItems.center,
+    marginBottom: designTokens.spacing.xxl,
   },
   title: {
     fontSize: mobileFontSizes['4xl'],
-    fontWeight: 'bold',
+    fontWeight: designTokens.fontWeight.bold,
     color: designTokens.colors.textPrimary,
-    textAlign: 'center',
-    marginBottom: 16,
+    textAlign: layoutConstants.textAlign.center,
+    marginBottom: designTokens.spacing.lg,
   },
   message: {
     fontSize: mobileFontSizes.xl,
     color: designTokens.colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: 24,
+    textAlign: layoutConstants.textAlign.center,
+    marginBottom: designTokens.spacing.xxl,
   },
   userName: {
-    fontWeight: 'bold',
+    fontWeight: designTokens.fontWeight.bold,
     color: designTokens.colors.primary,
   },
   infoCard: {
     backgroundColor: designTokens.colors.backgroundPrimary,
     borderRadius: designTokens.borderRadius.lg,
     padding: designTokens.spacing.lg,
-    marginBottom: 20,
+    marginBottom: designTokens.spacing.xl,
     shadowColor: designTokens.colors.textPrimary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: shadowOffsetValues.md,
+    shadowOpacity: designTokens.shadows.md.shadowOpacity,
+    shadowRadius: designTokens.shadows.sm.shadowRadius,
+    elevation: designTokens.shadows.md.elevation,
   },
   infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-    gap: 12,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    paddingVertical: designTokens.spacing.sm,
+    gap: designTokens.spacing.md,
   },
   infoText: {
     fontSize: mobileFontSizes.lg,
     color: designTokens.colors.textPrimary,
-    flex: 1,
+    flex: flexValues.one,
   },
   statusCard: {
     backgroundColor: designTokens.colors.backgroundPrimary,
     borderRadius: designTokens.borderRadius.lg,
     padding: designTokens.spacing.xl,
-    marginBottom: 20,
+    marginBottom: designTokens.spacing.xl,
     shadowColor: designTokens.colors.textPrimary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: shadowOffsetValues.md,
+    shadowOpacity: designTokens.shadows.md.shadowOpacity,
+    shadowRadius: designTokens.shadows.sm.shadowRadius,
+    elevation: designTokens.shadows.md.elevation,
   },
   statusHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-    gap: 12,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    marginBottom: designTokens.spacing.xl,
+    gap: designTokens.spacing.md,
   },
   statusTitle: {
     fontSize: mobileFontSizes['2xl'],
-    fontWeight: 'bold',
+    fontWeight: designTokens.fontWeight.bold,
     color: designTokens.colors.textPrimary,
   },
   statusStep: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 16,
-    gap: 12,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.flexStart,
+    marginBottom: designTokens.spacing.lg,
+    gap: designTokens.spacing.md,
   },
   stepNumber: {
     width: 28,
     height: 28,
-    borderRadius: 14,
+    borderRadius: designTokens.borderRadius['2xl'],
     backgroundColor: designTokens.colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
   },
   stepNumberText: {
     color: designTokens.colors.textInverse,
     fontSize: mobileFontSizes.sm,
-    fontWeight: 'bold',
+    fontWeight: designTokens.fontWeight.bold,
   },
   stepText: {
-    flex: 1,
+    flex: flexValues.one,
     fontSize: mobileFontSizes.lg,
     color: designTokens.colors.textSecondary,
-    lineHeight: 22,
-    marginTop: 3,
+    lineHeight: typographyValues.lineHeight.xl,
+    marginTop: designTokens.spacing.xxs,
   },
   noteCard: {
-    flexDirection: 'row',
+    flexDirection: layoutConstants.flexDirection.row,
     backgroundColor: designTokens.colors.warningLight,
     borderRadius: designTokens.borderRadius.lg,
     padding: designTokens.spacing.lg,
-    marginBottom: 24,
-    gap: 12,
+    marginBottom: designTokens.spacing.xxl,
+    gap: designTokens.spacing.md,
     borderLeftWidth: 4,
     borderLeftColor: designTokens.colors.warning,
   },
   noteText: {
-    flex: 1,
+    flex: flexValues.one,
     fontSize: mobileFontSizes.sm,
     color: designTokens.colors.textSecondary,
-    lineHeight: 20,
+    lineHeight: typographyValues.lineHeight.lg,
   },
   logoutButton: {
-    flexDirection: 'row',
+    flexDirection: layoutConstants.flexDirection.row,
     backgroundColor: designTokens.colors.primary,
     padding: designTokens.spacing.lg,
     borderRadius: designTokens.borderRadius.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
+    gap: designTokens.spacing.sm,
   },
   logoutButtonText: {
     color: designTokens.colors.textInverse,
     fontSize: mobileFontSizes.lg,
-    fontWeight: 'bold',
+    fontWeight: designTokens.fontWeight.bold,
   },
 });
 

@@ -11,36 +11,38 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { clubService } from '../../services/clubService';
-import { Club, PathfinderClass } from '../../types';
+import { Club, PathfinderClass, PATHFINDER_CLASSES } from '../../types';
 import { ClassSelectionModal } from '../../components/ClassSelectionModal';
 import { StandardInput, StandardButton } from '../../shared/components';
-import { mobileTypography, mobileIconSizes } from '../../shared/theme';
-import { designTokens } from '../../shared/theme/designTokens';
-import { MESSAGES, VALIDATION, LIMITS } from '../../shared/constants';
+import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../../shared/theme';
+import { MESSAGES, VALIDATION, LIMITS, ICONS, ACTIVITY_INDICATOR_SIZE, SCREENS, KEYBOARD_TYPE, EMPTY_VALUE, SAFE_AREA_EDGES, PLATFORM_OS, KEYBOARD_BEHAVIOR, AUTO_CAPITALIZE, AUTO_COMPLETE, COMPONENT_VARIANT, LIST_SEPARATOR } from '../../shared/constants';
+import { flexValues, dimensionValues } from '../../shared/constants/layoutConstants';
 
 const RegisterScreen = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [whatsappNumber, setWhatsappNumber] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const { t } = useTranslation();
+  const [name, setName] = useState(EMPTY_VALUE);
+  const [email, setEmail] = useState(EMPTY_VALUE);
+  const [whatsappNumber, setWhatsappNumber] = useState(EMPTY_VALUE);
+  const [password, setPassword] = useState(EMPTY_VALUE);
+  const [confirmPassword, setConfirmPassword] = useState(EMPTY_VALUE);
   // Club selection via organizational hierarchy
-  const [division, setDivision] = useState('');
-  const [union, setUnion] = useState('');
-  const [association, setAssociation] = useState('');
-  const [church, setChurch] = useState('');
-  const [clubId, setClubId] = useState('');
+  const [division, setDivision] = useState(EMPTY_VALUE);
+  const [union, setUnion] = useState(EMPTY_VALUE);
+  const [association, setAssociation] = useState(EMPTY_VALUE);
+  const [church, setChurch] = useState(EMPTY_VALUE);
+  const [clubId, setClubId] = useState(EMPTY_VALUE);
   const [clubs, setClubs] = useState<Club[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingClubs, setLoadingClubs] = useState(true);
   // Role selection
   const [isClubAdmin, setIsClubAdmin] = useState(false);
   // Class selection
-  const [selectedClasses, setSelectedClasses] = useState<PathfinderClass[]>(['Friend']);
+  const [selectedClasses, setSelectedClasses] = useState<PathfinderClass[]>([PATHFINDER_CLASSES[0]]);
   const [classModalVisible, setClassModalVisible] = useState(false);
   const { register } = useAuth();
   const navigation = useNavigation();
@@ -156,28 +158,28 @@ const RegisterScreen = () => {
   // Handle hierarchy changes
   const handleDivisionChange = (newDivision: string) => {
     setDivision(newDivision);
-    setUnion('');
-    setAssociation('');
-    setChurch('');
-    setClubId('');
+    setUnion(EMPTY_VALUE);
+    setAssociation(EMPTY_VALUE);
+    setChurch(EMPTY_VALUE);
+    setClubId(EMPTY_VALUE);
   };
 
   const handleUnionChange = (newUnion: string) => {
     setUnion(newUnion);
-    setAssociation('');
-    setChurch('');
-    setClubId('');
+    setAssociation(EMPTY_VALUE);
+    setChurch(EMPTY_VALUE);
+    setClubId(EMPTY_VALUE);
   };
 
   const handleAssociationChange = (newAssociation: string) => {
     setAssociation(newAssociation);
-    setChurch('');
-    setClubId('');
+    setChurch(EMPTY_VALUE);
+    setClubId(EMPTY_VALUE);
   };
 
   const handleChurchChange = (newChurch: string) => {
     setChurch(newChurch);
-    setClubId('');
+    setClubId(EMPTY_VALUE);
   };
 
   // Auto-select when only one option is available
@@ -239,7 +241,7 @@ const RegisterScreen = () => {
     }
 
     // Validate WhatsApp number format (basic validation)
-    if (!VALIDATION.WHATSAPP.REGEX.test(whatsappNumber.replace(/[\s()-]/g, ''))) {
+    if (!VALIDATION.WHATSAPP.REGEX.test(whatsappNumber.replace(VALIDATION.WHATSAPP.NORMALIZE_PATTERN, EMPTY_VALUE))) {
       Alert.alert(
         MESSAGES.TITLES.ERROR,
         MESSAGES.ERRORS.INVALID_WHATSAPP
@@ -279,9 +281,9 @@ const RegisterScreen = () => {
 
   if (loadingClubs) {
     return (
-      <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+      <SafeAreaView style={styles.safeArea} edges={SAFE_AREA_EDGES.TOP_LEFT_RIGHT}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={designTokens.colors.primary} />
+          <ActivityIndicator size={ACTIVITY_INDICATOR_SIZE.large} color={designTokens.colors.primary} />
           <Text style={styles.loadingText}>{MESSAGES.INFO.LOADING_CLUBS}</Text>
         </View>
       </SafeAreaView>
@@ -289,89 +291,89 @@ const RegisterScreen = () => {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={styles.safeArea} edges={SAFE_AREA_EDGES.TOP_LEFT_RIGHT}>
       <KeyboardAvoidingView
         style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === PLATFORM_OS.IOS ? KEYBOARD_BEHAVIOR.PADDING : KEYBOARD_BEHAVIOR.HEIGHT}
       >
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <MaterialCommunityIcons name="account-plus" size={60} color={designTokens.colors.primary} />
-          <Text style={styles.title}>Create Account</Text>
-          <Text style={styles.subtitle}>Join a club to get started</Text>
+          <MaterialCommunityIcons name={ICONS.ACCOUNT_PLUS} size={designTokens.iconSize['3xl']} color={designTokens.colors.primary} />
+          <Text style={styles.title}>{t('screens.register.title')}</Text>
+          <Text style={styles.subtitle}>{t('screens.register.subtitle')}</Text>
         </View>
 
         <View style={styles.form}>
           <StandardInput
-            label="Full Name"
-            icon="account"
+            label={t('screens.register.fullName')}
+            icon={ICONS.ACCOUNT}
             placeholder={MESSAGES.PLACEHOLDERS.FULL_NAME}
             value={name}
             onChangeText={setName}
-            autoCapitalize="words"
+            autoCapitalize={AUTO_CAPITALIZE.WORDS}
             required
           />
 
           <StandardInput
-            label="Email"
-            icon="email"
+            label={t('screens.register.email')}
+            icon={ICONS.EMAIL}
             placeholder={MESSAGES.PLACEHOLDERS.EMAIL}
             value={email}
             onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoComplete="email"
+            keyboardType={KEYBOARD_TYPE.EMAIL}
+            autoCapitalize={AUTO_CAPITALIZE.NONE}
+            autoComplete={AUTO_COMPLETE.EMAIL}
             required
           />
 
           <StandardInput
-            label="WhatsApp Number"
-            icon="whatsapp"
+            label={t('screens.register.whatsAppNumber')}
+            icon={ICONS.WHATSAPP}
             placeholder={MESSAGES.PLACEHOLDERS.WHATSAPP}
             value={whatsappNumber}
             onChangeText={setWhatsappNumber}
-            keyboardType="phone-pad"
-            autoCapitalize="none"
+            keyboardType={KEYBOARD_TYPE.PHONE}
+            autoCapitalize={AUTO_CAPITALIZE.NONE}
             required
           />
 
           {/* Role Selection */}
           <View style={styles.sectionHeader}>
-            <MaterialCommunityIcons name="account-cog" size={mobileIconSizes.medium} color={designTokens.colors.primary} />
-            <Text style={styles.sectionTitle}>Account Type</Text>
+            <MaterialCommunityIcons name={ICONS.ACCOUNT_COG} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+            <Text style={styles.sectionTitle}>{t('screens.register.accountType')}</Text>
           </View>
           <TouchableOpacity
             style={styles.checkboxContainer}
             onPress={() => setIsClubAdmin(!isClubAdmin)}
           >
             <MaterialCommunityIcons
-              name={isClubAdmin ? 'checkbox-marked' : 'checkbox-blank-outline'}
+              name={isClubAdmin ? ICONS.CHECKBOX_MARKED : ICONS.CHECKBOX_BLANK_OUTLINE}
               size={mobileIconSizes.large}
               color={designTokens.colors.primary}
             />
-            <Text style={styles.checkboxLabel}>I am a club admin</Text>
+            <Text style={styles.checkboxLabel}>{t('screens.register.iAmClubAdmin')}</Text>
           </TouchableOpacity>
           {isClubAdmin && (
             <View style={styles.infoBox}>
-              <MaterialCommunityIcons name="information" size={mobileIconSizes.medium} color={designTokens.colors.info} />
+              <MaterialCommunityIcons name={ICONS.INFORMATION} size={mobileIconSizes.medium} color={designTokens.colors.info} />
               <Text style={styles.infoText}>
-                Club admin accounts require approval from a system administrator.
+                {t('screens.register.clubAdminApprovalNote')}
               </Text>
             </View>
           )}
 
           {/* Club Selection via Organizational Hierarchy */}
           <View style={styles.sectionHeader}>
-            <MaterialCommunityIcons name="sitemap" size={mobileIconSizes.medium} color={designTokens.colors.primary} />
-            <Text style={styles.sectionTitle}>Find Your Club</Text>
+            <MaterialCommunityIcons name={ICONS.SITEMAP} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+            <Text style={styles.sectionTitle}>{t('screens.register.findYourClub')}</Text>
           </View>
           <Text style={styles.sectionDescription}>
-            Navigate through your organization to find your club
+            {t('screens.register.navigateOrganization')}
           </Text>
 
           {/* Division Selection */}
           <View style={styles.pickerContainer}>
-            <Text style={styles.pickerLabel}>1. Select Division *</Text>
+            <Text style={styles.pickerLabel}>{t('screens.register.selectDivision')}</Text>
             <ScrollView style={styles.optionsList}>
               {getUniqueDivisions().map((div) => (
                 <TouchableOpacity
@@ -380,7 +382,7 @@ const RegisterScreen = () => {
                   onPress={() => handleDivisionChange(div)}
                 >
                   <MaterialCommunityIcons
-                    name={division === div ? 'radiobox-marked' : 'radiobox-blank'}
+                    name={division === div ? ICONS.RADIOBOX_MARKED : ICONS.RADIOBOX_BLANK}
                     size={mobileIconSizes.medium}
                     color={division === div ? designTokens.colors.primary : designTokens.colors.textSecondary}
                   />
@@ -393,7 +395,7 @@ const RegisterScreen = () => {
           {/* Union Selection */}
           {division && (
             <View style={styles.pickerContainer}>
-              <Text style={styles.pickerLabel}>2. Select Union *</Text>
+              <Text style={styles.pickerLabel}>{t('screens.register.selectUnion')}</Text>
               <ScrollView style={styles.optionsList}>
                 {getUniqueUnions().map((uni) => (
                   <TouchableOpacity
@@ -402,7 +404,7 @@ const RegisterScreen = () => {
                     onPress={() => handleUnionChange(uni)}
                   >
                     <MaterialCommunityIcons
-                      name={union === uni ? 'radiobox-marked' : 'radiobox-blank'}
+                      name={union === uni ? ICONS.RADIOBOX_MARKED : ICONS.RADIOBOX_BLANK}
                       size={mobileIconSizes.medium}
                       color={union === uni ? designTokens.colors.primary : designTokens.colors.textSecondary}
                     />
@@ -416,7 +418,7 @@ const RegisterScreen = () => {
           {/* Association Selection */}
           {union && (
             <View style={styles.pickerContainer}>
-              <Text style={styles.pickerLabel}>3. Select Association *</Text>
+              <Text style={styles.pickerLabel}>{t('screens.register.selectAssociation')}</Text>
               <ScrollView style={styles.optionsList}>
                 {getUniqueAssociations().map((assoc) => (
                   <TouchableOpacity
@@ -425,7 +427,7 @@ const RegisterScreen = () => {
                     onPress={() => handleAssociationChange(assoc)}
                   >
                     <MaterialCommunityIcons
-                      name={association === assoc ? 'radiobox-marked' : 'radiobox-blank'}
+                      name={association === assoc ? ICONS.RADIOBOX_MARKED : ICONS.RADIOBOX_BLANK}
                       size={mobileIconSizes.medium}
                       color={association === assoc ? designTokens.colors.primary : designTokens.colors.textSecondary}
                     />
@@ -439,7 +441,7 @@ const RegisterScreen = () => {
           {/* Church Selection */}
           {association && (
             <View style={styles.pickerContainer}>
-              <Text style={styles.pickerLabel}>4. Select Church *</Text>
+              <Text style={styles.pickerLabel}>{t('screens.register.selectChurch')}</Text>
               <ScrollView style={styles.optionsList}>
                 {getUniqueChurches().map((ch) => (
                   <TouchableOpacity
@@ -448,7 +450,7 @@ const RegisterScreen = () => {
                     onPress={() => handleChurchChange(ch)}
                   >
                     <MaterialCommunityIcons
-                      name={church === ch ? 'radiobox-marked' : 'radiobox-blank'}
+                      name={church === ch ? ICONS.RADIOBOX_MARKED : ICONS.RADIOBOX_BLANK}
                       size={mobileIconSizes.medium}
                       color={church === ch ? designTokens.colors.primary : designTokens.colors.textSecondary}
                     />
@@ -462,7 +464,7 @@ const RegisterScreen = () => {
           {/* Club Selection */}
           {church && getFilteredClubs().length > 0 && (
             <View style={styles.pickerContainer}>
-              <Text style={styles.pickerLabel}>5. Select Your Club *</Text>
+              <Text style={styles.pickerLabel}>{t('screens.register.selectClub')}</Text>
               <ScrollView style={styles.clubsList}>
                 {getFilteredClubs().map((club) => (
                   <TouchableOpacity
@@ -471,7 +473,7 @@ const RegisterScreen = () => {
                     onPress={() => setClubId(club.id)}
                   >
                     <MaterialCommunityIcons
-                      name={clubId === club.id ? 'radiobox-marked' : 'radiobox-blank'}
+                      name={clubId === club.id ? ICONS.RADIOBOX_MARKED : ICONS.RADIOBOX_BLANK}
                       size={mobileIconSizes.medium}
                       color={clubId === club.id ? designTokens.colors.primary : designTokens.colors.textSecondary}
                     />
@@ -489,11 +491,11 @@ const RegisterScreen = () => {
           {!isClubAdmin && (
             <>
               <View style={styles.sectionHeader}>
-                <MaterialCommunityIcons name="school" size={mobileIconSizes.medium} color={designTokens.colors.primary} />
-                <Text style={styles.sectionTitle}>Pathfinder Classes</Text>
+                <MaterialCommunityIcons name={ICONS.SCHOOL} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+                <Text style={styles.sectionTitle}>{t('screens.register.pathfinderClasses')}</Text>
               </View>
               <Text style={styles.sectionDescription}>
-                Select 1 to 3 Pathfinder classes you belong to
+                {t('screens.register.selectClassesInstruction')}
               </Text>
 
               <TouchableOpacity
@@ -501,52 +503,52 @@ const RegisterScreen = () => {
                 onPress={() => setClassModalVisible(true)}
               >
                 <View style={styles.classSelectionContent}>
-                  <MaterialCommunityIcons name="school" size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+                  <MaterialCommunityIcons name={ICONS.SCHOOL} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
                   <Text style={styles.classSelectionText}>
                     {selectedClasses.length > 0
-                      ? `Selected: ${selectedClasses.join(', ')}`
-                      : 'Select Classes'}
+                      ? t('screens.register.selectedClasses', { classes: selectedClasses.join(LIST_SEPARATOR) })
+                      : t('screens.register.selectClasses')}
                   </Text>
                 </View>
-                <MaterialCommunityIcons name="chevron-right" size={mobileIconSizes.large} color={designTokens.colors.primary} />
+                <MaterialCommunityIcons name={ICONS.CHEVRON_RIGHT} size={mobileIconSizes.large} color={designTokens.colors.primary} />
               </TouchableOpacity>
             </>
           )}
 
           <StandardInput
-            label="Password"
-            icon="lock"
+            label={t('screens.register.password')}
+            icon={ICONS.LOCK}
             placeholder={MESSAGES.PLACEHOLDERS.PASSWORD}
             value={password}
             onChangeText={setPassword}
             secureTextEntry
-            autoCapitalize="none"
+            autoCapitalize={AUTO_CAPITALIZE.NONE}
             required
           />
 
           <StandardInput
-            label="Confirm Password"
-            icon="lock-check"
+            label={t('screens.register.confirmPassword')}
+            icon={ICONS.LOCK_CHECK}
             placeholder={MESSAGES.PLACEHOLDERS.CONFIRM_PASSWORD}
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             secureTextEntry
-            autoCapitalize="none"
+            autoCapitalize={AUTO_CAPITALIZE.NONE}
             required
           />
 
           <StandardButton
-            title={loading ? 'Creating account...' : 'Register'}
+            title={loading ? t('screens.register.creatingAccount') : t('screens.register.registerButton')}
             onPress={handleRegister}
             disabled={loading}
             loading={loading}
-            icon="account-plus"
+            icon={ICONS.ACCOUNT_PLUS}
           />
 
           <StandardButton
-            title="Already have an account? Login"
-            variant="ghost"
-            onPress={() => navigation.navigate('Login' as never)}
+            title={t('screens.register.alreadyHaveAccount')}
+            variant={COMPONENT_VARIANT.ghost}
+            onPress={() => navigation.navigate(SCREENS.LOGIN as never)}
           />
         </View>
       </ScrollView>
@@ -565,22 +567,22 @@ const RegisterScreen = () => {
 
 const styles = StyleSheet.create({
   safeArea: {
-    flex: 1,
+    flex: flexValues.one,
     backgroundColor: designTokens.colors.backgroundPrimary,
   },
   container: {
-    flex: 1,
+    flex: flexValues.one,
     backgroundColor: designTokens.colors.backgroundPrimary,
   },
   scrollContent: {
-    flexGrow: 1,
+    flexGrow: flexValues.one,
     padding: designTokens.spacing.lg,
     paddingTop: designTokens.spacing['3xl'],
   },
   loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    flex: flexValues.one,
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
     backgroundColor: designTokens.colors.backgroundPrimary,
   },
   loadingText: {
@@ -588,7 +590,7 @@ const styles = StyleSheet.create({
     marginTop: designTokens.spacing.md,
   },
   header: {
-    alignItems: 'center',
+    alignItems: layoutConstants.alignItems.center,
     marginBottom: designTokens.spacing.xxl,
   },
   title: {
@@ -601,11 +603,11 @@ const styles = StyleSheet.create({
     marginTop: designTokens.spacing.sm,
   },
   form: {
-    width: '100%',
+    width: dimensionValues.maxWidthPercent.full,
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     borderWidth: designTokens.borderWidth.thin,
     borderColor: designTokens.colors.borderMedium,
     borderRadius: designTokens.borderRadius.md,
@@ -617,13 +619,13 @@ const styles = StyleSheet.create({
     marginRight: designTokens.spacing.sm,
   },
   input: {
-    flex: 1,
-    height: 50,
+    flex: flexValues.one,
+    height: dimensionValues.height.input,
     ...mobileTypography.bodyLarge,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     marginTop: designTokens.spacing.sm,
     marginBottom: designTokens.spacing.md,
     gap: designTokens.spacing.sm,
@@ -646,15 +648,15 @@ const styles = StyleSheet.create({
     marginBottom: designTokens.spacing.md,
   },
   optionsList: {
-    maxHeight: 150,
+    maxHeight: dimensionValues.maxHeight.listSmall,
     borderWidth: designTokens.borderWidth.thin,
     borderColor: designTokens.colors.borderMedium,
     borderRadius: designTokens.borderRadius.md,
     backgroundColor: designTokens.colors.inputBackground,
   },
   option: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     padding: designTokens.spacing.md,
     borderBottomWidth: designTokens.borderWidth.thin,
     borderBottomColor: designTokens.colors.borderLight,
@@ -667,15 +669,15 @@ const styles = StyleSheet.create({
     ...mobileTypography.bodyLarge,
   },
   clubsList: {
-    maxHeight: 200,
+    maxHeight: dimensionValues.maxHeight.listMedium,
     borderWidth: designTokens.borderWidth.thin,
     borderColor: designTokens.colors.borderMedium,
     borderRadius: designTokens.borderRadius.md,
     backgroundColor: designTokens.colors.inputBackground,
   },
   clubOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     padding: designTokens.spacing.md,
     borderBottomWidth: designTokens.borderWidth.thin,
     borderBottomColor: designTokens.colors.borderLight,
@@ -685,32 +687,32 @@ const styles = StyleSheet.create({
   },
   clubInfo: {
     marginLeft: designTokens.spacing.md,
-    flex: 1,
+    flex: flexValues.one,
   },
   clubName: {
     ...mobileTypography.bodyLargeBold,
   },
   clubDescription: {
     ...mobileTypography.bodySmall,
-    marginTop: 4,
+    marginTop: designTokens.spacing.xs,
   },
   button: {
     backgroundColor: designTokens.colors.primary,
     padding: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.md,
-    alignItems: 'center',
+    alignItems: layoutConstants.alignItems.center,
     marginTop: designTokens.spacing.sm,
-    minHeight: 52,
+    minHeight: dimensionValues.minHeight.button,
   },
   buttonDisabled: {
-    opacity: 0.6,
+    opacity: designTokens.opacity.high,
   },
   buttonText: {
     ...mobileTypography.button,
   },
   linkButton: {
-    marginTop: 20,
-    alignItems: 'center',
+    marginTop: designTokens.spacing.xl,
+    alignItems: layoutConstants.alignItems.center,
   },
   linkText: {
     ...mobileTypography.bodySmall,
@@ -721,50 +723,50 @@ const styles = StyleSheet.create({
     color: designTokens.colors.primary,
   },
   classSelectionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderWidth: 1,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.spaceBetween,
+    borderWidth: designTokens.borderWidth.thin,
     borderColor: designTokens.colors.borderLight,
     borderRadius: designTokens.borderRadius.md,
-    marginBottom: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 16,
+    marginBottom: designTokens.spacing.lg,
+    paddingHorizontal: designTokens.spacing.md,
+    paddingVertical: designTokens.spacing.lg,
     backgroundColor: designTokens.colors.inputBackground,
   },
   classSelectionContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    flex: 1,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    gap: designTokens.spacing.md,
+    flex: flexValues.one,
   },
   classSelectionText: {
     ...mobileTypography.bodyLarge,
-    flex: 1,
+    flex: flexValues.one,
   },
   checkboxContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-    paddingVertical: 8,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    marginBottom: designTokens.spacing.lg,
+    paddingVertical: designTokens.spacing.sm,
   },
   checkboxLabel: {
     ...mobileTypography.bodyLarge,
-    marginLeft: 12,
+    marginLeft: designTokens.spacing.md,
     color: designTokens.colors.textPrimary,
   },
   infoBox: {
-    flexDirection: 'row',
+    flexDirection: layoutConstants.flexDirection.row,
     backgroundColor: designTokens.colors.infoLight,
     borderRadius: designTokens.borderRadius.md,
     padding: designTokens.spacing.md,
-    marginBottom: 16,
-    gap: 10,
+    marginBottom: designTokens.spacing.lg,
+    gap: designTokens.spacing.md,
   },
   infoText: {
     ...mobileTypography.bodySmall,
     color: designTokens.colors.info,
-    flex: 1,
+    flex: flexValues.one,
   },
 });
 

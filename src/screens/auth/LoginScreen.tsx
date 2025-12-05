@@ -16,21 +16,24 @@ import {
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { validate, LoginSchema } from '../../utils/validation';
 import { getErrorMessage } from '../../utils/errors';
-import { mobileTypography, designTokens } from '../../shared/theme';
+import { mobileTypography, designTokens, layoutConstants } from '../../shared/theme';
 import { StandardButton, StandardInput, Card, Badge } from '../../shared/components';
-import { MESSAGES } from '../../shared/constants';
+import { MESSAGES, ICONS, COMPONENT_SIZE, COMPONENT_VARIANT, SCREENS, EMPTY_VALUE, SAFE_AREA_EDGES, PLATFORM_OS, KEYBOARD_BEHAVIOR, TEST_IDS, FORM_FIELDS } from '../../shared/constants';
+import { flexValues, dimensionValues } from '../../shared/constants/layoutConstants';
 
 const DEFAULT_TEST_PASSWORD = 'password123';
 
 const LoginScreen: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const { t } = useTranslation();
+  const [email, setEmail] = useState(EMPTY_VALUE);
+  const [password, setPassword] = useState(EMPTY_VALUE);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
@@ -54,9 +57,9 @@ const LoginScreen: React.FC = () => {
     if (!result.success) {
       const formErrors: { email?: string; password?: string } = {};
       result.errors.forEach((error) => {
-        if (error.includes('email')) {
+        if (error.includes(FORM_FIELDS.EMAIL)) {
           formErrors.email = error;
-        } else if (error.includes('Password')) {
+        } else if (error.includes(FORM_FIELDS.PASSWORD)) {
           formErrors.password = error;
         }
       });
@@ -114,57 +117,57 @@ const LoginScreen: React.FC = () => {
    * Handles navigation to register screen
    */
   const navigateToRegister = useCallback(() => {
-    navigation.navigate('Register' as never);
+    navigation.navigate(SCREENS.REGISTER as never);
   }, [navigation]);
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]} edges={SAFE_AREA_EDGES.TOP_LEFT_RIGHT}>
       <KeyboardAvoidingView
         style={[styles.container, { backgroundColor: colors.background }]}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === PLATFORM_OS.IOS ? KEYBOARD_BEHAVIOR.PADDING : KEYBOARD_BEHAVIOR.HEIGHT}
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.header}>
-            <MaterialCommunityIcons name="account-group" size={80} color={colors.primary} />
-            <Text style={[styles.title, { color: colors.textPrimary }]}>SDA Master Guid</Text>
-            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Club Management App</Text>
+            <MaterialCommunityIcons name={ICONS.ACCOUNT_GROUP} size={designTokens.iconSize['4xl']} color={colors.primary} />
+            <Text style={[styles.title, { color: colors.textPrimary }]}>{t('screens.login.appTitle')}</Text>
+            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{t('screens.login.appSubtitle')}</Text>
           </View>
 
         <View style={styles.form}>
           {/* Email Input */}
           <StandardInput
-            label="Email"
-            icon="email"
+            label={t('screens.login.email')}
+            icon={ICONS.EMAIL}
             placeholder={MESSAGES.PLACEHOLDERS.EMAIL}
             value={email}
             onChangeText={setEmail}
             error={errors.email}
             disabled={loading}
-            testID="email-input"
+            testID={TEST_IDS.EMAIL_INPUT}
           />
 
           {/* Password Input */}
           <StandardInput
-            label="Password"
-            icon="lock"
+            label={t('screens.login.password')}
+            icon={ICONS.LOCK}
             placeholder={MESSAGES.PLACEHOLDERS.PASSWORD}
             value={password}
             onChangeText={setPassword}
             secureTextEntry
             error={errors.password}
             disabled={loading}
-            testID="password-input"
+            testID={TEST_IDS.PASSWORD_INPUT}
           />
 
           {/* Login Button */}
           <StandardButton
-            title={loading ? 'Logging in...' : 'Login'}
+            title={loading ? t('screens.login.loggingIn') : t('screens.login.loginButton')}
             onPress={handleLogin}
-            variant="primary"
+            variant={COMPONENT_VARIANT.primary}
             loading={loading}
             disabled={loading}
             fullWidth
-            testID="login-button"
+            testID={TEST_IDS.LOGIN_BUTTON}
           />
 
           {/* Register Link */}
@@ -174,7 +177,7 @@ const LoginScreen: React.FC = () => {
             disabled={loading}
           >
             <Text style={[styles.linkText, { color: colors.textSecondary }]}>
-              Don&apos;t have an account? <Text style={[styles.linkTextBold, { color: colors.primary }]}>Register</Text>
+              {t('screens.login.noAccount')} <Text style={[styles.linkTextBold, { color: colors.primary }]}>{t('screens.login.registerLink')}</Text>
             </Text>
           </TouchableOpacity>
 
@@ -182,10 +185,10 @@ const LoginScreen: React.FC = () => {
           {__DEV__ && (
             <View style={[styles.quickLoginSection, { borderTopColor: colors.border }]}>
               <View style={styles.quickLoginHeader}>
-                <Text style={[styles.quickLoginTitle, { color: colors.textPrimary }]}>Quick Login (Test Users)</Text>
-                <Badge label="DEV" variant="warning" size="sm" />
+                <Text style={[styles.quickLoginTitle, { color: colors.textPrimary }]}>{t('screens.login.quickLoginTitle')}</Text>
+                <Badge label={t('screens.login.quickLoginBadge')} variant="warning" size={COMPONENT_SIZE.sm} />
               </View>
-              <Text style={[styles.quickLoginSubtitle, { color: colors.textSecondary }]}>Click to auto-fill and login</Text>
+              <Text style={[styles.quickLoginSubtitle, { color: colors.textSecondary }]}>{t('screens.login.quickLoginSubtitle')}</Text>
               <View style={styles.quickLoginGrid}>
                 {TEST_USERS.map((user) => (
                   <Card
@@ -194,7 +197,7 @@ const LoginScreen: React.FC = () => {
                     style={{
                       ...styles.quickLoginCard,
                       borderLeftColor: user.color,
-                      borderLeftWidth: 4,
+                      borderLeftWidth: designTokens.borderWidth.heavy,
                     }}
                   >
                     <View style={styles.quickLoginInfo}>
@@ -202,7 +205,7 @@ const LoginScreen: React.FC = () => {
                       <Text style={[styles.quickLoginRole, { color: colors.textSecondary }]}>{user.role}</Text>
                       <Text style={[styles.quickLoginEmail, { color: colors.textTertiary }]}>{user.email}</Text>
                     </View>
-                    <MaterialCommunityIcons name="chevron-right" size={designTokens.icon.sizes.md} color={colors.textTertiary} />
+                    <MaterialCommunityIcons name={ICONS.CHEVRON_RIGHT} size={designTokens.icon.sizes.md} color={colors.textTertiary} />
                   </Card>
                 ))}
               </View>
@@ -217,18 +220,18 @@ const LoginScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   safeArea: {
-    flex: 1,
+    flex: flexValues.one,
   },
   container: {
-    flex: 1,
+    flex: flexValues.one,
   },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: layoutConstants.justifyContent.center,
     padding: designTokens.spacing.lg,
   },
   header: {
-    alignItems: 'center',
+    alignItems: layoutConstants.alignItems.center,
     marginBottom: designTokens.spacing['4xl'],
   },
   title: {
@@ -241,12 +244,12 @@ const styles = StyleSheet.create({
     marginTop: designTokens.spacing.sm,
   },
   form: {
-    width: '100%',
+    width: dimensionValues.width.full,
     gap: designTokens.spacing.md,
   },
   linkButton: {
     marginTop: designTokens.spacing.lg,
-    alignItems: 'center',
+    alignItems: layoutConstants.alignItems.center,
     padding: designTokens.spacing.sm,
   },
   linkText: {
@@ -261,8 +264,8 @@ const styles = StyleSheet.create({
     borderTopWidth: designTokens.borderWidth.thin,
   },
   quickLoginHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     gap: designTokens.spacing.sm,
     marginBottom: designTokens.spacing.xs,
   },
@@ -277,21 +280,21 @@ const styles = StyleSheet.create({
     gap: designTokens.spacing.sm,
   },
   quickLoginCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 0,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.spaceBetween,
+    marginBottom: designTokens.spacing.none,
   },
   quickLoginInfo: {
-    flex: 1,
+    flex: flexValues.one,
   },
   quickLoginName: {
     ...mobileTypography.bodySmallBold,
-    marginBottom: 3,
+    marginBottom: designTokens.spacing.xxs,
   },
   quickLoginRole: {
     ...mobileTypography.label,
-    marginBottom: 3,
+    marginBottom: designTokens.spacing.xxs,
   },
   quickLoginEmail: {
     ...mobileTypography.caption,
