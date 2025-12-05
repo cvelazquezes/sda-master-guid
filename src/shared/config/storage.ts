@@ -1,9 +1,9 @@
 /**
  * Storage Configuration
- * 
+ *
  * Storage keys, persistence policies, and data management constants.
  * This is the SINGLE SOURCE OF TRUTH for all storage-related decisions.
- * 
+ *
  * ❌ NEVER write: await AsyncStorage.getItem('user_token')
  * ✅ ALWAYS use: await AsyncStorage.getItem(storageConfig.keys.AUTH_TOKEN)
  */
@@ -44,6 +44,10 @@ export const storageKeys = {
   RECENT_ITEMS: '@sda_recent_items',
   FAVORITES: '@sda_favorites',
   DRAFT_DATA: '@sda_draft_data',
+
+  // Payment Data
+  PAYMENTS: '@sda_payments',
+  CUSTOM_CHARGES: '@sda_custom_charges',
 
   // Sync State
   LAST_SYNC_TIME: '@sda_last_sync_time',
@@ -261,7 +265,7 @@ export type StorageConfig = typeof storageConfig;
 
 /**
  * Generate a user-specific storage key
- * 
+ *
  * @example
  * const key = getUserStorageKey('preferences', 'user123');
  * // Returns '@sda_user_user123_preferences'
@@ -272,7 +276,7 @@ export function getUserStorageKey(key: string, userId: string): string {
 
 /**
  * Generate a cache key
- * 
+ *
  * @example
  * const key = getCacheKey('clubs_list');
  * // Returns '@sda_cache_clubs_list'
@@ -299,6 +303,5 @@ export function isClearable(key: string): boolean {
 // TYPE EXPORTS
 // ============================================================================
 
-export type StorageKey = typeof storageKeys[keyof typeof storageKeys];
-export type SecureStorageKey = typeof secureStorageKeys[keyof typeof secureStorageKeys];
-
+export type StorageKey = (typeof storageKeys)[keyof typeof storageKeys];
+export type SecureStorageKey = (typeof secureStorageKeys)[keyof typeof secureStorageKeys];
