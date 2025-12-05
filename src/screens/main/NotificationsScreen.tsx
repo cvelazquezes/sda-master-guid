@@ -8,13 +8,19 @@ import {
   RefreshControl,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
-import { mobileTypography, mobileIconSizes } from '../../shared/theme';
+import { mobileTypography, mobileIconSizes, layoutConstants } from '../../shared/theme';
 import { designTokens } from '../../shared/theme/designTokens';
+import { ICONS, TOUCH_OPACITY, TEXT_LINES, NOTIFICATION_TYPE } from '../../shared/constants';
+import { flexValues, shadowOffsetValues, dimensionValues, borderValues } from '../../shared/constants/layoutConstants';
+import { TIMING } from '../../shared/constants/timing';
+
+type NotificationType = typeof NOTIFICATION_TYPE[keyof typeof NOTIFICATION_TYPE];
 
 interface Notification {
   id: string;
-  type: 'activity' | 'fee' | 'club' | 'system';
+  type: NotificationType;
   title: string;
   message: string;
   timestamp: Date;
@@ -22,6 +28,7 @@ interface Notification {
 }
 
 const NotificationsScreen = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -35,34 +42,34 @@ const NotificationsScreen = () => {
     const mockNotifications: Notification[] = [
       {
         id: '1',
-        type: 'activity',
-        title: 'New Social Activity',
-        message: 'You have a new social activity scheduled for next week',
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
+        type: NOTIFICATION_TYPE.ACTIVITY,
+        title: t('screens.notifications.mockTitles.newActivity'),
+        message: t('screens.notifications.mockMessages.newActivity'),
+        timestamp: new Date(Date.now() - TIMING.MS_PER.HOUR * 2), // 2 hours ago
         read: false,
       },
       {
         id: '2',
-        type: 'fee',
-        title: 'Payment Due',
-        message: 'Your monthly fee of $50.00 is due on December 15',
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
+        type: NOTIFICATION_TYPE.FEE,
+        title: t('screens.notifications.mockTitles.paymentDue'),
+        message: t('screens.notifications.mockMessages.paymentDue'),
+        timestamp: new Date(Date.now() - TIMING.MS_PER.DAY), // 1 day ago
         read: false,
       },
       {
         id: '3',
-        type: 'club',
-        title: 'Club Update',
-        message: 'Your club administrator has shared an important update',
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48), // 2 days ago
+        type: NOTIFICATION_TYPE.CLUB,
+        title: t('screens.notifications.mockTitles.clubUpdate'),
+        message: t('screens.notifications.mockMessages.clubUpdate'),
+        timestamp: new Date(Date.now() - TIMING.MS_PER.DAY * 2), // 2 days ago
         read: true,
       },
       {
         id: '4',
-        type: 'system',
-        title: 'Welcome!',
-        message: 'Welcome to SDA Master Guid. Start connecting with fellow members.',
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 72), // 3 days ago
+        type: NOTIFICATION_TYPE.SYSTEM,
+        title: t('screens.notifications.mockTitles.welcome'),
+        message: t('screens.notifications.mockMessages.welcome'),
+        timestamp: new Date(Date.now() - TIMING.MS_PER.DAY * 3), // 3 days ago
         read: true,
       },
     ];
@@ -88,30 +95,30 @@ const NotificationsScreen = () => {
     setNotifications(prev => prev.map(notif => ({ ...notif, read: true })));
   };
 
-  const getNotificationIcon = (type: Notification['type']) => {
+  const getNotificationIcon = (type: NotificationType) => {
     switch (type) {
-      case 'activity':
-        return 'account-heart';
-      case 'fee':
-        return 'cash';
-      case 'club':
-        return 'account-group';
-      case 'system':
-        return 'bell';
+      case NOTIFICATION_TYPE.ACTIVITY:
+        return ICONS.ACCOUNT_HEART;
+      case NOTIFICATION_TYPE.FEE:
+        return ICONS.CASH;
+      case NOTIFICATION_TYPE.CLUB:
+        return ICONS.ACCOUNT_GROUP;
+      case NOTIFICATION_TYPE.SYSTEM:
+        return ICONS.BELL;
       default:
-        return 'bell';
+        return ICONS.BELL;
     }
   };
 
-  const getNotificationColor = (type: Notification['type']) => {
+  const getNotificationColor = (type: NotificationType) => {
     switch (type) {
-      case 'activity':
+      case NOTIFICATION_TYPE.ACTIVITY:
         return designTokens.colors.primary;
-      case 'fee':
+      case NOTIFICATION_TYPE.FEE:
         return designTokens.colors.warning;
-      case 'club':
+      case NOTIFICATION_TYPE.CLUB:
         return designTokens.colors.info;
-      case 'system':
+      case NOTIFICATION_TYPE.SYSTEM:
         return designTokens.colors.textSecondary;
       default:
         return designTokens.colors.textSecondary;
@@ -121,16 +128,16 @@ const NotificationsScreen = () => {
   const formatTimestamp = (date: Date) => {
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
+    const diffMins = Math.floor(diffMs / TIMING.MS_PER.MINUTE);
+    const diffHours = Math.floor(diffMs / TIMING.MS_PER.HOUR);
+    const diffDays = Math.floor(diffMs / TIMING.MS_PER.DAY);
 
-    if (diffMins < 60) {
-      return `${diffMins}m ago`;
-    } else if (diffHours < 24) {
-      return `${diffHours}h ago`;
-    } else if (diffDays < 7) {
-      return `${diffDays}d ago`;
+    if (diffMins < TIMING.RELATIVE_TIME.MINUTES_THRESHOLD) {
+      return t('screens.notifications.timeAgo.minutes', { count: diffMins });
+    } else if (diffHours < TIMING.RELATIVE_TIME.HOURS_THRESHOLD) {
+      return t('screens.notifications.timeAgo.hours', { count: diffHours });
+    } else if (diffDays < TIMING.RELATIVE_TIME.DAYS_THRESHOLD) {
+      return t('screens.notifications.timeAgo.days', { count: diffDays });
     } else {
       return date.toLocaleDateString();
     }
@@ -142,10 +149,10 @@ const NotificationsScreen = () => {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Notifications</Text>
+        <Text style={styles.headerTitle}>{t('screens.notifications.title')}</Text>
         {unreadCount > 0 && (
           <TouchableOpacity onPress={markAllAsRead} style={styles.markAllButton}>
-            <Text style={styles.markAllText}>Mark all as read</Text>
+            <Text style={styles.markAllText}>{t('screens.notifications.markAllAsRead')}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -153,9 +160,9 @@ const NotificationsScreen = () => {
       {/* Unread Count Banner */}
       {unreadCount > 0 && (
         <View style={styles.unreadBanner}>
-          <MaterialCommunityIcons name="bell-badge" size={mobileIconSizes.medium} color={designTokens.colors.primary} />
+          <MaterialCommunityIcons name={ICONS.BELL_BADGE} size={mobileIconSizes.medium} color={designTokens.colors.primary} />
           <Text style={styles.unreadText}>
-            You have {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
+            {t('screens.notifications.unreadCount', { count: unreadCount })}
           </Text>
         </View>
       )}
@@ -174,7 +181,7 @@ const NotificationsScreen = () => {
                 !notification.read && styles.notificationCardUnread,
               ]}
               onPress={() => markAsRead(notification.id)}
-              activeOpacity={0.7}
+              activeOpacity={TOUCH_OPACITY.default}
             >
               {/* Unread indicator dot */}
               {!notification.read && <View style={styles.unreadDot} />}
@@ -196,14 +203,14 @@ const NotificationsScreen = () => {
               {/* Content */}
               <View style={styles.notificationContent}>
                 <View style={styles.notificationHeader}>
-                  <Text style={styles.notificationTitle} numberOfLines={1}>
+                  <Text style={styles.notificationTitle} numberOfLines={TEXT_LINES.single}>
                     {notification.title}
                   </Text>
                   <Text style={styles.notificationTime}>
                     {formatTimestamp(notification.timestamp)}
                   </Text>
                 </View>
-                <Text style={styles.notificationMessage} numberOfLines={2}>
+                <Text style={styles.notificationMessage} numberOfLines={TEXT_LINES.double}>
                   {notification.message}
                 </Text>
               </View>
@@ -212,13 +219,13 @@ const NotificationsScreen = () => {
         ) : (
           <View style={styles.emptyState}>
             <MaterialCommunityIcons
-              name="bell-off-outline"
+              name={ICONS.BELL_OFF_OUTLINE}
               size={mobileIconSizes.xxlarge * 2}
               color={designTokens.colors.borderMedium}
             />
-            <Text style={styles.emptyText}>No notifications</Text>
+            <Text style={styles.emptyText}>{t('screens.notifications.noNotifications')}</Text>
             <Text style={styles.emptySubtext}>
-              You're all caught up! New notifications will appear here.
+              {t('screens.notifications.allCaughtUp')}
             </Text>
           </View>
         )}
@@ -229,95 +236,95 @@ const NotificationsScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: flexValues.one,
     backgroundColor: designTokens.colors.backgroundSecondary,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    justifyContent: layoutConstants.justifyContent.spaceBetween,
+    alignItems: layoutConstants.alignItems.center,
     backgroundColor: designTokens.colors.backgroundPrimary,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
+    paddingHorizontal: designTokens.spacing.xl,
+    paddingVertical: designTokens.spacing.lg,
+    borderBottomWidth: designTokens.borderWidth.thin,
     borderBottomColor: designTokens.colors.borderLight,
   },
   headerTitle: {
     ...mobileTypography.heading1,
   },
   markAllButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingVertical: designTokens.spacing.sm,
+    paddingHorizontal: designTokens.spacing.md,
   },
   markAllText: {
     ...mobileTypography.labelBold,
     color: designTokens.colors.primary,
   },
   unreadBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     backgroundColor: designTokens.colors.primaryLight,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    gap: 10,
+    paddingHorizontal: designTokens.spacing.xl,
+    paddingVertical: designTokens.spacing.md,
+    gap: designTokens.spacing.md,
   },
   unreadText: {
     ...mobileTypography.bodySmall,
     color: designTokens.colors.primary,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
   },
   content: {
-    flex: 1,
+    flex: flexValues.one,
   },
   notificationCard: {
-    flexDirection: 'row',
+    flexDirection: layoutConstants.flexDirection.row,
     backgroundColor: designTokens.colors.backgroundPrimary,
     padding: designTokens.spacing.lg,
-    marginHorizontal: 16,
-    marginTop: 12,
+    marginHorizontal: designTokens.spacing.lg,
+    marginTop: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.lg,
     shadowColor: designTokens.colors.textPrimary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
-    position: 'relative',
+    shadowOffset: shadowOffsetValues.md,
+    shadowOpacity: designTokens.shadows.sm.shadowOpacity,
+    shadowRadius: designTokens.shadows.sm.shadowRadius,
+    elevation: designTokens.shadows.sm.elevation,
+    position: layoutConstants.position.relative,
   },
   notificationCardUnread: {
     backgroundColor: designTokens.colors.infoLight,
-    borderLeftWidth: 3,
+    borderLeftWidth: borderValues.width.medium,
     borderLeftColor: designTokens.colors.primary,
   },
   unreadDot: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
-    width: 8,
-    height: 8,
+    position: layoutConstants.position.absolute,
+    top: designTokens.spacing.md,
+    right: designTokens.spacing.md,
+    width: dimensionValues.progressBar.standard,
+    height: dimensionValues.progressBar.standard,
     borderRadius: designTokens.borderRadius.xs,
     backgroundColor: designTokens.colors.primary,
   },
   iconContainer: {
-    width: 48,
-    height: 48,
+    width: designTokens.componentSizes.iconContainer.lg,
+    height: designTokens.componentSizes.iconContainer.lg,
     borderRadius: designTokens.borderRadius['3xl'],
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
+    marginRight: designTokens.spacing.md,
   },
   notificationContent: {
-    flex: 1,
+    flex: flexValues.one,
   },
   notificationHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 6,
-    gap: 8,
+    flexDirection: layoutConstants.flexDirection.row,
+    justifyContent: layoutConstants.justifyContent.spaceBetween,
+    alignItems: layoutConstants.alignItems.flexStart,
+    marginBottom: designTokens.spacing.sm,
+    gap: designTokens.spacing.sm,
   },
   notificationTitle: {
     ...mobileTypography.bodyMediumBold,
-    flex: 1,
+    flex: flexValues.one,
   },
   notificationTime: {
     ...mobileTypography.caption,
@@ -328,21 +335,21 @@ const styles = StyleSheet.create({
     color: designTokens.colors.textSecondary,
   },
   emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 80,
-    paddingHorizontal: 40,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
+    paddingVertical: designTokens.spacing['7xl'],
+    paddingHorizontal: designTokens.spacing['4xl'],
   },
   emptyText: {
     ...mobileTypography.heading3,
     color: designTokens.colors.textSecondary,
-    marginTop: 16,
+    marginTop: designTokens.spacing.lg,
   },
   emptySubtext: {
     ...mobileTypography.bodySmall,
     color: designTokens.colors.textTertiary,
-    textAlign: 'center',
-    marginTop: 8,
+    textAlign: layoutConstants.textAlign.center,
+    marginTop: designTokens.spacing.sm,
   },
 });
 

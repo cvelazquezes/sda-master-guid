@@ -8,6 +8,7 @@ import {
   Alert,
   Linking,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { matchService } from '../../services/matchService';
@@ -22,9 +23,14 @@ import {
 } from '../../shared/components';
 import { designTokens } from '../../shared/theme/designTokens';
 import { mobileTypography } from '../../shared/theme/mobileTypography';
-import { MESSAGES, EXTERNAL_URLS } from '../../shared/constants';
+import { layoutConstants } from '../../shared/theme';
+import { MESSAGES, EXTERNAL_URLS, ICONS, COMPONENT_VARIANT, BUTTON_SIZE, ALERT_BUTTON_STYLE, EMPTY_VALUE, VALIDATION } from '../../shared/constants';
+import { flexValues } from '../../shared/constants/layoutConstants';
+import { LOG_MESSAGES } from '../../shared/constants/logMessages';
+import { logger } from '../../services/logger';
 
 const ActivitiesScreen = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,10 +65,10 @@ const ActivitiesScreen = () => {
       MESSAGES.TITLES.SKIP_ACTIVITY,
       MESSAGES.WARNINGS.CONFIRM_SKIP,
       [
-        { text: MESSAGES.BUTTONS.CANCEL, style: 'cancel' },
+        { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
         {
           text: MESSAGES.BUTTONS.SKIP,
-          style: 'destructive',
+          style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
           onPress: async () => {
             try {
               await matchService.skipMatch(matchId);
@@ -86,14 +92,14 @@ const ActivitiesScreen = () => {
       );
       setMatchParticipants(participants);
     } catch (error) {
-      console.error('Failed to load participants:', error);
+      logger.error(LOG_MESSAGES.ACTIVITIES.FAILED_TO_LOAD_PARTICIPANTS, error as Error);
     }
   };
 
   const handleContactParticipant = (participant: User) => {
     if (participant.whatsappNumber) {
-      const message = `Hi ${participant.name}! Let's schedule our meetup for this week. What day works best for you?`;
-      const url = `${EXTERNAL_URLS.WHATSAPP_BASE}${participant.whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
+      const message = t('screens.activities.whatsappMessageSingle', { name: participant.name });
+      const url = `${EXTERNAL_URLS.WHATSAPP_BASE}${participant.whatsappNumber.replace(VALIDATION.WHATSAPP.STRIP_NON_DIGITS, EMPTY_VALUE)}?text=${encodeURIComponent(message)}`;
       Linking.openURL(url).catch(() => {
         Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.COULD_NOT_OPEN_WHATSAPP);
       });
@@ -105,11 +111,11 @@ const ActivitiesScreen = () => {
     
     const phoneNumbers = matchParticipants
       .filter(p => p.whatsappNumber && p.id !== user?.id)
-      .map(p => p.whatsappNumber.replace(/[^0-9]/g, ''))
+      .map(p => p.whatsappNumber.replace(VALIDATION.WHATSAPP.STRIP_NON_DIGITS, EMPTY_VALUE))
       .join(',');
     
     if (phoneNumbers) {
-      const message = `Hi everyone! Let's schedule our club meetup this week. What day and time works for everyone?`;
+      const message = t('screens.activities.whatsappMessageGroup');
       const url = `${EXTERNAL_URLS.WHATSAPP_GROUP}?text=${encodeURIComponent(message)}&phone=${phoneNumbers}`;
       Linking.openURL(url).catch(() => {
         Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.COULD_NOT_OPEN_WHATSAPP);
@@ -139,38 +145,38 @@ const ActivitiesScreen = () => {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <ScreenHeader
-          title="Club Activities"
-          subtitle="Social meetups and events"
+          title={t('screens.activities.title')}
+          subtitle={t('screens.activities.socialMeetupsSubtitle')}
         />
 
         <View style={styles.content}>
           {loading ? (
             <EmptyState
-              icon="loading"
-              title="Loading activities..."
-              description="Please wait"
+              icon={ICONS.LOADING}
+              title={t('screens.activities.loadingActivities')}
+              description={t('common.pleaseWait')}
             />
           ) : matches.length === 0 ? (
             <EmptyState
-              icon="account-heart"
-              title="No activities yet"
-              description="Social activities will appear here when they're organized by your club admin"
+              icon={ICONS.ACCOUNT_HEART}
+              title={t('screens.activities.noActivitiesYet')}
+              description={t('screens.activities.noActivitiesDescription')}
             />
           ) : (
             <>
               {/* Filter badges (visual only for now) */}
               <View style={styles.filterContainer}>
-                <Text style={styles.filterLabel}>Filter by status:</Text>
+                <Text style={styles.filterLabel}>{t('screens.activities.filterByStatus')}</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
                   {[
-                    { label: 'All', status: null },
-                    { label: 'Pending', status: MatchStatus.PENDING },
-                    { label: 'Scheduled', status: MatchStatus.SCHEDULED },
-                    { label: 'Completed', status: MatchStatus.COMPLETED },
+                    { label: t('screens.activities.filterAll'), status: null },
+                    { label: t('screens.activities.filterPending'), status: MatchStatus.PENDING },
+                    { label: t('screens.activities.filterScheduled'), status: MatchStatus.SCHEDULED },
+                    { label: t('screens.activities.filterCompleted'), status: MatchStatus.COMPLETED },
                   ].map((filter) => (
                     <View key={filter.label} style={styles.filterBadge}>
                       <MaterialCommunityIcons
-                        name="circle"
+                        name={ICONS.CIRCLE}
                         size={designTokens.icon.sizes.xs}
                         color={filter.status ? getStatusColor(filter.status) : designTokens.colors.textSecondary}
                       />
@@ -205,19 +211,19 @@ const ActivitiesScreen = () => {
             setSelectedMatch(null);
             setMatchParticipants([]);
           }}
-          title="Activity Details"
-          subtitle="Social meetup information"
-          icon="account-heart"
+          title={t('screens.activities.activityDetails')}
+          subtitle={t('screens.activities.socialMeetupInfo')}
+          icon={ICONS.ACCOUNT_HEART}
           iconColor={designTokens.colors.primary}
           iconBackgroundColor={designTokens.colors.primaryLight}
         >
           <View style={styles.modalContent}>
             {/* Activity Status */}
             <View style={styles.modalSection}>
-              <Text style={styles.modalSectionTitle}>Status</Text>
+              <Text style={styles.modalSectionTitle}>{t('screens.activities.status')}</Text>
               <View style={[styles.statusBadge, { backgroundColor: `${getStatusColor(selectedMatch.status)}20` }]}>
                 <MaterialCommunityIcons
-                  name={selectedMatch.status === MatchStatus.COMPLETED ? 'check-circle' : 'clock-outline'}
+                  name={selectedMatch.status === MatchStatus.COMPLETED ? ICONS.CHECK_CIRCLE : ICONS.CLOCK_OUTLINE}
                   size={designTokens.icon.sizes.md}
                   color={getStatusColor(selectedMatch.status)}
                 />
@@ -229,7 +235,7 @@ const ActivitiesScreen = () => {
 
             {/* Participants */}
             <View style={styles.modalSection}>
-              <Text style={styles.modalSectionTitle}>Participants</Text>
+              <Text style={styles.modalSectionTitle}>{t('screens.activities.participants')}</Text>
               {matchParticipants.map((participant) => (
                 <View key={participant.id} style={styles.participantRow}>
                   <View style={styles.participantAvatar}>
@@ -243,10 +249,10 @@ const ActivitiesScreen = () => {
                   </View>
                   {participant.id !== user?.id && (
                     <StandardButton
-                      title="Chat"
-                      icon="whatsapp"
-                      variant="secondary"
-                      size="small"
+                      title={t('screens.activities.chat')}
+                      icon={ICONS.WHATSAPP}
+                      variant={COMPONENT_VARIANT.secondary}
+                      size={BUTTON_SIZE.small}
                       onPress={() => handleContactParticipant(participant)}
                     />
                   )}
@@ -257,17 +263,17 @@ const ActivitiesScreen = () => {
             {/* Actions */}
             <View style={styles.modalSection}>
               <StandardButton
-                title="Create Group Chat"
-                icon="whatsapp"
-                variant="primary"
+                title={t('screens.activities.createGroupChat')}
+                icon={ICONS.WHATSAPP}
+                variant={COMPONENT_VARIANT.primary}
                 fullWidth
                 onPress={handleCreateGroupChat}
               />
               {selectedMatch.status === MatchStatus.PENDING && (
                 <StandardButton
-                  title="Skip This Activity"
-                  icon="close"
-                  variant="danger"
+                  title={t('screens.activities.skipActivity')}
+                  icon={ICONS.CLOSE}
+                  variant={COMPONENT_VARIANT.danger}
                   fullWidth
                   onPress={() => {
                     setDetailModalVisible(false);
@@ -285,7 +291,7 @@ const ActivitiesScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: flexValues.one,
     backgroundColor: designTokens.colors.backgroundSecondary,
   },
   content: {
@@ -300,17 +306,17 @@ const styles = StyleSheet.create({
     marginBottom: designTokens.spacing.sm,
   },
   filterScroll: {
-    flexDirection: 'row',
+    flexDirection: layoutConstants.flexDirection.row,
   },
   filterBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     paddingHorizontal: designTokens.spacing.md,
     paddingVertical: designTokens.spacing.sm,
     backgroundColor: designTokens.colors.backgroundPrimary,
     borderRadius: designTokens.borderRadius.full,
     marginRight: designTokens.spacing.sm,
-    gap: 6,
+    gap: designTokens.spacing.sm,
   },
   filterText: {
     ...mobileTypography.labelBold,
@@ -328,8 +334,8 @@ const styles = StyleSheet.create({
     marginBottom: designTokens.spacing.md,
   },
   statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     paddingVertical: designTokens.spacing.md,
     paddingHorizontal: designTokens.spacing.lg,
     borderRadius: designTokens.borderRadius.lg,
@@ -339,8 +345,8 @@ const styles = StyleSheet.create({
     ...mobileTypography.bodyLargeBold,
   },
   participantRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     padding: designTokens.spacing.md,
     backgroundColor: designTokens.colors.backgroundSecondary,
     borderRadius: designTokens.borderRadius.lg,
@@ -348,19 +354,19 @@ const styles = StyleSheet.create({
     gap: designTokens.spacing.md,
   },
   participantAvatar: {
-    width: 48,
-    height: 48,
+    width: designTokens.componentSizes.iconContainer.lg,
+    height: designTokens.componentSizes.iconContainer.lg,
     borderRadius: designTokens.borderRadius['3xl'],
     backgroundColor: designTokens.colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
   },
   participantAvatarText: {
     ...mobileTypography.heading3,
     color: designTokens.colors.textInverse,
   },
   participantInfo: {
-    flex: 1,
+    flex: flexValues.one,
   },
   participantName: {
     ...mobileTypography.bodyLargeBold,
@@ -369,7 +375,7 @@ const styles = StyleSheet.create({
   participantEmail: {
     ...mobileTypography.caption,
     color: designTokens.colors.textSecondary,
-    marginTop: 2,
+    marginTop: designTokens.spacing.xxs,
   },
 });
 

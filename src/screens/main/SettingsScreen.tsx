@@ -11,6 +11,7 @@ import {
   Animated,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { clubService } from '../../services/clubService';
@@ -19,8 +20,11 @@ import { UserRole, Club, User } from '../../types';
 import { ThemeSwitcher } from '../../components/ThemeSwitcher';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 import { UserDetailModal } from '../../components/UserDetailModal';
-import { mobileTypography, mobileFontSizes } from '../../shared/theme';
-import { designTokens } from '../../shared/theme/designTokens';
+import { mobileTypography, mobileFontSizes, designTokens, layoutConstants } from '../../shared/theme';
+import { ICONS, ALERT_BUTTON_STYLE, MESSAGES, ANIMATION_DURATION } from '../../shared/constants';
+import { flexValues, textTransformValues, typographyValues } from '../../shared/constants/layoutConstants';
+import { LOG_MESSAGES } from '../../shared/constants/logMessages';
+import { logger } from '../../shared/utils/logger';
 
 type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
 
@@ -37,6 +41,7 @@ interface MenuItemProps {
 }
 
 const SettingsScreen = () => {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const { colors } = useTheme();
   const [club, setClub] = useState<Club | null>(null);
@@ -57,7 +62,7 @@ const SettingsScreen = () => {
     if (!loading) {
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 400,
+        duration: ANIMATION_DURATION.MEDIUM,
         useNativeDriver: true,
       }).start();
     }
@@ -76,7 +81,7 @@ const SettingsScreen = () => {
         setIsActive(userData?.isActive ?? true);
       }
     } catch (error) {
-      console.error('Failed to load settings data:', error);
+      logger.error(LOG_MESSAGES.SETTINGS.FAILED_TO_LOAD_DATA, error as Error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -91,14 +96,13 @@ const SettingsScreen = () => {
   const handleToggleActive = async (newValue: boolean) => {
     if (!user) return;
 
-    const actionText = newValue ? 'activate' : 'pause';
     Alert.alert(
-      `${newValue ? 'Activate' : 'Pause'} Account`,
-      `Are you sure you want to ${actionText} your account?`,
+      newValue ? t('screens.settings.activateAccount') : t('screens.settings.pauseAccount'),
+      newValue ? t('screens.settings.confirmActivate') : t('screens.settings.confirmPause'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: ALERT_BUTTON_STYLE.CANCEL },
         {
-          text: 'Confirm',
+          text: t('common.confirm'),
           onPress: async () => {
             try {
               await userService.updateUserActiveStatus(
@@ -106,9 +110,9 @@ const SettingsScreen = () => {
                 newValue
               );
               setIsActive(newValue);
-              Alert.alert('Success', `Your account has been ${newValue ? 'activated' : 'paused'}.`);
+              Alert.alert(MESSAGES.TITLES.SUCCESS, newValue ? t('screens.settings.accountActivated') : t('screens.settings.accountPaused'));
             } catch (error) {
-              Alert.alert('Error', `Failed to ${actionText} your account.`);
+              Alert.alert(MESSAGES.TITLES.ERROR, newValue ? t('screens.settings.failedToActivate') : t('screens.settings.failedToPause'));
             }
           },
         },
@@ -118,13 +122,13 @@ const SettingsScreen = () => {
 
   const handleLogout = () => {
     Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out?',
+      t('screens.settings.signOut'),
+      t('screens.settings.confirmSignOut'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: ALERT_BUTTON_STYLE.CANCEL },
         {
-          text: 'Sign Out',
-          style: 'destructive',
+          text: t('screens.settings.signOut'),
+          style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
           onPress: logout,
         },
       ]
@@ -135,24 +139,24 @@ const SettingsScreen = () => {
     switch (user?.role) {
       case UserRole.ADMIN:
         return { 
-          label: 'Administrator', 
+          label: t('roles.administrator'), 
           color: colors.error,
           bg: colors.errorLight || `${colors.error}15`,
-          icon: 'shield-crown' as IconName
+          icon: ICONS.SHIELD_CROWN as IconName
         };
       case UserRole.CLUB_ADMIN:
         return { 
-          label: 'Club Admin', 
+          label: t('roles.clubAdmin'), 
           color: colors.warning,
           bg: colors.warningLight || `${colors.warning}15`,
-          icon: 'account-star' as IconName
+          icon: ICONS.ACCOUNT_STAR as IconName
         };
       default:
         return { 
-          label: 'Member', 
+          label: t('roles.member'), 
           color: colors.info,
           bg: colors.infoLight || `${colors.info}15`,
-          icon: 'account' as IconName
+          icon: ICONS.ACCOUNT as IconName
         };
     }
   };
@@ -180,7 +184,7 @@ const SettingsScreen = () => {
       ]}>
         <MaterialCommunityIcons 
           name={icon} 
-          size={22} 
+          size={designTokens.iconSize.md} 
           color={iconColor || (danger ? colors.error : colors.primary)} 
         />
       </View>
@@ -200,8 +204,8 @@ const SettingsScreen = () => {
       {rightComponent}
       {showChevron && onPress && (
         <MaterialCommunityIcons 
-          name="chevron-right" 
-          size={24} 
+          name={ICONS.CHEVRON_RIGHT} 
+          size={designTokens.iconSize.lg} 
           color={colors.textTertiary} 
         />
       )}
@@ -262,7 +266,7 @@ const SettingsScreen = () => {
 
           {/* Role Badge */}
           <View style={[styles.roleBadge, { backgroundColor: `${colors.textInverse}25` }]}>
-            <MaterialCommunityIcons name={roleConfig.icon} size={16} color={colors.textInverse} />
+            <MaterialCommunityIcons name={roleConfig.icon} size={designTokens.iconSize.sm} color={colors.textInverse} />
             <Text style={[styles.roleText, { color: colors.textInverse }]}>
               {roleConfig.label}
             </Text>
@@ -272,7 +276,7 @@ const SettingsScreen = () => {
           {club && (
             <View style={[styles.headerStats, { borderTopColor: `${colors.textInverse}30` }]}>
               <View style={styles.headerStat}>
-                <MaterialCommunityIcons name="church" size={20} color={colors.textInverse} />
+                <MaterialCommunityIcons name={ICONS.CHURCH} size={designTokens.iconSize.md} color={colors.textInverse} />
                 <Text style={[styles.headerStatText, { color: colors.textInverse }]}>
                   {club.name}
                 </Text>
@@ -287,7 +291,7 @@ const SettingsScreen = () => {
                     { backgroundColor: isActive ? colors.success : colors.warning }
                   ]} />
                   <Text style={[styles.headerStatText, { color: colors.textInverse }]}>
-                    {isActive ? 'Active' : 'Paused'}
+                      {isActive ? t('common.active') : t('common.paused')}
                   </Text>
                 </View>
               )}
@@ -304,9 +308,9 @@ const SettingsScreen = () => {
             onPress={() => setDetailVisible(true)}
           >
             <View style={[styles.quickActionIcon, { backgroundColor: `${colors.primary}15` }]}>
-              <MaterialCommunityIcons name="account-circle" size={24} color={colors.primary} />
+              <MaterialCommunityIcons name={ICONS.ACCOUNT_CIRCLE} size={designTokens.iconSize.lg} color={colors.primary} />
             </View>
-            <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>View Profile</Text>
+            <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>{t('screens.settings.viewProfile')}</Text>
           </TouchableOpacity>
 
           {user?.role !== UserRole.ADMIN && (
@@ -319,13 +323,13 @@ const SettingsScreen = () => {
                 { backgroundColor: isActive ? `${colors.warning}15` : `${colors.success}15` }
               ]}>
                 <MaterialCommunityIcons 
-                  name={isActive ? 'pause-circle' : 'play-circle'} 
-                  size={24} 
+                    name={isActive ? ICONS.PAUSE_CIRCLE : ICONS.PLAY_CIRCLE} 
+                  size={designTokens.iconSize.lg} 
                   color={isActive ? colors.warning : colors.success} 
                 />
               </View>
               <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>
-                {isActive ? 'Pause' : 'Activate'}
+                {isActive ? t('common.pause') : t('common.activate')}
               </Text>
             </TouchableOpacity>
           )}
@@ -335,29 +339,29 @@ const SettingsScreen = () => {
             onPress={handleLogout}
           >
             <View style={[styles.quickActionIcon, { backgroundColor: `${colors.error}15` }]}>
-              <MaterialCommunityIcons name="logout" size={24} color={colors.error} />
+              <MaterialCommunityIcons name={ICONS.LOGOUT} size={designTokens.iconSize.lg} color={colors.error} />
             </View>
-            <Text style={[styles.quickActionText, { color: colors.error }]}>Sign Out</Text>
+            <Text style={[styles.quickActionText, { color: colors.error }]}>{t('screens.settings.signOut')}</Text>
           </TouchableOpacity>
         </View>
 
         {/* Appearance Section */}
         <View style={[styles.section, { backgroundColor: colors.surface }]}>
           <View style={styles.sectionHeader}>
-            <MaterialCommunityIcons name="palette-outline" size={22} color={colors.primary} />
+            <MaterialCommunityIcons name={ICONS.PALETTE_OUTLINE} size={designTokens.iconSize.md} color={colors.primary} />
             <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
-              Appearance
+              {t('screens.settings.appearance')}
             </Text>
           </View>
           
           <View style={[styles.menuItem, { borderBottomColor: colors.border }]}>
             <View style={[styles.menuIcon, { backgroundColor: `${colors.primary}15` }]}>
-              <MaterialCommunityIcons name="theme-light-dark" size={22} color={colors.primary} />
+              <MaterialCommunityIcons name={ICONS.THEME_LIGHT_DARK} size={designTokens.iconSize.md} color={colors.primary} />
             </View>
             <View style={styles.menuContent}>
-              <Text style={[styles.menuTitle, { color: colors.textPrimary }]}>Theme</Text>
+              <Text style={[styles.menuTitle, { color: colors.textPrimary }]}>{t('screens.settings.theme')}</Text>
               <Text style={[styles.menuSubtitle, { color: colors.textTertiary }]}>
-                Customize app appearance
+                {t('screens.settings.customizeAppearance')}
               </Text>
             </View>
             <ThemeSwitcher />
@@ -365,12 +369,12 @@ const SettingsScreen = () => {
 
           <View style={[styles.menuItem, { borderBottomWidth: 0 }]}>
             <View style={[styles.menuIcon, { backgroundColor: `${colors.info}15` }]}>
-              <MaterialCommunityIcons name="translate" size={22} color={colors.info} />
+              <MaterialCommunityIcons name={ICONS.TRANSLATE} size={designTokens.iconSize.md} color={colors.info} />
             </View>
             <View style={styles.menuContent}>
-              <Text style={[styles.menuTitle, { color: colors.textPrimary }]}>Language</Text>
+              <Text style={[styles.menuTitle, { color: colors.textPrimary }]}>{t('screens.settings.language')}</Text>
               <Text style={[styles.menuSubtitle, { color: colors.textTertiary }]}>
-                Change app language
+                {t('screens.settings.changeLanguage')}
               </Text>
             </View>
             <LanguageSwitcher />
@@ -380,25 +384,25 @@ const SettingsScreen = () => {
         {/* Account Section */}
         <View style={[styles.section, { backgroundColor: colors.surface }]}>
           <View style={styles.sectionHeader}>
-            <MaterialCommunityIcons name="account-cog-outline" size={22} color={colors.primary} />
+            <MaterialCommunityIcons name={ICONS.ACCOUNT_COG_OUTLINE} size={designTokens.iconSize.md} color={colors.primary} />
             <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
-              Account
+              {t('screens.settings.account')}
             </Text>
           </View>
 
           <MenuItem
-            icon="account-circle-outline"
-            title="Profile Information"
-            subtitle="View and edit your details"
+            icon={ICONS.ACCOUNT_CIRCLE_OUTLINE}
+            title={t('screens.settings.profileInformation')}
+            subtitle={t('screens.settings.profileSubtitle')}
             onPress={() => setDetailVisible(true)}
           />
 
           {club && (
             <MenuItem
-              icon="church"
+              icon={ICONS.CHURCH}
               iconColor={colors.secondary}
               iconBg={`${colors.secondary}15`}
-              title="Club Details"
+              title={t('screens.settings.clubDetails')}
               subtitle={club.name}
             />
           )}
@@ -410,15 +414,15 @@ const SettingsScreen = () => {
                 { backgroundColor: isActive ? `${colors.success}15` : `${colors.warning}15` }
               ]}>
                 <MaterialCommunityIcons 
-                  name={isActive ? 'check-circle' : 'pause-circle'} 
-                  size={22} 
+                  name={isActive ? ICONS.CHECK_CIRCLE : ICONS.PAUSE_CIRCLE} 
+                  size={designTokens.iconSize.md} 
                   color={isActive ? colors.success : colors.warning} 
                 />
               </View>
               <View style={styles.menuContent}>
-                <Text style={[styles.menuTitle, { color: colors.textPrimary }]}>Account Status</Text>
+                <Text style={[styles.menuTitle, { color: colors.textPrimary }]}>{t('screens.settings.accountStatus')}</Text>
                 <Text style={[styles.menuSubtitle, { color: colors.textTertiary }]}>
-                  {isActive ? 'Your account is active' : 'Your account is paused'}
+                  {isActive ? t('screens.settings.accountIsActive') : t('screens.settings.accountIsPaused')}
                 </Text>
               </View>
               <Switch
@@ -434,20 +438,20 @@ const SettingsScreen = () => {
         {/* Notifications Section */}
         <View style={[styles.section, { backgroundColor: colors.surface }]}>
           <View style={styles.sectionHeader}>
-            <MaterialCommunityIcons name="bell-outline" size={22} color={colors.primary} />
+            <MaterialCommunityIcons name={ICONS.BELL_OUTLINE} size={designTokens.iconSize.md} color={colors.primary} />
             <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
-              Notifications
+              {t('screens.settings.notifications')}
             </Text>
           </View>
 
           <View style={[styles.menuItem, { borderBottomColor: colors.border }]}>
             <View style={[styles.menuIcon, { backgroundColor: `${colors.primary}15` }]}>
-              <MaterialCommunityIcons name="bell-ring-outline" size={22} color={colors.primary} />
+              <MaterialCommunityIcons name={ICONS.BELL_RING_OUTLINE} size={designTokens.iconSize.md} color={colors.primary} />
             </View>
             <View style={styles.menuContent}>
-              <Text style={[styles.menuTitle, { color: colors.textPrimary }]}>Push Notifications</Text>
+              <Text style={[styles.menuTitle, { color: colors.textPrimary }]}>{t('screens.settings.pushNotifications')}</Text>
               <Text style={[styles.menuSubtitle, { color: colors.textTertiary }]}>
-                Receive app notifications
+                {t('screens.settings.receiveAppNotifications')}
               </Text>
             </View>
             <Switch
@@ -459,12 +463,12 @@ const SettingsScreen = () => {
 
           <View style={[styles.menuItem, { borderBottomWidth: 0 }]}>
             <View style={[styles.menuIcon, { backgroundColor: `${colors.info}15` }]}>
-              <MaterialCommunityIcons name="email-outline" size={22} color={colors.info} />
+              <MaterialCommunityIcons name={ICONS.EMAIL_OUTLINE} size={designTokens.iconSize.md} color={colors.info} />
             </View>
             <View style={styles.menuContent}>
-              <Text style={[styles.menuTitle, { color: colors.textPrimary }]}>Email Updates</Text>
+              <Text style={[styles.menuTitle, { color: colors.textPrimary }]}>{t('screens.settings.emailUpdates')}</Text>
               <Text style={[styles.menuSubtitle, { color: colors.textTertiary }]}>
-                Receive email notifications
+                {t('screens.settings.receiveEmailNotifications')}
               </Text>
             </View>
             <Switch
@@ -478,37 +482,37 @@ const SettingsScreen = () => {
         {/* Support Section */}
         <View style={[styles.section, { backgroundColor: colors.surface }]}>
           <View style={styles.sectionHeader}>
-            <MaterialCommunityIcons name="help-circle-outline" size={22} color={colors.primary} />
+            <MaterialCommunityIcons name={ICONS.HELP_CIRCLE_OUTLINE} size={designTokens.iconSize.md} color={colors.primary} />
             <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
-              Support
+              {t('screens.settings.support')}
             </Text>
           </View>
 
           <MenuItem
-            icon="frequently-asked-questions"
+            icon={ICONS.FREQUENTLY_ASKED_QUESTIONS}
             iconColor={colors.info}
             iconBg={`${colors.info}15`}
-            title="FAQ"
-            subtitle="Frequently asked questions"
+            title={t('screens.settings.faq')}
+            subtitle={t('screens.settings.faqSubtitle')}
           />
 
           <MenuItem
-            icon="message-text-outline"
+            icon={ICONS.MESSAGE_TEXT_OUTLINE}
             iconColor={colors.secondary}
             iconBg={`${colors.secondary}15`}
-            title="Contact Support"
-            subtitle="Get help from our team"
+            title={t('screens.settings.contactSupport')}
+            subtitle={t('screens.settings.contactSupportSubtitle')}
           />
 
           <MenuItem
-            icon="file-document-outline"
-            title="Privacy Policy"
+            icon={ICONS.FILE_DOCUMENT_OUTLINE}
+            title={t('screens.settings.privacyPolicy')}
           />
 
           <MenuItem
-            icon="information-outline"
-            title="About"
-            subtitle="Version 1.0.0"
+            icon={ICONS.INFORMATION_OUTLINE}
+            title={t('screens.settings.about')}
+            subtitle={t('screens.settings.version', { version: '1.0.0' })}
             showChevron={false}
           />
         </View>
@@ -516,8 +520,8 @@ const SettingsScreen = () => {
         {/* Danger Zone */}
         <View style={[styles.section, { backgroundColor: colors.surface }]}>
           <MenuItem
-            icon="logout"
-            title="Sign Out"
+            icon={ICONS.LOGOUT}
+            title={t('screens.settings.signOut')}
             danger
             onPress={handleLogout}
             showChevron={false}
@@ -539,44 +543,44 @@ const SettingsScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: flexValues.one,
   },
   header: {
-    paddingTop: 60,
-    paddingBottom: 24,
+    paddingTop: designTokens.spacing['6xl'],
+    paddingBottom: designTokens.spacing.xxl,
     paddingHorizontal: designTokens.spacing.lg,
   },
   headerContent: {
-    alignItems: 'center',
+    alignItems: layoutConstants.alignItems.center,
   },
   avatarContainer: {
-    padding: 4,
-    borderRadius: 60,
+    padding: designTokens.spacing.xs,
+    borderRadius: designTokens.borderRadius.full,
     marginBottom: designTokens.spacing.lg,
   },
   avatar: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: designTokens.avatarSize.xxl,
+    height: designTokens.avatarSize.xxl,
+    borderRadius: designTokens.borderRadius.full,
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
   },
   avatarText: {
-    fontSize: 36,
-    fontWeight: '700',
+    fontSize: designTokens.fontSize['4xl'],
+    fontWeight: designTokens.fontWeight.bold,
   },
   activeIndicator: {
-    position: 'absolute',
-    bottom: 4,
-    right: 4,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 3,
+    position: layoutConstants.position.absolute,
+    bottom: designTokens.spacing.xs,
+    right: designTokens.spacing.xs,
+    width: designTokens.spacing.xl,
+    height: designTokens.spacing.xl,
+    borderRadius: designTokens.borderRadius.full,
+    borderWidth: designTokens.borderWidth.thick,
   },
   userName: {
     fontSize: mobileFontSizes['2xl'],
-    fontWeight: '700',
+    fontWeight: designTokens.fontWeight.bold,
     marginBottom: designTokens.spacing.xs,
   },
   userEmail: {
@@ -584,8 +588,8 @@ const styles = StyleSheet.create({
     marginBottom: designTokens.spacing.md,
   },
   roleBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     paddingHorizontal: designTokens.spacing.md,
     paddingVertical: designTokens.spacing.sm,
     borderRadius: designTokens.borderRadius.full,
@@ -593,72 +597,72 @@ const styles = StyleSheet.create({
   },
   roleText: {
     fontSize: mobileFontSizes.sm,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    fontWeight: designTokens.fontWeight.semibold,
+    textTransform: textTransformValues.uppercase,
+    letterSpacing: typographyValues.letterSpacing.normal,
   },
   headerStats: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     marginTop: designTokens.spacing.lg,
     paddingTop: designTokens.spacing.lg,
-    borderTopWidth: 1,
+    borderTopWidth: designTokens.borderWidth.thin,
     gap: designTokens.spacing.md,
   },
   headerStat: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     gap: designTokens.spacing.sm,
   },
   headerStatText: {
     fontSize: mobileFontSizes.sm,
   },
   headerStatDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
+    width: designTokens.spacing.xs,
+    height: designTokens.spacing.xs,
+    borderRadius: designTokens.borderRadius.full,
   },
   statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: designTokens.spacing.sm,
+    height: designTokens.spacing.sm,
+    borderRadius: designTokens.borderRadius.full,
   },
   quickActions: {
-    flexDirection: 'row',
+    flexDirection: layoutConstants.flexDirection.row,
     paddingHorizontal: designTokens.spacing.lg,
     paddingVertical: designTokens.spacing.lg,
     gap: designTokens.spacing.md,
   },
   quickAction: {
-    flex: 1,
-    alignItems: 'center',
+    flex: flexValues.one,
+    alignItems: layoutConstants.alignItems.center,
     paddingVertical: designTokens.spacing.lg,
     borderRadius: designTokens.borderRadius.xl,
     ...designTokens.shadows.sm,
   },
   quickActionIcon: {
-    width: 48,
-    height: 48,
+    width: designTokens.componentSizes.iconContainer.lg,
+    height: designTokens.componentSizes.iconContainer.lg,
     borderRadius: designTokens.borderRadius.lg,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
     marginBottom: designTokens.spacing.sm,
   },
   quickActionText: {
     fontSize: mobileFontSizes.xs,
-    fontWeight: '600',
-    textAlign: 'center',
+    fontWeight: designTokens.fontWeight.semibold,
+    textAlign: layoutConstants.textAlign.center,
   },
   section: {
     marginHorizontal: designTokens.spacing.lg,
     marginBottom: designTokens.spacing.lg,
     borderRadius: designTokens.borderRadius.xl,
-    overflow: 'hidden',
+    overflow: layoutConstants.overflow.hidden,
     ...designTokens.shadows.sm,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     paddingHorizontal: designTokens.spacing.lg,
     paddingTop: designTokens.spacing.lg,
     paddingBottom: designTokens.spacing.sm,
@@ -666,31 +670,31 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: mobileFontSizes.sm,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    fontWeight: designTokens.fontWeight.bold,
+    textTransform: textTransformValues.uppercase,
+    letterSpacing: typographyValues.letterSpacing.normal,
   },
   menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     paddingHorizontal: designTokens.spacing.lg,
     paddingVertical: designTokens.spacing.lg,
     gap: designTokens.spacing.md,
-    borderBottomWidth: 1,
+    borderBottomWidth: designTokens.borderWidth.thin,
   },
   menuIcon: {
-    width: 40,
-    height: 40,
+    width: designTokens.componentSizes.iconContainer.md,
+    height: designTokens.componentSizes.iconContainer.md,
     borderRadius: designTokens.borderRadius.lg,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
   },
   menuContent: {
-    flex: 1,
+    flex: flexValues.one,
   },
   menuTitle: {
     fontSize: mobileFontSizes.md,
-    fontWeight: '600',
+    fontWeight: designTokens.fontWeight.semibold,
     marginBottom: designTokens.spacing.xxs,
   },
   menuSubtitle: {
@@ -698,24 +702,24 @@ const styles = StyleSheet.create({
   },
   // Skeleton
   skeletonProfile: {
-    alignItems: 'center',
+    alignItems: layoutConstants.alignItems.center,
     paddingVertical: designTokens.spacing['4xl'],
   },
   skeletonAvatar: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
+    width: designTokens.avatarSize.xxl,
+    height: designTokens.avatarSize.xxl,
+    borderRadius: designTokens.borderRadius.full,
     marginBottom: designTokens.spacing.lg,
   },
   skeletonName: {
-    width: 150,
-    height: 24,
+    width: designTokens.componentSizes.skeleton.text.sm,
+    height: designTokens.componentSizes.tabBarIndicator.lg,
     borderRadius: designTokens.borderRadius.sm,
     marginBottom: designTokens.spacing.sm,
   },
   skeletonEmail: {
-    width: 200,
-    height: 16,
+    width: designTokens.componentSizes.skeleton.text.md,
+    height: designTokens.lineHeights.captionLarge,
     borderRadius: designTokens.borderRadius.sm,
   },
 });

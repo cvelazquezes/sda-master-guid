@@ -5,28 +5,32 @@
 
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { ScreenHeader, MenuCard, SectionHeader } from '../../shared/components';
 import { designTokens } from '../../shared/theme/designTokens';
+import { flexValues } from '../../shared/constants/layoutConstants';
+import { ICONS, MENU_ITEM_IDS } from '../../shared/constants';
 
 const UserMoreScreen = () => {
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   const clubItems = [
     {
-      id: 'club-info',
-      title: 'Club Information',
-      description: 'View your club details and hierarchy',
-      icon: 'information',
+      id: MENU_ITEM_IDS.CLUB_INFO,
+      title: t('screens.userMore.clubInfo'),
+      description: t('screens.userMore.clubInfoDescription'),
+      icon: ICONS.INFORMATION,
       screen: null,
       color: colors.info,
       disabled: true,
     },
     {
-      id: 'contact-admin',
-      title: 'Contact Club Admin',
-      description: 'Get in touch with your club administrator',
-      icon: 'message-text',
+      id: MENU_ITEM_IDS.CONTACT_ADMIN,
+      title: t('screens.userMore.contactAdmin'),
+      description: t('screens.userMore.contactAdminDescription'),
+      icon: ICONS.MESSAGE_TEXT,
       screen: null,
       color: colors.primary,
       disabled: true,
@@ -35,19 +39,19 @@ const UserMoreScreen = () => {
 
   const helpItems = [
     {
-      id: 'help',
-      title: 'Help & Support',
-      description: 'Get help using the app',
-      icon: 'help-circle',
+      id: MENU_ITEM_IDS.HELP,
+      title: t('screens.userMore.helpAndSupport'),
+      description: t('screens.userMore.helpAndSupportDescription'),
+      icon: ICONS.HELP_CIRCLE,
       screen: null,
       color: colors.textSecondary,
       disabled: true,
     },
     {
-      id: 'feedback',
-      title: 'Send Feedback',
-      description: 'Share your thoughts and suggestions',
-      icon: 'message-reply-text',
+      id: MENU_ITEM_IDS.FEEDBACK,
+      title: t('screens.userMore.sendFeedback'),
+      description: t('screens.userMore.sendFeedbackDescription'),
+      icon: ICONS.MESSAGE_REPLY_TEXT,
       screen: null,
       color: colors.warning,
       disabled: true,
@@ -57,18 +61,18 @@ const UserMoreScreen = () => {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScreenHeader
-        title="More Options"
-        subtitle="Additional features and settings"
+        title={t('screens.userMore.title')}
+        subtitle={t('screens.userMore.subtitle')}
       />
       
       <ScrollView style={styles.scrollView}>
         <View style={styles.content}>
-          <SectionHeader title="My Club" />
+          <SectionHeader title={t('screens.userMore.myClubSection')} />
           {clubItems.map((item) => (
             <MenuCard
               key={item.id}
               title={item.title}
-              description={item.disabled ? 'Coming soon' : item.description}
+              description={item.disabled ? t('common.comingSoon') : item.description}
               icon={item.icon}
               color={item.disabled ? colors.textTertiary : item.color}
               onPress={() => {}}
@@ -78,12 +82,12 @@ const UserMoreScreen = () => {
         </View>
 
         <View style={styles.content}>
-          <SectionHeader title="Help" />
+          <SectionHeader title={t('screens.userMore.helpSection')} />
           {helpItems.map((item) => (
             <MenuCard
               key={item.id}
               title={item.title}
-              description={item.disabled ? 'Coming soon' : item.description}
+              description={item.disabled ? t('common.comingSoon') : item.description}
               icon={item.icon}
               color={item.disabled ? colors.textTertiary : item.color}
               onPress={() => {}}
@@ -98,10 +102,10 @@ const UserMoreScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: flexValues.one,
   },
   scrollView: {
-    flex: 1,
+    flex: flexValues.one,
   },
   content: {
     padding: designTokens.spacing.lg,

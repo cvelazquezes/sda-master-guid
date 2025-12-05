@@ -8,6 +8,7 @@ import {
   Alert,
   TextInput,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { clubService } from '../../services/clubService';
@@ -18,25 +19,26 @@ import {
   ScreenHeader,
   StandardButton 
 } from '../../shared/components';
-import { designTokens } from '../../shared/theme/designTokens';
-import { mobileTypography } from '../../shared/theme/mobileTypography';
+import { mobileTypography, designTokens, layoutConstants } from '../../shared/theme';
 import { Linking } from 'react-native';
-import { MESSAGES, EXTERNAL_URLS } from '../../shared/constants';
+import { MESSAGES, EXTERNAL_URLS, ICONS, COMPONENT_VARIANT, BUTTON_SIZE, EMPTY_VALUE, VALIDATION } from '../../shared/constants';
+import { flexValues, dimensionValues } from '../../shared/constants/layoutConstants';
 
 const MembersScreen = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [members, setMembers] = useState<User[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(EMPTY_VALUE);
 
   useEffect(() => {
     loadMembers();
   }, [user]);
 
   useEffect(() => {
-    if (searchQuery.trim() === '') {
+    if (searchQuery.trim() === EMPTY_VALUE) {
       setFilteredMembers(members);
     } else {
       const query = searchQuery.toLowerCase();
@@ -75,8 +77,8 @@ const MembersScreen = () => {
 
   const handleContactMember = (member: User) => {
     if (member.whatsappNumber) {
-      const message = `Hi ${member.name}! I'm reaching out from our SDA club.`;
-      const url = `${EXTERNAL_URLS.WHATSAPP_BASE}${member.whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
+      const message = t('screens.members.whatsappMessage', { name: member.name });
+      const url = `${EXTERNAL_URLS.WHATSAPP_BASE}${member.whatsappNumber.replace(VALIDATION.WHATSAPP.STRIP_NON_DIGITS, EMPTY_VALUE)}?text=${encodeURIComponent(message)}`;
       Linking.openURL(url).catch(() => {
         Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.COULD_NOT_OPEN_WHATSAPP);
       });
@@ -89,9 +91,9 @@ const MembersScreen = () => {
     return (
       <View style={styles.container}>
         <EmptyState
-          icon="account-alert"
-          title="You are not part of a club"
-          description="Please contact an administrator to join a club"
+          icon={ICONS.ACCOUNT_ALERT}
+          title={t('screens.members.notPartOfClub')}
+          description={t('screens.members.contactAdminDescription')}
           iconColor={designTokens.colors.warning}
         />
       </View>
@@ -101,32 +103,32 @@ const MembersScreen = () => {
   return (
     <View style={styles.container}>
       <ScreenHeader
-        title="Club Members"
-        subtitle={`${filteredMembers.length} member${filteredMembers.length !== 1 ? 's' : ''}`}
+        title={t('screens.members.title')}
+        subtitle={`${filteredMembers.length} ${filteredMembers.length !== 1 ? t('screens.members.subtitle_plural', { count: filteredMembers.length }) : t('screens.members.subtitle', { count: filteredMembers.length })}`}
       />
       
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <MaterialCommunityIcons
-          name="magnify"
-          size={24}
+          name={ICONS.MAGNIFY}
+          size={designTokens.iconSize.lg}
           color={designTokens.colors.textSecondary}
           style={styles.searchIcon}
         />
         <TextInput
           style={styles.searchInput}
-          placeholder="Search by name or email..."
+          placeholder={t('placeholders.searchByNameOrEmail')}
           value={searchQuery}
           onChangeText={setSearchQuery}
           placeholderTextColor={designTokens.colors.textTertiary}
         />
         {searchQuery.length > 0 && (
           <MaterialCommunityIcons
-            name="close-circle"
-            size={20}
+            name={ICONS.CLOSE_CIRCLE}
+            size={designTokens.iconSize.md}
             color={designTokens.colors.textSecondary}
             style={styles.clearIcon}
-            onPress={() => setSearchQuery('')}
+            onPress={() => setSearchQuery(EMPTY_VALUE)}
           />
         )}
       </View>
@@ -138,23 +140,23 @@ const MembersScreen = () => {
         <View style={styles.content}>
           {loading ? (
             <EmptyState
-              icon="loading"
-              title="Loading members..."
-              description="Please wait"
+              icon={ICONS.LOADING}
+              title={t('screens.members.loadingMembers')}
+              description={t('common.pleaseWait')}
             />
           ) : filteredMembers.length === 0 ? (
             <EmptyState
-              icon={searchQuery ? "account-search" : "account-group"}
-              title={searchQuery ? "No members found" : "No members yet"}
+              icon={searchQuery ? ICONS.ACCOUNT_SEARCH : ICONS.ACCOUNT_GROUP}
+              title={searchQuery ? t('screens.members.noMembersFound') : t('screens.members.noMembersYet')}
               description={
                 searchQuery
-                  ? "Try a different search term"
-                  : "Members will appear here once they join the club"
+                  ? t('screens.members.noMembersMatchSearch')
+                  : t('screens.members.joinClubToSeeMembers')
               }
             />
           ) : (
             filteredMembers.map((member) => (
-              <Card key={member.id} variant="elevated" style={styles.memberCard}>
+              <Card key={member.id} variant={COMPONENT_VARIANT.elevated} style={styles.memberCard}>
                 <View style={styles.memberContent}>
                   <View style={styles.memberAvatar}>
                     <Text style={styles.memberAvatarText}>
@@ -167,20 +169,20 @@ const MembersScreen = () => {
                     {member.whatsappNumber && (
                       <View style={styles.whatsappBadge}>
                         <MaterialCommunityIcons
-                          name="whatsapp"
-                          size={14}
+                          name={ICONS.WHATSAPP}
+                          size={designTokens.iconSize.xs}
                           color={designTokens.colors.success}
                         />
-                        <Text style={styles.whatsappText}>Available on WhatsApp</Text>
+                        <Text style={styles.whatsappText}>{t('screens.members.availableOnWhatsApp')}</Text>
                       </View>
                     )}
                   </View>
                   {member.id !== user?.id && member.whatsappNumber && (
                     <StandardButton
-                      title="Contact"
-                      icon="message"
-                      variant="secondary"
-                      size="small"
+                      title={t('screens.members.contact')}
+                      icon={ICONS.MESSAGE}
+                      variant={COMPONENT_VARIANT.secondary}
+                      size={BUTTON_SIZE.small}
                       onPress={() => handleContactMember(member)}
                     />
                   )}
@@ -196,12 +198,12 @@ const MembersScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: flexValues.one,
     backgroundColor: designTokens.colors.backgroundSecondary,
   },
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     backgroundColor: designTokens.colors.backgroundPrimary,
     marginHorizontal: designTokens.spacing.lg,
     marginTop: designTokens.spacing.md,
@@ -215,7 +217,7 @@ const styles = StyleSheet.create({
     marginRight: designTokens.spacing.sm,
   },
   searchInput: {
-    flex: 1,
+    flex: flexValues.one,
     paddingVertical: designTokens.spacing.md,
     ...mobileTypography.body,
     color: designTokens.colors.textPrimary,
@@ -224,7 +226,7 @@ const styles = StyleSheet.create({
     marginLeft: designTokens.spacing.sm,
   },
   scrollView: {
-    flex: 1,
+    flex: flexValues.one,
   },
   content: {
     padding: designTokens.spacing.lg,
@@ -233,40 +235,40 @@ const styles = StyleSheet.create({
     marginBottom: designTokens.spacing.md,
   },
   memberContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     gap: designTokens.spacing.md,
   },
   memberAvatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: dimensionValues.size.avatarMedium,
+    height: dimensionValues.size.avatarMedium,
+    borderRadius: designTokens.borderRadius['4xl'],
     backgroundColor: designTokens.colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
   },
   memberAvatarText: {
     ...mobileTypography.heading2,
     color: designTokens.colors.textInverse,
   },
   memberInfo: {
-    flex: 1,
+    flex: flexValues.one,
   },
   memberName: {
     ...mobileTypography.bodyLargeBold,
     color: designTokens.colors.textPrimary,
-    marginBottom: 2,
+    marginBottom: designTokens.spacing.xxs,
   },
   memberEmail: {
     ...mobileTypography.caption,
     color: designTokens.colors.textSecondary,
-    marginBottom: 4,
+    marginBottom: designTokens.spacing.xs,
   },
   whatsappBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: 4,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    gap: designTokens.spacing.xs,
+    marginTop: designTokens.spacing.xs,
   },
   whatsappText: {
     ...mobileTypography.caption,
