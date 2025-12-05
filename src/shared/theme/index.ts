@@ -1,20 +1,20 @@
 /**
  * Theme System
- * 
+ *
  * Comprehensive design system combining colors, typography, spacing, and more.
  * Supports light/dark modes and follows Material Design & iOS HIG principles.
- * 
+ *
  * Updated with SDA Master Guide Brand Colors and Design Tokens
- * 
+ *
  * Based on design systems from:
  * - Material Design 3
  * - iOS Human Interface Guidelines
  * - Tailwind CSS
  * - Chakra UI
- * 
+ *
  * DESIGN TOKENS (Recommended - Single Source of Truth):
  * Import from './tokens' for the new unified token system:
- * 
+ *
  * ```typescript
  * import { useDesignTokens } from '../hooks/useDesignTokens';
  * // or
@@ -63,6 +63,9 @@ import { designTokens } from './designTokens';
 // NEW: Design Tokens V2 - Single Source of Truth
 import { designTokensV2 } from './tokens';
 
+// Layout Constants - Single Source of Truth for style string values
+import { layoutConstants } from './layoutConstants';
+
 /**
  * Theme modes
  */
@@ -73,7 +76,7 @@ export type ThemeMode = 'light' | 'dark' | 'system';
  */
 export const lightTheme = {
   mode: 'light' as ThemeMode,
-  
+
   // Colors
   colors: {
     ...colors,
@@ -89,7 +92,7 @@ export const lightTheme = {
     shadow: colors.light.shadow,
     disabled: colors.light.disabled,
     placeholder: colors.light.placeholder,
-    
+
     // Semantic colors
     primary: colors.primary[500],
     primaryLight: colors.primary[300],
@@ -102,31 +105,31 @@ export const lightTheme = {
     error: colors.error[500],
     info: colors.info[500],
   },
-  
+
   // Typography
   typography,
   fontFamilies,
   fontWeights,
   fontSizes,
   lineHeights,
-  
+
   // Spacing
   spacing,
   semanticSpacing,
   containerSpacing,
   componentSpacing,
-  
+
   // Borders & Shadows
   borderRadius,
   borderWidth,
   shadows,
-  
+
   // Layout
   zIndex,
   opacity,
   sizes,
   iconSizes,
-  
+
   // Utilities
   utils: colorUtils,
 } as const;
@@ -136,7 +139,7 @@ export const lightTheme = {
  */
 export const darkTheme = {
   mode: 'dark' as ThemeMode,
-  
+
   // Colors
   colors: {
     ...colors,
@@ -152,7 +155,7 @@ export const darkTheme = {
     shadow: colors.dark.shadow,
     disabled: colors.dark.disabled,
     placeholder: colors.dark.placeholder,
-    
+
     // Semantic colors (adjusted for dark mode)
     primary: colors.primary[400],
     primaryLight: colors.primary[300],
@@ -165,31 +168,31 @@ export const darkTheme = {
     error: colors.error[400],
     info: colors.info[400],
   },
-  
+
   // Typography
   typography,
   fontFamilies,
   fontWeights,
   fontSizes,
   lineHeights,
-  
+
   // Spacing
   spacing,
   semanticSpacing,
   containerSpacing,
   componentSpacing,
-  
+
   // Borders & Shadows
   borderRadius,
   borderWidth,
   shadows,
-  
+
   // Layout
   zIndex,
   opacity,
   sizes,
   iconSizes,
-  
+
   // Utilities
   utils: colorUtils,
 } as const;
@@ -206,10 +209,10 @@ export type Theme = typeof lightTheme;
 
 /**
  * Get theme by mode
- * 
+ *
  * @param mode - Theme mode
  * @returns Theme object
- * 
+ *
  * @example
  * ```typescript
  * const currentTheme = getTheme('dark');
@@ -261,7 +264,7 @@ export {
   getResponsiveFontSize,
   calculateLineHeight,
   isMobileFriendly,
-  
+
   // SDA Brand System (Recommended)
   sdaColors,
   sdaBrandColors,
@@ -271,24 +274,18 @@ export {
   hierarchyColors,
   sdaColorUtils,
   designTokens,
-  
+
   // NEW: Design Tokens V2 - Single Source of Truth (RECOMMENDED)
   designTokensV2,
+
+  // Layout Constants - Style string values
+  layoutConstants,
 };
 
-// Export the new token system
-export * from './tokens';
+// Note: For Design Tokens V2, import directly from './tokens'
+// export * from './tokens'; // Commented to avoid duplicate exports
 
 /**
- * Export types
+ * Export types from colors module
  */
-export type {
-  ColorName,
-  ColorShade,
-  TypographyStyle,
-  SpacingKey,
-  SemanticSpacingKey,
-  BorderRadiusKey,
-  ShadowKey,
-} from './colors';
-
+export type { ColorName, ColorShade } from './colors';

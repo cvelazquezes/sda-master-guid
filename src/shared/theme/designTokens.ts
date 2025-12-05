@@ -1,143 +1,96 @@
 /**
- * Design Tokens
- * Centralized design system tokens for SDA Master Guide app
- * Following design system best practices from major tech companies
+ * Design Tokens - SINGLE SOURCE OF TRUTH
+ *
+ * One file. One export. No confusion.
+ *
+ * Usage:
+ *   import { designTokens } from '../shared/theme';
+ *
+ *   designTokens.spacing.md
+ *   designTokens.iconSize.lg
+ *   designTokens.colors.white
  */
 
-import { ViewStyle, TextStyle } from 'react-native';
+import { TextStyle } from 'react-native';
+import { primitiveTokens } from './tokens/primitives';
 import { sdaSemanticColors, roleColors, statusColors, hierarchyColors } from './sdaColors';
 
-/**
- * Spacing Scale
- * Based on 4px grid system
- */
+// =============================================================================
+// CORE SCALES
+// =============================================================================
+
 export const spacing = {
-  none: 0,
-  xxs: 2,
-  xs: 4,
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  xxl: 24,
-  '3xl': 32,
-  '4xl': 40,
-  '5xl': 48,
-  '6xl': 64,
+  none: primitiveTokens.spacing.none,
+  xxs: primitiveTokens.spacing.xxs,
+  xs: primitiveTokens.spacing.xs,
+  sm: primitiveTokens.spacing.sm,
+  md: primitiveTokens.spacing.md,
+  lg: primitiveTokens.spacing.lg,
+  xl: primitiveTokens.spacing.xl,
+  xxl: primitiveTokens.spacing['2xl'],
+  '3xl': primitiveTokens.spacing['3xl'],
+  '4xl': primitiveTokens.spacing['4xl'],
+  '5xl': primitiveTokens.spacing['5xl'],
+  '6xl': primitiveTokens.spacing['6xl'],
+  '7xl': primitiveTokens.spacing['7xl'],
+  '8xl': primitiveTokens.spacing['8xl'],
 } as const;
 
-/**
- * Border Radius Scale
- */
 export const borderRadius = {
-  none: 0,
-  xs: 4,
-  sm: 6,
-  md: 8,
-  lg: 12,
-  xl: 16,
-  xxl: 20,
-  '3xl': 24,
-  full: 9999,
+  none: primitiveTokens.radius.none, // 0
+  xs: primitiveTokens.radius.xs, // 2
+  sm: primitiveTokens.radius.sm, // 4
+  md: primitiveTokens.radius.md, // 6
+  lg: primitiveTokens.radius.lg, // 8
+  xl: primitiveTokens.radius.xl, // 12
+  '2xl': primitiveTokens.radius['2xl'], // 16
+  '3xl': primitiveTokens.radius['3xl'], // 20
+  '4xl': primitiveTokens.radius['4xl'], // 24
+  '5xl': primitiveTokens.radius['5xl'], // 32
+  full: primitiveTokens.radius.full, // 9999 (circular)
 } as const;
 
-/**
- * Border Width Scale
- */
 export const borderWidth = {
-  none: 0,
-  thin: 1,
-  medium: 2,
-  thick: 3,
-  heavy: 4,
+  none: primitiveTokens.borderWidth.none,
+  hairline: primitiveTokens.borderWidth.hairline,
+  thin: primitiveTokens.borderWidth.thin,
+  medium: primitiveTokens.borderWidth.medium,
+  thick: primitiveTokens.borderWidth.thick,
+  heavy: primitiveTokens.borderWidth.heavy,
 } as const;
 
-/**
- * Shadow Definitions
- */
 export const shadows = {
-  none: {
-    shadowColor: 'transparent',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0,
-    shadowRadius: 0,
-    elevation: 0,
-  },
-  xs: {
-    shadowColor: sdaSemanticColors.shadowLight,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  sm: {
-    shadowColor: sdaSemanticColors.shadowMedium,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  md: {
-    shadowColor: sdaSemanticColors.shadowMedium,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  lg: {
-    shadowColor: sdaSemanticColors.shadowHeavy,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  xl: {
-    shadowColor: sdaSemanticColors.shadowHeavy,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  '2xl': {
-    shadowColor: sdaSemanticColors.shadowXL,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 8,
-  },
+  none: primitiveTokens.shadow.none,
+  xs: primitiveTokens.shadow.xs,
+  sm: primitiveTokens.shadow.sm,
+  md: primitiveTokens.shadow.md,
+  lg: primitiveTokens.shadow.lg,
+  xl: primitiveTokens.shadow.xl,
+  '2xl': primitiveTokens.shadow['2xl'],
 } as const;
 
-/**
- * Z-Index Scale
- */
 export const zIndex = {
-  base: 0,
-  dropdown: 1000,
-  sticky: 1100,
-  overlay: 1200,
-  modal: 1300,
-  popover: 1400,
-  toast: 1500,
-  tooltip: 1600,
+  base: primitiveTokens.zIndex.base,
+  dropdown: primitiveTokens.zIndex.dropdown,
+  sticky: primitiveTokens.zIndex.sticky,
+  overlay: primitiveTokens.zIndex.overlay,
+  modal: primitiveTokens.zIndex.modal,
+  popover: primitiveTokens.zIndex.popover,
+  toast: primitiveTokens.zIndex.toast,
+  tooltip: primitiveTokens.zIndex.tooltip,
 } as const;
 
-/**
- * Opacity Scale
- */
 export const opacity = {
-  none: 0,
-  low: 0.1,
-  medium: 0.5,
-  high: 0.8,
-  full: 1,
-  disabled: 0.4,
-  hover: 0.9,
-  pressed: 0.7,
+  none: primitiveTokens.opacity.none,
+  low: primitiveTokens.opacity.light,
+  medium: primitiveTokens.opacity.medium,
+  high: primitiveTokens.opacity.heavy,
+  full: primitiveTokens.opacity.full,
+  disabled: primitiveTokens.opacity.disabled,
+  hover: primitiveTokens.opacity.hover,
+  pressed: primitiveTokens.opacity.pressed,
 } as const;
 
-/**
- * Animation Duration
- */
 export const animation = {
   instant: 0,
   fast: 150,
@@ -146,11 +99,150 @@ export const animation = {
   slower: 500,
 } as const;
 
-/**
- * Component-specific Design Tokens
- */
+// =============================================================================
+// SIZE TOKENS
+// =============================================================================
 
-// Button Tokens
+export const iconSize = {
+  xxs: 12,
+  '2xs': 12,
+  xs: primitiveTokens.size.icon.xs,
+  sm: primitiveTokens.size.icon.sm,
+  md: primitiveTokens.size.icon.md,
+  lg: primitiveTokens.size.icon.lg,
+  xl: primitiveTokens.size.icon.xl,
+  xxl: primitiveTokens.size.icon['2xl'],
+  '3xl': primitiveTokens.size.icon['3xl'],
+  '4xl': primitiveTokens.size.icon['4xl'],
+} as const;
+
+export const avatarSize = {
+  xs: primitiveTokens.size.avatar.xs,
+  sm: primitiveTokens.size.avatar.sm,
+  md: primitiveTokens.size.avatar.md,
+  lg: primitiveTokens.size.avatar.lg,
+  xl: primitiveTokens.size.avatar.xl,
+  xxl: primitiveTokens.size.avatar['3xl'],
+} as const;
+
+export const touchTarget = {
+  minimum: primitiveTokens.size.touchTarget.minimum,
+  comfortable: primitiveTokens.size.touchTarget.comfortable,
+  spacious: primitiveTokens.size.touchTarget.spacious,
+} as const;
+
+// =============================================================================
+// COMPONENT SIZES
+// =============================================================================
+
+export const componentSizes = {
+  checkbox: { sm: 20, md: 24, lg: 28 },
+  badge: { sm: 24, md: 28, lg: 32 },
+  iconContainer: {
+    xs: 28,
+    sm: 36,
+    md: 40,
+    lg: 48,
+    xl: 56,
+    '2xl': 64,
+    '3xl': 80,
+    '4xl': 96,
+    '5xl': 100,
+  },
+  indicator: { xs: 4, sm: 8, md: 12, lg: 20 },
+  handleBar: { width: 40, height: 4 },
+  divider: { vertical: { width: 1, height: 30 } },
+  progressBar: { height: 8 },
+  skeleton: { text: { sm: 150, md: 200, lg: 250 }, block: { sm: 80, md: 120, lg: 160 } },
+  inputHeight: { sm: 44, md: 48, lg: 56 },
+  cardMinHeight: { sm: 72, md: 80, lg: 100 },
+  tabBarIndicator: { height: 18, md: 20, lg: 24 },
+} as const;
+
+// =============================================================================
+// SHADOW CONFIGURATION (Theme-aware)
+// =============================================================================
+
+export const shadowConfig = {
+  light: { opacity: 0.2, elevation: 5 },
+  dark: { opacity: 0.4, elevation: 8 },
+  lightSubtle: { opacity: 0.12, elevation: 3 },
+  darkSubtle: { opacity: 0.25, elevation: 4 },
+  lightStrong: { opacity: 0.25, elevation: 6 },
+  darkStrong: { opacity: 0.5, elevation: 12 },
+} as const;
+
+// =============================================================================
+// LINE HEIGHTS (Pixel values for specific use cases)
+// =============================================================================
+
+export const lineHeights = {
+  caption: 14,
+  captionLarge: 16,
+  body: 18,
+  bodyLarge: 20,
+  title: 22,
+  heading: 24,
+  display: 28,
+} as const;
+
+// =============================================================================
+// TYPOGRAPHY
+// =============================================================================
+
+export const fontSize = {
+  '2xs': primitiveTokens.typography.fontSize['2xs'], // 11
+  xs: primitiveTokens.typography.fontSize.xs, // 13
+  sm: primitiveTokens.typography.fontSize.sm, // 14
+  md: primitiveTokens.typography.fontSize.md, // 15
+  lg: primitiveTokens.typography.fontSize.lg, // 16
+  xl: primitiveTokens.typography.fontSize.xl, // 18
+  '2xl': primitiveTokens.typography.fontSize['2xl'], // 20
+  '3xl': primitiveTokens.typography.fontSize['3xl'], // 24
+  '4xl': primitiveTokens.typography.fontSize['4xl'], // 28
+  '5xl': primitiveTokens.typography.fontSize['5xl'], // 32
+  '6xl': primitiveTokens.typography.fontSize['6xl'], // 36
+  '7xl': primitiveTokens.typography.fontSize['7xl'], // 40
+  '8xl': primitiveTokens.typography.fontSize['8xl'], // 48
+} as const;
+
+export const fontWeight = {
+  regular: primitiveTokens.typography.fontWeight.regular as TextStyle['fontWeight'],
+  medium: primitiveTokens.typography.fontWeight.medium as TextStyle['fontWeight'],
+  semibold: primitiveTokens.typography.fontWeight.semibold as TextStyle['fontWeight'],
+  bold: primitiveTokens.typography.fontWeight.bold as TextStyle['fontWeight'],
+} as const;
+
+// =============================================================================
+// COLORS (Static values - use useTheme().colors for dynamic theme colors)
+// =============================================================================
+
+export const colors = {
+  // Absolute colors for static use
+  white: primitiveTokens.color.absolute.white,
+  black: primitiveTokens.color.absolute.black,
+  transparent: primitiveTokens.color.absolute.transparent,
+  // Social
+  social: primitiveTokens.color.social,
+  // Semantic (these don't change with theme in current setup)
+  ...sdaSemanticColors,
+} as const;
+
+export const overlay = {
+  light: 'rgba(255, 255, 255, 0.2)',
+  lightMedium: 'rgba(255, 255, 255, 0.5)',
+  lightStrong: 'rgba(255, 255, 255, 0.8)',
+  darkSubtle: 'rgba(0, 0, 0, 0.1)',
+  darkLight: 'rgba(0, 0, 0, 0.2)',
+  darkMedium: 'rgba(0, 0, 0, 0.5)',
+  darkStrong: 'rgba(0, 0, 0, 0.7)',
+  darkIntense: 'rgba(0, 0, 0, 0.85)',
+} as const;
+
+// =============================================================================
+// COMPONENT TOKENS
+// =============================================================================
+
 export const buttonTokens = {
   sizes: {
     small: {
@@ -211,7 +303,6 @@ export const buttonTokens = {
   borderWidth: borderWidth.medium,
 } as const;
 
-// Card Tokens
 export const cardTokens = {
   borderRadius: borderRadius.lg,
   padding: spacing.lg,
@@ -222,7 +313,6 @@ export const cardTokens = {
   shadow: shadows.md,
 } as const;
 
-// Input Tokens
 export const inputTokens = {
   borderRadius: borderRadius.md,
   paddingVertical: spacing.md,
@@ -238,7 +328,6 @@ export const inputTokens = {
   placeholderColor: sdaSemanticColors.textQuaternary,
 } as const;
 
-// Modal Tokens
 export const modalTokens = {
   borderRadius: borderRadius.xl,
   padding: spacing.xl,
@@ -249,7 +338,6 @@ export const modalTokens = {
   maxWidth: 500,
 } as const;
 
-// Badge Tokens
 export const badgeTokens = {
   borderRadius: borderRadius.full,
   paddingVertical: spacing.xs,
@@ -261,79 +349,29 @@ export const badgeTokens = {
   letterSpacing: 0.5,
 } as const;
 
-// Avatar Tokens
 export const avatarTokens = {
-  sizes: {
-    xs: 24,
-    sm: 32,
-    md: 40,
-    lg: 48,
-    xl: 64,
-    xxl: 96,
-  },
+  sizes: avatarSize,
   borderRadius: borderRadius.full,
-  fontSize: {
-    xs: 10,
-    sm: 13,
-    md: 16,
-    lg: 20,
-    xl: 28,
-    xxl: 40,
-  },
+  fontSize: { xs: 10, sm: 13, md: 16, lg: 20, xl: 28, xxl: 40 },
 } as const;
 
-// Icon Tokens
 export const iconTokens = {
-  sizes: {
-    xs: 14,
-    sm: 16,
-    md: 20,
-    lg: 24,
-    xl: 28,
-    xxl: 32,
-    '3xl': 40,
-    '4xl': 48,
-  },
+  sizes: iconSize,
 } as const;
 
-// Touch Target Tokens
-export const touchTargets = {
-  minimum: 44,
-  comfortable: 48,
-  spacious: 56,
-} as const;
+export const touchTargets = touchTarget;
 
-// Typography Tokens (referencing mobileTypography)
 export const typographyTokens = {
-  fontSizes: {
-    xs: 13,
-    sm: 14,
-    md: 15,
-    lg: 16,
-    xl: 18,
-    '2xl': 20,
-    '3xl': 24,
-    '4xl': 28,
-    '5xl': 32,
-    '6xl': 36,
-  },
-  fontWeights: {
-    regular: '400' as TextStyle['fontWeight'],
-    medium: '500' as TextStyle['fontWeight'],
-    semibold: '600' as TextStyle['fontWeight'],
-    bold: '700' as TextStyle['fontWeight'],
-  },
+  fontSizes: fontSize,
+  fontWeights: fontWeight,
   lineHeights: {
-    tight: 1.2,
-    normal: 1.5,
-    relaxed: 1.75,
-    loose: 2,
+    tight: primitiveTokens.typography.lineHeight.tight,
+    normal: primitiveTokens.typography.lineHeight.normal,
+    relaxed: primitiveTokens.typography.lineHeight.relaxed,
+    loose: primitiveTokens.typography.lineHeight.loose,
   },
 } as const;
 
-/**
- * Layout Tokens
- */
 export const layoutTokens = {
   container: {
     maxWidth: 1200,
@@ -350,9 +388,6 @@ export const layoutTokens = {
   },
 } as const;
 
-/**
- * List Tokens
- */
 export const listTokens = {
   gap: spacing.md,
   itemPadding: spacing.lg,
@@ -360,18 +395,12 @@ export const listTokens = {
   itemMinHeight: 72,
 } as const;
 
-/**
- * Divider Tokens
- */
 export const dividerTokens = {
   color: sdaSemanticColors.borderLight,
   thickness: borderWidth.thin,
   spacing: spacing.md,
 } as const;
 
-/**
- * Status-specific tokens
- */
 export const statusTokens = {
   active: statusColors.active,
   inactive: statusColors.inactive,
@@ -383,18 +412,12 @@ export const statusTokens = {
   cancelled: statusColors.cancelled,
 } as const;
 
-/**
- * Role-specific tokens
- */
 export const roleTokens = {
   admin: roleColors.admin,
   club_admin: roleColors.club_admin,
   user: roleColors.user,
 } as const;
 
-/**
- * Hierarchy tokens
- */
 export const hierarchyTokens = {
   division: hierarchyColors.division,
   union: hierarchyColors.union,
@@ -403,10 +426,59 @@ export const hierarchyTokens = {
   club: hierarchyColors.club,
 } as const;
 
-/**
- * Complete Design Tokens Export
- */
+// =============================================================================
+// RESPONSIVE BREAKPOINTS
+// =============================================================================
+
+export const breakpoints = {
+  mobile: 480,
+  tablet: 768,
+  desktop: 1200,
+} as const;
+
+export const responsiveScale = {
+  modal: {
+    mobile: 0.9,
+    mobileLarge: 0.85,
+    tablet: 0.65,
+    desktop: 0.45,
+  },
+  maxWidth: {
+    modal: 600,
+    modalSmall: 500,
+    modalLarge: 700,
+  },
+  maxHeight: {
+    modal: 0.85,
+    modalLarge: 0.9,
+  },
+} as const;
+
+// =============================================================================
+// TYPOGRAPHY STYLING
+// =============================================================================
+
+export const letterSpacing = {
+  none: 0,
+  tight: 0.25,
+  normal: 0.5,
+  wide: 0.75,
+  wider: 1,
+} as const;
+
+export const textTransform = {
+  none: 'none' as const,
+  uppercase: 'uppercase' as const,
+  lowercase: 'lowercase' as const,
+  capitalize: 'capitalize' as const,
+} as const;
+
+// =============================================================================
+// UNIFIED EXPORT
+// =============================================================================
+
 export const designTokens = {
+  // Core scales
   spacing,
   borderRadius,
   borderWidth,
@@ -414,7 +486,34 @@ export const designTokens = {
   zIndex,
   opacity,
   animation,
-  colors: sdaSemanticColors,
+
+  // Sizes (flat access)
+  iconSize,
+  avatarSize,
+  touchTarget,
+  componentSizes,
+
+  // Typography (flat access)
+  fontSize,
+  fontWeight,
+  lineHeights,
+
+  // Shadow configuration (theme-aware)
+  shadowConfig,
+
+  // Colors
+  colors,
+  overlay,
+
+  // Responsive
+  breakpoints,
+  responsiveScale,
+
+  // Typography styling
+  letterSpacing,
+  textTransform,
+
+  // Component tokens (nested)
   button: buttonTokens,
   card: cardTokens,
   input: inputTokens,
@@ -422,7 +521,6 @@ export const designTokens = {
   badge: badgeTokens,
   avatar: avatarTokens,
   icon: iconTokens,
-  touchTarget: touchTargets,
   typography: typographyTokens,
   layout: layoutTokens,
   list: listTokens,
@@ -433,4 +531,3 @@ export const designTokens = {
 } as const;
 
 export default designTokens;
-
