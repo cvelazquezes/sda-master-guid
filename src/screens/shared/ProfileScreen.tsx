@@ -22,9 +22,9 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { ThemeSwitcher } from '../../components/ThemeSwitcher';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 import { UserRole } from '../../types';
-import { designTokens } from '../../shared/theme/designTokens';
+import { designTokens, layoutConstants } from '../../shared/theme';
 import { mobileTypography } from '../../shared/theme/mobileTypography';
-import { MESSAGES } from '../../shared/constants';
+import { MESSAGES, ICONS, TOUCH_OPACITY, flexValues, ALERT_BUTTON_STYLE, LIST_SEPARATOR, OPACITY, COMPONENT_VARIANT } from '../../shared/constants';
 import { Card, SectionHeader } from '../../shared/components';
 
 const ProfileScreen = () => {
@@ -57,10 +57,10 @@ const ProfileScreen = () => {
       MESSAGES.TITLES.LOGOUT,
       MESSAGES.WARNINGS.CONFIRM_LOGOUT,
       [
-        { text: MESSAGES.BUTTONS.CANCEL, style: 'cancel' },
+        { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
         {
           text: MESSAGES.TITLES.LOGOUT,
-          style: 'destructive',
+          style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
           onPress: async () => {
             try {
               await logout();
@@ -76,37 +76,37 @@ const ProfileScreen = () => {
   const getRoleLabel = (role: UserRole | undefined): string => {
     switch (role) {
       case UserRole.ADMIN:
-        return 'Administrator';
+        return t('roles.administrator');
       case UserRole.CLUB_ADMIN:
-        return 'Club Admin';
+        return t('roles.clubAdmin');
       case UserRole.USER:
-        return 'Member';
+        return t('roles.member');
       default:
-        return 'User';
+        return t('roles.user');
     }
   };
 
   const getRoleIcon = (role: UserRole | undefined): keyof typeof MaterialCommunityIcons.glyphMap => {
     switch (role) {
       case UserRole.ADMIN:
-        return 'shield-crown';
+        return ICONS.SHIELD_CROWN;
       case UserRole.CLUB_ADMIN:
-        return 'account-tie';
+        return ICONS.ACCOUNT_TIE;
       case UserRole.USER:
-        return 'account';
+        return ICONS.ACCOUNT;
       default:
-        return 'account';
+        return ICONS.ACCOUNT;
     }
   };
 
   const getRoleColor = (role: UserRole | undefined): string => {
     switch (role) {
       case UserRole.ADMIN:
-        return '#E53935'; // Red for admin
+        return designTokens.colors.error[500]; // Red for admin
       case UserRole.CLUB_ADMIN:
-        return '#FB8C00'; // Orange for club admin
+        return designTokens.colors.warning[500]; // Orange for club admin
       case UserRole.USER:
-        return '#43A047'; // Green for user
+        return designTokens.colors.success[500]; // Green for user
       default:
         return colors.primary;
     }
@@ -115,11 +115,11 @@ const ProfileScreen = () => {
   const getRoleGradientStart = (role: UserRole | undefined): string => {
     switch (role) {
       case UserRole.ADMIN:
-        return '#1565C0';
+        return designTokens.colors.primary[600]; // Deep blue for admin
       case UserRole.CLUB_ADMIN:
-        return '#1976D2';
+        return designTokens.colors.primary[500]; // Main blue for club admin
       case UserRole.USER:
-        return '#1E88E5';
+        return designTokens.colors.primary[400]; // Lighter blue for user
       default:
         return colors.primary;
     }
@@ -132,28 +132,28 @@ const ProfileScreen = () => {
     >
       {/* Profile Header Card */}
       <View style={styles.headerSection}>
-        <Card variant="elevated" style={[styles.profileCard, { backgroundColor: getRoleGradientStart(user?.role) }]}>
+        <Card variant={COMPONENT_VARIANT.elevated} style={[styles.profileCard, { backgroundColor: getRoleGradientStart(user?.role) }]}>
           <View style={styles.profileHeader}>
             <View style={styles.avatarWrapper}>
-              <View style={[styles.avatarOuter, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
-                <View style={[styles.avatarInner, { backgroundColor: 'rgba(255,255,255,0.9)' }]}>
+              <View style={[styles.avatarOuter, { backgroundColor: designTokens.overlay.light }]}>
+                <View style={[styles.avatarInner, { backgroundColor: designTokens.overlay.lightOpaque }]}>
                   <MaterialCommunityIcons
                     name={getRoleIcon(user?.role)}
-                    size={40}
+                    size={designTokens.iconSize['3xl']}
                     color={getRoleGradientStart(user?.role)}
                   />
                 </View>
               </View>
             </View>
             
-            <Text style={styles.userName}>{user?.name || 'User'}</Text>
-            <Text style={styles.userEmail}>{user?.email || 'email@example.com'}</Text>
+            <Text style={styles.userName}>{user?.name || t('roles.user')}</Text>
+            <Text style={styles.userEmail}>{user?.email || t('screens.account.defaultEmail')}</Text>
             
             <View style={styles.roleBadge}>
               <MaterialCommunityIcons
                 name={getRoleIcon(user?.role)}
-                size={14}
-                color="rgba(255,255,255,0.9)"
+                size={designTokens.iconSize.xs}
+                color={designTokens.overlay.lightOpaque}
               />
               <Text style={styles.roleText}>{getRoleLabel(user?.role)}</Text>
             </View>
@@ -162,16 +162,16 @@ const ProfileScreen = () => {
             {user?.role !== UserRole.ADMIN && (
               <View style={styles.statsRow}>
                 <View style={styles.statItem}>
-                  <MaterialCommunityIcons name="check-circle" size={18} color="rgba(255,255,255,0.9)" />
-                  <Text style={styles.statText}>{isActive ? 'Active' : 'Inactive'}</Text>
+                  <MaterialCommunityIcons name={ICONS.CHECK_CIRCLE} size={designTokens.iconSize.md} color={designTokens.overlay.lightOpaque} />
+                  <Text style={styles.statText}>{isActive ? t('common.active') : t('screens.profile.inactive')}</Text>
                 </View>
                 {user?.classes && user.classes.length > 0 && (
                   <View style={styles.statDivider} />
                 )}
                 {user?.classes && user.classes.length > 0 && (
                   <View style={styles.statItem}>
-                    <MaterialCommunityIcons name="school" size={18} color="rgba(255,255,255,0.9)" />
-                    <Text style={styles.statText}>{user.classes.length} Classes</Text>
+                    <MaterialCommunityIcons name={ICONS.SCHOOL} size={designTokens.iconSize.md} color={designTokens.overlay.lightOpaque} />
+                    <Text style={styles.statText}>{t('screens.profile.classCount', { count: user.classes.length })}</Text>
                   </View>
                 )}
               </View>
@@ -182,8 +182,8 @@ const ProfileScreen = () => {
 
       {/* Preferences Section */}
       <View style={styles.section}>
-        <SectionHeader title="Preferences" />
-        <Card variant="elevated">
+        <SectionHeader title={t('screens.profile.preferences')} />
+        <Card variant={COMPONENT_VARIANT.elevated}>
           <View style={styles.settingsContainer}>
             <View style={[styles.settingRow, { borderBottomColor: colors.border }]}>
               <ThemeSwitcher showLabel={true} />
@@ -197,18 +197,18 @@ const ProfileScreen = () => {
 
       {/* Timezone */}
       <View style={styles.section}>
-        <Card variant="elevated">
-          <TouchableOpacity style={styles.menuItem} activeOpacity={0.7}>
+        <Card variant={COMPONENT_VARIANT.elevated}>
+          <TouchableOpacity style={styles.menuItem} activeOpacity={TOUCH_OPACITY.default}>
             <View style={[styles.menuIconContainer, { backgroundColor: colors.info + '20' }]}>
-              <MaterialCommunityIcons name="earth" size={22} color={colors.info} />
+              <MaterialCommunityIcons name={ICONS.EARTH} size={designTokens.iconSize.lg} color={colors.info} />
             </View>
             <View style={styles.menuContent}>
-              <Text style={[styles.menuLabel, { color: colors.textSecondary }]}>Timezone</Text>
+              <Text style={[styles.menuLabel, { color: colors.textSecondary }]}>{t('screens.profile.timezone')}</Text>
               <Text style={[styles.menuValue, { color: colors.textPrimary }]}>
-                {user?.timezone || 'America/New_York'}
+                {user?.timezone || t('screens.profile.defaultTimezone')}
               </Text>
             </View>
-            <MaterialCommunityIcons name="chevron-right" size={22} color={colors.textTertiary} />
+            <MaterialCommunityIcons name={ICONS.CHEVRON_RIGHT} size={designTokens.iconSize.lg} color={colors.textTertiary} />
           </TouchableOpacity>
         </Card>
       </View>
@@ -216,26 +216,26 @@ const ProfileScreen = () => {
       {/* Account Status - Only shown for non-admin users */}
       {user?.role !== UserRole.ADMIN && (
         <View style={styles.section}>
-          <SectionHeader title="Activity Status" />
-          <Card variant="elevated">
+          <SectionHeader title={t('screens.profile.activityStatus')} />
+          <Card variant={COMPONENT_VARIANT.elevated}>
             <View style={styles.statusContainer}>
               <View style={styles.statusInfo}>
                 <View style={[
                   styles.statusIconContainer, 
-                  { backgroundColor: isActive ? colors.success + '20' : colors.textTertiary + '20' }
+                  { backgroundColor: isActive ? `${colors.success}${OPACITY.LIGHT}` : `${colors.textTertiary}${OPACITY.LIGHT}` }
                 ]}>
                   <MaterialCommunityIcons
-                    name={isActive ? 'account-check' : 'account-off'}
-                    size={24}
+                    name={isActive ? ICONS.ACCOUNT_CHECK : ICONS.ACCOUNT_OFF}
+                    size={designTokens.iconSize.lg}
                     color={isActive ? colors.success : colors.textTertiary}
                   />
                 </View>
                 <View style={styles.statusText}>
                   <Text style={[styles.statusLabel, { color: colors.textPrimary }]}>
-                    {isActive ? 'Participating' : 'Not Participating'}
+                    {isActive ? t('screens.profile.participating') : t('screens.profile.notParticipating')}
                   </Text>
                   <Text style={[styles.statusDescription, { color: colors.textSecondary }]}>
-                    {isActive ? 'You are active in club activities' : 'You are not participating in activities'}
+                    {isActive ? t('screens.profile.activeInActivities') : t('screens.profile.notInActivities')}
                   </Text>
                 </View>
               </View>
@@ -254,16 +254,16 @@ const ProfileScreen = () => {
       {/* Contact Information - Only show if user has whatsapp or classes */}
       {(user?.whatsappNumber || (user?.classes && user.classes.length > 0)) && (
         <View style={styles.section}>
-          <SectionHeader title="Contact & Info" />
-          <Card variant="elevated">
+          <SectionHeader title={t('screens.profile.contactInfo')} />
+          <Card variant={COMPONENT_VARIANT.elevated}>
             <View style={styles.detailsContainer}>
               {user?.whatsappNumber && (
                 <View style={[styles.detailRow, { borderBottomColor: colors.border }]}>
-                  <View style={[styles.detailIconContainer, { backgroundColor: '#25D366' + '20' }]}>
-                    <MaterialCommunityIcons name="whatsapp" size={22} color="#25D366" />
+                  <View style={[styles.detailIconContainer, { backgroundColor: designTokens.colors.social.whatsapp + '20' }]}>
+                    <MaterialCommunityIcons name={ICONS.WHATSAPP} size={designTokens.iconSize.lg} color={designTokens.colors.social.whatsapp} />
                   </View>
                   <View style={styles.detailText}>
-                    <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>WhatsApp</Text>
+                    <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>{t('screens.profile.whatsApp')}</Text>
                     <Text style={[styles.detailValue, { color: colors.textPrimary }]}>
                       {user.whatsappNumber}
                     </Text>
@@ -274,12 +274,12 @@ const ProfileScreen = () => {
               {user?.classes && user.classes.length > 0 && (
                 <View style={styles.detailRow}>
                   <View style={[styles.detailIconContainer, { backgroundColor: colors.primary + '20' }]}>
-                    <MaterialCommunityIcons name="school" size={22} color={colors.primary} />
+                    <MaterialCommunityIcons name={ICONS.SCHOOL} size={designTokens.iconSize.lg} color={colors.primary} />
                   </View>
                   <View style={styles.detailText}>
-                    <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>Pathfinder Classes</Text>
+                    <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>{t('screens.profile.pathfinderClasses')}</Text>
                     <Text style={[styles.detailValue, { color: colors.textPrimary }]}>
-                      {user.classes.join(', ')}
+                      {user.classes.join(LIST_SEPARATOR)}
                     </Text>
                   </View>
                 </View>
@@ -294,11 +294,11 @@ const ProfileScreen = () => {
         <TouchableOpacity
           style={[styles.logoutButton, { backgroundColor: colors.error + '12', borderColor: colors.error }]}
           onPress={handleLogout}
-          activeOpacity={0.7}
+          activeOpacity={TOUCH_OPACITY.default}
         >
-          <MaterialCommunityIcons name="logout" size={22} color={colors.error} />
+          <MaterialCommunityIcons name={ICONS.LOGOUT} size={designTokens.iconSize.lg} color={colors.error} />
           <Text style={[styles.logoutButtonText, { color: colors.error }]}>
-            Sign Out
+            {t('screens.settings.signOut')}
           </Text>
         </TouchableOpacity>
       </View>
@@ -306,7 +306,7 @@ const ProfileScreen = () => {
       {/* Version info */}
       <View style={styles.versionSection}>
         <Text style={[styles.versionText, { color: colors.textTertiary }]}>
-          SDA Master Guid • Version 1.0.0
+          {t('screens.profile.appName')} • {t('screens.settings.version', { version: '1.0.0' })}
         </Text>
       </View>
     </ScrollView>
@@ -315,17 +315,17 @@ const ProfileScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: flexValues.one,
   },
   headerSection: {
     paddingHorizontal: designTokens.spacing.lg,
     paddingTop: designTokens.spacing.lg,
   },
   profileCard: {
-    overflow: 'hidden',
+    overflow: layoutConstants.overflow.hidden,
   },
   profileHeader: {
-    alignItems: 'center',
+    alignItems: layoutConstants.alignItems.center,
     paddingVertical: designTokens.spacing.xl,
     paddingHorizontal: designTokens.spacing.lg,
   },
@@ -333,66 +333,66 @@ const styles = StyleSheet.create({
     marginBottom: designTokens.spacing.md,
   },
   avatarOuter: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: designTokens.avatarSize['3xl'],          // 96 → closest token
+    height: designTokens.avatarSize['3xl'],
+    borderRadius: designTokens.avatarSize['3xl'] / 2,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
   },
   avatarInner: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: designTokens.avatarSize['2xl'],          // 80
+    height: designTokens.avatarSize['2xl'],
+    borderRadius: designTokens.avatarSize['2xl'] / 2,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
   },
   userName: {
     ...mobileTypography.heading2,
-    color: '#FFFFFF',
-    marginBottom: 4,
-    textAlign: 'center',
+    color: designTokens.colors.white,
+    marginBottom: designTokens.spacing.xs,
+    textAlign: layoutConstants.textAlign.center,
   },
   userEmail: {
     ...mobileTypography.body,
-    color: 'rgba(255,255,255,0.85)',
+    color: designTokens.overlay.lightOpaque,
     marginBottom: designTokens.spacing.md,
-    textAlign: 'center',
+    textAlign: layoutConstants.textAlign.center,
   },
   roleBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    backgroundColor: designTokens.overlay.light,
     paddingVertical: designTokens.spacing.xs,
     paddingHorizontal: designTokens.spacing.md,
-    borderRadius: designTokens.borderRadius.full,
+    borderRadius: designTokens.radius.full,
     gap: designTokens.spacing.xs,
   },
   roleText: {
     ...mobileTypography.captionBold,
-    color: '#FFFFFF',
+    color: designTokens.colors.white,
   },
   statsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     marginTop: designTokens.spacing.lg,
     paddingTop: designTokens.spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.2)',
+    borderTopWidth: designTokens.borderWidth.thin,
+    borderTopColor: designTokens.overlay.light,
   },
   statItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     gap: designTokens.spacing.xs,
   },
   statDivider: {
-    width: 1,
-    height: 16,
-    backgroundColor: 'rgba(255,255,255,0.3)',
+    width: designTokens.borderWidth.thin,
+    height: designTokens.spacing.lg,
+    backgroundColor: designTokens.overlay.lightStrong,
     marginHorizontal: designTokens.spacing.md,
   },
   statText: {
     ...mobileTypography.caption,
-    color: 'rgba(255,255,255,0.9)',
+    color: designTokens.overlay.lightOpaque,
   },
   section: {
     paddingHorizontal: designTokens.spacing.lg,
@@ -404,55 +404,55 @@ const styles = StyleSheet.create({
   settingRow: {
     paddingHorizontal: designTokens.spacing.sm,
     paddingVertical: designTokens.spacing.xs,
-    borderBottomWidth: 1,
-    borderBottomColor: 'transparent',
+    borderBottomWidth: designTokens.borderWidth.thin,
+    borderBottomColor: designTokens.colors.transparent,
   },
   menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     gap: designTokens.spacing.md,
   },
   menuIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: designTokens.touchTarget.minimum,        // 44
+    height: designTokens.touchTarget.minimum,
+    borderRadius: designTokens.touchTarget.minimum / 2,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
   },
   menuContent: {
-    flex: 1,
+    flex: flexValues.one,
   },
   menuLabel: {
     ...mobileTypography.caption,
-    marginBottom: 2,
+    marginBottom: designTokens.spacing.xxs,
   },
   menuValue: {
     ...mobileTypography.bodyLarge,
   },
   statusContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.spaceBetween,
   },
   statusInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    flex: flexValues.one,
     gap: designTokens.spacing.md,
   },
   statusIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: designTokens.touchTarget.comfortable,    // 48
+    height: designTokens.touchTarget.comfortable,
+    borderRadius: designTokens.touchTarget.comfortable / 2,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
   },
   statusText: {
-    flex: 1,
+    flex: flexValues.one,
   },
   statusLabel: {
     ...mobileTypography.bodyLargeBold,
-    marginBottom: 2,
+    marginBottom: designTokens.spacing.xxs,
   },
   statusDescription: {
     ...mobileTypography.caption,
@@ -461,44 +461,44 @@ const styles = StyleSheet.create({
     // Container for detail items
   },
   detailRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
     paddingVertical: designTokens.spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: 'transparent',
+    borderBottomWidth: designTokens.borderWidth.thin,
+    borderBottomColor: designTokens.colors.transparent,
     gap: designTokens.spacing.md,
   },
   detailIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: designTokens.touchTarget.minimum,
+    height: designTokens.touchTarget.minimum,
+    borderRadius: designTokens.touchTarget.minimum / 2,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
   },
   detailText: {
-    flex: 1,
+    flex: flexValues.one,
   },
   detailLabel: {
     ...mobileTypography.caption,
-    marginBottom: 2,
+    marginBottom: designTokens.spacing.xxs,
   },
   detailValue: {
     ...mobileTypography.bodyLarge,
   },
   logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
     padding: designTokens.spacing.md,
-    borderRadius: designTokens.borderRadius.lg,
-    borderWidth: 1.5,
+    borderRadius: designTokens.radius.lg,
+    borderWidth: designTokens.borderWidth.medium,
     gap: designTokens.spacing.sm,
   },
   logoutButtonText: {
     ...mobileTypography.bodyLargeBold,
   },
   versionSection: {
-    alignItems: 'center',
+    alignItems: layoutConstants.alignItems.center,
     paddingVertical: designTokens.spacing.xl,
     paddingBottom: designTokens.spacing['3xl'],
   },

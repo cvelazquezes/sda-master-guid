@@ -4,12 +4,12 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 import { useAuth } from '../context/AuthContext';
-import { UserRole } from '../types';
+import { UserRole, ApprovalStatus } from '../types';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { designTokens } from '../shared/theme/designTokens';
-import { mobileFontSizes } from '../shared/theme/mobileTypography';
+import { mobileFontSizes, designTokens, layoutConstants } from '../shared/theme';
 import { useTheme } from '../contexts/ThemeContext';
+import { SCREENS, TABS, SCREEN_TITLES, ICONS, A11Y_ROLE, dimensionValues, PRESENTATION, BADGE, NAV_KEYS } from '../shared/constants';
 
 // Auth Screens - Direct imports (lazy loading disabled to fix Metro bundler issue)
 import LoginScreen from '../screens/auth/LoginScreen';
@@ -56,12 +56,12 @@ const ProfileIcon = () => {
   return (
     <TouchableOpacity
       style={headerIconStyles.iconButton}
-      onPress={() => navigation.navigate('Account')}
-      accessibilityLabel="Open account settings"
-      accessibilityRole="button"
+      onPress={() => navigation.navigate(SCREENS.ACCOUNT as never)}
+      accessibilityLabel={SCREEN_TITLES.MY_ACCOUNT}
+      accessibilityRole={A11Y_ROLE.BUTTON}
     >
       <View style={[headerIconStyles.avatarCircle, { backgroundColor: colors.primaryAlpha20 }]}>
-        <MaterialCommunityIcons name="account" size={22} color={colors.primary} />
+        <MaterialCommunityIcons name={ICONS.ACCOUNT} size={designTokens.iconSize.md} color={colors.primary} />
       </View>
     </TouchableOpacity>
   );
@@ -76,14 +76,14 @@ const NotificationBell = () => {
   return (
     <TouchableOpacity
       style={headerIconStyles.iconButton}
-      onPress={() => navigation.navigate('Notifications' as never)}
-      accessibilityLabel="Open notifications"
-      accessibilityRole="button"
+      onPress={() => navigation.navigate(SCREENS.NOTIFICATIONS as never)}
+      accessibilityLabel={SCREEN_TITLES.NOTIFICATIONS}
+      accessibilityRole={A11Y_ROLE.BUTTON}
     >
-      <MaterialCommunityIcons name="bell" size={24} color={colors.textPrimary} />
+      <MaterialCommunityIcons name={ICONS.BELL} size={designTokens.iconSize.lg} color={colors.textPrimary} />
       {unreadCount > 0 && (
         <View style={[headerIconStyles.badge, { backgroundColor: colors.error }]}>
-          <Text style={headerIconStyles.badgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
+          <Text style={headerIconStyles.badgeText}>{unreadCount > BADGE.MAX_COUNT ? BADGE.OVERFLOW_TEXT : unreadCount}</Text>
         </View>
       )}
     </TouchableOpacity>
@@ -102,36 +102,36 @@ const HeaderRight = () => {
 
 const headerIconStyles = StyleSheet.create({
   headerRightContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 8,
+    flexDirection: layoutConstants.flexDirection.row,
+    alignItems: layoutConstants.alignItems.center,
+    marginRight: designTokens.spacing.sm,
   },
   iconButton: {
-    padding: 8,
-    position: 'relative',
+    padding: designTokens.spacing.sm,
+    position: layoutConstants.position.relative,
   },
   avatarCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: dimensionValues.minWidth.iconButtonSmall,
+    height: dimensionValues.minHeight.iconButtonSmall,
+    borderRadius: designTokens.borderRadius['3xl'],
+    alignItems: layoutConstants.alignItems.center,
+    justifyContent: layoutConstants.justifyContent.center,
   },
   badge: {
-    position: 'absolute',
-    top: 4,
-    right: 4,
-    borderRadius: 10,
-    minWidth: 18,
-    height: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 4,
+    position: layoutConstants.position.absolute,
+    top: designTokens.spacing.xs,
+    right: designTokens.spacing.xs,
+    borderRadius: designTokens.borderRadius.xl,
+    minWidth: dimensionValues.minWidth.badge,
+    height: dimensionValues.minHeight.badge,
+    justifyContent: layoutConstants.justifyContent.center,
+    alignItems: layoutConstants.alignItems.center,
+    paddingHorizontal: designTokens.spacing.xs,
   },
   badgeText: {
     color: designTokens.colors.textInverse,
     fontSize: mobileFontSizes.xs,
-    fontWeight: 'bold',
+    fontWeight: designTokens.fontWeight.bold,
   },
 });
 
@@ -146,24 +146,24 @@ const MainTabs = () => {
   // Tab icon mapping for navigation
   const getTabIcon = (routeName: string): keyof typeof MaterialCommunityIcons.glyphMap => {
     switch (routeName) {
-      case 'Home':
-        return 'home';
-      case 'Members':
-        return 'account-group';
-      case 'Activities':
-        return 'account-heart';
-      case 'Users':
-        return 'account-multiple';
-      case 'Clubs':
-        return 'office-building';
-      case 'Meetings':
-        return 'calendar-clock';
-      case 'Finances':
-        return 'cash-multiple';
-      case 'More':
-        return 'dots-horizontal';
+      case SCREENS.HOME:
+        return ICONS.HOME;
+      case TABS.MEMBERS:
+        return ICONS.ACCOUNT_GROUP;
+      case SCREENS.ACTIVITIES:
+        return ICONS.ACCOUNT_HEART;
+      case TABS.USERS:
+        return ICONS.ACCOUNT_MULTIPLE;
+      case TABS.CLUBS:
+        return ICONS.OFFICE_BUILDING;
+      case TABS.MEETINGS:
+        return ICONS.CALENDAR_CLOCK;
+      case TABS.FINANCES:
+        return ICONS.CASH_MULTIPLE;
+      case TABS.MORE:
+        return ICONS.DOTS_HORIZONTAL;
       default:
-        return 'help';
+        return ICONS.HELP;
     }
   };
 
@@ -225,65 +225,65 @@ const MainTabs = () => {
     >
       {/* Tab 1: Home - Role-specific home screen */}
       <Tab.Screen 
-        name="Home" 
-        options={{ title: 'Home' }}
+        name={SCREENS.HOME} 
+        options={{ title: SCREEN_TITLES.HOME }}
       >
         {() => getDashboardScreen()}
       </Tab.Screen>
 
       {/* Admin-only tabs: Users and Clubs management */}
       {isAdmin && (
-        <Tab.Screen name="Users" options={{ title: 'Users' }}>
+        <Tab.Screen name={TABS.USERS} options={{ title: SCREEN_TITLES.USERS }}>
           {() => <UsersManagementScreen />}
         </Tab.Screen>
       )}
 
       {isAdmin && (
-        <Tab.Screen name="Clubs" options={{ title: 'Clubs' }}>
+        <Tab.Screen name={TABS.CLUBS} options={{ title: SCREEN_TITLES.CLUBS }}>
           {() => <ClubsManagementScreen />}
         </Tab.Screen>
       )}
 
       {/* Club Admin tabs: Members and Plan Meetings */}
       {isClubAdmin && (
-        <Tab.Screen name="Members" options={{ title: 'Members' }}>
+        <Tab.Screen name={TABS.MEMBERS} options={{ title: SCREEN_TITLES.MEMBERS }}>
           {() => <ClubMembersScreen />}
         </Tab.Screen>
       )}
 
       {isClubAdmin && (
-        <Tab.Screen name="Meetings" options={{ title: 'Meetings' }}>
+        <Tab.Screen name={TABS.MEETINGS} options={{ title: SCREEN_TITLES.MEETINGS }}>
           {() => <MeetingPlannerScreen />}
         </Tab.Screen>
       )}
 
       {isClubAdmin && (
-        <Tab.Screen name="Finances" options={{ title: 'Finances' }}>
+        <Tab.Screen name={TABS.FINANCES} options={{ title: SCREEN_TITLES.FINANCES }}>
           {() => <ClubFeesScreen />}
         </Tab.Screen>
       )}
 
       {/* Regular User tabs: Members, Meetings, and Finances */}
       {isRegularUser && (
-        <Tab.Screen name="Members" options={{ title: 'Members' }}>
+        <Tab.Screen name={TABS.MEMBERS} options={{ title: SCREEN_TITLES.MEMBERS }}>
           {() => <MembersScreen />}
         </Tab.Screen>
       )}
 
       {isRegularUser && (
-        <Tab.Screen name="Meetings" options={{ title: 'Meetings' }}>
+        <Tab.Screen name={TABS.MEETINGS} options={{ title: SCREEN_TITLES.MEETINGS }}>
           {() => <ActivitiesScreen />}
         </Tab.Screen>
       )}
 
       {isRegularUser && (
-        <Tab.Screen name="Finances" options={{ title: 'Finances' }}>
+        <Tab.Screen name={TABS.FINANCES} options={{ title: SCREEN_TITLES.FINANCES }}>
           {() => <MyFeesScreen />}
         </Tab.Screen>
       )}
 
       {/* Tab: More - Role-specific additional options */}
-      <Tab.Screen name="More" options={{ title: 'More' }}>
+      <Tab.Screen name={TABS.MORE} options={{ title: SCREEN_TITLES.MORE }}>
         {() => getMoreScreen()}
       </Tab.Screen>
     </Tab.Navigator>
@@ -295,11 +295,11 @@ const AuthStack = () => {
     <Stack.Navigator 
       screenOptions={{ 
         headerShown: false,
-        contentStyle: { backgroundColor: '#fff' },
+        contentStyle: { backgroundColor: designTokens.colors.white },
       }}
     >
-      <Stack.Screen name="Login">{() => <LoginScreen />}</Stack.Screen>
-      <Stack.Screen name="Register">{() => <RegisterScreen />}</Stack.Screen>
+      <Stack.Screen name={SCREENS.LOGIN}>{() => <LoginScreen />}</Stack.Screen>
+      <Stack.Screen name={SCREENS.REGISTER}>{() => <RegisterScreen />}</Stack.Screen>
     </Stack.Navigator>
   );
 };
@@ -311,40 +311,40 @@ const AppStack = () => {
     <Stack.Navigator 
       screenOptions={{ 
         headerShown: false,
-        contentStyle: { backgroundColor: '#fff' },
+        contentStyle: { backgroundColor: designTokens.colors.white },
       }}
     >
-      <Stack.Screen name="Main" component={MainTabs} />
+      <Stack.Screen name={SCREENS.MAIN} component={MainTabs} />
       {/* Account - Available for all roles via header icon */}
       <Stack.Screen 
-        name="Account" 
+        name={SCREENS.ACCOUNT} 
         component={AccountScreen}
         options={{
           headerShown: true,
-          title: 'My Account',
-          presentation: 'modal',
+          title: SCREEN_TITLES.MY_ACCOUNT,
+          presentation: PRESENTATION.MODAL,
         }}
       />
       {/* Notifications - Available for all roles */}
       <Stack.Screen 
-        name="Notifications" 
+        name={SCREENS.NOTIFICATIONS} 
         component={NotificationsScreen}
         options={{
           headerShown: true,
-          title: 'Notifications',
-          presentation: 'modal',
+          title: SCREEN_TITLES.NOTIFICATIONS,
+          presentation: PRESENTATION.MODAL,
         }}
       />
       {/* Admin-specific screens */}
       {user?.role === UserRole.ADMIN && (
         <>
-          <Stack.Screen name="UsersManagement" options={{ headerShown: true, title: 'User Management' }}>
+          <Stack.Screen name={SCREENS.USERS_MANAGEMENT} options={{ headerShown: true, title: SCREEN_TITLES.USER_MANAGEMENT }}>
             {() => <UsersManagementScreen />}
           </Stack.Screen>
-          <Stack.Screen name="ClubsManagement" options={{ headerShown: true, title: 'Club Management' }}>
+          <Stack.Screen name={SCREENS.CLUBS_MANAGEMENT} options={{ headerShown: true, title: SCREEN_TITLES.CLUB_MANAGEMENT }}>
             {() => <ClubsManagementScreen />}
           </Stack.Screen>
-          <Stack.Screen name="OrganizationManagement" options={{ headerShown: true, title: 'Organization' }}>
+          <Stack.Screen name={SCREENS.ORGANIZATION_MANAGEMENT} options={{ headerShown: true, title: SCREEN_TITLES.ORGANIZATION }}>
             {() => <OrganizationManagementScreen />}
           </Stack.Screen>
         </>
@@ -352,23 +352,23 @@ const AppStack = () => {
       {/* Club Admin-specific screens */}
       {user?.role === UserRole.CLUB_ADMIN && (
         <>
-          <Stack.Screen name="ClubSettings" options={{ headerShown: true, title: 'Club Settings' }}>
+          <Stack.Screen name={SCREENS.CLUB_SETTINGS} options={{ headerShown: true, title: SCREEN_TITLES.CLUB_SETTINGS }}>
             {() => <ClubSettingsScreen />}
           </Stack.Screen>
-          <Stack.Screen name="ClubMatches" options={{ headerShown: true, title: 'Activity Management' }}>
+          <Stack.Screen name={SCREENS.CLUB_MATCHES} options={{ headerShown: true, title: SCREEN_TITLES.ACTIVITY_MANAGEMENT }}>
             {() => <ClubMatchesScreen />}
           </Stack.Screen>
-          <Stack.Screen name="GenerateMatches" options={{ headerShown: true, title: 'Generate Activities' }}>
+          <Stack.Screen name={SCREENS.GENERATE_MATCHES} options={{ headerShown: true, title: SCREEN_TITLES.GENERATE_ACTIVITIES }}>
             {() => <GenerateMatchesScreen />}
           </Stack.Screen>
-          <Stack.Screen name="ClubDirective" options={{ headerShown: true, title: 'Club Directive' }}>
+          <Stack.Screen name={SCREENS.CLUB_DIRECTIVE} options={{ headerShown: true, title: SCREEN_TITLES.CLUB_DIRECTIVE }}>
             {() => <ClubDirectiveScreen />}
           </Stack.Screen>
         </>
       )}
       {/* User-specific screens (available to regular users and club admins) */}
       {(user?.role === UserRole.USER || user?.role === UserRole.CLUB_ADMIN) && (
-        <Stack.Screen name="MyFees" options={{ headerShown: true, title: 'My Fees' }}>
+        <Stack.Screen name={SCREENS.MY_FEES} options={{ headerShown: true, title: SCREEN_TITLES.MY_FEES }}>
           {() => <MyFeesScreen />}
         </Stack.Screen>
       )}
@@ -381,10 +381,10 @@ const PendingStack = () => {
     <Stack.Navigator 
       screenOptions={{ 
         headerShown: false,
-        contentStyle: { backgroundColor: '#fff' },
+        contentStyle: { backgroundColor: designTokens.colors.white },
       }}
     >
-      <Stack.Screen name="PendingApproval" component={PendingApprovalScreen} />
+      <Stack.Screen name={SCREENS.PENDING_APPROVAL} component={PendingApprovalScreen} />
     </Stack.Navigator>
   );
 };
@@ -403,12 +403,12 @@ const AppNavigator = () => {
     }
 
     // If user has pending approval status, show pending screen
-    if (user.approvalStatus === 'pending') {
+    if (user.approvalStatus === ApprovalStatus.PENDING) {
       return <PendingStack />;
     }
 
     // If user is rejected, redirect to auth (logout)
-    if (user.approvalStatus === 'rejected') {
+    if (user.approvalStatus === ApprovalStatus.REJECTED) {
       return <AuthStack />;
     }
 
@@ -418,7 +418,7 @@ const AppNavigator = () => {
 
   // Use a key based on user state to force remount when logging out
   // This ensures navigation state is completely reset
-  const navigationKey = user ? `${user.id}-${user.approvalStatus}` : 'unauthenticated';
+  const navigationKey = user ? `${user.id}-${user.approvalStatus}` : NAV_KEYS.UNAUTHENTICATED;
 
   return <NavigationContainer key={navigationKey}>{getNavigationStack()}</NavigationContainer>;
 };
