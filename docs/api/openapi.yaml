@@ -1,25 +1,45 @@
 openapi: 3.0.3
 info:
   title: SDA Master Guid API
-  version: 1.0.0
+  version: 2.0.0
   description: |
     RESTful API for the SDA Master Guid Club Management application.
     
     This API enables:
-    - User authentication and management
-    - Club administration
-    - Social activity generation and scheduling
-    - Organizational hierarchy management
+    - User authentication and authorization with role-based access control
+    - Club administration and organizational hierarchy management
+    - Social activity (match) generation and scheduling
+    - Payment and fee management
+    - WhatsApp and push notification integration
+    - Member approval workflows
+    
+    ## User Roles
+    
+    The system supports three user roles with distinct permissions:
+    
+    | Role | Description | Permissions |
+    |------|-------------|-------------|
+    | `admin` | System administrator | Full system access, manage all clubs and users |
+    | `club_admin` | Club administrator | Manage club members, matches, fees, notifications |
+    | `user` | Regular member | View own matches, fees, and club members |
     
     ## Authentication
+    
     All authenticated endpoints require a Bearer token in the Authorization header:
     ```
     Authorization: Bearer {token}
     ```
     
+    Tokens are obtained via the `/auth/login` endpoint and expire after 24 hours.
+    Use the `/auth/refresh` endpoint to obtain a new access token.
+    
     ## Rate Limiting
     - 100 requests per minute per user
-    - 429 Too Many Requests if exceeded
+    - 429 Too Many Requests response if exceeded
+    - Rate limit headers included in all responses:
+      - `X-RateLimit-Limit`: Maximum requests per window
+      - `X-RateLimit-Remaining`: Requests remaining
+      - `X-RateLimit-Reset`: Unix timestamp when limit resets
     
     ## Error Responses
     All error responses follow this format:
@@ -34,8 +54,30 @@ info:
       }
     }
     ```
+    
+    ## Pagination
+    List endpoints support pagination with the following query parameters:
+    - `page`: Page number (default: 1)
+    - `pageSize`: Items per page (default: 20, max: 100)
+    
+    Responses include pagination metadata:
+    ```json
+    {
+      "pagination": {
+        "page": 1,
+        "pageSize": 20,
+        "totalItems": 100,
+        "totalPages": 5,
+        "hasNext": true,
+        "hasPrev": false
+      }
+    }
+    ```
+    
   contact:
+    name: SDA Master Guid Support
     email: api@sdamasterguid.com
+    url: https://sdamasterguid.com/support
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
@@ -50,13 +92,19 @@ servers:
 
 tags:
   - name: Authentication
-    description: User authentication endpoints
+    description: User authentication and session management
   - name: Users
-    description: User management
+    description: User management and approval workflows
   - name: Clubs
-    description: Club management
+    description: Club management and organizational hierarchy
   - name: Matches
-    description: Social activity match management
+    description: Social activity match generation and management
+  - name: Payments
+    description: Fee and payment management
+  - name: Notifications
+    description: WhatsApp and push notification delivery
+  - name: Organization
+    description: SDA organizational hierarchy management
 
 paths:
   # ============================================================================
@@ -67,7 +115,15 @@ paths:
     post:
       tags: [Authentication]
       summary: User login
-      description: Authenticates a user and returns access and refresh tokens
+      description: |
+        Authenticates a user with email and password credentials.
+        Returns access and refresh tokens along with user information.
+        
+        **Flow:**
+        1. Validate credentials against stored user
+        2. Check user approval status
+        3. Generate JWT access token (24h expiry) and refresh token (7d expiry)
+        4. Return tokens and user data
       operationId: login
       requestBody:
         required: true
@@ -76,16 +132,21 @@ paths:
             schema:
               $ref: '#/components/schemas/LoginRequest'
             examples:
-              user:
+              regularUser:
                 summary: Regular user login
                 value:
                   email: user@example.com
                   password: Password123!
-              admin:
-                summary: Admin login
+              clubAdmin:
+                summary: Club admin login
                 value:
-                  email: admin@example.com
+                  email: clubadmin@sda.com
                   password: AdminPass123!
+              admin:
+                summary: System admin login
+                value:
+                  email: admin@sda.com
+                  password: SuperAdmin123!
       responses:
         '200':
           description: Login successful
@@ -93,6 +154,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LoginResponse'
+              examples:
+                approvedUser:
+                  summary: Approved user
+                  value:
+                    data:
+                      user:
+                        id: "user_123"
+                        email: "user@example.com"
+                        name: "John Doe"
+                        role: "user"
+                        approvalStatus: "approved"
+                        isActive: true
+                      accessToken: "eyJhbGciOiJIUzI1NiIs..."
+                      refreshToken: "eyJhbGciOiJIUzI1NiIs..."
+                    meta:
+                      requestId: "req_abc123"
+                      timestamp: "2024-01-01T00:00:00Z"
+                pendingUser:
+                  summary: Pending approval user
+                  value:
+                    data:
+                      user:
+                        id: "user_456"
+                        email: "new@example.com"
+                        name: "Jane Doe"
+                        role: "user"
+                        approvalStatus: "pending"
+                        isActive: false
+                      accessToken: "eyJhbGciOiJIUzI1NiIs..."
+                      refreshToken: "eyJhbGciOiJIUzI1NiIs..."
         '401':
           $ref: '#/components/responses/Unauthorized'
         '422':
@@ -104,7 +195,19 @@ paths:
     post:
       tags: [Authentication]
       summary: User registration
-      description: Registers a new user account
+      description: |
+        Registers a new user account. New users start with `pending` approval status.
+        
+        **Registration Flow:**
+        1. Validate input data (email format, password strength, etc.)
+        2. Check if email already exists
+        3. Create user with `pending` approval status
+        4. Send notification to club admin (for regular users) or system admin (for club admins)
+        5. Return user data and tokens
+        
+        **Approval Workflow:**
+        - Regular users (`isClubAdmin: false`): Approved by club admin
+        - Club admins (`isClubAdmin: true`): Approved by system admin
       operationId: register
       requestBody:
         required: true
@@ -112,9 +215,29 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/RegisterRequest'
+            examples:
+              regularMember:
+                summary: Regular member registration
+                value:
+                  email: "member@example.com"
+                  password: "SecurePass123!"
+                  name: "Carlos Martínez"
+                  whatsappNumber: "+52 55 1234 5678"
+                  clubId: "club_123"
+                  classes: ["Friend", "Companion"]
+                  isClubAdmin: false
+              clubAdminRegistration:
+                summary: Club admin registration
+                value:
+                  email: "newadmin@example.com"
+                  password: "AdminPass123!"
+                  name: "María López"
+                  whatsappNumber: "+52 55 9999 0000"
+                  clubId: "club_456"
+                  isClubAdmin: true
       responses:
         '201':
-          description: Registration successful
+          description: Registration successful - user pending approval
           content:
             application/json:
               schema:
@@ -124,11 +247,67 @@ paths:
         '422':
           $ref: '#/components/responses/ValidationError'
   
+  /auth/refresh:
+    post:
+      tags: [Authentication]
+      summary: Refresh access token
+      description: |
+        Obtains a new access token using a valid refresh token.
+        The refresh token itself is rotated for security.
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+                  description: Valid refresh token from login or previous refresh
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      accessToken:
+                        type: string
+                      refreshToken:
+                        type: string
+                  meta:
+                    $ref: '#/components/schemas/ResponseMeta'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  
+  /auth/logout:
+    post:
+      tags: [Authentication]
+      summary: User logout
+      description: |
+        Invalidates the current session and refresh token.
+        Clears server-side session data.
+      operationId: logout
+      security:
+        - BearerAuth: []
+      responses:
+        '204':
+          description: Logout successful
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  
   /auth/me:
     get:
       tags: [Authentication]
       summary: Get current user
-      description: Returns the currently authenticated user's information
+      description: Returns the currently authenticated user's complete information
       operationId: getCurrentUser
       security:
         - BearerAuth: []
@@ -145,7 +324,15 @@ paths:
     patch:
       tags: [Authentication]
       summary: Update current user
-      description: Updates the currently authenticated user's information
+      description: |
+        Updates the currently authenticated user's profile information.
+        
+        **Updatable fields:**
+        - `name`: Display name
+        - `timezone`: User's timezone
+        - `language`: Preferred language (2-letter code)
+        - `whatsappNumber`: WhatsApp contact number
+        - `classes`: Pathfinder classes (for regular users)
       operationId: updateCurrentUser
       security:
         - BearerAuth: []
@@ -175,7 +362,13 @@ paths:
     get:
       tags: [Users]
       summary: List users
-      description: Returns a paginated list of users (admin only)
+      description: |
+        Returns a paginated list of users.
+        
+        **Access Control:**
+        - `admin`: Can view all users across all clubs
+        - `club_admin`: Can view users in their club only
+        - `user`: Forbidden
       operationId: listUsers
       security:
         - BearerAuth: []
@@ -200,6 +393,17 @@ paths:
           schema:
             type: boolean
           description: Filter by active status
+        - name: approvalStatus
+          in: query
+          schema:
+            type: string
+            enum: [pending, approved, rejected]
+          description: Filter by approval status
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Search by name or email
       responses:
         '200':
           description: List of users
@@ -237,7 +441,12 @@ paths:
     patch:
       tags: [Users]
       summary: Update user
-      description: Updates a user's information (admin only)
+      description: |
+        Updates a user's information.
+        
+        **Access Control:**
+        - `admin`: Can update any user
+        - `club_admin`: Can update users in their club
       operationId: updateUser
       security:
         - BearerAuth: []
@@ -248,7 +457,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateUserRequest'
+              $ref: '#/components/schemas/AdminUpdateUserRequest'
       responses:
         '200':
           description: User updated
@@ -266,7 +475,9 @@ paths:
     delete:
       tags: [Users]
       summary: Delete user
-      description: Deletes a user account (admin only)
+      description: |
+        Soft-deletes a user account. Admin only.
+        Associated data (payments, matches) is preserved for audit purposes.
       operationId: deleteUser
       security:
         - BearerAuth: []
@@ -282,6 +493,135 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
   
+  /users/{userId}/approve:
+    post:
+      tags: [Users]
+      summary: Approve user registration
+      description: |
+        Approves a pending user registration.
+        
+        **Workflow:**
+        1. Sets `approvalStatus` to `approved`
+        2. Sets `isActive` to `true`
+        3. Sends notification to user
+        
+        **Access Control:**
+        - `admin`: Can approve any user
+        - `club_admin`: Can approve users in their club
+      operationId: approveUser
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: User approved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: User is not in pending status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /users/{userId}/reject:
+    post:
+      tags: [Users]
+      summary: Reject user registration
+      description: |
+        Rejects a pending user registration.
+        
+        **Workflow:**
+        1. Sets `approvalStatus` to `rejected`
+        2. Sets `isActive` to `false`
+        3. Sends notification to user
+      operationId: rejectUser
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  description: Optional reason for rejection
+      responses:
+        '200':
+          description: User rejected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  
+  /users/{userId}/activate:
+    post:
+      tags: [Users]
+      summary: Activate user
+      description: Reactivates a deactivated user account
+      operationId: activateUser
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: User activated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  
+  /users/{userId}/deactivate:
+    post:
+      tags: [Users]
+      summary: Deactivate user
+      description: |
+        Temporarily deactivates a user account.
+        User retains their data but cannot log in or participate in matches.
+      operationId: deactivateUser
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: User deactivated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  
   # ============================================================================
   # Clubs
   # ============================================================================
@@ -290,19 +630,43 @@ paths:
     get:
       tags: [Clubs]
       summary: List clubs
-      description: Returns a paginated list of clubs
+      description: Returns a paginated list of clubs with optional filtering
       operationId: listClubs
       security:
         - BearerAuth: []
       parameters:
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/PageSize'
-        - name: organizationLevel
+        - name: division
           in: query
           schema:
             type: string
-            enum: [church, association, union, division]
-          description: Filter by organization level
+          description: Filter by SDA division
+        - name: union
+          in: query
+          schema:
+            type: string
+          description: Filter by SDA union
+        - name: association
+          in: query
+          schema:
+            type: string
+          description: Filter by SDA association
+        - name: church
+          in: query
+          schema:
+            type: string
+          description: Filter by church name
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+          description: Filter by active status
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Search by club name
       responses:
         '200':
           description: List of clubs
@@ -316,7 +680,14 @@ paths:
     post:
       tags: [Clubs]
       summary: Create club
-      description: Creates a new club (admin only)
+      description: |
+        Creates a new club. Admin only.
+        
+        **Required organizational hierarchy:**
+        - Division (e.g., "División Interamericana")
+        - Union (e.g., "Unión Mexicana Central")
+        - Association (e.g., "Asociación Metropolitana Mexicana")
+        - Church (e.g., "Iglesia Adventista de Narvarte")
       operationId: createClub
       security:
         - BearerAuth: []
@@ -344,7 +715,7 @@ paths:
     get:
       tags: [Clubs]
       summary: Get club by ID
-      description: Returns club information
+      description: Returns club information including member count
       operationId: getClubById
       security:
         - BearerAuth: []
@@ -361,13 +732,155 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+    
+    patch:
+      tags: [Clubs]
+      summary: Update club
+      description: |
+        Updates club settings.
+        
+        **Access Control:**
+        - `admin`: Can update any club
+        - `club_admin`: Can update their own club
+      operationId: updateClub
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ClubId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateClubRequest'
+      responses:
+        '200':
+          description: Club updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClubResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    
+    delete:
+      tags: [Clubs]
+      summary: Delete club
+      description: Soft-deletes a club. Admin only.
+      operationId: deleteClub
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ClubId'
+      responses:
+        '204':
+          description: Club deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
   
   /clubs/{clubId}/members:
     get:
       tags: [Clubs]
       summary: Get club members
-      description: Returns a list of club members
+      description: Returns a list of club members with optional filtering
       operationId: getClubMembers
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ClubId'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: approvalStatus
+          in: query
+          schema:
+            type: string
+            enum: [pending, approved, rejected]
+          description: Filter by approval status
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+          description: Filter by active status
+      responses:
+        '200':
+          description: List of club members
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  
+  /clubs/{clubId}/join:
+    post:
+      tags: [Clubs]
+      summary: Join club
+      description: |
+        Request to join a club.
+        Creates membership with `pending` approval status.
+      operationId: joinClub
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ClubId'
+      responses:
+        '200':
+          description: Join request submitted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "Join request submitted. Awaiting approval."
+                      approvalStatus:
+                        type: string
+                        example: "pending"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Already a member of this or another club
+  
+  /clubs/{clubId}/leave:
+    post:
+      tags: [Clubs]
+      summary: Leave club
+      description: Removes user from the club
+      operationId: leaveClub
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ClubId'
+      responses:
+        '200':
+          description: Successfully left club
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  
+  /clubs/{clubId}/users:
+    get:
+      tags: [Clubs]
+      summary: Get club users (alias)
+      description: Alias for /clubs/{clubId}/members
+      operationId: getClubUsers
       security:
         - BearerAuth: []
       parameters:
@@ -376,7 +889,7 @@ paths:
         - $ref: '#/components/parameters/PageSize'
       responses:
         '200':
-          description: List of club members
+          description: List of club users
           content:
             application/json:
               schema:
@@ -394,7 +907,7 @@ paths:
     get:
       tags: [Matches]
       summary: List matches
-      description: Returns a paginated list of matches
+      description: Returns a paginated list of matches for a club
       operationId: listMatches
       security:
         - BearerAuth: []
@@ -411,8 +924,20 @@ paths:
           in: query
           schema:
             type: string
-            enum: [pending, scheduled, completed, skipped]
+            enum: [pending, scheduled, completed, skipped, cancelled]
           description: Filter by match status
+        - name: fromDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Filter matches scheduled after this date
+        - name: toDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Filter matches scheduled before this date
       responses:
         '200':
           description: List of matches
@@ -434,6 +959,12 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/PageSize'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, scheduled, completed, skipped, cancelled]
+          description: Filter by status
       responses:
         '200':
           description: List of user's matches
@@ -444,11 +975,115 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
   
+  /matches/{matchId}:
+    get:
+      tags: [Matches]
+      summary: Get match by ID
+      description: Returns match details including participant information
+      operationId: getMatchById
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/MatchId'
+      responses:
+        '200':
+          description: Match information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    
+    patch:
+      tags: [Matches]
+      summary: Update match
+      description: Updates match details (scheduled date, status)
+      operationId: updateMatch
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/MatchId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                scheduledDate:
+                  type: string
+                  format: date-time
+                status:
+                  type: string
+                  enum: [pending, scheduled, completed, skipped, cancelled]
+      responses:
+        '200':
+          description: Match updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  
+  /matches/{matchId}/status:
+    patch:
+      tags: [Matches]
+      summary: Update match status
+      description: Updates only the match status
+      operationId: updateMatchStatus
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/MatchId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [pending, scheduled, completed, skipped, cancelled]
+      responses:
+        '200':
+          description: Match status updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  
   /matches/generate:
     post:
       tags: [Matches]
       summary: Generate matches
-      description: Generates new match round for a club (club admin only)
+      description: |
+        Generates a new match round for a club.
+        
+        **Algorithm:**
+        1. Get all active, approved members
+        2. Shuffle members randomly
+        3. Group into pairs/trios based on club's `groupSize` setting
+        4. Create match records with `pending` status
+        5. Return the new match round
+        
+        **Requirements:**
+        - Minimum `groupSize` active members required
+        - Club admin or admin role required
       operationId: generateMatches
       security:
         - BearerAuth: []
@@ -464,22 +1099,724 @@ paths:
           content:
             application/json:
               schema:
+                $ref: '#/components/schemas/MatchRoundResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          description: Not enough active members
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /matches/rounds:
+    get:
+      tags: [Matches]
+      summary: Get match rounds
+      description: Returns all match rounds for a club
+      operationId: getMatchRounds
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: clubId
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Club ID
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: List of match rounds
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MatchRound'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  
+  /matches/club/{clubId}:
+    get:
+      tags: [Matches]
+      summary: Get club matches
+      description: Returns all matches for a specific club
+      operationId: getClubMatches
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ClubId'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: List of club matches
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  
+  # ============================================================================
+  # Payments
+  # ============================================================================
+  
+  /payments:
+    get:
+      tags: [Payments]
+      summary: Get club payments
+      description: Returns all payments for a club with optional year filter
+      operationId: getClubPayments
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: clubId
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Club ID
+        - name: year
+          in: query
+          schema:
+            type: integer
+          description: Filter by year
+        - name: month
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+          description: Filter by month
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [paid, pending, overdue, exempt]
+          description: Filter by payment status
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: List of payments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  
+  /payments/generate:
+    post:
+      tags: [Payments]
+      summary: Generate monthly fees
+      description: |
+        Generates monthly fee records for all eligible club members.
+        
+        **Process:**
+        1. Get all active, approved members
+        2. For each active month in fee settings
+        3. Create payment record with `pending` status
+        4. Skip if payment already exists for member/month
+        
+        Club admin only.
+      operationId: generateMonthlyFees
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - clubId
+                - year
+              properties:
+                clubId:
+                  type: string
+                year:
+                  type: integer
+                  minimum: 2020
+                  maximum: 2100
+      responses:
+        '201':
+          description: Fees generated
+          content:
+            application/json:
+              schema:
                 type: object
                 properties:
                   data:
                     type: object
                     properties:
-                      roundId:
+                      message:
                         type: string
-                      matchCount:
+                      paymentsCreated:
                         type: integer
-                      generatedAt:
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  
+  /payments/member/{userId}:
+    get:
+      tags: [Payments]
+      summary: Get member payments
+      description: Returns all payments for a specific member
+      operationId: getMemberPayments
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - name: clubId
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Club ID
+        - name: year
+          in: query
+          schema:
+            type: integer
+          description: Filter by year
+      responses:
+        '200':
+          description: List of member payments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  
+  /payments/{paymentId}:
+    patch:
+      tags: [Payments]
+      summary: Update payment
+      description: Updates payment status and details
+      operationId: updatePayment
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Payment ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [paid, pending, overdue, exempt]
+                paidDate:
+                  type: string
+                  format: date-time
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Payment updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  
+  /payments/balance/{userId}:
+    get:
+      tags: [Payments]
+      summary: Get member balance
+      description: Returns the calculated balance for a member
+      operationId: getMemberBalance
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - name: clubId
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Club ID
+      responses:
+        '200':
+          description: Member balance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemberBalanceResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  
+  # ============================================================================
+  # Custom Charges
+  # ============================================================================
+  
+  /charges/custom:
+    get:
+      tags: [Payments]
+      summary: Get custom charges
+      description: Returns all custom charges for a club
+      operationId: getCustomCharges
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: clubId
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Club ID
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+          description: Filter by active status
+      responses:
+        '200':
+          description: List of custom charges
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomChargeListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    
+    post:
+      tags: [Payments]
+      summary: Create custom charge
+      description: |
+        Creates a custom charge and applies it to selected members.
+        
+        **Process:**
+        1. Create custom charge record
+        2. Create payment records for each selected member
+        3. All payments start with `pending` status
+        
+        Club admin only.
+      operationId: createCustomCharge
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCustomChargeRequest'
+      responses:
+        '201':
+          description: Custom charge created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomChargeResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  
+  /charges/custom/{chargeId}:
+    delete:
+      tags: [Payments]
+      summary: Delete custom charge
+      description: Soft-deletes a custom charge (sets isActive to false)
+      operationId: deleteCustomCharge
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: chargeId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Charge ID
+      responses:
+        '204':
+          description: Charge deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  
+  # ============================================================================
+  # Notifications
+  # ============================================================================
+  
+  /notifications/send:
+    post:
+      tags: [Notifications]
+      summary: Send notification
+      description: |
+        Sends a notification to a user via WhatsApp, push, or both.
+        
+        **WhatsApp Integration:**
+        - Uses WhatsApp Business API in production
+        - Falls back to direct WhatsApp link in development
+        
+        **Push Notifications:**
+        - Uses Firebase Cloud Messaging (FCM)
+        - Requires device token registration
+      operationId: sendNotification
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendNotificationRequest'
+      responses:
+        '200':
+          description: Notification sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      success:
+                        type: boolean
+                      messageId:
+                        type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  
+  /notifications/bulk:
+    post:
+      tags: [Notifications]
+      summary: Send bulk notifications
+      description: Sends notifications to multiple users
+      operationId: sendBulkNotifications
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkNotificationRequest'
+      responses:
+        '200':
+          description: Notifications sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      success:
+                        type: integer
+                        description: Number of successful deliveries
+                      failed:
+                        type: integer
+                        description: Number of failed deliveries
+                      total:
+                        type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  
+  /notifications/schedule:
+    post:
+      tags: [Notifications]
+      summary: Schedule notification
+      description: Schedules a notification for future delivery
+      operationId: scheduleNotification
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleNotificationRequest'
+      responses:
+        '201':
+          description: Notification scheduled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      notificationId:
+                        type: string
+                      scheduledDate:
                         type: string
                         format: date-time
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+  
+  /notifications/scheduled/{notificationId}:
+    delete:
+      tags: [Notifications]
+      summary: Cancel scheduled notification
+      description: Cancels a scheduled notification
+      operationId: cancelScheduledNotification
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: notificationId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Notification ID
+      responses:
+        '204':
+          description: Notification cancelled
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  
+  # ============================================================================
+  # Organization Hierarchy
+  # ============================================================================
+  
+  /organization/divisions:
+    get:
+      tags: [Organization]
+      summary: List divisions
+      description: Returns all SDA divisions in the system
+      operationId: listDivisions
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of divisions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        unionCount:
+                          type: integer
+                        clubCount:
+                          type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  
+  /organization/unions:
+    get:
+      tags: [Organization]
+      summary: List unions
+      description: Returns SDA unions, optionally filtered by division
+      operationId: listUnions
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: division
+          in: query
+          schema:
+            type: string
+          description: Filter by division name
+      responses:
+        '200':
+          description: List of unions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        division:
+                          type: string
+                        associationCount:
+                          type: integer
+                        clubCount:
+                          type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  
+  /organization/associations:
+    get:
+      tags: [Organization]
+      summary: List associations
+      description: Returns SDA associations, optionally filtered by union
+      operationId: listAssociations
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: union
+          in: query
+          schema:
+            type: string
+          description: Filter by union name
+      responses:
+        '200':
+          description: List of associations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        union:
+                          type: string
+                        division:
+                          type: string
+                        churchCount:
+                          type: integer
+                        clubCount:
+                          type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  
+  /organization/churches:
+    get:
+      tags: [Organization]
+      summary: List churches
+      description: Returns churches, optionally filtered by association
+      operationId: listChurches
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: association
+          in: query
+          schema:
+            type: string
+          description: Filter by association name
+      responses:
+        '200':
+          description: List of churches
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        association:
+                          type: string
+                        union:
+                          type: string
+                        division:
+                          type: string
+                        clubCount:
+                          type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  
+  /organization/hierarchy:
+    get:
+      tags: [Organization]
+      summary: Get full hierarchy
+      description: Returns the complete organizational hierarchy tree
+      operationId: getOrganizationHierarchy
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Organization hierarchy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        division:
+                          type: string
+                        unions:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                              associations:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    name:
+                                      type: string
+                                    churches:
+                                      type: array
+                                      items:
+                                        type: object
+                                        properties:
+                                          name:
+                                            type: string
+                                          clubs:
+                                            type: array
+                                            items:
+                                              $ref: '#/components/schemas/ClubSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
 
 # ============================================================================
 # Components
@@ -491,7 +1828,15 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: JWT token obtained from /auth/login
+      description: |
+        JWT token obtained from `/auth/login`.
+        
+        Token payload includes:
+        - `sub`: User ID
+        - `email`: User email
+        - `role`: User role
+        - `clubId`: Club ID (if applicable)
+        - `exp`: Expiration timestamp
   
   parameters:
     UserId:
@@ -509,6 +1854,14 @@ components:
       schema:
         type: string
       description: Club ID
+    
+    MatchId:
+      name: matchId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Match ID
     
     Page:
       name: page
@@ -576,56 +1929,154 @@ components:
         email:
           type: string
           format: email
+          description: User's email address (must be unique)
         password:
           type: string
           format: password
           minLength: 8
           pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$'
+          description: |
+            Password requirements:
+            - Minimum 8 characters
+            - At least one uppercase letter
+            - At least one lowercase letter
+            - At least one number
+            - At least one special character
         name:
           type: string
           minLength: 2
           maxLength: 100
+          description: User's display name
         whatsappNumber:
           type: string
           pattern: '^\+[1-9]\d{1,14}$'
-          example: +1234567890
+          example: "+52 55 1234 5678"
+          description: WhatsApp number with country code
         clubId:
           type: string
+          description: ID of club to join
+        classes:
+          type: array
+          items:
+            type: string
+            enum: [Friend, Companion, Explorer, Ranger, Voyager, Guide]
+          minItems: 1
+          maxItems: 3
+          description: Pathfinder classes (required for regular users)
+        isClubAdmin:
+          type: boolean
+          default: false
+          description: Whether registering as a club administrator
     
     UpdateUserRequest:
       type: object
       properties:
         name:
           type: string
+          minLength: 2
+          maxLength: 100
         timezone:
           type: string
+          example: "America/Mexico_City"
         language:
           type: string
           minLength: 2
           maxLength: 2
-        isPaused:
+          example: "es"
+        whatsappNumber:
+          type: string
+          pattern: '^\+[1-9]\d{1,14}$'
+        classes:
+          type: array
+          items:
+            type: string
+            enum: [Friend, Companion, Explorer, Ranger, Voyager, Guide]
+          minItems: 1
+          maxItems: 3
+    
+    AdminUpdateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        role:
+          type: string
+          enum: [user, club_admin, admin]
+        clubId:
+          type: string
+        isActive:
           type: boolean
+        approvalStatus:
+          type: string
+          enum: [pending, approved, rejected]
+        classes:
+          type: array
+          items:
+            type: string
+            enum: [Friend, Companion, Explorer, Ranger, Voyager, Guide]
     
     CreateClubRequest:
       type: object
       required:
         - name
-        - organizationLevel
+        - church
+        - association
+        - union
+        - division
+        - matchFrequency
+        - groupSize
       properties:
         name:
           type: string
-        organizationLevel:
+          minLength: 2
+          maxLength: 100
+          description: Club name
+        description:
           type: string
-          enum: [church, association, union, division]
-        parentClubId:
+          maxLength: 500
+          description: Club description
+        church:
+          type: string
+          description: Church name in the SDA hierarchy
+        association:
+          type: string
+          description: Association name
+        union:
+          type: string
+          description: Union name
+        division:
+          type: string
+          description: Division name
+        matchFrequency:
+          type: string
+          enum: [weekly, biweekly, monthly]
+          description: How often matches are generated
+        groupSize:
+          type: integer
+          minimum: 2
+          maximum: 4
+          description: Number of participants per match group
+        feeSettings:
+          $ref: '#/components/schemas/ClubFeeSettings'
+    
+    UpdateClubRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
           type: string
         matchFrequency:
           type: string
           enum: [weekly, biweekly, monthly]
-        matchGroupSize:
+        groupSize:
           type: integer
           minimum: 2
           maximum: 4
+        isActive:
+          type: boolean
+        feeSettings:
+          $ref: '#/components/schemas/ClubFeeSettings'
     
     GenerateMatchesRequest:
       type: object
@@ -634,6 +2085,91 @@ components:
       properties:
         clubId:
           type: string
+          description: Club ID to generate matches for
+    
+    CreateCustomChargeRequest:
+      type: object
+      required:
+        - clubId
+        - description
+        - amount
+        - dueDate
+        - appliedToUserIds
+      properties:
+        clubId:
+          type: string
+        description:
+          type: string
+          minLength: 1
+          maxLength: 200
+        amount:
+          type: number
+          format: float
+          minimum: 0.01
+        dueDate:
+          type: string
+          format: date-time
+        appliedToUserIds:
+          type: array
+          items:
+            type: string
+          description: User IDs to apply charge to (empty array means all members)
+    
+    SendNotificationRequest:
+      type: object
+      required:
+        - userId
+        - message
+        - type
+      properties:
+        userId:
+          type: string
+        message:
+          type: string
+          maxLength: 4096
+        type:
+          type: string
+          enum: [whatsapp, push, both]
+    
+    BulkNotificationRequest:
+      type: object
+      required:
+        - userIds
+        - messages
+        - type
+      properties:
+        userIds:
+          type: array
+          items:
+            type: string
+        messages:
+          type: object
+          additionalProperties:
+            type: string
+          description: Map of userId to message
+        type:
+          type: string
+          enum: [whatsapp, push, both]
+    
+    ScheduleNotificationRequest:
+      type: object
+      required:
+        - userId
+        - title
+        - body
+        - scheduledDate
+      properties:
+        userId:
+          type: string
+        title:
+          type: string
+          maxLength: 100
+        body:
+          type: string
+          maxLength: 4096
+        scheduledDate:
+          type: string
+          format: date-time
     
     # ========== Response Schemas ==========
     
@@ -647,8 +2183,10 @@ components:
               $ref: '#/components/schemas/User'
             accessToken:
               type: string
+              description: JWT access token (24h expiry)
             refreshToken:
               type: string
+              description: Refresh token (7d expiry)
         meta:
           $ref: '#/components/schemas/ResponseMeta'
     
@@ -692,6 +2230,14 @@ components:
         meta:
           $ref: '#/components/schemas/ResponseMeta'
     
+    MatchResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Match'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+    
     MatchListResponse:
       type: object
       properties:
@@ -699,6 +2245,62 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Match'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+    
+    MatchRoundResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/MatchRound'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+    
+    PaymentResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/MemberPayment'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+    
+    PaymentListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/MemberPayment'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+    
+    MemberBalanceResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/MemberBalance'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+    
+    CustomChargeResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/CustomCharge'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+    
+    CustomChargeListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomCharge'
         pagination:
           $ref: '#/components/schemas/Pagination'
         meta:
@@ -720,20 +2322,37 @@ components:
         role:
           type: string
           enum: [user, club_admin, admin]
+          description: |
+            User role:
+            - `admin`: System administrator
+            - `club_admin`: Club administrator
+            - `user`: Regular member
         clubId:
           type: string
           nullable: true
+          description: Club ID (null for admin users)
         whatsappNumber:
           type: string
           nullable: true
         isActive:
           type: boolean
-        isPaused:
-          type: boolean
+          description: Whether user can actively participate
+        approvalStatus:
+          type: string
+          enum: [pending, approved, rejected]
+          description: Registration approval status
+        classes:
+          type: array
+          items:
+            type: string
+            enum: [Friend, Companion, Explorer, Ranger, Voyager, Guide]
+          description: Pathfinder classes
         timezone:
           type: string
+          example: "America/Mexico_City"
         language:
           type: string
+          example: "es"
         createdAt:
           type: string
           format: date-time
@@ -748,22 +2367,77 @@ components:
           type: string
         name:
           type: string
-        organizationLevel:
+        description:
           type: string
-          enum: [church, association, union, division]
-        parentClubId:
+        adminId:
           type: string
-          nullable: true
+          description: ID of the club administrator
+        isActive:
+          type: boolean
         matchFrequency:
           type: string
           enum: [weekly, biweekly, monthly]
-        matchGroupSize:
+        groupSize:
           type: integer
+          description: Number of participants per match
+        church:
+          type: string
+          description: Church name in SDA hierarchy
+        association:
+          type: string
+        union:
+          type: string
+        division:
+          type: string
+        feeSettings:
+          $ref: '#/components/schemas/ClubFeeSettings'
         memberCount:
           type: integer
+          description: Number of approved members
         createdAt:
           type: string
           format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    
+    ClubSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        memberCount:
+          type: integer
+        isActive:
+          type: boolean
+    
+    ClubFeeSettings:
+      type: object
+      properties:
+        monthlyFeeAmount:
+          type: number
+          format: float
+          description: Monthly fee amount
+        currency:
+          type: string
+          example: "MXN"
+          description: Currency code (ISO 4217)
+        activeMonths:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+            maximum: 12
+          description: Months when fees apply (1=January, 12=December)
+        isActive:
+          type: boolean
+          description: Whether fee collection is active
+        lastNotificationDate:
+          type: string
+          format: date-time
+          description: Last time payment reminders were sent
     
     Match:
       type: object
@@ -772,19 +2446,144 @@ components:
           type: string
         clubId:
           type: string
-        roundId:
-          type: string
         participants:
           type: array
           items:
             type: string
+          description: User IDs of participants
         status:
           type: string
-          enum: [pending, scheduled, completed, skipped]
+          enum: [pending, scheduled, completed, skipped, cancelled]
         scheduledDate:
           type: string
           format: date-time
           nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    
+    MatchRound:
+      type: object
+      properties:
+        id:
+          type: string
+        clubId:
+          type: string
+        matches:
+          type: array
+          items:
+            $ref: '#/components/schemas/Match'
+        scheduledDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [pending, active, completed]
+        createdAt:
+          type: string
+          format: date-time
+    
+    MemberPayment:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        clubId:
+          type: string
+        year:
+          type: integer
+        month:
+          type: integer
+          minimum: 1
+          maximum: 12
+        amount:
+          type: number
+          format: float
+        status:
+          type: string
+          enum: [paid, pending, overdue, exempt]
+        paidDate:
+          type: string
+          format: date-time
+          nullable: true
+        dueDate:
+          type: string
+          format: date-time
+        notes:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    
+    MemberBalance:
+      type: object
+      properties:
+        userId:
+          type: string
+        clubId:
+          type: string
+        totalOwed:
+          type: number
+          format: float
+          description: Total amount of charges
+        totalPaid:
+          type: number
+          format: float
+          description: Total amount paid
+        balance:
+          type: number
+          format: float
+          description: Current balance (negative = owes, positive = credit)
+        pendingCharges:
+          type: number
+          format: float
+        overdueCharges:
+          type: number
+          format: float
+        lastPaymentDate:
+          type: string
+          format: date-time
+          nullable: true
+    
+    CustomCharge:
+      type: object
+      properties:
+        id:
+          type: string
+        clubId:
+          type: string
+        description:
+          type: string
+        amount:
+          type: number
+          format: float
+        type:
+          type: string
+          enum: [monthly_fee, custom]
+        appliedToUserIds:
+          type: array
+          items:
+            type: string
+        createdDate:
+          type: string
+          format: date-time
+        dueDate:
+          type: string
+          format: date-time
+        isActive:
+          type: boolean
+        createdBy:
+          type: string
+          description: Club admin user ID
         createdAt:
           type: string
           format: date-time
@@ -797,6 +2596,7 @@ components:
         requestId:
           type: string
           example: req_abc123
+          description: Unique request identifier for tracing
         timestamp:
           type: string
           format: date-time
@@ -829,9 +2629,11 @@ components:
             code:
               type: string
               example: VALIDATION_ERROR
+              description: Machine-readable error code
             message:
               type: string
               example: Invalid input data
+              description: Human-readable error message
             details:
               type: array
               items:
@@ -851,7 +2653,7 @@ components:
   
   responses:
     Unauthorized:
-      description: Authentication required
+      description: Authentication required or token expired
       content:
         application/json:
           schema:
@@ -864,7 +2666,7 @@ components:
               timestamp: '2024-01-01T00:00:00Z'
     
     Forbidden:
-      description: Insufficient permissions
+      description: Insufficient permissions for this operation
       content:
         application/json:
           schema:
@@ -890,7 +2692,7 @@ components:
               timestamp: '2024-01-01T00:00:00Z'
     
     Conflict:
-      description: Resource conflict
+      description: Resource conflict (e.g., duplicate email)
       content:
         application/json:
           schema:
@@ -903,7 +2705,7 @@ components:
               timestamp: '2024-01-01T00:00:00Z'
     
     ValidationError:
-      description: Validation error
+      description: Request validation failed
       content:
         application/json:
           schema:
@@ -916,6 +2718,9 @@ components:
                 - field: email
                   message: Invalid email format
                   code: INVALID_FORMAT
+                - field: password
+                  message: Password too weak
+                  code: WEAK_PASSWORD
               requestId: req_abc123
               timestamp: '2024-01-01T00:00:00Z'
     
@@ -948,4 +2753,3 @@ components:
           schema:
             type: integer
           description: Seconds to wait before retrying
-
