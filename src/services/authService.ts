@@ -30,7 +30,7 @@ interface AuthResponse {
 }
 
 class AuthService {
-  private useMockData = environment.useMockData;
+  private useMockData = environment.mock.useMockApi;
 
   /**
    * Authenticates user with credentials

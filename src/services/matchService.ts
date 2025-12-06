@@ -19,13 +19,13 @@ import {
 } from './mockData';
 import { NotFoundError, ValidationError } from '../utils/errors';
 import { LOG_MESSAGES } from '../shared/constants/logMessages';
-import { TIMING } from '../shared/constants/timing';
+import { MOCK_DELAY } from '../shared/constants/timing';
+import { MS, OPACITY_VALUE } from '../shared/constants/numbers';
 import { MATCH_ROUND_STATUS } from '../shared/constants/ui';
-import { OPACITY_VALUE } from '../shared/constants/numbers';
 import i18n from '../i18n';
 
 class MatchService {
-  private useMockData = environment.useMockData;
+  private useMockData = environment.mock.useMockApi;
 
   /**
    * Get matches for a club
@@ -115,7 +115,7 @@ class MatchService {
    * Mock get match implementation
    */
   private async mockGetMatch(matchId: string): Promise<Match> {
-    await this.sleep(TIMING.MOCK_API.FAST);
+    await this.sleep(MOCK_DELAY.FAST);
 
     const match = mockMatches.find((m) => m.id === matchId);
     if (!match) {
@@ -153,7 +153,7 @@ class MatchService {
    * Mock update match status implementation
    */
   private async mockUpdateMatchStatus(matchId: string, status: MatchStatus): Promise<Match> {
-    await this.sleep(TIMING.MOCK_API.FAST);
+    await this.sleep(MOCK_DELAY.FAST);
 
     const matchIndex = mockMatches.findIndex((m) => m.id === matchId);
     if (matchIndex === -1) {
@@ -197,7 +197,7 @@ class MatchService {
    * Mock schedule match implementation
    */
   private async mockScheduleMatch(matchId: string, scheduledDate: string): Promise<Match> {
-    await this.sleep(TIMING.MOCK_API.FAST);
+    await this.sleep(MOCK_DELAY.FAST);
 
     const matchIndex = mockMatches.findIndex((m) => m.id === matchId);
     if (matchIndex === -1) {
@@ -248,7 +248,7 @@ class MatchService {
    * Mock generate matches implementation
    */
   private async mockGenerateMatches(clubId: string): Promise<MatchRound> {
-    await this.sleep(TIMING.MOCK_API.SLOW);
+    await this.sleep(MOCK_DELAY.SLOW);
 
     const club = mockClubs.find((c) => c.id === clubId);
     if (!club) {
@@ -298,7 +298,7 @@ class MatchService {
       id: String(mockMatchRounds.length + 1),
       clubId,
       matches: newMatches,
-      scheduledDate: new Date(Date.now() + TIMING.MS_PER.WEEK).toISOString(),
+      scheduledDate: new Date(Date.now() + MS.WEEK).toISOString(),
       status: MATCH_ROUND_STATUS.ACTIVE,
       createdAt: new Date().toISOString(),
     };

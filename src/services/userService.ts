@@ -14,7 +14,7 @@ import { NotFoundError } from '../utils/errors';
 const MOCK_API_DELAY_MS = 300;
 
 class UserService {
-  private useMockData = environment.useMockData;
+  private useMockData = environment.mock.useMockApi;
 
   /**
    * Get all users

@@ -10,7 +10,7 @@ import { Club, MatchFrequency, User, ApprovalStatus } from '../types';
 import { mockClubs, getUsersByClub } from './mockData';
 import { NotFoundError } from '../utils/errors';
 import { LOG_MESSAGES } from '../shared/constants/logMessages';
-import { TIMING } from '../shared/constants/timing';
+import { MOCK_DELAY } from '../shared/constants/timing';
 
 interface CreateClubData {
   name: string;
@@ -24,7 +24,7 @@ interface CreateClubData {
 }
 
 class ClubService {
-  private useMockData = environment.useMockData;
+  private useMockData = environment.mock.useMockApi;
 
   /**
    * Get all clubs
@@ -144,7 +144,7 @@ class ClubService {
    * Mock create club implementation
    */
   private async mockCreateClub(data: CreateClubData): Promise<Club> {
-    await this.sleep(TIMING.MOCK_API.NORMAL); // Longer delay for create operations
+    await this.sleep(MOCK_DELAY.NORMAL); // Longer delay for create operations
 
     const newClub: Club = {
       id: String(mockClubs.length + 1),
@@ -185,7 +185,7 @@ class ClubService {
    * Mock update club implementation
    */
   private async mockUpdateClub(clubId: string, data: Partial<Club>): Promise<Club> {
-    await this.sleep(TIMING.MOCK_API.FAST);
+    await this.sleep(MOCK_DELAY.FAST);
 
     const clubIndex = mockClubs.findIndex((c) => c.id === clubId);
     if (clubIndex === -1) {
@@ -226,7 +226,7 @@ class ClubService {
    * Mock delete club implementation
    */
   private async mockDeleteClub(clubId: string): Promise<void> {
-    await this.sleep(TIMING.MOCK_API.FAST);
+    await this.sleep(MOCK_DELAY.FAST);
 
     const clubIndex = mockClubs.findIndex((c) => c.id === clubId);
     if (clubIndex !== -1) {
@@ -260,7 +260,7 @@ class ClubService {
    * Mock join club implementation
    */
   private async mockJoinClub(clubId: string): Promise<void> {
-    await this.sleep(TIMING.MOCK_API.FAST);
+    await this.sleep(MOCK_DELAY.FAST);
     // This would update the user's clubId in a real scenario
     logger.info(LOG_MESSAGES.CLUB.MOCK_JOINED, { clubId });
   }
@@ -288,7 +288,7 @@ class ClubService {
    * Mock leave club implementation
    */
   private async mockLeaveClub(clubId: string): Promise<void> {
-    await this.sleep(TIMING.MOCK_API.FAST);
+    await this.sleep(MOCK_DELAY.FAST);
     logger.info(LOG_MESSAGES.CLUB.MOCK_LEFT, { clubId });
   }
 

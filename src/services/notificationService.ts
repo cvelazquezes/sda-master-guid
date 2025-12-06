@@ -8,7 +8,7 @@ import { apiService } from './api';
 import { environment } from '../config/environment';
 import { logger } from '../utils/logger';
 import { MemberBalance, User } from '../types';
-import { TIMING, ALERT_BUTTON_STYLE, EMPTY_VALUE } from '../shared/constants';
+import { DEBOUNCE, ALERT_BUTTON_STYLE, EMPTY_VALUE } from '../shared/constants';
 import { ID_GENERATION } from '../shared/constants/numbers';
 import { NUMERIC } from '../shared/constants/validation';
 import { LOG_MESSAGES } from '../shared/constants/logMessages';
@@ -44,7 +44,7 @@ interface ScheduleNotificationRequest {
 }
 
 class NotificationService {
-  private useMockData = environment.useMockData;
+  private useMockData = environment.mock.useMockApi;
 
   /**
    * Send WhatsApp notification with payment reminder
@@ -333,7 +333,7 @@ class NotificationService {
 
       // Simulate progress for UI
       for (let i = 0; i < users.length; i++) {
-        await new Promise((resolve) => setTimeout(resolve, TIMING.DEBOUNCE.FAST));
+        await new Promise((resolve) => setTimeout(resolve, DEBOUNCE.FAST));
         onProgress?.(i + 1, users.length);
       }
 
@@ -372,7 +372,7 @@ class NotificationService {
         }
 
         // Small delay between messages to avoid rate limiting
-        await new Promise((resolve) => setTimeout(resolve, TIMING.DEBOUNCE.SLOW));
+        await new Promise((resolve) => setTimeout(resolve, DEBOUNCE.SLOW));
 
         onProgress?.(i + 1, users.length);
       }

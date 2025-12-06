@@ -41,7 +41,7 @@ interface CreateCustomChargeRequest {
 }
 
 class PaymentService {
-  private useMockData = environment.useMockData;
+  private useMockData = environment.mock.useMockApi;
   // ============================================
   // Storage Management
   // ============================================

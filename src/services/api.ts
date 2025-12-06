@@ -19,8 +19,10 @@ import {
 import { apiRateLimiter } from '../shared/services/rateLimit';
 import { HTTP_STATUS } from '../shared/constants/http';
 import { MATH, ID_GENERATION } from '../shared/constants/numbers';
+import { TIMEOUT } from '../shared/constants/timing';
 
-// Constants - API_TIMEOUT_MS defined in shared config
+// Constants
+const API_TIMEOUT_MS = TIMEOUT.API_DEFAULT;
 
 // Security headers following OWASP best practices
 const SECURITY_HEADERS = {
@@ -36,7 +38,7 @@ const SECURITY_HEADERS = {
  */
 const createApiClient = (): AxiosInstance => {
   const client = axios.create({
-    baseURL: environment.apiUrl,
+    baseURL: environment.api.base,
     timeout: API_TIMEOUT_MS,
     headers: {
       'Content-Type': 'application/json',
