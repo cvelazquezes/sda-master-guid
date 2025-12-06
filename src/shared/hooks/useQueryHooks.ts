@@ -160,9 +160,6 @@ export function useMatch(
  * ```
  */
 export function useUpdateMatch(): ReturnType<typeof useMutation> {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const queryClient = useQueryClient();
-
   return useMutation(
     ({ matchId, ...data }: { matchId: string; status?: string; [key: string]: unknown }) =>
       matchService.updateMatchStatus(matchId, data.status),
