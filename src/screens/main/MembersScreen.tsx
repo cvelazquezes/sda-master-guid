@@ -21,7 +21,7 @@ import {
   EXTERNAL_URLS,
   ICONS,
   MESSAGES,
-  VALIDATION,
+  PHONE,
   dimensionValues,
   flexValues,
 } from '../../shared/constants';
@@ -182,10 +182,7 @@ const contactMember = (member: User, message: string): void => {
     Alert.alert(MESSAGES.TITLES.NO_WHATSAPP, MESSAGES.INFO.NO_WHATSAPP_PROVIDED);
     return;
   }
-  const cleanNumber = member.whatsappNumber.replace(
-    VALIDATION.WHATSAPP.STRIP_NON_DIGITS,
-    EMPTY_VALUE
-  );
+  const cleanNumber = member.whatsappNumber.replace(PHONE.STRIP_NON_DIGITS, EMPTY_VALUE);
   const url = `${EXTERNAL_URLS.WHATSAPP_BASE}${cleanNumber}?text=${encodeURIComponent(message)}`;
   Linking.openURL(url).catch(() => {
     Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.COULD_NOT_OPEN_WHATSAPP);

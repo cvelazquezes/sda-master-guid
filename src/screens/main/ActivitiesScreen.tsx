@@ -27,7 +27,7 @@ import {
   EXTERNAL_URLS,
   ICONS,
   MESSAGES,
-  VALIDATION,
+  PHONE,
   flexValues,
 } from '../../shared/constants';
 
@@ -152,10 +152,7 @@ function createContactHandler(t: TranslationFn): (participant: User) => void {
       return;
     }
     const message = t('screens.activities.whatsappMessageSingle', { name: participant.name });
-    const cleanNum = participant.whatsappNumber.replace(
-      VALIDATION.WHATSAPP.STRIP_NON_DIGITS,
-      EMPTY_VALUE
-    );
+    const cleanNum = participant.whatsappNumber.replace(PHONE.STRIP_NON_DIGITS, EMPTY_VALUE);
     const url = `${EXTERNAL_URLS.WHATSAPP_BASE}${cleanNum}?text=${encodeURIComponent(message)}`;
     openWhatsApp(url);
   };
@@ -172,7 +169,7 @@ function createGroupChatHandler(
     }
     const phoneNumbers = participants
       .filter((p) => p.whatsappNumber && p.id !== currentUserId)
-      .map((p) => p.whatsappNumber.replace(VALIDATION.WHATSAPP.STRIP_NON_DIGITS, EMPTY_VALUE))
+      .map((p) => p.whatsappNumber.replace(PHONE.STRIP_NON_DIGITS, EMPTY_VALUE))
       .join(',');
     if (phoneNumbers) {
       const message = t('screens.activities.whatsappMessageGroup');

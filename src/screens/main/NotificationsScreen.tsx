@@ -7,7 +7,8 @@ import { Text } from '../../shared/components';
 import { useAuth } from '../../context/AuthContext';
 import { mobileTypography, mobileIconSizes, layoutConstants } from '../../shared/theme';
 import { designTokens } from '../../shared/theme/designTokens';
-import { TIMING } from '../../shared/constants/timing';
+import { RELATIVE_TIME } from '../../shared/constants/timing';
+import { MS } from '../../shared/constants/numbers';
 import {
   ICONS,
   NOTIFICATION_TYPE,
@@ -18,7 +19,6 @@ import {
   flexValues,
   shadowOffsetValues,
 } from '../../shared/constants';
-import { TIME_MULTIPLIER, MATH } from '../../shared/constants/http';
 
 type NotificationType = (typeof NOTIFICATION_TYPE)[keyof typeof NOTIFICATION_TYPE];
 
@@ -56,18 +56,26 @@ const getNotificationColor = (type: NotificationType): string => {
 
 type TranslationFn = ReturnType<typeof useTranslation>['t'];
 
+// Time multipliers for mock data
+/* eslint-disable no-magic-numbers */
+const TIME_MULTIPLIER = {
+  TWO: 2,
+  THREE: 3,
+} as const;
+/* eslint-enable no-magic-numbers */
+
 const formatTimestamp = (date: Date, t: TranslationFn): string => {
   const diffMs = Date.now() - date.getTime();
-  const diffMins = Math.floor(diffMs / TIMING.MS_PER.MINUTE);
-  const diffHours = Math.floor(diffMs / TIMING.MS_PER.HOUR);
-  const diffDays = Math.floor(diffMs / TIMING.MS_PER.DAY);
-  if (diffMins < TIMING.RELATIVE_TIME.MINUTES) {
+  const diffMins = Math.floor(diffMs / MS.MINUTE);
+  const diffHours = Math.floor(diffMs / MS.HOUR);
+  const diffDays = Math.floor(diffMs / MS.DAY);
+  if (diffMins < RELATIVE_TIME.MINUTES_THRESHOLD) {
     return t('screens.notifications.timeAgo.minutes', { count: diffMins });
   }
-  if (diffHours < TIMING.RELATIVE_TIME.HOURS) {
+  if (diffHours < RELATIVE_TIME.HOURS_THRESHOLD) {
     return t('screens.notifications.timeAgo.hours', { count: diffHours });
   }
-  if (diffDays < TIMING.RELATIVE_TIME.DAYS) {
+  if (diffDays < RELATIVE_TIME.DAYS_THRESHOLD) {
     return t('screens.notifications.timeAgo.days', { count: diffDays });
   }
   return date.toLocaleDateString();
@@ -127,7 +135,7 @@ const createMockNotifications = (t: TranslationFn): Notification[] => {
       type: NOTIFICATION_TYPE.ACTIVITY,
       title: t('screens.notifications.mockTitles.newActivity'),
       message: t('screens.notifications.mockMessages.newActivity'),
-      timestamp: new Date(now - TIMING.MS_PER.HOUR * TIME_MULTIPLIER.TWO),
+      timestamp: new Date(now - MS.HOUR * TIME_MULTIPLIER.TWO),
       read: false,
     },
     {
@@ -135,7 +143,7 @@ const createMockNotifications = (t: TranslationFn): Notification[] => {
       type: NOTIFICATION_TYPE.FEE,
       title: t('screens.notifications.mockTitles.paymentDue'),
       message: t('screens.notifications.mockMessages.paymentDue'),
-      timestamp: new Date(now - TIMING.MS_PER.DAY),
+      timestamp: new Date(now - MS.DAY),
       read: false,
     },
     {
@@ -143,7 +151,7 @@ const createMockNotifications = (t: TranslationFn): Notification[] => {
       type: NOTIFICATION_TYPE.CLUB,
       title: t('screens.notifications.mockTitles.clubUpdate'),
       message: t('screens.notifications.mockMessages.clubUpdate'),
-      timestamp: new Date(now - TIMING.MS_PER.DAY * TIME_MULTIPLIER.TWO),
+      timestamp: new Date(now - MS.DAY * TIME_MULTIPLIER.TWO),
       read: true,
     },
     {
@@ -151,7 +159,7 @@ const createMockNotifications = (t: TranslationFn): Notification[] => {
       type: NOTIFICATION_TYPE.SYSTEM,
       title: t('screens.notifications.mockTitles.welcome'),
       message: t('screens.notifications.mockMessages.welcome'),
-      timestamp: new Date(now - TIMING.MS_PER.DAY * TIME_MULTIPLIER.THREE),
+      timestamp: new Date(now - MS.DAY * TIME_MULTIPLIER.THREE),
       read: true,
     },
   ];
