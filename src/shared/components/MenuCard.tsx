@@ -5,11 +5,12 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
-import { mobileTypography, mobileFontSizes, designTokens, layoutConstants } from '../theme';
+import { designTokens, layoutConstants } from '../theme';
 import { A11Y_ROLE, ICONS, TEXT_LINES, TOUCH_OPACITY, flexValues } from '../constants';
+import { Text } from './Text';
 
 interface MenuCardProps {
   title: string;
@@ -75,22 +76,18 @@ export const MenuCard: React.FC<MenuCardProps> = ({
       {/* Content */}
       <View style={styles.content}>
         <View style={styles.titleRow}>
-          <Text
-            style={[styles.title, { color: colors.textPrimary }]}
-            numberOfLines={TEXT_LINES.single}
-          >
+          <Text variant="h4" numberOfLines={TEXT_LINES.single} style={styles.title}>
             {title}
           </Text>
           {badge !== undefined && (
             <View style={[styles.badge, { backgroundColor: iconColor }]}>
-              <Text style={styles.badgeText}>{badge}</Text>
+              <Text variant="caption" weight="bold" color="onPrimary">
+                {badge}
+              </Text>
             </View>
           )}
         </View>
-        <Text
-          style={[styles.description, { color: colors.textSecondary }]}
-          numberOfLines={TEXT_LINES.double}
-        >
+        <Text variant="bodySmall" color="secondary" numberOfLines={TEXT_LINES.double}>
           {description}
         </Text>
       </View>
@@ -137,11 +134,7 @@ const styles = StyleSheet.create({
     marginBottom: designTokens.spacing.xs,
   },
   title: {
-    ...mobileTypography.heading4,
     flex: flexValues.one,
-  },
-  description: {
-    ...mobileTypography.bodySmall,
   },
   badge: {
     paddingHorizontal: designTokens.spacing.sm,
@@ -151,11 +144,6 @@ const styles = StyleSheet.create({
     height: designTokens.componentSizes.tabBarIndicator.lg,
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
-  },
-  badgeText: {
-    ...mobileTypography.captionBold,
-    color: designTokens.colors.white,
-    fontSize: mobileFontSizes.xs,
   },
   chevron: {
     flexShrink: flexValues.shrinkDisabled,

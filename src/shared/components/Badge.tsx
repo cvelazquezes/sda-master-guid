@@ -1,17 +1,23 @@
 /**
- * Badge Component
- * Reusable badge component for status indicators, roles, and labels
- * Supports dynamic theming (light/dark mode)
+ * Badge Primitive Component
+ *
+ * Reusable badge component for status indicators, roles, and labels.
+ * Uses theme-aware status/role colors that automatically switch for light/dark mode.
+ *
+ * @example
+ * <Badge label="Active" status="active" />
+ * <Badge label="Admin" role="admin" />
+ * <Badge label={t('badge.new')} variant="primary" />
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { View, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { designTokens } from '../theme/designTokens';
-import { statusColors, roleColors } from '../theme/sdaColors';
 import { mobileFontSizes, layoutConstants } from '../theme';
-import { TEXT_LINES, COMPONENT_VARIANT, COMPONENT_SIZE, A11Y_ROLE } from '../constants';
+import { TEXT_LINES, COMPONENT_VARIANT, COMPONENT_SIZE, A11Y_ROLE, ICONS } from '../constants';
+import { Text } from './Text';
 
 type BadgeVariant =
   | typeof COMPONENT_VARIANT.primary
@@ -23,8 +29,20 @@ type BadgeVariant =
   | typeof COMPONENT_VARIANT.info
   | typeof COMPONENT_VARIANT.neutral;
 type BadgeSize = typeof COMPONENT_SIZE.sm | typeof COMPONENT_SIZE.md | typeof COMPONENT_SIZE.lg;
-type StatusType = keyof typeof statusColors;
-type RoleType = keyof typeof roleColors;
+
+// Status types match the keys in statusColors (from ThemeContext)
+type StatusType =
+  | 'active'
+  | 'inactive'
+  | 'paused'
+  | 'pending'
+  | 'completed'
+  | 'scheduled'
+  | 'skipped'
+  | 'cancelled';
+
+// Role types match the keys in roleColors (from ThemeContext)
+type RoleType = 'admin' | 'club_admin' | 'user';
 
 interface BadgeProps {
   // Content
@@ -60,23 +78,32 @@ export const Badge: React.FC<BadgeProps> = ({
   style,
   testID,
 }) => {
-  const { colors: themeColors } = useTheme();
+  // Get theme-aware colors from context (includes statusColors and roleColors)
+  const {
+    colors: themeColors,
+    statusColors: themeStatusColors,
+    roleColors: themeRoleColors,
+  } = useTheme();
 
-  // Determine colors based on status/role or variant (using theme colors)
+  // Determine colors based on status/role or variant (using theme-aware colors)
   const getColors = (): { bg: string; text: string; border: string } => {
+    // Use theme-aware status colors
     if (status) {
+      const statusConfig = themeStatusColors[status];
       return {
-        bg: statusColors[status].light,
-        text: statusColors[status].text,
-        border: statusColors[status].primary,
+        bg: statusConfig.light,
+        text: statusConfig.text,
+        border: statusConfig.primary,
       };
     }
 
+    // Use theme-aware role colors
     if (role) {
+      const roleConfig = themeRoleColors[role];
       return {
-        bg: roleColors[role].light,
-        text: roleColors[role].text,
-        border: roleColors[role].primary,
+        bg: roleConfig.light,
+        text: roleConfig.text,
+        border: roleConfig.primary,
       };
     }
 
@@ -208,8 +235,11 @@ export const Badge: React.FC<BadgeProps> = ({
         />
       )}
       <Text
-        style={[styles.text, sizeStyles.text, { color: finalTextColor }]}
+        variant="caption"
+        weight="bold"
+        uppercase
         numberOfLines={TEXT_LINES.single}
+        style={[sizeStyles.text, { color: finalTextColor }]}
       >
         {label}
       </Text>
@@ -227,11 +257,6 @@ const styles = StyleSheet.create({
   },
   icon: {
     marginRight: designTokens.spacing.xs,
-  },
-  text: {
-    fontWeight: designTokens.badge.fontWeight,
-    textTransform: designTokens.badge.textTransform,
-    letterSpacing: designTokens.badge.letterSpacing,
   },
 });
 

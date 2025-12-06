@@ -1,11 +1,13 @@
 /**
  * IconButton Component
  * Reusable icon button component
+ * Supports dynamic theming (light/dark mode)
  */
 
 import React from 'react';
 import { TouchableOpacity, StyleSheet, ViewStyle, StyleProp } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTheme } from '../../contexts/ThemeContext';
 import { designTokens, layoutConstants } from '../theme';
 import {
   A11Y_ROLE,
@@ -13,6 +15,7 @@ import {
   COMPONENT_VARIANT,
   TOUCH_OPACITY,
   dimensionValues,
+  ICONS,
 } from '../constants';
 
 type IconButtonVariant =
@@ -53,6 +56,8 @@ export const IconButton: React.FC<IconButtonProps> = ({
   accessibilityLabel,
   accessibilityHint,
 }) => {
+  const { colors } = useTheme();
+
   const getSizeStyles = (): { containerSize: number; iconSize: number } => {
     switch (size) {
       case COMPONENT_SIZE.sm:
@@ -77,28 +82,28 @@ export const IconButton: React.FC<IconButtonProps> = ({
     switch (variant) {
       case COMPONENT_VARIANT.primary:
         return {
-          backgroundColor: designTokens.colors.primary,
-          color: designTokens.colors.textOnPrimary,
+          backgroundColor: colors.primary,
+          color: colors.textOnPrimary,
         };
       case COMPONENT_VARIANT.secondary:
         return {
-          backgroundColor: designTokens.colors.secondary,
-          color: designTokens.colors.textOnSecondary,
+          backgroundColor: colors.secondary,
+          color: colors.textOnSecondary || colors.textOnPrimary,
         };
       case COMPONENT_VARIANT.accent:
         return {
-          backgroundColor: designTokens.colors.accent,
-          color: designTokens.colors.textOnAccent,
+          backgroundColor: colors.accent,
+          color: colors.textOnAccent || colors.textPrimary,
         };
       case COMPONENT_VARIANT.danger:
         return {
-          backgroundColor: designTokens.colors.error,
-          color: designTokens.colors.textInverse,
+          backgroundColor: colors.error,
+          color: colors.textInverse,
         };
       default:
         return {
-          backgroundColor: designTokens.colors.transparent,
-          color: designTokens.colors.textPrimary,
+          backgroundColor: 'transparent',
+          color: colors.textPrimary,
         };
     }
   };
@@ -134,7 +139,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
       <MaterialCommunityIcons
         name={icon as typeof ICONS.CHECK}
         size={sizeStyles.iconSize}
-        color={disabled ? designTokens.colors.textDisabled : finalColor}
+        color={disabled ? colors.textDisabled : finalColor}
       />
     </TouchableOpacity>
   );

@@ -4,12 +4,13 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
-import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../theme';
+import { mobileIconSizes, designTokens, layoutConstants } from '../theme';
 import { A11Y_ROLE, ICONS, TEXT_LINES, flexValues } from '../constants';
 import { SPACING, MATH } from '../constants/numbers';
+import { Text } from './Text';
 
 interface StandardPickerProps {
   label?: string;
@@ -61,9 +62,9 @@ export const StandardPicker: React.FC<StandardPickerProps> = ({
       {/* Label */}
       {label && (
         <View style={styles.labelContainer}>
-          <Text style={[styles.label, { color: colors.textPrimary }]}>
+          <Text variant="label" weight="bold">
             {label}
-            {required && <Text style={{ color: colors.error }}> *</Text>}
+            {required && <Text color="error"> *</Text>}
           </Text>
         </View>
       )}
@@ -90,12 +91,10 @@ export const StandardPicker: React.FC<StandardPickerProps> = ({
 
         {/* Value/Placeholder */}
         <Text
-          style={[
-            styles.pickerText,
-            { color: colors.textPrimary },
-            !hasValue && { color: colors.textTertiary },
-          ]}
+          variant="bodyLarge"
+          color={hasValue ? 'primary' : 'tertiary'}
           numberOfLines={TEXT_LINES.single}
+          style={styles.pickerText}
         >
           {hasValue ? value : displayPlaceholder}
         </Text>
@@ -117,7 +116,9 @@ export const StandardPicker: React.FC<StandardPickerProps> = ({
             color={colors.error}
             style={styles.messageIcon}
           />
-          <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>
+          <Text variant="caption" color="error" style={styles.errorText}>
+            {error}
+          </Text>
         </View>
       )}
     </View>
@@ -130,9 +131,6 @@ const styles = StyleSheet.create({
   },
   labelContainer: {
     marginBottom: designTokens.spacing.sm,
-  },
-  label: {
-    ...mobileTypography.labelBold,
   },
   pickerContainer: {
     flexDirection: layoutConstants.flexDirection.row,
@@ -147,7 +145,6 @@ const styles = StyleSheet.create({
   },
   pickerText: {
     flex: flexValues.one,
-    ...mobileTypography.bodyLarge,
   },
   messageContainer: {
     flexDirection: layoutConstants.flexDirection.row,
@@ -159,7 +156,6 @@ const styles = StyleSheet.create({
     marginRight: designTokens.spacing.xs,
   },
   errorText: {
-    ...mobileTypography.caption,
     flex: flexValues.one,
   },
 });

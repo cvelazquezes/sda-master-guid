@@ -5,12 +5,13 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { StandardModal } from './StandardModal';
-import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../theme';
+import { mobileIconSizes, designTokens, layoutConstants } from '../theme';
 import { A11Y_ROLE, ICONS, TOUCH_OPACITY, dimensionValues, flexValues } from '../constants';
+import { Text } from './Text';
 
 export interface SelectionItem {
   id: string;
@@ -93,28 +94,22 @@ export const SelectionModal: React.FC<SelectionModalProps> = ({
 
         {item.avatar && (
           <View style={[styles.avatar, { backgroundColor: iconColor }]}>
-            <Text style={styles.avatarText}>{item.avatar}</Text>
+            <Text variant="body" weight="bold" color="onPrimary">
+              {item.avatar}
+            </Text>
           </View>
         )}
 
         {/* Content */}
         <View style={styles.itemContent}>
-          <Text
-            style={[
-              styles.itemTitle,
-              { color: colors.textPrimary },
-              isDisabled && { color: colors.textTertiary },
-            ]}
-          >
+          <Text variant="body" weight="bold" color={isDisabled ? 'tertiary' : 'primary'}>
             {item.title}
           </Text>
           {item.subtitle && (
             <Text
-              style={[
-                styles.itemSubtitle,
-                { color: colors.textSecondary },
-                isDisabled && { color: colors.textTertiary },
-              ]}
+              variant="caption"
+              color={isDisabled ? 'tertiary' : 'secondary'}
+              style={styles.itemSubtitle}
             >
               {item.subtitle}
             </Text>
@@ -128,7 +123,11 @@ export const SelectionModal: React.FC<SelectionModalProps> = ({
                 size={mobileIconSizes.tiny}
                 color={item.badgeColor || colors.primary}
               />
-              <Text style={[styles.badgeText, { color: item.badgeColor || colors.primary }]}>
+              <Text
+                variant="caption"
+                weight="semibold"
+                style={{ color: item.badgeColor || colors.primary }}
+              >
                 {item.badge}
               </Text>
             </View>
@@ -162,7 +161,7 @@ export const SelectionModal: React.FC<SelectionModalProps> = ({
             size={designTokens.iconSize['3xl']}
             color={colors.textTertiary}
           />
-          <Text style={[styles.emptyText, { color: colors.textTertiary }]}>
+          <Text variant="body" color="tertiary" align="center" style={styles.emptyText}>
             {displayEmptyMessage}
           </Text>
         </View>
@@ -213,18 +212,11 @@ const styles = StyleSheet.create({
     alignItems: layoutConstants.alignItems.center,
     marginRight: designTokens.spacing.md,
   },
-  avatarText: {
-    ...mobileTypography.bodyMediumBold,
-  },
   itemContent: {
     flex: flexValues.one,
     marginRight: designTokens.spacing.md,
   },
-  itemTitle: {
-    ...mobileTypography.bodyMediumBold,
-  },
   itemSubtitle: {
-    ...mobileTypography.caption,
     marginTop: designTokens.spacing.xs,
   },
   badge: {
@@ -237,18 +229,12 @@ const styles = StyleSheet.create({
     marginTop: designTokens.spacing.sm,
     alignSelf: layoutConstants.alignSelf.flexStart,
   },
-  badgeText: {
-    ...mobileTypography.caption,
-    fontWeight: designTokens.fontWeight.semibold,
-  },
   emptyContainer: {
     alignItems: layoutConstants.alignItems.center,
     justifyContent: layoutConstants.justifyContent.center,
     padding: designTokens.spacing['6xl'],
   },
   emptyText: {
-    ...mobileTypography.bodyMedium,
     marginTop: designTokens.spacing.lg,
-    textAlign: layoutConstants.textAlign.center,
   },
 });

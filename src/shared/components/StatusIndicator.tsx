@@ -1,21 +1,38 @@
 /**
- * StatusIndicator Component
- * Reusable component for displaying status with icon and label
+ * StatusIndicator Primitive Component
+ *
+ * Reusable component for displaying status with icon and label.
+ * Uses theme-aware status colors that automatically switch for light/dark mode.
+ *
+ * @example
+ * <StatusIndicator status="active" />
+ * <StatusIndicator status="pending" label={t('status.pending')} />
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { statusColors } from '../theme/sdaColors';
-import { mobileTypography, mobileFontSizes } from '../theme/mobileTypography';
+import { useTheme } from '../../contexts/ThemeContext';
+import { mobileFontSizes } from '../theme/mobileTypography';
 import { designTokens } from '../theme/designTokens';
 import { layoutConstants } from '../theme';
-import { TEXT_LINES, COMPONENT_SIZE, A11Y_ROLE } from '../constants';
+import { TEXT_LINES, COMPONENT_SIZE, A11Y_ROLE, ICONS } from '../constants';
+import { Text } from './Text';
 
-type StatusType = keyof typeof statusColors;
+// Status types match the keys in statusColors
+type StatusType =
+  | 'active'
+  | 'inactive'
+  | 'paused'
+  | 'pending'
+  | 'completed'
+  | 'scheduled'
+  | 'skipped'
+  | 'cancelled';
+
 type StatusSize = typeof COMPONENT_SIZE.sm | typeof COMPONENT_SIZE.md | typeof COMPONENT_SIZE.lg;
 
-interface StatusIndicatorProps {
+export interface StatusIndicatorProps {
   status: StatusType;
   label?: string;
   showIcon?: boolean;
@@ -37,6 +54,8 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
   testID,
   accessibilityLabel,
 }) => {
+  // Get theme-aware status colors from context
+  const { statusColors } = useTheme();
   const statusConfig = statusColors[status];
 
   const displayLabel = label || status.charAt(0).toUpperCase() + status.slice(1);
@@ -83,14 +102,10 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
       )}
       {showLabel && (
         <Text
-          style={[
-            styles.label,
-            {
-              color: statusConfig.text,
-              fontSize: sizeStyles.fontSize,
-            },
-          ]}
+          variant="label"
+          weight="bold"
           numberOfLines={TEXT_LINES.single}
+          style={{ color: statusConfig.text, fontSize: sizeStyles.fontSize }}
         >
           {displayLabel}
         </Text>
@@ -104,9 +119,6 @@ const styles = StyleSheet.create({
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
     alignSelf: layoutConstants.alignSelf.flexStart,
-  },
-  label: {
-    ...mobileTypography.labelBold,
   },
 });
 

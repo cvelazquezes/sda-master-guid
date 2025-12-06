@@ -54,6 +54,9 @@ export const Card: React.FC<CardProps> = ({
 }) => {
   const { colors, isDark } = useTheme();
 
+  // Get shadow color from theme (falls back to black if not defined)
+  const shadowColor = colors.shadow || '#000000';
+
   const getVariantStyle = (): ViewStyle => {
     const baseStyle: ViewStyle = {
       backgroundColor: colors.surface,
@@ -66,7 +69,7 @@ export const Card: React.FC<CardProps> = ({
       case COMPONENT_VARIANT.elevated:
         return {
           ...baseStyle,
-          shadowColor: designTokens.colors.black,
+          shadowColor,
           shadowOffset: { width: 0, height: designTokens.spacing.xs },
           shadowOpacity: isDark
             ? designTokens.shadowConfig.darkStrong.opacity
@@ -79,7 +82,7 @@ export const Card: React.FC<CardProps> = ({
           ...baseStyle,
           borderWidth: designTokens.card.borderWidth || designTokens.borderWidth.thin,
           borderColor: colors.border,
-          shadowColor: designTokens.colors.black,
+          shadowColor,
           shadowOffset: { width: 0, height: designTokens.borderWidth.thin },
           shadowOpacity: isDark
             ? designTokens.shadowConfig.darkSubtle.opacity
@@ -90,12 +93,12 @@ export const Card: React.FC<CardProps> = ({
       case COMPONENT_VARIANT.flat:
         return {
           ...baseStyle,
-          backgroundColor: designTokens.colors.transparent,
+          backgroundColor: 'transparent',
         };
       default:
         return {
           ...baseStyle,
-          shadowColor: designTokens.colors.black,
+          shadowColor,
           shadowOffset: { width: 0, height: designTokens.borderWidth.thick },
           shadowOpacity: isDark
             ? designTokens.shadowConfig.dark.opacity

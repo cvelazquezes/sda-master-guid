@@ -6,14 +6,14 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { View, Text, StyleSheet, ViewToken } from 'react-native';
+import { View, StyleSheet, ViewToken } from 'react-native';
 import { FlashList, ListRenderItem } from '@shopify/flash-list';
 import { useTheme, layoutConstants } from '../theme';
-import { mobileFontSizes } from '../theme/mobileTypography';
 import { designTokens } from '../theme/designTokens';
 import { logger } from '../utils/logger';
 import { LIST_THRESHOLDS, flexValues } from '../constants';
 import { MATH } from '../constants/numbers';
+import { Text } from './Text';
 
 // ============================================================================
 // FlashList Wrapper with Best Practices
@@ -128,11 +128,15 @@ const UserListItem = memo<UserListItemProps>(function UserListItem({ user, onPre
       ]}
     >
       <View style={[styles.avatar, { backgroundColor: colors.info }]}>
-        <Text style={{ color: theme.colors.onPrimary }}>{user.name.charAt(0).toUpperCase()}</Text>
+        <Text variant="body" color="onPrimary">
+          {user.name.charAt(0).toUpperCase()}
+        </Text>
       </View>
       <View style={styles.userInfo}>
-        <Text style={[styles.userName, { color: theme.colors.onSurface }]}>{user.name}</Text>
-        <Text style={[styles.userEmail, { color: theme.colors.onSurfaceVariant }]}>
+        <Text variant="body" weight="semibold" style={styles.userName}>
+          {user.name}
+        </Text>
+        <Text variant="bodySmall" color="secondary">
           {user.email}
         </Text>
       </View>
@@ -172,7 +176,6 @@ export const OptimizedUserList = memo<OptimizedUserListProps>(function Optimized
   onRefresh,
   emptyMessage,
 }) {
-  const { colors } = useTheme();
   const renderItem = useCallback<ListRenderItem<User>>(
     ({ item }) => <UserListItem user={item} onPress={onUserPress} />,
     [onUserPress]
@@ -183,10 +186,12 @@ export const OptimizedUserList = memo<OptimizedUserListProps>(function Optimized
   const ListEmptyComponent = useCallback(
     () => (
       <View style={styles.emptyContainer}>
-        <Text style={[styles.emptyText, { color: colors.textSecondary }]}>{emptyMessage}</Text>
+        <Text variant="bodyLarge" color="secondary">
+          {emptyMessage}
+        </Text>
       </View>
     ),
-    [colors.textSecondary, emptyMessage]
+    [emptyMessage]
   );
 
   return (
@@ -292,20 +297,12 @@ const styles = StyleSheet.create({
     flex: flexValues.one,
   },
   userName: {
-    fontSize: mobileFontSizes.lg,
-    fontWeight: designTokens.fontWeight.semibold,
     marginBottom: designTokens.spacing.xs,
-  },
-  userEmail: {
-    fontSize: mobileFontSizes.sm,
   },
   emptyContainer: {
     flex: flexValues.one,
     alignItems: layoutConstants.alignItems.center,
     justifyContent: layoutConstants.justifyContent.center,
     padding: designTokens.spacing['4xl'],
-  },
-  emptyText: {
-    fontSize: mobileFontSizes.lg,
   },
 });

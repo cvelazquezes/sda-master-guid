@@ -8,6 +8,7 @@ import React from 'react';
 import { View, TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from './Text';
+import { useTheme } from '../../contexts/ThemeContext';
 import { designTokens, layoutConstants } from '../theme';
 import { ICONS } from '../constants';
 
@@ -52,6 +53,8 @@ export function HierarchyFilterItem({
   disabled = false,
   style,
 }: HierarchyFilterItemProps): React.JSX.Element | null {
+  const { colors: themeColors } = useTheme();
+
   // If no options, don't render anything
   if (options.length === 0) {
     return null;
@@ -60,15 +63,19 @@ export function HierarchyFilterItem({
   // Single option - show as auto-selected
   if (options.length === 1) {
     return (
-      <View style={[styles.hierarchyItem, style]}>
+      <View style={[styles.hierarchyItem, { backgroundColor: themeColors.surfaceLight }, style]}>
         <MaterialCommunityIcons
           name={icon}
           size={designTokens.iconSize.sm}
           color={colors.primary}
         />
         <View style={styles.hierarchyInfo}>
-          <Text style={[styles.hierarchyLabel, { color: colors.textSecondary }]}>{label}</Text>
-          <Text style={[styles.hierarchyValue, { color: colors.textPrimary }]}>{options[0]}</Text>
+          <Text variant="caption" color="secondary">
+            {label}
+          </Text>
+          <Text variant="bodySmall" weight="semibold">
+            {options[0]}
+          </Text>
         </View>
         <MaterialCommunityIcons
           name={ICONS.CHECK_CIRCLE as IconName}
@@ -82,7 +89,9 @@ export function HierarchyFilterItem({
   // Multiple options - show selectable list
   return (
     <View style={[styles.filterSection, style]}>
-      <Text style={[styles.filterLabel, { color: colors.textSecondary }]}>{label}</Text>
+      <Text variant="label" color="secondary" style={styles.filterLabel}>
+        {label}
+      </Text>
       {options.map((option) => {
         const isSelected = selectedValue === option;
         return (
@@ -91,18 +100,19 @@ export function HierarchyFilterItem({
             style={[
               styles.filterOption,
               { borderColor: colors.border },
-              isSelected && [styles.filterOptionActive, { borderColor: colors.primary }],
+              isSelected && [
+                styles.filterOptionActive,
+                { borderColor: colors.primary, backgroundColor: `${themeColors.primary}10` },
+              ],
             ]}
             onPress={() => !disabled && onSelect(option)}
             disabled={disabled}
             activeOpacity={0.7}
           >
             <Text
-              style={[
-                styles.filterOptionText,
-                { color: colors.textPrimary },
-                isSelected && [styles.filterOptionTextActive, { color: colors.primary }],
-              ]}
+              variant="bodySmall"
+              weight={isSelected ? 'semibold' : 'normal'}
+              style={{ color: isSelected ? colors.primary : colors.textPrimary }}
             >
               {option}
             </Text>
@@ -127,26 +137,16 @@ const styles = StyleSheet.create({
     padding: designTokens.spacing.md,
     marginBottom: designTokens.spacing.sm,
     borderRadius: designTokens.borderRadius.md,
-    backgroundColor: designTokens.colors.backgroundSecondary,
+    // backgroundColor set dynamically via useTheme
   },
   hierarchyInfo: {
     flex: 1,
     marginLeft: designTokens.spacing.sm,
   },
-  hierarchyLabel: {
-    fontSize: designTokens.typography.fontSizes.xs,
-    marginBottom: designTokens.spacing.xxs,
-  },
-  hierarchyValue: {
-    fontSize: designTokens.typography.fontSizes.sm,
-    fontWeight: '600',
-  },
   filterSection: {
     marginBottom: designTokens.spacing.md,
   },
   filterLabel: {
-    fontSize: designTokens.typography.fontSizes.sm,
-    fontWeight: '500',
     marginBottom: designTokens.spacing.xs,
   },
   filterOption: {
@@ -159,13 +159,7 @@ const styles = StyleSheet.create({
     marginBottom: designTokens.spacing.xs,
   },
   filterOptionActive: {
-    backgroundColor: `${designTokens.colors.primary}10`,
-  },
-  filterOptionText: {
-    fontSize: designTokens.typography.fontSizes.sm,
-  },
-  filterOptionTextActive: {
-    fontWeight: '600',
+    // backgroundColor set dynamically via useTheme
   },
 });
 

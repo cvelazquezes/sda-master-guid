@@ -6,13 +6,13 @@
  */
 
 import React, { Suspense, ComponentType, LazyExoticComponent, Component, lazy } from 'react';
-import { View, ActivityIndicator, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTheme, layoutConstants } from '../theme';
-import { mobileFontSizes } from '../theme/mobileTypography';
 import { designTokens } from '../theme/designTokens';
 import { LOG_MESSAGES } from '../constants/logMessages';
 import { logger } from '../utils/logger';
 import { A11Y_ROLE, ACTIVITY_INDICATOR_SIZE, TOUCH_OPACITY, flexValues } from '../constants';
+import { Text } from './Text';
 
 /**
  * Loading fallback labels (passed via options or use defaults)
@@ -32,7 +32,9 @@ function LoadingFallback({ loadingText }: { loadingText?: string }): React.JSX.E
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <ActivityIndicator size={ACTIVITY_INDICATOR_SIZE.large} color={theme.colors.primary} />
-      <Text style={[styles.text, { color: theme.colors.onSurface }]}>{loadingText}</Text>
+      <Text variant="bodyLarge" style={styles.text}>
+        {loadingText}
+      </Text>
     </View>
   );
 }
@@ -53,12 +55,14 @@ function ErrorFallback({
   errorTitle,
   retryText,
 }: ErrorFallbackProps): React.JSX.Element {
-  const { theme } = useTheme();
+  const { theme, colors } = useTheme();
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <Text style={[styles.errorTitle, { color: theme.colors.error }]}>{errorTitle}</Text>
-      <Text style={[styles.errorMessage, { color: theme.colors.onSurfaceVariant }]}>
+      <Text variant="h2" color="error" style={styles.errorTitle}>
+        {errorTitle}
+      </Text>
+      <Text variant="bodySmall" color="secondary" align="center" style={styles.errorMessage}>
         {error.message}
       </Text>
       <TouchableOpacity
@@ -67,7 +71,13 @@ function ErrorFallback({
         accessibilityRole={A11Y_ROLE.BUTTON}
         accessibilityLabel={retryText}
       >
-        <Text style={[styles.retryButton, { color: theme.colors.primary }]}>{retryText}</Text>
+        <Text
+          variant="bodyLarge"
+          weight="semibold"
+          style={[styles.retryButton, { color: colors.primary }]}
+        >
+          {retryText}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -198,21 +208,14 @@ const styles = StyleSheet.create({
   },
   text: {
     marginTop: designTokens.spacing.lg,
-    fontSize: mobileFontSizes.lg,
   },
   errorTitle: {
-    fontSize: mobileFontSizes['2xl'],
-    fontWeight: designTokens.fontWeight.bold,
     marginBottom: designTokens.spacing.sm,
   },
   errorMessage: {
-    fontSize: mobileFontSizes.sm,
-    textAlign: layoutConstants.textAlign.center,
     marginBottom: designTokens.spacing.lg,
   },
   retryButton: {
-    fontSize: mobileFontSizes.lg,
-    fontWeight: designTokens.fontWeight.semibold,
     padding: designTokens.spacing.md,
   },
 });

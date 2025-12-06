@@ -10,6 +10,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from './Text';
 import { designTokens, layoutConstants } from '../theme';
 import { ICONS, FILTER_STATUS } from '../constants';
+import { useTheme } from '../../contexts/ThemeContext';
 
 type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
 type StatusValue =
@@ -63,6 +64,8 @@ export function StatusFilterSection({
   options,
   style,
 }: StatusFilterSectionProps): React.JSX.Element {
+  const { colors: themeColors } = useTheme();
+
   const defaultOptions: StatusOption[] = [
     { value: FILTER_STATUS.ALL, label: 'All', icon: DEFAULT_ICONS[FILTER_STATUS.ALL] },
     {
@@ -83,7 +86,9 @@ export function StatusFilterSection({
 
   return (
     <View style={[styles.container, style]}>
-      <Text style={[styles.label, { color: colors.textSecondary }]}>{label}</Text>
+      <Text variant="label" color="secondary" style={styles.label}>
+        {label}
+      </Text>
       {statusOptions.map((option) => {
         const isSelected = selectedStatus === option.value;
         const iconColor = isSelected ? colors.primary : option.activeColor || colors.textSecondary;
@@ -94,7 +99,10 @@ export function StatusFilterSection({
             style={[
               styles.option,
               { borderColor: colors.border },
-              isSelected && [styles.optionActive, { borderColor: colors.primary }],
+              isSelected && [
+                styles.optionActive,
+                { borderColor: colors.primary, backgroundColor: `${themeColors.primary}10` },
+              ],
             ]}
             onPress={() => onSelect(option.value)}
             activeOpacity={0.7}
@@ -106,11 +114,9 @@ export function StatusFilterSection({
                 color={iconColor}
               />
               <Text
-                style={[
-                  styles.optionText,
-                  { color: colors.textPrimary },
-                  isSelected && [styles.optionTextActive, { color: colors.primary }],
-                ]}
+                variant="bodySmall"
+                weight={isSelected ? 'semibold' : 'normal'}
+                style={{ color: isSelected ? colors.primary : colors.textPrimary }}
               >
                 {option.label}
               </Text>
@@ -134,8 +140,6 @@ const styles = StyleSheet.create({
     marginBottom: designTokens.spacing.md,
   },
   label: {
-    fontSize: designTokens.typography.fontSize.sm,
-    fontWeight: '500',
     marginBottom: designTokens.spacing.xs,
   },
   option: {
@@ -148,18 +152,12 @@ const styles = StyleSheet.create({
     marginBottom: designTokens.spacing.xs,
   },
   optionActive: {
-    backgroundColor: `${designTokens.colors.primary}10`,
+    // backgroundColor set dynamically via useTheme
   },
   optionContent: {
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
     gap: designTokens.spacing.sm,
-  },
-  optionText: {
-    fontSize: designTokens.typography.fontSize.sm,
-  },
-  optionTextActive: {
-    fontWeight: '600',
   },
 });
 

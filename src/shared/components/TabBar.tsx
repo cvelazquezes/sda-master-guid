@@ -5,11 +5,12 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
-import { mobileTypography, mobileFontSizes, designTokens, layoutConstants } from '../theme';
-import { A11Y_ROLE, flexValues } from '../constants';
+import { designTokens, layoutConstants } from '../theme';
+import { A11Y_ROLE, ICONS, flexValues } from '../constants';
+import { Text } from './Text';
 
 export interface Tab {
   id: string;
@@ -57,17 +58,17 @@ export const TabBar: React.FC<TabBarProps> = ({ tabs, activeTabId, onTabChange, 
               />
             )}
             <Text
-              style={[
-                styles.tabText,
-                { color: colors.textTertiary },
-                isActive && { color: colors.primary },
-              ]}
+              variant="label"
+              weight="bold"
+              style={{ color: isActive ? colors.primary : colors.textTertiary }}
             >
               {tab.label}
             </Text>
             {tab.badge !== undefined && tab.badge > 0 && (
               <View style={[styles.badge, { backgroundColor: colors.error }]}>
-                <Text style={styles.badgeText}>{tab.badge}</Text>
+                <Text variant="caption" weight="bold" color="onPrimary">
+                  {tab.badge}
+                </Text>
               </View>
             )}
           </TouchableOpacity>
@@ -93,9 +94,6 @@ const styles = StyleSheet.create({
     borderBottomColor: designTokens.colors.transparent,
     position: layoutConstants.position.relative,
   },
-  tabText: {
-    ...mobileTypography.labelBold,
-  },
   badge: {
     position: layoutConstants.position.absolute,
     top: designTokens.spacing.sm,
@@ -106,11 +104,6 @@ const styles = StyleSheet.create({
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
     paddingHorizontal: designTokens.spacing.sm,
-  },
-  badgeText: {
-    ...mobileTypography.captionBold,
-    color: designTokens.colors.white,
-    fontSize: mobileFontSizes.xs,
   },
 });
 

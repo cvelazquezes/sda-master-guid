@@ -5,11 +5,12 @@
  */
 
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
+import { View, TextInput, TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { mobileTypography, designTokens, layoutConstants } from '../theme';
 import { A11Y_ROLE, EMPTY_VALUE, ICONS, flexValues } from '../constants';
+import { Text } from './Text';
 
 interface SearchBarProps {
   value: string;
@@ -102,7 +103,9 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             size={designTokens.icon.sizes.md}
             color={colors.primary}
           />
-          <Text style={[styles.filterButtonText, { color: colors.primary }]}>{filterLabel}</Text>
+          <Text variant="label" weight="bold" style={{ color: colors.primary }}>
+            {filterLabel}
+          </Text>
           {filterActive && <View style={[styles.filterBadge, { backgroundColor: colors.error }]} />}
         </TouchableOpacity>
       )}
@@ -139,9 +142,6 @@ const styles = StyleSheet.create({
     height: designTokens.touchTarget.comfortable,
     gap: designTokens.spacing.sm,
     position: layoutConstants.position.relative,
-  },
-  filterButtonText: {
-    ...mobileTypography.labelBold,
   },
   filterBadge: {
     position: layoutConstants.position.absolute,

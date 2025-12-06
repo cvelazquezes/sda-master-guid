@@ -1,14 +1,21 @@
 /**
- * EmptyState Component
- * Reusable empty state component for lists and screens
- * Supports dynamic theming (light/dark mode)
+ * EmptyState Primitive Component
+ *
+ * Reusable empty state component for lists and screens.
+ * Uses Text primitive for proper theme integration.
+ *
+ * @example
+ * <EmptyState
+ *   icon="inbox-outline"
+ *   title={t('emptyState.noData')}
+ *   description={t('emptyState.noDataDescription')}
+ * />
  */
 
 import React, { ReactNode } from 'react';
-import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
-import { mobileTypography } from '../theme/mobileTypography';
 import { designTokens } from '../theme/designTokens';
 import { layoutConstants } from '../theme';
 import { StandardButton } from './StandardButton';
@@ -20,6 +27,7 @@ import {
   dimensionValues,
   flexValues,
 } from '../constants';
+import { Text } from './Text';
 
 export interface EmptyStateProps {
   // Content
@@ -79,11 +87,13 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       </View>
 
       {/* Title */}
-      <Text style={[styles.title, { color: colors.textPrimary }]}>{title}</Text>
+      <Text variant="h3" align="center" style={styles.title}>
+        {title}
+      </Text>
 
       {/* Description */}
       {displayDescription && (
-        <Text style={[styles.description, { color: colors.textSecondary }]}>
+        <Text variant="bodySmall" color="secondary" align="center" style={styles.description}>
           {displayDescription}
         </Text>
       )}
@@ -120,13 +130,9 @@ const styles = StyleSheet.create({
     opacity: designTokens.opacity.high,
   },
   title: {
-    ...mobileTypography.heading3,
-    textAlign: layoutConstants.textAlign.center,
     marginBottom: designTokens.spacing.sm,
   },
   description: {
-    ...mobileTypography.bodySmall,
-    textAlign: layoutConstants.textAlign.center,
     maxWidth: dimensionValues.maxWidth.message,
     marginBottom: designTokens.spacing.lg,
   },

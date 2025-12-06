@@ -1,14 +1,21 @@
 /**
- * ScreenHeader Component
- * Standard header for screens with title and subtitle
- * Supports dynamic theming (light/dark mode)
+ * ScreenHeader Primitive Component
+ *
+ * Standard header for screens with title and subtitle.
+ * Uses Text primitive for proper theme integration.
+ *
+ * @example
+ * <ScreenHeader
+ *   title={t('screens.home.title')}
+ *   subtitle={t('screens.home.subtitle')}
+ * />
  */
 
 import React, { ReactNode } from 'react';
-import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { designTokens } from '../theme/designTokens';
-import { mobileTypography } from '../theme/mobileTypography';
+import { Text } from './Text';
 
 interface ScreenHeaderProps {
   title: string;
@@ -40,9 +47,11 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
       testID={testID}
     >
       <View style={styles.textContainer}>
-        <Text style={[styles.title, { color: colors.textPrimary }]}>{title}</Text>
+        <Text variant="displayMedium">{title}</Text>
         {subtitle && (
-          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{subtitle}</Text>
+          <Text variant="bodyLarge" color="secondary" style={styles.subtitle}>
+            {subtitle}
+          </Text>
         )}
       </View>
       {children}
@@ -58,11 +67,7 @@ const styles = StyleSheet.create({
   textContainer: {
     marginBottom: designTokens.spacing.sm,
   },
-  title: {
-    ...mobileTypography.displayMedium,
-  },
   subtitle: {
-    ...mobileTypography.bodyLarge,
     marginTop: designTokens.spacing.xs,
   },
 });

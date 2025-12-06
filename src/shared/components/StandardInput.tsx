@@ -7,7 +7,6 @@
 import React, { useState } from 'react';
 import {
   View,
-  Text,
   TextInput,
   StyleSheet,
   TouchableOpacity,
@@ -18,6 +17,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../theme';
 import { A11Y_ROLE, ICONS, dimensionValues, flexValues } from '../constants';
+import { Text } from './Text';
 
 interface StandardInputProps extends TextInputProps {
   label?: string;
@@ -103,9 +103,9 @@ export const StandardInput: React.FC<StandardInputProps> = ({
       {/* Label */}
       {label && (
         <View style={styles.labelContainer}>
-          <Text style={[styles.label, { color: colors.textPrimary }]}>
+          <Text variant="label" weight="bold">
             {label}
-            {required && <Text style={{ color: colors.error }}> *</Text>}
+            {required && <Text color="error"> *</Text>}
           </Text>
         </View>
       )}
@@ -167,13 +167,17 @@ export const StandardInput: React.FC<StandardInputProps> = ({
             color={colors.error}
             style={styles.messageIcon}
           />
-          <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>
+          <Text variant="caption" color="error" style={styles.errorText}>
+            {error}
+          </Text>
         </View>
       )}
 
       {/* Helper Text */}
       {!error && helperText && (
-        <Text style={[styles.helperText, { color: colors.textTertiary }]}>{helperText}</Text>
+        <Text variant="caption" color="tertiary" style={styles.helperText}>
+          {helperText}
+        </Text>
       )}
     </View>
   );
@@ -185,9 +189,6 @@ const styles = StyleSheet.create({
   },
   labelContainer: {
     marginBottom: designTokens.spacing.sm,
-  },
-  label: {
-    ...mobileTypography.labelBold,
   },
   inputContainer: {
     flexDirection: layoutConstants.flexDirection.row,
@@ -226,11 +227,9 @@ const styles = StyleSheet.create({
     marginRight: designTokens.spacing.xs,
   },
   errorText: {
-    ...mobileTypography.caption,
     flex: flexValues.one,
   },
   helperText: {
-    ...mobileTypography.caption,
     marginTop: designTokens.spacing.xs,
     marginLeft: designTokens.spacing.xs,
   },

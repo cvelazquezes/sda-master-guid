@@ -8,7 +8,6 @@
 import React from 'react';
 import {
   TouchableOpacity,
-  Text,
   StyleSheet,
   ActivityIndicator,
   View,
@@ -17,7 +16,7 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
-import { mobileTypography, designTokens, layoutConstants } from '../theme';
+import { designTokens, layoutConstants } from '../theme';
 import {
   A11Y_ROLE,
   TOUCH_OPACITY,
@@ -28,6 +27,7 @@ import {
   ICON_POSITION,
   ICONS,
 } from '../constants';
+import { Text } from './Text';
 
 type ButtonVariant =
   | typeof COMPONENT_VARIANT.primary
@@ -157,22 +157,15 @@ export const StandardButton: React.FC<StandardButtonProps> = ({
     }
   };
 
-  const getTextStyle = (): TextStyle[] => {
-    const baseStyle: TextStyle[] = [styles.buttonText, { color: getTextColor() }];
+  const getTextStyle = (): TextStyle => {
+    const textStyle: TextStyle = { color: getTextColor() };
 
-    // Size text styles
-    switch (size) {
-      case BUTTON_SIZE.small:
-        baseStyle.push(styles.buttonTextSmall);
-        break;
-      case BUTTON_SIZE.large:
-        baseStyle.push(styles.buttonTextLarge);
-        break;
-      default:
-        baseStyle.push(styles.buttonTextMedium);
+    // Large size needs bigger font
+    if (size === BUTTON_SIZE.large) {
+      textStyle.fontSize = designTokens.typography.fontSizes.xl;
     }
 
-    return baseStyle;
+    return textStyle;
   };
 
   const getIconSize = (): number => {
@@ -230,7 +223,13 @@ export const StandardButton: React.FC<StandardButtonProps> = ({
               style={styles.iconLeft}
             />
           )}
-          <Text style={getTextStyle()}>{title}</Text>
+          <Text
+            variant={size === BUTTON_SIZE.small ? 'buttonSmall' : 'button'}
+            align="center"
+            style={getTextStyle()}
+          >
+            {title}
+          </Text>
           {icon && iconPosition === ICON_POSITION.RIGHT && (
             <MaterialCommunityIcons
               name={icon as typeof ICONS.CHECK}
@@ -281,21 +280,6 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     opacity: designTokens.opacity.disabled,
-  },
-
-  // Text styles (colors handled dynamically via useTheme)
-  buttonText: {
-    textAlign: layoutConstants.textAlign.center,
-  },
-  buttonTextSmall: {
-    ...mobileTypography.buttonSmall,
-  },
-  buttonTextMedium: {
-    ...mobileTypography.button,
-  },
-  buttonTextLarge: {
-    ...mobileTypography.button,
-    fontSize: designTokens.typography.fontSizes.xl,
   },
 
   // Icon styles

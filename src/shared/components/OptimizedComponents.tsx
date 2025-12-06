@@ -6,11 +6,11 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ViewProps } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, ViewProps } from 'react-native';
 import { useTheme, layoutConstants } from '../theme';
-import { mobileFontSizes } from '../theme/mobileTypography';
 import { designTokens } from '../theme/designTokens';
 import { COMPONENT_VARIANT, flexValues } from '../constants';
+import { Text } from './Text';
 
 // ============================================================================
 // Basic React.memo Example
@@ -54,7 +54,9 @@ export const OptimizedButton = memo<ButtonProps>(function OptimizedButton({
       onPress={onPress}
       disabled={disabled}
     >
-      <Text style={[styles.buttonText, { color: theme.colors.white }]}>{title}</Text>
+      <Text variant="bodyLarge" weight="semibold" color="onPrimary">
+        {title}
+      </Text>
     </TouchableOpacity>
   );
 });
@@ -93,11 +95,13 @@ export const OptimizedCard = memo<CardProps>(
         style={[styles.card, { backgroundColor: theme.colors.surface }]}
         onPress={handlePress}
       >
-        <Text style={[styles.cardTitle, { color: theme.colors.onSurface }]}>{title}</Text>
-        <Text style={[styles.cardDescription, { color: theme.colors.onSurfaceVariant }]}>
+        <Text variant="h3" style={styles.cardTitle}>
+          {title}
+        </Text>
+        <Text variant="bodySmall" color="secondary" style={styles.cardDescription}>
           {description}
         </Text>
-        <Text style={[styles.cardDate, { color: theme.colors.onSurfaceVariant }]}>
+        <Text variant="caption" color="secondary">
           {formattedDate}
         </Text>
       </TouchableOpacity>
@@ -155,7 +159,7 @@ export const OptimizedListItem = memo<ListItemProps>(function OptimizedListItem(
   onPress,
   selected = false,
 }) {
-  const { theme } = useTheme();
+  const { theme, colors } = useTheme();
 
   const handlePress = useCallback(() => {
     onPress(id);
@@ -164,10 +168,15 @@ export const OptimizedListItem = memo<ListItemProps>(function OptimizedListItem(
   const backgroundColor = selected ? theme.colors.primaryLight : theme.colors.surface;
 
   return (
-    <TouchableOpacity style={[styles.listItem, { backgroundColor }]} onPress={handlePress}>
+    <TouchableOpacity
+      style={[styles.listItem, { backgroundColor, borderBottomColor: colors.border }]}
+      onPress={handlePress}
+    >
       <View style={styles.listItemContent}>
-        <Text style={[styles.listItemName, { color: theme.colors.onSurface }]}>{name}</Text>
-        <Text style={[styles.listItemEmail, { color: theme.colors.onSurfaceVariant }]}>
+        <Text variant="body" weight="semibold" style={styles.listItemName}>
+          {name}
+        </Text>
+        <Text variant="bodySmall" color="secondary">
           {email}
         </Text>
       </View>
@@ -275,41 +284,26 @@ const styles = StyleSheet.create({
   disabled: {
     opacity: designTokens.opacity.medium,
   },
-  buttonText: {
-    fontSize: mobileFontSizes.lg,
-    fontWeight: designTokens.fontWeight.semibold,
-  },
   card: {
     padding: designTokens.spacing.lg,
     borderRadius: designTokens.borderRadius.lg,
     marginBottom: designTokens.spacing.md,
   },
   cardTitle: {
-    fontSize: mobileFontSizes.xl,
-    fontWeight: designTokens.fontWeight.bold,
     marginBottom: designTokens.spacing.sm,
   },
   cardDescription: {
-    fontSize: mobileFontSizes.sm,
     marginBottom: designTokens.spacing.sm,
-  },
-  cardDate: {
-    fontSize: mobileFontSizes.xs,
   },
   listItem: {
     padding: designTokens.spacing.lg,
     borderBottomWidth: designTokens.borderWidth.thin,
-    borderBottomColor: designTokens.colors.borderLight,
+    // borderBottomColor is set dynamically via useTheme
   },
   listItemContent: {
     flex: flexValues.one,
   },
   listItemName: {
-    fontSize: mobileFontSizes.lg,
-    fontWeight: designTokens.fontWeight.semibold,
     marginBottom: designTokens.spacing.xs,
-  },
-  listItemEmail: {
-    fontSize: mobileFontSizes.sm,
   },
 });

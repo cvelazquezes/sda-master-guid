@@ -1,17 +1,22 @@
 /**
- * SectionHeader Component
- * Reusable section header with title and optional badge/action
- * Supports dynamic theming (light/dark mode)
+ * SectionHeader Primitive Component
+ *
+ * Reusable section header with title and optional badge/action.
+ * Uses Text primitive for proper theme integration.
+ *
+ * @example
+ * <SectionHeader title={t('sections.overview')} />
+ * <SectionHeader title={t('sections.members')} badge={12} />
  */
 
 import React, { ReactNode } from 'react';
-import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { designTokens } from '../theme/designTokens';
-import { mobileTypography, mobileFontSizes } from '../theme/mobileTypography';
 import { layoutConstants } from '../theme';
 import { flexValues } from '../constants';
 import { SPACING } from '../constants/numbers';
+import { Text } from './Text';
 
 interface SectionHeaderProps {
   title: string;
@@ -33,10 +38,12 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
   return (
     <View style={[styles.container, style]} testID={testID}>
       <View style={styles.titleContainer}>
-        <Text style={[styles.title, { color: colors.textPrimary }]}>{title}</Text>
+        <Text variant="h2">{title}</Text>
         {badge !== undefined && (
           <View style={[styles.badge, { backgroundColor: colors.primaryAlpha10 }]}>
-            <Text style={[styles.badgeText, { color: colors.primary }]}>{badge}</Text>
+            <Text variant="caption" weight="bold" style={{ color: colors.primary }}>
+              {badge}
+            </Text>
           </View>
         )}
       </View>
@@ -58,9 +65,6 @@ const styles = StyleSheet.create({
     gap: designTokens.spacing.sm,
     flex: flexValues.one,
   },
-  title: {
-    ...mobileTypography.heading2,
-  },
   badge: {
     paddingHorizontal: designTokens.spacing.sm,
     paddingVertical: designTokens.spacing.xs,
@@ -69,10 +73,6 @@ const styles = StyleSheet.create({
     height: SPACING.LG,
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
-  },
-  badgeText: {
-    ...mobileTypography.captionBold,
-    fontSize: mobileFontSizes.xs,
   },
   actionContainer: {
     marginLeft: designTokens.spacing.md,
