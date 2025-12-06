@@ -80,8 +80,8 @@ export interface ThemeContextType {
   activeTheme: ActiveTheme;
 
   /**
-   * Legacy colors object (flat structure)
-   * @deprecated For new code, use useDesignTokens() hook instead
+   * Colors object (flat structure)
+   * NOTE: For new semantic token structure, use useDesignTokens() hook
    */
   colors: LegacyThemeColors;
 
@@ -237,17 +237,6 @@ export const useTheme = (): ThemeContextType => {
     throw new Error(LOG_MESSAGES.CONTEXTS.THEME.USE_OUTSIDE_PROVIDER);
   }
   return context;
-};
-
-/**
- * Helper hook for easy color access
- *
- * @deprecated For new code, use useTokenColors() from ../shared/hooks instead
- * @returns Legacy flat colors object for the current theme
- */
-export const useThemeColors = (): LegacyThemeColors => {
-  const { colors } = useTheme();
-  return colors;
 };
 
 /**
