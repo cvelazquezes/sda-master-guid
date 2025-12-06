@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { ScreenHeader, MenuCard, SectionHeader } from '../../shared/components';
 import { designTokens } from '../../shared/theme/designTokens';
-import { ICONS, MENU_ITEM_IDS, SCREENS, flexValues } from '../../shared/constants';
+import { ICONS, MENU_ITEM_IDS, SCREENS, FLEX } from '../../shared/constants';
 
 interface MenuItem {
   id: string;
@@ -110,10 +110,10 @@ const AdminMoreScreen = (): React.JSX.Element => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   scrollView: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   content: {
     padding: designTokens.spacing.lg,

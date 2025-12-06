@@ -13,7 +13,7 @@ import {
   BREAKPOINTS,
   HIERARCHY_FIELDS,
   EMPTY_VALUE,
-  flexValues,
+  FLEX,
 } from '../../../shared/constants';
 import { styles } from './styles';
 import { OrganizationItem } from './types';
@@ -156,7 +156,7 @@ function ActionsBar({
           placeholder={t('screens.organizationManagement.searchType', {
             type: getTypeLabel(selectedType, t).toLowerCase(),
           })}
-          style={{ flex: flexValues.one }}
+          style={{ flex: FLEX.ONE }}
         />
       </View>
       <TouchableOpacity

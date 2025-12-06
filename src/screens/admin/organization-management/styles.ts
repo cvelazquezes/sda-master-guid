@@ -1,16 +1,10 @@
 import { StyleSheet } from 'react-native';
 import { mobileFontSizes, designTokens, layoutConstants } from '../../../shared/theme';
-import {
-  flexValues,
-  dimensionValues,
-  borderValues,
-  textTransformValues,
-  typographyValues,
-} from '../../../shared/constants';
+import { FLEX, DIMENSIONS, BORDERS, TEXT_TRANSFORM, TYPOGRAPHY } from '../../../shared/constants';
 
 export const styles = StyleSheet.create({
   container: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     backgroundColor: designTokens.colors.backgroundSecondary,
   },
   typeSelectorContainer: {
@@ -32,8 +26,8 @@ export const styles = StyleSheet.create({
     backgroundColor: designTokens.colors.backgroundSecondary,
     gap: designTokens.spacing.xs,
     borderWidth: designTokens.borderWidth.medium,
-    borderColor: borderValues.color.transparent,
-    minHeight: dimensionValues.minHeight.touchTarget,
+    borderColor: BORDERS.COLOR.TRANSPARENT,
+    minHeight: DIMENSIONS.MIN_HEIGHT.TOUCH_TARGET,
   },
   typeButtonActive: {
     backgroundColor: designTokens.colors.primary,
@@ -55,7 +49,7 @@ export const styles = StyleSheet.create({
     backgroundColor: designTokens.colors.backgroundPrimary,
   },
   searchContainer: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   createButton: {
     flexDirection: layoutConstants.flexDirection.row,
@@ -66,7 +60,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.lg,
     gap: designTokens.spacing.xs,
-    minHeight: dimensionValues.minHeight.touchTargetStandard,
+    minHeight: DIMENSIONS.MIN_HEIGHT.TOUCH_TARGETStandard,
   },
   createButtonText: {
     fontSize: mobileFontSizes.md,
@@ -74,7 +68,7 @@ export const styles = StyleSheet.create({
     color: designTokens.colors.textInverse,
   },
   content: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     padding: designTokens.spacing.lg,
   },
   loadingText: {
@@ -102,11 +96,11 @@ export const cardStyles = StyleSheet.create({
   title: {
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     gap: designTokens.spacing.sm,
   },
   info: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   name: {
     fontSize: mobileFontSizes.md,
@@ -121,8 +115,8 @@ export const cardStyles = StyleSheet.create({
   deleteButton: {
     padding: designTokens.spacing.xs,
     borderRadius: designTokens.borderRadius.md,
-    minWidth: dimensionValues.minWidth.iconButtonSmall,
-    minHeight: dimensionValues.minHeight.iconButtonSmall,
+    minWidth: DIMENSIONS.MIN_WIDTH.ICON_BUTTON_SMALL,
+    minHeight: DIMENSIONS.MIN_HEIGHT.ICON_BUTTON_SMALL,
     alignItems: layoutConstants.alignItems.center,
     justifyContent: layoutConstants.justifyContent.center,
   },
@@ -142,7 +136,7 @@ export const cardStyles = StyleSheet.create({
 
 export const modalStyles = StyleSheet.create({
   overlay: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     backgroundColor: designTokens.overlay.darkMedium,
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
@@ -155,20 +149,20 @@ export const modalStyles = StyleSheet.create({
   content: {
     backgroundColor: designTokens.colors.backgroundPrimary,
     borderRadius: designTokens.borderRadius['3xl'],
-    width: dimensionValues.width.full,
-    maxWidth: dimensionValues.maxWidth.modal,
-    maxHeight: dimensionValues.maxHeight.modalPercent,
+    width: DIMENSIONS.WIDTH.FULL,
+    maxWidth: DIMENSIONS.MAX_WIDTH.MODAL,
+    maxHeight: DIMENSIONS.MAX_HEIGHT.MODAL_PERCENT,
   },
   contentMobile: {
-    maxWidth: dimensionValues.maxWidthPercent.full,
-    borderBottomLeftRadius: borderValues.radius.none,
-    borderBottomRightRadius: borderValues.radius.none,
+    maxWidth: DIMENSIONS.MAX_WIDTH_PERCENT.FULL,
+    borderBottomLeftRadius: BORDERS.RADIUS.NONE,
+    borderBottomRightRadius: BORDERS.RADIUS.NONE,
     borderTopLeftRadius: designTokens.borderRadius['3xl'],
     borderTopRightRadius: designTokens.borderRadius['3xl'],
   },
   handle: {
     width: designTokens.componentSizes.iconContainer.md,
-    height: dimensionValues.height.dragHandle,
+    height: DIMENSIONS.HEIGHT.DRAG_HANDLE,
     backgroundColor: designTokens.colors.borderLight,
     borderRadius: designTokens.borderRadius.full,
     alignSelf: layoutConstants.alignSelf.center,
@@ -193,7 +187,7 @@ export const modalStyles = StyleSheet.create({
     padding: designTokens.spacing.xs,
   },
   body: {
-    maxHeight: dimensionValues.maxHeight.modalBodyMedium,
+    maxHeight: DIMENSIONS.MAX_HEIGHT.MODAL_BODY_MEDIUM,
   },
   footer: {
     flexDirection: layoutConstants.flexDirection.row,
@@ -217,10 +211,10 @@ export const filterStyles = StyleSheet.create({
     gap: designTokens.spacing.sm,
   },
   infoText: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     fontSize: mobileFontSizes.xs,
     color: designTokens.colors.primary,
-    lineHeight: typographyValues.lineHeight.md,
+    lineHeight: TYPOGRAPHY.LINE_HEIGHT.MD,
   },
   section: {
     padding: designTokens.spacing.lg,
@@ -252,14 +246,14 @@ export const filterStyles = StyleSheet.create({
     gap: designTokens.spacing.md,
   },
   hierarchyInfo: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   hierarchyLabel: {
     fontSize: mobileFontSizes.xs,
     color: designTokens.colors.textTertiary,
     fontWeight: designTokens.fontWeight.semibold,
-    textTransform: textTransformValues.uppercase,
-    letterSpacing: typographyValues.letterSpacing.normal,
+    textTransform: TEXT_TRANSFORM.UPPERCASE,
+    letterSpacing: TYPOGRAPHY.LETTER_SPACING.NORMAL,
     marginBottom: designTokens.spacing.xxs,
   },
   hierarchyValue: {
@@ -277,8 +271,8 @@ export const filterStyles = StyleSheet.create({
     marginBottom: designTokens.spacing.sm,
     backgroundColor: designTokens.colors.backgroundSecondary,
     borderWidth: designTokens.borderWidth.medium,
-    borderColor: borderValues.color.transparent,
-    minHeight: dimensionValues.minHeight.filterOption,
+    borderColor: BORDERS.COLOR.TRANSPARENT,
+    minHeight: DIMENSIONS.MIN_HEIGHT.FILTER_OPTION,
   },
   optionActive: {
     backgroundColor: designTokens.colors.primaryLight,
@@ -287,13 +281,13 @@ export const filterStyles = StyleSheet.create({
   optionContent: {
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     gap: designTokens.spacing.md,
   },
   optionText: {
     fontSize: mobileFontSizes.md,
     color: designTokens.colors.textSecondary,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   optionTextActive: {
     color: designTokens.colors.primary,
@@ -317,16 +311,16 @@ export const filterStyles = StyleSheet.create({
     gap: designTokens.spacing.sm,
   },
   warningText: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     fontSize: mobileFontSizes.sm,
     color: designTokens.colors.warning,
-    lineHeight: typographyValues.lineHeight.lg,
+    lineHeight: TYPOGRAPHY.LINE_HEIGHT.LG,
   },
 });
 
 export const buttonStyles = StyleSheet.create({
   clear: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     paddingVertical: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.lg,
     backgroundColor: designTokens.colors.backgroundSecondary,
@@ -334,7 +328,7 @@ export const buttonStyles = StyleSheet.create({
     flexDirection: layoutConstants.flexDirection.row,
     justifyContent: layoutConstants.justifyContent.center,
     gap: designTokens.spacing.xs,
-    minHeight: dimensionValues.minHeight.selectItem,
+    minHeight: DIMENSIONS.MIN_HEIGHT.SELECT_ITEM,
   },
   clearText: {
     fontSize: mobileFontSizes.md,
@@ -342,7 +336,7 @@ export const buttonStyles = StyleSheet.create({
     color: designTokens.colors.textSecondary,
   },
   apply: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     paddingVertical: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.lg,
     backgroundColor: designTokens.colors.primary,
@@ -350,7 +344,7 @@ export const buttonStyles = StyleSheet.create({
     flexDirection: layoutConstants.flexDirection.row,
     justifyContent: layoutConstants.justifyContent.center,
     gap: designTokens.spacing.xs,
-    minHeight: dimensionValues.minHeight.selectItem,
+    minHeight: DIMENSIONS.MIN_HEIGHT.SELECT_ITEM,
   },
   applyText: {
     fontSize: mobileFontSizes.md,

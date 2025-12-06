@@ -9,7 +9,7 @@ import {
   HIERARCHY_FIELDS,
   MESSAGES,
   KEYBOARD_TYPE,
-  flexValues,
+  FLEX,
 } from '../../../shared/constants';
 import { MatchFrequency } from '../../../types';
 import { modalStyles, filterStyles, buttonStyles } from './styles';
@@ -336,7 +336,7 @@ function FreqOption({ option, isActive, colors, onPress }: FreqOptionProps): Rea
           size={designTokens.iconSize.md}
           color={iconColor}
         />
-        <View style={{ flex: flexValues.one }}>
+        <View style={{ flex: FLEX.ONE }}>
           <Text style={[filterStyles.optionText, isActive && filterStyles.optionTextActive]}>
             {option.title}
           </Text>

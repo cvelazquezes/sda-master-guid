@@ -5,22 +5,16 @@ import {
   designTokens,
   layoutConstants,
 } from '../../../shared/theme';
-import {
-  borderValues,
-  dimensionValues,
-  flexValues,
-  textTransformValues,
-  typographyValues,
-} from '../../../shared/constants';
+import { BORDERS, DIMENSIONS, FLEX, TEXT_TRANSFORM, TYPOGRAPHY } from '../../../shared/constants';
 
 export const styles = StyleSheet.create({
-  container: { flex: flexValues.one, backgroundColor: designTokens.colors.backgroundSecondary },
+  container: { flex: FLEX.ONE, backgroundColor: designTokens.colors.backgroundSecondary },
   content: { padding: designTokens.spacing.lg },
 });
 
 export const modalStyles = StyleSheet.create({
   overlay: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     backgroundColor: designTokens.overlay.darkMedium,
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
@@ -33,21 +27,21 @@ export const modalStyles = StyleSheet.create({
   content: {
     backgroundColor: designTokens.colors.backgroundPrimary,
     borderRadius: designTokens.borderRadius['3xl'],
-    width: dimensionValues.width.full,
-    maxWidth: dimensionValues.maxWidth.modal,
-    maxHeight: dimensionValues.maxHeight.modalPercent,
+    width: DIMENSIONS.WIDTH.FULL,
+    maxWidth: DIMENSIONS.MAX_WIDTH.MODAL,
+    maxHeight: DIMENSIONS.MAX_HEIGHT.MODAL_PERCENT,
   },
   contentMobile: {
-    maxWidth: dimensionValues.maxWidthPercent.full,
-    borderBottomLeftRadius: borderValues.radius.none,
-    borderBottomRightRadius: borderValues.radius.none,
+    maxWidth: DIMENSIONS.MAX_WIDTH_PERCENT.FULL,
+    borderBottomLeftRadius: BORDERS.RADIUS.NONE,
+    borderBottomRightRadius: BORDERS.RADIUS.NONE,
     borderTopLeftRadius: designTokens.borderRadius['3xl'],
     borderTopRightRadius: designTokens.borderRadius['3xl'],
   },
   body: { paddingHorizontal: designTokens.spacing.lg, paddingBottom: designTokens.spacing.lg },
   dragHandle: {
     width: designTokens.componentSizes.iconContainer.md,
-    height: dimensionValues.height.dragHandle,
+    height: DIMENSIONS.HEIGHT.DRAG_HANDLE,
     backgroundColor: designTokens.colors.borderLight,
     borderRadius: designTokens.borderRadius.full,
     alignSelf: layoutConstants.alignSelf.center,
@@ -87,10 +81,10 @@ export const filterStyles = StyleSheet.create({
     gap: designTokens.spacing.sm,
   },
   infoText: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     fontSize: mobileFontSizes.xs,
     color: designTokens.colors.primary,
-    lineHeight: typographyValues.lineHeight.md,
+    lineHeight: TYPOGRAPHY.LINE_HEIGHT.MD,
   },
   section: { padding: designTokens.spacing.lg },
   sectionTitle: {
@@ -103,8 +97,8 @@ export const filterStyles = StyleSheet.create({
     fontSize: mobileFontSizes.xs,
     color: designTokens.colors.textTertiary,
     fontWeight: designTokens.fontWeight.semibold,
-    textTransform: textTransformValues.uppercase,
-    letterSpacing: typographyValues.letterSpacing.normal,
+    textTransform: TEXT_TRANSFORM.UPPERCASE,
+    letterSpacing: TYPOGRAPHY.LETTER_SPACING.NORMAL,
     marginTop: designTokens.spacing.lg,
     marginBottom: designTokens.spacing.sm,
   },
@@ -118,7 +112,7 @@ export const filterStyles = StyleSheet.create({
     marginBottom: designTokens.spacing.sm,
     gap: designTokens.spacing.md,
   },
-  hierarchyInfo: { flex: flexValues.one },
+  hierarchyInfo: { flex: FLEX.ONE },
   hierarchyValue: {
     fontSize: mobileFontSizes.sm,
     color: designTokens.colors.textPrimary,
@@ -134,8 +128,8 @@ export const filterStyles = StyleSheet.create({
     marginBottom: designTokens.spacing.sm,
     backgroundColor: designTokens.colors.backgroundSecondary,
     borderWidth: designTokens.borderWidth.medium,
-    borderColor: borderValues.color.transparent,
-    minHeight: dimensionValues.minHeight.filterOption,
+    borderColor: BORDERS.COLOR.TRANSPARENT,
+    minHeight: DIMENSIONS.MIN_HEIGHT.FILTER_OPTION,
   },
   optionActive: {
     backgroundColor: designTokens.colors.primaryLight,
@@ -144,13 +138,13 @@ export const filterStyles = StyleSheet.create({
   optionContent: {
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     gap: designTokens.spacing.md,
   },
   optionText: {
     fontSize: mobileFontSizes.md,
     color: designTokens.colors.textSecondary,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   optionTextActive: {
     color: designTokens.colors.primary,
@@ -176,7 +170,7 @@ export const filterStyles = StyleSheet.create({
 
 export const buttonStyles = StyleSheet.create({
   clear: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     paddingVertical: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.lg,
     backgroundColor: designTokens.colors.backgroundSecondary,
@@ -191,7 +185,7 @@ export const buttonStyles = StyleSheet.create({
     color: designTokens.colors.textSecondary,
   },
   apply: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     paddingVertical: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.lg,
     backgroundColor: designTokens.colors.primary,

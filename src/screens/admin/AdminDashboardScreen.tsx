@@ -18,7 +18,7 @@ import { layoutConstants } from '../../shared/theme';
 import { ScreenHeader, SectionHeader, MenuCard } from '../../shared/components';
 import { logger } from '../../shared/utils/logger';
 import { ApprovalStatus } from '../../types';
-import { ICONS, LOG_MESSAGES, MENU_ITEM_IDS, SCREENS, flexValues } from '../../shared/constants';
+import { ICONS, LOG_MESSAGES, MENU_ITEM_IDS, SCREENS, FLEX } from '../../shared/constants';
 
 interface DashboardStats {
   totalUsers: number;
@@ -146,7 +146,7 @@ function StatsSection({ stats, colors, t, navigation }: StatsSectionProps): Reac
 
 const styles = StyleSheet.create({
   container: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   statsSection: {
     padding: designTokens.spacing.lg,
