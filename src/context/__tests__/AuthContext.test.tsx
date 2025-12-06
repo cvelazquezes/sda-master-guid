@@ -1,4 +1,3 @@
-/* eslint-disable max-lines-per-function */
 /**
  * AuthContext Tests
  * Testing state management following Meta/Google standards
