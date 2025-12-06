@@ -129,6 +129,8 @@ export const settingsStyles = StyleSheet.create({
     marginBottom: designTokens.spacing.md,
   },
   amountRow: { flexDirection: layoutConstants.flexDirection.row, gap: designTokens.spacing.md },
+  amountInputWrapper: { flex: FLEX.ONE },
+  currencyInputWrapper: { width: designTokens.spacing['8xl'] + designTokens.spacing.xs },
   amountInputContainer: {
     flex: FLEX.ONE,
     flexDirection: layoutConstants.flexDirection.row,

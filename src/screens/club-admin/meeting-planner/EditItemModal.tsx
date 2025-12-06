@@ -1,8 +1,7 @@
 import React from 'react';
-// eslint-disable-next-line no-restricted-imports -- TextInput needed for complex form input with custom styling
-import { View, TouchableOpacity, Modal, ScrollView, TextInput } from 'react-native';
+import { View, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text } from '../../../shared/components';
+import { Text, Input } from '../../../shared/components';
 import { mobileIconSizes, designTokens, layoutConstants } from '../../../shared/theme';
 import { ANIMATION, ICONS, KEYBOARD_TYPE, TEXT_INPUT } from '../../../shared/constants';
 import { MODAL_OPACITY } from '../../../shared/constants/http';
@@ -132,20 +131,16 @@ function InputField({
   multiline,
   numberOfLines,
 }: InputFieldProps): React.JSX.Element {
-  const inputStyle = multiline ? [modalStyles.input, modalStyles.textArea] : modalStyles.input;
   return (
-    <>
-      <Text style={modalStyles.inputLabel}>{label}</Text>
-      <TextInput
-        style={inputStyle}
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        keyboardType={keyboardType as typeof KEYBOARD_TYPE.NUMERIC}
-        multiline={multiline}
-        numberOfLines={numberOfLines}
-      />
-    </>
+    <Input
+      label={label}
+      value={value}
+      onChangeText={onChangeText}
+      placeholder={placeholder}
+      keyboardType={keyboardType as typeof KEYBOARD_TYPE.NUMERIC}
+      multiline={multiline}
+      numberOfLines={numberOfLines}
+    />
   );
 }
 

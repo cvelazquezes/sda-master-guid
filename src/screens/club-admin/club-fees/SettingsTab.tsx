@@ -1,8 +1,7 @@
 import React from 'react';
-// eslint-disable-next-line no-restricted-imports -- TextInput needed for complex form input with custom styling
-import { View, ScrollView, TouchableOpacity, Switch, TextInput } from 'react-native';
+import { View, ScrollView, TouchableOpacity, Switch } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text } from '../../../shared/components';
+import { Text, Input } from '../../../shared/components';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { designTokens } from '../../../shared/theme';
 import { ICONS, TOUCH_OPACITY, KEYBOARD_TYPE, ALL_MONTHS } from '../../../shared/constants';
@@ -62,7 +61,6 @@ export function SettingsTab({
           setFeeAmount={setFeeAmount}
           currency={currency}
           setCurrency={setCurrency}
-          colors={colors}
           t={t}
         />
         <MonthSelectionCard
@@ -155,33 +153,27 @@ function AmountInputCard({
   setFeeAmount,
   currency,
   setCurrency,
-  colors,
   t,
-}: AmountInputCardProps): React.JSX.Element {
+}: Omit<AmountInputCardProps, 'colors'>): React.JSX.Element {
   const currencyMaxLength = 3;
   return (
     <View style={settingsStyles.inputCard}>
       <Text style={settingsStyles.inputLabel}>{t('screens.clubFees.monthlyFeeAmount')}</Text>
       <Text style={settingsStyles.inputSubtext}>{t('screens.clubFees.setRecurringAmount')}</Text>
       <View style={settingsStyles.amountRow}>
-        <View style={settingsStyles.amountInputContainer}>
-          <Text style={settingsStyles.currencySymbol}>$</Text>
-          <TextInput
-            style={settingsStyles.amountInput}
+        <View style={settingsStyles.amountInputWrapper}>
+          <Input
             value={feeAmount}
             onChangeText={setFeeAmount}
             keyboardType={KEYBOARD_TYPE.DECIMAL_PAD}
-            placeholder={t('screens.clubFees.amountPlaceholder')}
-            placeholderTextColor={colors.textTertiary}
+            placeholder={`$ ${t('screens.clubFees.amountPlaceholder')}`}
           />
         </View>
-        <View style={settingsStyles.currencyInputContainer}>
-          <TextInput
-            style={settingsStyles.currencyInput}
+        <View style={settingsStyles.currencyInputWrapper}>
+          <Input
             value={currency}
             onChangeText={setCurrency}
             placeholder={t('screens.clubFees.currencyPlaceholder')}
-            placeholderTextColor={colors.textTertiary}
             maxLength={currencyMaxLength}
           />
         </View>

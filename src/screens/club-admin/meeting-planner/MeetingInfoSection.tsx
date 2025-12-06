@@ -1,8 +1,7 @@
 import React from 'react';
-// eslint-disable-next-line no-restricted-imports -- TextInput needed for complex form input with custom styling
-import { View, TouchableOpacity, TextInput } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text } from '../../../shared/components';
+import { Text, Input } from '../../../shared/components';
 import { mobileIconSizes, designTokens } from '../../../shared/theme';
 import { DATE_LOCALE_OPTIONS, ICONS } from '../../../shared/constants';
 import { meetingInfoStyles } from './styles';
@@ -57,8 +56,7 @@ export function MeetingInfoSection({
             </Text>
           </TouchableOpacity>
         </View>
-        <TextInput
-          style={meetingInfoStyles.titleInput}
+        <Input
           value={meetingTitle}
           onChangeText={setMeetingTitle}
           placeholder={t('screens.meetingPlanner.titlePlaceholder')}

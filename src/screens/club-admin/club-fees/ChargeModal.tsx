@@ -13,7 +13,6 @@ import {
   TEXT_LINES,
   KEYBOARD_TYPE,
 } from '../../../shared/constants';
-import { settingsStyles } from './styles';
 import { modalStyles } from './modalStyles';
 
 interface ChargeModalProps {
@@ -66,14 +65,9 @@ export function ChargeModal({
         <View style={[modalStyles.content, { width: modalWidth, maxHeight }]}>
           <ModalHeader onClose={onClose} colors={colors} t={t} />
           <ScrollView style={modalStyles.body} showsVerticalScrollIndicator={false}>
-            <DescriptionInput
-              value={chargeDescription}
-              onChange={setChargeDescription}
-              colors={colors}
-              t={t}
-            />
-            <AmountInput value={chargeAmount} onChange={setChargeAmount} colors={colors} t={t} />
-            <DueDateInput value={chargeDueDate} onChange={setChargeDueDate} colors={colors} t={t} />
+            <DescriptionInput value={chargeDescription} onChange={setChargeDescription} t={t} />
+            <AmountInput value={chargeAmount} onChange={setChargeAmount} t={t} />
+            <DueDateInput value={chargeDueDate} onChange={setChargeDueDate} t={t} />
             <ApplyToSection
               chargeApplyToAll={chargeApplyToAll}
               setChargeApplyToAll={setChargeApplyToAll}
@@ -144,19 +138,15 @@ function AmountInput({ value, onChange, t }: Omit<InputProps, 'colors'>): React.
   );
 }
 
-function DueDateInput({ value, onChange, colors, t }: InputProps): React.JSX.Element {
+function DueDateInput({ value, onChange, t }: Omit<InputProps, 'colors'>): React.JSX.Element {
   return (
-    <View style={modalStyles.inputGroup}>
-      <Text style={modalStyles.label}>{t('screens.clubFees.dueDateLabel')}</Text>
-      <TextInput
-        style={modalStyles.input}
-        value={value}
-        onChangeText={onChange}
-        placeholder={DATE_FORMATS.ISO_DATE}
-        placeholderTextColor={colors.textTertiary}
-      />
-      <Text style={modalStyles.hint}>{t('screens.clubFees.dueDateFormat')}</Text>
-    </View>
+    <Input
+      label={t('screens.clubFees.dueDateLabel')}
+      value={value}
+      onChangeText={onChange}
+      placeholder={DATE_FORMATS.ISO_DATE}
+      helperText={t('screens.clubFees.dueDateFormat')}
+    />
   );
 }
 
