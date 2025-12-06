@@ -224,29 +224,6 @@ export const minutes = (m: number): number => m * MS.MINUTE;
 export const hours = (h: number): number => h * MS.HOUR;
 
 // =============================================================================
-// LEGACY EXPORT - For backward compatibility
-// =============================================================================
-
-/**
- * @deprecated Use individual exports instead (DEBOUNCE, DURATION, etc.)
- */
-export const TIMING = {
-  DEBOUNCE,
-  ANIMATION: DURATION,
-  DURATION,
-  TIMEOUT,
-  POLLING,
-  RETRY,
-  AUTO_SAVE,
-  MOCK_API: MOCK_DELAY,
-  CACHE,
-  MS_PER: MS,
-  SCHEDULE,
-  RELATIVE_TIME,
-  FEEDBACK,
-} as const;
-
-// =============================================================================
 // TYPE EXPORTS
 // =============================================================================
 

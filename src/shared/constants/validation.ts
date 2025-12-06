@@ -241,52 +241,6 @@ export const ARRAY_LIMITS = {
 } as const;
 
 // =============================================================================
-// LEGACY EXPORTS - For backward compatibility
-// =============================================================================
-
-/** @deprecated Use individual exports */
-export const VALIDATION = {
-  PASSWORD,
-  PHONE,
-  EMAIL,
-  TEXT,
-  NUMERIC,
-  DATE,
-  FILE_UPLOAD,
-} as const;
-
-/** @deprecated Use individual exports */
-export const BUSINESS_RULES = {
-  ...RETRY_CONFIG,
-  ...CIRCUIT_BREAKER,
-  ...RATE_LIMIT,
-  ...PAYMENT,
-  ...NOTIFICATION,
-  ...SESSION,
-  ...CLUB,
-  ...MATCH,
-} as const;
-
-// Legacy aliases
-export const PASSWORD_RULES = PASSWORD;
-export const WHATSAPP_RULES = PHONE;
-export const EMAIL_RULES = EMAIL;
-export const TEXT_RULES = TEXT;
-export const NUMERIC_RULES = NUMERIC;
-export const DATE_RULES = DATE;
-export const FILE_UPLOAD_RULES = FILE_UPLOAD;
-export const CLUB_SETTINGS = CLUB;
-export const MATCH_RULES = MATCH;
-export const RETRY_RULES = RETRY_CONFIG;
-export const RATE_LIMITING = RATE_LIMIT;
-export const PAYMENT_RULES = PAYMENT;
-export const NOTIFICATION_RULES = NOTIFICATION;
-export const SESSION_RULES = SESSION;
-export const VALIDATION_LIMITS = ARRAY_LIMITS;
-
-// Note: PAGE is defined in numbers.ts to avoid duplication
-
-// =============================================================================
 // TYPE EXPORTS
 // =============================================================================
 
