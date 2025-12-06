@@ -1,6 +1,6 @@
 import { Alert } from 'react-native';
 import { PathfinderClass } from '../../../types';
-import { LIMITS, MESSAGES, VALIDATION, EMPTY_VALUE } from '../../../shared/constants';
+import { LIMITS, MESSAGES, PHONE, PASSWORD, EMPTY_VALUE } from '../../../shared/constants';
 
 interface FormData {
   name: string;
@@ -23,8 +23,8 @@ function hasRequiredFields(form: FormData): boolean {
 }
 
 function isValidWhatsapp(number: string): boolean {
-  const normalized = number.replace(VALIDATION.WHATSAPP.NORMALIZE_PATTERN, EMPTY_VALUE);
-  return VALIDATION.WHATSAPP.REGEX.test(normalized);
+  const normalized = number.replace(PHONE.NORMALIZE_PATTERN, EMPTY_VALUE);
+  return PHONE.REGEX.test(normalized);
 }
 
 export function validateRegistration(form: FormData): boolean {
@@ -40,7 +40,7 @@ export function validateRegistration(form: FormData): boolean {
   if (form.password !== form.confirmPassword) {
     return showError(MESSAGES.ERRORS.PASSWORD_MISMATCH);
   }
-  if (form.password.length < VALIDATION.PASSWORD.MIN_LENGTH) {
+  if (form.password.length < PASSWORD.MIN_LENGTH) {
     return showError(MESSAGES.ERRORS.PASSWORD_TOO_SHORT);
   }
   return true;

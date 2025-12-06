@@ -6,7 +6,7 @@
  */
 
 import { z } from 'zod';
-import { VALIDATION, MESSAGES } from '../../../shared/constants';
+import { PASSWORD, TEXT, MESSAGES } from '../../../shared/constants';
 
 /**
  * Login credentials validation schema
@@ -20,7 +20,7 @@ export const loginSchema = z.object({
   email: z.string().email(MESSAGES.ERRORS.INVALID_EMAIL_ADDRESS).toLowerCase().trim(),
   password: z
     .string()
-    .min(VALIDATION.PASSWORD.MIN_LENGTH, MESSAGES.ERRORS.PASSWORD_TOO_SHORT_8)
+    .min(PASSWORD.MIN_LENGTH, MESSAGES.ERRORS.PASSWORD_TOO_SHORT_8)
     .regex(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
       MESSAGES.ERRORS.PASSWORD_REQUIREMENTS
@@ -39,15 +39,15 @@ export const registerSchema = z.object({
   email: z.string().email(MESSAGES.ERRORS.INVALID_EMAIL_ADDRESS).toLowerCase().trim(),
   password: z
     .string()
-    .min(VALIDATION.PASSWORD.MIN_LENGTH, MESSAGES.ERRORS.PASSWORD_TOO_SHORT_8)
+    .min(PASSWORD.MIN_LENGTH, MESSAGES.ERRORS.PASSWORD_TOO_SHORT_8)
     .regex(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
       MESSAGES.ERRORS.PASSWORD_REQUIREMENTS
     ),
   name: z
     .string()
-    .min(VALIDATION.TEXT.NAME_MIN_LENGTH, MESSAGES.ERRORS.NAME_TOO_SHORT)
-    .max(VALIDATION.TEXT.NAME_MAX_LENGTH, MESSAGES.ERRORS.NAME_TOO_LONG)
+    .min(TEXT.NAME_MIN, MESSAGES.ERRORS.NAME_TOO_SHORT)
+    .max(TEXT.NAME_MAX, MESSAGES.ERRORS.NAME_TOO_LONG)
     .trim(),
   clubId: z.string().min(1, MESSAGES.ERRORS.CLUB_ID_REQUIRED).trim(),
 });
@@ -66,8 +66,8 @@ export const updateUserSchema = z
   .object({
     name: z
       .string()
-      .min(VALIDATION.TEXT.NAME_MIN_LENGTH, MESSAGES.ERRORS.NAME_TOO_SHORT)
-      .max(VALIDATION.TEXT.NAME_MAX_LENGTH, MESSAGES.ERRORS.NAME_TOO_LONG)
+      .min(TEXT.NAME_MIN, MESSAGES.ERRORS.NAME_TOO_SHORT)
+      .max(TEXT.NAME_MAX, MESSAGES.ERRORS.NAME_TOO_LONG)
       .trim()
       .optional(),
     email: z.string().email(MESSAGES.ERRORS.INVALID_EMAIL_ADDRESS).toLowerCase().trim().optional(),
@@ -77,7 +77,7 @@ export const updateUserSchema = z
       .optional(),
     language: z
       .string()
-      .length(VALIDATION.TEXT.LANGUAGE_CODE_LENGTH, MESSAGES.ERRORS.INVALID_LANGUAGE_CODE)
+      .length(TEXT.LANGUAGE_CODE_LENGTH, MESSAGES.ERRORS.INVALID_LANGUAGE_CODE)
       .toLowerCase()
       .optional(),
     isActive: z.boolean().optional(),
@@ -98,7 +98,7 @@ export const changePasswordSchema = z
     currentPassword: z.string().min(1, MESSAGES.ERRORS.CURRENT_PASSWORD_REQUIRED),
     newPassword: z
       .string()
-      .min(VALIDATION.PASSWORD.MIN_LENGTH, MESSAGES.ERRORS.PASSWORD_TOO_SHORT_8)
+      .min(PASSWORD.MIN_LENGTH, MESSAGES.ERRORS.PASSWORD_TOO_SHORT_8)
       .regex(
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
         MESSAGES.ERRORS.PASSWORD_REQUIREMENTS
@@ -131,7 +131,7 @@ export function isValidEmail(email: string): boolean {
  * @returns Strength level: weak, medium, strong
  */
 export function getPasswordStrength(password: string): 'weak' | 'medium' | 'strong' {
-  if (password.length < VALIDATION.PASSWORD.MIN_LENGTH) {
+  if (password.length < PASSWORD.MIN_LENGTH) {
     return 'weak';
   }
 
@@ -143,8 +143,8 @@ export function getPasswordStrength(password: string): 'weak' | 'medium' | 'stro
   const strength = [hasLower, hasUpper, hasNumber, hasSpecial].filter(Boolean).length;
 
   if (
-    strength < VALIDATION.PASSWORD.MIN_STRENGTH_REQUIREMENTS ||
-    password.length < VALIDATION.PASSWORD.MIN_LENGTH_STRONG
+    strength < PASSWORD.MIN_STRENGTH_REQUIREMENTS ||
+    password.length < PASSWORD.MIN_LENGTH_STRONG
   ) {
     return 'medium';
   }

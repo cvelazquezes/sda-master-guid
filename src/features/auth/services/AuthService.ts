@@ -307,9 +307,13 @@ export class AuthService implements IAuthService {
  * ```
  */
 export function createAuthService(): AuthService {
-  const repository = environment.useMockData ? new MockAuthRepository() : new ApiAuthRepository();
+  const repository = environment.mock.useMockApi
+    ? new MockAuthRepository()
+    : new ApiAuthRepository();
 
-  logger.info(`AuthService created with ${environment.useMockData ? 'Mock' : 'API'} repository`);
+  logger.info(
+    `AuthService created with ${environment.mock.useMockApi ? 'Mock' : 'API'} repository`
+  );
 
   return new AuthService(repository, tokenStorage);
 }
