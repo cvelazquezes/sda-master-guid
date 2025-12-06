@@ -598,6 +598,35 @@ export const BATCH = {
 } as const;
 
 // =============================================================================
+// SHADOW PRESETS
+// =============================================================================
+
+/**
+ * Shadow preset height values for different component elevations
+ */
+export const SHADOW_HEIGHT = {
+  SUBTLE: 1,
+  CARD: 2,
+  ELEVATED: 4,
+  MODAL: 8,
+} as const;
+
+/**
+ * Shadow preset radius values for blur effect
+ */
+export const SHADOW_BLUR = {
+  SUBTLE: 2,
+  CARD: 4,
+  ELEVATED: 8,
+  MODAL: 16,
+} as const;
+
+/**
+ * Modal shadow elevation for Android
+ */
+export const MODAL_ELEVATION = 24;
+
+// =============================================================================
 // TYPE EXPORTS
 // =============================================================================
 
