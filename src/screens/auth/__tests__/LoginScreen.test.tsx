@@ -6,9 +6,9 @@
 
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { NavigationContainer } from '@react-navigation/native';
 import LoginScreen from '../LoginScreen';
 import { useAuth } from '../../../context/AuthContext';
-import { NavigationContainer } from '@react-navigation/native';
 import { AuthenticationError, NetworkError } from '../../../shared/utils/errors';
 
 // Mock navigation
@@ -24,7 +24,7 @@ jest.mock('@react-navigation/native', () => ({
 jest.mock('../../../context/AuthContext');
 
 // Helper to render with navigation
-const renderWithNavigation = (component: React.ReactElement) => {
+const renderWithNavigation = (component: React.ReactElement): ReturnType<typeof render> => {
   return render(<NavigationContainer>{component}</NavigationContainer>);
 };
 

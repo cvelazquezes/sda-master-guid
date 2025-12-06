@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -12,12 +11,11 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { userService } from '../../services/userService';
-import { User } from '../../types';
+import { User, UserRole } from '../../types';
 import { mobileTypography, mobileIconSizes, layoutConstants } from '../../shared/theme';
 import { designTokens } from '../../shared/theme/designTokens';
-import { SelectionModal } from '../../shared/components';
+import { SelectionModal, Text } from '../../shared/components';
 import { logger } from '../../shared/utils/logger';
-import { UserRole } from '../../types';
 import {
   ALERT_BUTTON_STYLE,
   DIRECTIVE_POSITION_IDS,
@@ -89,30 +87,29 @@ const DIRECTIVE_POSITION_CONFIG = [
   },
 ] as const;
 
-const ClubDirectiveScreen = () => {
-  const { t } = useTranslation();
-  const { user } = useAuth();
+type TranslationFn = ReturnType<typeof useTranslation>['t'];
+
+// Custom hook for directive data
+interface UseDirectiveDataReturn {
+  positions: DirectivePosition[];
+  setPositions: React.Dispatch<React.SetStateAction<DirectivePosition[]>>;
+  clubMembers: User[];
+  refreshing: boolean;
+  onRefresh: () => void;
+}
+
+function useDirectiveData(clubId?: string): UseDirectiveDataReturn {
   const [positions, setPositions] = useState<DirectivePosition[]>([]);
   const [clubMembers, setClubMembers] = useState<User[]>([]);
   const [, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [selectMemberModalVisible, setSelectMemberModalVisible] = useState(false);
-  const [currentPosition, setCurrentPosition] = useState<DirectivePosition | null>(null);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async (): Promise<void> => {
     try {
-      // Initialize positions
       const initialPositions = DIRECTIVE_POSITION_CONFIG.map((pos) => ({ ...pos }));
       setPositions(initialPositions);
-
-      // Load club members (exclude club_admin role as they're already directors)
-      if (user?.clubId) {
-        const members = await userService.getUsersByClub(user.clubId);
-        // Filter active members who are not club admins
+      if (clubId) {
+        const members = await userService.getUsersByClub(clubId);
         const eligibleMembers = members.filter((m) => m.isActive && m.role === UserRole.USER);
         setClubMembers(eligibleMembers);
       }
@@ -123,300 +120,403 @@ const ClubDirectiveScreen = () => {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [clubId]);
 
-  const onRefresh = () => {
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const onRefresh = (): void => {
     setRefreshing(true);
     loadData();
   };
 
-  const handleAssignMember = (position: DirectivePosition) => {
-    setCurrentPosition(position);
-    setSelectMemberModalVisible(true);
-  };
+  return { positions, setPositions, clubMembers, refreshing, onRefresh };
+}
 
-  const handleSelectMember = (member: User) => {
-    if (!currentPosition) return;
+// Summary banner component
+function SummaryBanner({
+  assignedCount,
+  vacantCount,
+  t,
+}: {
+  assignedCount: number;
+  vacantCount: number;
+  t: TranslationFn;
+}): React.JSX.Element {
+  return (
+    <View style={styles.summaryBanner}>
+      <View style={styles.summaryItem}>
+        <MaterialCommunityIcons
+          name={ICONS.ACCOUNT_CHECK}
+          size={mobileIconSizes.medium}
+          color={designTokens.colors.success}
+        />
+        <Text style={styles.summaryText}>
+          <Text style={styles.summaryBold}>{assignedCount}</Text>{' '}
+          {t('screens.clubDirective.assigned')}
+        </Text>
+      </View>
+      <View style={styles.summarySeparator} />
+      <View style={styles.summaryItem}>
+        <MaterialCommunityIcons
+          name={ICONS.ACCOUNT_CLOCK}
+          size={mobileIconSizes.medium}
+          color={designTokens.colors.warning}
+        />
+        <Text style={styles.summaryText}>
+          <Text style={styles.summaryBold}>{vacantCount}</Text> {t('screens.clubDirective.vacant')}
+        </Text>
+      </View>
+    </View>
+  );
+}
 
-    // Check if member is already assigned to another position
-    const existingPosition = positions.find(
-      (pos) => pos.memberId === member.id && pos.id !== currentPosition.id
-    );
+// Assigned position card
+function AssignedPositionCard({
+  position,
+  onRemove,
+  t,
+}: {
+  position: DirectivePosition;
+  onRemove: () => void;
+  t: TranslationFn;
+}): React.JSX.Element {
+  return (
+    <View style={styles.positionCard}>
+      <View style={[styles.positionIcon, { backgroundColor: `${position.color}20` }]}>
+        <MaterialCommunityIcons
+          name={position.icon as typeof ICONS.CHECK}
+          size={mobileIconSizes.xlarge}
+          color={position.color}
+        />
+      </View>
+      <View style={styles.positionContent}>
+        <View style={styles.positionHeader}>
+          <Text style={styles.positionTitle}>{t(position.titleKey)}</Text>
+        </View>
+        <View style={styles.memberCard}>
+          <View style={[styles.memberAvatar, { backgroundColor: position.color }]}>
+            <Text style={styles.memberAvatarText}>
+              {position.memberName?.charAt(0).toUpperCase()}
+            </Text>
+          </View>
+          <View style={styles.memberInfo}>
+            <Text style={styles.memberName}>{position.memberName}</Text>
+            <Text style={styles.memberEmail}>{position.memberEmail}</Text>
+          </View>
+          <TouchableOpacity style={styles.removeButton} onPress={onRemove}>
+            <MaterialCommunityIcons
+              name={ICONS.CLOSE_CIRCLE}
+              size={mobileIconSizes.medium}
+              color={designTokens.colors.error}
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
+}
 
-    if (existingPosition) {
-      Alert.alert(
-        MESSAGES.TITLES.MEMBER_ALREADY_ASSIGNED,
-        MESSAGES.WARNINGS.MEMBER_ALREADY_IN_POSITION,
-        [
-          { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
-          {
-            text: t('screens.clubDirective.reassign'),
-            onPress: () => {
-              // Remove from old position
-              setPositions((prev) =>
-                prev.map((pos) =>
-                  pos.id === existingPosition.id
-                    ? { ...pos, memberId: undefined, memberName: undefined, memberEmail: undefined }
-                    : pos
-                )
-              );
-              // Assign to new position
-              assignMemberToPosition(member);
-            },
-          },
-        ]
+// Vacant position card
+function VacantPositionCard({
+  position,
+  onAssign,
+  t,
+}: {
+  position: DirectivePosition;
+  onAssign: () => void;
+  t: TranslationFn;
+}): React.JSX.Element {
+  return (
+    <View style={styles.positionCard}>
+      <View style={[styles.positionIcon, { backgroundColor: `${position.color}20` }]}>
+        <MaterialCommunityIcons
+          name={position.icon as typeof ICONS.CHECK}
+          size={mobileIconSizes.xlarge}
+          color={position.color}
+        />
+      </View>
+      <View style={styles.positionContent}>
+        <View style={styles.positionHeader}>
+          <Text style={styles.positionTitle}>{t(position.titleKey)}</Text>
+        </View>
+        <Text style={styles.positionDescription}>{t(position.descriptionKey)}</Text>
+        <TouchableOpacity style={styles.assignButton} onPress={onAssign}>
+          <MaterialCommunityIcons
+            name={ICONS.ACCOUNT_PLUS}
+            size={mobileIconSizes.small}
+            color={designTokens.colors.primary}
+          />
+          <Text style={styles.assignButtonText}>{t('screens.clubDirective.assignMember')}</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
+// Custom hook for directive handlers
+interface UseDirectiveHandlersReturn {
+  selectMemberModalVisible: boolean;
+  currentPosition: DirectivePosition | null;
+  assignedPositions: DirectivePosition[];
+  vacantPositions: DirectivePosition[];
+  handleAssignMember: (pos: DirectivePosition) => void;
+  handleSelectMember: (member: User) => void;
+  handleRemoveMember: (pos: DirectivePosition) => void;
+  handleSaveDirective: () => void;
+  closeModal: () => void;
+}
+
+// Helper: clear position data
+const clearPositionData = (
+  setPositions: React.Dispatch<React.SetStateAction<DirectivePosition[]>>,
+  positionId: string
+): void => {
+  setPositions((prev) =>
+    prev.map((pos) =>
+      pos.id === positionId
+        ? { ...pos, memberId: undefined, memberName: undefined, memberEmail: undefined }
+        : pos
+    )
+  );
+};
+
+function useDirectiveHandlers(
+  positions: DirectivePosition[],
+  setPositions: React.Dispatch<React.SetStateAction<DirectivePosition[]>>,
+  t: TranslationFn
+): UseDirectiveHandlersReturn {
+  const [selectMemberModalVisible, setSelectMemberModalVisible] = useState(false);
+  const [currentPosition, setCurrentPosition] = useState<DirectivePosition | null>(null);
+
+  const assignedPositions = positions.filter((pos) => pos.memberId);
+  const vacantPositions = positions.filter((pos) => !pos.memberId);
+  const closeModal = (): void => setSelectMemberModalVisible(false);
+
+  const clearPosition = useCallback(
+    (id: string): void => clearPositionData(setPositions, id),
+    [setPositions]
+  );
+
+  const assignMemberToPosition = useCallback(
+    (member: User): void => {
+      if (!currentPosition) {
+        return;
+      }
+      setPositions((prev) =>
+        prev.map((pos) =>
+          pos.id === currentPosition.id
+            ? { ...pos, memberId: member.id, memberName: member.name, memberEmail: member.email }
+            : pos
+        )
       );
-      return;
-    }
+      setSelectMemberModalVisible(false);
+      Alert.alert(
+        MESSAGES.TITLES.MEMBER_ASSIGNED_TO_POSITION,
+        `${member.name} assigned as ${t(currentPosition.titleKey)}.`
+      );
+      setCurrentPosition(null);
+    },
+    [currentPosition, setPositions, t]
+  );
 
-    assignMemberToPosition(member);
-  };
+  const handleAssignMember = useCallback((pos: DirectivePosition): void => {
+    setCurrentPosition(pos);
+    setSelectMemberModalVisible(true);
+  }, []);
 
-  const assignMemberToPosition = (member: User) => {
-    if (!currentPosition) return;
+  const handleSelectMember = useCallback(
+    (member: User): void => {
+      if (!currentPosition) {
+        return;
+      }
+      const existing = positions.find(
+        (p) => p.memberId === member.id && p.id !== currentPosition.id
+      );
+      if (existing) {
+        const onReassign = (): void => {
+          clearPosition(existing.id);
+          assignMemberToPosition(member);
+        };
+        Alert.alert(
+          MESSAGES.TITLES.MEMBER_ALREADY_ASSIGNED,
+          MESSAGES.WARNINGS.MEMBER_ALREADY_IN_POSITION,
+          [
+            { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
+            { text: t('screens.clubDirective.reassign'), onPress: onReassign },
+          ]
+        );
+        return;
+      }
+      assignMemberToPosition(member);
+    },
+    [currentPosition, positions, t, clearPosition, assignMemberToPosition]
+  );
 
-    setPositions((prev) =>
-      prev.map((pos) =>
-        pos.id === currentPosition.id
-          ? {
-              ...pos,
-              memberId: member.id,
-              memberName: member.name,
-              memberEmail: member.email,
-            }
-          : pos
-      )
-    );
-
-    setSelectMemberModalVisible(false);
-    setCurrentPosition(null);
-
-    // Show success message
-    Alert.alert(
-      MESSAGES.TITLES.MEMBER_ASSIGNED_TO_POSITION,
-      `${member.name} has been assigned as ${t(currentPosition.titleKey)}.`,
-      [{ text: MESSAGES.BUTTONS.OK }]
-    );
-  };
-
-  const handleRemoveMember = (position: DirectivePosition) => {
-    Alert.alert(MESSAGES.TITLES.REMOVE_MEMBER, MESSAGES.WARNINGS.CONFIRM_REMOVE_MEMBER, [
-      { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
-      {
-        text: t('screens.clubDirective.remove'),
-        style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
-        onPress: () => {
-          setPositions((prev) =>
-            prev.map((pos) =>
-              pos.id === position.id
-                ? { ...pos, memberId: undefined, memberName: undefined, memberEmail: undefined }
-                : pos
-            )
-          );
+  const handleRemoveMember = useCallback(
+    (pos: DirectivePosition): void => {
+      Alert.alert(MESSAGES.TITLES.REMOVE_MEMBER, MESSAGES.WARNINGS.CONFIRM_REMOVE_MEMBER, [
+        { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
+        {
+          text: t('screens.clubDirective.remove'),
+          style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
+          onPress: (): void => clearPosition(pos.id),
         },
-      },
-    ]);
-  };
-
-  const handleSaveDirective = () => {
-    const assignedCount = positions.filter((pos) => pos.memberId).length;
-
-    if (assignedCount === 0) {
-      Alert.alert(MESSAGES.TITLES.NO_ASSIGNMENTS, t('screens.clubDirective.assignAtLeastOne'), [
-        { text: MESSAGES.BUTTONS.OK },
       ]);
+    },
+    [t, clearPosition]
+  );
+
+  return {
+    selectMemberModalVisible,
+    currentPosition,
+    assignedPositions,
+    vacantPositions,
+    handleAssignMember,
+    handleSelectMember,
+    handleRemoveMember,
+    closeModal,
+  };
+}
+
+interface PositionSectionProps {
+  positions: DirectivePosition[];
+  titleKey: string;
+  renderCard: (pos: DirectivePosition) => React.JSX.Element;
+  t: TranslationFn;
+}
+
+function PositionSection({
+  positions,
+  titleKey,
+  renderCard,
+  t,
+}: PositionSectionProps): React.JSX.Element | null {
+  if (positions.length === 0) {
+    return null;
+  }
+  return (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>{t(titleKey)}</Text>
+      {positions.map(renderCard)}
+    </View>
+  );
+}
+
+function InfoBanner({ t }: { t: TranslationFn }): React.JSX.Element {
+  return (
+    <View style={styles.infoBanner}>
+      <MaterialCommunityIcons
+        name={ICONS.INFORMATION}
+        size={mobileIconSizes.medium}
+        color={designTokens.colors.info}
+      />
+      <Text style={styles.infoText}>{t('screens.clubDirective.infoText')}</Text>
+    </View>
+  );
+}
+
+function SaveFooter({ onSave, t }: { onSave: () => void; t: TranslationFn }): React.JSX.Element {
+  return (
+    <View style={styles.footer}>
+      <TouchableOpacity style={styles.saveButton} onPress={onSave}>
+        <MaterialCommunityIcons
+          name={ICONS.CONTENT_SAVE}
+          size={mobileIconSizes.large}
+          color={designTokens.colors.textInverse}
+        />
+        <Text style={styles.saveButtonText}>{t('screens.clubDirective.saveDirective')}</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+const ClubDirectiveScreen = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  const { user } = useAuth();
+  const { positions, setPositions, clubMembers, refreshing, onRefresh } = useDirectiveData(
+    user?.clubId
+  );
+  const h = useDirectiveHandlers(positions, setPositions, t);
+
+  const handleSave = (): void => {
+    if (h.assignedPositions.length === 0) {
+      Alert.alert(MESSAGES.TITLES.NO_ASSIGNMENTS, t('screens.clubDirective.assignAtLeastOne'));
       return;
     }
-
-    Alert.alert(
-      MESSAGES.TITLES.DIRECTIVE_SAVED_TITLE,
-      t('screens.clubDirective.saveSuccess', { count: assignedCount }),
-      [{ text: MESSAGES.BUTTONS.OK }]
-    );
+    const msg = t('screens.clubDirective.saveSuccess', { count: h.assignedPositions.length });
+    Alert.alert(MESSAGES.TITLES.DIRECTIVE_SAVED_TITLE, msg);
   };
 
-  const getAssignedPositions = () => positions.filter((pos) => pos.memberId);
-  const getUnassignedPositions = () => positions.filter((pos) => !pos.memberId);
+  const modalItems = clubMembers.map((m) => {
+    const ap = positions.find((p) => p.memberId === m.id);
+    return {
+      id: m.id,
+      title: m.name,
+      subtitle: m.email,
+      avatar: m.name.charAt(0).toUpperCase(),
+      iconColor: ap?.color || designTokens.colors.primary,
+      badge: ap ? t(ap.titleKey) : undefined,
+      badgeColor: ap?.color,
+      disabled: ap?.id === h.currentPosition?.id,
+    };
+  });
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>{t('screens.clubDirective.title')}</Text>
         <Text style={styles.headerSubtitle}>{t('screens.clubDirective.subtitle')}</Text>
       </View>
-
-      {/* Summary Banner */}
-      <View style={styles.summaryBanner}>
-        <View style={styles.summaryItem}>
-          <MaterialCommunityIcons
-            name={ICONS.ACCOUNT_CHECK}
-            size={mobileIconSizes.medium}
-            color={designTokens.colors.success}
-          />
-          <Text style={styles.summaryText}>
-            <Text style={styles.summaryBold}>{getAssignedPositions().length}</Text>{' '}
-            {t('screens.clubDirective.assigned')}
-          </Text>
-        </View>
-        <View style={styles.summarySeparator} />
-        <View style={styles.summaryItem}>
-          <MaterialCommunityIcons
-            name={ICONS.ACCOUNT_CLOCK}
-            size={mobileIconSizes.medium}
-            color={designTokens.colors.warning}
-          />
-          <Text style={styles.summaryText}>
-            <Text style={styles.summaryBold}>{getUnassignedPositions().length}</Text>{' '}
-            {t('screens.clubDirective.vacant')}
-          </Text>
-        </View>
-      </View>
-
+      <SummaryBanner
+        assignedCount={h.assignedPositions.length}
+        vacantCount={h.vacantPositions.length}
+        t={t}
+      />
       <ScrollView
         style={styles.content}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        {/* Assigned Positions Section */}
-        {getAssignedPositions().length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t('screens.clubDirective.assignedPositions')}</Text>
-            {getAssignedPositions().map((position) => (
-              <View key={position.id} style={styles.positionCard}>
-                {/* Position Icon & Info */}
-                <View style={[styles.positionIcon, { backgroundColor: `${position.color}20` }]}>
-                  <MaterialCommunityIcons
-                    name={position.icon as typeof ICONS.CHECK}
-                    size={mobileIconSizes.xlarge}
-                    color={position.color}
-                  />
-                </View>
-
-                <View style={styles.positionContent}>
-                  <View style={styles.positionHeader}>
-                    <Text style={styles.positionTitle}>{t(position.titleKey)}</Text>
-                  </View>
-
-                  {/* Assigned Member */}
-                  <View style={styles.memberCard}>
-                    <View style={[styles.memberAvatar, { backgroundColor: position.color }]}>
-                      <Text style={styles.memberAvatarText}>
-                        {position.memberName?.charAt(0).toUpperCase()}
-                      </Text>
-                    </View>
-                    <View style={styles.memberInfo}>
-                      <Text style={styles.memberName}>{position.memberName}</Text>
-                      <Text style={styles.memberEmail}>{position.memberEmail}</Text>
-                    </View>
-                    <TouchableOpacity
-                      style={styles.removeButton}
-                      onPress={() => handleRemoveMember(position)}
-                    >
-                      <MaterialCommunityIcons
-                        name={ICONS.CLOSE_CIRCLE}
-                        size={mobileIconSizes.medium}
-                        color={designTokens.colors.error}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </View>
-            ))}
-          </View>
-        )}
-
-        {/* Vacant Positions Section */}
-        {getUnassignedPositions().length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t('screens.clubDirective.vacantPositions')}</Text>
-            {getUnassignedPositions().map((position) => (
-              <View key={position.id} style={styles.positionCard}>
-                {/* Position Icon & Info */}
-                <View style={[styles.positionIcon, { backgroundColor: `${position.color}20` }]}>
-                  <MaterialCommunityIcons
-                    name={position.icon as typeof ICONS.CHECK}
-                    size={mobileIconSizes.xlarge}
-                    color={position.color}
-                  />
-                </View>
-
-                <View style={styles.positionContent}>
-                  <View style={styles.positionHeader}>
-                    <Text style={styles.positionTitle}>{t(position.titleKey)}</Text>
-                  </View>
-                  <Text style={styles.positionDescription}>{t(position.descriptionKey)}</Text>
-
-                  {/* Assign Button */}
-                  <TouchableOpacity
-                    style={styles.assignButton}
-                    onPress={() => handleAssignMember(position)}
-                  >
-                    <MaterialCommunityIcons
-                      name={ICONS.ACCOUNT_PLUS}
-                      size={mobileIconSizes.small}
-                      color={designTokens.colors.primary}
-                    />
-                    <Text style={styles.assignButtonText}>
-                      {t('screens.clubDirective.assignMember')}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))}
-          </View>
-        )}
-
-        {/* Info Banner */}
-        <View style={styles.infoBanner}>
-          <MaterialCommunityIcons
-            name={ICONS.INFORMATION}
-            size={mobileIconSizes.medium}
-            color={designTokens.colors.info}
-          />
-          <Text style={styles.infoText}>{t('screens.clubDirective.infoText')}</Text>
-        </View>
-      </ScrollView>
-
-      {/* Save Button */}
-      {getAssignedPositions().length > 0 && (
-        <View style={styles.footer}>
-          <TouchableOpacity style={styles.saveButton} onPress={handleSaveDirective}>
-            <MaterialCommunityIcons
-              name={ICONS.CONTENT_SAVE}
-              size={mobileIconSizes.large}
-              color={designTokens.colors.textInverse}
+        <PositionSection
+          positions={h.assignedPositions}
+          titleKey="screens.clubDirective.assignedPositions"
+          t={t}
+          renderCard={(pos): React.JSX.Element => (
+            <AssignedPositionCard
+              key={pos.id}
+              position={pos}
+              onRemove={(): void => h.handleRemoveMember(pos)}
+              t={t}
             />
-            <Text style={styles.saveButtonText}>{t('screens.clubDirective.saveDirective')}</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {/* Select Member Modal */}
+          )}
+        />
+        <PositionSection
+          positions={h.vacantPositions}
+          titleKey="screens.clubDirective.vacantPositions"
+          t={t}
+          renderCard={(pos): React.JSX.Element => (
+            <VacantPositionCard
+              key={pos.id}
+              position={pos}
+              onAssign={(): void => h.handleAssignMember(pos)}
+              t={t}
+            />
+          )}
+        />
+        <InfoBanner t={t} />
+      </ScrollView>
+      {h.assignedPositions.length > 0 && <SaveFooter onSave={handleSave} t={t} />}
       <SelectionModal
-        visible={selectMemberModalVisible}
-        onClose={() => setSelectMemberModalVisible(false)}
+        visible={h.selectMemberModalVisible}
+        onClose={h.closeModal}
         title={t('screens.clubDirective.assignMember')}
-        subtitle={currentPosition ? t(currentPosition.titleKey) : undefined}
-        items={clubMembers.map((member) => {
-          const assignedPosition = positions.find((pos) => pos.memberId === member.id);
-          const isAssigned = !!assignedPosition;
-          const isSamePosition = assignedPosition?.id === currentPosition?.id;
-
-          return {
-            id: member.id,
-            title: member.name,
-            subtitle: member.email,
-            avatar: member.name.charAt(0).toUpperCase(),
-            iconColor: assignedPosition?.color || designTokens.colors.primary,
-            badge: isAssigned ? t(assignedPosition.titleKey) : undefined,
-            badgeColor: assignedPosition?.color,
-            disabled: isAssigned && isSamePosition,
-          };
-        })}
-        onSelectItem={(item) => {
-          const member = clubMembers.find((m) => m.id === item.id);
-          if (member) {
-            handleSelectMember(member);
+        subtitle={h.currentPosition ? t(h.currentPosition.titleKey) : undefined}
+        items={modalItems}
+        onSelectItem={(item): void => {
+          const m = clubMembers.find((x) => x.id === item.id);
+          if (m) {
+            h.handleSelectMember(m);
           }
         }}
         emptyMessage={t('screens.clubDirective.noAvailableMembers')}

@@ -1,0 +1,61 @@
+import { useState, useEffect, useCallback } from 'react';
+import { Alert } from 'react-native';
+import { clubService } from '../../../services/clubService';
+import { paymentService } from '../../../services/paymentService';
+import { User, Club, MemberBalance, ApprovalStatus } from '../../../types';
+import { MESSAGES } from '../../../shared/constants';
+
+interface UseClubMembersReturn {
+  members: User[];
+  balances: MemberBalance[];
+  refreshing: boolean;
+  loadData: () => Promise<void>;
+  onRefresh: () => void;
+}
+
+export function useClubMembers(clubId?: string): UseClubMembersReturn {
+  const [members, setMembers] = useState<User[]>([]);
+  const [, setClub] = useState<Club | null>(null);
+  const [balances, setBalances] = useState<MemberBalance[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadData = useCallback(async (): Promise<void> => {
+    if (!clubId) {
+      return;
+    }
+    try {
+      const [membersData, clubData] = await Promise.all([
+        clubService.getClubMembers(clubId),
+        clubService.getClub(clubId),
+      ]);
+      setMembers(membersData);
+      setClub(clubData);
+
+      const approvedMemberIds = membersData
+        .filter((m) => m.approvalStatus === ApprovalStatus.APPROVED)
+        .map((m) => m.id);
+
+      if (approvedMemberIds.length > 0) {
+        const balancesData = await paymentService.getAllMembersBalances(clubId, approvedMemberIds);
+        setBalances(balancesData);
+      }
+    } catch {
+      Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_LOAD_DATA);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [clubId]);
+
+  useEffect(() => {
+    if (clubId) {
+      loadData();
+    }
+  }, [clubId, loadData]);
+
+  const onRefresh = (): void => {
+    setRefreshing(true);
+    loadData();
+  };
+
+  return { members, balances, refreshing, loadData, onRefresh };
+}

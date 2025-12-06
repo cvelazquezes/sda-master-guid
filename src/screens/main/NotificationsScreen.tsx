@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+// ✅ Import Text from UI primitives
 import { useTranslation } from 'react-i18next';
+import { Text } from '../../shared/components';
 import { useAuth } from '../../context/AuthContext';
 import { mobileTypography, mobileIconSizes, layoutConstants } from '../../shared/theme';
 import { designTokens } from '../../shared/theme/designTokens';
@@ -16,6 +18,7 @@ import {
   flexValues,
   shadowOffsetValues,
 } from '../../shared/constants';
+import { TIME_MULTIPLIER, MATH } from '../../shared/constants/http';
 
 type NotificationType = (typeof NOTIFICATION_TYPE)[keyof typeof NOTIFICATION_TYPE];
 
@@ -28,125 +31,165 @@ interface Notification {
   read: boolean;
 }
 
-const NotificationsScreen = () => {
-  const { t } = useTranslation();
-  const {} = useAuth();
+// Helper functions extracted outside component
+const getNotificationIcon = (
+  type: NotificationType
+): keyof typeof MaterialCommunityIcons.glyphMap => {
+  const icons: Record<NotificationType, string> = {
+    [NOTIFICATION_TYPE.ACTIVITY]: ICONS.ACCOUNT_HEART,
+    [NOTIFICATION_TYPE.FEE]: ICONS.CASH,
+    [NOTIFICATION_TYPE.CLUB]: ICONS.ACCOUNT_GROUP,
+    [NOTIFICATION_TYPE.SYSTEM]: ICONS.BELL,
+  };
+  return (icons[type] || ICONS.BELL) as keyof typeof MaterialCommunityIcons.glyphMap;
+};
+
+const getNotificationColor = (type: NotificationType): string => {
+  const colors: Record<NotificationType, string> = {
+    [NOTIFICATION_TYPE.ACTIVITY]: designTokens.colors.primary,
+    [NOTIFICATION_TYPE.FEE]: designTokens.colors.warning,
+    [NOTIFICATION_TYPE.CLUB]: designTokens.colors.info,
+    [NOTIFICATION_TYPE.SYSTEM]: designTokens.colors.textSecondary,
+  };
+  return colors[type] || designTokens.colors.textSecondary;
+};
+
+type TranslationFn = ReturnType<typeof useTranslation>['t'];
+
+const formatTimestamp = (date: Date, t: TranslationFn): string => {
+  const diffMs = Date.now() - date.getTime();
+  const diffMins = Math.floor(diffMs / TIMING.MS_PER.MINUTE);
+  const diffHours = Math.floor(diffMs / TIMING.MS_PER.HOUR);
+  const diffDays = Math.floor(diffMs / TIMING.MS_PER.DAY);
+  if (diffMins < TIMING.RELATIVE_TIME.MINUTES) {
+    return t('screens.notifications.timeAgo.minutes', { count: diffMins });
+  }
+  if (diffHours < TIMING.RELATIVE_TIME.HOURS) {
+    return t('screens.notifications.timeAgo.hours', { count: diffHours });
+  }
+  if (diffDays < TIMING.RELATIVE_TIME.DAYS) {
+    return t('screens.notifications.timeAgo.days', { count: diffDays });
+  }
+  return date.toLocaleDateString();
+};
+
+// Notification card component
+interface NotificationCardProps {
+  notification: Notification;
+  onPress: () => void;
+  t: TranslationFn;
+}
+
+function NotificationCard({ notification, onPress, t }: NotificationCardProps): React.JSX.Element {
+  const color = getNotificationColor(notification.type);
+  const cardStyles = [styles.notificationCard, !notification.read && styles.notificationCardUnread];
+  return (
+    <TouchableOpacity style={cardStyles} onPress={onPress} activeOpacity={TOUCH_OPACITY.default}>
+      {!notification.read && <View style={styles.unreadDot} />}
+      <View style={[styles.iconContainer, { backgroundColor: `${color}15` }]}>
+        <MaterialCommunityIcons
+          name={getNotificationIcon(notification.type)}
+          size={mobileIconSizes.large}
+          color={color}
+        />
+      </View>
+      <View style={styles.notificationContent}>
+        <View style={styles.notificationHeader}>
+          <Text style={styles.notificationTitle} numberOfLines={TEXT_LINES.single}>
+            {notification.title}
+          </Text>
+          <Text style={styles.notificationTime}>{formatTimestamp(notification.timestamp, t)}</Text>
+        </View>
+        <Text style={styles.notificationMessage} numberOfLines={TEXT_LINES.double}>
+          {notification.message}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  );
+}
+
+// Custom hook for notifications
+interface UseNotificationsReturn {
+  notifications: Notification[];
+  refreshing: boolean;
+  refresh: () => void;
+  markAsRead: (id: string) => void;
+  markAllAsRead: () => void;
+  unreadCount: number;
+}
+
+// Mock notifications factory
+const createMockNotifications = (t: TranslationFn): Notification[] => {
+  const now = Date.now();
+  return [
+    {
+      id: '1',
+      type: NOTIFICATION_TYPE.ACTIVITY,
+      title: t('screens.notifications.mockTitles.newActivity'),
+      message: t('screens.notifications.mockMessages.newActivity'),
+      timestamp: new Date(now - TIMING.MS_PER.HOUR * TIME_MULTIPLIER.TWO),
+      read: false,
+    },
+    {
+      id: '2',
+      type: NOTIFICATION_TYPE.FEE,
+      title: t('screens.notifications.mockTitles.paymentDue'),
+      message: t('screens.notifications.mockMessages.paymentDue'),
+      timestamp: new Date(now - TIMING.MS_PER.DAY),
+      read: false,
+    },
+    {
+      id: '3',
+      type: NOTIFICATION_TYPE.CLUB,
+      title: t('screens.notifications.mockTitles.clubUpdate'),
+      message: t('screens.notifications.mockMessages.clubUpdate'),
+      timestamp: new Date(now - TIMING.MS_PER.DAY * TIME_MULTIPLIER.TWO),
+      read: true,
+    },
+    {
+      id: '4',
+      type: NOTIFICATION_TYPE.SYSTEM,
+      title: t('screens.notifications.mockTitles.welcome'),
+      message: t('screens.notifications.mockMessages.welcome'),
+      timestamp: new Date(now - TIMING.MS_PER.DAY * TIME_MULTIPLIER.THREE),
+      read: true,
+    },
+  ];
+};
+
+function useNotifications(t: TranslationFn): UseNotificationsReturn {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
+  const loadNotifications = useCallback(async () => {
+    setNotifications(createMockNotifications(t));
+    setRefreshing(false);
+  }, [t]);
+
   useEffect(() => {
     loadNotifications();
-  }, []);
+  }, [loadNotifications]);
 
-  const loadNotifications = async () => {
-    // Mock notifications - replace with actual API call
-    const mockNotifications: Notification[] = [
-      {
-        id: '1',
-        type: NOTIFICATION_TYPE.ACTIVITY,
-        title: t('screens.notifications.mockTitles.newActivity'),
-        message: t('screens.notifications.mockMessages.newActivity'),
-        timestamp: new Date(Date.now() - TIMING.MS_PER.HOUR * 2), // 2 hours ago
-        read: false,
-      },
-      {
-        id: '2',
-        type: NOTIFICATION_TYPE.FEE,
-        title: t('screens.notifications.mockTitles.paymentDue'),
-        message: t('screens.notifications.mockMessages.paymentDue'),
-        timestamp: new Date(Date.now() - TIMING.MS_PER.DAY), // 1 day ago
-        read: false,
-      },
-      {
-        id: '3',
-        type: NOTIFICATION_TYPE.CLUB,
-        title: t('screens.notifications.mockTitles.clubUpdate'),
-        message: t('screens.notifications.mockMessages.clubUpdate'),
-        timestamp: new Date(Date.now() - TIMING.MS_PER.DAY * 2), // 2 days ago
-        read: true,
-      },
-      {
-        id: '4',
-        type: NOTIFICATION_TYPE.SYSTEM,
-        title: t('screens.notifications.mockTitles.welcome'),
-        message: t('screens.notifications.mockMessages.welcome'),
-        timestamp: new Date(Date.now() - TIMING.MS_PER.DAY * 3), // 3 days ago
-        read: true,
-      },
-    ];
-
-    setNotifications(mockNotifications);
-    setRefreshing(false);
-  };
-
-  const onRefresh = () => {
+  const refresh = (): void => {
     setRefreshing(true);
     loadNotifications();
   };
-
-  const markAsRead = (notificationId: string) => {
-    setNotifications((prev) =>
-      prev.map((notif) => (notif.id === notificationId ? { ...notif, read: true } : notif))
-    );
-  };
-
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((notif) => ({ ...notif, read: true })));
-  };
-
-  const getNotificationIcon = (type: NotificationType) => {
-    switch (type) {
-      case NOTIFICATION_TYPE.ACTIVITY:
-        return ICONS.ACCOUNT_HEART;
-      case NOTIFICATION_TYPE.FEE:
-        return ICONS.CASH;
-      case NOTIFICATION_TYPE.CLUB:
-        return ICONS.ACCOUNT_GROUP;
-      case NOTIFICATION_TYPE.SYSTEM:
-        return ICONS.BELL;
-      default:
-        return ICONS.BELL;
-    }
-  };
-
-  const getNotificationColor = (type: NotificationType) => {
-    switch (type) {
-      case NOTIFICATION_TYPE.ACTIVITY:
-        return designTokens.colors.primary;
-      case NOTIFICATION_TYPE.FEE:
-        return designTokens.colors.warning;
-      case NOTIFICATION_TYPE.CLUB:
-        return designTokens.colors.info;
-      case NOTIFICATION_TYPE.SYSTEM:
-        return designTokens.colors.textSecondary;
-      default:
-        return designTokens.colors.textSecondary;
-    }
-  };
-
-  const formatTimestamp = (date: Date) => {
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / TIMING.MS_PER.MINUTE);
-    const diffHours = Math.floor(diffMs / TIMING.MS_PER.HOUR);
-    const diffDays = Math.floor(diffMs / TIMING.MS_PER.DAY);
-
-    if (diffMins < TIMING.RELATIVE_TIME.MINUTES_THRESHOLD) {
-      return t('screens.notifications.timeAgo.minutes', { count: diffMins });
-    } else if (diffHours < TIMING.RELATIVE_TIME.HOURS_THRESHOLD) {
-      return t('screens.notifications.timeAgo.hours', { count: diffHours });
-    } else if (diffDays < TIMING.RELATIVE_TIME.DAYS_THRESHOLD) {
-      return t('screens.notifications.timeAgo.days', { count: diffDays });
-    } else {
-      return date.toLocaleDateString();
-    }
-  };
-
+  const markAsRead = (id: string): void =>
+    setNotifications((p) => p.map((n) => (n.id === id ? { ...n, read: true } : n)));
+  const markAllAsRead = (): void => setNotifications((p) => p.map((n) => ({ ...n, read: true })));
   const unreadCount = notifications.filter((n) => !n.read).length;
+
+  return { notifications, refreshing, refresh, markAsRead, markAllAsRead, unreadCount };
+}
+
+const NotificationsScreen = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  useAuth();
+  const { notifications, refreshing, refresh, markAsRead, markAllAsRead, unreadCount } =
+    useNotifications(t);
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>{t('screens.notifications.title')}</Text>
         {unreadCount > 0 && (
@@ -155,8 +198,6 @@ const NotificationsScreen = () => {
           </TouchableOpacity>
         )}
       </View>
-
-      {/* Unread Count Banner */}
       {unreadCount > 0 && (
         <View style={styles.unreadBanner}>
           <MaterialCommunityIcons
@@ -169,58 +210,19 @@ const NotificationsScreen = () => {
           </Text>
         </View>
       )}
-
-      {/* Notifications List */}
       <ScrollView
         style={styles.content}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
       >
         {notifications.length > 0 ? (
-          notifications.map((notification) => (
-            <TouchableOpacity
-              key={notification.id}
-              style={[styles.notificationCard, !notification.read && styles.notificationCardUnread]}
-              onPress={() => markAsRead(notification.id)}
-              activeOpacity={TOUCH_OPACITY.default}
-            >
-              {/* Unread indicator dot */}
-              {!notification.read && <View style={styles.unreadDot} />}
-
-              {/* Icon */}
-              <View
-                style={[
-                  styles.iconContainer,
-                  { backgroundColor: `${getNotificationColor(notification.type)}15` },
-                ]}
-              >
-                <MaterialCommunityIcons
-                  name={getNotificationIcon(notification.type)}
-                  size={mobileIconSizes.large}
-                  color={getNotificationColor(notification.type)}
-                />
-              </View>
-
-              {/* Content */}
-              <View style={styles.notificationContent}>
-                <View style={styles.notificationHeader}>
-                  <Text style={styles.notificationTitle} numberOfLines={TEXT_LINES.single}>
-                    {notification.title}
-                  </Text>
-                  <Text style={styles.notificationTime}>
-                    {formatTimestamp(notification.timestamp)}
-                  </Text>
-                </View>
-                <Text style={styles.notificationMessage} numberOfLines={TEXT_LINES.double}>
-                  {notification.message}
-                </Text>
-              </View>
-            </TouchableOpacity>
+          notifications.map((n) => (
+            <NotificationCard key={n.id} notification={n} onPress={() => markAsRead(n.id)} t={t} />
           ))
         ) : (
           <View style={styles.emptyState}>
             <MaterialCommunityIcons
               name={ICONS.BELL_OFF_OUTLINE}
-              size={mobileIconSizes.xxlarge * 2}
+              size={mobileIconSizes.xxlarge * MATH.HALF}
               color={designTokens.colors.borderMedium}
             />
             <Text style={styles.emptyText}>{t('screens.notifications.noNotifications')}</Text>

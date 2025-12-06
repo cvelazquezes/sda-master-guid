@@ -7,12 +7,73 @@ import { ScreenHeader, MenuCard, SectionHeader } from '../../shared/components';
 import { designTokens } from '../../shared/theme/designTokens';
 import { ICONS, SCREENS, MENU_ITEM_IDS, flexValues } from '../../shared/constants';
 
-const MoreScreen = () => {
+interface MenuItem {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  screen: string | null;
+  color: string;
+  disabled?: boolean;
+}
+
+// Extracted navigable menu section
+function NavMenuSection({
+  items,
+  navigation,
+}: {
+  items: MenuItem[];
+  navigation: ReturnType<typeof useNavigation>;
+}): React.JSX.Element {
+  return (
+    <>
+      {items.map((item) => (
+        <MenuCard
+          key={item.id}
+          title={item.title}
+          description={item.description}
+          icon={item.icon}
+          color={item.color}
+          onPress={() => item.screen && navigation.navigate(item.screen as never)}
+        />
+      ))}
+    </>
+  );
+}
+
+// Extracted disabled menu section
+function DisabledMenuSection({
+  items,
+  colors,
+  t,
+}: {
+  items: MenuItem[];
+  colors: ReturnType<typeof useTheme>['colors'];
+  t: ReturnType<typeof useTranslation>['t'];
+}): React.JSX.Element {
+  return (
+    <>
+      {items.map((item) => (
+        <MenuCard
+          key={item.id}
+          title={item.title}
+          description={item.disabled ? t('common.comingSoon') : item.description}
+          icon={item.icon}
+          color={item.disabled ? colors.textTertiary : item.color}
+          onPress={undefined}
+          disabled={item.disabled}
+        />
+      ))}
+    </>
+  );
+}
+
+const MoreScreen = (): React.JSX.Element => {
   const navigation = useNavigation();
   const { colors } = useTheme();
   const { t } = useTranslation();
 
-  const activityItems = [
+  const activityItems: MenuItem[] = [
     {
       id: MENU_ITEM_IDS.GENERATE_MATCHES,
       title: t('screens.clubDashboard.menuItems.generateActivities'),
@@ -31,7 +92,7 @@ const MoreScreen = () => {
     },
   ];
 
-  const managementItems = [
+  const managementItems: MenuItem[] = [
     {
       id: MENU_ITEM_IDS.DIRECTIVE,
       title: t('screens.clubDashboard.menuItems.clubDirective'),
@@ -50,7 +111,7 @@ const MoreScreen = () => {
     },
   ];
 
-  const helpItems = [
+  const helpItems: MenuItem[] = [
     {
       id: MENU_ITEM_IDS.HELP,
       title: t('screens.clubMore.helpAndSupport'),
@@ -65,49 +126,18 @@ const MoreScreen = () => {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScreenHeader title={t('screens.clubMore.title')} subtitle={t('screens.clubMore.subtitle')} />
-
       <ScrollView style={styles.scrollView}>
         <View style={styles.content}>
           <SectionHeader title={t('screens.clubMore.activitiesSection')} />
-          {activityItems.map((item) => (
-            <MenuCard
-              key={item.id}
-              title={item.title}
-              description={item.description}
-              icon={item.icon}
-              color={item.color}
-              onPress={() => navigation.navigate(item.screen as never)}
-            />
-          ))}
+          <NavMenuSection items={activityItems} navigation={navigation} />
         </View>
-
         <View style={styles.content}>
           <SectionHeader title={t('screens.clubMore.clubManagementSection')} />
-          {managementItems.map((item) => (
-            <MenuCard
-              key={item.id}
-              title={item.title}
-              description={item.description}
-              icon={item.icon}
-              color={item.color}
-              onPress={() => navigation.navigate(item.screen as never)}
-            />
-          ))}
+          <NavMenuSection items={managementItems} navigation={navigation} />
         </View>
-
         <View style={styles.content}>
           <SectionHeader title={t('screens.clubMore.helpSection')} />
-          {helpItems.map((item) => (
-            <MenuCard
-              key={item.id}
-              title={item.title}
-              description={item.disabled ? t('common.comingSoon') : item.description}
-              icon={item.icon}
-              color={item.disabled ? colors.textTertiary : item.color}
-              onPress={() => {}}
-              disabled={item.disabled}
-            />
-          ))}
+          <DisabledMenuSection items={helpItems} colors={colors} t={t} />
         </View>
       </ScrollView>
     </View>

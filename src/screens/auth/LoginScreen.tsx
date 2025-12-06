@@ -2,12 +2,16 @@
  * Login Screen
  * User authentication with validation and error handling
  * Supports dynamic theming (light/dark mode)
+ *
+ * ✅ REFACTORED: Uses UI primitives instead of raw React Native components
+ * - Text → Text primitive from @/ui
+ * - TouchableOpacity kept for custom press handling (escape hatch)
+ * - View kept for layout only (no colors/styles defined here)
  */
 
 import React, { useState, useCallback } from 'react';
 import {
   View,
-  Text,
   TouchableOpacity,
   StyleSheet,
   Alert,
@@ -17,14 +21,15 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../context/AuthContext';
-import { useTheme } from '../../contexts/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { validate, LoginSchema } from '../../utils/validation';
 import { getErrorMessage } from '../../utils/errors';
-import { mobileTypography, designTokens, layoutConstants } from '../../shared/theme';
-import { StandardButton, StandardInput, Card, Badge } from '../../shared/components';
+import { designTokens, layoutConstants } from '../../shared/theme';
+// ✅ GOOD: Import UI primitives (Text, Button, Input, Card, Badge)
+import { Text, Button, Input, Card, Badge } from '../../shared/components';
 import {
   COMPONENT_SIZE,
   COMPONENT_VARIANT,
@@ -43,82 +48,325 @@ import {
 
 const DEFAULT_TEST_PASSWORD = 'password123';
 
-const LoginScreen: React.FC = () => {
-  const { t } = useTranslation();
+interface TestUser {
+  email: string;
+  name: string;
+  role: string;
+  color: string;
+}
+
+// Form validation helper
+const validateLoginForm = (
+  email: string,
+  password: string,
+  setErrors: React.Dispatch<React.SetStateAction<{ email?: string; password?: string }>>
+): boolean => {
+  const result = validate(LoginSchema, { email, password });
+  if (!result.success) {
+    const formErrors: { email?: string; password?: string } = {};
+    result.errors.forEach((e) => {
+      if (e.includes(FORM_FIELDS.EMAIL)) {
+        formErrors.email = e;
+      } else if (e.includes(FORM_FIELDS.PASSWORD)) {
+        formErrors.password = e;
+      }
+    });
+    setErrors(formErrors);
+    return false;
+  }
+  setErrors({});
+  return true;
+};
+
+type TranslationFn = ReturnType<typeof useTranslation>['t'];
+type ThemeColors = ReturnType<typeof useTheme>['colors'];
+
+// Test users configuration
+const createTestUsers = (colors: ThemeColors): TestUser[] => [
+  { email: 'admin@sda.com', name: 'Admin User', role: 'Admin', color: colors.error },
+  { email: 'clubadmin@sda.com', name: 'Club Admin', role: 'Club Admin', color: colors.warning },
+  { email: 'carlos.martinez@sda.com', name: 'Carlos Martínez', role: 'User', color: colors.info },
+];
+
+// Quick login card component
+function QuickLoginCard({
+  user,
+  onPress,
+  colors,
+}: {
+  user: TestUser;
+  onPress: () => void;
+  colors: ThemeColors;
+}): React.JSX.Element {
+  const cardStyle = {
+    ...styles.quickLoginCard,
+    borderLeftColor: user.color,
+    borderLeftWidth: designTokens.borderWidth.heavy,
+  };
+  return (
+    <Card onPress={onPress} style={cardStyle}>
+      <View style={styles.quickLoginInfo}>
+        <Text variant="bodySmall" weight="bold">
+          {user.name}
+        </Text>
+        <Text variant="label" color="secondary">
+          {user.role}
+        </Text>
+        <Text variant="caption" color="tertiary">
+          {user.email}
+        </Text>
+      </View>
+      <MaterialCommunityIcons
+        name={ICONS.CHEVRON_RIGHT}
+        size={designTokens.icon.sizes.md}
+        color={colors.textTertiary}
+      />
+    </Card>
+  );
+}
+
+// Quick login section props
+interface QuickLoginSectionProps {
+  testUsers: TestUser[];
+  onQuickLogin: (email: string) => void;
+  colors: ThemeColors;
+  t: TranslationFn;
+}
+
+function QuickLoginSection({
+  testUsers,
+  onQuickLogin,
+  colors,
+  t,
+}: QuickLoginSectionProps): React.JSX.Element {
+  return (
+    <View style={[styles.quickLoginSection, { borderTopColor: colors.border }]}>
+      <View style={styles.quickLoginHeader}>
+        <Text variant="h4">{t('screens.login.quickLoginTitle')}</Text>
+        <Badge
+          label={t('screens.login.quickLoginBadge')}
+          variant="warning"
+          size={COMPONENT_SIZE.sm}
+        />
+      </View>
+      <Text variant="label" color="secondary" style={styles.quickLoginSubtitle}>
+        {t('screens.login.quickLoginSubtitle')}
+      </Text>
+      <View style={styles.quickLoginGrid}>
+        {testUsers.map((user) => (
+          <QuickLoginCard
+            key={user.email}
+            user={user}
+            onPress={() => onQuickLogin(user.email)}
+            colors={colors}
+          />
+        ))}
+      </View>
+    </View>
+  );
+}
+
+// Login header props
+interface LoginHeaderProps {
+  colors: ThemeColors;
+  t: TranslationFn;
+}
+
+function LoginHeader({ colors, t }: LoginHeaderProps): React.JSX.Element {
+  return (
+    <View style={styles.header}>
+      <MaterialCommunityIcons
+        name={ICONS.ACCOUNT_GROUP}
+        size={designTokens.iconSize['4xl']}
+        color={colors.primary}
+      />
+      <Text variant="displayMedium" style={styles.title}>
+        {t('screens.login.appTitle')}
+      </Text>
+      <Text variant="h3" color="secondary" style={styles.subtitle}>
+        {t('screens.login.appSubtitle')}
+      </Text>
+    </View>
+  );
+}
+
+// Login form props
+interface LoginFormProps {
+  email: string;
+  password: string;
+  loading: boolean;
+  errors: { email?: string; password?: string };
+  onEmailChange: (v: string) => void;
+  onPasswordChange: (v: string) => void;
+  onLogin: () => void;
+  onRegister: () => void;
+  t: TranslationFn;
+}
+
+// Email input component
+function EmailInput({
+  t,
+  email,
+  onChange,
+  error,
+  disabled,
+}: {
+  t: TranslationFn;
+  email: string;
+  onChange: (v: string) => void;
+  error?: string;
+  disabled: boolean;
+}): React.JSX.Element {
+  return (
+    <Input
+      label={t('screens.login.email')}
+      icon={ICONS.EMAIL}
+      placeholder={MESSAGES.PLACEHOLDERS.EMAIL}
+      value={email}
+      onChangeText={onChange}
+      error={error}
+      disabled={disabled}
+      testID={TEST_IDS.EMAIL_INPUT}
+    />
+  );
+}
+
+// Password input component
+function PasswordInput({
+  t,
+  password,
+  onChange,
+  error,
+  disabled,
+}: {
+  t: TranslationFn;
+  password: string;
+  onChange: (v: string) => void;
+  error?: string;
+  disabled: boolean;
+}): React.JSX.Element {
+  return (
+    <Input
+      label={t('screens.login.password')}
+      icon={ICONS.LOCK}
+      placeholder={MESSAGES.PLACEHOLDERS.PASSWORD}
+      value={password}
+      onChangeText={onChange}
+      secureTextEntry
+      error={error}
+      disabled={disabled}
+      testID={TEST_IDS.PASSWORD_INPUT}
+    />
+  );
+}
+
+// Register link component
+function RegisterLink({
+  t,
+  onPress,
+  disabled,
+}: {
+  t: TranslationFn;
+  onPress: () => void;
+  disabled: boolean;
+}): React.JSX.Element {
+  return (
+    <TouchableOpacity style={styles.linkButton} onPress={onPress} disabled={disabled}>
+      <Text variant="bodySmall" color="secondary">
+        {t('screens.login.noAccount')}{' '}
+        <Text variant="bodySmall" color="link" weight="bold">
+          {t('screens.login.registerLink')}
+        </Text>
+      </Text>
+    </TouchableOpacity>
+  );
+}
+
+function LoginForm(props: LoginFormProps): React.JSX.Element {
+  const {
+    email,
+    password,
+    loading,
+    errors,
+    onEmailChange,
+    onPasswordChange,
+    onLogin,
+    onRegister,
+    t,
+  } = props;
+  const title = loading ? t('screens.login.loggingIn') : t('screens.login.loginButton');
+  return (
+    <>
+      <EmailInput
+        t={t}
+        email={email}
+        onChange={onEmailChange}
+        error={errors.email}
+        disabled={loading}
+      />
+      <PasswordInput
+        t={t}
+        password={password}
+        onChange={onPasswordChange}
+        error={errors.password}
+        disabled={loading}
+      />
+      <Button
+        title={title}
+        onPress={onLogin}
+        variant={COMPONENT_VARIANT.primary}
+        loading={loading}
+        disabled={loading}
+        fullWidth
+        testID={TEST_IDS.LOGIN_BUTTON}
+      />
+      <RegisterLink t={t} onPress={onRegister} disabled={loading} />
+    </>
+  );
+}
+
+// Login handlers return type
+interface UseLoginHandlersReturn {
+  email: string;
+  setEmail: (v: string) => void;
+  password: string;
+  setPassword: (v: string) => void;
+  loading: boolean;
+  errors: { email?: string; password?: string };
+  handleLogin: () => Promise<void>;
+  handleQuickLogin: (email: string) => Promise<void>;
+}
+
+function useLoginHandlers(login: (e: string, p: string) => Promise<void>): UseLoginHandlersReturn {
   const [email, setEmail] = useState(EMPTY_VALUE);
   const [password, setPassword] = useState(EMPTY_VALUE);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
-  const { login } = useAuth();
-  const { colors } = useTheme();
-  const navigation = useNavigation();
-
-  // Test users for quick login (development only) - One of each type
-  const TEST_USERS = [
-    { email: 'admin@sda.com', name: 'Admin User', role: 'Admin', color: colors.error },
-    { email: 'clubadmin@sda.com', name: 'Club Admin', role: 'Club Admin', color: colors.warning },
-    { email: 'carlos.martinez@sda.com', name: 'Carlos Martínez', role: 'User', color: colors.info },
-  ];
-
-  /**
-   * Validates login form
-   */
-  const validateForm = useCallback((): boolean => {
-    const result = validate(LoginSchema, { email, password });
-
-    if (!result.success) {
-      const formErrors: { email?: string; password?: string } = {};
-      result.errors.forEach((error) => {
-        if (error.includes(FORM_FIELDS.EMAIL)) {
-          formErrors.email = error;
-        } else if (error.includes(FORM_FIELDS.PASSWORD)) {
-          formErrors.password = error;
-        }
-      });
-      setErrors(formErrors);
-      return false;
-    }
-
-    setErrors({});
-    return true;
-  }, [email, password]);
-
-  /**
-   * Handles login submission
-   */
   const handleLogin = useCallback(async () => {
-    if (!validateForm()) {
+    if (!validateLoginForm(email, password, setErrors)) {
       return;
     }
-
     setLoading(true);
     try {
       await login(email, password);
-      // Navigation handled by AuthContext
     } catch (error) {
-      const errorMessage = getErrorMessage(error);
-      Alert.alert(MESSAGES.TITLES.LOGIN_FAILED, errorMessage);
+      Alert.alert(MESSAGES.TITLES.LOGIN_FAILED, getErrorMessage(error));
     } finally {
       setLoading(false);
     }
-  }, [email, password, validateForm, login]);
+  }, [email, password, login]);
 
-  /**
-   * Handles quick login with test user
-   */
   const handleQuickLogin = useCallback(
     async (userEmail: string) => {
       setEmail(userEmail);
       setPassword(DEFAULT_TEST_PASSWORD);
       setErrors({});
-
       setLoading(true);
       try {
         await login(userEmail, DEFAULT_TEST_PASSWORD);
       } catch (error) {
-        const errorMessage = getErrorMessage(error);
-        Alert.alert(MESSAGES.TITLES.LOGIN_FAILED, errorMessage);
+        Alert.alert(MESSAGES.TITLES.LOGIN_FAILED, getErrorMessage(error));
       } finally {
         setLoading(false);
       }
@@ -126,12 +374,31 @@ const LoginScreen: React.FC = () => {
     [login]
   );
 
-  /**
-   * Handles navigation to register screen
-   */
-  const navigateToRegister = useCallback(() => {
-    navigation.navigate(SCREENS.REGISTER as never);
-  }, [navigation]);
+  return {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    loading,
+    errors,
+    handleLogin,
+    handleQuickLogin,
+  };
+}
+
+const LoginScreen: React.FC = () => {
+  const { t } = useTranslation();
+  const { login } = useAuth();
+  const { colors } = useTheme();
+  const navigation = useNavigation();
+  const handlers = useLoginHandlers(login);
+  const testUsers = createTestUsers(colors);
+  const navigateToRegister = useCallback(
+    () => navigation.navigate(SCREENS.REGISTER as never),
+    [navigation]
+  );
+  const keyboardBehavior =
+    Platform.OS === PLATFORM_OS.IOS ? KEYBOARD_BEHAVIOR.PADDING : KEYBOARD_BEHAVIOR.HEIGHT;
 
   return (
     <SafeAreaView
@@ -140,123 +407,29 @@ const LoginScreen: React.FC = () => {
     >
       <KeyboardAvoidingView
         style={[styles.container, { backgroundColor: colors.background }]}
-        behavior={
-          Platform.OS === PLATFORM_OS.IOS ? KEYBOARD_BEHAVIOR.PADDING : KEYBOARD_BEHAVIOR.HEIGHT
-        }
+        behavior={keyboardBehavior}
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          <View style={styles.header}>
-            <MaterialCommunityIcons
-              name={ICONS.ACCOUNT_GROUP}
-              size={designTokens.iconSize['4xl']}
-              color={colors.primary}
-            />
-            <Text style={[styles.title, { color: colors.textPrimary }]}>
-              {t('screens.login.appTitle')}
-            </Text>
-            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-              {t('screens.login.appSubtitle')}
-            </Text>
-          </View>
-
+          <LoginHeader colors={colors} t={t} />
           <View style={styles.form}>
-            {/* Email Input */}
-            <StandardInput
-              label={t('screens.login.email')}
-              icon={ICONS.EMAIL}
-              placeholder={MESSAGES.PLACEHOLDERS.EMAIL}
-              value={email}
-              onChangeText={setEmail}
-              error={errors.email}
-              disabled={loading}
-              testID={TEST_IDS.EMAIL_INPUT}
+            <LoginForm
+              email={handlers.email}
+              password={handlers.password}
+              loading={handlers.loading}
+              errors={handlers.errors}
+              onEmailChange={handlers.setEmail}
+              onPasswordChange={handlers.setPassword}
+              onLogin={handlers.handleLogin}
+              onRegister={navigateToRegister}
+              t={t}
             />
-
-            {/* Password Input */}
-            <StandardInput
-              label={t('screens.login.password')}
-              icon={ICONS.LOCK}
-              placeholder={MESSAGES.PLACEHOLDERS.PASSWORD}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              error={errors.password}
-              disabled={loading}
-              testID={TEST_IDS.PASSWORD_INPUT}
-            />
-
-            {/* Login Button */}
-            <StandardButton
-              title={loading ? t('screens.login.loggingIn') : t('screens.login.loginButton')}
-              onPress={handleLogin}
-              variant={COMPONENT_VARIANT.primary}
-              loading={loading}
-              disabled={loading}
-              fullWidth
-              testID={TEST_IDS.LOGIN_BUTTON}
-            />
-
-            {/* Register Link */}
-            <TouchableOpacity
-              style={styles.linkButton}
-              onPress={navigateToRegister}
-              disabled={loading}
-            >
-              <Text style={[styles.linkText, { color: colors.textSecondary }]}>
-                {t('screens.login.noAccount')}{' '}
-                <Text style={[styles.linkTextBold, { color: colors.primary }]}>
-                  {t('screens.login.registerLink')}
-                </Text>
-              </Text>
-            </TouchableOpacity>
-
-            {/* Quick Login Section (Development Only) */}
             {__DEV__ && (
-              <View style={[styles.quickLoginSection, { borderTopColor: colors.border }]}>
-                <View style={styles.quickLoginHeader}>
-                  <Text style={[styles.quickLoginTitle, { color: colors.textPrimary }]}>
-                    {t('screens.login.quickLoginTitle')}
-                  </Text>
-                  <Badge
-                    label={t('screens.login.quickLoginBadge')}
-                    variant="warning"
-                    size={COMPONENT_SIZE.sm}
-                  />
-                </View>
-                <Text style={[styles.quickLoginSubtitle, { color: colors.textSecondary }]}>
-                  {t('screens.login.quickLoginSubtitle')}
-                </Text>
-                <View style={styles.quickLoginGrid}>
-                  {TEST_USERS.map((user) => (
-                    <Card
-                      key={user.email}
-                      onPress={() => handleQuickLogin(user.email)}
-                      style={{
-                        ...styles.quickLoginCard,
-                        borderLeftColor: user.color,
-                        borderLeftWidth: designTokens.borderWidth.heavy,
-                      }}
-                    >
-                      <View style={styles.quickLoginInfo}>
-                        <Text style={[styles.quickLoginName, { color: colors.textPrimary }]}>
-                          {user.name}
-                        </Text>
-                        <Text style={[styles.quickLoginRole, { color: colors.textSecondary }]}>
-                          {user.role}
-                        </Text>
-                        <Text style={[styles.quickLoginEmail, { color: colors.textTertiary }]}>
-                          {user.email}
-                        </Text>
-                      </View>
-                      <MaterialCommunityIcons
-                        name={ICONS.CHEVRON_RIGHT}
-                        size={designTokens.icon.sizes.md}
-                        color={colors.textTertiary}
-                      />
-                    </Card>
-                  ))}
-                </View>
-              </View>
+              <QuickLoginSection
+                testUsers={testUsers}
+                onQuickLogin={handlers.handleQuickLogin}
+                colors={colors}
+                t={t}
+              />
             )}
           </View>
         </ScrollView>
@@ -265,7 +438,14 @@ const LoginScreen: React.FC = () => {
   );
 };
 
+/**
+ * Styles - Now simplified since Text primitive handles typography
+ *
+ * ✅ GOOD: Only layout styles (flex, margin, padding) are defined here
+ * ❌ BAD: No inline colors, font sizes, or typography - use tokens/primitives
+ */
 const styles = StyleSheet.create({
+  // Layout styles only - no colors or typography
   safeArea: {
     flex: flexValues.one,
   },
@@ -281,13 +461,12 @@ const styles = StyleSheet.create({
     alignItems: layoutConstants.alignItems.center,
     marginBottom: designTokens.spacing['4xl'],
   },
+  // Title spacing only - typography handled by Text variant="displayMedium"
   title: {
-    ...mobileTypography.displayMedium,
-    fontSize: designTokens.typography.fontSizes['5xl'],
     marginTop: designTokens.spacing.lg,
   },
+  // Subtitle spacing only - typography handled by Text variant="h3"
   subtitle: {
-    ...mobileTypography.heading3,
     marginTop: designTokens.spacing.sm,
   },
   form: {
@@ -299,12 +478,7 @@ const styles = StyleSheet.create({
     alignItems: layoutConstants.alignItems.center,
     padding: designTokens.spacing.sm,
   },
-  linkText: {
-    ...mobileTypography.bodySmall,
-  },
-  linkTextBold: {
-    ...mobileTypography.bodySmallBold,
-  },
+  // Removed linkText/linkTextBold - handled by Text variant props
   quickLoginSection: {
     marginTop: designTokens.spacing['3xl'],
     paddingTop: designTokens.spacing.xxl,
@@ -316,11 +490,8 @@ const styles = StyleSheet.create({
     gap: designTokens.spacing.sm,
     marginBottom: designTokens.spacing.xs,
   },
-  quickLoginTitle: {
-    ...mobileTypography.heading4,
-  },
+  // Removed quickLoginTitle - handled by Text variant="h4"
   quickLoginSubtitle: {
-    ...mobileTypography.label,
     marginBottom: designTokens.spacing.lg,
   },
   quickLoginGrid: {
@@ -334,18 +505,9 @@ const styles = StyleSheet.create({
   },
   quickLoginInfo: {
     flex: flexValues.one,
+    gap: designTokens.spacing.xxs,
   },
-  quickLoginName: {
-    ...mobileTypography.bodySmallBold,
-    marginBottom: designTokens.spacing.xxs,
-  },
-  quickLoginRole: {
-    ...mobileTypography.label,
-    marginBottom: designTokens.spacing.xxs,
-  },
-  quickLoginEmail: {
-    ...mobileTypography.caption,
-  },
+  // Removed quickLoginName/Role/Email - handled by Text variant props
 });
 
 export default LoginScreen;

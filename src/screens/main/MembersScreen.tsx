@@ -1,13 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, Alert, TextInput } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, StyleSheet, ScrollView, RefreshControl, Alert, Linking } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../context/AuthContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useAuth } from '../../context/AuthContext';
 import { clubService } from '../../services/clubService';
 import { User } from '../../types';
-import { EmptyState, Card, ScreenHeader, StandardButton } from '../../shared/components';
-import { mobileTypography, designTokens, layoutConstants } from '../../shared/theme';
-import { Linking } from 'react-native';
+import {
+  Text,
+  Input,
+  EmptyState,
+  Card,
+  ScreenHeader,
+  StandardButton,
+} from '../../shared/components';
+import { designTokens, layoutConstants, mobileTypography } from '../../shared/theme';
 import {
   BUTTON_SIZE,
   COMPONENT_VARIANT,
@@ -20,177 +26,233 @@ import {
   flexValues,
 } from '../../shared/constants';
 
-const MembersScreen = () => {
-  const { t } = useTranslation();
-  const { user } = useAuth();
+// Extracted member card component
+interface MemberCardProps {
+  member: User;
+  currentUserId?: string;
+  onContact: (member: User) => void;
+  t: ReturnType<typeof useTranslation>['t'];
+}
+
+function MemberCard({ member, currentUserId, onContact, t }: MemberCardProps): React.JSX.Element {
+  return (
+    <Card variant={COMPONENT_VARIANT.elevated} style={styles.memberCard}>
+      <View style={styles.memberContent}>
+        <View style={styles.memberAvatar}>
+          <Text style={styles.memberAvatarText}>{member.name.charAt(0).toUpperCase()}</Text>
+        </View>
+        <View style={styles.memberInfo}>
+          <Text style={styles.memberName}>{member.name}</Text>
+          <Text style={styles.memberEmail}>{member.email}</Text>
+          {member.whatsappNumber && (
+            <View style={styles.whatsappBadge}>
+              <MaterialCommunityIcons
+                name={ICONS.WHATSAPP}
+                size={designTokens.iconSize.xs}
+                color={designTokens.colors.success}
+              />
+              <Text style={styles.whatsappText}>{t('screens.members.availableOnWhatsApp')}</Text>
+            </View>
+          )}
+        </View>
+        {member.id !== currentUserId && member.whatsappNumber && (
+          <StandardButton
+            title={t('screens.members.contact')}
+            icon={ICONS.MESSAGE}
+            variant={COMPONENT_VARIANT.secondary}
+            size={BUTTON_SIZE.small}
+            onPress={() => onContact(member)}
+          />
+        )}
+      </View>
+    </Card>
+  );
+}
+
+// Extracted member list content
+function MemberListContent({
+  loading,
+  members,
+  searchQuery,
+  currentUserId,
+  onContact,
+  t,
+}: {
+  loading: boolean;
+  members: User[];
+  searchQuery: string;
+  currentUserId?: string;
+  onContact: (m: User) => void;
+  t: ReturnType<typeof useTranslation>['t'];
+}): React.JSX.Element {
+  if (loading) {
+    return (
+      <EmptyState
+        icon={ICONS.LOADING}
+        title={t('screens.members.loadingMembers')}
+        description={t('common.pleaseWait')}
+      />
+    );
+  }
+  if (members.length === 0) {
+    const icon = searchQuery ? ICONS.ACCOUNT_SEARCH : ICONS.ACCOUNT_GROUP;
+    const title = searchQuery
+      ? t('screens.members.noMembersFound')
+      : t('screens.members.noMembersYet');
+    const desc = searchQuery
+      ? t('screens.members.noMembersMatchSearch')
+      : t('screens.members.joinClubToSeeMembers');
+    return <EmptyState icon={icon} title={title} description={desc} />;
+  }
+  return (
+    <>
+      {members.map((m) => (
+        <MemberCard
+          key={m.id}
+          member={m}
+          currentUserId={currentUserId}
+          onContact={onContact}
+          t={t}
+        />
+      ))}
+    </>
+  );
+}
+
+// Custom hook for members data management
+interface UseMembersDataReturn {
+  filteredMembers: User[];
+  loading: boolean;
+  refreshing: boolean;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+  refresh: () => void;
+}
+
+function useMembersData(clubId?: string): UseMembersDataReturn {
   const [members, setMembers] = useState<User[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState(EMPTY_VALUE);
 
-  useEffect(() => {
-    loadMembers();
-  }, [user]);
-
-  useEffect(() => {
-    if (searchQuery.trim() === EMPTY_VALUE) {
-      setFilteredMembers(members);
-    } else {
-      const query = searchQuery.toLowerCase();
-      const filtered = members.filter(
-        (member) =>
-          member.name.toLowerCase().includes(query) || member.email.toLowerCase().includes(query)
-      );
-      setFilteredMembers(filtered);
+  const loadMembers = useCallback(async () => {
+    if (!clubId) {
+      return;
     }
-  }, [searchQuery, members]);
-
-  const loadMembers = async () => {
-    if (!user?.clubId) return;
-
     try {
-      const membersData = await clubService.getClubMembers(user.clubId);
-      // Sort by name and filter only active members
-      const activeMembers = membersData
-        .filter((m) => m.isActive)
-        .sort((a, b) => a.name.localeCompare(b.name));
-      setMembers(activeMembers);
-      setFilteredMembers(activeMembers);
-    } catch (error) {
+      const data = await clubService.getClubMembers(clubId);
+      const active = data.filter((m) => m.isActive).sort((a, b) => a.name.localeCompare(b.name));
+      setMembers(active);
+      setFilteredMembers(active);
+    } catch {
       Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_LOAD_MEMBERS);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [clubId]);
 
-  const onRefresh = () => {
+  useEffect(() => {
+    loadMembers();
+  }, [loadMembers]);
+
+  useEffect(() => {
+    if (searchQuery.trim() === EMPTY_VALUE) {
+      setFilteredMembers(members);
+      return;
+    }
+    const q = searchQuery.toLowerCase();
+    setFilteredMembers(
+      members.filter((m) => m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q))
+    );
+  }, [searchQuery, members]);
+
+  const refresh = (): void => {
     setRefreshing(true);
     loadMembers();
   };
 
-  const handleContactMember = (member: User) => {
-    if (member.whatsappNumber) {
-      const message = t('screens.members.whatsappMessage', { name: member.name });
-      const url = `${EXTERNAL_URLS.WHATSAPP_BASE}${member.whatsappNumber.replace(VALIDATION.WHATSAPP.STRIP_NON_DIGITS, EMPTY_VALUE)}?text=${encodeURIComponent(message)}`;
-      Linking.openURL(url).catch(() => {
-        Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.COULD_NOT_OPEN_WHATSAPP);
-      });
-    } else {
-      Alert.alert(MESSAGES.TITLES.NO_WHATSAPP, MESSAGES.INFO.NO_WHATSAPP_PROVIDED);
-    }
-  };
+  return { filteredMembers, loading, refreshing, searchQuery, setSearchQuery, refresh };
+}
+
+// Contact member helper
+const contactMember = (member: User, message: string): void => {
+  if (!member.whatsappNumber) {
+    Alert.alert(MESSAGES.TITLES.NO_WHATSAPP, MESSAGES.INFO.NO_WHATSAPP_PROVIDED);
+    return;
+  }
+  const cleanNumber = member.whatsappNumber.replace(
+    VALIDATION.WHATSAPP.STRIP_NON_DIGITS,
+    EMPTY_VALUE
+  );
+  const url = `${EXTERNAL_URLS.WHATSAPP_BASE}${cleanNumber}?text=${encodeURIComponent(message)}`;
+  Linking.openURL(url).catch(() => {
+    Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.COULD_NOT_OPEN_WHATSAPP);
+  });
+};
+
+// No club state component
+function NoClubState({ t }: { t: ReturnType<typeof useTranslation>['t'] }): React.JSX.Element {
+  return (
+    <View style={styles.container}>
+      <EmptyState
+        icon={ICONS.ACCOUNT_ALERT}
+        title={t('screens.members.notPartOfClub')}
+        description={t('screens.members.contactAdminDescription')}
+        iconColor={designTokens.colors.warning}
+      />
+    </View>
+  );
+}
+
+// Get subtitle helper
+const getMemberSubtitle = (count: number, t: ReturnType<typeof useTranslation>['t']): string => {
+  const key =
+    count !== 1
+      ? t('screens.members.subtitle_plural', { count })
+      : t('screens.members.subtitle', { count });
+  return `${count} ${key}`;
+};
+
+const MembersScreen = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  const { user } = useAuth();
+  const { filteredMembers, loading, refreshing, searchQuery, setSearchQuery, refresh } =
+    useMembersData(user?.clubId);
 
   if (!user?.clubId) {
-    return (
-      <View style={styles.container}>
-        <EmptyState
-          icon={ICONS.ACCOUNT_ALERT}
-          title={t('screens.members.notPartOfClub')}
-          description={t('screens.members.contactAdminDescription')}
-          iconColor={designTokens.colors.warning}
-        />
-      </View>
-    );
+    return <NoClubState t={t} />;
   }
+
+  const subtitle = getMemberSubtitle(filteredMembers.length, t);
+  const handleContact = (m: User): void =>
+    contactMember(m, t('screens.members.whatsappMessage', { name: m.name }));
 
   return (
     <View style={styles.container}>
-      <ScreenHeader
-        title={t('screens.members.title')}
-        subtitle={`${filteredMembers.length} ${filteredMembers.length !== 1 ? t('screens.members.subtitle_plural', { count: filteredMembers.length }) : t('screens.members.subtitle', { count: filteredMembers.length })}`}
-      />
-
-      {/* Search Bar */}
+      <ScreenHeader title={t('screens.members.title')} subtitle={subtitle} />
       <View style={styles.searchContainer}>
-        <MaterialCommunityIcons
-          name={ICONS.MAGNIFY}
-          size={designTokens.iconSize.lg}
-          color={designTokens.colors.textSecondary}
-          style={styles.searchIcon}
-        />
-        <TextInput
-          style={styles.searchInput}
+        <Input
           placeholder={t('placeholders.searchByNameOrEmail')}
           value={searchQuery}
           onChangeText={setSearchQuery}
-          placeholderTextColor={designTokens.colors.textTertiary}
+          icon={ICONS.MAGNIFY}
         />
-        {searchQuery.length > 0 && (
-          <MaterialCommunityIcons
-            name={ICONS.CLOSE_CIRCLE}
-            size={designTokens.iconSize.md}
-            color={designTokens.colors.textSecondary}
-            style={styles.clearIcon}
-            onPress={() => setSearchQuery(EMPTY_VALUE)}
-          />
-        )}
       </View>
-
       <ScrollView
         style={styles.scrollView}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
       >
         <View style={styles.content}>
-          {loading ? (
-            <EmptyState
-              icon={ICONS.LOADING}
-              title={t('screens.members.loadingMembers')}
-              description={t('common.pleaseWait')}
-            />
-          ) : filteredMembers.length === 0 ? (
-            <EmptyState
-              icon={searchQuery ? ICONS.ACCOUNT_SEARCH : ICONS.ACCOUNT_GROUP}
-              title={
-                searchQuery
-                  ? t('screens.members.noMembersFound')
-                  : t('screens.members.noMembersYet')
-              }
-              description={
-                searchQuery
-                  ? t('screens.members.noMembersMatchSearch')
-                  : t('screens.members.joinClubToSeeMembers')
-              }
-            />
-          ) : (
-            filteredMembers.map((member) => (
-              <Card key={member.id} variant={COMPONENT_VARIANT.elevated} style={styles.memberCard}>
-                <View style={styles.memberContent}>
-                  <View style={styles.memberAvatar}>
-                    <Text style={styles.memberAvatarText}>
-                      {member.name.charAt(0).toUpperCase()}
-                    </Text>
-                  </View>
-                  <View style={styles.memberInfo}>
-                    <Text style={styles.memberName}>{member.name}</Text>
-                    <Text style={styles.memberEmail}>{member.email}</Text>
-                    {member.whatsappNumber && (
-                      <View style={styles.whatsappBadge}>
-                        <MaterialCommunityIcons
-                          name={ICONS.WHATSAPP}
-                          size={designTokens.iconSize.xs}
-                          color={designTokens.colors.success}
-                        />
-                        <Text style={styles.whatsappText}>
-                          {t('screens.members.availableOnWhatsApp')}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                  {member.id !== user?.id && member.whatsappNumber && (
-                    <StandardButton
-                      title={t('screens.members.contact')}
-                      icon={ICONS.MESSAGE}
-                      variant={COMPONENT_VARIANT.secondary}
-                      size={BUTTON_SIZE.small}
-                      onPress={() => handleContactMember(member)}
-                    />
-                  )}
-                </View>
-              </Card>
-            ))
-          )}
+          <MemberListContent
+            loading={loading}
+            members={filteredMembers}
+            searchQuery={searchQuery}
+            currentUserId={user?.id}
+            onContact={handleContact}
+            t={t}
+          />
         </View>
       </ScrollView>
     </View>
@@ -202,29 +264,11 @@ const styles = StyleSheet.create({
     flex: flexValues.one,
     backgroundColor: designTokens.colors.backgroundSecondary,
   },
+  // Search container now uses Input primitive which handles its own styling
   searchContainer: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    backgroundColor: designTokens.colors.backgroundPrimary,
     marginHorizontal: designTokens.spacing.lg,
     marginTop: designTokens.spacing.md,
     marginBottom: designTokens.spacing.lg,
-    paddingHorizontal: designTokens.spacing.md,
-    borderRadius: designTokens.borderRadius.lg,
-    borderWidth: designTokens.borderWidth.thin,
-    borderColor: designTokens.colors.borderLight,
-  },
-  searchIcon: {
-    marginRight: designTokens.spacing.sm,
-  },
-  searchInput: {
-    flex: flexValues.one,
-    paddingVertical: designTokens.spacing.md,
-    ...mobileTypography.body,
-    color: designTokens.colors.textPrimary,
-  },
-  clearIcon: {
-    marginLeft: designTokens.spacing.sm,
   },
   scrollView: {
     flex: flexValues.one,

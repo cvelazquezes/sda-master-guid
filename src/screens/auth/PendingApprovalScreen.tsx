@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { Text } from '../../shared/components';
 import { useAuth } from '../../context/AuthContext';
 import { UserRole } from '../../types';
 import { mobileFontSizes, designTokens, layoutConstants } from '../../shared/theme';
@@ -15,20 +16,68 @@ import {
   shadowOffsetValues,
   typographyValues,
 } from '../../shared/constants';
+import { SPACING, BORDER_WIDTH } from '../../shared/constants/numbers';
 
-const PendingApprovalScreen = () => {
+// Step component for reuse
+function StatusStep({ number, text }: { number: number; text: string }): React.JSX.Element {
+  return (
+    <View style={styles.statusStep}>
+      <View style={styles.stepNumber}>
+        <Text style={styles.stepNumberText}>{number}</Text>
+      </View>
+      <Text style={styles.stepText}>{text}</Text>
+    </View>
+  );
+}
+
+// Info row component
+function InfoRow({ icon, text }: { icon: string; text?: string }): React.JSX.Element {
+  return (
+    <View style={styles.infoRow}>
+      <MaterialCommunityIcons
+        name={icon as never}
+        size={designTokens.iconSize.md}
+        color={designTokens.colors.textSecondary}
+      />
+      <Text style={styles.infoText}>{text}</Text>
+    </View>
+  );
+}
+
+// Status steps content
+function StatusStepsContent({
+  isClubAdmin,
+  t,
+}: {
+  isClubAdmin: boolean;
+  t: ReturnType<typeof useTranslation>['t'];
+}): React.JSX.Element {
+  const prefix = isClubAdmin ? 'adminStep' : 'userStep';
+  return (
+    <>
+      <StatusStep number={1} text={t(`screens.pendingApproval.${prefix}1`)} />
+      <StatusStep number={2} text={t(`screens.pendingApproval.${prefix}2`)} />
+      <StatusStep number={3} text={t(`screens.pendingApproval.${prefix}3`)} />
+    </>
+  );
+}
+
+const PendingApprovalScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
-
   const isClubAdmin = user?.role === UserRole.CLUB_ADMIN;
 
-  const handleLogout = async () => {
+  const handleLogout = async (): Promise<void> => {
     try {
       await logout();
     } catch (error) {
       logger.error(LOG_MESSAGES.AUTH.LOGOUT_ERROR, error as Error);
     }
   };
+
+  const adminLabel = isClubAdmin
+    ? t('screens.pendingApproval.systemAdmin')
+    : t('screens.pendingApproval.clubAdmin');
 
   return (
     <SafeAreaView style={styles.safeArea} edges={SAFE_AREA_EDGES.TOP_LEFT_RIGHT}>
@@ -41,32 +90,14 @@ const PendingApprovalScreen = () => {
               color={designTokens.colors.warning}
             />
           </View>
-
           <Text style={styles.title}>{t('screens.pendingApproval.title')}</Text>
-
           <Text style={styles.message}>
             {t('screens.pendingApproval.thankYouMessage', { name: user?.name })}
           </Text>
-
           <View style={styles.infoCard}>
-            <View style={styles.infoRow}>
-              <MaterialCommunityIcons
-                name={ICONS.EMAIL}
-                size={designTokens.iconSize.md}
-                color={designTokens.colors.textSecondary}
-              />
-              <Text style={styles.infoText}>{user?.email}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <MaterialCommunityIcons
-                name={ICONS.WHATSAPP}
-                size={designTokens.iconSize.md}
-                color={designTokens.colors.textSecondary}
-              />
-              <Text style={styles.infoText}>{user?.whatsappNumber}</Text>
-            </View>
+            <InfoRow icon={ICONS.EMAIL} text={user?.email} />
+            <InfoRow icon={ICONS.WHATSAPP} text={user?.whatsappNumber} />
           </View>
-
           <View style={styles.statusCard}>
             <View style={styles.statusHeader}>
               <MaterialCommunityIcons
@@ -76,56 +107,8 @@ const PendingApprovalScreen = () => {
               />
               <Text style={styles.statusTitle}>{t('screens.pendingApproval.whatHappensNext')}</Text>
             </View>
-
-            {isClubAdmin ? (
-              <>
-                <View style={styles.statusStep}>
-                  <View style={styles.stepNumber}>
-                    <Text style={styles.stepNumberText}>1</Text>
-                  </View>
-                  <Text style={styles.stepText}>{t('screens.pendingApproval.adminStep1')}</Text>
-                </View>
-
-                <View style={styles.statusStep}>
-                  <View style={styles.stepNumber}>
-                    <Text style={styles.stepNumberText}>2</Text>
-                  </View>
-                  <Text style={styles.stepText}>{t('screens.pendingApproval.adminStep2')}</Text>
-                </View>
-
-                <View style={styles.statusStep}>
-                  <View style={styles.stepNumber}>
-                    <Text style={styles.stepNumberText}>3</Text>
-                  </View>
-                  <Text style={styles.stepText}>{t('screens.pendingApproval.adminStep3')}</Text>
-                </View>
-              </>
-            ) : (
-              <>
-                <View style={styles.statusStep}>
-                  <View style={styles.stepNumber}>
-                    <Text style={styles.stepNumberText}>1</Text>
-                  </View>
-                  <Text style={styles.stepText}>{t('screens.pendingApproval.userStep1')}</Text>
-                </View>
-
-                <View style={styles.statusStep}>
-                  <View style={styles.stepNumber}>
-                    <Text style={styles.stepNumberText}>2</Text>
-                  </View>
-                  <Text style={styles.stepText}>{t('screens.pendingApproval.userStep2')}</Text>
-                </View>
-
-                <View style={styles.statusStep}>
-                  <View style={styles.stepNumber}>
-                    <Text style={styles.stepNumberText}>3</Text>
-                  </View>
-                  <Text style={styles.stepText}>{t('screens.pendingApproval.userStep3')}</Text>
-                </View>
-              </>
-            )}
+            <StatusStepsContent isClubAdmin={isClubAdmin} t={t} />
           </View>
-
           <View style={styles.noteCard}>
             <MaterialCommunityIcons
               name={ICONS.ALERT_CIRCLE}
@@ -133,14 +116,9 @@ const PendingApprovalScreen = () => {
               color={designTokens.colors.warning}
             />
             <Text style={styles.noteText}>
-              {t('screens.pendingApproval.noteText', {
-                admin: isClubAdmin
-                  ? t('screens.pendingApproval.systemAdmin')
-                  : t('screens.pendingApproval.clubAdmin'),
-              })}
+              {t('screens.pendingApproval.noteText', { admin: adminLabel })}
             </Text>
           </View>
-
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
             <MaterialCommunityIcons
               name={ICONS.LOGOUT}
@@ -241,8 +219,8 @@ const styles = StyleSheet.create({
     gap: designTokens.spacing.md,
   },
   stepNumber: {
-    width: 28,
-    height: 28,
+    width: SPACING.LG_PLUS, // 28
+    height: SPACING.LG_PLUS, // 28
     borderRadius: designTokens.borderRadius['2xl'],
     backgroundColor: designTokens.colors.primary,
     justifyContent: layoutConstants.justifyContent.center,
@@ -267,7 +245,7 @@ const styles = StyleSheet.create({
     padding: designTokens.spacing.lg,
     marginBottom: designTokens.spacing.xxl,
     gap: designTokens.spacing.md,
-    borderLeftWidth: 4,
+    borderLeftWidth: BORDER_WIDTH.HEAVY,
     borderLeftColor: designTokens.colors.warning,
   },
   noteText: {

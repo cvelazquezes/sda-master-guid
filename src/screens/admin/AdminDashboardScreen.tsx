@@ -4,9 +4,10 @@
  * Supports dynamic theming (light/dark mode)
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { StatCard } from '../../components/StatCard';
@@ -17,44 +18,53 @@ import { layoutConstants } from '../../shared/theme';
 import { ScreenHeader, SectionHeader, MenuCard } from '../../shared/components';
 import { logger } from '../../shared/utils/logger';
 import { ApprovalStatus } from '../../types';
-import { useTranslation } from 'react-i18next';
 import { ICONS, LOG_MESSAGES, MENU_ITEM_IDS, SCREENS, flexValues } from '../../shared/constants';
 
-const AdminDashboardScreen = () => {
+interface DashboardStats {
+  totalUsers: number;
+  activeUsers: number;
+  totalClubs: number;
+  activeClubs: number;
+  pendingApprovals: number;
+}
+
+const initialStats: DashboardStats = {
+  totalUsers: 0,
+  activeUsers: 0,
+  totalClubs: 0,
+  activeClubs: 0,
+  pendingApprovals: 0,
+};
+
+const loadDashboardStats = async (): Promise<DashboardStats> => {
+  const [users, clubs] = await Promise.all([userService.getAllUsers(), clubService.getAllClubs()]);
+  return {
+    totalUsers: users.length,
+    activeUsers: users.filter((u) => u.isActive).length,
+    totalClubs: clubs.length,
+    activeClubs: clubs.filter((c) => c.isActive).length,
+    pendingApprovals: users.filter((u) => u.approvalStatus === ApprovalStatus.PENDING).length,
+  };
+};
+
+const AdminDashboardScreen = (): React.JSX.Element => {
   const navigation = useNavigation();
   const { user } = useAuth();
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const [stats, setStats] = useState({
-    totalUsers: 0,
-    activeUsers: 0,
-    totalClubs: 0,
-    activeClubs: 0,
-    pendingApprovals: 0,
-  });
+  const [stats, setStats] = useState<DashboardStats>(initialStats);
 
-  useEffect(() => {
-    loadStats();
-  }, []);
-
-  const loadStats = async () => {
+  const loadStats = useCallback(async () => {
     try {
-      const [users, clubs] = await Promise.all([
-        userService.getAllUsers(),
-        clubService.getAllClubs(),
-      ]);
-
-      setStats({
-        totalUsers: users.length,
-        activeUsers: users.filter((u) => u.isActive).length,
-        totalClubs: clubs.length,
-        activeClubs: clubs.filter((c) => c.isActive).length,
-        pendingApprovals: users.filter((u) => u.approvalStatus === ApprovalStatus.PENDING).length,
-      });
+      setStats(await loadDashboardStats());
     } catch (error) {
       logger.error(LOG_MESSAGES.SCREENS.ADMIN_DASHBOARD.FAILED_TO_LOAD_STATS, error as Error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadStats();
+  }, [loadStats]);
 
   const menuItems = [
     {
@@ -73,40 +83,7 @@ const AdminDashboardScreen = () => {
         title={t('screens.adminDashboard.title')}
         subtitle={t('screens.adminDashboard.welcomeSubtitle', { name: user?.name })}
       />
-
-      {/* Statistics Section */}
-      <View style={styles.statsSection}>
-        <SectionHeader title={t('sections.overview')} />
-        <View style={styles.statsGrid}>
-          <StatCard
-            icon={ICONS.ACCOUNT_GROUP}
-            label={t('stats.totalUsers')}
-            value={stats.totalUsers}
-            color={colors.info}
-            subtitle={t('screens.adminDashboard.activeCount', { count: stats.activeUsers })}
-          />
-          <StatCard
-            icon={ICONS.ACCOUNT_GROUP}
-            label={t('stats.totalClubs')}
-            value={stats.totalClubs}
-            color={colors.success}
-            subtitle={t('screens.adminDashboard.activeCount', { count: stats.activeClubs })}
-          />
-        </View>
-        {stats.pendingApprovals > 0 && (
-          <View style={styles.statsRow}>
-            <StatCard
-              icon={ICONS.CLOCK_ALERT_OUTLINE}
-              label={t('stats.pendingApprovals')}
-              value={stats.pendingApprovals}
-              color={colors.warning}
-              onPress={() => navigation.navigate(SCREENS.USERS_MANAGEMENT as never)}
-            />
-          </View>
-        )}
-      </View>
-
-      {/* Management Menu */}
+      <StatsSection stats={stats} colors={colors} t={t} navigation={navigation} />
       <View style={styles.content}>
         <SectionHeader title={t('sections.management')} />
         {menuItems.map((item) => (
@@ -123,6 +100,49 @@ const AdminDashboardScreen = () => {
     </ScrollView>
   );
 };
+
+// Extracted stats section component
+interface StatsSectionProps {
+  stats: DashboardStats;
+  colors: ReturnType<typeof useTheme>['colors'];
+  t: ReturnType<typeof useTranslation>['t'];
+  navigation: ReturnType<typeof useNavigation>;
+}
+
+function StatsSection({ stats, colors, t, navigation }: StatsSectionProps): React.JSX.Element {
+  return (
+    <View style={styles.statsSection}>
+      <SectionHeader title={t('sections.overview')} />
+      <View style={styles.statsGrid}>
+        <StatCard
+          icon={ICONS.ACCOUNT_GROUP}
+          label={t('stats.totalUsers')}
+          value={stats.totalUsers}
+          color={colors.info}
+          subtitle={t('screens.adminDashboard.activeCount', { count: stats.activeUsers })}
+        />
+        <StatCard
+          icon={ICONS.ACCOUNT_GROUP}
+          label={t('stats.totalClubs')}
+          value={stats.totalClubs}
+          color={colors.success}
+          subtitle={t('screens.adminDashboard.activeCount', { count: stats.activeClubs })}
+        />
+      </View>
+      {stats.pendingApprovals > 0 && (
+        <View style={styles.statsRow}>
+          <StatCard
+            icon={ICONS.CLOCK_ALERT_OUTLINE}
+            label={t('stats.pendingApprovals')}
+            value={stats.pendingApprovals}
+            color={colors.warning}
+            onPress={() => navigation.navigate(SCREENS.USERS_MANAGEMENT as never)}
+          />
+        </View>
+      )}
+    </View>
+  );
+}
 
 const styles = StyleSheet.create({
   container: {
