@@ -119,7 +119,7 @@ const sentryConfig: Sentry.ReactNativeOptions = {
       routingInstrumentation: new Sentry.ReactNavigationInstrumentation(),
 
       // Track user interactions
-      tracingOrigins: ['localhost', environment.apiUrl, /^\//],
+      tracingOrigins: ['localhost', environment.api.base, /^\//],
 
       // Enable automatic tracing for fetch/XHR
       traceFetch: true,

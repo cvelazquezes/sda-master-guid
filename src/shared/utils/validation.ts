@@ -4,16 +4,13 @@
  */
 
 import { z } from 'zod';
-import { PASSWORD_RULES, TEXT_RULES } from '../constants/validation';
+import { PASSWORD, TEXT } from '../constants/validation';
 
 // Password validation schema
 export const PasswordSchema = z
   .string()
-  .min(
-    PASSWORD_RULES.MIN_LENGTH,
-    `Password must be at least ${PASSWORD_RULES.MIN_LENGTH} characters`
-  )
-  .max(PASSWORD_RULES.MAX_LENGTH, 'Password too long')
+  .min(PASSWORD.MIN_LENGTH, `Password must be at least ${PASSWORD.MIN_LENGTH} characters`)
+  .max(PASSWORD.MAX_LENGTH, 'Password too long')
   .regex(/[A-Z]/, 'Must contain at least one uppercase letter')
   .regex(/[a-z]/, 'Must contain at least one lowercase letter')
   .regex(/[0-9]/, 'Must contain at least one number')
@@ -23,7 +20,7 @@ export const PasswordSchema = z
 export const EmailSchema = z
   .string()
   .email('Invalid email address')
-  .max(TEXT_RULES.EMAIL_MAX, 'Email too long')
+  .max(TEXT.EMAIL_MAX, 'Email too long')
   .toLowerCase();
 
 // Login credentials schema
@@ -40,8 +37,8 @@ export const RegisterSchema = z.object({
   password: PasswordSchema,
   name: z
     .string()
-    .min(TEXT_RULES.NAME_MIN, `Name must be at least ${TEXT_RULES.NAME_MIN} characters`)
-    .max(TEXT_RULES.NAME_MAX, 'Name too long')
+    .min(TEXT.NAME_MIN, `Name must be at least ${TEXT.NAME_MIN} characters`)
+    .max(TEXT.NAME_MAX, 'Name too long')
     .regex(/^[a-zA-Z\s'-]+$/, 'Name contains invalid characters'),
   clubId: z.string().min(1, 'Club is required'),
 });
@@ -52,11 +49,11 @@ export type RegisterData = z.infer<typeof RegisterSchema>;
 export const UpdateUserSchema = z.object({
   name: z
     .string()
-    .min(TEXT_RULES.NAME_MIN, `Name must be at least ${TEXT_RULES.NAME_MIN} characters`)
-    .max(TEXT_RULES.NAME_MAX, 'Name too long')
+    .min(TEXT.NAME_MIN, `Name must be at least ${TEXT.NAME_MIN} characters`)
+    .max(TEXT.NAME_MAX, 'Name too long')
     .optional(),
   timezone: z.string().optional(),
-  language: z.string().length(TEXT_RULES.LANGUAGE_CODE_LENGTH).optional(),
+  language: z.string().length(TEXT.LANGUAGE_CODE_LENGTH).optional(),
   isPaused: z.boolean().optional(),
 });
 

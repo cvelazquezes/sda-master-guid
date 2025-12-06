@@ -281,8 +281,6 @@ interface EnvironmentConfigResult {
   devTools: (typeof devToolsConfig)[Environment];
   security: (typeof securityConfig)[Environment];
   mock: (typeof mockConfig)[Environment];
-  apiUrl: string;
-  useMockData: boolean;
 }
 
 function getEnvironmentConfig(): EnvironmentConfigResult {
@@ -311,12 +309,6 @@ function getEnvironmentConfig(): EnvironmentConfigResult {
     security: securityConfig[env],
     /** Mock data config for current environment */
     mock: mockConfig[env],
-
-    // Backward compatibility aliases
-    /** @deprecated Use api.base instead */
-    apiUrl: apiUrls[env].base,
-    /** @deprecated Use mock.useMockApi instead */
-    useMockData: mockConfig[env].useMockApi,
   };
 }
 

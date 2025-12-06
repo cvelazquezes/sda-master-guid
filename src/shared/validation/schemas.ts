@@ -5,7 +5,8 @@
  */
 
 import { z } from 'zod';
-import { PASSWORD_RULES, TEXT, NUMERIC, MATCH, PAGE } from '../constants/validation';
+import { PASSWORD, TEXT, NUMERIC, MATCH } from '../constants/validation';
+import { PAGE } from '../constants/numbers';
 
 // ============================================================================
 // Common Validation Rules
@@ -30,11 +31,8 @@ export const CommonSchemas = {
 
   password: z
     .string()
-    .min(
-      PASSWORD_RULES.MIN_LENGTH,
-      `Password must be at least ${PASSWORD_RULES.MIN_LENGTH} characters`
-    )
-    .max(PASSWORD_RULES.MAX_LENGTH, 'Password is too long')
+    .min(PASSWORD.MIN_LENGTH, `Password must be at least ${PASSWORD.MIN_LENGTH} characters`)
+    .max(PASSWORD.MAX_LENGTH, 'Password is too long')
     .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
     .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
     .regex(/[0-9]/, 'Password must contain at least one number')
