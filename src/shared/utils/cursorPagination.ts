@@ -1,4 +1,3 @@
-/* eslint-disable no-magic-numbers, max-lines-per-function, @typescript-eslint/no-explicit-any */
 /**
  * Cursor-Based Pagination Utility
  * Following GitHub/Stripe API pagination patterns for scalability
@@ -6,6 +5,7 @@
 
 import { useState, useCallback } from 'react';
 import { logger } from './logger';
+import { LIST_LIMITS } from '../constants/numbers';
 
 // ============================================================================
 // React Hook for Cursor Pagination
@@ -63,7 +63,7 @@ interface CursorData {
  */
 export interface PaginatedQueryOptions<T> extends CursorPaginationParams {
   /** Function to fetch items */
-  fetcher: (params: any) => Promise<T[]>;
+  fetcher: (params: CursorPaginationParams) => Promise<T[]>;
   /** Function to extract ID from item */
   getId: (item: T) => string;
   /** Function to extract timestamp from item */
@@ -138,12 +138,12 @@ export class CursorPaginationService {
   /**
    * Default limit for pagination
    */
-  private static readonly DEFAULT_LIMIT = 20;
+  private static readonly DEFAULT_LIMIT = LIST_LIMITS.PAGE_SIZE_DEFAULT;
 
   /**
    * Maximum limit allowed
    */
-  private static readonly MAX_LIMIT = 100;
+  private static readonly MAX_LIMIT = LIST_LIMITS.PAGE_SIZE_MAX;
 
   /**
    * Executes a paginated query
@@ -395,10 +395,10 @@ export function validatePaginationParams(params: Partial<CursorPaginationParams>
 /**
  * Creates HATEOAS links for pagination
  */
-export function createPaginationLinks(
+export function createPaginationLinks<T>(
   baseUrl: string,
   params: CursorPaginationParams,
-  pagination: CursorPaginationResponse<any>['pagination']
+  pagination: CursorPaginationResponse<T>['pagination']
 ): {
   self: string;
   next: string | null;
