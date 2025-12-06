@@ -1,12 +1,12 @@
 /**
  * API Configuration
- * 
+ *
  * HTTP/network configuration, timeouts, retry policies, and API-related constants.
  * This is the SINGLE SOURCE OF TRUTH for all API/network behavior.
- * 
+ *
  * ❌ NEVER write: fetch(url, { timeout: 5000 })
  * ✅ ALWAYS use: fetch(url, { timeout: apiConfig.timeouts.default })
- * 
+ *
  * ❌ NEVER write: if (status === 500) { retry() }
  * ✅ ALWAYS use: if (apiConfig.retry.retryableStatuses.includes(status)) { retry() }
  */
@@ -271,15 +271,19 @@ export const circuitBreakerConfig = {
 export const uploadConfig = {
   /** Maximum file sizes (bytes) */
   maxSize: {
-    image: 10 * 1024 * 1024,      // 10MB
-    document: 25 * 1024 * 1024,   // 25MB
-    video: 100 * 1024 * 1024,     // 100MB
-    avatar: 5 * 1024 * 1024,      // 5MB
+    image: 10 * 1024 * 1024, // 10MB
+    document: 25 * 1024 * 1024, // 25MB
+    video: 100 * 1024 * 1024, // 100MB
+    avatar: 5 * 1024 * 1024, // 5MB
   },
   /** Allowed MIME types */
   allowedTypes: {
     image: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
-    document: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+    document: [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ],
     video: ['video/mp4', 'video/quicktime', 'video/webm'],
   },
   /** Chunk size for resumable uploads */
@@ -315,8 +319,7 @@ export type ApiConfig = typeof apiConfig;
 // TYPE EXPORTS
 // ============================================================================
 
-export type HttpStatus = typeof httpStatus[keyof typeof httpStatus];
-export type HttpMethod = typeof httpMethods[keyof typeof httpMethods];
-export type ContentType = typeof contentTypes[keyof typeof contentTypes];
-export type CacheStrategy = typeof cacheConfig.strategies[keyof typeof cacheConfig.strategies];
-
+export type HttpStatus = (typeof httpStatus)[keyof typeof httpStatus];
+export type HttpMethod = (typeof httpMethods)[keyof typeof httpMethods];
+export type ContentType = (typeof contentTypes)[keyof typeof contentTypes];
+export type CacheStrategy = (typeof cacheConfig.strategies)[keyof typeof cacheConfig.strategies];

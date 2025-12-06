@@ -2,14 +2,7 @@
  * Performance Utilities Tests
  */
 
-import {
-  debounce,
-  throttle,
-  memoize,
-  once,
-  batch,
-  rateLimit,
-} from '../performance';
+import { debounce, throttle, memoize, once, batch, rateLimit } from '../performance';
 
 describe('Performance Utilities', () => {
   beforeEach(() => {
@@ -248,4 +241,3 @@ describe('Performance Utilities', () => {
     });
   });
 });
-

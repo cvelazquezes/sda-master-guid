@@ -11,8 +11,9 @@
  */
 
 import * as Sentry from '@sentry/react-native';
-import { environment } from './environment';
+// eslint-disable-next-line import/no-named-as-default
 import Constants from 'expo-constants';
+import { environment } from './environment';
 
 /**
  * Sentry configuration options
@@ -61,7 +62,7 @@ const sentryConfig: Sentry.ReactNativeOptions = {
   beforeSend(event, hint) {
     // Don't send events in development
     if (__DEV__) {
-      console.log('Sentry event (dev mode, not sent):', event);
+      console.info('Sentry event (dev mode, not sent):', event);
       return null;
     }
 
@@ -139,12 +140,12 @@ const sentryConfig: Sentry.ReactNativeOptions = {
  * initSentry();
  * ```
  */
-export function initSentry() {
+export function initSentry(): void {
   if (sentryConfig.enabled) {
     Sentry.init(sentryConfig);
-    console.log('Sentry initialized');
+    console.info('Sentry initialized');
   } else {
-    console.log('Sentry disabled (dev mode or no DSN)');
+    console.info('Sentry disabled (dev mode or no DSN)');
   }
 }
 
@@ -167,7 +168,7 @@ export function setSentryUser(user: {
   email?: string;
   username?: string;
   [key: string]: unknown;
-}) {
+}): void {
   Sentry.setUser(user);
 }
 
@@ -179,7 +180,7 @@ export function setSentryUser(user: {
  * clearSentryUser();
  * ```
  */
-export function clearSentryUser() {
+export function clearSentryUser(): void {
   Sentry.setUser(null);
 }
 
@@ -197,7 +198,7 @@ export function clearSentryUser() {
  * });
  * ```
  */
-export function setSentryContext(name: string, context: Record<string, unknown>) {
+export function setSentryContext(name: string, context: Record<string, unknown>): void {
   Sentry.setContext(name, context);
 }
 
@@ -220,7 +221,7 @@ export function addSentryBreadcrumb(breadcrumb: {
   message?: string;
   level?: 'fatal' | 'error' | 'warning' | 'log' | 'info' | 'debug';
   data?: Record<string, unknown>;
-}) {
+}): void {
   Sentry.addBreadcrumb(breadcrumb);
 }
 
@@ -248,7 +249,7 @@ export function captureSentryException(
     tags?: Record<string, string>;
     level?: Sentry.SeverityLevel;
   }
-) {
+): void {
   Sentry.captureException(error, {
     ...context,
   });
@@ -275,7 +276,7 @@ export function captureSentryMessage(
     extra?: Record<string, unknown>;
     tags?: Record<string, string>;
   }
-) {
+): void {
   Sentry.captureMessage(message, {
     level,
     ...context,
@@ -300,7 +301,10 @@ export function captureSentryMessage(
  * }
  * ```
  */
-export function startSentryTransaction(name: string, op: string) {
+export function startSentryTransaction(
+  name: string,
+  op: string
+): ReturnType<typeof Sentry.startTransaction> {
   return Sentry.startTransaction({
     name,
     op,

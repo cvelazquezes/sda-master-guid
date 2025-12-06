@@ -9,6 +9,8 @@
  *   designTokens.spacing.md
  *   designTokens.iconSize.lg
  *   designTokens.colors.white
+ *
+ * NOTE: This file intentionally contains literal numbers as it DEFINES design tokens.
  */
 
 import { TextStyle } from 'react-native';

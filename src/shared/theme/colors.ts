@@ -1,8 +1,10 @@
 /**
  * Color Palette
- * 
+ *
  * Comprehensive color system following Material Design and iOS HIG principles.
  * Supports light and dark modes with accessibility-first colors (WCAG AAA).
+ *
+ * NOTE: This file intentionally contains literal numbers as it DEFINES color tokens.
  */
 
 export const colors = {
@@ -159,11 +161,11 @@ export const colors = {
 export const colorUtils = {
   /**
    * Add alpha transparency to hex color
-   * 
+   *
    * @param hex - Hex color (e.g., "#FF0000")
    * @param alpha - Alpha value (0-1)
    * @returns RGBA color string
-   * 
+   *
    * @example
    * addAlpha('#FF0000', 0.5) // "rgba(255, 0, 0, 0.5)"
    */
@@ -176,7 +178,7 @@ export const colorUtils = {
 
   /**
    * Lighten a hex color
-   * 
+   *
    * @param hex - Hex color
    * @param percent - Percentage to lighten (0-100)
    * @returns Lightened hex color
@@ -199,7 +201,7 @@ export const colorUtils = {
 
   /**
    * Darken a hex color
-   * 
+   *
    * @param hex - Hex color
    * @param percent - Percentage to darken (0-100)
    * @returns Darkened hex color
@@ -211,4 +213,3 @@ export const colorUtils = {
 
 export type ColorName = keyof typeof colors;
 export type ColorShade = keyof typeof colors.primary;
-

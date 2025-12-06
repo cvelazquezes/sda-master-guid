@@ -1,11 +1,13 @@
 /**
  * Behavior Design Tokens
- * 
+ *
  * UI behavior configuration that affects user experience.
  * These tokens drive ALL interaction patterns across the codebase.
- * 
+ *
  * ❌ NEVER write: setTimeout(fn, 3000), debounceTime = 300
  * ✅ ALWAYS use: setTimeout(fn, behaviorTokens.feedback.toastDuration)
+ *
+ * NOTE: This file intentionally contains literal numbers as it DEFINES the behavior tokens.
  */
 
 // ============================================================================
@@ -414,4 +416,3 @@ export const behaviorTokens = {
 } as const;
 
 export type BehaviorTokens = typeof behaviorTokens;
-

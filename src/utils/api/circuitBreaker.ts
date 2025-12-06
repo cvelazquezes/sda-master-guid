@@ -4,10 +4,11 @@
  */
 
 import { logger } from '../logger';
+import { CIRCUIT_BREAKER } from '../../shared/constants/validation';
 
 export enum CircuitState {
-  CLOSED = 'CLOSED',       // Normal operation
-  OPEN = 'OPEN',           // Failing, reject requests
+  CLOSED = 'CLOSED', // Normal operation
+  OPEN = 'OPEN', // Failing, reject requests
   HALF_OPEN = 'HALF_OPEN', // Testing if service recovered
 }
 
@@ -19,10 +20,10 @@ interface CircuitBreakerOptions {
 }
 
 const DEFAULT_OPTIONS: CircuitBreakerOptions = {
-  failureThreshold: 5,
-  successThreshold: 2,
-  timeout: 60000,
-  halfOpenMaxCalls: 3,
+  failureThreshold: CIRCUIT_BREAKER.FAILURE_THRESHOLD,
+  successThreshold: CIRCUIT_BREAKER.SUCCESS_THRESHOLD,
+  timeout: CIRCUIT_BREAKER.TIMEOUT_MS,
+  halfOpenMaxCalls: CIRCUIT_BREAKER.HALF_OPEN_MAX_CALLS,
 };
 
 export class CircuitBreaker {
@@ -163,4 +164,3 @@ export class CircuitBreaker {
 // Global circuit breakers for different services
 export const apiCircuitBreaker = new CircuitBreaker('API');
 export const authCircuitBreaker = new CircuitBreaker('Auth');
-

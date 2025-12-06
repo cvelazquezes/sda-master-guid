@@ -2,6 +2,8 @@
  * SDA Master Guide Brand Colors
  * Official color palette following SDA and Master Guide branding
  * All colors meet WCAG AA accessibility standards
+ *
+ * NOTE: This file intentionally contains literal numbers as it DEFINES color tokens.
  */
 
 export const sdaBrandColors = {

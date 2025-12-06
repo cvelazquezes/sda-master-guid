@@ -47,7 +47,6 @@ import {
   calculateLineHeight,
   isMobileFriendly,
 } from './mobileTypography';
-
 // SDA Brand Colors and Design Tokens
 import sdaColors, {
   sdaBrandColors,
@@ -57,12 +56,9 @@ import sdaColors, {
   hierarchyColors,
   sdaColorUtils,
 } from './sdaColors';
-
 import { designTokens } from './designTokens';
-
 // NEW: Design Tokens V2 - Single Source of Truth
 import { designTokensV2 } from './tokens';
-
 // Layout Constants - Single Source of Truth for style string values
 import { layoutConstants } from './layoutConstants';
 

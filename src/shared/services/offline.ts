@@ -3,17 +3,17 @@
  * Handles offline queue and synchronization following Progressive Web App patterns
  */
 
+import { useState, useEffect } from 'react';
 import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { logger } from '../utils/logger';
 import { addBreadcrumb } from './sentry';
 import { TIMING } from '../constants';
+import { LIST_LIMITS, ID_GENERATION } from '../constants/numbers';
 
 // ============================================================================
 // React Hooks
 // ============================================================================
-
-import { useState, useEffect } from 'react';
 
 // ============================================================================
 // Types
@@ -46,7 +46,7 @@ export interface OfflineQueueStats {
 class OfflineService {
   private queue: QueuedRequest[] = [];
   private readonly STORAGE_KEY = '@offline_queue';
-  private readonly MAX_QUEUE_SIZE = 100;
+  private readonly MAX_QUEUE_SIZE = LIST_LIMITS.MAX_QUEUE;
   private isOnline = true;
   private isSyncing = false;
   private listeners = new Set<(status: NetworkStatus) => void>();
@@ -301,7 +301,7 @@ class OfflineService {
    * Generates unique ID
    */
   private generateId(): string {
-    return `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+    return `${Date.now()}-${Math.random().toString(ID_GENERATION.RADIX).substring(ID_GENERATION.SUBSTRING_START, ID_GENERATION.SUFFIX_LENGTH)}`;
   }
 
   /**
@@ -408,7 +408,7 @@ export async function offlineFetch(
       method: (options.method as 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE') || 'GET',
       data: options.body ? JSON.parse(options.body as string) : undefined,
       headers: options.headers as Record<string, string>,
-      maxRetries: options.maxRetries || 3,
+      maxRetries: options.maxRetries || LIST_LIMITS.MAX_RETRIES,
     });
 
     throw new Error('Device is offline, request queued for sync');

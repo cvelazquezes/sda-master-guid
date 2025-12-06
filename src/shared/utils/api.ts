@@ -10,6 +10,8 @@
  * - Stripe API
  */
 
+import { PAGE, ID_GENERATION, MATH } from '../constants/numbers';
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -94,7 +96,7 @@ export interface QueryParams extends PaginationParams, SortParams, FilterParams 
  * ```
  */
 export function createPaginationParams(params: PaginationParams): Record<string, string> {
-  const { page = 1, pageSize = 20, limit, offset } = params;
+  const { page = PAGE.DEFAULT_NUMBER, pageSize = PAGE.DEFAULT_SIZE, limit, offset } = params;
 
   const calculatedOffset = offset ?? (page - 1) * pageSize;
   const calculatedLimit = limit ?? pageSize;
@@ -122,7 +124,7 @@ export function createPaginationParams(params: PaginationParams): Record<string,
 export function createCursorPaginationParams(
   params: CursorPaginationParams
 ): Record<string, string> {
-  const { cursor, limit = 20 } = params;
+  const { cursor, limit = PAGE.DEFAULT_SIZE } = params;
 
   const result: Record<string, string> = {
     limit: String(limit),
@@ -187,9 +189,39 @@ export function calculatePaginationMeta(
  * // Returns: "status=active&role=admin&role=user&createdAt[gte]=2024-01-01"
  * ```
  */
+type ArrayFormatType = 'repeat' | 'bracket' | 'comma';
+
+function handleArrayValue(
+  params: Record<string, string | string[]>,
+  fullKey: string,
+  value: unknown[],
+  arrayFormat: ArrayFormatType
+): void {
+  const stringValues = value.map(String);
+  if (arrayFormat === 'repeat') {
+    params[fullKey] = stringValues;
+  } else if (arrayFormat === 'bracket') {
+    params[`${fullKey}[]`] = stringValues;
+  } else if (arrayFormat === 'comma') {
+    params[fullKey] = stringValues.join(',');
+  }
+}
+
+function handleNestedObject(
+  params: Record<string, string | string[]>,
+  fullKey: string,
+  value: Record<string, unknown>
+): void {
+  for (const [nestedKey, nestedValue] of Object.entries(value)) {
+    if (nestedValue !== null && nestedValue !== undefined) {
+      params[`${fullKey}[${nestedKey}]`] = String(nestedValue);
+    }
+  }
+}
+
 export function createFilterParams(
   filters: FilterParams,
-  options: { prefix?: string; arrayFormat?: 'repeat' | 'bracket' | 'comma' } = {}
+  options: { prefix?: string; arrayFormat?: ArrayFormatType } = {}
 ): Record<string, string | string[]> {
   const { prefix = '', arrayFormat = 'repeat' } = options;
   const params: Record<string, string | string[]> = {};
@@ -202,23 +234,9 @@ export function createFilterParams(
     const fullKey = prefix ? `${prefix}[${key}]` : key;
 
     if (Array.isArray(value)) {
-      if (arrayFormat === 'repeat') {
-        // status=active&status=pending
-        params[fullKey] = value.map(String);
-      } else if (arrayFormat === 'bracket') {
-        // status[]=active&status[]=pending
-        params[`${fullKey}[]`] = value.map(String);
-      } else if (arrayFormat === 'comma') {
-        // status=active,pending
-        params[fullKey] = value.join(',');
-      }
+      handleArrayValue(params, fullKey, value, arrayFormat);
     } else if (typeof value === 'object' && value !== null) {
-      // Nested object: { gte: '2024-01-01' } => key[gte]=2024-01-01
-      for (const [nestedKey, nestedValue] of Object.entries(value)) {
-        if (nestedValue !== null && nestedValue !== undefined) {
-          params[`${fullKey}[${nestedKey}]`] = String(nestedValue);
-        }
-      }
+      handleNestedObject(params, fullKey, value as Record<string, unknown>);
     } else {
       params[fullKey] = String(value);
     }
@@ -415,9 +433,15 @@ export function extractPaginationFromHeaders(
 
   const result: Partial<PaginatedResponse<unknown>['pagination']> = {};
 
-  if (total) result.total = parseInt(total, 10);
-  if (page) result.page = parseInt(page, 10);
-  if (pageSize) result.pageSize = parseInt(pageSize, 10);
+  if (total) {
+    result.total = parseInt(total, MATH.DECIMAL_BASE);
+  }
+  if (page) {
+    result.page = parseInt(page, MATH.DECIMAL_BASE);
+  }
+  if (pageSize) {
+    result.pageSize = parseInt(pageSize, MATH.DECIMAL_BASE);
+  }
 
   if (result.total && result.page && result.pageSize) {
     result.totalPages = Math.ceil(result.total / result.pageSize);
@@ -450,8 +474,10 @@ export function extractPaginationFromHeaders(
  * ```
  */
 export function generateIdempotencyKey(prefix?: string): string {
-  const timestamp = Date.now().toString(36);
-  const random = Math.random().toString(36).substring(2, 15);
+  const timestamp = Date.now().toString(ID_GENERATION.RADIX);
+  const random = Math.random()
+    .toString(ID_GENERATION.RADIX)
+    .substring(ID_GENERATION.SUBSTRING_START, ID_GENERATION.SUFFIX_LENGTH);
   const key = `${timestamp}${random}`;
   return prefix ? `${prefix}_${key}` : key;
 }

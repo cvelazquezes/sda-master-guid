@@ -4,6 +4,7 @@
  */
 
 import { AccessibilityProps, Platform } from 'react-native';
+import { COLOR, WCAG, TOUCH_TARGET, SPACING, MATH } from '../constants/numbers';
 
 // ============================================================================
 // Accessibility Role Mapping
@@ -289,11 +290,11 @@ export function combineA11yLabel(...parts: (string | undefined | null)[]): strin
  * Formats a number for screen readers
  */
 export function formatNumberA11y(value: number): string {
-  if (value >= 1000000) {
-    return `${(value / 1000000).toFixed(1)} million`;
+  if (value >= MATH.MILLION) {
+    return `${(value / MATH.MILLION).toFixed(1)} million`;
   }
-  if (value >= 1000) {
-    return `${(value / 1000).toFixed(1)} thousand`;
+  if (value >= MATH.THOUSAND) {
+    return `${(value / MATH.THOUSAND).toFixed(1)} thousand`;
   }
   return value.toString();
 }
@@ -338,7 +339,7 @@ export function createListItemA11y(
 // Touch Target Helpers
 // ============================================================================
 
-export const MINIMUM_TOUCH_TARGET = 44; // iOS HIG & Material Design minimum
+export const MINIMUM_TOUCH_TARGET = TOUCH_TARGET.STANDARD;
 
 /**
  * Ensures minimum touch target size
@@ -357,7 +358,7 @@ export function getMinimumTouchTarget(currentSize: number): {
 /**
  * Creates hit slop for better touch targets
  */
-export function createHitSlop(size: number = 8): {
+export function createHitSlop(size: number = SPACING.XS): {
   top: number;
   bottom: number;
   left: number;
@@ -407,12 +408,27 @@ export async function isScreenReaderEnabled(): Promise<boolean> {
  * Calculates relative luminance of a color
  */
 function getRelativeLuminance(r: number, g: number, b: number): number {
+  const { MAX_RGB } = COLOR;
+  const {
+    RED: RED_COEFFICIENT,
+    GREEN: GREEN_COEFFICIENT,
+    BLUE: BLUE_COEFFICIENT,
+    THRESHOLD,
+    LINEAR_SCALE,
+    GAMMA,
+    OFFSET,
+    DENOMINATOR,
+  } = WCAG.LUMINANCE;
+
   const [rs, gs, bs] = [r, g, b].map((c) => {
-    const sRGB = c / 255;
-    return sRGB <= 0.03928 ? sRGB / 12.92 : Math.pow((sRGB + 0.055) / 1.055, 2.4);
+    const sRGB = c / MAX_RGB;
+    return sRGB <= THRESHOLD ? sRGB / LINEAR_SCALE : Math.pow((sRGB + OFFSET) / DENOMINATOR, GAMMA);
   });
-  return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+  return RED_COEFFICIENT * rs + GREEN_COEFFICIENT * gs + BLUE_COEFFICIENT * bs;
 }
+
+/** Luminance offset for contrast calculation per WCAG */
+const LUMINANCE_OFFSET = 0.05;
 
 /**
  * Calculates contrast ratio between two colors
@@ -427,21 +443,25 @@ export function getContrastRatio(
   const lighter = Math.max(l1, l2);
   const darker = Math.min(l1, l2);
 
-  return (lighter + 0.05) / (darker + 0.05);
+  return (lighter + LUMINANCE_OFFSET) / (darker + LUMINANCE_OFFSET);
 }
 
 /**
  * Checks if contrast ratio meets WCAG AA standard
  */
 export function meetsWCAGAA(contrastRatio: number, isLargeText: boolean = false): boolean {
-  return isLargeText ? contrastRatio >= 3 : contrastRatio >= 4.5;
+  return isLargeText
+    ? contrastRatio >= WCAG.CONTRAST.AA_LARGE
+    : contrastRatio >= WCAG.CONTRAST.AA_NORMAL;
 }
 
 /**
  * Checks if contrast ratio meets WCAG AAA standard
  */
 export function meetsWCAGAAA(contrastRatio: number, isLargeText: boolean = false): boolean {
-  return isLargeText ? contrastRatio >= 4.5 : contrastRatio >= 7;
+  return isLargeText
+    ? contrastRatio >= WCAG.CONTRAST.AAA_LARGE
+    : contrastRatio >= WCAG.CONTRAST.AAA_NORMAL;
 }
 
 // ============================================================================

@@ -25,7 +25,9 @@ export interface Environment {
 }
 
 const getBoolEnvVar = (value: string | undefined, defaultValue: boolean): boolean => {
-  if (value === undefined) return defaultValue;
+  if (value === undefined) {
+    return defaultValue;
+  }
   return value === 'true';
 };
 
@@ -73,7 +75,7 @@ export const validateEnvironment = (): void => {
   // that don't have a backend server. This is intentional for testing
   // and demonstration purposes.
   if (environment.env === 'production' && environment.useMockData) {
-    console.log('⚠️  Running in production mode with mock data enabled');
+    console.warn('⚠️  Running in production mode with mock data enabled');
   }
 };
 

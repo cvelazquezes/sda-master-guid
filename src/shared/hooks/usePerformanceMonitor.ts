@@ -6,6 +6,17 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { InteractionManager } from 'react-native';
 import { logger } from '../utils/logger';
+import { MS, MATH, OPACITY_VALUE, LIST_LIMITS } from '../constants/numbers';
+
+// Performance thresholds
+/* eslint-disable no-magic-numbers -- Performance metric thresholds */
+const PERF_THRESHOLD = {
+  TARGET_FPS: 60,
+  LOW_FPS_WARNING: 55,
+  MEMORY_WARNING_RATIO: OPACITY_VALUE.NEAR_FULL, // 0.9
+  EXCESSIVE_RENDERS: LIST_LIMITS.MAX_DROPDOWN_ITEMS, // 50
+} as const;
+/* eslint-enable no-magic-numbers */
 
 // ============================================================================
 // Types
@@ -135,9 +146,11 @@ export function usePerformanceMonitor(
     return () => {
       interactionHandle.cancel();
     };
+    // Note: metrics.mountTime is intentionally not in deps to avoid re-running
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [componentName, budget]);
 
-  // Track renders
+  // Track renders - intentionally runs on every render
   useEffect(() => {
     const renderStart = lastRenderTimeRef.current;
     const renderEnd = performance.now();
@@ -163,7 +176,9 @@ export function usePerformanceMonitor(
 
     // Record start time for next render
     lastRenderTimeRef.current = performance.now();
-  });
+    // Intentionally no deps - this runs on every render to track performance
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [budget?.maxRenderTime, componentName]);
 
   return metrics;
 }
@@ -188,7 +203,12 @@ export function usePerformanceMonitor(
  * };
  * ```
  */
-export function usePerformanceMeasure() {
+export function usePerformanceMeasure(): {
+  measure: <T>(name: string, fn: () => Promise<T>, options?: { budget?: number }) => Promise<T>;
+  measurements: PerformanceMeasurement[];
+  clearMeasurements: () => void;
+  getAverageDuration: (operationName: string) => number;
+} {
   const [measurements, setMeasurements] = useState<PerformanceMeasurement[]>([]);
 
   const measure = useCallback(
@@ -250,7 +270,9 @@ export function usePerformanceMeasure() {
   const getAverageDuration = useCallback(
     (operationName: string): number => {
       const filtered = measurements.filter((m) => m.name === operationName);
-      if (filtered.length === 0) return 0;
+      if (filtered.length === 0) {
+        return 0;
+      }
 
       const sum = filtered.reduce((acc, m) => acc + m.duration, 0);
       return sum / filtered.length;
@@ -285,30 +307,30 @@ export function usePerformanceMeasure() {
  * }
  * ```
  */
-export function useFPSMonitor(sampleInterval: number = 1000): number {
-  const [fps, setFPS] = useState(60);
+export function useFPSMonitor(sampleInterval: number = MS.SECOND): number {
+  const [fps, setFPS] = useState(PERF_THRESHOLD.TARGET_FPS);
   const frameCountRef = useRef(0);
   const lastTimeRef = useRef(performance.now());
 
   useEffect(() => {
     let animationFrameId: number;
-    const measureFPS = () => {
+    const measureFPS = (): void => {
       frameCountRef.current++;
       animationFrameId = requestAnimationFrame(measureFPS);
     };
 
-    const calculateFPS = () => {
+    const calculateFPS = (): void => {
       const now = performance.now();
       const elapsed = now - lastTimeRef.current;
-      const currentFPS = Math.round((frameCountRef.current * 1000) / elapsed);
+      const currentFPS = Math.round((frameCountRef.current * MS.SECOND) / elapsed);
 
       setFPS(currentFPS);
 
       // Warn if FPS is low
-      if (currentFPS < 55) {
+      if (currentFPS < PERF_THRESHOLD.LOW_FPS_WARNING) {
         logger.warn('Low FPS detected', {
           fps: currentFPS,
-          target: 60,
+          target: PERF_THRESHOLD.TARGET_FPS,
         });
       }
 
@@ -347,7 +369,11 @@ export function useFPSMonitor(sampleInterval: number = 1000): number {
  * }
  * ```
  */
-export function useMemoryMonitor(interval: number = 5000) {
+export function useMemoryMonitor(interval: number = 5000): {
+  usedJSHeapSize: number;
+  totalJSHeapSize: number;
+  jsHeapSizeLimit: number;
+} | null {
   const [memory, setMemory] = useState<{
     usedJSHeapSize: number;
     totalJSHeapSize: number;
@@ -355,7 +381,7 @@ export function useMemoryMonitor(interval: number = 5000) {
   } | null>(null);
 
   useEffect(() => {
-    const checkMemory = () => {
+    const checkMemory = (): void => {
       // @ts-expect-error - performance.memory is not standard but available in some environments
       if (performance.memory) {
         // @ts-expect-error - performance.memory is not standard
@@ -368,11 +394,11 @@ export function useMemoryMonitor(interval: number = 5000) {
         });
 
         // Warn if using > 90% of heap
-        if (usedJSHeapSize > jsHeapSizeLimit * 0.9) {
+        if (usedJSHeapSize > jsHeapSizeLimit * PERF_THRESHOLD.MEMORY_WARNING_RATIO) {
           logger.warn('High memory usage detected', {
             used: usedJSHeapSize,
             limit: jsHeapSizeLimit,
-            percentage: (usedJSHeapSize / jsHeapSizeLimit) * 100,
+            percentage: (usedJSHeapSize / jsHeapSizeLimit) * MATH.HUNDRED,
           });
         }
       }
@@ -435,7 +461,7 @@ export function useRenderTracker<T extends Record<string, unknown>>(
       }
 
       // Warn if too many renders
-      if (renderCount.current > 50) {
+      if (renderCount.current > PERF_THRESHOLD.EXCESSIVE_RENDERS) {
         logger.warn('Excessive re-renders detected', {
           component: componentName,
           renderCount: renderCount.current,
@@ -467,7 +493,19 @@ export function useRenderTracker<T extends Record<string, unknown>>(
  * };
  * ```
  */
-export function useNetworkMonitor() {
+export function useNetworkMonitor(): {
+  trackRequest: <T>(
+    name: string,
+    fn: () => Promise<T>,
+    options?: { budget?: number }
+  ) => Promise<T>;
+  metrics: {
+    requestCount: number;
+    averageDuration: number;
+    slowestRequest: string | null;
+    slowestDuration: number;
+  };
+} {
   const [metrics, setMetrics] = useState<{
     requestCount: number;
     averageDuration: number;

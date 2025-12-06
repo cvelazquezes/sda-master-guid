@@ -3,9 +3,25 @@
  * Enables gradual rollouts and A/B testing following LaunchDarkly/Optimizely patterns
  */
 
+import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { logger } from '../utils/logger';
 import { environment } from '../config/environment';
+import { MATH } from '../constants/numbers';
+
+// Feature flag rollout percentages
+/* eslint-disable no-magic-numbers -- Rollout percentage constants */
+const ROLLOUT_PERCENTAGE = {
+  SMALL: MATH.TEN, // 10%
+  MEDIUM: 25, // 25%
+  FULL: MATH.HUNDRED, // 100%
+  HASH_BITSHIFT: MATH.FIVE, // For bit shifting in hash
+} as const;
+/* eslint-enable no-magic-numbers */
+
+// ============================================================================
+// React Hook
+// ============================================================================
 
 // ============================================================================
 // Types
@@ -95,7 +111,7 @@ class FeatureFlagsService {
         key: 'enableABTesting',
         value: false,
         enabled: false,
-        rolloutPercentage: 10, // 10% rollout
+        rolloutPercentage: ROLLOUT_PERCENTAGE.SMALL, // 10% rollout
       },
       enableAdvancedAnalytics: {
         key: 'enableAdvancedAnalytics',
@@ -107,7 +123,7 @@ class FeatureFlagsService {
         key: 'enableNewMatchUI',
         value: false,
         enabled: false,
-        rolloutPercentage: 25, // 25% rollout
+        rolloutPercentage: ROLLOUT_PERCENTAGE.MEDIUM, // 25% rollout
       },
 
       // Admin features
@@ -127,61 +143,70 @@ class FeatureFlagsService {
     }
   }
 
+  private isExpired(flag: FeatureFlag, featureKey: string): boolean {
+    if (flag.expiresAt && Date.now() > flag.expiresAt) {
+      logger.debug(`Feature flag expired: ${featureKey}`);
+      return true;
+    }
+    return false;
+  }
+
+  private checkUserTargeting(flag: FeatureFlag): boolean | null {
+    if (flag.userIds && this.userId) {
+      return flag.userIds.includes(this.userId);
+    }
+    return null;
+  }
+
+  private checkGroupTargeting(flag: FeatureFlag): boolean {
+    if (!flag.userGroups || this.userGroups.length === 0) {
+      return true;
+    }
+    return flag.userGroups.some((group) => this.userGroups.includes(group));
+  }
+
+  private checkRollout(flag: FeatureFlag): boolean | null {
+    if (flag.rolloutPercentage !== undefined && this.userId) {
+      const userHash = this.hashUserId(this.userId);
+      return userHash % ROLLOUT_PERCENTAGE.FULL < flag.rolloutPercentage;
+    }
+    return null;
+  }
+
   /**
    * Checks if a feature is enabled for the current user
    */
   isEnabled(featureKey: string): boolean {
     const flag = this.flags.get(featureKey);
-
     if (!flag) {
       logger.warn(`Feature flag not found: ${featureKey}`);
       return false;
     }
-
-    // Check if flag is globally enabled
-    if (!flag.enabled) {
+    if (!flag.enabled || this.isExpired(flag, featureKey)) {
       return false;
     }
 
-    // Check if flag has expired
-    if (flag.expiresAt && Date.now() > flag.expiresAt) {
-      logger.debug(`Feature flag expired: ${featureKey}`);
+    const userTarget = this.checkUserTargeting(flag);
+    if (userTarget !== null) {
+      return userTarget;
+    }
+
+    if (!this.checkGroupTargeting(flag)) {
       return false;
     }
 
-    // Check user-specific targeting
-    if (flag.userIds && this.userId) {
-      return flag.userIds.includes(this.userId);
+    const rollout = this.checkRollout(flag);
+    if (rollout !== null) {
+      return rollout;
     }
 
-    // Check group-specific targeting
-    if (flag.userGroups && this.userGroups.length > 0) {
-      const hasGroup = flag.userGroups.some((group) =>
-        this.userGroups.includes(group)
-      );
-      if (!hasGroup) {
-        return false;
-      }
-    }
-
-    // Check rollout percentage
-    if (flag.rolloutPercentage !== undefined && this.userId) {
-      const userHash = this.hashUserId(this.userId);
-      const isInRollout = userHash % 100 < flag.rolloutPercentage;
-      return isInRollout;
-    }
-
-    // Default to the flag's value if boolean
     return typeof flag.value === 'boolean' ? flag.value : flag.enabled;
   }
 
   /**
    * Gets a feature flag value with type safety
    */
-  getValue<T extends FeatureFlagValue>(
-    featureKey: string,
-    defaultValue: T
-  ): T {
+  getValue<T extends FeatureFlagValue>(featureKey: string, defaultValue: T): T {
     if (!this.isEnabled(featureKey)) {
       return defaultValue;
     }
@@ -279,7 +304,7 @@ class FeatureFlagsService {
       const stored = await AsyncStorage.getItem(this.STORAGE_KEY);
       if (stored) {
         const config: FeatureFlagConfig = JSON.parse(stored);
-        
+
         // Load flags into memory
         for (const [key, flag] of Object.entries(config.flags)) {
           this.flags.set(key, flag);
@@ -302,7 +327,7 @@ class FeatureFlagsService {
     let hash = 0;
     for (let i = 0; i < userId.length; i++) {
       const char = userId.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
+      hash = (hash << ROLLOUT_PERCENTAGE.HASH_BITSHIFT) - hash + char;
       hash = hash & hash; // Convert to 32bit integer
     }
     return Math.abs(hash);
@@ -341,19 +366,11 @@ class FeatureFlagsService {
 
 export const featureFlagsService = new FeatureFlagsService();
 
-// ============================================================================
-// React Hook
-// ============================================================================
-
-import { useState, useEffect } from 'react';
-
 /**
  * React hook to check if a feature is enabled
  */
 export function useFeatureFlag(featureKey: string): boolean {
-  const [isEnabled, setIsEnabled] = useState(() =>
-    featureFlagsService.isEnabled(featureKey)
-  );
+  const [isEnabled, setIsEnabled] = useState(() => featureFlagsService.isEnabled(featureKey));
 
   useEffect(() => {
     // Re-check on mount
@@ -397,7 +414,7 @@ export function createRolloutFlag(
     key,
     value,
     enabled: true,
-    rolloutPercentage: Math.max(0, Math.min(100, rolloutPercentage)),
+    rolloutPercentage: Math.max(0, Math.min(ROLLOUT_PERCENTAGE.FULL, rolloutPercentage)),
   };
 }
 
@@ -433,4 +450,3 @@ export function createTimeLimitedFlag(
     expiresAt: Date.now() + expiresInDays * millisecondsPerDay,
   };
 }
-

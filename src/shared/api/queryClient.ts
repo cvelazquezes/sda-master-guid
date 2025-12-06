@@ -9,10 +9,14 @@
  * - Airbnb's data fetching patterns
  * - Netflix's caching strategies
  */
+/**
+ */
 
 import { QueryClient, QueryCache, MutationCache } from '@tanstack/react-query';
 import { logger } from '../utils/logger';
 import { AppError } from '../utils/errors';
+import { CACHE, RETRY } from '../constants/timing';
+import { LIST_LIMITS } from '../constants/numbers';
 
 /**
  * Default query options
@@ -20,14 +24,15 @@ import { AppError } from '../utils/errors';
 const defaultQueryOptions = {
   queries: {
     // Stale time: how long data is considered fresh (5 minutes)
-    staleTime: 5 * 60 * 1000,
+    staleTime: CACHE.MEDIUM,
 
     // Cache time: how long unused data stays in cache (10 minutes)
-    cacheTime: 10 * 60 * 1000,
+    cacheTime: CACHE.MEDIUM * (LIST_LIMITS.MAX_RETRIES - 1),
 
     // Retry failed requests (3 times with exponential backoff)
-    retry: 3,
-    retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    retry: LIST_LIMITS.MAX_RETRIES,
+    retryDelay: (attemptIndex: number) =>
+      Math.min(RETRY.FIRST * RETRY.MULTIPLIER ** attemptIndex, RETRY.MAX),
 
     // Refetch on window focus (user returns to tab)
     refetchOnWindowFocus: true,
@@ -44,7 +49,7 @@ const defaultQueryOptions = {
   mutations: {
     // Retry mutations once
     retry: 1,
-    retryDelay: 1000,
+    retryDelay: RETRY.FIRST,
   },
 };
 

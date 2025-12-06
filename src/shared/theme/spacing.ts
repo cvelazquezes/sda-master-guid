@@ -1,8 +1,10 @@
 /**
  * Spacing System
- * 
+ *
  * Consistent spacing scale following 8px grid system.
  * Used for margins, padding, gaps, etc.
+ *
+ * NOTE: This file intentionally contains literal numbers as it DEFINES spacing tokens.
  */
 
 /**
@@ -12,7 +14,7 @@ export const BASE_SPACING = 8;
 
 /**
  * Spacing scale
- * 
+ *
  * Uses 8px base unit for consistent spacing throughout the app.
  * Each step is a multiple of 8px for perfect alignment.
  */
@@ -44,25 +46,25 @@ export const spacing = {
 export const semanticSpacing = {
   // Extra small spacing
   xs: spacing[1], // 4px
-  
+
   // Small spacing
   sm: spacing[2], // 8px
-  
+
   // Medium spacing (default)
   md: spacing[4], // 16px
-  
+
   // Large spacing
   lg: spacing[6], // 24px
-  
+
   // Extra large spacing
   xl: spacing[8], // 32px
-  
+
   // 2x extra large
   '2xl': spacing[12], // 48px
-  
+
   // 3x extra large
   '3xl': spacing[16], // 64px
-  
+
   // 4x extra large
   '4xl': spacing[20], // 80px
 } as const;
@@ -127,7 +129,7 @@ export const shadows = {
     shadowRadius: 0,
     elevation: 0,
   },
-  
+
   sm: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -135,7 +137,7 @@ export const shadows = {
     shadowRadius: 2,
     elevation: 2,
   },
-  
+
   md: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -143,7 +145,7 @@ export const shadows = {
     shadowRadius: 4,
     elevation: 4,
   },
-  
+
   lg: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -151,7 +153,7 @@ export const shadows = {
     shadowRadius: 8,
     elevation: 8,
   },
-  
+
   xl: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
@@ -159,7 +161,7 @@ export const shadows = {
     shadowRadius: 16,
     elevation: 12,
   },
-  
+
   '2xl': {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 12 },
@@ -251,4 +253,3 @@ export type SpacingKey = keyof typeof spacing;
 export type SemanticSpacingKey = keyof typeof semanticSpacing;
 export type BorderRadiusKey = keyof typeof borderRadius;
 export type ShadowKey = keyof typeof shadows;
-

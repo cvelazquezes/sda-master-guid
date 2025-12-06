@@ -5,6 +5,7 @@
  */
 
 import { z } from 'zod';
+import { PASSWORD_RULES, TEXT, NUMERIC, MATCH, PAGE } from '../constants/validation';
 
 // ============================================================================
 // Common Validation Rules
@@ -14,10 +15,6 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_REGEX = /^\+?[1-9]\d{1,14}$/;
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-// Strong password requirements (NIST guidelines)
-const PASSWORD_MIN_LENGTH = 8;
-const PASSWORD_MAX_LENGTH = 128;
-
 // ============================================================================
 // Reusable Field Schemas
 // ============================================================================
@@ -25,41 +22,35 @@ const PASSWORD_MAX_LENGTH = 128;
 export const CommonSchemas = {
   email: z
     .string()
-    .min(1, 'Email is required')
-    .max(255, 'Email is too long')
+    .min(NUMERIC.MIN_REQUIRED, 'Email is required')
+    .max(TEXT.EMAIL_MAX, 'Email is too long')
     .regex(EMAIL_REGEX, 'Invalid email format')
     .toLowerCase()
     .trim(),
 
   password: z
     .string()
-    .min(PASSWORD_MIN_LENGTH, `Password must be at least ${PASSWORD_MIN_LENGTH} characters`)
-    .max(PASSWORD_MAX_LENGTH, 'Password is too long')
+    .min(
+      PASSWORD_RULES.MIN_LENGTH,
+      `Password must be at least ${PASSWORD_RULES.MIN_LENGTH} characters`
+    )
+    .max(PASSWORD_RULES.MAX_LENGTH, 'Password is too long')
     .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
     .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
     .regex(/[0-9]/, 'Password must contain at least one number')
     .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character'),
 
-  phone: z
-    .string()
-    .regex(PHONE_REGEX, 'Invalid phone number format')
-    .optional()
-    .or(z.literal('')),
+  phone: z.string().regex(PHONE_REGEX, 'Invalid phone number format').optional().or(z.literal('')),
 
   name: z
     .string()
-    .min(1, 'Name is required')
-    .max(100, 'Name is too long')
+    .min(NUMERIC.MIN_REQUIRED, 'Name is required')
+    .max(TEXT.NAME_MAX, 'Name is too long')
     .trim(),
 
-  uuid: z
-    .string()
-    .regex(UUID_REGEX, 'Invalid ID format'),
+  uuid: z.string().regex(UUID_REGEX, 'Invalid ID format'),
 
-  url: z
-    .string()
-    .url('Invalid URL format')
-    .max(2048, 'URL is too long'),
+  url: z.string().url('Invalid URL format').max(TEXT.LONG_TEXT_MAX, 'URL is too long'),
 
   timezone: z
     .string()
@@ -80,15 +71,9 @@ export const CommonSchemas = {
     errorMap: () => ({ message: 'Invalid language code' }),
   }),
 
-  positiveInteger: z
-    .number()
-    .int('Must be an integer')
-    .positive('Must be positive'),
+  positiveInteger: z.number().int('Must be an integer').positive('Must be positive'),
 
-  nonNegativeInteger: z
-    .number()
-    .int('Must be an integer')
-    .nonnegative('Must be non-negative'),
+  nonNegativeInteger: z.number().int('Must be an integer').nonnegative('Must be non-negative'),
 };
 
 // ============================================================================
@@ -162,9 +147,9 @@ export const UserSchemas = {
     clubId: z.string().optional(),
     isActive: z.boolean().optional(),
     isPaused: z.boolean().optional(),
-    search: z.string().max(100).optional(),
-    page: CommonSchemas.positiveInteger.default(1),
-    pageSize: CommonSchemas.positiveInteger.max(100).default(20),
+    search: z.string().max(TEXT.NAME_MAX).optional(),
+    page: CommonSchemas.positiveInteger.default(PAGE.DEFAULT_NUMBER),
+    pageSize: CommonSchemas.positiveInteger.max(PAGE.MAX_SIZE).default(PAGE.DEFAULT_SIZE),
   }),
 };
 
@@ -174,16 +159,19 @@ export const UserSchemas = {
 
 export const ClubSchemas = {
   create: z.object({
-    name: z.string().min(1, 'Name is required').max(100, 'Name is too long'),
-    address: z.string().min(1, 'Address is required').max(200),
-    city: z.string().min(1, 'City is required').max(100),
-    country: z.string().min(1, 'Country is required').max(100),
+    name: z
+      .string()
+      .min(NUMERIC.MIN_REQUIRED, 'Name is required')
+      .max(TEXT.NAME_MAX, 'Name is too long'),
+    address: z.string().min(NUMERIC.MIN_REQUIRED, 'Address is required').max(TEXT.MEDIUM_TEXT_MAX),
+    city: z.string().min(NUMERIC.MIN_REQUIRED, 'City is required').max(TEXT.NAME_MAX),
+    country: z.string().min(NUMERIC.MIN_REQUIRED, 'Country is required').max(TEXT.NAME_MAX),
     timezone: CommonSchemas.timezone,
     numberOfCourts: CommonSchemas.positiveInteger,
-    courtNames: z.array(z.string().max(50)).optional(),
+    courtNames: z.array(z.string().max(TEXT.SHORT_TEXT_MAX)).optional(),
     settings: z
       .object({
-        matchDuration: CommonSchemas.positiveInteger.default(90),
+        matchDuration: CommonSchemas.positiveInteger.default(MATCH.DEFAULT_DURATION_MINUTES),
         openingTime: z.string().regex(/^\d{2}:\d{2}$/, 'Invalid time format'),
         closingTime: z.string().regex(/^\d{2}:\d{2}$/, 'Invalid time format'),
         allowBookings: z.boolean().default(true),
@@ -192,19 +180,27 @@ export const ClubSchemas = {
   }),
 
   update: z.object({
-    name: z.string().min(1).max(100).optional(),
-    address: z.string().min(1).max(200).optional(),
-    city: z.string().min(1).max(100).optional(),
-    country: z.string().min(1).max(100).optional(),
+    name: z.string().min(NUMERIC.MIN_REQUIRED).max(TEXT.NAME_MAX).optional(),
+    address: z.string().min(NUMERIC.MIN_REQUIRED).max(TEXT.MEDIUM_TEXT_MAX).optional(),
+    city: z.string().min(NUMERIC.MIN_REQUIRED).max(TEXT.NAME_MAX).optional(),
+    country: z.string().min(NUMERIC.MIN_REQUIRED).max(TEXT.NAME_MAX).optional(),
     timezone: CommonSchemas.timezone.optional(),
     numberOfCourts: CommonSchemas.positiveInteger.optional(),
-    courtNames: z.array(z.string().max(50)).optional(),
-    settings: z.object({
-      matchDuration: CommonSchemas.positiveInteger.optional(),
-      openingTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
-      closingTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
-      allowBookings: z.boolean().optional(),
-    }).optional(),
+    courtNames: z.array(z.string().max(TEXT.SHORT_TEXT_MAX)).optional(),
+    settings: z
+      .object({
+        matchDuration: CommonSchemas.positiveInteger.optional(),
+        openingTime: z
+          .string()
+          .regex(/^\d{2}:\d{2}$/)
+          .optional(),
+        closingTime: z
+          .string()
+          .regex(/^\d{2}:\d{2}$/)
+          .optional(),
+        allowBookings: z.boolean().optional(),
+      })
+      .optional(),
   }),
 };
 
@@ -214,15 +210,15 @@ export const ClubSchemas = {
 
 export const MatchSchemas = {
   create: z.object({
-    clubId: z.string().min(1, 'Club ID is required'),
+    clubId: z.string().min(NUMERIC.MIN_REQUIRED, 'Club ID is required'),
     date: z.string().datetime('Invalid date format'),
     courtNumber: CommonSchemas.positiveInteger,
-    duration: CommonSchemas.positiveInteger.default(90),
+    duration: CommonSchemas.positiveInteger.default(MATCH.DEFAULT_DURATION_MINUTES),
     participants: z
-      .array(z.string().min(1, 'Participant ID is required'))
-      .min(2, 'At least 2 participants required')
-      .max(4, 'Maximum 4 participants allowed'),
-    notes: z.string().max(500).optional(),
+      .array(z.string().min(NUMERIC.MIN_REQUIRED, 'Participant ID is required'))
+      .min(MATCH.MIN_PARTICIPANTS, 'At least 2 participants required')
+      .max(MATCH.MAX_PARTICIPANTS, 'Maximum 4 participants allowed'),
+    notes: z.string().max(TEXT.DESCRIPTION_MAX).optional(),
   }),
 
   update: z.object({
@@ -230,11 +226,11 @@ export const MatchSchemas = {
     courtNumber: CommonSchemas.positiveInteger.optional(),
     duration: CommonSchemas.positiveInteger.optional(),
     participants: z
-      .array(z.string().min(1))
-      .min(2)
-      .max(4)
+      .array(z.string().min(NUMERIC.MIN_REQUIRED))
+      .min(MATCH.MIN_PARTICIPANTS)
+      .max(MATCH.MAX_PARTICIPANTS)
       .optional(),
-    notes: z.string().max(500).optional(),
+    notes: z.string().max(TEXT.DESCRIPTION_MAX).optional(),
     status: z.enum(['scheduled', 'in_progress', 'completed', 'cancelled']).optional(),
   }),
 
@@ -243,8 +239,8 @@ export const MatchSchemas = {
     date: z.string().datetime().optional(),
     status: z.enum(['scheduled', 'in_progress', 'completed', 'cancelled']).optional(),
     participantId: z.string().optional(),
-    page: CommonSchemas.positiveInteger.default(1),
-    pageSize: CommonSchemas.positiveInteger.max(100).default(20),
+    page: CommonSchemas.positiveInteger.default(PAGE.DEFAULT_NUMBER),
+    pageSize: CommonSchemas.positiveInteger.max(PAGE.MAX_SIZE).default(PAGE.DEFAULT_SIZE),
   }),
 };
 
@@ -254,16 +250,16 @@ export const MatchSchemas = {
 
 export const ApiSchemas = {
   pagination: z.object({
-    page: CommonSchemas.positiveInteger.default(1),
-    pageSize: CommonSchemas.positiveInteger.max(100).default(20),
-    sortBy: z.string().max(50).optional(),
+    page: CommonSchemas.positiveInteger.default(PAGE.DEFAULT_NUMBER),
+    pageSize: CommonSchemas.positiveInteger.max(PAGE.MAX_SIZE).default(PAGE.DEFAULT_SIZE),
+    sortBy: z.string().max(TEXT.SHORT_TEXT_MAX).optional(),
     sortOrder: z.enum(['asc', 'desc']).default('asc'),
   }),
 
   idempotencyKey: z
     .string()
-    .min(1, 'Idempotency key is required')
-    .max(255, 'Idempotency key is too long')
+    .min(NUMERIC.MIN_REQUIRED, 'Idempotency key is required')
+    .max(TEXT.EMAIL_MAX, 'Idempotency key is too long')
     .regex(/^[a-zA-Z0-9-_]+$/, 'Invalid idempotency key format'),
 };
 
@@ -352,4 +348,3 @@ export type UpdateMatchInput = z.infer<typeof MatchSchemas.update>;
 export type MatchFilterInput = z.infer<typeof MatchSchemas.filter>;
 
 export type PaginationInput = z.infer<typeof ApiSchemas.pagination>;
-

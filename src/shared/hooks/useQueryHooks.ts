@@ -17,6 +17,7 @@ import { queryKeys, optimisticUpdates, queryClient } from '../api/queryClient';
 import { authService } from '../../features/auth/services/AuthService';
 import { matchService } from '../../services/matchService';
 import { User, Match } from '../../types';
+import { CACHE } from '../constants/timing';
 
 // ============================================================================
 // Auth Hooks
@@ -30,9 +31,11 @@ import { User, Match } from '../../types';
  * const { data: user, isLoading, error } = useCurrentUser();
  * ```
  */
-export function useCurrentUser(options?: UseQueryOptions<User | null>) {
+export function useCurrentUser(
+  options?: UseQueryOptions<User | null>
+): ReturnType<typeof useQuery<User | null>> {
   return useQuery(queryKeys.auth.currentUser(), () => authService.getCurrentUser(), {
-    staleTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: CACHE.LONG, // 10 minutes
     ...options,
   });
 }
@@ -46,7 +49,7 @@ export function useCurrentUser(options?: UseQueryOptions<User | null>) {
  * await updateUser.mutateAsync({ name: 'New Name' });
  * ```
  */
-export function useUpdateUser() {
+export function useUpdateUser(): ReturnType<typeof useMutation<User, Error, Partial<User>>> {
   const queryClient = useQueryClient();
 
   return useMutation((userData: Partial<User>) => authService.updateUser(userData), {
@@ -98,9 +101,11 @@ export function useUpdateUser() {
  * const { data: matches, isLoading } = useMyMatches();
  * ```
  */
-export function useMyMatches(options?: UseQueryOptions<Match[]>) {
+export function useMyMatches(
+  options?: UseQueryOptions<Match[]>
+): ReturnType<typeof useQuery<Match[]>> {
   return useQuery(queryKeys.matches.list({ scope: 'my' }), () => matchService.getMyMatches(), {
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: CACHE.SHORT, // ~1 minute
     ...options,
   });
 }
@@ -114,10 +119,13 @@ export function useMyMatches(options?: UseQueryOptions<Match[]>) {
  * const { data: matches } = useClubMatches('club-123');
  * ```
  */
-export function useClubMatches(clubId: string, options?: UseQueryOptions<Match[]>) {
+export function useClubMatches(
+  clubId: string,
+  options?: UseQueryOptions<Match[]>
+): ReturnType<typeof useQuery<Match[]>> {
   return useQuery(queryKeys.matches.list({ clubId }), () => matchService.getMatches(clubId), {
     enabled: !!clubId,
-    staleTime: 2 * 60 * 1000,
+    staleTime: CACHE.SHORT,
     ...options,
   });
 }
@@ -131,10 +139,13 @@ export function useClubMatches(clubId: string, options?: UseQueryOptions<Match[]
  * const { data: match } = useMatch('match-123');
  * ```
  */
-export function useMatch(matchId: string, options?: UseQueryOptions<Match>) {
+export function useMatch(
+  matchId: string,
+  options?: UseQueryOptions<Match>
+): ReturnType<typeof useQuery<Match>> {
   return useQuery(queryKeys.matches.detail(matchId), () => matchService.getMatch(matchId), {
     enabled: !!matchId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: CACHE.MEDIUM,
     ...options,
   });
 }
@@ -148,7 +159,7 @@ export function useMatch(matchId: string, options?: UseQueryOptions<Match>) {
  * await updateMatch.mutateAsync({ matchId: '123', status: 'completed' });
  * ```
  */
-export function useUpdateMatch() {
+export function useUpdateMatch(): ReturnType<typeof useMutation> {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const queryClient = useQueryClient();
 
@@ -160,7 +171,7 @@ export function useUpdateMatch() {
       onMutate: async ({ matchId, ...newData }) => {
         const queryKey = queryKeys.matches.detail(matchId);
         const context = await optimisticUpdates.update<Match>(queryKey, (old) =>
-          old ? { ...old, ...newData } : old!
+          old ? { ...old, ...newData } : old
         );
         return context;
       },
@@ -192,7 +203,7 @@ export function useUpdateMatch() {
  * await generateMatches.mutateAsync('club-123');
  * ```
  */
-export function useGenerateMatches() {
+export function useGenerateMatches(): ReturnType<typeof useMutation> {
   const queryClient = useQueryClient();
 
   return useMutation((clubId: string) => matchService.generateMatches(clubId), {
@@ -222,7 +233,10 @@ export function useGenerateMatches() {
  * } = useInfiniteMatches('club-123');
  * ```
  */
-export function useInfiniteMatches(clubId: string, options?: UseInfiniteQueryOptions<Match[]>) {
+export function useInfiniteMatches(
+  clubId: string,
+  options?: UseInfiniteQueryOptions<Match[]>
+): ReturnType<typeof useInfiniteQuery<Match[]>> {
   return useInfiniteQuery(
     [...queryKeys.matches.list({ clubId }), 'infinite'],
     async ({ pageParam: _pageParam = 1 }) => {
@@ -253,7 +267,7 @@ export function useInfiniteMatches(clubId: string, options?: UseInfiniteQueryOpt
  * await prefetchMyMatches();
  * ```
  */
-export async function prefetchMyMatches() {
+export async function prefetchMyMatches(): Promise<void> {
   await queryClient.prefetchQuery({
     queryKey: queryKeys.matches.list({ scope: 'my' }),
     queryFn: matchService.getMyMatches,
@@ -269,7 +283,7 @@ export async function prefetchMyMatches() {
  * await prefetchMatch('match-123');
  * ```
  */
-export async function prefetchMatch(matchId: string) {
+export async function prefetchMatch(matchId: string): Promise<void> {
   await queryClient.prefetchQuery({
     queryKey: queryKeys.matches.detail(matchId),
     queryFn: () => matchService.getMatch(matchId),
@@ -288,7 +302,7 @@ export async function prefetchMatch(matchId: string) {
  * invalidateMatches();
  * ```
  */
-export function invalidateMatches() {
+export function invalidateMatches(): Promise<void> {
   return queryClient.invalidateQueries({ queryKey: queryKeys.matches.all });
 }
 
@@ -300,6 +314,6 @@ export function invalidateMatches() {
  * invalidateAuth();
  * ```
  */
-export function invalidateAuth() {
+export function invalidateAuth(): Promise<void> {
   return queryClient.invalidateQueries({ queryKey: queryKeys.auth.all });
 }

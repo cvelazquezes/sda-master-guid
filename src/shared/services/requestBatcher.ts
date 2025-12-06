@@ -4,6 +4,7 @@
  */
 
 import { logger } from '../utils/logger';
+import { BATCH } from '../constants/numbers';
 
 // ============================================================================
 // Types
@@ -36,8 +37,8 @@ export class RequestBatcher<K = string, V = unknown> {
 
   constructor(batchFn: BatchFunction<K, V>, config: BatchConfig = {}) {
     this.batchFn = batchFn;
-    this.maxBatchSize = config.maxBatchSize || 100;
-    this.batchWindowMs = config.batchWindowMs || 10;
+    this.maxBatchSize = config.maxBatchSize || BATCH.DEFAULT_SIZE;
+    this.batchWindowMs = config.batchWindowMs || BATCH.WINDOW_MS;
   }
 
   /**
@@ -309,11 +310,11 @@ export function createUserBatchLoader<T extends { id: string }>(
 
       // Ensure order matches input
       const userMap = new Map(users.map((u) => [u.id, u]));
-      return ids.map((id) => userMap.get(id)!);
+      return ids.map((id) => userMap.get(id)).filter((u): u is User => u !== undefined);
     },
     {
-      maxBatchSize: 50,
-      batchWindowMs: 10,
+      maxBatchSize: BATCH.USER_BATCH_SIZE,
+      batchWindowMs: BATCH.WINDOW_MS,
     }
   );
 }

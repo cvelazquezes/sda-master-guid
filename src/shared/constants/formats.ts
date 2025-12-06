@@ -2,6 +2,7 @@
  * Format Constants
  * Centralized format strings for dates, numbers, currency, etc.
  */
+/* eslint-disable no-magic-numbers */
 
 // External Service URLs
 export const EXTERNAL_URLS = {

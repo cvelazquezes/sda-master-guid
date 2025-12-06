@@ -12,6 +12,8 @@
  * ❌ NEVER write: flexDirection: 'row', alignItems: 'center'
  * ✅ ALWAYS use: flexDirection: layoutConstants.flexDirection.row
  *
+ * NOTE: This file intentionally contains literal numbers as it DEFINES layout constants.
+ *
  * @version 1.0.0
  */
 

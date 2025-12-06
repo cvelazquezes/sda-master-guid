@@ -10,11 +10,12 @@
  * - Netflix API patterns
  */
 
+import { useState, useMemo, useCallback } from 'react';
+import { PAGE, MATH } from '../shared/constants/numbers';
+
 /**
  * Offset-based pagination parameters
  */
-// Note: Add this import at the top of a React file
-import React from 'react';
 
 export interface OffsetPaginationParams {
   /**
@@ -255,8 +256,8 @@ export function validatePaginationParams(
     return { valid: false, error: 'Limit must be >= 1' };
   }
 
-  if (limit > 100) {
-    return { valid: false, error: 'Limit must be <= 100' };
+  if (limit > PAGE.MAX_SIZE) {
+    return { valid: false, error: `Limit must be <= ${PAGE.MAX_SIZE}` };
   }
 
   return { valid: true };
@@ -282,9 +283,9 @@ export function validatePaginationParams(
 export function getPageNumbers(
   currentPage: number,
   totalPages: number,
-  maxVisible: number = 5
+  maxVisible: number = MATH.FIVE
 ): number[] {
-  const half = Math.floor(maxVisible / 2);
+  const half = Math.floor(maxVisible / MATH.HALF);
   let start = Math.max(1, currentPage - half);
   const end = Math.min(totalPages, start + maxVisible - 1);
 
@@ -332,8 +333,8 @@ export function getPageNumbers(
  * ```
  */
 export function usePagination(
-  initialPage: number = 1,
-  initialLimit: number = 20
+  initialPage: number = PAGE.DEFAULT_NUMBER,
+  initialLimit: number = PAGE.DEFAULT_SIZE
 ): {
   currentPage: number;
   limit: number;
@@ -344,29 +345,29 @@ export function usePagination(
   prevPage: () => void;
   reset: () => void;
 } {
-  const [currentPage, setCurrentPage] = React.useState(initialPage);
-  const [limit, setLimit] = React.useState(initialLimit);
+  const [currentPage, setCurrentPage] = useState(initialPage);
+  const [limit, setLimit] = useState(initialLimit);
 
-  const params = React.useMemo(
+  const params = useMemo(
     () => createOffsetPaginationParams(currentPage, limit),
     [currentPage, limit]
   );
 
-  const setPage = React.useCallback((page: number) => {
+  const setPage = useCallback((page: number) => {
     if (page >= 1) {
       setCurrentPage(page);
     }
   }, []);
 
-  const nextPage = React.useCallback(() => {
+  const nextPage = useCallback(() => {
     setCurrentPage((prev) => prev + 1);
   }, []);
 
-  const prevPage = React.useCallback(() => {
+  const prevPage = useCallback(() => {
     setCurrentPage((prev) => Math.max(1, prev - 1));
   }, []);
 
-  const reset = React.useCallback(() => {
+  const reset = useCallback(() => {
     setCurrentPage(initialPage);
     setLimit(initialLimit);
   }, [initialPage, initialLimit]);
@@ -390,22 +391,22 @@ export const PAGINATION_DEFAULTS = {
   /**
    * Default page size
    */
-  PAGE_SIZE: 20,
+  PAGE_SIZE: PAGE.DEFAULT_SIZE,
 
   /**
    * Maximum page size
    */
-  MAX_PAGE_SIZE: 100,
+  MAX_PAGE_SIZE: PAGE.MAX_SIZE,
 
   /**
    * Minimum page size
    */
-  MIN_PAGE_SIZE: 1,
+  MIN_PAGE_SIZE: PAGE.MIN_SIZE,
 
   /**
    * Default page number
    */
-  DEFAULT_PAGE: 1,
+  DEFAULT_PAGE: PAGE.DEFAULT_NUMBER,
 } as const;
 
 /**

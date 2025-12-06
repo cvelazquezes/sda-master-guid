@@ -7,6 +7,8 @@
  * USAGE:
  * const tokens = useDesignTokens();
  * const buttonStyle = tokens.components.button.primary;
+ *
+ * NOTE: This file intentionally contains literal numbers as it DEFINES component tokens.
  */
 
 import { TextStyle } from 'react-native';
@@ -23,7 +25,39 @@ import {
 // BUTTON TOKENS
 // ============================================================================
 
-const createButtonTokens = (theme: ThemeMode) => {
+const createButtonTokens = (
+  theme: ThemeMode
+): {
+  sizes: {
+    small: {
+      paddingVertical: number;
+      paddingHorizontal: number;
+      minHeight: number;
+      fontSize: number;
+      iconSize: number;
+      borderRadius: number;
+    };
+    medium: {
+      paddingVertical: number;
+      paddingHorizontal: number;
+      minHeight: number;
+      fontSize: number;
+      iconSize: number;
+      borderRadius: number;
+    };
+    large: {
+      paddingVertical: number;
+      paddingHorizontal: number;
+      minHeight: number;
+      fontSize: number;
+      iconSize: number;
+      borderRadius: number;
+    };
+  };
+  variants: Record<string, { backgroundColor: string; color: string; borderColor: string }>;
+  states: { disabled: { opacity: number }; loading: { opacity: number } };
+  borderWidth: number;
+} => {
   const colors = createSemanticColors(theme);
 
   return {
@@ -106,7 +140,21 @@ const createButtonTokens = (theme: ThemeMode) => {
 // CARD TOKENS
 // ============================================================================
 
-const createCardTokens = (theme: ThemeMode) => {
+const createCardTokens = (
+  theme: ThemeMode
+): {
+  variants: Record<
+    string,
+    {
+      backgroundColor: string;
+      borderRadius: number;
+      padding: number;
+      shadow: object;
+      border?: { width: number; color: string };
+    }
+  >;
+  interactive: { opacity: number };
+} => {
   const colors = createSemanticColors(theme);
   const isLight = theme === 'light';
 
@@ -159,7 +207,26 @@ const createCardTokens = (theme: ThemeMode) => {
 // INPUT TOKENS
 // ============================================================================
 
-const createInputTokens = (theme: ThemeMode) => {
+const createInputTokens = (
+  theme: ThemeMode
+): {
+  default: {
+    backgroundColor: string;
+    borderColor: string;
+    borderRadius: number;
+    borderWidth: number;
+    paddingVertical: number;
+    paddingHorizontal: number;
+    minHeight: number;
+    fontSize: number;
+    color: string;
+    placeholderColor: string;
+  };
+  states: Record<string, { borderColor?: string; backgroundColor?: string; opacity?: number }>;
+  iconSize: number;
+  labelSpacing: number;
+  helperSpacing: number;
+} => {
   const colors = createSemanticColors(theme);
 
   return {
@@ -202,7 +269,21 @@ const createInputTokens = (theme: ThemeMode) => {
 // MODAL TOKENS
 // ============================================================================
 
-const createModalTokens = (theme: ThemeMode) => {
+const createModalTokens = (
+  theme: ThemeMode
+): {
+  container: {
+    backgroundColor: string;
+    borderRadius: number;
+    padding: number;
+    maxWidth: number;
+    shadow: object;
+  };
+  overlay: { backgroundColor: string };
+  header: { marginBottom: number };
+  content: { gap: number };
+  footer: { marginTop: number; gap: number };
+} => {
   const colors = createSemanticColors(theme);
   const isLight = theme === 'light';
 
@@ -238,7 +319,19 @@ const createModalTokens = (theme: ThemeMode) => {
 // BADGE TOKENS
 // ============================================================================
 
-const createBadgeTokens = (theme: ThemeMode) => {
+const createBadgeTokens = (
+  theme: ThemeMode
+): {
+  base: {
+    paddingVertical: number;
+    paddingHorizontal: number;
+    borderRadius: number;
+    fontSize: number;
+    fontWeight: string;
+  };
+  variants: Record<string, { backgroundColor: string; color: string }>;
+  sizes: Record<string, { paddingVertical: number; paddingHorizontal: number; fontSize: number }>;
+} => {
   const colors = createSemanticColors(theme);
 
   return {
@@ -304,7 +397,17 @@ const createBadgeTokens = (theme: ThemeMode) => {
 // AVATAR TOKENS
 // ============================================================================
 
-const createAvatarTokens = (theme: ThemeMode) => {
+const createAvatarTokens = (
+  theme: ThemeMode
+): {
+  sizes: typeof sizePrimitives.avatar;
+  borderRadius: number;
+  backgroundColor: string;
+  textColor: string;
+  borderWidth: number;
+  borderColor: string;
+  fontSize: Record<string, number>;
+} => {
   const colors = createSemanticColors(theme);
 
   return {
@@ -330,7 +433,20 @@ const createAvatarTokens = (theme: ThemeMode) => {
 // LIST TOKENS
 // ============================================================================
 
-const createListTokens = (theme: ThemeMode) => {
+const createListTokens = (
+  theme: ThemeMode
+): {
+  gap: number;
+  item: {
+    padding: number;
+    borderRadius: number;
+    minHeight: number;
+    backgroundColor: string;
+    activeBackgroundColor: string;
+  };
+  separator: { color: string; thickness: number };
+  section: { headerPadding: number; headerColor: string; headerFontSize: number };
+} => {
   const colors = createSemanticColors(theme);
 
   return {
@@ -358,7 +474,13 @@ const createListTokens = (theme: ThemeMode) => {
 // DIVIDER TOKENS
 // ============================================================================
 
-const createDividerTokens = (theme: ThemeMode) => {
+const createDividerTokens = (
+  theme: ThemeMode
+): {
+  color: string;
+  thickness: number;
+  spacing: number;
+} => {
   const colors = createSemanticColors(theme);
 
   return {
@@ -372,7 +494,19 @@ const createDividerTokens = (theme: ThemeMode) => {
 // TAB TOKENS
 // ============================================================================
 
-const createTabTokens = (theme: ThemeMode) => {
+const createTabTokens = (
+  theme: ThemeMode
+): {
+  bar: {
+    backgroundColor: string;
+    borderTopWidth: number;
+    borderTopColor: string;
+    height: number;
+    paddingBottom: number;
+  };
+  item: { activeColor: string; inactiveColor: string; iconSize: number; fontSize: number };
+  indicator: { color: string; height: number; borderRadius: number };
+} => {
   const colors = createSemanticColors(theme);
 
   return {
@@ -401,7 +535,13 @@ const createTabTokens = (theme: ThemeMode) => {
 // ICON BUTTON TOKENS
 // ============================================================================
 
-const createIconButtonTokens = (theme: ThemeMode) => {
+const createIconButtonTokens = (
+  theme: ThemeMode
+): {
+  sizes: Record<string, { size: number; iconSize: number; borderRadius: number }>;
+  variants: Record<string, { backgroundColor: string; color: string }>;
+  states: { disabled: { opacity: number } };
+} => {
   const colors = createSemanticColors(theme);
 
   return {
@@ -448,7 +588,20 @@ const createIconButtonTokens = (theme: ThemeMode) => {
 // SCREEN LAYOUT TOKENS
 // ============================================================================
 
-const createLayoutTokens = (theme: ThemeMode) => {
+const createLayoutTokens = (
+  theme: ThemeMode
+): {
+  screen: { backgroundColor: string; paddingHorizontal: number; paddingVertical: number };
+  header: {
+    backgroundColor: string;
+    height: number;
+    paddingHorizontal: number;
+    borderBottomWidth: number;
+    borderBottomColor: string;
+  };
+  section: { marginBottom: number; gap: number };
+  container: { maxWidth: number; paddingHorizontal: number };
+} => {
   const colors = createSemanticColors(theme);
 
   return {
@@ -479,7 +632,20 @@ const createLayoutTokens = (theme: ThemeMode) => {
 // TOAST TOKENS
 // ============================================================================
 
-const createToastTokens = (theme: ThemeMode) => {
+const createToastTokens = (
+  theme: ThemeMode
+): {
+  container: {
+    borderRadius: number;
+    padding: number;
+    shadow: object;
+    minWidth: number;
+    maxWidth: string;
+  };
+  variants: Record<string, { backgroundColor: string; color: string }>;
+  iconSize: number;
+  gap: number;
+} => {
   const colors = createSemanticColors(theme);
   const isLight = theme === 'light';
 
@@ -522,7 +688,21 @@ const createToastTokens = (theme: ThemeMode) => {
 // EMPTY STATE TOKENS
 // ============================================================================
 
-const createEmptyStateTokens = (theme: ThemeMode) => {
+const createEmptyStateTokens = (
+  theme: ThemeMode
+): {
+  container: { padding: number; gap: number };
+  icon: {
+    size: number;
+    color: string;
+    containerSize: number;
+    containerRadius: number;
+    containerBackground: string;
+  };
+  title: object;
+  description: object;
+  action: { marginTop: number };
+} => {
   const colors = createSemanticColors(theme);
 
   return {
@@ -552,7 +732,23 @@ const createEmptyStateTokens = (theme: ThemeMode) => {
 // CREATE COMPONENT TOKENS FUNCTION
 // ============================================================================
 
-export const createComponentTokens = (theme: ThemeMode) => ({
+export const createComponentTokens = (
+  theme: ThemeMode
+): {
+  button: ReturnType<typeof createButtonTokens>;
+  card: ReturnType<typeof createCardTokens>;
+  input: ReturnType<typeof createInputTokens>;
+  modal: ReturnType<typeof createModalTokens>;
+  badge: ReturnType<typeof createBadgeTokens>;
+  avatar: ReturnType<typeof createAvatarTokens>;
+  list: ReturnType<typeof createListTokens>;
+  divider: ReturnType<typeof createDividerTokens>;
+  tab: ReturnType<typeof createTabTokens>;
+  iconButton: ReturnType<typeof createIconButtonTokens>;
+  layout: ReturnType<typeof createLayoutTokens>;
+  toast: ReturnType<typeof createToastTokens>;
+  emptyState: ReturnType<typeof createEmptyStateTokens>;
+} => ({
   button: createButtonTokens(theme),
   card: createCardTokens(theme),
   input: createInputTokens(theme),

@@ -27,6 +27,9 @@
 // App metadata
 export * from './app';
 
+// HTTP and numeric constants
+export * from './http';
+
 // Validation & Business Rules (consolidated)
 export * from './validation';
 
@@ -56,3 +59,6 @@ export * from './logMessages';
 
 // Formats (date, number, currency)
 export * from './formats';
+
+// Numeric constants (NO MAGIC NUMBERS)
+export * from './numbers';

@@ -5,6 +5,8 @@
 
 import { logger } from '../utils/logger';
 import { captureError } from '../services/sentry';
+import { CACHE } from '../constants/timing';
+import { ID_GENERATION } from '../constants/numbers';
 
 // ============================================================================
 // Types
@@ -141,7 +143,7 @@ class CommandBus {
    * Generates a correlation ID
    */
   private generateCorrelationId(): string {
-    return `cmd-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+    return `cmd-${Date.now()}-${Math.random().toString(ID_GENERATION.RADIX).substring(ID_GENERATION.SUBSTRING_START, ID_GENERATION.SUFFIX_LENGTH)}`;
   }
 
   /**
@@ -167,7 +169,7 @@ class CommandBus {
 class QueryBus {
   private handlers = new Map<string, QueryHandler<Query, unknown>>();
   private cache = new Map<string, { result: unknown; timestamp: number }>();
-  private readonly CACHE_TTL = 60000; // 1 minute
+  private readonly CACHE_TTL = CACHE.SHORT; // 1 minute
 
   /**
    * Registers a query handler
@@ -330,7 +332,10 @@ export function validationMiddleware<T>(validator: (command: Command<T>) => Prom
 /**
  * Logging middleware
  */
-export const loggingMiddleware = async (command: Command, next: () => Promise<unknown>) => {
+export const loggingMiddleware = async (
+  command: Command,
+  next: () => Promise<unknown>
+): Promise<unknown> => {
   const startTime = Date.now();
 
   logger.info('Command started', {

@@ -4,13 +4,12 @@
  * Following GitHub/Stripe API pagination patterns for scalability
  */
 
+import { useState, useCallback } from 'react';
 import { logger } from './logger';
 
 // ============================================================================
 // React Hook for Cursor Pagination
 // ============================================================================
-
-import { useState, useCallback } from 'react';
 
 // ============================================================================
 // Types

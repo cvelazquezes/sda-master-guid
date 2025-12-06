@@ -3,6 +3,8 @@
  * Provides type-safe error handling
  */
 
+import { HTTP_STATUS } from '../shared/constants/http';
+
 /**
  * Base application error
  */
@@ -10,7 +12,7 @@ export class AppError extends Error {
   constructor(
     message: string,
     public code: string,
-    public statusCode: number = 500
+    public statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR
   ) {
     super(message);
     this.name = 'AppError';
@@ -22,7 +24,7 @@ export class AppError extends Error {
  */
 export class AuthenticationError extends AppError {
   constructor(message: string = 'Authentication failed') {
-    super(message, 'AUTHENTICATION_ERROR', 401);
+    super(message, 'AUTHENTICATION_ERROR', HTTP_STATUS.UNAUTHORIZED);
     this.name = 'AuthenticationError';
   }
 }
@@ -35,7 +37,7 @@ export const AuthError = AuthenticationError;
  */
 export class AuthorizationError extends AppError {
   constructor(message: string = 'Insufficient permissions') {
-    super(message, 'AUTHORIZATION_ERROR', 403);
+    super(message, 'AUTHORIZATION_ERROR', HTTP_STATUS.FORBIDDEN);
     this.name = 'AuthorizationError';
   }
 }
@@ -49,7 +51,7 @@ export class ValidationError extends AppError {
     public field?: string,
     public value?: unknown
   ) {
-    super(message, 'VALIDATION_ERROR', 422);
+    super(message, 'VALIDATION_ERROR', HTTP_STATUS.UNPROCESSABLE_ENTITY);
     this.name = 'ValidationError';
   }
 }
@@ -62,7 +64,7 @@ export class NetworkError extends AppError {
     message: string = 'Network request failed',
     public endpoint?: string
   ) {
-    super(message, 'NETWORK_ERROR', 503);
+    super(message, 'NETWORK_ERROR', HTTP_STATUS.SERVICE_UNAVAILABLE);
     this.name = 'NetworkError';
   }
 }
@@ -72,7 +74,7 @@ export class NetworkError extends AppError {
  */
 export class TimeoutError extends AppError {
   constructor(message: string = 'Request timed out') {
-    super(message, 'TIMEOUT_ERROR', 408);
+    super(message, 'TIMEOUT_ERROR', HTTP_STATUS.REQUEST_TIMEOUT);
     this.name = 'TimeoutError';
   }
 }
@@ -85,7 +87,7 @@ export class NotFoundError extends AppError {
     message: string = 'Resource not found',
     public resource?: string
   ) {
-    super(message, 'NOT_FOUND_ERROR', 404);
+    super(message, 'NOT_FOUND_ERROR', HTTP_STATUS.NOT_FOUND);
     this.name = 'NotFoundError';
   }
 }
@@ -95,7 +97,7 @@ export class NotFoundError extends AppError {
  */
 export class ConflictError extends AppError {
   constructor(message: string = 'Resource conflict') {
-    super(message, 'CONFLICT_ERROR', 409);
+    super(message, 'CONFLICT_ERROR', HTTP_STATUS.CONFLICT);
     this.name = 'ConflictError';
   }
 }
@@ -108,7 +110,7 @@ export class RateLimitError extends AppError {
     message: string = 'Rate limit exceeded',
     public retryAfter?: number
   ) {
-    super(message, 'RATE_LIMIT_ERROR', 429);
+    super(message, 'RATE_LIMIT_ERROR', HTTP_STATUS.TOO_MANY_REQUESTS);
     this.name = 'RateLimitError';
   }
 }
@@ -140,11 +142,10 @@ export function toAppError(error: unknown): AppError {
   if (isAppError(error)) {
     return error;
   }
-  
+
   if (error instanceof Error) {
     return new AppError(error.message, 'UNKNOWN_ERROR');
   }
-  
+
   return new AppError('An unknown error occurred', 'UNKNOWN_ERROR');
 }
-

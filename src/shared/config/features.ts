@@ -1,12 +1,12 @@
 /**
  * Feature Configuration
- * 
+ *
  * Feature flags, country/region rules, and business conditions.
  * This is the SINGLE SOURCE OF TRUTH for all feature toggles and business rules.
- * 
+ *
  * ❌ NEVER write: if (country === 'MLM') { ... }
  * ✅ ALWAYS use: if (country === featureConfig.countries.MEXICO) { ... }
- * 
+ *
  * ❌ NEVER write: if (isNewFeatureEnabled) { ... }
  * ✅ ALWAYS use: if (featureConfig.flags.newFeature) { ... }
  */
@@ -117,10 +117,7 @@ export const regionConfig = {
       countryCodes.PARAGUAY,
       countryCodes.URUGUAY,
     ],
-    nad: [
-      countryCodes.USA,
-      countryCodes.CANADA,
-    ],
+    nad: [countryCodes.USA, countryCodes.CANADA],
   } as const,
 
   /** Default language by country */
@@ -307,7 +304,7 @@ export type FeatureConfig = typeof featureConfig;
 
 /**
  * Check if a feature flag is enabled
- * 
+ *
  * @example
  * if (isFeatureEnabled('darkMode')) { ... }
  */
@@ -317,18 +314,20 @@ export function isFeatureEnabled(feature: keyof typeof featureFlags): boolean {
 
 /**
  * Get default language for a country
- * 
+ *
  * @example
  * const lang = getDefaultLanguage('BRA'); // 'pt'
  */
 export function getDefaultLanguage(countryCode: string): string {
-  return (regionConfig.defaultLanguage as Record<string, string>)[countryCode] 
-    ?? regionConfig.defaultLanguage.default;
+  return (
+    (regionConfig.defaultLanguage as Record<string, string>)[countryCode] ??
+    regionConfig.defaultLanguage.default
+  );
 }
 
 /**
  * Check if country is in a specific division
- * 
+ *
  * @example
  * if (isCountryInDivision('MEX', 'iad')) { ... }
  */
@@ -343,8 +342,7 @@ export function isCountryInDivision(
 // TYPE EXPORTS
 // ============================================================================
 
-export type CountryCode = typeof countryCodes[keyof typeof countryCodes];
-export type LanguageCode = typeof languageCodes[keyof typeof languageCodes];
-export type Division = typeof regionConfig.divisions[keyof typeof regionConfig.divisions];
+export type CountryCode = (typeof countryCodes)[keyof typeof countryCodes];
+export type LanguageCode = (typeof languageCodes)[keyof typeof languageCodes];
+export type Division = (typeof regionConfig.divisions)[keyof typeof regionConfig.divisions];
 export type FeatureFlag = keyof typeof featureFlags;
-

@@ -3,9 +3,10 @@
  * Ensures operations can be safely retried following Stripe/PayPal patterns
  */
 
-import { logger } from '../utils/logger';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { TIMING } from '../constants';
+import { logger } from '../utils/logger';
+import { TIMING } from '../constants/timing';
+import { TIME_UNIT, OPACITY_VALUE, ID_GENERATION, LIST_LIMITS } from '../constants/numbers';
 
 // ============================================================================
 // Types
@@ -25,8 +26,8 @@ interface IdempotencyRecord<T = unknown> {
 class IdempotencyService {
   private memoryCache = new Map<string, IdempotencyRecord>();
   private readonly STORAGE_KEY_PREFIX = '@idempotency:';
-  private readonly DEFAULT_TTL = 3600; // 1 hour in seconds
-  private readonly MAX_MEMORY_CACHE_SIZE = 100;
+  private readonly DEFAULT_TTL = TIME_UNIT.SECONDS_PER_HOUR; // 1 hour in seconds
+  private readonly MAX_MEMORY_CACHE_SIZE = LIST_LIMITS.MAX_CACHE;
   private cleanupInterval: NodeJS.Timeout | null = null;
 
   constructor() {
@@ -77,7 +78,7 @@ class IdempotencyService {
    */
   private async set<T>(key: string, result: T, ttlSeconds: number): Promise<void> {
     const now = Date.now();
-    const expiresAt = now + ttlSeconds * 1000;
+    const expiresAt = now + ttlSeconds * TIME_UNIT.MS_PER_SECOND;
 
     const record: IdempotencyRecord<T> = {
       key,
@@ -188,7 +189,7 @@ class IdempotencyService {
     entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
 
     // Remove oldest 10%
-    const toRemove = Math.floor(this.MAX_MEMORY_CACHE_SIZE * 0.1);
+    const toRemove = Math.floor(this.MAX_MEMORY_CACHE_SIZE * OPACITY_VALUE.SUBTLE);
     for (let i = 0; i < toRemove; i++) {
       this.memoryCache.delete(entries[i][0]);
     }
@@ -228,7 +229,9 @@ class IdempotencyService {
 
       for (const storageKey of idempotencyKeys) {
         const removed = await this.cleanExpiredStorageKey(storageKey, now);
-        if (removed) removedCount++;
+        if (removed) {
+          removedCount++;
+        }
       }
     } catch (error) {
       logger.warn('Failed to cleanup expired idempotency keys', error as Error);
@@ -245,10 +248,14 @@ class IdempotencyService {
   private async cleanExpiredStorageKey(storageKey: string, now: number): Promise<boolean> {
     try {
       const stored = await AsyncStorage.getItem(storageKey);
-      if (!stored) return false;
+      if (!stored) {
+        return false;
+      }
 
       const record = JSON.parse(stored) as IdempotencyRecord;
-      if (record.expiresAt > now) return false;
+      if (record.expiresAt > now) {
+        return false;
+      }
 
       await AsyncStorage.removeItem(storageKey);
       return true;
@@ -304,7 +311,9 @@ export const idempotencyService = new IdempotencyService();
  */
 export function generateIdempotencyKey(operation: string, ...params: unknown[]): string {
   const timestamp = Date.now();
-  const randomSuffix = Math.random().toString(36).substring(2, 15);
+  const randomSuffix = Math.random()
+    .toString(ID_GENERATION.RADIX)
+    .substring(ID_GENERATION.SUBSTRING_START, ID_GENERATION.SUFFIX_LENGTH);
   const paramString = params.map((p) => JSON.stringify(p)).join('-');
 
   return `${operation}-${paramString}-${timestamp}-${randomSuffix}`;

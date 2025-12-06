@@ -4,12 +4,16 @@
  */
 
 import { z } from 'zod';
+import { PASSWORD_RULES, TEXT_RULES } from '../constants/validation';
 
 // Password validation schema
 export const PasswordSchema = z
   .string()
-  .min(8, 'Password must be at least 8 characters')
-  .max(128, 'Password too long')
+  .min(
+    PASSWORD_RULES.MIN_LENGTH,
+    `Password must be at least ${PASSWORD_RULES.MIN_LENGTH} characters`
+  )
+  .max(PASSWORD_RULES.MAX_LENGTH, 'Password too long')
   .regex(/[A-Z]/, 'Must contain at least one uppercase letter')
   .regex(/[a-z]/, 'Must contain at least one lowercase letter')
   .regex(/[0-9]/, 'Must contain at least one number')
@@ -19,7 +23,7 @@ export const PasswordSchema = z
 export const EmailSchema = z
   .string()
   .email('Invalid email address')
-  .max(255, 'Email too long')
+  .max(TEXT_RULES.EMAIL_MAX, 'Email too long')
   .toLowerCase();
 
 // Login credentials schema
@@ -34,9 +38,10 @@ export type LoginCredentials = z.infer<typeof LoginSchema>;
 export const RegisterSchema = z.object({
   email: EmailSchema,
   password: PasswordSchema,
-  name: z.string()
-    .min(2, 'Name must be at least 2 characters')
-    .max(100, 'Name too long')
+  name: z
+    .string()
+    .min(TEXT_RULES.NAME_MIN, `Name must be at least ${TEXT_RULES.NAME_MIN} characters`)
+    .max(TEXT_RULES.NAME_MAX, 'Name too long')
     .regex(/^[a-zA-Z\s'-]+$/, 'Name contains invalid characters'),
   clubId: z.string().min(1, 'Club is required'),
 });
@@ -45,12 +50,13 @@ export type RegisterData = z.infer<typeof RegisterSchema>;
 
 // User update schema
 export const UpdateUserSchema = z.object({
-  name: z.string()
-    .min(2, 'Name must be at least 2 characters')
-    .max(100, 'Name too long')
+  name: z
+    .string()
+    .min(TEXT_RULES.NAME_MIN, `Name must be at least ${TEXT_RULES.NAME_MIN} characters`)
+    .max(TEXT_RULES.NAME_MAX, 'Name too long')
     .optional(),
   timezone: z.string().optional(),
-  language: z.string().length(2).optional(),
+  language: z.string().length(TEXT_RULES.LANGUAGE_CODE_LENGTH).optional(),
   isPaused: z.boolean().optional(),
 });
 
@@ -73,20 +79,13 @@ export class ValidationError extends Error {
 /**
  * Validates input and throws ValidationError if invalid
  */
-export function validateOrThrow<T>(
-  schema: z.ZodSchema<T>,
-  data: unknown
-): T {
+export function validateOrThrow<T>(schema: z.ZodSchema<T>, data: unknown): T {
   try {
     return schema.parse(data);
   } catch (error) {
     if (error instanceof z.ZodError) {
       const firstError = error.errors[0];
-      throw new ValidationError(
-        firstError.message,
-        firstError.path.join('.'),
-        data
-      );
+      throw new ValidationError(firstError.message, firstError.path.join('.'), data);
     }
     throw error;
   }
@@ -100,14 +99,13 @@ export function validate<T>(
   data: unknown
 ): { success: true; data: T } | { success: false; errors: string[] } {
   const result = schema.safeParse(data);
-  
+
   if (result.success) {
     return { success: true, data: result.data };
   }
-  
+
   return {
     success: false,
     errors: result.error.errors.map((e) => e.message),
   };
 }
-

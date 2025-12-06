@@ -4,8 +4,8 @@
  * Web platform should use httpOnly cookies managed by backend
  */
 
-import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
 import { logger } from './logger';
 
 export class SecureStorageError extends Error {
@@ -35,7 +35,7 @@ class SecureStorage {
     if (!this.isAvailable()) {
       throw new SecureStorageError(
         'Secure storage is not available on web platform. ' +
-        'Use server-side sessions with httpOnly cookies instead.'
+          'Use server-side sessions with httpOnly cookies instead.'
       );
     }
   }
@@ -45,7 +45,7 @@ class SecureStorage {
    */
   async saveTokens(accessToken: string, refreshToken: string): Promise<void> {
     this.ensureNativePlatform();
-    
+
     try {
       await Promise.all([
         SecureStore.setItemAsync(SecureStorage.AUTH_TOKEN_KEY, accessToken),
@@ -63,7 +63,7 @@ class SecureStorage {
    */
   async getAccessToken(): Promise<string | null> {
     this.ensureNativePlatform();
-    
+
     try {
       return await SecureStore.getItemAsync(SecureStorage.AUTH_TOKEN_KEY);
     } catch (error) {
@@ -77,7 +77,7 @@ class SecureStorage {
    */
   async getRefreshToken(): Promise<string | null> {
     this.ensureNativePlatform();
-    
+
     try {
       return await SecureStore.getItemAsync(SecureStorage.REFRESH_TOKEN_KEY);
     } catch (error) {
@@ -91,7 +91,7 @@ class SecureStorage {
    */
   async saveUserId(userId: string): Promise<void> {
     this.ensureNativePlatform();
-    
+
     try {
       await SecureStore.setItemAsync(SecureStorage.USER_ID_KEY, userId);
     } catch (error) {
@@ -105,7 +105,7 @@ class SecureStorage {
    */
   async getUserId(): Promise<string | null> {
     this.ensureNativePlatform();
-    
+
     try {
       return await SecureStore.getItemAsync(SecureStorage.USER_ID_KEY);
     } catch (error) {
@@ -119,7 +119,7 @@ class SecureStorage {
    */
   async saveCsrfToken(csrfToken: string): Promise<void> {
     this.ensureNativePlatform();
-    
+
     try {
       await SecureStore.setItemAsync(SecureStorage.CSRF_TOKEN_KEY, csrfToken);
       logger.debug('CSRF token saved securely');
@@ -134,7 +134,7 @@ class SecureStorage {
    */
   async getCsrfToken(): Promise<string | null> {
     this.ensureNativePlatform();
-    
+
     try {
       return await SecureStore.getItemAsync(SecureStorage.CSRF_TOKEN_KEY);
     } catch (error) {
@@ -148,7 +148,7 @@ class SecureStorage {
    */
   async clearAuth(): Promise<void> {
     this.ensureNativePlatform();
-    
+
     try {
       await Promise.all([
         SecureStore.deleteItemAsync(SecureStorage.AUTH_TOKEN_KEY),
@@ -168,7 +168,7 @@ class SecureStorage {
    */
   async setItem(key: string, value: string): Promise<void> {
     this.ensureNativePlatform();
-    
+
     try {
       await SecureStore.setItemAsync(key, value);
     } catch (error) {
@@ -182,7 +182,7 @@ class SecureStorage {
    */
   async getItem(key: string): Promise<string | null> {
     this.ensureNativePlatform();
-    
+
     try {
       return await SecureStore.getItemAsync(key);
     } catch (error) {
@@ -196,7 +196,7 @@ class SecureStorage {
    */
   async removeItem(key: string): Promise<void> {
     this.ensureNativePlatform();
-    
+
     try {
       await SecureStore.deleteItemAsync(key);
     } catch (error) {
@@ -207,4 +207,3 @@ class SecureStorage {
 }
 
 export const secureStorage = new SecureStorage();
-

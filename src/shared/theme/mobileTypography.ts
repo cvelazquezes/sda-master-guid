@@ -1,8 +1,10 @@
 /**
  * Mobile Typography Utilities
- * 
+ *
  * Enhanced typography system optimized for mobile readability
  * Ensures minimum font sizes for accessibility (WCAG 2.1 AA)
+ *
+ * NOTE: This file intentionally contains literal numbers as it DEFINES typography tokens.
  */
 
 import { TextStyle } from 'react-native';
@@ -208,7 +210,7 @@ export const mobileTypography = {
     lineHeight: 18,
     color: '#f44336',
   },
-  
+
   // Backward compatibility aliases
   body: {
     fontSize: mobileFontSizes.md,
@@ -282,4 +284,3 @@ export const textStyles = {
 } as const;
 
 export default mobileTypography;
-

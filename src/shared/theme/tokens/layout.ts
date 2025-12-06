@@ -1,11 +1,13 @@
 /**
  * Layout Design Tokens
- * 
+ *
  * Breakpoints, grid system, density, and responsive layout configurations.
  * These tokens drive ALL layout decisions across the entire codebase.
- * 
+ *
  * ❌ NEVER write: width < 768, isCompact = width < 500
  * ✅ ALWAYS use: width < layoutTokens.breakpoints.sm
+ *
+ * NOTE: This file intentionally contains literal numbers as it DEFINES the layout tokens.
  */
 
 import { Dimensions } from 'react-native';
@@ -17,11 +19,11 @@ import { Dimensions } from 'react-native';
 /**
  * Responsive breakpoints
  * Used for ALL responsive logic throughout the app
- * 
+ *
  * @example
  * // ❌ BAD
  * const isTablet = width >= 768;
- * 
+ *
  * // ✅ GOOD
  * const isTablet = width >= breakpointTokens.md;
  */
@@ -47,7 +49,7 @@ export const breakpointTokens = {
 /**
  * UI Density configurations
  * Controls compact vs comfortable vs spacious layouts
- * 
+ *
  * @example
  * const density = useLayoutDensity();
  * const padding = densityTokens[density].cardPadding;
@@ -433,23 +435,33 @@ export type LayoutTokens = typeof layoutTokens;
 
 /**
  * Get the current breakpoint based on screen width
- * 
+ *
  * @example
  * const breakpoint = getCurrentBreakpoint(width);
  * // Returns 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl'
  */
 export function getCurrentBreakpoint(width: number): keyof typeof breakpointTokens {
-  if (width >= breakpointTokens['2xl']) return '2xl';
-  if (width >= breakpointTokens.xl) return 'xl';
-  if (width >= breakpointTokens.lg) return 'lg';
-  if (width >= breakpointTokens.md) return 'md';
-  if (width >= breakpointTokens.sm) return 'sm';
+  if (width >= breakpointTokens['2xl']) {
+    return '2xl';
+  }
+  if (width >= breakpointTokens.xl) {
+    return 'xl';
+  }
+  if (width >= breakpointTokens.lg) {
+    return 'lg';
+  }
+  if (width >= breakpointTokens.md) {
+    return 'md';
+  }
+  if (width >= breakpointTokens.sm) {
+    return 'sm';
+  }
   return 'xs';
 }
 
 /**
  * Check if current width matches a breakpoint query
- * 
+ *
  * @example
  * const isTablet = matchBreakpoint(width, 'md'); // width >= md
  * const isPhone = matchBreakpoint(width, 'sm', 'down'); // width < md
@@ -465,7 +477,7 @@ export function matchBreakpoint(
 
 /**
  * Check if device is in compact mode based on width
- * 
+ *
  * @example
  * // ❌ BAD: const isCompact = width < 768;
  * // ✅ GOOD:
@@ -477,7 +489,7 @@ export function isCompactWidth(width: number): boolean {
 
 /**
  * Check if device is tablet or larger
- * 
+ *
  * @example
  * const isTablet = isTabletWidth(width);
  */
@@ -487,19 +499,23 @@ export function isTabletWidth(width: number): boolean {
 
 /**
  * Get appropriate density based on screen width
- * 
+ *
  * @example
  * const density = getResponsiveDensity(width);
  */
 export function getResponsiveDensity(width: number): DensityMode {
-  if (width < breakpointTokens.sm) return 'compact';
-  if (width >= breakpointTokens.lg) return 'spacious';
+  if (width < breakpointTokens.sm) {
+    return 'compact';
+  }
+  if (width >= breakpointTokens.lg) {
+    return 'spacious';
+  }
   return 'comfortable';
 }
 
 /**
  * Calculate number of grid columns for current width
- * 
+ *
  * @example
  * const columns = getGridColumns(width);
  */
@@ -510,7 +526,7 @@ export function getGridColumns(width: number): number {
 
 /**
  * Calculate number of cards per row for current width
- * 
+ *
  * @example
  * const cardsPerRow = getCardsPerRow(width);
  */
@@ -518,4 +534,3 @@ export function getCardsPerRow(width: number): number {
   const breakpoint = getCurrentBreakpoint(width);
   return cardLayoutTokens.cardsPerRow[breakpoint];
 }
-

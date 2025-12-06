@@ -1,9 +1,9 @@
 /**
  * Environment Configuration
- * 
+ *
  * Environment-specific settings and runtime configuration.
  * This is the SINGLE SOURCE OF TRUTH for all environment-related decisions.
- * 
+ *
  * ❌ NEVER write: if (process.env.NODE_ENV === 'production') { ... }
  * ✅ ALWAYS use: if (isProduction()) { ... }
  */
@@ -27,8 +27,12 @@ function detectEnvironment(): Environment {
 
   // Fall back to NODE_ENV
   const nodeEnv = process.env.NODE_ENV;
-  if (nodeEnv === 'production') return 'production';
-  if (nodeEnv === 'test') return 'development';
+  if (nodeEnv === 'production') {
+    return 'production';
+  }
+  if (nodeEnv === 'test') {
+    return 'development';
+  }
 
   // Default to development
   return 'development';
@@ -265,9 +269,25 @@ export const mockConfig = {
 // COMBINED ENVIRONMENT CONFIG
 // ============================================================================
 
-function getEnvironmentConfig() {
+interface EnvironmentConfigResult {
+  name: Environment;
+  isProduction: boolean;
+  isDevelopment: boolean;
+  isStaging: boolean;
+  api: (typeof apiUrls)[Environment];
+  logging: (typeof loggingConfig)[Environment];
+  analytics: (typeof analyticsConfig)[Environment];
+  errorReporting: (typeof errorReportingConfig)[Environment];
+  devTools: (typeof devToolsConfig)[Environment];
+  security: (typeof securityConfig)[Environment];
+  mock: (typeof mockConfig)[Environment];
+  apiUrl: string;
+  useMockData: boolean;
+}
+
+function getEnvironmentConfig(): EnvironmentConfigResult {
   const env = currentEnvironment;
-  
+
   return {
     /** Current environment name */
     name: env,
@@ -291,7 +311,7 @@ function getEnvironmentConfig() {
     security: securityConfig[env],
     /** Mock data config for current environment */
     mock: mockConfig[env],
-    
+
     // Backward compatibility aliases
     /** @deprecated Use api.base instead */
     apiUrl: apiUrls[env].base,

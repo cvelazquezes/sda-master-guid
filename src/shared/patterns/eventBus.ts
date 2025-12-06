@@ -3,14 +3,14 @@
  * Enables loosely-coupled communication following Google/AWS EventBridge patterns
  */
 
+import { useEffect } from 'react';
 import { logger } from '../utils/logger';
 import { captureError, addBreadcrumb } from '../services/sentry';
+import { LIST_LIMITS, ID_GENERATION } from '../constants/numbers';
 
 // ============================================================================
 // React Hook
 // ============================================================================
-
-import { useEffect } from 'react';
 
 // ============================================================================
 // Types
@@ -46,7 +46,7 @@ export interface EventSubscription {
 class EventBus {
   private subscriptions = new Map<string, Map<string, EventHandler>>();
   private eventHistory: DomainEvent[] = [];
-  private readonly MAX_HISTORY_SIZE = 100;
+  private readonly MAX_HISTORY_SIZE = LIST_LIMITS.MAX_HISTORY;
   private middleware: ((event: DomainEvent, next: () => Promise<void>) => Promise<void>)[] = [];
 
   /**
@@ -281,14 +281,14 @@ class EventBus {
    * Generates event ID
    */
   private generateEventId(): string {
-    return `evt-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+    return `evt-${Date.now()}-${Math.random().toString(ID_GENERATION.RADIX).substring(ID_GENERATION.SUBSTRING_START, ID_GENERATION.SUFFIX_LENGTH)}`;
   }
 
   /**
    * Generates subscription ID
    */
   private generateSubscriptionId(): string {
-    return `sub-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+    return `sub-${Date.now()}-${Math.random().toString(ID_GENERATION.RADIX).substring(ID_GENERATION.SUBSTRING_START, ID_GENERATION.SUFFIX_LENGTH)}`;
   }
 
   /**
@@ -323,7 +323,10 @@ export const eventBus = new EventBus();
 /**
  * Logging middleware
  */
-export const eventLoggingMiddleware = async (event: DomainEvent, next: () => Promise<void>) => {
+export const eventLoggingMiddleware = async (
+  event: DomainEvent,
+  next: () => Promise<void>
+): Promise<void> => {
   logger.info('Event received', {
     type: event.type,
     eventId: event.metadata.eventId,
@@ -366,7 +369,7 @@ export function createEvent<TPayload>(
     type,
     payload,
     metadata: {
-      eventId: `evt-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`,
+      eventId: `evt-${Date.now()}-${Math.random().toString(ID_GENERATION.RADIX).substring(ID_GENERATION.SUBSTRING_START, ID_GENERATION.SUFFIX_LENGTH)}`,
       timestamp: Date.now(),
       source: 'app',
       version: '1.0',

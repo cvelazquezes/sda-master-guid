@@ -48,8 +48,8 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
   let lastCallTime: number | null = null;
   let lastInvokeTime = 0;
 
-  function invokeFunc(time: number) {
-    const args = lastArgs!;
+  function invokeFunc(time: number): ReturnType<T> {
+    const args = lastArgs ?? ([] as unknown as Parameters<T>);
     const thisArg = lastThis;
 
     lastArgs = null;
@@ -70,7 +70,7 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
     );
   }
 
-  function timerExpired() {
+  function timerExpired(): ReturnType<T> | void {
     const time = Date.now();
     if (shouldInvoke(time)) {
       return trailingEdge(time);
@@ -86,13 +86,13 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
     return Math.min(timeWaiting, maxWaitTime);
   }
 
-  function leadingEdge(time: number) {
+  function leadingEdge(time: number): ReturnType<T> | undefined {
     lastInvokeTime = time;
     timeoutId = setTimeout(timerExpired, wait);
     return leading ? invokeFunc(time) : undefined;
   }
 
-  function trailingEdge(time: number) {
+  function trailingEdge(time: number): ReturnType<T> | undefined {
     timeoutId = null;
 
     if (trailing && lastArgs) {
@@ -103,7 +103,7 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
     return undefined;
   }
 
-  function cancel() {
+  function cancel(): void {
     if (timeoutId !== null) {
       clearTimeout(timeoutId);
     }
@@ -114,7 +114,7 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
     timeoutId = null;
   }
 
-  const debounced = function (this: unknown, ...args: Parameters<T>) {
+  const debounced = function (this: unknown, ...args: Parameters<T>): ReturnType<T> | undefined {
     const time = Date.now();
     const isInvoking = shouldInvoke(time);
 
@@ -199,14 +199,14 @@ export function delay<T extends (...args: unknown[]) => unknown>(
 ): ((...args: Parameters<T>) => void) & { cancel: () => void } {
   let timeoutId: NodeJS.Timeout | null = null;
 
-  function cancel() {
+  function cancel(): void {
     if (timeoutId !== null) {
       clearTimeout(timeoutId);
       timeoutId = null;
     }
   }
 
-  function delayed(...args: Parameters<T>) {
+  function delayed(...args: Parameters<T>): void {
     cancel();
     timeoutId = setTimeout(() => {
       func(...args);
@@ -242,15 +242,16 @@ export function memoize<T extends (...args: unknown[]) => unknown>(
 ): T & { cache: Map<string, ReturnType<T>>; clear: () => void } {
   const cache = new Map<string, ReturnType<T>>();
 
-  function clear() {
+  function clear(): void {
     cache.clear();
   }
 
   function memoized(...args: Parameters<T>): ReturnType<T> {
     const key = resolver ? resolver(...args) : JSON.stringify(args);
 
-    if (cache.has(key)) {
-      return cache.get(key)!;
+    const cached = cache.get(key);
+    if (cached !== undefined) {
+      return cached;
     }
 
     const result = func(...args);
@@ -361,7 +362,7 @@ export function rateLimit<T extends (...args: unknown[]) => unknown>(
 ): T & { remaining: () => number } {
   const calls: number[] = [];
 
-  function removeOldCalls() {
+  function removeOldCalls(): void {
     const now = Date.now();
     const cutoff = now - period;
     while (calls.length > 0 && calls[0] < cutoff) {
@@ -408,14 +409,14 @@ export function rateLimit<T extends (...args: unknown[]) => unknown>(
  * perf.end(); // Logs: "API Call: 123ms"
  * ```
  */
-export function performanceMeasure(label: string) {
+export function performanceMeasure(label: string): { start: () => void; end: () => number } {
   let startTime: number;
 
   return {
-    start() {
+    start(): void {
       startTime = Date.now();
     },
-    end() {
+    end(): number {
       const duration = Date.now() - startTime;
       console.info(`[Performance] ${label}: ${duration}ms`);
       return duration;

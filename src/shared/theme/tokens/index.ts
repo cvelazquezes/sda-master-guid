@@ -1,16 +1,16 @@
 /**
  * Design Tokens - Single Source of Truth
- * 
+ *
  * This module is the ONLY place where design values should be defined.
  * All visual decisions across the project MUST consume these tokens.
- * 
+ *
  * @module tokens
  * @version 2.0.0
- * 
+ *
  * ⚠️ STRONG COMPLIANCE RULE:
  * ❌ Do NOT hardcode colors, spacing, font sizes, breakpoints, timing, etc.
  * ✅ Do use design tokens for ALL UI-related values
- * 
+ *
  * Architecture:
  * - primitives.ts: Raw values (colors, numbers, etc.) - Theme agnostic
  * - semantic.ts: Semantic tokens that map to primitives - Theme aware
@@ -22,6 +22,14 @@
  */
 
 // Primitive tokens (raw values)
+// Re-export default resolved tokens for convenience
+import { primitiveTokens } from './primitives';
+import { createSemanticTokens } from './semantic';
+import { createComponentTokens } from './components';
+import { motionTokens } from './motion';
+import { layoutTokens } from './layout';
+import { behaviorTokens } from './behavior';
+
 export * from './primitives';
 
 // Semantic tokens (theme-aware)
@@ -45,18 +53,10 @@ export * from './types';
 // Main token resolver
 export { resolveTokens, getTokenValue, type ResolvedTokens } from './resolver';
 
-// Re-export default resolved tokens for convenience
-import { primitiveTokens } from './primitives';
-import { createSemanticTokens } from './semantic';
-import { createComponentTokens } from './components';
-import { motionTokens } from './motion';
-import { layoutTokens } from './layout';
-import { behaviorTokens } from './behavior';
-
 /**
  * Default design tokens (light theme)
  * For theme-aware tokens, use useDesignTokens() hook or resolveTokens()
- * 
+ *
  * This is the SINGLE SOURCE OF TRUTH for all UI decisions.
  */
 export const designTokensV2 = {
@@ -69,4 +69,3 @@ export const designTokensV2 = {
 } as const;
 
 export default designTokensV2;
-

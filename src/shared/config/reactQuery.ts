@@ -309,7 +309,17 @@ export async function optimisticUpdate<TData, TVariables>({
   updater,
   onSuccess,
   onError,
-}: OptimisticUpdateOptions<TData, TVariables>) {
+}: OptimisticUpdateOptions<TData, TVariables>): Promise<{
+  mutationFn: typeof mutationFn;
+  onMutate: (variables: TVariables) => Promise<{ previousData: TData | undefined }>;
+  onError: (
+    err: Error,
+    variables: TVariables,
+    context: { previousData: TData | undefined } | undefined
+  ) => void;
+  onSuccess: (data: TData, variables: TVariables) => void;
+  onSettled: () => Promise<void>;
+}> {
   return {
     mutationFn,
     onMutate: async (variables: TVariables) => {

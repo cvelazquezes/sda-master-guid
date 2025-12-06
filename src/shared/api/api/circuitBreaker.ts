@@ -7,8 +7,8 @@ import { logger } from '../../utils/logger';
 import { BUSINESS_RULES } from '../../constants';
 
 export enum CircuitState {
-  CLOSED = 'CLOSED',       // Normal operation
-  OPEN = 'OPEN',           // Failing, reject requests
+  CLOSED = 'CLOSED', // Normal operation
+  OPEN = 'OPEN', // Failing, reject requests
   HALF_OPEN = 'HALF_OPEN', // Testing if service recovered
 }
 
@@ -164,4 +164,3 @@ export class CircuitBreaker {
 // Global circuit breakers for different services
 export const apiCircuitBreaker = new CircuitBreaker('API');
 export const authCircuitBreaker = new CircuitBreaker('Auth');
-

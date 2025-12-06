@@ -1,6 +1,6 @@
 /**
  * Shared Hooks
- * 
+ *
  * Central export for all shared React hooks
  */
 
@@ -8,7 +8,7 @@
 export {
   // Main hook
   useDesignTokens,
-  
+
   // Category-specific hooks
   useTokenColors,
   useTokenSpacing,
@@ -18,16 +18,16 @@ export {
   useTokenPrimitives,
   useTokenLayout,
   useTokenBehavior,
-  
+
   // Responsive layout hooks
   useResponsiveLayout,
   useDensity,
-  
+
   // Theme utilities
   useThemedColor,
   useThemedValue,
   useThemeState,
-  
+
   // Static access
   getStaticTokens,
 } from './useDesignTokens';
@@ -37,4 +37,3 @@ export * from './usePerformanceMonitor';
 
 // Query Hooks
 export * from './useQueryHooks';
-

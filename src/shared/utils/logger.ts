@@ -3,6 +3,8 @@
  * Provides structured logging with sanitization
  */
 
+import { MS } from '../constants/numbers';
+
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 interface LogEntry {
@@ -89,9 +91,13 @@ class Logger {
     // In development, use console for better DX
     if (__DEV__) {
       const style = this.getConsoleStyle(level);
-      console.log(`[${level.toUpperCase()}] ${message}`, style);
-      if (data) console.log('Data:', data);
-      if (error) console.error('Error:', error);
+      console.info(`[${level.toUpperCase()}] ${message}`, style);
+      if (data) {
+        console.info('Data:', data);
+      }
+      if (error) {
+        console.error('Error:', error);
+      }
       return;
     }
 
@@ -160,7 +166,7 @@ class Logger {
       ...metadata,
     });
 
-    if (duration > 1000) {
+    if (duration > MS.SECOND) {
       this.warn(`Slow operation detected: ${operation}`, {
         duration,
         ...metadata,
@@ -170,4 +176,3 @@ class Logger {
 }
 
 export const logger = new Logger();
-

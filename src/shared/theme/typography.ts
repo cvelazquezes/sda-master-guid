@@ -3,6 +3,8 @@
  *
  * Type scale following Material Design and iOS HIG principles.
  * Ensures consistent, accessible, and responsive typography.
+ *
+ * NOTE: This file intentionally contains literal numbers as it DEFINES typography tokens.
  */
 
 import { Platform, TextStyle } from 'react-native';

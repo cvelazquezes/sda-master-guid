@@ -1,11 +1,14 @@
 /**
  * Primitive Design Tokens
- * 
+ *
  * Raw, theme-agnostic values that serve as the foundation for all design decisions.
  * These values NEVER change based on theme - they are the atomic building blocks.
- * 
+ *
  * IMPORTANT: Do not use primitive tokens directly in components.
  * Instead, use semantic tokens that map to these primitives.
+ *
+ * NOTE: This file intentionally contains literal numbers as it DEFINES the design tokens.
+ * All other files should import from here rather than using magic numbers.
  */
 
 import { TextStyle } from 'react-native';
@@ -474,4 +477,3 @@ export const primitiveTokens = {
 } as const;
 
 export type PrimitiveTokens = typeof primitiveTokens;
-

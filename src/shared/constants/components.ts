@@ -9,6 +9,7 @@
  *
  * @version 1.0.0
  */
+/* eslint-disable no-magic-numbers */
 
 // =============================================================================
 // COMPONENT DISPLAY NAMES

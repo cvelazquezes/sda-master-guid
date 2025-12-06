@@ -1,15 +1,21 @@
 /**
  * Semantic Design Tokens
- * 
+ *
  * Theme-aware tokens that map primitive values to meaningful design concepts.
  * These are the tokens that should be used in components and layouts.
- * 
+ *
  * USAGE:
  * - Import these tokens directly OR
  * - Use the useDesignTokens() hook for reactive theme changes
  */
 
-import { colorPrimitives, spacingPrimitives, radiusPrimitives, opacityPrimitives, typographyPrimitives } from './primitives';
+import {
+  colorPrimitives,
+  spacingPrimitives,
+  radiusPrimitives,
+  opacityPrimitives,
+  typographyPrimitives,
+} from './primitives';
 
 export type ThemeMode = 'light' | 'dark';
 
@@ -17,10 +23,24 @@ export type ThemeMode = 'light' | 'dark';
 // SEMANTIC COLOR TOKENS
 // ============================================================================
 
+/** Semantic color token structure */
+export interface SemanticColors {
+  brand: Record<string, string>;
+  feedback: Record<string, string>;
+  text: Record<string, string>;
+  background: Record<string, string>;
+  border: Record<string, string>;
+  shadow: Record<string, string>;
+  divider: Record<string, string>;
+  icon: Record<string, string>;
+  role: Record<string, { primary: string; subtle: string; text: string }>;
+  status: Record<string, { primary: string; subtle: string; text: string }>;
+}
+
 /**
  * Creates theme-aware semantic color tokens
  */
-export const createSemanticColors = (theme: ThemeMode) => {
+export const createSemanticColors = (theme: ThemeMode): SemanticColors => {
   const isLight = theme === 'light';
   const c = colorPrimitives;
 
@@ -92,12 +112,12 @@ export const createSemanticColors = (theme: ThemeMode) => {
       primary: isLight ? c.absolute.white : c.gray[950],
       secondary: isLight ? c.gray[100] : c.gray[900],
       tertiary: isLight ? c.gray[200] : c.gray[800],
-      
+
       // Surface backgrounds (cards, modals)
       surface: isLight ? c.absolute.white : c.gray[900],
       surfaceElevated: isLight ? c.absolute.white : c.gray[800],
       surfaceSubdued: isLight ? c.gray[50] : c.gray[900],
-      
+
       // Interactive backgrounds
       hover: isLight ? c.gray[100] : `rgba(255, 255, 255, 0.05)`,
       pressed: isLight ? c.gray[200] : `rgba(255, 255, 255, 0.1)`,
@@ -415,7 +435,7 @@ export const semanticBorder = {
     lg: radiusPrimitives.xl,
     xl: radiusPrimitives['2xl'],
     full: radiusPrimitives.full,
-    
+
     // Component-specific
     button: radiusPrimitives.lg,
     card: radiusPrimitives.xl,
@@ -431,7 +451,15 @@ export const semanticBorder = {
 // CREATE SEMANTIC TOKENS FUNCTION
 // ============================================================================
 
-export const createSemanticTokens = (theme: ThemeMode) => ({
+export const createSemanticTokens = (
+  theme: ThemeMode
+): {
+  colors: SemanticColors;
+  spacing: typeof semanticSpacing;
+  typography: typeof semanticTypography;
+  border: typeof semanticBorder;
+  opacity: typeof opacityPrimitives;
+} => ({
   colors: createSemanticColors(theme),
   spacing: semanticSpacing,
   typography: semanticTypography,
@@ -440,5 +468,3 @@ export const createSemanticTokens = (theme: ThemeMode) => ({
 });
 
 export type SemanticTokens = ReturnType<typeof createSemanticTokens>;
-export type SemanticColors = ReturnType<typeof createSemanticColors>;
-

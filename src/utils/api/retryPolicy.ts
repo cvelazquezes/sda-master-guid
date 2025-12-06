@@ -5,6 +5,9 @@
 
 import { logger } from '../logger';
 import { NetworkError, TimeoutError } from '../errors';
+import { RETRY_CONFIG } from '../../shared/constants/validation';
+import { RETRYABLE_STATUS_CODES } from '../../shared/constants/http';
+import { OPACITY_VALUE } from '../../shared/constants/numbers';
 
 interface RetryOptions {
   maxRetries: number;
@@ -12,16 +15,16 @@ interface RetryOptions {
   maxDelay: number;
   backoffMultiplier: number;
   jitter: boolean;
-  retryableStatuses: number[];
+  retryableStatuses: readonly number[];
 }
 
 const DEFAULT_OPTIONS: RetryOptions = {
-  maxRetries: 3,
-  baseDelay: 1000,
-  maxDelay: 30000,
-  backoffMultiplier: 2,
+  maxRetries: RETRY_CONFIG.MAX_ATTEMPTS,
+  baseDelay: RETRY_CONFIG.INITIAL_DELAY_MS,
+  maxDelay: RETRY_CONFIG.MAX_DELAY_MS,
+  backoffMultiplier: RETRY_CONFIG.BACKOFF_MULTIPLIER,
   jitter: true,
-  retryableStatuses: [408, 429, 500, 502, 503, 504],
+  retryableStatuses: RETRYABLE_STATUS_CODES,
 };
 
 export class RetryPolicy {
@@ -60,7 +63,7 @@ export class RetryPolicy {
       }
     }
 
-    throw lastError!;
+    throw lastError;
   }
 
   /**
@@ -98,9 +101,9 @@ export class RetryPolicy {
       this.options.maxDelay
     );
 
-    // Add jitter to prevent thundering herd
+    // Add jitter to prevent thundering herd (0.5 + 0-0.5 random)
     if (this.options.jitter) {
-      return exponentialDelay * (0.5 + Math.random() * 0.5);
+      return exponentialDelay * (OPACITY_VALUE.MEDIUM + Math.random() * OPACITY_VALUE.MEDIUM);
     }
 
     return exponentialDelay;

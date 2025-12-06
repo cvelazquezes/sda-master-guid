@@ -3,9 +3,16 @@
  * Following OWASP CSRF Prevention Cheat Sheet
  */
 
+import crypto from 'crypto';
+import { useState, useEffect, useCallback } from 'react';
 import { secureStorage } from './secureStorage';
 import { logger } from './logger';
-import crypto from 'crypto';
+import { CACHE } from '../constants/timing';
+import { MATH, CRYPTO } from '../constants/numbers';
+
+// ============================================================================
+// React Hook for CSRF Token
+// ============================================================================
 
 // ============================================================================
 // Types
@@ -32,10 +39,10 @@ interface CSRFConfig {
 export class CSRFTokenService {
   private static readonly TOKEN_KEY = 'csrf_token';
   private static readonly TOKEN_TIMESTAMP_KEY = 'csrf_token_timestamp';
-  
+
   private static readonly config: CSRFConfig = {
-    expirationTime: 60 * 60 * 1000, // 1 hour
-    refreshThreshold: 5 * 60 * 1000, // 5 minutes
+    expirationTime: CACHE.VERY_LONG, // 1 hour
+    refreshThreshold: CACHE.MEDIUM, // 5 minutes
   };
 
   /**
@@ -43,7 +50,7 @@ export class CSRFTokenService {
    */
   static generateToken(): string {
     // Generate cryptographically secure random token
-    const randomBytes = crypto.randomBytes(32);
+    const randomBytes = crypto.randomBytes(CRYPTO.TOKEN_BYTES);
     return randomBytes.toString('base64');
   }
 
@@ -76,7 +83,7 @@ export class CSRFTokenService {
         return null;
       }
 
-      const timestamp = parseInt(timestampStr, 10);
+      const timestamp = parseInt(timestampStr, MATH.DECIMAL_BASE);
       const now = Date.now();
 
       // Check if token is expired
@@ -106,7 +113,7 @@ export class CSRFTokenService {
       // Check if token should be refreshed
       const timestampStr = await secureStorage.getItem(this.TOKEN_TIMESTAMP_KEY);
       if (timestampStr) {
-        const timestamp = parseInt(timestampStr, 10);
+        const timestamp = parseInt(timestampStr, MATH.DECIMAL_BASE);
         const age = Date.now() - timestamp;
 
         if (age > this.config.expirationTime - this.config.refreshThreshold) {
@@ -167,21 +174,15 @@ export class CSRFTokenService {
   }
 }
 
-// ============================================================================
-// React Hook for CSRF Token
-// ============================================================================
-
-import { useState, useEffect, useCallback } from 'react';
-
 /**
  * Hook for managing CSRF tokens
- * 
+ *
  * @returns CSRF token management utilities
- * 
+ *
  * @example
  * ```typescript
  * const { token, refreshToken } = useCSRFToken();
- * 
+ *
  * const submitForm = async () => {
  *   await api.post('/data', formData, {
  *     headers: { 'X-CSRF-Token': token }
@@ -232,7 +233,7 @@ export function useCSRFToken(): {
 
 /**
  * Implements double submit cookie pattern for CSRF protection
- * 
+ *
  * This should be used in conjunction with backend validation:
  * - Token is sent in both cookie and custom header
  * - Backend validates both match
@@ -242,7 +243,7 @@ export class DoubleSubmitCookieService {
 
   /**
    * Sets CSRF token in cookie
-   * 
+   *
    * Note: Cookies are managed by the backend in React Native
    * This is a placeholder for web platform compatibility
    */
@@ -283,7 +284,7 @@ export async function addCSRFHeader(
   headers: Record<string, string>
 ): Promise<Record<string, string>> {
   const token = await CSRFTokenService.getOrGenerateToken();
-  
+
   return {
     ...headers,
     'X-CSRF-Token': token,
@@ -308,10 +309,10 @@ export async function validateCSRFToken(token: string | null): Promise<boolean> 
 
 /**
  * Example: Using CSRF protection in API calls
- * 
+ *
  * ```typescript
  * import { requiresCSRFProtection, addCSRFHeader } from './csrfProtection';
- * 
+ *
  * // In API client interceptor
  * axios.interceptors.request.use(async (config) => {
  *   if (config.method && requiresCSRFProtection(config.method)) {
@@ -319,40 +320,39 @@ export async function validateCSRFToken(token: string | null): Promise<boolean> 
  *   }
  *   return config;
  * });
- * 
+ *
  * // In React component
  * const MyForm = () => {
  *   const { token } = useCSRFToken();
- *   
+ *
  *   const handleSubmit = async () => {
  *     await api.post('/data', formData, {
  *       headers: { 'X-CSRF-Token': token }
  *     });
  *   };
- *   
+ *
  *   return <form onSubmit={handleSubmit}>...</form>;
  * };
  * ```
- * 
+ *
  * Example: Backend validation (Node.js/Express)
- * 
+ *
  * ```typescript
  * app.use((req, res, next) => {
  *   if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
  *     const tokenFromHeader = req.headers['x-csrf-token'];
  *     const tokenFromCookie = req.cookies['__Host-csrf-token'];
- *     
+ *
  *     if (!tokenFromHeader || !tokenFromCookie) {
  *       return res.status(403).json({ error: 'Missing CSRF token' });
  *     }
- *     
+ *
  *     if (tokenFromHeader !== tokenFromCookie) {
  *       return res.status(403).json({ error: 'Invalid CSRF token' });
  *     }
  *   }
- *   
+ *
  *   next();
  * });
  * ```
  */
-

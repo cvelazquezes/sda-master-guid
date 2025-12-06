@@ -4,6 +4,18 @@
  */
 
 import { logger } from '../utils/logger';
+import { MS, MATH, LIST_LIMITS } from '../constants/numbers';
+
+// Rate limit configuration constants
+/* eslint-disable no-magic-numbers -- Rate limit configuration */
+const RATE_LIMIT_CONFIG = {
+  API_REQUESTS_PER_MIN: LIST_LIMITS.MAX_CACHE, // 100
+  AUTH_ATTEMPTS_PER_MIN: MATH.FIVE, // 5
+  SEARCH_REQUESTS_PER_MIN: 30,
+  HEAVY_OPS_PER_MIN: MATH.TEN, // 10
+  ONE_MINUTE_MS: MS.MINUTE, // 60000
+} as const;
+/* eslint-enable no-magic-numbers */
 
 // ============================================================================
 // Types
@@ -63,9 +75,12 @@ export class RateLimiter {
   async consume(key: string, tokensNeeded: number = 1): Promise<void> {
     while (!(await this.tryConsume(key, tokensNeeded))) {
       // Calculate wait time
-      const bucket = this.buckets.get(key)!;
+      const bucket = this.buckets.get(key);
+      if (!bucket) {
+        continue;
+      }
       const tokensNeededToRefill = tokensNeeded - bucket.tokens;
-      const timeToWait = (tokensNeededToRefill / this.options.refillRate) * 1000;
+      const timeToWait = (tokensNeededToRefill / this.options.refillRate) * MS.SECOND;
 
       logger.debug(`Rate limit: waiting ${timeToWait}ms for tokens`);
       await this.sleep(Math.min(timeToWait, this.options.interval));
@@ -99,7 +114,7 @@ export class RateLimiter {
     const timePassed = now - bucket.lastRefill;
 
     if (timePassed > 0) {
-      const tokensToAdd = (timePassed / 1000) * bucket.refillRate;
+      const tokensToAdd = (timePassed / MS.SECOND) * bucket.refillRate;
       bucket.tokens = Math.min(bucket.maxTokens, bucket.tokens + tokensToAdd);
       bucket.lastRefill = now;
     }
@@ -213,30 +228,30 @@ export const rateLimitService = new RateLimitService();
 
 // API request limiter - 100 requests per minute
 export const apiRateLimiter = rateLimitService.getLimiter('api', {
-  tokensPerInterval: 100,
-  interval: 60000, // 1 minute
-  maxTokens: 100,
+  tokensPerInterval: RATE_LIMIT_CONFIG.API_REQUESTS_PER_MIN,
+  interval: RATE_LIMIT_CONFIG.ONE_MINUTE_MS,
+  maxTokens: RATE_LIMIT_CONFIG.API_REQUESTS_PER_MIN,
 });
 
 // Auth limiter - 5 attempts per minute
 export const authRateLimiter = rateLimitService.getLimiter('auth', {
-  tokensPerInterval: 5,
-  interval: 60000, // 1 minute
-  maxTokens: 5,
+  tokensPerInterval: RATE_LIMIT_CONFIG.AUTH_ATTEMPTS_PER_MIN,
+  interval: RATE_LIMIT_CONFIG.ONE_MINUTE_MS,
+  maxTokens: RATE_LIMIT_CONFIG.AUTH_ATTEMPTS_PER_MIN,
 });
 
 // Search limiter - 30 requests per minute
 export const searchRateLimiter = rateLimitService.getLimiter('search', {
-  tokensPerInterval: 30,
-  interval: 60000,
-  maxTokens: 30,
+  tokensPerInterval: RATE_LIMIT_CONFIG.SEARCH_REQUESTS_PER_MIN,
+  interval: RATE_LIMIT_CONFIG.ONE_MINUTE_MS,
+  maxTokens: RATE_LIMIT_CONFIG.SEARCH_REQUESTS_PER_MIN,
 });
 
 // Heavy operations limiter - 10 per minute
 export const heavyOperationsLimiter = rateLimitService.getLimiter('heavy', {
-  tokensPerInterval: 10,
-  interval: 60000,
-  maxTokens: 10,
+  tokensPerInterval: RATE_LIMIT_CONFIG.HEAVY_OPS_PER_MIN,
+  interval: RATE_LIMIT_CONFIG.ONE_MINUTE_MS,
+  maxTokens: RATE_LIMIT_CONFIG.HEAVY_OPS_PER_MIN,
 });
 
 // ============================================================================
@@ -311,7 +326,7 @@ export function createUserRateLimiter(
 ): (userId: string) => Promise<boolean> {
   const limiter = new RateLimiter({
     tokensPerInterval: requestsPerMinute,
-    interval: 60000,
+    interval: RATE_LIMIT_CONFIG.ONE_MINUTE_MS,
   });
 
   return async (userId: string) => {
@@ -327,7 +342,7 @@ export function createIPRateLimiter(
 ): (ipAddress: string) => Promise<boolean> {
   const limiter = new RateLimiter({
     tokensPerInterval: requestsPerMinute,
-    interval: 60000,
+    interval: RATE_LIMIT_CONFIG.ONE_MINUTE_MS,
   });
 
   return async (ipAddress: string) => {

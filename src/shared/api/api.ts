@@ -10,9 +10,11 @@ import { logger } from '../utils/logger';
 import { retryPolicy } from './api/retryPolicy';
 import { apiCircuitBreaker } from './api/circuitBreaker';
 import { NetworkError, TimeoutError, AuthenticationError, toAppError } from '../utils/errors';
+import { TIMEOUT } from '../constants/timing';
+import { HTTP_STATUS } from '../constants/http';
 
 // Constants
-const API_TIMEOUT_MS = 10000;
+const API_TIMEOUT_MS = TIMEOUT.API_DEFAULT;
 
 /**
  * Creates configured axios instance
@@ -50,7 +52,7 @@ const createApiClient = (): AxiosInstance => {
   client.interceptors.response.use(
     (response) => response,
     async (error: AxiosError) => {
-      if (error.response?.status === 401) {
+      if (error.response?.status === HTTP_STATUS.UNAUTHORIZED) {
         // Unauthorized - clear tokens and let app handle redirect
         logger.warn('Unauthorized request - clearing auth tokens');
         await secureStorage.clearAuth();

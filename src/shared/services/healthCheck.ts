@@ -5,7 +5,8 @@
 
 import { logger } from '../utils/logger';
 import { environment } from '../config/environment';
-import { TIMING } from '../constants';
+import { TIMING, TIMEOUT } from '../constants/timing';
+import { MATH } from '../constants/numbers';
 
 // ============================================================================
 // Types
@@ -107,7 +108,7 @@ class HealthCheckService {
     try {
       const isHealthy = await Promise.race([
         check(),
-        this.timeout(5000), // 5 second timeout
+        this.timeout(TIMEOUT.ALERT), // 5 second timeout
       ]);
 
       const responseTime = Date.now() - startTime;
@@ -238,7 +239,7 @@ export function registerDefaultHealthChecks(): void {
   healthCheckService.register('api', async () => {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      const timeoutId = setTimeout(() => controller.abort(), TIMEOUT.TOAST);
       const response = await fetch(`${environment.apiUrl}/health`, {
         method: 'GET',
         signal: controller.signal,
@@ -254,7 +255,7 @@ export function registerDefaultHealthChecks(): void {
   healthCheckService.register('memory', async () => {
     try {
       // Basic memory check - if we can allocate, we're okay
-      const testArray = new Array(1000);
+      const testArray = new Array(MATH.THOUSAND);
       testArray.fill(0);
       return true;
     } catch {
@@ -282,7 +283,10 @@ export function registerDefaultHealthChecks(): void {
 /**
  * Creates a simple HTTP health check
  */
-export function createHttpHealthCheck(url: string, timeoutMs: number = 3000): HealthCheckFunction {
+export function createHttpHealthCheck(
+  url: string,
+  timeoutMs: number = TIMEOUT.TOAST
+): HealthCheckFunction {
   return async () => {
     try {
       const controller = new AbortController();
@@ -306,19 +310,23 @@ export function createHttpHealthCheck(url: string, timeoutMs: number = 3000): He
  */
 export function createHealthCheckWithRetry(
   check: HealthCheckFunction,
-  maxRetries: number = 2
+  maxRetries: number = MATH.HALF
 ): HealthCheckFunction {
   return async () => {
     for (let i = 0; i <= maxRetries; i++) {
       try {
         const result = await check();
-        if (result) return true;
+        if (result) {
+          return true;
+        }
 
         if (i < maxRetries) {
           await new Promise((resolve) => setTimeout(resolve, TIMING.RETRY.FIRST));
         }
       } catch {
-        if (i === maxRetries) return false;
+        if (i === maxRetries) {
+          return false;
+        }
       }
     }
     return false;

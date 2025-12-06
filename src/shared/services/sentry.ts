@@ -6,6 +6,13 @@
 import * as Sentry from '@sentry/react-native';
 import { environment } from '../config/environment';
 import { logger } from '../utils/logger';
+import { MS, OPACITY_VALUE } from '../constants/numbers';
+
+// Sentry configuration constants
+const SENTRY_CONFIG = {
+  PRODUCTION_SAMPLE_RATE: OPACITY_VALUE.LIGHT_MEDIUM, // 0.2
+  SESSION_TRACKING_INTERVAL_MS: MS.THIRTY_SECONDS, // 30000
+} as const;
 
 // ============================================================================
 // Sentry Initialization
@@ -33,7 +40,10 @@ export function initializeSentry(): void {
       environment: environment.env,
 
       // Performance Monitoring
-      tracesSampleRate: environment.env === 'production' ? 0.2 : 1.0,
+      tracesSampleRate:
+        environment.env === 'production'
+          ? SENTRY_CONFIG.PRODUCTION_SAMPLE_RATE
+          : OPACITY_VALUE.FULL,
       enableTracing: true,
 
       // Release tracking
@@ -81,7 +91,7 @@ export function initializeSentry(): void {
 
       // Enable automatic session tracking
       enableAutoSessionTracking: true,
-      sessionTrackingIntervalMillis: 30000,
+      sessionTrackingIntervalMillis: SENTRY_CONFIG.SESSION_TRACKING_INTERVAL_MS,
 
       // Integrations
       integrations: [
@@ -309,7 +319,7 @@ export function addBreadcrumb(
     category,
     level,
     data,
-    timestamp: Date.now() / 1000,
+    timestamp: Date.now() / MS.SECOND,
   });
 }
 

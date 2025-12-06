@@ -12,6 +12,7 @@ import {
   ApprovalStatus,
   MatchFrequency,
 } from '../../types';
+import { TEST_DEFAULTS, GRID } from '../constants/http';
 
 // ============================================================================
 // User Builder
@@ -249,7 +250,7 @@ export class MatchBuilder {
       return new MatchBuilder()
         .withId(`match-${i}`)
         .withDate(date)
-        .onCourtNumber((i % 4) + 1)
+        .onCourtNumber((i % TEST_DEFAULTS.DEFAULT_COUNT) + 1)
         .build();
     });
   }
@@ -383,25 +384,25 @@ export function createTestDataset(): {
   clubs: Club[];
   matches: Match[];
 } {
-  const clubs = new ClubBuilder().buildMany(3);
+  const clubs = new ClubBuilder().buildMany(TEST_DEFAULTS.MATCH_COUNT);
 
   const users = [
     aSuperAdminUser().withId('super-admin-1').build(),
     aClubAdminUser(clubs[0].id).withId('club-admin-1').build(),
     aClubAdminUser(clubs[1].id).withId('club-admin-2').build(),
-    ...new UserBuilder().buildMany(10).map((u, i) => ({
+    ...new UserBuilder().buildMany(TEST_DEFAULTS.ARRAY_SIZE).map((u, i) => ({
       ...u,
       clubId: clubs[i % clubs.length].id,
     })),
   ];
 
   const matches = clubs.flatMap((club, _clubIndex) =>
-    new MatchBuilder().buildMany(5).map((m, _i) => ({
+    new MatchBuilder().buildMany(TEST_DEFAULTS.DEFAULT_VALUE).map((m, _i) => ({
       ...m,
       clubId: club.id,
       participants: users
         .filter((u) => u.clubId === club.id)
-        .slice(0, 4)
+        .slice(0, TEST_DEFAULTS.DEFAULT_COUNT)
         .map((u) => u.id),
     }))
   );
@@ -433,13 +434,14 @@ export function createRandomUsers(count: number, clubIds: string[]): User[] {
 export function createRandomMatches(count: number, clubIds: string[], userIds: string[]): Match[] {
   return Array.from({ length: count }, (_, i) => {
     const date = new Date();
-    date.setDate(date.getDate() + Math.floor(Math.random() * 30) - 15);
+    const randomOffset = Math.floor(Math.random() * TEST_DEFAULTS.DATE_RANGE_DAYS);
+    date.setDate(date.getDate() + randomOffset - TEST_DEFAULTS.HOURS_OFFSET);
 
     const statuses: Match['status'][] = ['scheduled', 'in_progress', 'completed', 'cancelled'];
     const status = statuses[Math.floor(Math.random() * statuses.length)];
 
     const participants = Array.from(
-      { length: Math.floor(Math.random() * 2) + 2 },
+      { length: Math.floor(Math.random() * GRID.COLUMNS_2) + GRID.COLUMNS_2 },
       () => userIds[Math.floor(Math.random() * userIds.length)]
     );
 
@@ -449,7 +451,7 @@ export function createRandomMatches(count: number, clubIds: string[], userIds: s
       .withDate(date)
       .withStatus(status)
       .withParticipants(participants)
-      .onCourtNumber(Math.floor(Math.random() * 4) + 1)
+      .onCourtNumber(Math.floor(Math.random() * TEST_DEFAULTS.DEFAULT_COUNT) + 1)
       .build();
   });
 }

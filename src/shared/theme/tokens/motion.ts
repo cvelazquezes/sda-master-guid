@@ -7,6 +7,8 @@
  * USAGE:
  * import { motionTokens } from './tokens';
  * Animated.timing(value, { duration: motionTokens.duration.normal });
+ *
+ * NOTE: This file intentionally contains literal numbers as it DEFINES the motion tokens.
  */
 
 import { Easing } from 'react-native';

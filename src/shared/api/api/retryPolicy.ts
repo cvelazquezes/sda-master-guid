@@ -6,6 +6,7 @@
 import { logger } from '../../utils/logger';
 import { NetworkError, TimeoutError } from '../../utils/errors';
 import { BUSINESS_RULES } from '../../constants';
+import { OPACITY_VALUE } from '../../constants/numbers';
 
 interface RetryOptions {
   maxRetries: number;
@@ -61,7 +62,7 @@ export class RetryPolicy {
       }
     }
 
-    throw lastError!;
+    throw lastError;
   }
 
   /**
@@ -101,7 +102,7 @@ export class RetryPolicy {
 
     // Add jitter to prevent thundering herd
     if (this.options.jitter) {
-      return exponentialDelay * (0.5 + Math.random() * 0.5);
+      return exponentialDelay * (OPACITY_VALUE.MEDIUM + Math.random() * OPACITY_VALUE.MEDIUM);
     }
 
     return exponentialDelay;

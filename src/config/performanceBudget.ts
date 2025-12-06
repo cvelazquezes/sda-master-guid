@@ -1,6 +1,6 @@
 /**
  * Performance Budget Configuration
- * 
+ *
  * Defines performance budgets based on best practices from:
  * - Google Web Vitals
  * - Meta (Facebook) Performance Guidelines
@@ -14,44 +14,44 @@
  */
 export const PERFORMANCE_BUDGET = {
   // === Core Web Vitals (Google) ===
-  
+
   /**
    * Time to Interactive (TTI)
    * Target: < 3000ms (3 seconds)
    * Critical: User can interact with the app
    */
   TTI: 3000,
-  
+
   /**
    * First Contentful Paint (FCP)
    * Target: < 1000ms (1 second)
    * Important: User sees something on screen
    */
   FCP: 1000,
-  
+
   /**
    * Largest Contentful Paint (LCP)
    * Target: < 2500ms (2.5 seconds)
    * Critical: Main content is visible
    */
   LCP: 2500,
-  
+
   /**
    * First Input Delay (FID)
    * Target: < 100ms
    * Critical: App responds to first user interaction
    */
   FID: 100,
-  
+
   /**
    * Cumulative Layout Shift (CLS)
    * Target: < 0.1
    * Important: Visual stability
    */
   CLS: 0.1,
-  
+
   // === Bundle Size (Meta/Netflix standards) ===
-  
+
   /**
    * Total JavaScript bundle size
    * Target: < 5MB for main bundle
@@ -59,36 +59,36 @@ export const PERFORMANCE_BUDGET = {
    * Excellent: < 1MB
    */
   BUNDLE_SIZE_TOTAL: 5 * 1024 * 1024, // 5MB in bytes
-  
+
   /**
    * Per-route bundle size
    * Target: < 500KB per lazy-loaded route
    */
   BUNDLE_SIZE_PER_ROUTE: 500 * 1024, // 500KB in bytes
-  
+
   /**
    * Vendor bundle size (node_modules)
    * Target: < 2MB
    */
   BUNDLE_SIZE_VENDOR: 2 * 1024 * 1024, // 2MB in bytes
-  
+
   // === Asset Budgets ===
-  
+
   /**
    * Image size per file
    * Target: < 200KB per image
    * Use compression and WebP format
    */
   IMAGE_SIZE: 200 * 1024, // 200KB in bytes
-  
+
   /**
    * Font size per file
    * Target: < 100KB per font file
    */
   FONT_SIZE: 100 * 1024, // 100KB in bytes
-  
+
   // === API Performance ===
-  
+
   /**
    * API response time
    * Target: < 500ms for most endpoints
@@ -96,28 +96,28 @@ export const PERFORMANCE_BUDGET = {
    */
   API_RESPONSE_TIME: 500,
   API_RESPONSE_TIME_MAX: 1000,
-  
+
   /**
    * GraphQL query time
    * Target: < 300ms
    */
   GRAPHQL_QUERY_TIME: 300,
-  
+
   // === React Native Specific ===
-  
+
   /**
    * Screen navigation time
    * Target: < 300ms (60 FPS = 16.67ms per frame)
    */
   SCREEN_NAVIGATION_TIME: 300,
-  
+
   /**
    * List scroll performance (FPS)
    * Target: > 55 FPS
    * Excellent: 60 FPS
    */
   LIST_SCROLL_FPS: 55,
-  
+
   /**
    * Component render time
    * Target: < 16ms (60 FPS)
@@ -125,9 +125,9 @@ export const PERFORMANCE_BUDGET = {
    */
   COMPONENT_RENDER_TIME: 16,
   COMPONENT_RENDER_TIME_MAX: 33,
-  
+
   // === Memory Budgets ===
-  
+
   /**
    * JavaScript heap size
    * Target: < 50MB
@@ -135,21 +135,21 @@ export const PERFORMANCE_BUDGET = {
    */
   JS_HEAP_SIZE: 50 * 1024 * 1024, // 50MB in bytes
   JS_HEAP_SIZE_MAX: 100 * 1024 * 1024, // 100MB in bytes
-  
+
   /**
    * Memory per screen
    * Target: < 10MB per screen
    */
   MEMORY_PER_SCREEN: 10 * 1024 * 1024, // 10MB in bytes
-  
+
   // === Network Budgets ===
-  
+
   /**
    * Number of HTTP requests per page
    * Target: < 50 requests
    */
   HTTP_REQUESTS_PER_PAGE: 50,
-  
+
   /**
    * WebSocket message size
    * Target: < 50KB per message
@@ -170,7 +170,7 @@ export const PERFORMANCE_THRESHOLDS = {
     FID: 50,
     CLS: 0.05,
   },
-  
+
   // Yellow: Needs improvement
   NEEDS_IMPROVEMENT: {
     TTI: 3000,
@@ -179,7 +179,7 @@ export const PERFORMANCE_THRESHOLDS = {
     FID: 100,
     CLS: 0.1,
   },
-  
+
   // Red: Poor performance
   POOR: {
     TTI: 5000,
@@ -193,10 +193,7 @@ export const PERFORMANCE_THRESHOLDS = {
 /**
  * Checks if a metric is within budget
  */
-export function isWithinBudget(
-  metric: keyof typeof PERFORMANCE_BUDGET,
-  value: number
-): boolean {
+export function isWithinBudget(metric: keyof typeof PERFORMANCE_BUDGET, value: number): boolean {
   return value <= PERFORMANCE_BUDGET[metric];
 }
 
@@ -242,12 +239,12 @@ export function formatTime(ms: number): string {
  * Performance Budget Validator
  */
 export class PerformanceBudgetValidator {
-  private violations: Array<{
+  private violations: {
     metric: string;
     value: number;
     budget: number;
     severity: 'warning' | 'error';
-  }> = [];
+  }[] = [];
 
   /**
    * Validates a performance metric
@@ -290,7 +287,7 @@ export class PerformanceBudgetValidator {
     }
 
     let report = '⚠️ Performance Budget Violations:\n\n';
-    
+
     for (const violation of this.violations) {
       const icon = violation.severity === 'error' ? '❌' : '⚠️';
       report += `${icon} ${violation.metric}\n`;
@@ -312,25 +309,24 @@ export class PerformanceBudgetValidator {
 
 /**
  * Usage Examples:
- * 
+ *
  * ```typescript
  * import { PERFORMANCE_BUDGET, PerformanceBudgetValidator } from './config/performanceBudget';
- * 
+ *
  * // Check if bundle size is within budget
  * const bundleSize = 4 * 1024 * 1024; // 4MB
  * if (bundleSize > PERFORMANCE_BUDGET.BUNDLE_SIZE_TOTAL) {
  *   console.warn('Bundle size exceeds budget!');
  * }
- * 
+ *
  * // Validate multiple metrics
  * const validator = new PerformanceBudgetValidator();
  * validator.validate('TTI', 3500, 'error');
  * validator.validate('BUNDLE_SIZE_TOTAL', 6 * 1024 * 1024, 'error');
- * 
+ *
  * if (validator.hasViolations()) {
  *   console.log(validator.getReport());
  *   process.exit(1); // Fail CI/CD
  * }
  * ```
  */
-
