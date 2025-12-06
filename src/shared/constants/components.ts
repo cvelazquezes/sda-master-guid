@@ -62,6 +62,16 @@ export const ACTIVITY_INDICATOR_SIZE = {
   large: 'large',
 } as const;
 
+/**
+ * Heading Levels - Semantic HTML heading levels
+ */
+export const HEADING_LEVEL = {
+  H1: 1,
+  H2: 2,
+  H3: 3,
+  H4: 4,
+} as const;
+
 // =============================================================================
 // COMPONENT VARIANTS
 // =============================================================================

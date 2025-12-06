@@ -626,6 +626,14 @@ export const SHADOW_BLUR = {
  */
 export const MODAL_ELEVATION = 24;
 
+/**
+ * Performance monitoring thresholds (FPS)
+ */
+export const FPS = {
+  TARGET: 60,
+  LOW_WARNING: 55,
+} as const;
+
 // =============================================================================
 // TYPE EXPORTS
 // =============================================================================
