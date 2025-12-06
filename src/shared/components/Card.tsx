@@ -9,6 +9,19 @@ import { View, StyleSheet, TouchableOpacity, ViewStyle, StyleProp } from 'react-
 import { useTheme } from '../../contexts/ThemeContext';
 import { designTokens } from '../theme';
 import { A11Y_ROLE, TOUCH_OPACITY, COMPONENT_VARIANT } from '../constants';
+import { MATH, OPACITY_VALUE } from '../constants/numbers';
+
+// Card elevation values for different themes and variants
+/* eslint-disable no-magic-numbers -- Elevation constants for card shadows */
+const CARD_ELEVATION = {
+  ELEVATED_DARK: 10,
+  ELEVATED_LIGHT: 8,
+  OUTLINED_DARK: 3,
+  DEFAULT_DARK: 6,
+  DEFAULT_LIGHT: 4,
+} as const;
+const SHADOW_OPACITY_ADJUSTMENT = OPACITY_VALUE.VERY_LIGHT; // 0.06
+/* eslint-enable no-magic-numbers */
 
 type CardVariant =
   | typeof COMPONENT_VARIANT.default
@@ -59,7 +72,7 @@ export const Card: React.FC<CardProps> = ({
             ? designTokens.shadowConfig.darkStrong.opacity
             : designTokens.shadowConfig.light.opacity,
           shadowRadius: designTokens.spacing.md,
-          elevation: isDark ? 10 : 8,
+          elevation: isDark ? CARD_ELEVATION.ELEVATED_DARK : CARD_ELEVATION.ELEVATED_LIGHT,
         };
       case COMPONENT_VARIANT.outlined:
         return {
@@ -72,7 +85,7 @@ export const Card: React.FC<CardProps> = ({
             ? designTokens.shadowConfig.darkSubtle.opacity
             : designTokens.shadowConfig.lightSubtle.opacity,
           shadowRadius: designTokens.spacing.xs,
-          elevation: isDark ? 3 : 2,
+          elevation: isDark ? CARD_ELEVATION.OUTLINED_DARK : MATH.HALF,
         };
       case COMPONENT_VARIANT.flat:
         return {
@@ -86,9 +99,9 @@ export const Card: React.FC<CardProps> = ({
           shadowOffset: { width: 0, height: designTokens.borderWidth.thick },
           shadowOpacity: isDark
             ? designTokens.shadowConfig.dark.opacity
-            : designTokens.shadowConfig.lightSubtle.opacity + 0.06,
+            : designTokens.shadowConfig.lightSubtle.opacity + SHADOW_OPACITY_ADJUSTMENT,
           shadowRadius: designTokens.spacing.sm + designTokens.spacing.xxs,
-          elevation: isDark ? 6 : 4,
+          elevation: isDark ? CARD_ELEVATION.DEFAULT_DARK : CARD_ELEVATION.DEFAULT_LIGHT,
         };
     }
   };
@@ -103,7 +116,7 @@ export const Card: React.FC<CardProps> = ({
         disabled={disabled}
         activeOpacity={TOUCH_OPACITY.default}
         testID={testID}
-        accessible={true}
+        accessible
         accessibilityRole={A11Y_ROLE.BUTTON}
         accessibilityLabel={accessibilityLabel}
         accessibilityHint={accessibilityHint}
@@ -115,12 +128,7 @@ export const Card: React.FC<CardProps> = ({
   }
 
   return (
-    <View
-      style={cardStyle}
-      testID={testID}
-      accessible={true}
-      accessibilityLabel={accessibilityLabel}
-    >
+    <View style={cardStyle} testID={testID} accessible accessibilityLabel={accessibilityLabel}>
       <View style={[styles.content, contentStyle]}>{children}</View>
     </View>
   );

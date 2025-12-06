@@ -65,7 +65,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
     <View
       style={[styles.container, { backgroundColor: colors.surface }, style]}
       testID={testID}
-      accessible={true}
+      accessible
       accessibilityLabel={`${title}${displayDescription ? `. ${displayDescription}` : ''}`}
       accessibilityRole={A11Y_ROLE.TEXT}
     >

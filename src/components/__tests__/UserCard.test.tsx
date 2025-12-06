@@ -1,6 +1,6 @@
 /**
  * UserCard Component Tests
- * 
+ *
  * Tests following best practices from:
  * - React Testing Library
  * - Jest
@@ -131,9 +131,7 @@ describe('UserCard', () => {
       const user = createMockUser();
       const onPress = jest.fn();
 
-      const { getByLabelText } = render(
-        <UserCard user={user} onPress={onPress} />
-      );
+      const { getByLabelText } = render(<UserCard user={user} onPress={onPress} />);
 
       const card = getByLabelText(`View details for ${user.name}`);
       fireEvent.press(card);
@@ -160,7 +158,7 @@ describe('UserCard', () => {
       const { getByLabelText } = render(
         <UserCard
           user={user}
-          showAdminActions={true}
+          showAdminActions
           onToggleStatus={onToggleStatus}
           onDelete={onDelete}
         />
@@ -173,9 +171,7 @@ describe('UserCard', () => {
     it('should not show admin actions when showAdminActions is false', () => {
       const user = createMockUser();
 
-      const { queryByLabelText } = render(
-        <UserCard user={user} showAdminActions={false} />
-      );
+      const { queryByLabelText } = render(<UserCard user={user} showAdminActions={false} />);
 
       expect(queryByLabelText(/Pause/)).toBeNull();
       expect(queryByLabelText(/Delete/)).toBeNull();
@@ -186,11 +182,7 @@ describe('UserCard', () => {
       const onToggleStatus = jest.fn();
 
       const { getByLabelText } = render(
-        <UserCard
-          user={user}
-          showAdminActions={true}
-          onToggleStatus={onToggleStatus}
-        />
+        <UserCard user={user} showAdminActions onToggleStatus={onToggleStatus} />
       );
 
       const pauseButton = getByLabelText('Pause user');
@@ -204,11 +196,7 @@ describe('UserCard', () => {
       const onToggleStatus = jest.fn();
 
       const { getByLabelText } = render(
-        <UserCard
-          user={user}
-          showAdminActions={true}
-          onToggleStatus={onToggleStatus}
-        />
+        <UserCard user={user} showAdminActions onToggleStatus={onToggleStatus} />
       );
 
       expect(getByLabelText('Resume user')).toBeTruthy();
@@ -219,11 +207,7 @@ describe('UserCard', () => {
       const onDelete = jest.fn();
 
       const { getByLabelText } = render(
-        <UserCard
-          user={user}
-          showAdminActions={true}
-          onDelete={onDelete}
-        />
+        <UserCard user={user} showAdminActions onDelete={onDelete} />
       );
 
       const deleteButton = getByLabelText(`Delete ${user.name}`);
@@ -238,9 +222,7 @@ describe('UserCard', () => {
       const user = createMockUser();
       const onPress = jest.fn();
 
-      const { getByLabelText } = render(
-        <UserCard user={user} onPress={onPress} />
-      );
+      const { getByLabelText } = render(<UserCard user={user} onPress={onPress} />);
 
       const card = getByLabelText(`View details for ${user.name}`);
       expect(card.props.accessibilityRole).toBe('button');
@@ -250,9 +232,7 @@ describe('UserCard', () => {
       const user = createMockUser({ isActive: false });
       const onPress = jest.fn();
 
-      const { getByLabelText } = render(
-        <UserCard user={user} onPress={onPress} />
-      );
+      const { getByLabelText } = render(<UserCard user={user} onPress={onPress} />);
 
       const card = getByLabelText(`View details for ${user.name}`);
       expect(card.props.accessibilityState.disabled).toBe(true);
@@ -266,7 +246,7 @@ describe('UserCard', () => {
       const { getByLabelText } = render(
         <UserCard
           user={user}
-          showAdminActions={true}
+          showAdminActions
           onToggleStatus={onToggleStatus}
           onDelete={onDelete}
         />
@@ -321,9 +301,7 @@ describe('UserCard', () => {
     it('should handle all admin actions disabled', () => {
       const user = createMockUser();
 
-      const { queryByLabelText } = render(
-        <UserCard user={user} showAdminActions={true} />
-      );
+      const { queryByLabelText } = render(<UserCard user={user} showAdminActions />);
 
       // No actions should be visible when callbacks are not provided
       expect(queryByLabelText(/Pause/)).toBeNull();
@@ -331,4 +309,3 @@ describe('UserCard', () => {
     });
   });
 });
-

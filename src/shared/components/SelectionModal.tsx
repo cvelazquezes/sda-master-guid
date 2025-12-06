@@ -7,7 +7,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { StandardModal } from './StandardModal';
 import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../theme';
@@ -33,9 +32,12 @@ interface SelectionModalProps {
   items: SelectionItem[];
   onSelectItem: (item: SelectionItem) => void;
   selectedItemId?: string;
+  /** Empty state message (pass translated string from screen) */
   emptyMessage?: string;
   searchable?: boolean;
   multiSelect?: boolean;
+  /** Accessibility label for close button (pass translated string from screen) */
+  closeButtonLabel?: string;
 }
 
 export const SelectionModal: React.FC<SelectionModalProps> = ({
@@ -49,12 +51,12 @@ export const SelectionModal: React.FC<SelectionModalProps> = ({
   emptyMessage,
   searchable: _searchable = false,
   multiSelect: _multiSelect = false,
+  closeButtonLabel,
 }) => {
-  const { t } = useTranslation();
   const { colors } = useTheme();
-  const displayEmptyMessage = emptyMessage || t('placeholders.noItemsAvailable');
+  const displayEmptyMessage = emptyMessage || '';
 
-  const renderItem = ({ item }: { item: SelectionItem }) => {
+  const renderItem = ({ item }: { item: SelectionItem }): React.JSX.Element => {
     const isSelected = item.id === selectedItemId;
     const isDisabled = item.disabled;
     const iconColor = item.iconColor || colors.primary;
@@ -151,6 +153,7 @@ export const SelectionModal: React.FC<SelectionModalProps> = ({
       subtitle={subtitle}
       scrollable={false}
       maxHeight={dimensionValues.maxHeightPercent.eightyFive}
+      closeButtonLabel={closeButtonLabel}
     >
       {items.length === 0 ? (
         <View style={styles.emptyContainer}>
@@ -197,7 +200,7 @@ const styles = StyleSheet.create({
   iconContainer: {
     width: designTokens.componentSizes.iconContainer.md,
     height: designTokens.componentSizes.iconContainer.md,
-    borderRadius: designTokens.borderRadius.xxl,
+    borderRadius: designTokens.borderRadius['2xl'],
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
     marginRight: designTokens.spacing.md,
@@ -205,14 +208,13 @@ const styles = StyleSheet.create({
   avatar: {
     width: designTokens.componentSizes.iconContainer.md,
     height: designTokens.componentSizes.iconContainer.md,
-    borderRadius: designTokens.borderRadius.xxl,
+    borderRadius: designTokens.borderRadius['2xl'],
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
     marginRight: designTokens.spacing.md,
   },
   avatarText: {
     ...mobileTypography.bodyMediumBold,
-    color: designTokens.colors.white,
   },
   itemContent: {
     flex: flexValues.one,

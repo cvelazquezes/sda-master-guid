@@ -53,7 +53,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
   accessibilityLabel,
   accessibilityHint,
 }) => {
-  const getSizeStyles = () => {
+  const getSizeStyles = (): { containerSize: number; iconSize: number } => {
     switch (size) {
       case COMPONENT_SIZE.sm:
         return {
@@ -73,7 +73,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
     }
   };
 
-  const getVariantStyles = () => {
+  const getVariantStyles = (): { backgroundColor: string; color: string } => {
     switch (variant) {
       case COMPONENT_VARIANT.primary:
         return {
@@ -125,7 +125,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
       disabled={disabled}
       activeOpacity={TOUCH_OPACITY.default}
       testID={testID}
-      accessible={true}
+      accessible
       accessibilityRole={A11Y_ROLE.BUTTON}
       accessibilityLabel={accessibilityLabel}
       accessibilityHint={accessibilityHint}

@@ -57,7 +57,7 @@ export const MenuCard: React.FC<MenuCardProps> = ({
       disabled={disabled}
       activeOpacity={TOUCH_OPACITY.default}
       testID={testID}
-      accessible={true}
+      accessible
       accessibilityRole={A11Y_ROLE.BUTTON}
       accessibilityLabel={title}
       accessibilityHint={description}

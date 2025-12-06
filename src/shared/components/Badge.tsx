@@ -1,11 +1,13 @@
 /**
  * Badge Component
  * Reusable badge component for status indicators, roles, and labels
+ * Supports dynamic theming (light/dark mode)
  */
 
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTheme } from '../../contexts/ThemeContext';
 import { designTokens } from '../theme/designTokens';
 import { statusColors, roleColors } from '../theme/sdaColors';
 import { mobileFontSizes, layoutConstants } from '../theme';
@@ -58,8 +60,10 @@ export const Badge: React.FC<BadgeProps> = ({
   style,
   testID,
 }) => {
-  // Determine colors based on status/role or variant
-  const getColors = () => {
+  const { colors: themeColors } = useTheme();
+
+  // Determine colors based on status/role or variant (using theme colors)
+  const getColors = (): { bg: string; text: string; border: string } => {
     if (status) {
       return {
         bg: statusColors[status].light,
@@ -76,55 +80,55 @@ export const Badge: React.FC<BadgeProps> = ({
       };
     }
 
-    // Variant-based colors
+    // Variant-based colors from theme
     switch (variant) {
       case COMPONENT_VARIANT.primary:
         return {
-          bg: designTokens.colors.primaryLight,
-          text: designTokens.colors.primary,
-          border: designTokens.colors.primary,
+          bg: themeColors.primaryLight || themeColors.primaryAlpha10,
+          text: themeColors.primary,
+          border: themeColors.primary,
         };
       case COMPONENT_VARIANT.secondary:
         return {
-          bg: designTokens.colors.secondaryLight,
-          text: designTokens.colors.secondary,
-          border: designTokens.colors.secondary,
+          bg: themeColors.secondaryLight || themeColors.secondaryAlpha10,
+          text: themeColors.secondary,
+          border: themeColors.secondary,
         };
       case COMPONENT_VARIANT.accent:
         return {
-          bg: designTokens.colors.accentLight,
-          text: designTokens.colors.accent,
-          border: designTokens.colors.accent,
+          bg: themeColors.accentLight || themeColors.accentAlpha10,
+          text: themeColors.accent,
+          border: themeColors.accent,
         };
       case COMPONENT_VARIANT.success:
         return {
-          bg: designTokens.colors.successLight,
-          text: designTokens.colors.success,
-          border: designTokens.colors.success,
+          bg: themeColors.successLight,
+          text: themeColors.success,
+          border: themeColors.success,
         };
       case COMPONENT_VARIANT.warning:
         return {
-          bg: designTokens.colors.warningLight,
-          text: designTokens.colors.warning,
-          border: designTokens.colors.warning,
+          bg: themeColors.warningLight,
+          text: themeColors.warning,
+          border: themeColors.warning,
         };
       case COMPONENT_VARIANT.error:
         return {
-          bg: designTokens.colors.errorLight,
-          text: designTokens.colors.error,
-          border: designTokens.colors.error,
+          bg: themeColors.errorLight,
+          text: themeColors.error,
+          border: themeColors.error,
         };
       case COMPONENT_VARIANT.info:
         return {
-          bg: designTokens.colors.infoLight,
-          text: designTokens.colors.info,
-          border: designTokens.colors.info,
+          bg: themeColors.infoLight,
+          text: themeColors.info,
+          border: themeColors.info,
         };
       default:
         return {
-          bg: designTokens.colors.backgroundTertiary,
-          text: designTokens.colors.textSecondary,
-          border: designTokens.colors.borderMedium,
+          bg: themeColors.surfaceLight,
+          text: themeColors.textSecondary,
+          border: themeColors.border,
         };
     }
   };
@@ -191,7 +195,7 @@ export const Badge: React.FC<BadgeProps> = ({
         style,
       ]}
       testID={testID}
-      accessible={true}
+      accessible
       accessibilityRole={A11Y_ROLE.TEXT}
       accessibilityLabel={label}
     >

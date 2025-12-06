@@ -6,7 +6,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTranslation } from 'react-i18next';
 import { statusColors } from '../theme/sdaColors';
 import { mobileTypography, mobileFontSizes } from '../theme/mobileTypography';
 import { designTokens } from '../theme/designTokens';
@@ -24,6 +23,8 @@ interface StatusIndicatorProps {
   size?: StatusSize;
   style?: ViewStyle;
   testID?: string;
+  /** Accessibility label (pass translated string from screen) */
+  accessibilityLabel?: string;
 }
 
 export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
@@ -34,13 +35,13 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
   size = COMPONENT_SIZE.md,
   style,
   testID,
+  accessibilityLabel,
 }) => {
-  const { t } = useTranslation();
   const statusConfig = statusColors[status];
 
   const displayLabel = label || status.charAt(0).toUpperCase() + status.slice(1);
 
-  const getSizeStyles = () => {
+  const getSizeStyles = (): { iconSize: number; fontSize: number; gap: number } => {
     switch (size) {
       case COMPONENT_SIZE.sm:
         return {
@@ -69,9 +70,9 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
     <View
       style={[styles.container, { gap: sizeStyles.gap }, style]}
       testID={testID}
-      accessible={true}
+      accessible
       accessibilityRole={A11Y_ROLE.TEXT}
-      accessibilityLabel={t('accessibility.status', { status: displayLabel })}
+      accessibilityLabel={accessibilityLabel || displayLabel}
     >
       {showIcon && (
         <MaterialCommunityIcons

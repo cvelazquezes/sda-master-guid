@@ -8,12 +8,12 @@
 import React, { memo, useCallback } from 'react';
 import { View, Text, StyleSheet, ViewToken } from 'react-native';
 import { FlashList, ListRenderItem } from '@shopify/flash-list';
-import { useTranslation } from 'react-i18next';
 import { useTheme, layoutConstants } from '../theme';
 import { mobileFontSizes } from '../theme/mobileTypography';
 import { designTokens } from '../theme/designTokens';
 import { logger } from '../utils/logger';
 import { LIST_THRESHOLDS, flexValues } from '../constants';
+import { MATH } from '../constants/numbers';
 
 // ============================================================================
 // FlashList Wrapper with Best Practices
@@ -59,7 +59,7 @@ export function OptimizedList<T>({
   ListFooterComponent,
   refreshing,
   onRefresh,
-}: OptimizedListProps<T>) {
+}: OptimizedListProps<T>): React.JSX.Element {
   // Memoize viewability config
   const viewabilityConfig = {
     itemVisiblePercentThreshold: LIST_THRESHOLDS.ITEM_VISIBLE_PERCENT,
@@ -82,8 +82,8 @@ export function OptimizedList<T>({
       keyExtractor={keyExtractor}
       estimatedItemSize={estimatedItemSize}
       // Performance optimizations
-      drawDistance={estimatedItemSize * 5} // Render 5 screens ahead
-      removeClippedSubviews={true}
+      drawDistance={estimatedItemSize * MATH.FIVE} // Render 5 screens ahead
+      removeClippedSubviews
       // Pagination
       onEndReached={onEndReached}
       onEndReachedThreshold={onEndReachedThreshold}
@@ -118,11 +118,16 @@ interface UserListItemProps {
 }
 
 const UserListItem = memo<UserListItemProps>(function UserListItem({ user, onPress: _onPress }) {
-  const { theme } = useTheme();
+  const { theme, colors } = useTheme();
 
   return (
-    <View style={[styles.userItem, { backgroundColor: theme.colors.surface }]}>
-      <View style={styles.avatar}>
+    <View
+      style={[
+        styles.userItem,
+        { backgroundColor: theme.colors.surface, borderBottomColor: colors.border },
+      ]}
+    >
+      <View style={[styles.avatar, { backgroundColor: colors.info }]}>
         <Text style={{ color: theme.colors.onPrimary }}>{user.name.charAt(0).toUpperCase()}</Text>
       </View>
       <View style={styles.userInfo}>
@@ -141,6 +146,8 @@ interface OptimizedUserListProps {
   onLoadMore?: () => void;
   refreshing?: boolean;
   onRefresh?: () => void;
+  /** Empty state message (pass translated string from screen) */
+  emptyMessage?: string;
 }
 
 /**
@@ -163,8 +170,9 @@ export const OptimizedUserList = memo<OptimizedUserListProps>(function Optimized
   onLoadMore,
   refreshing,
   onRefresh,
+  emptyMessage,
 }) {
-  const { t } = useTranslation();
+  const { colors } = useTheme();
   const renderItem = useCallback<ListRenderItem<User>>(
     ({ item }) => <UserListItem user={item} onPress={onUserPress} />,
     [onUserPress]
@@ -175,10 +183,10 @@ export const OptimizedUserList = memo<OptimizedUserListProps>(function Optimized
   const ListEmptyComponent = useCallback(
     () => (
       <View style={styles.emptyContainer}>
-        <Text style={styles.emptyText}>{t('screens.usersManagement.noUsersFound')}</Text>
+        <Text style={[styles.emptyText, { color: colors.textSecondary }]}>{emptyMessage}</Text>
       </View>
     ),
-    []
+    [colors.textSecondary, emptyMessage]
   );
 
   return (
@@ -271,13 +279,11 @@ const styles = StyleSheet.create({
     padding: designTokens.spacing.lg,
     alignItems: layoutConstants.alignItems.center,
     borderBottomWidth: designTokens.borderWidth.thin,
-    borderBottomColor: designTokens.colors.borderLight,
   },
   avatar: {
     width: designTokens.componentSizes.iconContainer.lg,
     height: designTokens.componentSizes.iconContainer.lg,
     borderRadius: designTokens.borderRadius['3xl'],
-    backgroundColor: designTokens.colors.info,
     alignItems: layoutConstants.alignItems.center,
     justifyContent: layoutConstants.justifyContent.center,
     marginRight: designTokens.spacing.lg,
@@ -301,6 +307,5 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: mobileFontSizes.lg,
-    color: designTokens.colors.textSecondary,
   },
 });

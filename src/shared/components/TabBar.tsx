@@ -44,7 +44,7 @@ export const TabBar: React.FC<TabBarProps> = ({ tabs, activeTabId, onTabChange, 
             key={tab.id}
             style={[styles.tab, isActive && { borderBottomColor: colors.primary }]}
             onPress={() => onTabChange(tab.id)}
-            accessible={true}
+            accessible
             accessibilityRole={A11Y_ROLE.TAB}
             accessibilityLabel={tab.label}
             accessibilityState={{ selected: isActive }}

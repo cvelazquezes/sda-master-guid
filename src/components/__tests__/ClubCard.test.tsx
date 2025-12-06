@@ -1,6 +1,6 @@
 /**
  * ClubCard Component Tests
- * 
+ *
  * Tests following best practices from:
  * - React Testing Library
  * - Jest
@@ -145,9 +145,7 @@ describe('ClubCard', () => {
       const club = createMockClub();
       const onPress = jest.fn();
 
-      const { getByLabelText } = render(
-        <ClubCard club={club} onPress={onPress} />
-      );
+      const { getByLabelText } = render(<ClubCard club={club} onPress={onPress} />);
 
       const card = getByLabelText(`View details for ${club.name}`);
       fireEvent.press(card);
@@ -173,7 +171,7 @@ describe('ClubCard', () => {
       const { getByLabelText } = render(
         <ClubCard
           club={club}
-          showAdminActions={true}
+          showAdminActions
           onToggleStatus={onToggleStatus}
           onDelete={onDelete}
         />
@@ -186,9 +184,7 @@ describe('ClubCard', () => {
     it('should not show admin actions when showAdminActions is false', () => {
       const club = createMockClub();
 
-      const { queryByLabelText } = render(
-        <ClubCard club={club} showAdminActions={false} />
-      );
+      const { queryByLabelText } = render(<ClubCard club={club} showAdminActions={false} />);
 
       expect(queryByLabelText(/Deactivate/)).toBeNull();
       expect(queryByLabelText(/Delete/)).toBeNull();
@@ -199,11 +195,7 @@ describe('ClubCard', () => {
       const onToggleStatus = jest.fn();
 
       const { getByLabelText } = render(
-        <ClubCard
-          club={club}
-          showAdminActions={true}
-          onToggleStatus={onToggleStatus}
-        />
+        <ClubCard club={club} showAdminActions onToggleStatus={onToggleStatus} />
       );
 
       const deactivateButton = getByLabelText('Deactivate club');
@@ -217,11 +209,7 @@ describe('ClubCard', () => {
       const onToggleStatus = jest.fn();
 
       const { getByLabelText } = render(
-        <ClubCard
-          club={club}
-          showAdminActions={true}
-          onToggleStatus={onToggleStatus}
-        />
+        <ClubCard club={club} showAdminActions onToggleStatus={onToggleStatus} />
       );
 
       expect(getByLabelText('Activate club')).toBeTruthy();
@@ -232,11 +220,7 @@ describe('ClubCard', () => {
       const onDelete = jest.fn();
 
       const { getByLabelText } = render(
-        <ClubCard
-          club={club}
-          showAdminActions={true}
-          onDelete={onDelete}
-        />
+        <ClubCard club={club} showAdminActions onDelete={onDelete} />
       );
 
       const deleteButton = getByLabelText(`Delete ${club.name}`);
@@ -251,9 +235,7 @@ describe('ClubCard', () => {
       const club = createMockClub();
       const onPress = jest.fn();
 
-      const { getByLabelText } = render(
-        <ClubCard club={club} onPress={onPress} />
-      );
+      const { getByLabelText } = render(<ClubCard club={club} onPress={onPress} />);
 
       const card = getByLabelText(`View details for ${club.name}`);
       expect(card.props.accessibilityRole).toBe('button');
@@ -263,9 +245,7 @@ describe('ClubCard', () => {
       const club = createMockClub({ isActive: false });
       const onPress = jest.fn();
 
-      const { getByLabelText } = render(
-        <ClubCard club={club} onPress={onPress} />
-      );
+      const { getByLabelText } = render(<ClubCard club={club} onPress={onPress} />);
 
       const card = getByLabelText(`View details for ${club.name}`);
       expect(card.props.accessibilityState.disabled).toBe(true);
@@ -279,7 +259,7 @@ describe('ClubCard', () => {
       const { getByLabelText } = render(
         <ClubCard
           club={club}
-          showAdminActions={true}
+          showAdminActions
           onToggleStatus={onToggleStatus}
           onDelete={onDelete}
         />
@@ -339,9 +319,7 @@ describe('ClubCard', () => {
     it('should handle all admin actions disabled', () => {
       const club = createMockClub();
 
-      const { queryByLabelText } = render(
-        <ClubCard club={club} showAdminActions={true} />
-      );
+      const { queryByLabelText } = render(<ClubCard club={club} showAdminActions />);
 
       // No actions should be visible when callbacks are not provided
       expect(queryByLabelText(/Deactivate/)).toBeNull();
@@ -349,4 +327,3 @@ describe('ClubCard', () => {
     });
   });
 });
-

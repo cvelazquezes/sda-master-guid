@@ -15,7 +15,6 @@ import {
   ViewStyle,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../theme';
 import { A11Y_ROLE, ICONS, dimensionValues, flexValues } from '../constants';
@@ -29,6 +28,10 @@ interface StandardInputProps extends TextInputProps {
   secureTextEntry?: boolean;
   disabled?: boolean;
   containerStyle?: ViewStyle;
+  /** Accessibility label for show password button (pass translated string from screen) */
+  showPasswordLabel?: string;
+  /** Accessibility label for hide password button (pass translated string from screen) */
+  hidePasswordLabel?: string;
 }
 
 export const StandardInput: React.FC<StandardInputProps> = ({
@@ -41,9 +44,10 @@ export const StandardInput: React.FC<StandardInputProps> = ({
   disabled,
   containerStyle,
   multiline,
+  showPasswordLabel,
+  hidePasswordLabel,
   ...textInputProps
 }) => {
-  const { t } = useTranslation();
   const { colors } = useTheme();
   const [isSecureVisible, setIsSecureVisible] = useState(!secureTextEntry);
   const [isFocused, setIsFocused] = useState(false);
@@ -84,9 +88,13 @@ export const StandardInput: React.FC<StandardInputProps> = ({
     return baseStyle;
   };
 
-  const getIconColor = () => {
-    if (hasError) return colors.error;
-    if (isFocused) return colors.primary;
+  const getIconColor = (): string => {
+    if (hasError) {
+      return colors.error;
+    }
+    if (isFocused) {
+      return colors.primary;
+    }
     return colors.textTertiary;
   };
 
@@ -137,11 +145,9 @@ export const StandardInput: React.FC<StandardInputProps> = ({
           <TouchableOpacity
             style={styles.secureToggle}
             onPress={() => setIsSecureVisible(!isSecureVisible)}
-            accessible={true}
+            accessible
             accessibilityRole={A11Y_ROLE.BUTTON}
-            accessibilityLabel={
-              isSecureVisible ? t('accessibility.hidePassword') : t('accessibility.showPassword')
-            }
+            accessibilityLabel={isSecureVisible ? hidePasswordLabel : showPasswordLabel}
           >
             <MaterialCommunityIcons
               name={isSecureVisible ? ICONS.EYE_OFF : ICONS.EYE}

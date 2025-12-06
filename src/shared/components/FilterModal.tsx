@@ -15,7 +15,6 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { mobileTypography, designTokens, layoutConstants } from '../theme';
 import {
@@ -56,6 +55,12 @@ interface FilterModalProps {
   onApply: () => void;
   onSelectOption: (sectionId: string, value: string) => void;
   children?: ReactNode;
+  /** Label for close button (pass translated string from screen) */
+  closeLabel?: string;
+  /** Label for cancel/clear button (pass translated string from screen) */
+  cancelLabel?: string;
+  /** Label for apply/filter button (pass translated string from screen) */
+  applyLabel?: string;
 }
 
 export const FilterModal: React.FC<FilterModalProps> = ({
@@ -67,16 +72,20 @@ export const FilterModal: React.FC<FilterModalProps> = ({
   onApply,
   onSelectOption,
   children,
+  closeLabel,
+  cancelLabel,
+  applyLabel,
 }) => {
-  const { t } = useTranslation();
-  const displayTitle = title || t('common.filters');
+  const displayTitle = title || '';
   const { colors } = useTheme();
   const { width: windowWidth } = useWindowDimensions();
   const isMobile = windowWidth < designTokens.breakpoints.tablet;
 
   const isOptionSelected = (sectionId: string, value: string): boolean => {
     const section = sections.find((s) => s.id === sectionId);
-    if (!section) return false;
+    if (!section) {
+      return false;
+    }
 
     if (Array.isArray(section.selectedValue)) {
       return section.selectedValue.includes(value);
@@ -88,7 +97,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
     <Modal
       visible={visible}
       animationType={isMobile ? ANIMATION.SLIDE : ANIMATION.FADE}
-      transparent={true}
+      transparent
       onRequestClose={onClose}
     >
       <View style={[styles.overlay, isMobile && styles.overlayMobile]}>
@@ -108,9 +117,9 @@ export const FilterModal: React.FC<FilterModalProps> = ({
             <TouchableOpacity
               onPress={onClose}
               style={styles.closeButton}
-              accessible={true}
+              accessible
               accessibilityRole={A11Y_ROLE.BUTTON}
-              accessibilityLabel={t('accessibility.closeModal')}
+              accessibilityLabel={closeLabel}
             >
               <MaterialCommunityIcons
                 name={ICONS.CLOSE}
@@ -159,7 +168,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                         },
                       ]}
                       onPress={() => onSelectOption(section.id, option.value.toString())}
-                      accessible={true}
+                      accessible
                       accessibilityRole={A11Y_ROLE.BUTTON}
                       accessibilityLabel={option.label}
                       accessibilityState={{ selected: isSelected }}
@@ -209,9 +218,9 @@ export const FilterModal: React.FC<FilterModalProps> = ({
             <TouchableOpacity
               style={[styles.clearButton, { backgroundColor: colors.surfaceLight }]}
               onPress={onClear}
-              accessible={true}
+              accessible
               accessibilityRole={A11Y_ROLE.BUTTON}
-              accessibilityLabel={t('common.cancel')}
+              accessibilityLabel={cancelLabel}
             >
               <MaterialCommunityIcons
                 name={ICONS.FILTER}
@@ -219,17 +228,19 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                 color={colors.textSecondary}
               />
               <Text style={[styles.clearButtonText, { color: colors.textSecondary }]}>
-                {t('common.cancel')}
+                {cancelLabel}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.applyButton, { backgroundColor: colors.primary }]}
               onPress={onApply}
-              accessible={true}
+              accessible
               accessibilityRole={A11Y_ROLE.BUTTON}
-              accessibilityLabel={t('accessibility.filter')}
+              accessibilityLabel={applyLabel}
             >
-              <Text style={styles.applyButtonText}>{t('accessibility.filter')}</Text>
+              <Text style={[styles.applyButtonText, { color: colors.textOnPrimary }]}>
+                {applyLabel}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -356,7 +367,6 @@ const styles = StyleSheet.create({
   applyButtonText: {
     fontSize: designTokens.typography.fontSizes.md,
     fontWeight: designTokens.fontWeight.semibold,
-    color: designTokens.colors.white,
   },
 });
 

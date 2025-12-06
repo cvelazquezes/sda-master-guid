@@ -2,6 +2,7 @@
  * StandardButton Component
  * Consistent button component used across all screens and roles
  * Updated with SDA Brand Colors
+ * Supports dynamic theming (light/dark mode)
  */
 
 import React from 'react';
@@ -15,6 +16,7 @@ import {
   TextStyle,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTheme } from '../../contexts/ThemeContext';
 import { mobileTypography, designTokens, layoutConstants } from '../theme';
 import {
   A11Y_ROLE,
@@ -24,6 +26,7 @@ import {
   COMPONENT_VARIANT,
   BUTTON_SIZE,
   ICON_POSITION,
+  ICONS,
 } from '../constants';
 
 type ButtonVariant =
@@ -65,10 +68,41 @@ export const StandardButton: React.FC<StandardButtonProps> = ({
   accessibilityLabel,
   accessibilityHint,
 }) => {
+  const { colors } = useTheme();
   const isDisabled = disabled || loading;
 
+  // Get variant background color from theme
+  const getVariantBackgroundColor = (): string => {
+    switch (variant) {
+      case COMPONENT_VARIANT.primary:
+        return colors.primary;
+      case COMPONENT_VARIANT.secondary:
+        return colors.secondary;
+      case COMPONENT_VARIANT.accent:
+        return colors.accent;
+      case COMPONENT_VARIANT.danger:
+        return colors.error;
+      case COMPONENT_VARIANT.outline:
+      case COMPONENT_VARIANT.ghost:
+        return colors.transparent || 'transparent';
+      default:
+        return colors.primary;
+    }
+  };
+
+  // Get variant border color from theme
+  const getVariantBorderColor = (): string | undefined => {
+    if (variant === COMPONENT_VARIANT.outline) {
+      return colors.primary;
+    }
+    return undefined;
+  };
+
   const getButtonStyle = (): ViewStyle[] => {
-    const baseStyle: ViewStyle[] = [styles.button];
+    const baseStyle: ViewStyle[] = [
+      styles.button,
+      { backgroundColor: getVariantBackgroundColor() },
+    ];
 
     // Size styles
     switch (size) {
@@ -82,26 +116,12 @@ export const StandardButton: React.FC<StandardButtonProps> = ({
         baseStyle.push(styles.buttonMedium);
     }
 
-    // Variant styles
-    switch (variant) {
-      case COMPONENT_VARIANT.primary:
-        baseStyle.push(styles.buttonPrimary);
-        break;
-      case COMPONENT_VARIANT.secondary:
-        baseStyle.push(styles.buttonSecondary);
-        break;
-      case COMPONENT_VARIANT.accent:
-        baseStyle.push(styles.buttonAccent);
-        break;
-      case COMPONENT_VARIANT.danger:
-        baseStyle.push(styles.buttonDanger);
-        break;
-      case COMPONENT_VARIANT.outline:
-        baseStyle.push(styles.buttonOutline);
-        break;
-      case COMPONENT_VARIANT.ghost:
-        baseStyle.push(styles.buttonGhost);
-        break;
+    // Variant-specific styles (border for outline)
+    if (variant === COMPONENT_VARIANT.outline) {
+      baseStyle.push({
+        borderWidth: designTokens.button.borderWidth,
+        borderColor: getVariantBorderColor(),
+      });
     }
 
     // Full width
@@ -117,8 +137,28 @@ export const StandardButton: React.FC<StandardButtonProps> = ({
     return baseStyle;
   };
 
+  // Get text color from theme based on variant
+  const getTextColor = (): string => {
+    if (isDisabled) {
+      return colors.textDisabled;
+    }
+    switch (variant) {
+      case COMPONENT_VARIANT.primary:
+      case COMPONENT_VARIANT.secondary:
+      case COMPONENT_VARIANT.danger:
+        return colors.textOnPrimary;
+      case COMPONENT_VARIANT.accent:
+        return colors.textOnAccent || colors.textPrimary;
+      case COMPONENT_VARIANT.outline:
+      case COMPONENT_VARIANT.ghost:
+        return colors.primary;
+      default:
+        return colors.textOnPrimary;
+    }
+  };
+
   const getTextStyle = (): TextStyle[] => {
-    const baseStyle: TextStyle[] = [styles.buttonText];
+    const baseStyle: TextStyle[] = [styles.buttonText, { color: getTextColor() }];
 
     // Size text styles
     switch (size) {
@@ -132,30 +172,10 @@ export const StandardButton: React.FC<StandardButtonProps> = ({
         baseStyle.push(styles.buttonTextMedium);
     }
 
-    // Variant text styles
-    switch (variant) {
-      case COMPONENT_VARIANT.primary:
-      case COMPONENT_VARIANT.secondary:
-      case COMPONENT_VARIANT.danger:
-        baseStyle.push(styles.buttonTextLight);
-        break;
-      case COMPONENT_VARIANT.accent:
-        baseStyle.push(styles.buttonTextDark);
-        break;
-      case COMPONENT_VARIANT.outline:
-      case COMPONENT_VARIANT.ghost:
-        baseStyle.push(styles.buttonTextPrimary);
-        break;
-    }
-
-    if (isDisabled) {
-      baseStyle.push(styles.buttonTextDisabled);
-    }
-
     return baseStyle;
   };
 
-  const getIconSize = () => {
+  const getIconSize = (): number => {
     switch (size) {
       case BUTTON_SIZE.small:
         return designTokens.button.sizes.small.iconSize;
@@ -166,20 +186,22 @@ export const StandardButton: React.FC<StandardButtonProps> = ({
     }
   };
 
-  const getIconColor = () => {
-    if (isDisabled) return designTokens.colors.textDisabled;
+  const getIconColor = (): string => {
+    if (isDisabled) {
+      return colors.textDisabled;
+    }
     switch (variant) {
       case COMPONENT_VARIANT.primary:
       case COMPONENT_VARIANT.secondary:
       case COMPONENT_VARIANT.danger:
-        return designTokens.colors.textOnPrimary;
+        return colors.textOnPrimary;
       case COMPONENT_VARIANT.accent:
-        return designTokens.colors.textOnAccent;
+        return colors.textOnAccent || colors.textPrimary;
       case COMPONENT_VARIANT.outline:
       case COMPONENT_VARIANT.ghost:
-        return designTokens.colors.primary;
+        return colors.primary;
       default:
-        return designTokens.colors.textOnPrimary;
+        return colors.textOnPrimary;
     }
   };
 
@@ -190,7 +212,7 @@ export const StandardButton: React.FC<StandardButtonProps> = ({
       disabled={isDisabled}
       activeOpacity={TOUCH_OPACITY.default}
       testID={testID}
-      accessible={true}
+      accessible
       accessibilityRole={A11Y_ROLE.BUTTON}
       accessibilityLabel={accessibilityLabel || title}
       accessibilityHint={accessibilityHint}
@@ -253,27 +275,7 @@ const styles = StyleSheet.create({
     minHeight: designTokens.button.sizes.large.minHeight,
   },
 
-  // Style variants - SDA Brand Colors
-  buttonPrimary: {
-    backgroundColor: designTokens.button.variants.primary.backgroundColor,
-  },
-  buttonSecondary: {
-    backgroundColor: designTokens.button.variants.secondary.backgroundColor,
-  },
-  buttonAccent: {
-    backgroundColor: designTokens.button.variants.accent.backgroundColor,
-  },
-  buttonDanger: {
-    backgroundColor: designTokens.button.variants.danger.backgroundColor,
-  },
-  buttonOutline: {
-    backgroundColor: designTokens.button.variants.outline.backgroundColor,
-    borderWidth: designTokens.button.borderWidth,
-    borderColor: designTokens.button.variants.outline.borderColor,
-  },
-  buttonGhost: {
-    backgroundColor: designTokens.button.variants.ghost.backgroundColor,
-  },
+  // Layout styles (colors handled dynamically via useTheme)
   buttonFullWidth: {
     width: dimensionValues.width.full,
   },
@@ -281,7 +283,7 @@ const styles = StyleSheet.create({
     opacity: designTokens.opacity.disabled,
   },
 
-  // Text styles
+  // Text styles (colors handled dynamically via useTheme)
   buttonText: {
     textAlign: layoutConstants.textAlign.center,
   },
@@ -294,18 +296,6 @@ const styles = StyleSheet.create({
   buttonTextLarge: {
     ...mobileTypography.button,
     fontSize: designTokens.typography.fontSizes.xl,
-  },
-  buttonTextLight: {
-    color: designTokens.colors.textOnPrimary,
-  },
-  buttonTextPrimary: {
-    color: designTokens.colors.primary,
-  },
-  buttonTextDark: {
-    color: designTokens.colors.textPrimary,
-  },
-  buttonTextDisabled: {
-    color: designTokens.colors.textDisabled,
   },
 
   // Icon styles

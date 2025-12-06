@@ -6,10 +6,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../theme';
 import { A11Y_ROLE, ICONS, TEXT_LINES, flexValues } from '../constants';
+import { SPACING, MATH } from '../constants/numbers';
 
 interface StandardPickerProps {
   label?: string;
@@ -21,6 +21,8 @@ interface StandardPickerProps {
   disabled?: boolean;
   onPress: () => void;
   containerStyle?: ViewStyle;
+  /** Accessibility hint for the picker (pass translated string from screen) */
+  accessibilityHint?: string;
 }
 
 export const StandardPicker: React.FC<StandardPickerProps> = ({
@@ -33,52 +35,66 @@ export const StandardPicker: React.FC<StandardPickerProps> = ({
   disabled,
   onPress,
   containerStyle,
+  accessibilityHint,
 }) => {
-  const { t } = useTranslation();
-  const displayPlaceholder = placeholder || t('placeholders.selectOption');
   const { colors } = useTheme();
+  const displayPlaceholder = placeholder || '';
   const hasError = !!error;
   const hasValue = !!value;
+
+  // Dynamic styles from theme
+  const pickerContainerStyle = [
+    styles.pickerContainer,
+    {
+      borderColor: colors.border,
+      backgroundColor: colors.surfaceLight,
+    },
+    hasError && { borderColor: colors.error },
+    disabled && {
+      backgroundColor: colors.surfaceLight,
+      opacity: designTokens.opacity.high,
+    },
+  ];
 
   return (
     <View style={[styles.container, containerStyle]}>
       {/* Label */}
       {label && (
         <View style={styles.labelContainer}>
-          <Text style={styles.label}>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>
             {label}
-            {required && <Text style={styles.required}> *</Text>}
+            {required && <Text style={{ color: colors.error }}> *</Text>}
           </Text>
         </View>
       )}
 
       {/* Picker Button */}
       <TouchableOpacity
-        style={[
-          styles.pickerContainer,
-          hasError && styles.pickerContainerError,
-          disabled && styles.pickerContainerDisabled,
-        ]}
+        style={pickerContainerStyle}
         onPress={onPress}
         disabled={disabled}
-        accessible={true}
+        accessible
         accessibilityRole={A11Y_ROLE.BUTTON}
         accessibilityLabel={label || displayPlaceholder}
-        accessibilityHint={t('accessibility.selectOption')}
+        accessibilityHint={accessibilityHint}
       >
         {/* Icon */}
         {icon && (
           <MaterialCommunityIcons
             name={icon as typeof ICONS.CHECK}
             size={mobileIconSizes.medium}
-            color={hasError ? designTokens.colors.error : colors.textSecondary}
+            color={hasError ? colors.error : colors.textSecondary}
             style={styles.icon}
           />
         )}
 
         {/* Value/Placeholder */}
         <Text
-          style={[styles.pickerText, !hasValue && styles.pickerTextPlaceholder]}
+          style={[
+            styles.pickerText,
+            { color: colors.textPrimary },
+            !hasValue && { color: colors.textTertiary },
+          ]}
           numberOfLines={TEXT_LINES.single}
         >
           {hasValue ? value : displayPlaceholder}
@@ -98,10 +114,10 @@ export const StandardPicker: React.FC<StandardPickerProps> = ({
           <MaterialCommunityIcons
             name={ICONS.ALERT_CIRCLE}
             size={mobileIconSizes.tiny}
-            color={designTokens.colors.error}
+            color={colors.error}
             style={styles.messageIcon}
           />
-          <Text style={styles.errorText}>{error}</Text>
+          <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>
         </View>
       )}
     </View>
@@ -117,27 +133,14 @@ const styles = StyleSheet.create({
   },
   label: {
     ...mobileTypography.labelBold,
-    color: designTokens.colors.text.primary,
-  },
-  required: {
-    color: designTokens.colors.error,
   },
   pickerContainer: {
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
     borderWidth: designTokens.borderWidth.thin,
-    borderColor: designTokens.colors.border.medium,
     borderRadius: designTokens.borderRadius.xl,
     paddingHorizontal: designTokens.spacing.md,
-    backgroundColor: designTokens.colors.background.secondary,
-    minHeight: 52,
-  },
-  pickerContainerError: {
-    borderColor: designTokens.colors.error,
-  },
-  pickerContainerDisabled: {
-    backgroundColor: designTokens.colors.background.tertiary,
-    opacity: designTokens.opacity.high,
+    minHeight: SPACING.FIFTY + MATH.HALF, // 52
   },
   icon: {
     marginRight: designTokens.spacing.md,
@@ -145,10 +148,6 @@ const styles = StyleSheet.create({
   pickerText: {
     flex: flexValues.one,
     ...mobileTypography.bodyLarge,
-    color: designTokens.colors.text.primary,
-  },
-  pickerTextPlaceholder: {
-    color: designTokens.colors.text.tertiary,
   },
   messageContainer: {
     flexDirection: layoutConstants.flexDirection.row,
@@ -161,7 +160,6 @@ const styles = StyleSheet.create({
   },
   errorText: {
     ...mobileTypography.caption,
-    color: designTokens.colors.error,
     flex: flexValues.one,
   },
 });

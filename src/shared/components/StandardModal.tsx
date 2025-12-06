@@ -18,7 +18,6 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../theme';
 import {
@@ -32,6 +31,7 @@ import {
   dimensionValues,
   flexValues,
 } from '../constants';
+import { MATH } from '../constants/numbers';
 
 // Type for animation
 type AnimationType = typeof ANIMATION.FADE | typeof ANIMATION.SLIDE | typeof ANIMATION.NONE;
@@ -52,6 +52,8 @@ interface StandardModalProps {
   animationType?: AnimationType;
   fullScreen?: boolean;
   headerColor?: string;
+  /** Accessibility label for close button (pass translated string from screen) */
+  closeButtonLabel?: string;
 }
 
 export const StandardModal: React.FC<StandardModalProps> = ({
@@ -70,8 +72,8 @@ export const StandardModal: React.FC<StandardModalProps> = ({
   animationType = ANIMATION.SLIDE,
   fullScreen = false,
   headerColor,
+  closeButtonLabel,
 }) => {
-  const { t } = useTranslation();
   const { colors, isDark } = useTheme();
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
 
@@ -82,7 +84,7 @@ export const StandardModal: React.FC<StandardModalProps> = ({
   const isMobile = windowWidth < designTokens.breakpoints.tablet;
 
   // Calculate responsive modal width
-  const getModalWidth = () => {
+  const getModalWidth = (): number => {
     if (windowWidth > designTokens.breakpoints.desktop) {
       // Desktop large screens
       return Math.min(
@@ -102,7 +104,7 @@ export const StandardModal: React.FC<StandardModalProps> = ({
   };
 
   // Calculate responsive max height
-  const getMaxHeight = () => {
+  const getMaxHeight = (): number => {
     if (typeof maxHeight === 'string' && maxHeight.includes(MODAL_CONFIG.PERCENTAGE_SYMBOL)) {
       const percentage = parseFloat(maxHeight) / MODAL_CONFIG.PERCENTAGE_DIVISOR;
       return windowHeight * percentage;
@@ -191,9 +193,9 @@ export const StandardModal: React.FC<StandardModalProps> = ({
                 <TouchableOpacity
                   onPress={onClose}
                   style={styles.closeButton}
-                  accessible={true}
+                  accessible
                   accessibilityRole={A11Y_ROLE.BUTTON}
-                  accessibilityLabel={t('accessibility.closeModal')}
+                  accessibilityLabel={closeButtonLabel}
                 >
                   <MaterialCommunityIcons
                     name={ICONS.CLOSE}
@@ -250,14 +252,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: designTokens.spacing.none,
   },
   modalContent: {
-    ...designTokens.shadow.xl,
+    ...designTokens.shadows.xl,
   },
   modalContentDesktop: {
-    borderRadius: designTokens.borderRadius.xxl,
+    borderRadius: designTokens.borderRadius['2xl'],
   },
   modalContentMobile: {
-    borderTopLeftRadius: designTokens.borderRadius.xxl,
-    borderTopRightRadius: designTokens.borderRadius.xxl,
+    borderTopLeftRadius: designTokens.borderRadius['2xl'],
+    borderTopRightRadius: designTokens.borderRadius['2xl'],
     borderBottomLeftRadius: borderValues.radius.none,
     borderBottomRightRadius: borderValues.radius.none,
   },
@@ -286,7 +288,7 @@ const styles = StyleSheet.create({
   iconContainer: {
     width: designTokens.touchTarget.comfortable,
     height: designTokens.touchTarget.comfortable,
-    borderRadius: designTokens.touchTarget.comfortable / 2,
+    borderRadius: designTokens.touchTarget.comfortable / MATH.HALF,
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
     marginRight: designTokens.spacing.md,

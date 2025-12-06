@@ -11,6 +11,7 @@ import { designTokens } from '../theme/designTokens';
 import { mobileTypography, mobileFontSizes } from '../theme/mobileTypography';
 import { layoutConstants } from '../theme';
 import { flexValues } from '../constants';
+import { SPACING } from '../constants/numbers';
 
 interface SectionHeaderProps {
   title: string;
@@ -65,7 +66,7 @@ const styles = StyleSheet.create({
     paddingVertical: designTokens.spacing.xs,
     borderRadius: designTokens.borderRadius.full,
     minWidth: designTokens.spacing.xxl,
-    height: 24,
+    height: SPACING.LG,
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
   },

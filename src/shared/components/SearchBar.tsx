@@ -7,7 +7,6 @@
 import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { mobileTypography, designTokens, layoutConstants } from '../theme';
 import { A11Y_ROLE, EMPTY_VALUE, ICONS, flexValues } from '../constants';
@@ -20,6 +19,14 @@ interface SearchBarProps {
   filterActive?: boolean;
   style?: ViewStyle;
   testID?: string;
+  /** Accessibility label for search input (pass translated string from screen) */
+  searchAccessibilityLabel?: string;
+  /** Accessibility label for filter button (pass translated string from screen) */
+  filterAccessibilityLabel?: string;
+  /** Accessibility label for clear button (pass translated string from screen) */
+  clearAccessibilityLabel?: string;
+  /** Label text for filter button (pass translated string from screen) */
+  filterLabel?: string;
 }
 
 export const SearchBar: React.FC<SearchBarProps> = ({
@@ -30,10 +37,13 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   filterActive = false,
   style,
   testID,
+  searchAccessibilityLabel,
+  filterAccessibilityLabel,
+  clearAccessibilityLabel,
+  filterLabel,
 }) => {
-  const { t } = useTranslation();
   const { colors } = useTheme();
-  const displayPlaceholder = placeholder || t('placeholders.search');
+  const displayPlaceholder = placeholder || '';
 
   return (
     <View
@@ -57,16 +67,16 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           value={value}
           onChangeText={onChangeText}
           placeholderTextColor={colors.textTertiary}
-          accessible={true}
-          accessibilityLabel={t('accessibility.search')}
+          accessible
+          accessibilityLabel={searchAccessibilityLabel}
           accessibilityHint={displayPlaceholder}
         />
         {value.length > 0 && (
           <TouchableOpacity
             onPress={() => onChangeText(EMPTY_VALUE)}
-            accessible={true}
+            accessible
             accessibilityRole={A11Y_ROLE.BUTTON}
-            accessibilityLabel={t('placeholders.search')}
+            accessibilityLabel={clearAccessibilityLabel}
           >
             <MaterialCommunityIcons
               name={ICONS.CLOSE_CIRCLE}
@@ -82,9 +92,9 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         <TouchableOpacity
           style={[styles.filterButton, { backgroundColor: colors.primaryAlpha10 }]}
           onPress={onFilterPress}
-          accessible={true}
+          accessible
           accessibilityRole={A11Y_ROLE.BUTTON}
-          accessibilityLabel={t('accessibility.filter')}
+          accessibilityLabel={filterAccessibilityLabel}
           accessibilityState={{ selected: filterActive }}
         >
           <MaterialCommunityIcons
@@ -92,9 +102,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             size={designTokens.icon.sizes.md}
             color={colors.primary}
           />
-          <Text style={[styles.filterButtonText, { color: colors.primary }]}>
-            {t('accessibility.filter')}
-          </Text>
+          <Text style={[styles.filterButtonText, { color: colors.primary }]}>{filterLabel}</Text>
           {filterActive && <View style={[styles.filterBadge, { backgroundColor: colors.error }]} />}
         </TouchableOpacity>
       )}
