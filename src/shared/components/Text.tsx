@@ -24,6 +24,7 @@ import {
 import { useTheme } from '../../contexts/ThemeContext';
 import { semanticTypography } from '../theme/tokens/semantic';
 import { typographyPrimitives } from '../theme/tokens/primitives';
+import { HEADING_LEVEL } from '../constants/components';
 
 // ============================================================================
 // TYPES
@@ -278,11 +279,8 @@ export const Text: React.FC<TextProps> = ({
 // ============================================================================
 
 /** Heading text - use for section titles */
-// Heading levels are semantic HTML heading levels (h1-h4)
-/* eslint-disable no-magic-numbers */
-type HeadingLevel = 1 | 2 | 3 | 4;
-const DEFAULT_HEADING_LEVEL = 2 as HeadingLevel;
-/* eslint-enable no-magic-numbers */
+type HeadingLevel = (typeof HEADING_LEVEL)[keyof typeof HEADING_LEVEL];
+const DEFAULT_HEADING_LEVEL: HeadingLevel = HEADING_LEVEL.H2;
 export const Heading: React.FC<Omit<TextProps, 'variant'> & { level?: HeadingLevel }> = ({
   level = DEFAULT_HEADING_LEVEL,
   ...props

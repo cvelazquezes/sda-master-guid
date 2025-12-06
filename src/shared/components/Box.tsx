@@ -4,9 +4,6 @@
  * Themed View wrapper that provides background colors from the theme.
  * Use this instead of raw View when you need theme-aware backgrounds.
  *
- * ❌ <View style={{ backgroundColor: colors.surface }}>
- * ✅ <Box bg="surface">
- *
  * @example
  * <Box bg="surface" padding="md" radius="lg">
  *   <Text>Content</Text>
@@ -26,51 +23,28 @@ import {
 } from '../types/theme';
 
 export interface BoxProps {
-  /** Children elements */
   children?: ReactNode;
-  /** Background color from theme */
   bg?: BackgroundColor;
-  /** Padding (all sides) */
   padding?: SpacingKey;
-  /** Padding horizontal */
   paddingX?: SpacingKey;
-  /** Padding vertical */
   paddingY?: SpacingKey;
-  /** Padding top */
   paddingTop?: SpacingKey;
-  /** Padding bottom */
   paddingBottom?: SpacingKey;
-  /** Padding left */
   paddingLeft?: SpacingKey;
-  /** Padding right */
   paddingRight?: SpacingKey;
-  /** Margin (all sides) */
   margin?: SpacingKey;
-  /** Margin horizontal */
   marginX?: SpacingKey;
-  /** Margin vertical */
   marginY?: SpacingKey;
-  /** Margin top */
   marginTop?: SpacingKey;
-  /** Margin bottom */
   marginBottom?: SpacingKey;
-  /** Margin left */
   marginLeft?: SpacingKey;
-  /** Margin right */
   marginRight?: SpacingKey;
-  /** Border radius */
   radius?: RadiusKey;
-  /** Border width */
   borderWidth?: BorderWidthKey;
-  /** Border color from theme */
   borderColor?: BorderColor;
-  /** Gap between children (for flex containers) */
   gap?: SpacingKey;
-  /** Flex direction */
   direction?: 'row' | 'column' | 'row-reverse' | 'column-reverse';
-  /** Align items */
   align?: 'flex-start' | 'flex-end' | 'center' | 'stretch' | 'baseline';
-  /** Justify content */
   justify?:
     | 'flex-start'
     | 'flex-end'
@@ -78,125 +52,98 @@ export interface BoxProps {
     | 'space-between'
     | 'space-around'
     | 'space-evenly';
-  /** Flex value */
   flex?: number;
-  /** Flex wrap */
   wrap?: 'wrap' | 'nowrap' | 'wrap-reverse';
-  /** Additional styles (use sparingly - prefer props) */
   style?: StyleProp<ViewStyle>;
-  /** Test ID */
   testID?: string;
-  /** Accessibility label */
   accessibilityLabel?: string;
 }
 
-// ============================================================================
-// COMPONENT
-// ============================================================================
+interface PaddingProps {
+  padding?: SpacingKey;
+  paddingX?: SpacingKey;
+  paddingY?: SpacingKey;
+  paddingTop?: SpacingKey;
+  paddingBottom?: SpacingKey;
+  paddingLeft?: SpacingKey;
+  paddingRight?: SpacingKey;
+}
 
-// eslint-disable-next-line complexity -- Box component requires many conditional style props for flexibility
-export const Box: React.FC<BoxProps> = ({
-  children,
-  bg,
-  padding,
-  paddingX,
-  paddingY,
-  paddingTop,
-  paddingBottom,
-  paddingLeft,
-  paddingRight,
-  margin,
-  marginX,
-  marginY,
-  marginTop,
-  marginBottom,
-  marginLeft,
-  marginRight,
-  radius,
-  borderWidth,
-  borderColor,
-  gap,
-  direction,
-  align,
-  justify,
-  flex,
-  wrap,
-  style,
-  testID,
-  accessibilityLabel,
-}) => {
-  // Use centralized theme color hook
+interface MarginProps {
+  margin?: SpacingKey;
+  marginX?: SpacingKey;
+  marginY?: SpacingKey;
+  marginTop?: SpacingKey;
+  marginBottom?: SpacingKey;
+  marginLeft?: SpacingKey;
+  marginRight?: SpacingKey;
+}
+
+function buildPaddingStyle(p: PaddingProps): ViewStyle {
+  return {
+    ...(p.padding !== undefined && { padding: designTokens.spacing[p.padding] }),
+    ...(p.paddingX !== undefined && { paddingHorizontal: designTokens.spacing[p.paddingX] }),
+    ...(p.paddingY !== undefined && { paddingVertical: designTokens.spacing[p.paddingY] }),
+    ...(p.paddingTop !== undefined && { paddingTop: designTokens.spacing[p.paddingTop] }),
+    ...(p.paddingBottom !== undefined && { paddingBottom: designTokens.spacing[p.paddingBottom] }),
+    ...(p.paddingLeft !== undefined && { paddingLeft: designTokens.spacing[p.paddingLeft] }),
+    ...(p.paddingRight !== undefined && { paddingRight: designTokens.spacing[p.paddingRight] }),
+  };
+}
+
+function buildMarginStyle(m: MarginProps): ViewStyle {
+  return {
+    ...(m.margin !== undefined && { margin: designTokens.spacing[m.margin] }),
+    ...(m.marginX !== undefined && { marginHorizontal: designTokens.spacing[m.marginX] }),
+    ...(m.marginY !== undefined && { marginVertical: designTokens.spacing[m.marginY] }),
+    ...(m.marginTop !== undefined && { marginTop: designTokens.spacing[m.marginTop] }),
+    ...(m.marginBottom !== undefined && { marginBottom: designTokens.spacing[m.marginBottom] }),
+    ...(m.marginLeft !== undefined && { marginLeft: designTokens.spacing[m.marginLeft] }),
+    ...(m.marginRight !== undefined && { marginRight: designTokens.spacing[m.marginRight] }),
+  };
+}
+
+interface LayoutStyleProps {
+  gap?: SpacingKey;
+  direction?: BoxProps['direction'];
+  align?: BoxProps['align'];
+  justify?: BoxProps['justify'];
+  flex?: number;
+  wrap?: BoxProps['wrap'];
+}
+
+function buildLayoutStyle(props: LayoutStyleProps): ViewStyle {
+  const { gap, direction, align, justify, flex, wrap } = props;
+  return {
+    ...(gap !== undefined && { gap: designTokens.spacing[gap] }),
+    ...(direction && { flexDirection: direction }),
+    ...(align && { alignItems: align }),
+    ...(justify && { justifyContent: justify }),
+    ...(flex !== undefined && { flex }),
+    ...(wrap && { flexWrap: wrap }),
+  };
+}
+
+export const Box: React.FC<BoxProps> = (props) => {
+  const { children, bg, radius, borderWidth, borderColor, style, testID, accessibilityLabel } =
+    props;
   const { getBackgroundColor, getBorderColor } = useThemeColor();
 
-  // Build computed style (memoized for performance)
-  const computedStyle = useMemo<ViewStyle>(
-    // eslint-disable-next-line complexity -- Style object requires many conditional props
-    () => ({
-      // Background
+  const computedStyle = useMemo<ViewStyle>(() => {
+    const paddingStyle = buildPaddingStyle(props);
+    const marginStyle = buildMarginStyle(props);
+    const layoutStyle = buildLayoutStyle(props);
+    return {
       ...(bg && { backgroundColor: getBackgroundColor(bg) }),
-
-      // Padding
-      ...(padding !== undefined && { padding: designTokens.spacing[padding] }),
-      ...(paddingX !== undefined && { paddingHorizontal: designTokens.spacing[paddingX] }),
-      ...(paddingY !== undefined && { paddingVertical: designTokens.spacing[paddingY] }),
-      ...(paddingTop !== undefined && { paddingTop: designTokens.spacing[paddingTop] }),
-      ...(paddingBottom !== undefined && { paddingBottom: designTokens.spacing[paddingBottom] }),
-      ...(paddingLeft !== undefined && { paddingLeft: designTokens.spacing[paddingLeft] }),
-      ...(paddingRight !== undefined && { paddingRight: designTokens.spacing[paddingRight] }),
-
-      // Margin
-      ...(margin !== undefined && { margin: designTokens.spacing[margin] }),
-      ...(marginX !== undefined && { marginHorizontal: designTokens.spacing[marginX] }),
-      ...(marginY !== undefined && { marginVertical: designTokens.spacing[marginY] }),
-      ...(marginTop !== undefined && { marginTop: designTokens.spacing[marginTop] }),
-      ...(marginBottom !== undefined && { marginBottom: designTokens.spacing[marginBottom] }),
-      ...(marginLeft !== undefined && { marginLeft: designTokens.spacing[marginLeft] }),
-      ...(marginRight !== undefined && { marginRight: designTokens.spacing[marginRight] }),
-
-      // Border
+      ...paddingStyle,
+      ...marginStyle,
       ...(radius !== undefined && { borderRadius: designTokens.borderRadius[radius] }),
       ...(borderWidth !== undefined && { borderWidth: designTokens.borderWidth[borderWidth] }),
       ...(borderColor && { borderColor: getBorderColor(borderColor) }),
+      ...layoutStyle,
+    };
+  }, [props, bg, radius, borderWidth, borderColor, getBackgroundColor, getBorderColor]);
 
-      // Layout
-      ...(gap !== undefined && { gap: designTokens.spacing[gap] }),
-      ...(direction && { flexDirection: direction }),
-      ...(align && { alignItems: align }),
-      ...(justify && { justifyContent: justify }),
-      ...(flex !== undefined && { flex }),
-      ...(wrap && { flexWrap: wrap }),
-    }),
-    [
-      bg,
-      padding,
-      paddingX,
-      paddingY,
-      paddingTop,
-      paddingBottom,
-      paddingLeft,
-      paddingRight,
-      margin,
-      marginX,
-      marginY,
-      marginTop,
-      marginBottom,
-      marginLeft,
-      marginRight,
-      radius,
-      borderWidth,
-      borderColor,
-      gap,
-      direction,
-      align,
-      justify,
-      flex,
-      wrap,
-      getBackgroundColor,
-      getBorderColor,
-    ]
-  );
-
-  // Flatten style prop
   const flattenedStyle = style ? StyleSheet.flatten(style) : undefined;
 
   return (

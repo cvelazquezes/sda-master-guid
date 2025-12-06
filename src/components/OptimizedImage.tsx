@@ -132,6 +132,19 @@ interface OptimizedImageProps {
   accessibilityLabel?: string;
 }
 
+// Helper functions to reduce component complexity
+function getImageSource(
+  error: boolean,
+  fallbackSource: ImageSourcePropType | undefined,
+  source: ImageSourcePropType | { uri: string }
+): ImageSourcePropType | { uri: string } {
+  return error && fallbackSource ? fallbackSource : source;
+}
+
+function getLoadingBgColor(isDark: boolean): string {
+  return isDark ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.8)';
+}
+
 /**
  * Optimized Image Component
  *
@@ -148,7 +161,6 @@ interface OptimizedImageProps {
  * />
  * ```
  */
-// eslint-disable-next-line complexity -- Image component requires handling multiple loading states and source types
 export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   source,
   fallbackSource,
@@ -181,28 +193,26 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     onError?.();
   };
 
-  // Determine which source to use
-  const imageSource = error && fallbackSource ? fallbackSource : source;
-
-  // Loading container background based on theme
-  const loadingBgColor = isDark ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.8)';
+  // Computed values to reduce component complexity
+  const imageSource = getImageSource(error, fallbackSource, source);
+  const loadingBgColor = getLoadingBgColor(isDark);
+  const computedBlurRadius = loading && blurRadius ? blurRadius : undefined;
+  const showPlaceholder = Boolean(placeholderSource && loading);
+  const showLoadingIndicator = loading && showLoading;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.border }, containerStyle]}>
-      {/* Placeholder image */}
-      {placeholderSource && loading && (
+      {showPlaceholder && (
         <Image
           source={placeholderSource}
           style={[styles.placeholder, style]}
           resizeMode={resizeMode}
         />
       )}
-
-      {/* Main image */}
       <Image
         source={imageSource}
         style={[styles.image, style, { opacity: imageOpacity }]}
-        blurRadius={loading && blurRadius ? blurRadius : undefined}
+        blurRadius={computedBlurRadius}
         resizeMode={resizeMode}
         onLoad={handleLoad}
         onError={handleError}
@@ -210,9 +220,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         accessibilityLabel={accessibilityLabel || 'Image'}
         accessibilityRole="image"
       />
-
-      {/* Loading indicator */}
-      {loading && showLoading && (
+      {showLoadingIndicator && (
         <View style={[styles.loadingContainer, { backgroundColor: loadingBgColor }]}>
           <ActivityIndicator size={ACTIVITY_INDICATOR_SIZE.small} color={colors.primary} />
         </View>
