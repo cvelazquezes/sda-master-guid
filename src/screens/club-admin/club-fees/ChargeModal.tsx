@@ -267,8 +267,12 @@ function MemberItem({
   isSelected: boolean;
   onToggle: () => void;
 }): React.JSX.Element {
+  const { colors } = useTheme();
   const itemStyle = [modalStyles.memberItem, isSelected && modalStyles.memberItemSelected];
-  const checkboxStyle = [modalStyles.checkbox, isSelected && modalStyles.checkboxSelected];
+  const checkboxStyle = [
+    modalStyles.checkbox,
+    isSelected && [modalStyles.checkboxSelected, { backgroundColor: colors.primary }],
+  ];
   return (
     <TouchableOpacity
       key={member.id}
@@ -282,13 +286,17 @@ function MemberItem({
             <MaterialCommunityIcons
               name={ICONS.CHECK}
               size={designTokens.iconSize.sm}
-              color={designTokens.colors.white}
+              color={colors.textOnPrimary}
             />
           )}
         </View>
         <View style={modalStyles.memberItemInfo}>
-          <Text style={modalStyles.memberItemName}>{member.name}</Text>
-          <Text style={modalStyles.memberItemEmail}>{member.email}</Text>
+          <Text variant="body" weight="semibold">
+            {member.name}
+          </Text>
+          <Text variant="caption" color="secondary">
+            {member.email}
+          </Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -359,6 +367,7 @@ interface ModalFooterProps {
 }
 
 function ModalFooter({ onClose, onCreate, t }: ModalFooterProps): React.JSX.Element {
+  const { colors } = useTheme();
   return (
     <View style={modalStyles.footer}>
       <TouchableOpacity
@@ -366,19 +375,23 @@ function ModalFooter({ onClose, onCreate, t }: ModalFooterProps): React.JSX.Elem
         onPress={onClose}
         activeOpacity={TOUCH_OPACITY.default}
       >
-        <Text style={modalStyles.cancelText}>{t('common.cancel')}</Text>
+        <Text variant="body" weight="semibold" color="secondary">
+          {t('common.cancel')}
+        </Text>
       </TouchableOpacity>
       <TouchableOpacity
-        style={modalStyles.createButton}
+        style={[modalStyles.createButton, { backgroundColor: colors.primary }]}
         onPress={onCreate}
         activeOpacity={TOUCH_OPACITY.light}
       >
         <MaterialCommunityIcons
           name={ICONS.PLUS_CIRCLE}
           size={designTokens.iconSize.md}
-          color={designTokens.colors.white}
+          color={colors.textOnPrimary}
         />
-        <Text style={modalStyles.createText}>{t('screens.clubFees.createCharge')}</Text>
+        <Text variant="body" weight="semibold" color="onPrimary">
+          {t('screens.clubFees.createCharge')}
+        </Text>
       </TouchableOpacity>
     </View>
   );

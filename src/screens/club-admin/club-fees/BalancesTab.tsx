@@ -62,19 +62,34 @@ interface BalancesHeaderProps {
 }
 
 function BalancesHeader({ count, onNotifyAll, t }: BalancesHeaderProps): React.JSX.Element {
+  const { colors } = useTheme();
   return (
-    <View style={balanceStyles.header}>
+    <View
+      style={[
+        balanceStyles.header,
+        { backgroundColor: colors.surface, borderBottomColor: colors.border },
+      ]}
+    >
       <View>
-        <Text style={balanceStyles.title}>{t('screens.clubFees.memberBalances')}</Text>
-        <Text style={balanceStyles.subtitle}>{t('screens.clubFees.membersCount', { count })}</Text>
+        <Text variant="h3" color="primary">
+          {t('screens.clubFees.memberBalances')}
+        </Text>
+        <Text variant="caption" color="secondary">
+          {t('screens.clubFees.membersCount', { count })}
+        </Text>
       </View>
-      <TouchableOpacity style={balanceStyles.notifyAllButton} onPress={onNotifyAll}>
+      <TouchableOpacity
+        style={[balanceStyles.notifyAllButton, { backgroundColor: colors.primary }]}
+        onPress={onNotifyAll}
+      >
         <MaterialCommunityIcons
           name={ICONS.BELL_RING_OUTLINE}
           size={designTokens.iconSize.md}
-          color={designTokens.colors.white}
+          color={colors.textOnPrimary}
         />
-        <Text style={balanceStyles.notifyAllButtonText}>{t('screens.clubFees.notifyAll')}</Text>
+        <Text variant="label" weight="semibold" color="onPrimary">
+          {t('screens.clubFees.notifyAll')}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -110,11 +125,17 @@ function CardHeader({
     <View style={balanceStyles.cardHeader}>
       <View style={balanceStyles.memberInfo}>
         <View style={[balanceStyles.avatar, { backgroundColor: statusColor }]}>
-          <Text style={balanceStyles.avatarText}>{member.name.charAt(0).toUpperCase()}</Text>
+          <Text variant="h3" color="onPrimary">
+            {member.name.charAt(0).toUpperCase()}
+          </Text>
         </View>
         <View style={balanceStyles.memberTextInfo}>
-          <Text style={balanceStyles.name}>{member.name}</Text>
-          <Text style={balanceStyles.email}>{member.email}</Text>
+          <Text variant="body" weight="semibold">
+            {member.name}
+          </Text>
+          <Text variant="caption" color="secondary">
+            {member.email}
+          </Text>
         </View>
       </View>
       <TouchableOpacity style={balanceStyles.notifyButton} onPress={onPress}>
@@ -144,7 +165,7 @@ function BalanceCard({
         : EMPTY_VALUE;
 
   return (
-    <View style={balanceStyles.card}>
+    <View style={[balanceStyles.card, { backgroundColor: colors.surface }]}>
       <CardHeader
         member={member}
         statusColor={statusColor}
@@ -153,31 +174,39 @@ function BalanceCard({
       />
       <View style={balanceStyles.details}>
         <View style={balanceStyles.row}>
-          <Text style={balanceStyles.label}>{t('screens.clubFees.totalOwed')}</Text>
-          <Text style={balanceStyles.value}>
+          <Text variant="bodySmall" color="secondary">
+            {t('screens.clubFees.totalOwed')}
+          </Text>
+          <Text variant="body" weight="semibold">
             ${balance.totalOwed.toFixed(NUMERIC.DECIMAL_PLACES)}
           </Text>
         </View>
         <View style={balanceStyles.row}>
-          <Text style={balanceStyles.label}>{t('screens.clubFees.totalPaid')}</Text>
-          <Text style={[balanceStyles.value, { color: colors.success }]}>
+          <Text variant="bodySmall" color="secondary">
+            {t('screens.clubFees.totalPaid')}
+          </Text>
+          <Text variant="body" weight="semibold" style={{ color: colors.success }}>
             ${balance.totalPaid.toFixed(NUMERIC.DECIMAL_PLACES)}
           </Text>
         </View>
-        <View style={[balanceStyles.row, balanceStyles.totalRow]}>
-          <Text style={balanceStyles.totalLabel}>{t('screens.clubFees.currentBalance')}</Text>
-          <Text style={[balanceStyles.totalValue, { color: statusColor }]}>
+        <View
+          style={[balanceStyles.row, balanceStyles.totalRow, { borderTopColor: colors.border }]}
+        >
+          <Text variant="body" weight="bold">
+            {t('screens.clubFees.currentBalance')}
+          </Text>
+          <Text variant="h3" style={{ color: statusColor }}>
             ${Math.abs(balance.balance).toFixed(NUMERIC.DECIMAL_PLACES)} {statusText}
           </Text>
         </View>
         {balance.overdueCharges > 0 && (
-          <View style={balanceStyles.overdueNotice}>
+          <View style={[balanceStyles.overdueNotice, { backgroundColor: colors.errorLight }]}>
             <MaterialCommunityIcons
               name={ICONS.ALERT_CIRCLE}
               size={designTokens.iconSize.sm}
               color={colors.error}
             />
-            <Text style={balanceStyles.overdueText}>
+            <Text variant="caption" weight="semibold" color="error">
               {t('screens.clubFees.overdueAmount', {
                 amount: balance.overdueCharges.toFixed(NUMERIC.DECIMAL_PLACES),
               })}
@@ -190,15 +219,20 @@ function BalanceCard({
 }
 
 function EmptyBalances({ t }: { t: (key: string) => string }): React.JSX.Element {
+  const { colors } = useTheme();
   return (
     <View style={emptyStyles.container}>
       <MaterialCommunityIcons
         name={ICONS.WALLET_OUTLINE}
         size={designTokens.iconSize['4xl']}
-        color={designTokens.colors.borderLight}
+        color={colors.border}
       />
-      <Text style={emptyStyles.text}>{t('screens.clubFees.noBalances')}</Text>
-      <Text style={emptyStyles.subtext}>{t('screens.clubFees.generateFeesToSeeBalances')}</Text>
+      <Text variant="body" weight="semibold" color="tertiary" align="center">
+        {t('screens.clubFees.noBalances')}
+      </Text>
+      <Text variant="bodySmall" color="tertiary" align="center" style={emptyStyles.subtext}>
+        {t('screens.clubFees.generateFeesToSeeBalances')}
+      </Text>
     </View>
   );
 }

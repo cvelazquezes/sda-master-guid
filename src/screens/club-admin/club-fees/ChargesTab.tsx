@@ -55,19 +55,29 @@ function ChargesHeader({
   onAddCharge: () => void;
   t: (key: string) => string;
 }): React.JSX.Element {
+  const { colors } = useTheme();
   return (
-    <View style={chargeStyles.header}>
+    <View style={[chargeStyles.header, { backgroundColor: colors.surface }]}>
       <View>
-        <Text style={chargeStyles.title}>{t('screens.clubFees.customCharges')}</Text>
-        <Text style={chargeStyles.subtitle}>{count} active charges</Text>
+        <Text variant="h3" color="primary">
+          {t('screens.clubFees.customCharges')}
+        </Text>
+        <Text variant="caption" color="secondary">
+          {count} active charges
+        </Text>
       </View>
-      <TouchableOpacity style={chargeStyles.addButton} onPress={onAddCharge}>
+      <TouchableOpacity
+        style={[chargeStyles.addButton, { backgroundColor: colors.primary }]}
+        onPress={onAddCharge}
+      >
         <MaterialCommunityIcons
           name={ICONS.PLUS}
           size={designTokens.iconSize.md}
-          color={designTokens.colors.white}
+          color={colors.textOnPrimary}
         />
-        <Text style={chargeStyles.addButtonText}>{t('screens.clubFees.newCharge')}</Text>
+        <Text variant="label" weight="semibold" color="onPrimary">
+          {t('screens.clubFees.newCharge')}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -89,10 +99,19 @@ function ChargeCard({
       : t('screens.clubFees.memberCount', { count: memberCount });
 
   return (
-    <View style={chargeStyles.card}>
+    <View
+      style={[
+        chargeStyles.card,
+        { backgroundColor: colors.surface, borderLeftColor: colors.primary },
+      ]}
+    >
       <View style={chargeStyles.cardHeader}>
-        <Text style={chargeStyles.description}>{charge.description}</Text>
-        <Text style={chargeStyles.amount}>${charge.amount.toFixed(NUMERIC.DECIMAL_PLACES)}</Text>
+        <Text variant="body" weight="semibold" style={chargeStyles.description}>
+          {charge.description}
+        </Text>
+        <Text variant="h3" style={{ color: colors.primary }}>
+          ${charge.amount.toFixed(NUMERIC.DECIMAL_PLACES)}
+        </Text>
       </View>
       <View style={chargeStyles.details}>
         <View style={chargeStyles.detailRow}>
@@ -101,7 +120,7 @@ function ChargeCard({
             size={designTokens.iconSize.sm}
             color={colors.textSecondary}
           />
-          <Text style={chargeStyles.detailText}>
+          <Text variant="bodySmall" color="secondary">
             Due: {new Date(charge.dueDate).toLocaleDateString()}
           </Text>
         </View>
@@ -111,7 +130,9 @@ function ChargeCard({
             size={designTokens.iconSize.sm}
             color={colors.textSecondary}
           />
-          <Text style={chargeStyles.detailText}>{memberText}</Text>
+          <Text variant="bodySmall" color="secondary">
+            {memberText}
+          </Text>
         </View>
       </View>
     </View>
@@ -119,15 +140,20 @@ function ChargeCard({
 }
 
 function EmptyCharges({ t }: { t: (key: string) => string }): React.JSX.Element {
+  const { colors } = useTheme();
   return (
     <View style={emptyStyles.container}>
       <MaterialCommunityIcons
         name={ICONS.FILE_DOCUMENT_OUTLINE}
         size={designTokens.iconSize['4xl']}
-        color={designTokens.colors.borderLight}
+        color={colors.border}
       />
-      <Text style={emptyStyles.text}>{t('screens.clubFees.noCustomCharges')}</Text>
-      <Text style={emptyStyles.subtext}>{t('screens.clubFees.createChargesDescription')}</Text>
+      <Text variant="body" weight="semibold" color="tertiary" align="center">
+        {t('screens.clubFees.noCustomCharges')}
+      </Text>
+      <Text variant="bodySmall" color="tertiary" align="center" style={emptyStyles.subtext}>
+        {t('screens.clubFees.createChargesDescription')}
+      </Text>
     </View>
   );
 }

@@ -2,6 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, Card } from '../../../shared/components';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { User, UserRole } from '../../../types';
 import { designTokens } from '../../../shared/theme';
 import { ICONS, COMPONENT_VARIANT } from '../../../shared/constants';
@@ -21,6 +22,7 @@ export function ProfileHeader({
   colors,
   t,
 }: ProfileHeaderProps): React.JSX.Element {
+  const { colors: themeColors } = useTheme();
   const roleColor = getRoleColor(user?.role, colors.primary);
   const cardStyle = [styles.profileCard, { backgroundColor: roleColor }];
 
@@ -29,8 +31,12 @@ export function ProfileHeader({
       <Card variant={COMPONENT_VARIANT.elevated} style={cardStyle}>
         <View style={styles.profileHeader}>
           <AvatarSection roleColor={roleColor} role={user?.role} />
-          <Text style={styles.userName}>{user?.name || t('roles.user')}</Text>
-          <Text style={styles.userEmail}>{user?.email || t('screens.account.defaultEmail')}</Text>
+          <Text variant="h2" style={{ color: themeColors.textOnPrimary }} align="center">
+            {user?.name || t('roles.user')}
+          </Text>
+          <Text variant="body" style={{ color: designTokens.overlay.lightStrong }} align="center">
+            {user?.email || t('screens.account.defaultEmail')}
+          </Text>
           <RoleBadge role={user?.role} t={t} />
           {user?.role !== UserRole.ADMIN && <StatsRow user={user} isActive={isActive} t={t} />}
         </View>
@@ -68,6 +74,7 @@ function RoleBadge({
   role: UserRole | undefined;
   t: (key: string) => string;
 }): React.JSX.Element {
+  const { colors: themeColors } = useTheme();
   return (
     <View style={styles.roleBadge}>
       <MaterialCommunityIcons
@@ -75,7 +82,9 @@ function RoleBadge({
         size={designTokens.iconSize.xs}
         color={designTokens.overlay.lightStrong}
       />
-      <Text style={styles.roleText}>{getRoleLabel(role, t)}</Text>
+      <Text variant="caption" weight="bold" style={{ color: themeColors.textOnPrimary }}>
+        {getRoleLabel(role, t)}
+      </Text>
     </View>
   );
 }

@@ -272,20 +272,25 @@ function ActionButtons({
   return (
     <View style={settingsStyles.actionButtonsContainer}>
       <TouchableOpacity
-        style={settingsStyles.primaryButton}
+        style={[settingsStyles.primaryButton, { backgroundColor: colors.primary }]}
         onPress={onSave}
         activeOpacity={TOUCH_OPACITY.light}
       >
         <MaterialCommunityIcons
           name={ICONS.CONTENT_SAVE}
           size={designTokens.iconSize.md}
-          color={designTokens.colors.white}
+          color={colors.textOnPrimary}
         />
-        <Text style={settingsStyles.primaryButtonText}>{t('screens.clubFees.saveSettings')}</Text>
+        <Text variant="body" weight="semibold" color="onPrimary">
+          {t('screens.clubFees.saveSettings')}
+        </Text>
       </TouchableOpacity>
       {feeSettingsActive && (
         <TouchableOpacity
-          style={settingsStyles.secondaryButton}
+          style={[
+            settingsStyles.secondaryButton,
+            { backgroundColor: colors.surface, borderColor: colors.primary },
+          ]}
           onPress={onGenerateFees}
           activeOpacity={TOUCH_OPACITY.light}
         >
@@ -294,7 +299,7 @@ function ActionButtons({
             size={designTokens.iconSize.md}
             color={colors.primary}
           />
-          <Text style={settingsStyles.secondaryButtonText}>
+          <Text variant="body" weight="semibold" style={{ color: colors.primary }}>
             {t('screens.clubFees.generateFeesCurrentYear')}
           </Text>
         </TouchableOpacity>
