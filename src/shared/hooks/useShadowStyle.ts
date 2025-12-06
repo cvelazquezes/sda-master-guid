@@ -16,6 +16,7 @@ import { ViewStyle, Platform } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { designTokens } from '../theme/designTokens';
 import { ShadowPreset } from '../types/theme';
+import { SHADOW_HEIGHT, SHADOW_BLUR, SHADOW_OPACITY, MODAL_ELEVATION } from '../constants/numbers';
 
 interface ShadowConfig {
   shadowColor: string;
@@ -24,30 +25,6 @@ interface ShadowConfig {
   shadowRadius: number;
   elevation: number;
 }
-
-/* eslint-disable no-magic-numbers */
-// Shadow constants - these are design tokens for shadow presets
-const SHADOW_OFFSET = {
-  subtle: 1,
-  card: 2,
-  elevated: 4,
-  modal: 8,
-} as const;
-
-const SHADOW_RADIUS = {
-  subtle: 2,
-  card: 4,
-  elevated: 8,
-  modal: 16,
-} as const;
-
-const SHADOW_OPACITY = {
-  modal_light: 0.25,
-  modal_dark: 0.5,
-} as const;
-
-const MODAL_ELEVATION = 24;
-/* eslint-enable no-magic-numbers */
 
 interface UseShadowStyleReturn {
   /** Get shadow style by preset name */
@@ -81,64 +58,64 @@ const SHADOW_PRESETS: Record<ShadowPreset, { light: ShadowConfig; dark: ShadowCo
   subtle: {
     light: {
       shadowColor: '#000000',
-      shadowOffset: { width: 0, height: SHADOW_OFFSET.subtle },
+      shadowOffset: { width: 0, height: SHADOW_HEIGHT.SUBTLE },
       shadowOpacity: designTokens.shadowConfig.lightSubtle.opacity,
-      shadowRadius: SHADOW_RADIUS.subtle,
+      shadowRadius: SHADOW_BLUR.SUBTLE,
       elevation: designTokens.shadowConfig.lightSubtle.elevation,
     },
     dark: {
       shadowColor: '#000000',
-      shadowOffset: { width: 0, height: SHADOW_OFFSET.subtle },
+      shadowOffset: { width: 0, height: SHADOW_HEIGHT.SUBTLE },
       shadowOpacity: designTokens.shadowConfig.darkSubtle.opacity,
-      shadowRadius: SHADOW_RADIUS.subtle,
+      shadowRadius: SHADOW_BLUR.SUBTLE,
       elevation: designTokens.shadowConfig.darkSubtle.elevation,
     },
   },
   card: {
     light: {
       shadowColor: '#000000',
-      shadowOffset: { width: 0, height: SHADOW_OFFSET.card },
+      shadowOffset: { width: 0, height: SHADOW_HEIGHT.CARD },
       shadowOpacity: designTokens.shadowConfig.light.opacity,
-      shadowRadius: SHADOW_RADIUS.card,
+      shadowRadius: SHADOW_BLUR.CARD,
       elevation: designTokens.shadowConfig.light.elevation,
     },
     dark: {
       shadowColor: '#000000',
-      shadowOffset: { width: 0, height: SHADOW_OFFSET.card },
+      shadowOffset: { width: 0, height: SHADOW_HEIGHT.CARD },
       shadowOpacity: designTokens.shadowConfig.dark.opacity,
-      shadowRadius: SHADOW_RADIUS.card,
+      shadowRadius: SHADOW_BLUR.CARD,
       elevation: designTokens.shadowConfig.dark.elevation,
     },
   },
   elevated: {
     light: {
       shadowColor: '#000000',
-      shadowOffset: { width: 0, height: SHADOW_OFFSET.elevated },
+      shadowOffset: { width: 0, height: SHADOW_HEIGHT.ELEVATED },
       shadowOpacity: designTokens.shadowConfig.lightStrong.opacity,
-      shadowRadius: SHADOW_RADIUS.elevated,
+      shadowRadius: SHADOW_BLUR.ELEVATED,
       elevation: designTokens.shadowConfig.lightStrong.elevation,
     },
     dark: {
       shadowColor: '#000000',
-      shadowOffset: { width: 0, height: SHADOW_OFFSET.elevated },
+      shadowOffset: { width: 0, height: SHADOW_HEIGHT.ELEVATED },
       shadowOpacity: designTokens.shadowConfig.darkStrong.opacity,
-      shadowRadius: SHADOW_RADIUS.elevated,
+      shadowRadius: SHADOW_BLUR.ELEVATED,
       elevation: designTokens.shadowConfig.darkStrong.elevation,
     },
   },
   modal: {
     light: {
       shadowColor: '#000000',
-      shadowOffset: { width: 0, height: SHADOW_OFFSET.modal },
-      shadowOpacity: SHADOW_OPACITY.modal_light,
-      shadowRadius: SHADOW_RADIUS.modal,
+      shadowOffset: { width: 0, height: SHADOW_HEIGHT.MODAL },
+      shadowOpacity: SHADOW_OPACITY.MODAL_LIGHT,
+      shadowRadius: SHADOW_BLUR.MODAL,
       elevation: MODAL_ELEVATION,
     },
     dark: {
       shadowColor: '#000000',
-      shadowOffset: { width: 0, height: SHADOW_OFFSET.modal },
-      shadowOpacity: SHADOW_OPACITY.modal_dark,
-      shadowRadius: SHADOW_RADIUS.modal,
+      shadowOffset: { width: 0, height: SHADOW_HEIGHT.MODAL },
+      shadowOpacity: SHADOW_OPACITY.MODAL_DARK,
+      shadowRadius: SHADOW_BLUR.MODAL,
       elevation: MODAL_ELEVATION,
     },
   },

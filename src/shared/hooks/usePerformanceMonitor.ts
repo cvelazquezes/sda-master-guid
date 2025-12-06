@@ -6,17 +6,15 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { InteractionManager } from 'react-native';
 import { logger } from '../utils/logger';
-import { MS, MATH, OPACITY_VALUE, LIST_LIMITS } from '../constants/numbers';
+import { MS, MATH, OPACITY_VALUE, LIST_LIMITS, FPS } from '../constants/numbers';
 
 // Performance thresholds
-/* eslint-disable no-magic-numbers -- Performance metric thresholds */
 const PERF_THRESHOLD = {
-  TARGET_FPS: 60,
-  LOW_FPS_WARNING: 55,
+  TARGET_FPS: FPS.TARGET,
+  LOW_FPS_WARNING: FPS.LOW_WARNING,
   MEMORY_WARNING_RATIO: OPACITY_VALUE.NEAR_FULL, // 0.9
   EXCESSIVE_RENDERS: LIST_LIMITS.MAX_DROPDOWN_ITEMS, // 50
 } as const;
-/* eslint-enable no-magic-numbers */
 
 // ============================================================================
 // Types
@@ -117,11 +115,12 @@ export function usePerformanceMonitor(
     // Measure time to interactive
     const interactionHandle = InteractionManager.runAfterInteractions(() => {
       const tti = performance.now() - startTime;
+      const mountTime = performance.now() - startTime;
 
       setMetrics((prev) => ({
         ...prev,
         tti,
-        mountTime: performance.now() - startTime,
+        mountTime,
       }));
 
       // Check against budget
@@ -134,10 +133,10 @@ export function usePerformanceMonitor(
         });
       }
 
-      if (budget?.maxMountTime && metrics.mountTime > budget.maxMountTime) {
+      if (budget?.maxMountTime && mountTime > budget.maxMountTime) {
         logger.warn('Performance budget exceeded: Mount Time', {
           component: componentName,
-          mountTime: metrics.mountTime,
+          mountTime,
           budget: budget.maxMountTime,
         });
       }
@@ -146,8 +145,6 @@ export function usePerformanceMonitor(
     return () => {
       interactionHandle.cancel();
     };
-    // Note: metrics.mountTime is intentionally not in deps to avoid re-running
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [componentName, budget]);
 
   // Track renders - intentionally runs on every render
@@ -177,7 +174,6 @@ export function usePerformanceMonitor(
     // Record start time for next render
     lastRenderTimeRef.current = performance.now();
     // Intentionally no deps - this runs on every render to track performance
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [budget?.maxRenderTime, componentName]);
 
   return metrics;
