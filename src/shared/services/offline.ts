@@ -8,7 +8,7 @@ import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { logger } from '../utils/logger';
 import { addBreadcrumb } from './sentry';
-import { TIMING } from '../constants';
+import { POLLING } from '../constants/timing';
 import { LIST_LIMITS, ID_GENERATION } from '../constants/numbers';
 
 // ============================================================================
@@ -377,7 +377,7 @@ export function useOfflineStats(): OfflineQueueStats {
     // Periodic updates
     const interval = setInterval(() => {
       setStats(offlineService.getStats());
-    }, TIMING.POLLING.FAST);
+    }, POLLING.FAST);
 
     return () => {
       unsubscribe();

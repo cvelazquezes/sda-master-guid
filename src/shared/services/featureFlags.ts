@@ -129,8 +129,8 @@ class FeatureFlagsService {
       // Admin features
       enableAdminDebugTools: {
         key: 'enableAdminDebugTools',
-        value: environment.env === 'development',
-        enabled: environment.env === 'development',
+        value: environment.name === 'development',
+        enabled: environment.name === 'development',
         userGroups: ['super_admin'],
       },
     };

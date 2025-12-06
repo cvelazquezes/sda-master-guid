@@ -37,11 +37,11 @@ export function initializeSentry(): void {
   try {
     Sentry.init({
       dsn: environment.sentry.dsn,
-      environment: environment.env,
+      environment: environment.name,
 
       // Performance Monitoring
       tracesSampleRate:
-        environment.env === 'production'
+        environment.name === 'production'
           ? SENTRY_CONFIG.PRODUCTION_SAMPLE_RATE
           : OPACITY_VALUE.FULL,
       enableTracing: true,
@@ -99,14 +99,14 @@ export function initializeSentry(): void {
           routingInstrumentation: Sentry.reactNavigationIntegration(),
           tracePropagationTargets: [
             'localhost',
-            environment.apiUrl,
+            environment.api.base,
             /^https:\/\/api\.example\.com/,
           ],
         }),
       ],
 
       // Debug mode in development
-      debug: environment.env === 'development',
+      debug: environment.name === 'development',
 
       // Attach stack traces
       attachStacktrace: true,

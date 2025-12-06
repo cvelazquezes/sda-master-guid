@@ -5,7 +5,7 @@
 
 import { logger } from '../utils/logger';
 import { environment } from '../config/environment';
-import { TIMING, TIMEOUT } from '../constants/timing';
+import { RETRY, TIMEOUT } from '../constants/timing';
 import { MATH } from '../constants/numbers';
 
 // ============================================================================
@@ -240,7 +240,7 @@ export function registerDefaultHealthChecks(): void {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), TIMEOUT.TOAST);
-      const response = await fetch(`${environment.apiUrl}/health`, {
+      const response = await fetch(`${environment.api.base}/health`, {
         method: 'GET',
         signal: controller.signal,
       });
@@ -267,7 +267,7 @@ export function registerDefaultHealthChecks(): void {
   healthCheckService.register('config', async () => {
     try {
       // Verify critical config is present
-      return !!(environment.apiUrl && environment.wsUrl && environment.env);
+      return !!(environment.api.base && environment.api.websocket && environment.name);
     } catch {
       return false;
     }
@@ -321,7 +321,7 @@ export function createHealthCheckWithRetry(
         }
 
         if (i < maxRetries) {
-          await new Promise((resolve) => setTimeout(resolve, TIMING.RETRY.FIRST));
+          await new Promise((resolve) => setTimeout(resolve, RETRY.FIRST));
         }
       } catch {
         if (i === maxRetries) {
@@ -334,6 +334,6 @@ export function createHealthCheckWithRetry(
 }
 
 // Auto-register default checks
-if (environment.apiUrl) {
+if (environment.api.base) {
   registerDefaultHealthChecks();
 }
