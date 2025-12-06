@@ -5,7 +5,8 @@
 
 import { logger } from '../../utils/logger';
 import { NetworkError, TimeoutError } from '../../utils/errors';
-import { BUSINESS_RULES } from '../../constants';
+import { RETRY_CONFIG } from '../../constants/validation';
+import { RETRYABLE_STATUS_CODES } from '../../constants/http';
 import { OPACITY_VALUE } from '../../constants/numbers';
 
 interface RetryOptions {
@@ -18,12 +19,12 @@ interface RetryOptions {
 }
 
 const DEFAULT_OPTIONS: RetryOptions = {
-  maxRetries: BUSINESS_RULES.MAX_RETRY_ATTEMPTS,
-  baseDelay: BUSINESS_RULES.RETRY_BASE_DELAY_MS,
-  maxDelay: BUSINESS_RULES.RETRY_MAX_DELAY_MS,
-  backoffMultiplier: BUSINESS_RULES.RETRY_BACKOFF_MULTIPLIER,
+  maxRetries: RETRY_CONFIG.MAX_ATTEMPTS,
+  baseDelay: RETRY_CONFIG.INITIAL_DELAY_MS,
+  maxDelay: RETRY_CONFIG.MAX_DELAY_MS,
+  backoffMultiplier: RETRY_CONFIG.BACKOFF_MULTIPLIER,
   jitter: true,
-  retryableStatuses: [...BUSINESS_RULES.RETRYABLE_HTTP_STATUSES],
+  retryableStatuses: [...RETRYABLE_STATUS_CODES],
 };
 
 export class RetryPolicy {
