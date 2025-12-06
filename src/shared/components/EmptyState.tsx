@@ -21,7 +21,7 @@ import { layoutConstants } from '../theme';
 import { StandardButton } from './StandardButton';
 import {
   A11Y_ROLE,
-  COMPONENT_SIZE,
+  BUTTON_SIZE,
   COMPONENT_VARIANT,
   ICONS,
   dimensionValues,
@@ -34,8 +34,6 @@ export interface EmptyStateProps {
   icon?: string;
   title: string;
   description?: string;
-  /** @deprecated Use description instead */
-  message?: string;
 
   // Action
   actionLabel?: string;
@@ -55,7 +53,6 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   icon = ICONS.INBOX_OUTLINE,
   title,
   description,
-  message,
   actionLabel,
   onAction,
   actionIcon,
@@ -66,15 +63,13 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 }) => {
   const { colors } = useTheme();
   const finalIconColor = iconColor || colors.textTertiary;
-  // Support both description and message props
-  const displayDescription = description || message;
 
   return (
     <View
       style={[styles.container, { backgroundColor: colors.surface }, style]}
       testID={testID}
       accessible
-      accessibilityLabel={`${title}${displayDescription ? `. ${displayDescription}` : ''}`}
+      accessibilityLabel={`${title}${description ? `. ${description}` : ''}`}
       accessibilityRole={A11Y_ROLE.TEXT}
     >
       {/* Icon */}
@@ -92,9 +87,9 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       </Text>
 
       {/* Description */}
-      {displayDescription && (
+      {description && (
         <Text variant="bodySmall" color="secondary" align="center" style={styles.description}>
-          {displayDescription}
+          {description}
         </Text>
       )}
 
@@ -109,7 +104,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
             onPress={onAction}
             icon={actionIcon}
             variant={COMPONENT_VARIANT.primary}
-            size={COMPONENT_SIZE.md}
+            size={BUTTON_SIZE.medium}
           />
         </View>
       )}
