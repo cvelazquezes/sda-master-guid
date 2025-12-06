@@ -3,7 +3,7 @@
  * Configures i18next for internationalization
  */
 
-import i18next from 'i18next';
+import i18next, { use, changeLanguage as i18nChangeLanguage } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { resources, Language } from './locales';
@@ -40,8 +40,7 @@ const languageDetector = {
   },
 };
 
-i18next
-  .use(languageDetector)
+use(languageDetector)
   .use(initReactI18next)
   .init({
     resources,
@@ -60,7 +59,7 @@ export default i18next;
 // Helper to change language
 export const changeLanguage = async (language: Language): Promise<void> => {
   try {
-    await i18next.changeLanguage(language);
+    await i18nChangeLanguage(language);
     await AsyncStorage.setItem(storageKeys.LANGUAGE, language);
   } catch (error) {
     logger.error(LOG_MESSAGES.I18N.CHANGE_ERROR, error as Error);
