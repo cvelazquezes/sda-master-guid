@@ -29,7 +29,9 @@
     "e2e:build:android": "detox build --configuration android.emu.debug",
     "e2e:test:android": "detox test --configuration android.emu.debug",
     "e2e:test": "detox test",
-    "e2e:test:record": "detox test --record-videos all"
+    "e2e:test:record": "detox test --record-videos all",
+    "storybook": "sb-rn-get-stories && expo start --port 7007",
+    "storybook:generate": "sb-rn-get-stories"
   },
   "dependencies": {
     "@expo/metro-runtime": "~3.2.3",
@@ -66,6 +68,9 @@
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",
+    "@storybook/addon-ondevice-actions": "^10.0.7",
+    "@storybook/addon-ondevice-controls": "^10.0.7",
+    "@storybook/react-native": "^10.0.7",
     "@testing-library/jest-native": "^5.4.3",
     "@testing-library/react-native": "^12.4.3",
     "@types/jest": "^29.5.12",
@@ -75,6 +80,10 @@
     "detox": "^20.13.0",
     "eslint": "^8.57.0",
     "eslint-config-expo": "^7.0.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "husky": "^9.0.10",

@@ -1,44 +1,91 @@
+/**
+ * ESLint Configuration
+ *
+ * This configuration enforces strict code quality standards.
+ * All rules are set to 'error' to ensure code compliance.
+ *
+ * Configuration is modularized in config/lint/ directory:
+ * - base.js: Core JavaScript rules
+ * - typescript.js: TypeScript-specific rules
+ * - react.js: React and React Hooks rules
+ * - imports.js: Import organization rules
+ * - overrides.js: File-specific rule overrides
+ */
+
+const {
+  baseRules,
+  typescriptRules,
+  reactRules,
+  importRules,
+  overridesConfig,
+} = require('./config/lint');
+
 module.exports = {
+  root: true,
+
+  // === EXTENDS ===
   extends: [
     'expo',
     'plugin:@typescript-eslint/recommended',
     'plugin:react/recommended',
     'plugin:react-hooks/recommended',
+    'plugin:import/errors',
+    'plugin:import/warnings',
+    'plugin:import/typescript',
+    'plugin:prettier/recommended', // Must be last
   ],
+
+  // === PARSER ===
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', 'react', 'react-hooks'],
-  rules: {
-    // Code Quality
-    'max-len': ['error', { code: 100, ignoreStrings: true, ignoreTemplateLiterals: true }],
-    'max-lines-per-function': ['warn', { max: 50, skipBlankLines: true, skipComments: true }],
-    'complexity': ['warn', 10],
-    'max-depth': ['error', 3],
-    
-    // TypeScript
-    '@typescript-eslint/no-explicit-any': 'error',
-    '@typescript-eslint/explicit-function-return-type': ['warn', {
-      allowExpressions: true,
-      allowTypedFunctionExpressions: true,
-    }],
-    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-    
-    // React
-    'react/prop-types': 'off',
-    'react-hooks/rules-of-hooks': 'error',
-    'react-hooks/exhaustive-deps': 'warn',
-    
-    // Console
-    'no-console': ['warn', { allow: ['warn', 'error'] }],
-    
-    // Best Practices
-    'no-magic-numbers': ['warn', { ignore: [0, 1, -1], ignoreArrayIndexes: true }],
-    'prefer-const': 'error',
-    'no-var': 'error',
+  parserOptions: {
+    ecmaVersion: 2022,
+    sourceType: 'module',
+    ecmaFeatures: {
+      jsx: true,
+    },
   },
+
+  // === PLUGINS ===
+  plugins: ['@typescript-eslint', 'react', 'react-hooks', 'import', 'prettier'],
+
+  // === SETTINGS ===
   settings: {
     react: {
       version: 'detect',
     },
+    'import/resolver': {
+      typescript: {
+        alwaysTryTypes: true,
+        project: './tsconfig.json',
+      },
+    },
   },
-};
 
+  // === RULES ===
+  rules: {
+    // Prettier integration
+    'prettier/prettier': 'error',
+
+    // Merge all modular rules
+    ...baseRules.rules,
+    ...typescriptRules.rules,
+    ...reactRules.rules,
+    ...importRules.rules,
+  },
+
+  // === OVERRIDES ===
+  ...overridesConfig,
+
+  // === IGNORED PATTERNS ===
+  ignorePatterns: [
+    'node_modules/',
+    'android/',
+    'ios/',
+    '.expo/',
+    'coverage/',
+    'dist/',
+    '*.config.js',
+    'babel.config.js',
+    'metro.config.js',
+  ],
+};
