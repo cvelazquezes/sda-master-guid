@@ -7,6 +7,7 @@ import { logger } from '../utils/logger';
 import { environment } from '../config/environment';
 import { RETRY, TIMEOUT } from '../constants/timing';
 import { MATH } from '../constants/numbers';
+import packageJson from '../../../package.json';
 
 // ============================================================================
 // Types
@@ -94,8 +95,7 @@ class HealthCheckService {
       timestamp: new Date().toISOString(),
       checks: results,
       uptime: Date.now() - this.startTime,
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      version: require('../../../package.json').version,
+      version: packageJson.version,
     };
   }
 
@@ -148,8 +148,7 @@ class HealthCheckService {
         timestamp: new Date().toISOString(),
         checks: [],
         uptime: Date.now() - this.startTime,
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        version: require('../../../package.json').version,
+        version: packageJson.version,
       };
     }
 
@@ -161,8 +160,7 @@ class HealthCheckService {
       timestamp: new Date().toISOString(),
       checks: results,
       uptime: Date.now() - this.startTime,
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      version: require('../../../package.json').version,
+      version: packageJson.version,
     };
   }
 
