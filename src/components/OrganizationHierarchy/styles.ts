@@ -4,18 +4,15 @@ import { dimensionValues } from '../../shared/constants';
 
 export const styles = StyleSheet.create({
   container: {
-    backgroundColor: designTokens.colors.backgroundPrimary,
     borderRadius: designTokens.borderRadius.md,
     overflow: layoutConstants.overflow.hidden,
     borderWidth: designTokens.borderWidth.thin,
-    borderColor: designTokens.colors.borderLight,
   },
   header: {
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
     justifyContent: layoutConstants.justifyContent.spaceBetween,
     padding: designTokens.spacing.lg,
-    backgroundColor: designTokens.colors.backgroundSecondary,
   },
   headerLeft: {
     flexDirection: layoutConstants.flexDirection.row,
@@ -25,7 +22,6 @@ export const styles = StyleSheet.create({
   title: {
     fontSize: mobileFontSizes.lg,
     fontWeight: designTokens.fontWeight.semibold,
-    color: designTokens.colors.primary,
   },
   content: {
     padding: designTokens.spacing.lg,
@@ -42,10 +38,8 @@ export const styles = StyleSheet.create({
   levelLabel: {
     fontSize: mobileFontSizes.sm,
     fontWeight: designTokens.fontWeight.semibold,
-    color: designTokens.colors.textPrimary,
   },
   levelBadge: {
-    backgroundColor: designTokens.colors.infoLight,
     paddingHorizontal: designTokens.spacing.sm,
     paddingVertical: designTokens.spacing.xxs,
     borderRadius: designTokens.borderRadius.lg,
@@ -53,11 +47,9 @@ export const styles = StyleSheet.create({
   levelBadgeText: {
     fontSize: mobileFontSizes.xs,
     fontWeight: designTokens.fontWeight.semibold,
-    color: designTokens.colors.info,
   },
   hierarchyValue: {
     fontSize: mobileFontSizes.md,
-    color: designTokens.colors.textSecondary,
     marginLeft: designTokens.spacing.xxl,
     fontWeight: designTokens.fontWeight.medium,
   },
@@ -70,7 +62,6 @@ export const styles = StyleSheet.create({
   compactItem: {
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
-    backgroundColor: designTokens.colors.borderLight,
     paddingHorizontal: designTokens.spacing.md,
     paddingVertical: designTokens.spacing.sm,
     borderRadius: designTokens.borderRadius.lg,
@@ -78,7 +69,6 @@ export const styles = StyleSheet.create({
   },
   compactText: {
     fontSize: mobileFontSizes.xs,
-    color: designTokens.colors.textSecondary,
     fontWeight: designTokens.fontWeight.medium,
     maxWidth: dimensionValues.maxWidth.label,
   },

@@ -4,6 +4,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Text } from '../../shared/components';
 import { designTokens } from '../../shared/theme';
+import { ThemeColors } from './types';
 import { styles } from './styles';
 
 interface HierarchyItemProps {
@@ -11,6 +12,7 @@ interface HierarchyItemProps {
   labelKey: string;
   badgeKey: string;
   value: string;
+  colors: ThemeColors;
 }
 
 export const HierarchyItem: React.FC<HierarchyItemProps> = ({
@@ -18,6 +20,7 @@ export const HierarchyItem: React.FC<HierarchyItemProps> = ({
   labelKey,
   badgeKey,
   value,
+  colors,
 }) => {
   const { t } = useTranslation();
 
@@ -27,14 +30,14 @@ export const HierarchyItem: React.FC<HierarchyItemProps> = ({
         <MaterialCommunityIcons
           name={icon as keyof typeof MaterialCommunityIcons.glyphMap}
           size={designTokens.iconSize.sm}
-          color={designTokens.colors.textSecondary}
+          color={colors.textSecondary}
         />
-        <Text style={styles.levelLabel}>{t(labelKey)}</Text>
-        <View style={styles.levelBadge}>
-          <Text style={styles.levelBadgeText}>{t(badgeKey)}</Text>
+        <Text style={[styles.levelLabel, { color: colors.textPrimary }]}>{t(labelKey)}</Text>
+        <View style={[styles.levelBadge, { backgroundColor: colors.infoLight }]}>
+          <Text style={[styles.levelBadgeText, { color: colors.info }]}>{t(badgeKey)}</Text>
         </View>
       </View>
-      <Text style={styles.hierarchyValue}>{value}</Text>
+      <Text style={[styles.hierarchyValue, { color: colors.textSecondary }]}>{value}</Text>
     </View>
   );
 };
