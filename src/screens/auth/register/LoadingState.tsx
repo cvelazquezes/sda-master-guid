@@ -3,7 +3,7 @@ import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from '../../../shared/components';
 import { mobileTypography, designTokens, layoutConstants } from '../../../shared/theme';
-import { ACTIVITY_INDICATOR_SIZE, SAFE_AREA_EDGES, flexValues } from '../../../shared/constants';
+import { ACTIVITY_INDICATOR_SIZE, SAFE_AREA_EDGES, FLEX } from '../../../shared/constants';
 
 interface LoadingStateProps {
   message: string;
@@ -25,11 +25,11 @@ export function LoadingState({ message }: LoadingStateProps): React.JSX.Element 
 
 const styles = StyleSheet.create({
   safeArea: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     backgroundColor: designTokens.colors.backgroundPrimary,
   },
   container: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
     backgroundColor: designTokens.colors.backgroundPrimary,

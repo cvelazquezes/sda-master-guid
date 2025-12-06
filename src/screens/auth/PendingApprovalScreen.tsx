@@ -12,9 +12,9 @@ import {
   ICONS,
   LOG_MESSAGES,
   SAFE_AREA_EDGES,
-  flexValues,
-  shadowOffsetValues,
-  typographyValues,
+  FLEX,
+  SHADOW_OFFSET,
+  TYPOGRAPHY,
 } from '../../shared/constants';
 import { SPACING, BORDER_WIDTH } from '../../shared/constants/numbers';
 
@@ -135,15 +135,15 @@ const PendingApprovalScreen = (): React.JSX.Element => {
 
 const styles = StyleSheet.create({
   safeArea: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     backgroundColor: designTokens.colors.backgroundSecondary,
   },
   container: {
-    flexGrow: 1,
+    flexGrow: FLEX.GROW_ENABLED,
     backgroundColor: designTokens.colors.backgroundSecondary,
   },
   content: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     padding: designTokens.spacing.xl,
     paddingTop: designTokens.spacing['6xl'],
   },
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     padding: designTokens.spacing.lg,
     marginBottom: designTokens.spacing.xl,
     shadowColor: designTokens.colors.textPrimary,
-    shadowOffset: shadowOffsetValues.md,
+    shadowOffset: SHADOW_OFFSET.MD,
     shadowOpacity: designTokens.shadows.md.shadowOpacity,
     shadowRadius: designTokens.shadows.sm.shadowRadius,
     elevation: designTokens.shadows.md.elevation,
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
   infoText: {
     fontSize: mobileFontSizes.lg,
     color: designTokens.colors.textPrimary,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   statusCard: {
     backgroundColor: designTokens.colors.backgroundPrimary,
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
     padding: designTokens.spacing.xl,
     marginBottom: designTokens.spacing.xl,
     shadowColor: designTokens.colors.textPrimary,
-    shadowOffset: shadowOffsetValues.md,
+    shadowOffset: SHADOW_OFFSET.MD,
     shadowOpacity: designTokens.shadows.md.shadowOpacity,
     shadowRadius: designTokens.shadows.sm.shadowRadius,
     elevation: designTokens.shadows.md.elevation,
@@ -232,10 +232,10 @@ const styles = StyleSheet.create({
     fontWeight: designTokens.fontWeight.bold,
   },
   stepText: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     fontSize: mobileFontSizes.lg,
     color: designTokens.colors.textSecondary,
-    lineHeight: typographyValues.lineHeight.xl,
+    lineHeight: TYPOGRAPHY.LINE_HEIGHT.XL,
     marginTop: designTokens.spacing.xxs,
   },
   noteCard: {
@@ -249,10 +249,10 @@ const styles = StyleSheet.create({
     borderLeftColor: designTokens.colors.warning,
   },
   noteText: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     fontSize: mobileFontSizes.sm,
     color: designTokens.colors.textSecondary,
-    lineHeight: typographyValues.lineHeight.lg,
+    lineHeight: TYPOGRAPHY.LINE_HEIGHT.LG,
   },
   logoutButton: {
     flexDirection: layoutConstants.flexDirection.row,

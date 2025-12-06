@@ -1,4 +1,3 @@
-/* eslint-disable max-lines-per-function, no-magic-numbers */
 /**
  * LoginScreen Tests
  * Comprehensive tests following Google/Meta testing standards

@@ -8,7 +8,7 @@ import {
   designTokens,
   layoutConstants,
 } from '../../../shared/theme';
-import { ICONS, dimensionValues } from '../../../shared/constants';
+import { ICONS, DIMENSIONS } from '../../../shared/constants';
 
 interface HierarchyPickerProps {
   label: string;
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     marginBottom: designTokens.spacing.md,
   },
   optionsList: {
-    maxHeight: dimensionValues.maxHeight.listSmall,
+    maxHeight: DIMENSIONS.MAX_HEIGHT.LIST_SMALL,
     borderWidth: designTokens.borderWidth.thin,
     borderColor: designTokens.colors.borderMedium,
     borderRadius: designTokens.borderRadius.md,

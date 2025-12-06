@@ -14,8 +14,8 @@ import {
   PLATFORM_OS,
   SAFE_AREA_EDGES,
   SCREENS,
-  dimensionValues,
-  flexValues,
+  DIMENSIONS,
+  FLEX,
 } from '../../../shared/constants';
 import { useRegisterForm } from './useRegisterForm';
 import { useClubHierarchy } from './useClubHierarchy';
@@ -205,20 +205,20 @@ function RegisterFormContent(props: FormContentProps): React.JSX.Element {
 
 const styles = StyleSheet.create({
   safeArea: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     backgroundColor: designTokens.colors.backgroundPrimary,
   },
   container: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     backgroundColor: designTokens.colors.backgroundPrimary,
   },
   scrollContent: {
-    flexGrow: flexValues.one,
+    flexGrow: FLEX.ONE,
     padding: designTokens.spacing.lg,
     paddingTop: designTokens.spacing['3xl'],
   },
   form: {
-    width: dimensionValues.maxWidthPercent.full,
+    width: DIMENSIONS.MAX_WIDTH_PERCENT.FULL,
   },
 });
 

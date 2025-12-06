@@ -42,8 +42,8 @@ import {
   SAFE_AREA_EDGES,
   SCREENS,
   TEST_IDS,
-  dimensionValues,
-  flexValues,
+  DIMENSIONS,
+  FLEX,
 } from '../../shared/constants';
 
 const DEFAULT_TEST_PASSWORD = 'password123';
@@ -447,13 +447,13 @@ const LoginScreen: React.FC = () => {
 const styles = StyleSheet.create({
   // Layout styles only - no colors or typography
   safeArea: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   container: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   scrollContent: {
-    flexGrow: 1,
+    flexGrow: FLEX.GROW_ENABLED,
     justifyContent: layoutConstants.justifyContent.center,
     padding: designTokens.spacing.lg,
   },
@@ -470,7 +470,7 @@ const styles = StyleSheet.create({
     marginTop: designTokens.spacing.sm,
   },
   form: {
-    width: dimensionValues.width.full,
+    width: DIMENSIONS.WIDTH.FULL,
     gap: designTokens.spacing.md,
   },
   linkButton: {
@@ -504,7 +504,7 @@ const styles = StyleSheet.create({
     marginBottom: designTokens.spacing.none,
   },
   quickLoginInfo: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     gap: designTokens.spacing.xxs,
   },
   // Removed quickLoginName/Role/Email - handled by Text variant props

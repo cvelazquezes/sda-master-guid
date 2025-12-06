@@ -8,7 +8,7 @@ import {
   designTokens,
   layoutConstants,
 } from '../../../shared/theme';
-import { ICONS, flexValues } from '../../../shared/constants';
+import { ICONS, FLEX } from '../../../shared/constants';
 
 interface AccountTypeSectionProps {
   isClubAdmin: boolean;
@@ -93,6 +93,6 @@ const styles = StyleSheet.create({
   infoText: {
     ...mobileTypography.bodySmall,
     color: designTokens.colors.info,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
 });

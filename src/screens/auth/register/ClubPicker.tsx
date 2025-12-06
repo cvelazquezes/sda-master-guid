@@ -9,7 +9,7 @@ import {
   designTokens,
   layoutConstants,
 } from '../../../shared/theme';
-import { ICONS, dimensionValues, flexValues } from '../../../shared/constants';
+import { ICONS, DIMENSIONS, FLEX } from '../../../shared/constants';
 
 interface ClubPickerProps {
   label: string;
@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     marginBottom: designTokens.spacing.md,
   },
   clubsList: {
-    maxHeight: dimensionValues.maxHeight.listMedium,
+    maxHeight: DIMENSIONS.MAX_HEIGHT.LIST_MEDIUM,
     borderWidth: designTokens.borderWidth.thin,
     borderColor: designTokens.colors.borderMedium,
     borderRadius: designTokens.borderRadius.md,
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
   },
   clubInfo: {
     marginLeft: designTokens.spacing.md,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   clubName: {
     ...mobileTypography.bodyLargeBold,

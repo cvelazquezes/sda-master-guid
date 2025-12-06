@@ -9,7 +9,7 @@ import {
   designTokens,
   layoutConstants,
 } from '../../../shared/theme';
-import { ICONS, LIST_SEPARATOR, flexValues } from '../../../shared/constants';
+import { ICONS, LIST_SEPARATOR, FLEX } from '../../../shared/constants';
 
 interface ClassSelectionSectionProps {
   selectedClasses: PathfinderClass[];
@@ -97,10 +97,10 @@ const styles = StyleSheet.create({
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
     gap: designTokens.spacing.md,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   buttonText: {
     ...mobileTypography.bodyLarge,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
 });
