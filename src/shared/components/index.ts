@@ -21,6 +21,14 @@
 export { Text, Heading, Body, Label, Caption } from './Text';
 export type { TextProps, TextVariant, TextColor, TextWeight, TextAlign } from './Text';
 
+// Box primitive - themed View wrapper for backgrounds
+export { Box } from './Box';
+export type { BoxProps, BackgroundColor, BorderColor, SpacingKey, RadiusKey } from './Box';
+
+// Pressable primitive - themed TouchableOpacity with press states
+export { Pressable } from './Pressable';
+export type { PressableProps, PressableBackgroundColor } from './Pressable';
+
 // Button primitive
 export { StandardButton as Button } from './StandardButton';
 
@@ -36,8 +44,9 @@ export { Badge } from './Badge';
 // Icon button primitive
 export { IconButton } from './IconButton';
 
-// Divider primitive
+// Divider primitive - themed divider
 export { Divider } from './Divider';
+export type { DividerProps, DividerColor } from './Divider';
 
 // Status indicator primitive
 export { StatusIndicator } from './StatusIndicator';
