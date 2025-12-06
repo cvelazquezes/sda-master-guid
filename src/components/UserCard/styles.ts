@@ -1,12 +1,9 @@
 import { StyleSheet } from 'react-native';
-import {
-  mobileTypography,
-  mobileFontSizes,
-  designTokens,
-  layoutConstants,
-} from '../../shared/theme';
+import { mobileFontSizes, designTokens, layoutConstants } from '../../shared/theme';
 import { flexValues } from '../../shared/constants';
 
+// Note: Colors should be applied dynamically via useTheme() in the component
+// This file only contains layout-related styles
 export const styles = StyleSheet.create({
   card: {
     borderRadius: designTokens.borderRadius.lg,
@@ -19,7 +16,7 @@ export const styles = StyleSheet.create({
     minHeight: designTokens.componentSizes.cardMinHeight.md,
   },
   cardInactive: {
-    backgroundColor: designTokens.colors.backgroundTertiary,
+    // backgroundColor applied dynamically via useTheme
     opacity: designTokens.opacity.high,
   },
   avatar: {
@@ -32,11 +29,10 @@ export const styles = StyleSheet.create({
     flexShrink: flexValues.shrinkDisabled,
   },
   avatarText: {
-    ...mobileTypography.heading3,
-    color: designTokens.colors.textInverse,
+    // Typography handled by Text primitive variant
   },
   avatarTextInactive: {
-    color: designTokens.colors.textQuaternary,
+    // Color handled dynamically via useTheme
   },
   userInfo: {
     flex: flexValues.one,
@@ -50,20 +46,15 @@ export const styles = StyleSheet.create({
     gap: designTokens.spacing.sm,
   },
   userName: {
-    ...mobileTypography.bodyMediumBold,
-    color: designTokens.colors.textPrimary,
     flex: flexValues.one,
   },
   textInactive: {
-    color: designTokens.colors.textQuaternary,
+    // Color handled dynamically via useTheme
   },
   roleText: {
-    ...mobileTypography.badge,
     fontSize: mobileFontSizes.xs,
   },
   userEmail: {
-    ...mobileTypography.bodySmall,
-    color: designTokens.colors.textSecondary,
     marginBottom: designTokens.spacing.xs,
   },
   detailsRow: {
@@ -78,8 +69,7 @@ export const styles = StyleSheet.create({
     gap: designTokens.spacing.xs,
   },
   metaText: {
-    ...mobileTypography.caption,
-    color: designTokens.colors.textSecondary,
+    // Typography and color handled by Text primitive
   },
   actionsContainer: {
     flexDirection: layoutConstants.flexDirection.row,
@@ -94,7 +84,7 @@ export const styles = StyleSheet.create({
     marginTop: designTokens.spacing.sm,
     paddingTop: designTokens.spacing.sm,
     borderTopWidth: designTokens.borderWidth.thin,
-    borderTopColor: designTokens.colors.borderLight,
+    // borderTopColor applied dynamically via useTheme
     gap: designTokens.spacing.xs,
   },
   balanceRow: {
@@ -103,20 +93,19 @@ export const styles = StyleSheet.create({
     gap: designTokens.spacing.xs + designTokens.spacing.xxs,
   },
   balanceText: {
-    ...mobileTypography.labelBold,
+    // Typography handled by Text primitive variant
   },
   overdueWarning: {
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
     gap: designTokens.spacing.xs,
-    backgroundColor: designTokens.colors.errorLight,
+    // backgroundColor applied dynamically via useTheme
     paddingHorizontal: designTokens.spacing.sm,
     paddingVertical: designTokens.spacing.xs + designTokens.spacing.xxs,
     borderRadius: designTokens.borderRadius.sm,
   },
   overdueWarningText: {
-    ...mobileTypography.caption,
-    color: designTokens.colors.error,
+    // Color handled dynamically via useTheme
     fontWeight: designTokens.fontWeight.semibold,
   },
 });

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { Text } from '../shared/components';
 import { Match, MatchStatus } from '../types';
+import { useTheme } from '../contexts/ThemeContext';
 import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../shared/theme';
 import { formatMembersCount } from '../shared/utils/formatters';
 import {
@@ -32,15 +33,32 @@ const MatchCardComponent: React.FC<MatchCardProps> = ({
   showActions = false,
 }) => {
   const { t } = useTranslation();
+  const { colors, isDark } = useTheme();
 
-  const getStatusConfig = (status: MatchStatus): (typeof designTokens.status)[MatchStatus] => {
-    return designTokens.status[status] || designTokens.status.pending;
+  const getStatusConfig = (status: MatchStatus): { light: string; text: string; icon?: string } => {
+    const baseConfig = designTokens.status[status] || designTokens.status.pending;
+    return {
+      ...baseConfig,
+      light: baseConfig.light,
+      text: baseConfig.text,
+    };
   };
 
   const statusConfig = getStatusConfig(match.status);
+  const shadowConfig = isDark ? designTokens.shadowConfig.dark : designTokens.shadowConfig.light;
+
+  const cardStyle = [
+    styles.card,
+    {
+      backgroundColor: colors.surface,
+      shadowColor: colors.shadow || '#000000',
+      shadowOpacity: shadowConfig.opacity,
+      elevation: shadowConfig.elevation,
+    },
+  ];
 
   const CardContent = (
-    <View style={styles.card}>
+    <View style={cardStyle}>
       {/* Header with Status */}
       <View style={styles.header}>
         <View style={[styles.statusBadge, { backgroundColor: statusConfig.light }]}>
@@ -56,13 +74,18 @@ const MatchCardComponent: React.FC<MatchCardProps> = ({
 
         {/* Skip button for pending matches */}
         {showActions && match.status === MatchStatus.PENDING && onSkip && (
-          <TouchableOpacity style={styles.skipButton} onPress={onSkip}>
+          <TouchableOpacity
+            style={[styles.skipButton, { backgroundColor: colors.errorLight }]}
+            onPress={onSkip}
+          >
             <MaterialCommunityIcons
               name={ICONS.CLOSE}
               size={mobileIconSizes.small}
-              color={designTokens.colors.error}
+              color={colors.error}
             />
-            <Text style={styles.skipButtonText}>{t('components.matchCard.skip')}</Text>
+            <Text style={[styles.skipButtonText, { color: colors.error }]}>
+              {t('components.matchCard.skip')}
+            </Text>
           </TouchableOpacity>
         )}
       </View>
@@ -71,32 +94,38 @@ const MatchCardComponent: React.FC<MatchCardProps> = ({
       <View style={styles.body}>
         {/* Participants */}
         <View style={styles.infoRow}>
-          <View style={styles.iconBox}>
+          <View style={[styles.iconBox, { backgroundColor: colors.primaryLight }]}>
             <MaterialCommunityIcons
               name={ICONS.ACCOUNT_GROUP}
               size={mobileIconSizes.medium}
-              color={designTokens.colors.primary}
+              color={colors.primary}
             />
           </View>
           <View style={styles.infoTextContainer}>
-            <Text style={styles.infoLabel}>{t('components.matchCard.participants')}</Text>
-            <Text style={styles.infoValue}>{formatMembersCount(match.participants.length, t)}</Text>
+            <Text style={[styles.infoLabel, { color: colors.textTertiary }]}>
+              {t('components.matchCard.participants')}
+            </Text>
+            <Text style={[styles.infoValue, { color: colors.textPrimary }]}>
+              {formatMembersCount(match.participants.length, t)}
+            </Text>
           </View>
         </View>
 
         {/* Scheduled Date */}
         {match.scheduledDate && (
           <View style={styles.infoRow}>
-            <View style={styles.iconBox}>
+            <View style={[styles.iconBox, { backgroundColor: colors.primaryLight }]}>
               <MaterialCommunityIcons
                 name={ICONS.CALENDAR}
                 size={mobileIconSizes.medium}
-                color={designTokens.colors.primary}
+                color={colors.primary}
               />
             </View>
             <View style={styles.infoTextContainer}>
-              <Text style={styles.infoLabel}>{t('components.matchCard.scheduled')}</Text>
-              <Text style={styles.infoValue}>
+              <Text style={[styles.infoLabel, { color: colors.textTertiary }]}>
+                {t('components.matchCard.scheduled')}
+              </Text>
+              <Text style={[styles.infoValue, { color: colors.textPrimary }]}>
                 {format(new Date(match.scheduledDate), DATE_FORMATS.DATE_FNS_DATETIME_DISPLAY)}
               </Text>
             </View>
@@ -105,16 +134,18 @@ const MatchCardComponent: React.FC<MatchCardProps> = ({
 
         {/* Created Date */}
         <View style={styles.infoRow}>
-          <View style={styles.iconBox}>
+          <View style={[styles.iconBox, { backgroundColor: colors.surfaceLight }]}>
             <MaterialCommunityIcons
               name={ICONS.CLOCK_OUTLINE}
               size={mobileIconSizes.medium}
-              color={designTokens.colors.textSecondary}
+              color={colors.textSecondary}
             />
           </View>
           <View style={styles.infoTextContainer}>
-            <Text style={styles.infoLabel}>{t('components.matchCard.created')}</Text>
-            <Text style={styles.infoValue}>
+            <Text style={[styles.infoLabel, { color: colors.textTertiary }]}>
+              {t('components.matchCard.created')}
+            </Text>
+            <Text style={[styles.infoValue, { color: colors.textPrimary }]}>
               {format(new Date(match.createdAt), DATE_FORMATS.DATE_FNS_DATE_DISPLAY)}
             </Text>
           </View>
@@ -123,13 +154,18 @@ const MatchCardComponent: React.FC<MatchCardProps> = ({
 
       {/* Actions */}
       {showActions && match.status === MatchStatus.PENDING && onSchedule && (
-        <TouchableOpacity style={styles.scheduleButton} onPress={onSchedule}>
+        <TouchableOpacity
+          style={[styles.scheduleButton, { backgroundColor: colors.primary }]}
+          onPress={onSchedule}
+        >
           <MaterialCommunityIcons
             name={ICONS.CALENDAR_PLUS}
             size={mobileIconSizes.medium}
-            color={designTokens.colors.textInverse}
+            color={colors.textInverse}
           />
-          <Text style={styles.scheduleButtonText}>{t('components.matchCard.scheduleMeetup')}</Text>
+          <Text style={[styles.scheduleButtonText, { color: colors.textInverse }]}>
+            {t('components.matchCard.scheduleMeetup')}
+          </Text>
         </TouchableOpacity>
       )}
     </View>
@@ -167,8 +203,8 @@ MatchCard.displayName = COMPONENT_NAMES.MATCH_CARD;
 const styles = StyleSheet.create({
   card: {
     ...designTokens.card,
-    ...designTokens.card.shadow,
-    backgroundColor: designTokens.colors.backgroundPrimary,
+    shadowOffset: { width: 0, height: designTokens.spacing.xxs },
+    shadowRadius: designTokens.shadows.lg.shadowRadius,
   },
   header: {
     flexDirection: layoutConstants.flexDirection.row,
@@ -193,12 +229,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: designTokens.spacing.md,
     paddingVertical: designTokens.spacing.sm,
     borderRadius: designTokens.borderRadius.md,
-    backgroundColor: designTokens.colors.errorLight,
     gap: designTokens.spacing.sm,
   },
   skipButtonText: {
     ...mobileTypography.labelBold,
-    color: designTokens.colors.error,
   },
   body: {
     gap: designTokens.spacing.md,
@@ -212,7 +246,6 @@ const styles = StyleSheet.create({
     width: designTokens.componentSizes.iconContainer.md,
     height: designTokens.componentSizes.iconContainer.md,
     borderRadius: designTokens.borderRadius.xl,
-    backgroundColor: designTokens.colors.primaryLight,
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
   },
@@ -221,18 +254,15 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     ...mobileTypography.caption,
-    color: designTokens.colors.textTertiary,
     marginBottom: designTokens.spacing.xxs,
   },
   infoValue: {
     ...mobileTypography.bodyMediumBold,
-    color: designTokens.colors.textPrimary,
   },
   scheduleButton: {
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
     justifyContent: layoutConstants.justifyContent.center,
-    backgroundColor: designTokens.colors.primary,
     paddingVertical: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.xl,
     marginTop: designTokens.spacing.md,
@@ -240,6 +270,5 @@ const styles = StyleSheet.create({
   },
   scheduleButtonText: {
     ...mobileTypography.button,
-    color: designTokens.colors.textInverse,
   },
 });

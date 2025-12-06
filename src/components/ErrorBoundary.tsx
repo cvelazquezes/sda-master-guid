@@ -9,7 +9,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { withTranslation, WithTranslation } from 'react-i18next';
 import { Text } from '../shared/components';
 import { logger } from '../utils/logger';
-import { mobileFontSizes, designTokens, layoutConstants } from '../shared/theme';
+import { designTokens, layoutConstants } from '../shared/theme';
 import {
   ICONS,
   flexValues,
@@ -88,23 +88,33 @@ class ErrorBoundaryClass extends Component<Props, State> {
               size={designTokens.iconSize['3xl']}
               color={designTokens.colors.error}
             />
-            <Text style={styles.title}>{t('components.errorBoundary.title')}</Text>
-            <Text style={styles.message}>{t('components.errorBoundary.message')}</Text>
+            <Text variant="h1" style={styles.title}>
+              {t('components.errorBoundary.title')}
+            </Text>
+            <Text variant="bodyLarge" color="secondary" align="center" style={styles.message}>
+              {t('components.errorBoundary.message')}
+            </Text>
 
             {__DEV__ && this.state.error && (
               <ScrollView style={styles.errorDetails}>
-                <Text style={styles.errorTitle}>
+                <Text variant="label" weight="semibold" color="error" style={styles.errorTitle}>
                   {t('components.errorBoundary.errorDetailsTitle')}
                 </Text>
-                <Text style={styles.errorText}>{this.state.error.toString()}</Text>
+                <Text variant="caption" color="secondary" style={styles.errorText}>
+                  {this.state.error.toString()}
+                </Text>
                 {this.state.errorInfo && (
-                  <Text style={styles.errorText}>{this.state.errorInfo.componentStack}</Text>
+                  <Text variant="caption" color="secondary" style={styles.errorText}>
+                    {this.state.errorInfo.componentStack}
+                  </Text>
                 )}
               </ScrollView>
             )}
 
             <TouchableOpacity style={styles.button} onPress={this.handleReset}>
-              <Text style={styles.buttonText}>{t('components.errorBoundary.tryAgain')}</Text>
+              <Text variant="bodyLarge" weight="semibold" color="onPrimary">
+                {t('components.errorBoundary.tryAgain')}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -142,16 +152,10 @@ const styles = StyleSheet.create({
     elevation: designTokens.shadows.md.elevation,
   },
   title: {
-    fontSize: mobileFontSizes['3xl'],
-    fontWeight: designTokens.fontWeight.bold,
-    color: designTokens.colors.textPrimary,
     marginTop: designTokens.spacing.lg,
     marginBottom: designTokens.spacing.sm,
   },
   message: {
-    fontSize: mobileFontSizes.lg,
-    color: designTokens.colors.textSecondary,
-    textAlign: layoutConstants.textAlign.center,
     marginBottom: designTokens.spacing.xxl,
   },
   errorDetails: {
@@ -163,14 +167,9 @@ const styles = StyleSheet.create({
     marginBottom: designTokens.spacing.lg,
   },
   errorTitle: {
-    fontSize: mobileFontSizes.sm,
-    fontWeight: designTokens.fontWeight.semibold,
-    color: designTokens.colors.error,
     marginBottom: designTokens.spacing.sm,
   },
   errorText: {
-    fontSize: mobileFontSizes.xs,
-    color: designTokens.colors.textSecondary,
     fontFamily: fontFamilyValues.mono,
   },
   button: {
@@ -180,10 +179,5 @@ const styles = StyleSheet.create({
     borderRadius: designTokens.borderRadius.md,
     minWidth: dimensionValues.minWidth.button,
     alignItems: layoutConstants.alignItems.center,
-  },
-  buttonText: {
-    color: designTokens.colors.textInverse,
-    fontSize: mobileFontSizes.lg,
-    fontWeight: designTokens.fontWeight.semibold,
   },
 });

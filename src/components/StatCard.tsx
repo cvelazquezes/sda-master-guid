@@ -9,12 +9,7 @@ import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../shared/components';
 import { useTheme } from '../contexts/ThemeContext';
-import {
-  mobileTypography,
-  mobileIconSizes,
-  mobileFontSizes,
-  layoutConstants,
-} from '../shared/theme';
+import { mobileIconSizes, mobileFontSizes, layoutConstants } from '../shared/theme';
 import { designTokens } from '../shared/theme/designTokens';
 import { ICONS, TOUCH_OPACITY, flexValues } from '../shared/constants';
 
@@ -45,7 +40,7 @@ export const StatCard: React.FC<StatCardProps> = ({
         styles.card,
         {
           backgroundColor: colors.surface,
-          shadowColor: designTokens.colors.black,
+          shadowColor: colors.shadow || '#000000',
           shadowOpacity: shadowConfig.opacity,
           elevation: shadowConfig.elevation,
         },
@@ -60,10 +55,16 @@ export const StatCard: React.FC<StatCardProps> = ({
         />
       </View>
       <View style={styles.content}>
-        <Text style={[styles.value, { color: colors.textPrimary }]}>{value}</Text>
-        <Text style={[styles.label, { color: colors.textSecondary }]}>{label}</Text>
+        <Text variant="displaySmall" style={styles.value}>
+          {value}
+        </Text>
+        <Text variant="label" weight="bold" color="secondary">
+          {label}
+        </Text>
         {subtitle && (
-          <Text style={[styles.subtitle, { color: colors.textTertiary }]}>{subtitle}</Text>
+          <Text variant="caption" color="tertiary" style={styles.subtitle}>
+            {subtitle}
+          </Text>
         )}
       </View>
       {onPress && (
@@ -119,15 +120,10 @@ const styles = StyleSheet.create({
     flex: flexValues.one,
   },
   value: {
-    ...mobileTypography.displaySmall,
     fontSize: mobileFontSizes['3xl'],
     marginBottom: designTokens.spacing.xs,
   },
-  label: {
-    ...mobileTypography.labelBold,
-  },
   subtitle: {
-    ...mobileTypography.caption,
     marginTop: designTokens.spacing.xs,
   },
 });

@@ -2,11 +2,13 @@ import { StyleSheet } from 'react-native';
 import { mobileTypography, designTokens, layoutConstants } from '../../shared/theme';
 import { flexValues } from '../../shared/constants';
 
+// Note: shadowColor should be set dynamically via useTheme() in the component
+// Use colors.shadow || '#000000' for theme-aware shadow color
 export const styles = StyleSheet.create({
   card: {
     borderRadius: designTokens.borderRadius.lg,
     marginBottom: designTokens.spacing.md,
-    shadowColor: designTokens.colors.black,
+    // shadowColor is set dynamically in the component for theme-awareness
     shadowOffset: { width: 0, height: designTokens.spacing.xxs },
     shadowRadius: designTokens.shadows.md.shadowRadius,
     elevation: designTokens.shadows.md.elevation,

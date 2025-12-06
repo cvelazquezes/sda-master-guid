@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { Text } from '../../shared/components';
-import { designTokens } from '../../shared/theme';
+import { useTheme } from '../../contexts/ThemeContext';
 import { styles } from './styles';
 
 interface UserAvatarProps {
@@ -19,6 +19,8 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
   inactiveBackgroundColor,
   inactiveTextColor,
 }) => {
+  const { colors } = useTheme();
+
   return (
     <View
       style={[
@@ -27,11 +29,8 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
       ]}
     >
       <Text
-        style={[
-          styles.avatarText,
-          { color: designTokens.colors.white },
-          !isActive && { color: inactiveTextColor },
-        ]}
+        variant="h3"
+        style={[{ color: colors.textOnPrimary }, !isActive && { color: inactiveTextColor }]}
       >
         {name.charAt(0).toUpperCase()}
       </Text>

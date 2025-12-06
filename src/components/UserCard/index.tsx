@@ -42,7 +42,7 @@ const UserCardComponent: React.FC<UserCardProps> = ({
     styles.card,
     {
       backgroundColor: colors.surface,
-      shadowColor: designTokens.colors.black,
+      shadowColor: colors.shadow || '#000000',
       shadowOpacity: shadowConfig.opacity,
       elevation: shadowConfig.elevation,
     },
@@ -61,12 +61,11 @@ const UserCardComponent: React.FC<UserCardProps> = ({
       <View style={styles.userInfo}>
         <View style={styles.userHeader}>
           <Text
-            style={[
-              styles.userName,
-              { color: colors.textPrimary },
-              !user.isActive && { color: colors.textTertiary },
-            ]}
+            variant="body"
+            weight="bold"
+            color={user.isActive ? 'primary' : 'tertiary'}
             numberOfLines={TEXT_LINES.single}
+            style={styles.userName}
           >
             {user.name}
           </Text>
@@ -79,12 +78,10 @@ const UserCardComponent: React.FC<UserCardProps> = ({
           />
         </View>
         <Text
-          style={[
-            styles.userEmail,
-            { color: colors.textSecondary },
-            !user.isActive && { color: colors.textTertiary },
-          ]}
+          variant="bodySmall"
+          color={user.isActive ? 'secondary' : 'tertiary'}
           numberOfLines={TEXT_LINES.single}
+          style={styles.userEmail}
         >
           {user.email}
         </Text>

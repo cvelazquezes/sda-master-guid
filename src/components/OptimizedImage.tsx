@@ -27,7 +27,7 @@ import {
   ViewStyle,
   ImageSourcePropType,
 } from 'react-native';
-import { designTokens } from '../shared/theme/designTokens';
+import { useTheme } from '../contexts/ThemeContext';
 import { layoutConstants } from '../shared/theme';
 import { ACTIVITY_INDICATOR_SIZE, dimensionValues } from '../shared/constants';
 
@@ -148,6 +148,7 @@ interface OptimizedImageProps {
  * />
  * ```
  */
+// eslint-disable-next-line complexity
 export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   source,
   fallbackSource,
@@ -163,6 +164,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   blurRadius,
   accessibilityLabel,
 }) => {
+  const { colors, isDark } = useTheme();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [imageOpacity, setImageOpacity] = useState(0);
@@ -182,8 +184,11 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   // Determine which source to use
   const imageSource = error && fallbackSource ? fallbackSource : source;
 
+  // Loading container background based on theme
+  const loadingBgColor = isDark ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.8)';
+
   return (
-    <View style={[styles.container, containerStyle]}>
+    <View style={[styles.container, { backgroundColor: colors.border }, containerStyle]}>
       {/* Placeholder image */}
       {placeholderSource && loading && (
         <Image
@@ -208,11 +213,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
       {/* Loading indicator */}
       {loading && showLoading && (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator
-            size={ACTIVITY_INDICATOR_SIZE.small}
-            color={designTokens.colors.primary}
-          />
+        <View style={[styles.loadingContainer, { backgroundColor: loadingBgColor }]}>
+          <ActivityIndicator size={ACTIVITY_INDICATOR_SIZE.small} color={colors.primary} />
         </View>
       )}
     </View>
@@ -223,7 +225,6 @@ const styles = StyleSheet.create({
   container: {
     position: layoutConstants.position.relative,
     overflow: layoutConstants.overflow.hidden,
-    backgroundColor: designTokens.colors.borderLight,
   },
   image: {
     width: dimensionValues.width.full,
@@ -242,7 +243,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
-    backgroundColor: designTokens.overlay.lightStrong,
   },
 });
 

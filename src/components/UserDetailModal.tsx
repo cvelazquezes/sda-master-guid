@@ -7,6 +7,7 @@ import { User, Club, UserRole } from '../types';
 import { OrganizationHierarchy } from './OrganizationHierarchy';
 import { clubService } from '../services/clubService';
 import { StandardModal } from '../shared/components/StandardModal';
+import { useTheme } from '../contexts/ThemeContext';
 import {
   mobileTypography,
   mobileIconSizes,
@@ -25,6 +26,7 @@ interface UserDetailModalProps {
 
 export const UserDetailModal: React.FC<UserDetailModalProps> = ({ visible, user, onClose }) => {
   const { t } = useTranslation();
+  const { colors } = useTheme();
   const [club, setClub] = useState<Club | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -73,8 +75,8 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ visible, user,
       subtitle={t('components.userDetailModal.subtitle')}
     >
       {/* Personal Information */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>
+      <View style={[styles.section, { borderBottomColor: colors.border }]}>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
           {t('components.userDetailModal.personalInformation')}
         </Text>
 
@@ -82,11 +84,13 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ visible, user,
           <MaterialCommunityIcons
             name={ICONS.ACCOUNT}
             size={mobileIconSizes.medium}
-            color={designTokens.colors.primary}
+            color={colors.primary}
           />
           <View style={styles.infoContent}>
-            <Text style={styles.infoLabel}>{t('components.userDetailModal.name')}</Text>
-            <Text style={styles.infoValue}>{user.name}</Text>
+            <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>
+              {t('components.userDetailModal.name')}
+            </Text>
+            <Text style={[styles.infoValue, { color: colors.textPrimary }]}>{user.name}</Text>
           </View>
         </View>
 
@@ -94,11 +98,13 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ visible, user,
           <MaterialCommunityIcons
             name={ICONS.EMAIL}
             size={mobileIconSizes.medium}
-            color={designTokens.colors.primary}
+            color={colors.primary}
           />
           <View style={styles.infoContent}>
-            <Text style={styles.infoLabel}>{t('components.userDetailModal.email')}</Text>
-            <Text style={styles.infoValue}>{user.email}</Text>
+            <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>
+              {t('components.userDetailModal.email')}
+            </Text>
+            <Text style={[styles.infoValue, { color: colors.textPrimary }]}>{user.email}</Text>
           </View>
         </View>
 
@@ -107,11 +113,15 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ visible, user,
             <MaterialCommunityIcons
               name={ICONS.WHATSAPP}
               size={mobileIconSizes.medium}
-              color={designTokens.colors.success}
+              color={colors.success}
             />
             <View style={styles.infoContent}>
-              <Text style={styles.infoLabel}>{t('components.userDetailModal.whatsApp')}</Text>
-              <Text style={styles.infoValue}>{user.whatsappNumber}</Text>
+              <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>
+                {t('components.userDetailModal.whatsApp')}
+              </Text>
+              <Text style={[styles.infoValue, { color: colors.textPrimary }]}>
+                {user.whatsappNumber}
+              </Text>
             </View>
           </View>
         )}
@@ -120,30 +130,39 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ visible, user,
           <MaterialCommunityIcons
             name={ICONS.SHIELD_ACCOUNT}
             size={mobileIconSizes.medium}
-            color={designTokens.colors.primary}
+            color={colors.primary}
           />
           <View style={styles.infoContent}>
-            <Text style={styles.infoLabel}>{t('components.userDetailModal.role')}</Text>
-            <Text style={styles.infoValue}>{getRoleLabel(user.role)}</Text>
+            <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>
+              {t('components.userDetailModal.role')}
+            </Text>
+            <Text style={[styles.infoValue, { color: colors.textPrimary }]}>
+              {getRoleLabel(user.role)}
+            </Text>
           </View>
         </View>
       </View>
 
       {/* Pathfinder Classes */}
       {user.role !== UserRole.ADMIN && user.classes && user.classes.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
+        <View style={[styles.section, { borderBottomColor: colors.border }]}>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
             {t('components.userDetailModal.pathfinderClasses')}
           </Text>
           <View style={styles.classesContainer}>
             {user.classes.map((pathfinderClass) => (
-              <View key={pathfinderClass} style={styles.classBadge}>
+              <View
+                key={pathfinderClass}
+                style={[styles.classBadge, { backgroundColor: colors.primaryLight }]}
+              >
                 <MaterialCommunityIcons
                   name={ICONS.SCHOOL}
                   size={mobileIconSizes.small}
-                  color={designTokens.colors.primary}
+                  color={colors.primary}
                 />
-                <Text style={styles.classBadgeText}>{pathfinderClass}</Text>
+                <Text style={[styles.classBadgeText, { color: colors.primary }]}>
+                  {pathfinderClass}
+                </Text>
               </View>
             ))}
           </View>
@@ -151,16 +170,18 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ visible, user,
       )}
 
       {/* Status */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('components.userDetailModal.status')}</Text>
+      <View style={[styles.section, { borderBottomColor: colors.border }]}>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
+          {t('components.userDetailModal.status')}
+        </Text>
 
         <View style={styles.statusRow}>
           <MaterialCommunityIcons
             name={user.isActive ? ICONS.CHECK_CIRCLE : ICONS.CANCEL}
             size={mobileIconSizes.medium}
-            color={user.isActive ? designTokens.colors.success : designTokens.colors.error}
+            color={user.isActive ? colors.success : colors.error}
           />
-          <Text style={styles.statusText}>
+          <Text style={[styles.statusText, { color: colors.textPrimary }]}>
             {user.isActive
               ? t('components.userDetailModal.active')
               : t('components.userDetailModal.inactive')}
@@ -170,8 +191,8 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ visible, user,
 
       {/* Organizational Hierarchy */}
       {user.role !== UserRole.ADMIN && club && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
+        <View style={[styles.section, { borderBottomColor: colors.border }]}>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
             {t('components.userDetailModal.organizationAndClub')}
           </Text>
           <OrganizationHierarchy
@@ -190,11 +211,10 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ visible, user,
 
       {loading && (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator
-            size={ACTIVITY_INDICATOR_SIZE.small}
-            color={designTokens.colors.primary}
-          />
-          <Text style={styles.loadingText}>{t('components.userDetailModal.loadingClubInfo')}</Text>
+          <ActivityIndicator size={ACTIVITY_INDICATOR_SIZE.small} color={colors.primary} />
+          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
+            {t('components.userDetailModal.loadingClubInfo')}
+          </Text>
         </View>
       )}
     </StandardModal>
@@ -212,12 +232,10 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: mobileFontSizes['2xl'],
     fontWeight: designTokens.fontWeight.bold,
-    color: designTokens.colors.textInverse,
   },
   section: {
     padding: designTokens.spacing.xl,
     borderBottomWidth: designTokens.borderWidth.thin,
-    borderBottomColor: designTokens.colors.borderLight,
   },
   sectionTitle: {
     ...mobileTypography.heading4,
@@ -234,7 +252,6 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     ...mobileTypography.label,
-    color: designTokens.colors.textSecondary,
     marginBottom: designTokens.spacing.sm,
   },
   infoValue: {
@@ -257,7 +274,6 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     ...mobileTypography.bodySmall,
-    color: designTokens.colors.textSecondary,
     marginLeft: designTokens.spacing.md,
   },
   classesContainer: {
@@ -268,7 +284,6 @@ const styles = StyleSheet.create({
   classBadge: {
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
-    backgroundColor: designTokens.colors.primaryLight,
     paddingVertical: designTokens.spacing.md,
     paddingHorizontal: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius['2xl'],
@@ -276,6 +291,5 @@ const styles = StyleSheet.create({
   },
   classBadgeText: {
     ...mobileTypography.labelBold,
-    color: designTokens.colors.primary,
   },
 });
