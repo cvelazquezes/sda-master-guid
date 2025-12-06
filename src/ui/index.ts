@@ -29,13 +29,17 @@ export {
   Label,
   Caption,
 
+  // Layout primitives - use instead of raw View
+  Box,
+  Pressable,
+  Divider,
+
   // Core primitives
   Button,
   Input,
   Card,
   Badge,
   IconButton,
-  Divider,
   StatusIndicator,
   EmptyState,
 
@@ -60,11 +64,25 @@ export {
 
 // Export types
 export type {
+  // Text types
   TextProps,
   TextVariant,
   TextColor,
   TextWeight,
   TextAlign,
+  // Box types
+  BoxProps,
+  BackgroundColor,
+  BorderColor,
+  SpacingKey as BoxSpacingKey,
+  RadiusKey,
+  // Pressable types
+  PressableProps,
+  PressableBackgroundColor,
+  // Divider types
+  DividerProps,
+  DividerColor,
+  // Other component types
   SelectionItem,
   FilterOption,
   FilterSection,

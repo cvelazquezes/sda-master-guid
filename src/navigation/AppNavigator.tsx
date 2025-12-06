@@ -263,11 +263,12 @@ const MainTabs = (): React.JSX.Element => {
 };
 
 const AuthStack = (): React.JSX.Element => {
+  const { colors } = useTheme();
   return (
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: designTokens.colors.white },
+        contentStyle: { backgroundColor: colors.background },
       }}
     >
       <Stack.Screen name={SCREENS.LOGIN}>{(): React.JSX.Element => <LoginScreen />}</Stack.Screen>
@@ -334,11 +335,12 @@ const ClubAdminStackScreens = (): React.JSX.Element => (
 
 const AppStack = (): React.JSX.Element | null => {
   const { user } = useAuth();
+  const { colors } = useTheme();
   const showMyFees = user?.role === UserRole.USER || user?.role === UserRole.CLUB_ADMIN;
 
   const stackScreenOptions = {
     headerShown: false,
-    contentStyle: { backgroundColor: designTokens.colors.white },
+    contentStyle: { backgroundColor: colors.background },
   };
 
   const accountOptions = {
@@ -376,11 +378,12 @@ const AppStack = (): React.JSX.Element | null => {
 };
 
 const PendingStack = (): React.JSX.Element => {
+  const { colors } = useTheme();
   return (
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: designTokens.colors.white },
+        contentStyle: { backgroundColor: colors.background },
       }}
     >
       <Stack.Screen name={SCREENS.PENDING_APPROVAL} component={PendingApprovalScreen} />
