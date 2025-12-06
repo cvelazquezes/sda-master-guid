@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../context/AuthContext';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { UserRole } from '../../../types';
-import { flexValues } from '../../../shared/constants';
+import { FLEX } from '../../../shared/constants';
 import { useProfileState } from './useProfileState';
 import { ProfileHeader } from './ProfileHeader';
 import { PreferencesSection } from './PreferencesSection';
@@ -47,7 +47,7 @@ const ProfileScreen = (): React.JSX.Element => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
 });
 

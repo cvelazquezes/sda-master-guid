@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { designTokens, layoutConstants, mobileTypography } from '../../../shared/theme';
-import { flexValues } from '../../../shared/constants';
+import { FLEX } from '../../../shared/constants';
 import { MATH } from '../../../shared/constants/http';
 
 export const profileHeaderStyles = StyleSheet.create({
@@ -96,7 +96,7 @@ export const accountStatusStyles = StyleSheet.create({
   statusInfo: {
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     gap: designTokens.spacing.md,
   },
   statusIconContainer: {
@@ -107,7 +107,7 @@ export const accountStatusStyles = StyleSheet.create({
     justifyContent: layoutConstants.justifyContent.center,
   },
   statusText: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   statusLabel: {
     ...mobileTypography.bodyLargeBold,
@@ -139,7 +139,7 @@ export const contactInfoStyles = StyleSheet.create({
     justifyContent: layoutConstants.justifyContent.center,
   },
   detailText: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   detailLabel: {
     ...mobileTypography.caption,
@@ -177,7 +177,7 @@ export const preferencesStyles = StyleSheet.create({
     justifyContent: layoutConstants.justifyContent.center,
   },
   menuContent: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   menuLabel: {
     ...mobileTypography.caption,

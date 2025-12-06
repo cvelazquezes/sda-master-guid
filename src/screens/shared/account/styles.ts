@@ -1,13 +1,13 @@
 import { StyleSheet } from 'react-native';
 import { mobileTypography, designTokens, layoutConstants } from '../../../shared/theme';
-import { flexValues, borderValues } from '../../../shared/constants';
+import { FLEX, BORDERS } from '../../../shared/constants';
 
 export const styles = StyleSheet.create({
   container: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   scrollView: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   section: {
     paddingHorizontal: designTokens.spacing.lg,
@@ -51,7 +51,7 @@ export const styles = StyleSheet.create({
   },
   settingRow: {
     borderBottomWidth: designTokens.borderWidth.thin,
-    borderBottomColor: borderValues.color.transparent,
+    borderBottomColor: BORDERS.COLOR.TRANSPARENT,
   },
   detailsContainer: {},
   detailRow: {
@@ -59,7 +59,7 @@ export const styles = StyleSheet.create({
     alignItems: layoutConstants.alignItems.center,
     paddingVertical: designTokens.spacing.md,
     borderBottomWidth: designTokens.borderWidth.thin,
-    borderBottomColor: borderValues.color.transparent,
+    borderBottomColor: BORDERS.COLOR.TRANSPARENT,
     gap: designTokens.spacing.md,
   },
   detailIconContainer: {
@@ -70,7 +70,7 @@ export const styles = StyleSheet.create({
     justifyContent: layoutConstants.justifyContent.center,
   },
   detailText: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   detailLabel: {
     ...mobileTypography.caption,
@@ -108,7 +108,7 @@ export const statusStyles = StyleSheet.create({
   info: {
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     gap: designTokens.spacing.md,
   },
   iconContainer: {
@@ -119,7 +119,7 @@ export const statusStyles = StyleSheet.create({
     justifyContent: layoutConstants.justifyContent.center,
   },
   text: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   label: {
     ...mobileTypography.bodyLargeBold,
