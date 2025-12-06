@@ -4,10 +4,14 @@
  */
 
 export interface Environment {
-  apiUrl: string;
-  wsUrl: string;
-  env: 'development' | 'staging' | 'production';
-  useMockData: boolean;
+  api: {
+    base: string;
+    websocket: string;
+  };
+  name: 'development' | 'staging' | 'production';
+  mock: {
+    useMockApi: boolean;
+  };
   features: {
     enableBiometrics: boolean;
     enableOfflineMode: boolean;
@@ -32,10 +36,14 @@ const getBoolEnvVar = (value: string | undefined, defaultValue: boolean): boolea
 };
 
 export const environment: Environment = {
-  apiUrl: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api',
-  wsUrl: process.env.EXPO_PUBLIC_WS_URL || 'ws://localhost:3000',
-  env: (process.env.EXPO_PUBLIC_ENV || 'development') as Environment['env'],
-  useMockData: getBoolEnvVar(process.env.EXPO_PUBLIC_USE_MOCK_DATA, true),
+  api: {
+    base: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api',
+    websocket: process.env.EXPO_PUBLIC_WS_URL || 'ws://localhost:3000',
+  },
+  name: (process.env.EXPO_PUBLIC_ENV || 'development') as Environment['name'],
+  mock: {
+    useMockApi: getBoolEnvVar(process.env.EXPO_PUBLIC_USE_MOCK_DATA, true),
+  },
   features: {
     enableBiometrics: getBoolEnvVar(process.env.EXPO_PUBLIC_ENABLE_BIOMETRICS, true),
     enableOfflineMode: getBoolEnvVar(process.env.EXPO_PUBLIC_ENABLE_OFFLINE_MODE, true),
@@ -63,18 +71,20 @@ export const environment: Environment = {
  * @throws Error if critical configuration is missing
  */
 export const validateEnvironment = (): void => {
-  const required = ['apiUrl', 'wsUrl', 'env'];
-
-  for (const key of required) {
-    if (!environment[key as keyof Environment]) {
-      throw new Error(`Missing required environment variable: ${key}`);
-    }
+  if (!environment.api.base) {
+    throw new Error('Missing required environment variable: api.base');
+  }
+  if (!environment.api.websocket) {
+    throw new Error('Missing required environment variable: api.websocket');
+  }
+  if (!environment.name) {
+    throw new Error('Missing required environment variable: name');
   }
 
   // Note: Mock data is allowed in production for standalone APK builds
   // that don't have a backend server. This is intentional for testing
   // and demonstration purposes.
-  if (environment.env === 'production' && environment.useMockData) {
+  if (environment.name === 'production' && environment.mock.useMockApi) {
     console.warn('⚠️  Running in production mode with mock data enabled');
   }
 };
