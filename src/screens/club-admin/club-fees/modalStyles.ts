@@ -1,11 +1,11 @@
 import { StyleSheet } from 'react-native';
 import { mobileFontSizes, designTokens, layoutConstants } from '../../../shared/theme';
-import { flexValues, dimensionValues } from '../../../shared/constants';
+import { FLEX, DIMENSIONS } from '../../../shared/constants';
 import { MATH } from '../../../shared/constants/http';
 
 export const modalStyles = StyleSheet.create({
   overlay: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     backgroundColor: designTokens.overlay.darkMedium,
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
@@ -30,7 +30,7 @@ export const modalStyles = StyleSheet.create({
     color: designTokens.colors.textPrimary,
   },
   closeButton: { padding: designTokens.spacing.xs },
-  body: { padding: designTokens.spacing.xl, maxHeight: dimensionValues.maxHeight.modalBodyLarge },
+  body: { padding: designTokens.spacing.xl, maxHeight: DIMENSIONS.MAX_HEIGHT.MODAL_BODY_LARGE },
   inputGroup: { marginBottom: designTokens.spacing.xxl },
   label: {
     fontSize: mobileFontSizes.md,
@@ -57,7 +57,7 @@ export const modalStyles = StyleSheet.create({
     gap: designTokens.spacing.md,
   },
   applyToOption: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
     justifyContent: layoutConstants.justifyContent.center,
@@ -130,7 +130,7 @@ export const modalStyles = StyleSheet.create({
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
     gap: designTokens.spacing.md,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   checkbox: {
     width: designTokens.spacing.xxl,
@@ -146,7 +146,7 @@ export const modalStyles = StyleSheet.create({
     backgroundColor: designTokens.colors.primary,
     borderColor: designTokens.colors.primary,
   },
-  memberItemInfo: { flex: flexValues.one },
+  memberItemInfo: { flex: FLEX.ONE },
   memberItemName: {
     fontSize: mobileFontSizes.md,
     fontWeight: designTokens.fontWeight.semibold,
@@ -162,7 +162,7 @@ export const modalStyles = StyleSheet.create({
     borderTopColor: designTokens.colors.borderLight,
   },
   cancelButton: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     paddingVertical: designTokens.spacing.md + designTokens.spacing.xxs,
     borderRadius: designTokens.borderRadius.lg,
     borderWidth: designTokens.borderWidth.medium,
@@ -176,7 +176,7 @@ export const modalStyles = StyleSheet.create({
     color: designTokens.colors.textSecondary,
   },
   createButton: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
     justifyContent: layoutConstants.justifyContent.center,

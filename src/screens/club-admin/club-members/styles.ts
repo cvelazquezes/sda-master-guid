@@ -5,16 +5,11 @@ import {
   designTokens,
   layoutConstants,
 } from '../../../shared/theme';
-import {
-  flexValues,
-  textTransformValues,
-  typographyValues,
-  dimensionValues,
-} from '../../../shared/constants';
+import { FLEX, TEXT_TRANSFORM, TYPOGRAPHY, DIMENSIONS } from '../../../shared/constants';
 
 export const styles = StyleSheet.create({
   container: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     backgroundColor: designTokens.colors.backgroundSecondary,
   },
   content: {
@@ -31,7 +26,7 @@ export const pendingCardStyles = StyleSheet.create({
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
     padding: designTokens.spacing.lg,
-    minHeight: dimensionValues.minHeight.cardContent,
+    minHeight: DIMENSIONS.MIN_HEIGHT.CARD_CONTENT,
     borderLeftWidth: designTokens.borderWidth.medium,
     borderLeftColor: designTokens.colors.warning,
   },
@@ -43,7 +38,7 @@ export const pendingCardStyles = StyleSheet.create({
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
     marginRight: designTokens.spacing.md,
-    flexShrink: flexValues.shrinkDisabled,
+    flexShrink: FLEX.SHRINK_DISABLED,
     position: layoutConstants.position.relative,
   },
   avatarText: {
@@ -52,19 +47,19 @@ export const pendingCardStyles = StyleSheet.create({
   },
   badge: {
     position: layoutConstants.position.absolute,
-    bottom: dimensionValues.offset.badgeNegative,
-    right: dimensionValues.offset.badgeNegative,
+    bottom: DIMENSIONS.OFFSET.BADGE_NEGATIVE,
+    right: DIMENSIONS.OFFSET.BADGE_NEGATIVE,
     backgroundColor: designTokens.colors.backgroundPrimary,
     borderRadius: designTokens.borderRadius.xl,
-    width: dimensionValues.size.badgeSmall,
-    height: dimensionValues.size.badgeSmall,
+    width: DIMENSIONS.SIZE.BADGE_SMALL,
+    height: DIMENSIONS.SIZE.BADGE_SMALL,
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
     borderWidth: designTokens.borderWidth.medium,
     borderColor: designTokens.colors.warningLight,
   },
   info: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     marginRight: designTokens.spacing.md,
     minWidth: designTokens.spacing.none,
   },
@@ -77,7 +72,7 @@ export const pendingCardStyles = StyleSheet.create({
   name: {
     ...mobileTypography.bodyMediumBold,
     color: designTokens.colors.textPrimary,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   statusBadge: {
     flexDirection: layoutConstants.flexDirection.row,
@@ -87,14 +82,14 @@ export const pendingCardStyles = StyleSheet.create({
     paddingHorizontal: designTokens.spacing.sm,
     paddingVertical: designTokens.spacing.xxs,
     borderRadius: designTokens.borderRadius.sm,
-    flexShrink: flexValues.shrinkDisabled,
+    flexShrink: FLEX.SHRINK_DISABLED,
   },
   statusText: {
     fontSize: mobileFontSizes.xs,
     fontWeight: designTokens.fontWeight.semibold,
     color: designTokens.colors.warning,
-    textTransform: textTransformValues.uppercase,
-    letterSpacing: typographyValues.letterSpacing.normal,
+    textTransform: TEXT_TRANSFORM.UPPERCASE,
+    letterSpacing: TYPOGRAPHY.LETTER_SPACING.NORMAL,
   },
   email: {
     ...mobileTypography.bodySmall,
@@ -111,7 +106,7 @@ export const pendingCardStyles = StyleSheet.create({
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
     gap: designTokens.spacing.sm,
-    flexShrink: flexValues.shrinkDisabled,
+    flexShrink: FLEX.SHRINK_DISABLED,
   },
   rejectButton: {
     backgroundColor: designTokens.colors.error,
@@ -130,7 +125,7 @@ export const memberCardStyles = StyleSheet.create({
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
     padding: designTokens.spacing.lg,
-    minHeight: dimensionValues.minHeight.cardContent,
+    minHeight: DIMENSIONS.MIN_HEIGHT.CARD_CONTENT,
   },
   cardInactive: {
     backgroundColor: designTokens.colors.backgroundTertiary,
@@ -143,7 +138,7 @@ export const memberCardStyles = StyleSheet.create({
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
     marginRight: designTokens.spacing.md,
-    flexShrink: flexValues.shrinkDisabled,
+    flexShrink: FLEX.SHRINK_DISABLED,
   },
   avatarText: {
     ...mobileTypography.heading3,
@@ -153,7 +148,7 @@ export const memberCardStyles = StyleSheet.create({
     color: designTokens.colors.textQuaternary,
   },
   info: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     marginRight: designTokens.spacing.md,
     minWidth: designTokens.spacing.none,
   },
@@ -166,7 +161,7 @@ export const memberCardStyles = StyleSheet.create({
   name: {
     ...mobileTypography.bodyMediumBold,
     color: designTokens.colors.textPrimary,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   textInactive: {
     color: designTokens.colors.textQuaternary,
@@ -176,14 +171,14 @@ export const memberCardStyles = StyleSheet.create({
     paddingVertical: designTokens.spacing.xxs,
     borderRadius: designTokens.borderRadius.sm,
     backgroundColor: designTokens.colors.infoLight,
-    flexShrink: flexValues.shrinkDisabled,
+    flexShrink: FLEX.SHRINK_DISABLED,
   },
   roleText: {
     fontSize: mobileFontSizes.xs,
     fontWeight: designTokens.fontWeight.semibold,
     color: designTokens.colors.textSecondary,
-    textTransform: textTransformValues.uppercase,
-    letterSpacing: typographyValues.letterSpacing.normal,
+    textTransform: TEXT_TRANSFORM.UPPERCASE,
+    letterSpacing: TYPOGRAPHY.LETTER_SPACING.NORMAL,
   },
   roleTextInactive: {
     color: designTokens.colors.textQuaternary,
@@ -222,7 +217,7 @@ export const memberCardStyles = StyleSheet.create({
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
     gap: designTokens.spacing.xs,
-    flexShrink: flexValues.shrinkDisabled,
+    flexShrink: FLEX.SHRINK_DISABLED,
   },
   balanceRow: {
     marginTop: designTokens.spacing.sm,
@@ -248,7 +243,7 @@ export const memberCardStyles = StyleSheet.create({
     fontWeight: designTokens.fontWeight.bold,
     color: designTokens.colors.textInverse,
     marginLeft: designTokens.spacing.xs,
-    textTransform: textTransformValues.uppercase,
-    letterSpacing: typographyValues.letterSpacing.normal,
+    textTransform: TEXT_TRANSFORM.UPPERCASE,
+    letterSpacing: TYPOGRAPHY.LETTER_SPACING.NORMAL,
   },
 });

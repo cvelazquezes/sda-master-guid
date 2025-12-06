@@ -3,7 +3,7 @@ import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Text } from '../../../shared/components';
 import { MatchFrequency } from '../../../types';
 import { designTokens, mobileTypography, layoutConstants } from '../../../shared/theme';
-import { flexValues, GRID } from '../../../shared/constants';
+import { FLEX, GRID } from '../../../shared/constants';
 
 interface ActivitySettingsSectionProps {
   matchFrequency: MatchFrequency;
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
   selectLabel: { ...mobileTypography.bodyLargeBold, marginBottom: designTokens.spacing.md },
   selectOptions: { flexDirection: layoutConstants.flexDirection.row, gap: designTokens.spacing.md },
   selectOption: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     padding: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.md,
     borderWidth: designTokens.borderWidth.thin,

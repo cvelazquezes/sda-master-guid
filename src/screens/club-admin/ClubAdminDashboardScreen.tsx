@@ -19,7 +19,7 @@ import { Club, ApprovalStatus, MatchStatus } from '../../types';
 import { designTokens } from '../../shared/theme/designTokens';
 import { layoutConstants } from '../../shared/theme';
 import { ScreenHeader, SectionHeader, MenuCard } from '../../shared/components';
-import { ICONS, MENU_ITEM_IDS, MESSAGES, SCREENS, TABS, flexValues } from '../../shared/constants';
+import { ICONS, MENU_ITEM_IDS, MESSAGES, SCREENS, TABS, FLEX } from '../../shared/constants';
 
 interface DashboardStats {
   totalMembers: number;
@@ -232,7 +232,7 @@ const ClubAdminDashboardScreen = (): React.JSX.Element => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   clubCardContainer: {
     marginTop: designTokens.spacing.lg,

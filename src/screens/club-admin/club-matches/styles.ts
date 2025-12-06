@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { mobileTypography, designTokens, layoutConstants } from '../../../shared/theme';
-import { flexValues } from '../../../shared/constants';
+import { FLEX } from '../../../shared/constants';
 
 export const statsStyles = StyleSheet.create({
   container: {
@@ -18,7 +18,7 @@ export const statsStyles = StyleSheet.create({
     marginBottom: designTokens.spacing.md,
   },
   statCard: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     backgroundColor: designTokens.colors.inputBackground,
     padding: designTokens.spacing.lg,
     borderRadius: designTokens.borderRadius.lg,
@@ -123,7 +123,7 @@ export const modalStyles = StyleSheet.create({
     color: designTokens.colors.textInverse,
   },
   participantInfo: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   participantName: {
     ...mobileTypography.bodyLargeBold,
@@ -184,7 +184,7 @@ export const matchListStyles = StyleSheet.create({
   },
   matchTitle: {
     ...mobileTypography.bodyLargeBold,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   matchBadge: {
     paddingHorizontal: designTokens.spacing.sm,
@@ -210,7 +210,7 @@ export const matchListStyles = StyleSheet.create({
 
 export const indexStyles = StyleSheet.create({
   container: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   scrollContent: {
     paddingBottom: designTokens.spacing.xxl,

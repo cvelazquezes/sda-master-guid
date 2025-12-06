@@ -1,9 +1,9 @@
 import React from 'react';
-// eslint-disable-next-line no-restricted-imports
+// eslint-disable-next-line no-restricted-imports -- TextInput needed for complex form input with custom styling
 import { View, TextInput, StyleSheet } from 'react-native';
 import { Text } from '../../../shared/components';
-import { designTokens, mobileTypography, layoutConstants } from '../../../shared/theme';
-import { dimensionValues } from '../../../shared/constants';
+import { designTokens, mobileTypography } from '../../../shared/theme';
+import { DIMENSIONS, TEXT_ALIGN_VERTICAL } from '../../../shared/constants';
 
 interface BasicInfoSectionProps {
   name: string;
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     ...mobileTypography.bodyLarge,
   },
   textArea: {
-    minHeight: dimensionValues.minHeight.textarea,
-    textAlignVertical: layoutConstants.textAlignVertical.top,
+    minHeight: DIMENSIONS.MIN_HEIGHT.TEXTAREA,
+    textAlignVertical: TEXT_ALIGN_VERTICAL.TOP,
   },
 });

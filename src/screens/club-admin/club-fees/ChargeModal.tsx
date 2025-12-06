@@ -1,8 +1,7 @@
 import React from 'react';
-// eslint-disable-next-line no-restricted-imports
-import { View, ScrollView, TouchableOpacity, Modal, TextInput } from 'react-native';
+import { View, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text } from '../../../shared/components';
+import { Text, Input } from '../../../shared/components';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { User } from '../../../types';
 import { designTokens } from '../../../shared/theme';
@@ -120,39 +119,28 @@ interface InputProps {
   t: (key: string) => string;
 }
 
-function DescriptionInput({ value, onChange, colors, t }: InputProps): React.JSX.Element {
+function DescriptionInput({ value, onChange, t }: Omit<InputProps, 'colors'>): React.JSX.Element {
   return (
-    <View style={modalStyles.inputGroup}>
-      <Text style={modalStyles.label}>{t('screens.clubFees.description')}</Text>
-      <TextInput
-        style={modalStyles.input}
-        value={value}
-        onChangeText={onChange}
-        placeholder={t('screens.clubFees.descriptionPlaceholder')}
-        placeholderTextColor={colors.textTertiary}
-        multiline
-        numberOfLines={TEXT_LINES.double}
-      />
-    </View>
+    <Input
+      label={t('screens.clubFees.description')}
+      value={value}
+      onChangeText={onChange}
+      placeholder={t('screens.clubFees.descriptionPlaceholder')}
+      multiline
+      numberOfLines={TEXT_LINES.double}
+    />
   );
 }
 
-function AmountInput({ value, onChange, colors, t }: InputProps): React.JSX.Element {
+function AmountInput({ value, onChange, t }: Omit<InputProps, 'colors'>): React.JSX.Element {
   return (
-    <View style={modalStyles.inputGroup}>
-      <Text style={modalStyles.label}>{t('screens.clubFees.amount')}</Text>
-      <View style={settingsStyles.amountInputContainer}>
-        <Text style={settingsStyles.currencySymbol}>$</Text>
-        <TextInput
-          style={[settingsStyles.amountInput, { paddingLeft: designTokens.spacing.none }]}
-          value={value}
-          onChangeText={onChange}
-          keyboardType={KEYBOARD_TYPE.DECIMAL_PAD}
-          placeholder={t('screens.clubFees.amountPlaceholder')}
-          placeholderTextColor={colors.textTertiary}
-        />
-      </View>
-    </View>
+    <Input
+      label={t('screens.clubFees.amount')}
+      value={value}
+      onChangeText={onChange}
+      keyboardType={KEYBOARD_TYPE.DECIMAL_PAD}
+      placeholder={`$ ${t('screens.clubFees.amountPlaceholder')}`}
+    />
   );
 }
 

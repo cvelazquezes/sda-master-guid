@@ -1,12 +1,12 @@
 import { StyleSheet } from 'react-native';
 import { mobileFontSizes, designTokens, layoutConstants } from '../../../shared/theme';
-import { flexValues, shadowOffsetValues } from '../../../shared/constants';
+import { FLEX, SHADOW_OFFSET } from '../../../shared/constants';
 import { MATH } from '../../../shared/constants/http';
 
 export const styles = StyleSheet.create({
-  container: { flex: flexValues.one, backgroundColor: designTokens.colors.backgroundSecondary },
+  container: { flex: FLEX.ONE, backgroundColor: designTokens.colors.backgroundSecondary },
   loadingContainer: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
     backgroundColor: designTokens.colors.backgroundSecondary,
@@ -29,7 +29,7 @@ export const styles = StyleSheet.create({
     marginBottom: designTokens.spacing.xs,
   },
   headerSubtitle: { fontSize: mobileFontSizes.sm, color: designTokens.overlay.lightStrong },
-  tabContent: { flex: flexValues.one },
+  tabContent: { flex: FLEX.ONE },
   section: { padding: designTokens.spacing.lg },
 });
 
@@ -41,12 +41,12 @@ export const tabStyles = StyleSheet.create({
     borderBottomColor: designTokens.colors.borderLight,
     elevation: designTokens.shadows.sm.elevation,
     shadowColor: designTokens.colors.textPrimary,
-    shadowOffset: shadowOffsetValues.md,
+    shadowOffset: SHADOW_OFFSET.MD,
     shadowOpacity: designTokens.shadows.sm.shadowOpacity,
     shadowRadius: designTokens.shadows.sm.shadowRadius,
   },
   tab: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
     justifyContent: layoutConstants.justifyContent.center,
@@ -78,7 +78,7 @@ export const settingsStyles = StyleSheet.create({
     borderLeftColor: designTokens.colors.primary,
   },
   infoIconContainer: { marginRight: designTokens.spacing.md, marginTop: designTokens.spacing.xxs },
-  infoTextContainer: { flex: flexValues.one },
+  infoTextContainer: { flex: FLEX.ONE },
   infoTitle: {
     fontSize: mobileFontSizes.md,
     fontWeight: designTokens.fontWeight.semibold,
@@ -102,7 +102,7 @@ export const settingsStyles = StyleSheet.create({
     justifyContent: layoutConstants.justifyContent.spaceBetween,
     alignItems: layoutConstants.alignItems.center,
   },
-  settingLabelContainer: { flex: flexValues.one, marginRight: designTokens.spacing.lg },
+  settingLabelContainer: { flex: FLEX.ONE, marginRight: designTokens.spacing.lg },
   settingLabel: {
     fontSize: mobileFontSizes.lg,
     fontWeight: designTokens.fontWeight.semibold,
@@ -130,7 +130,7 @@ export const settingsStyles = StyleSheet.create({
   },
   amountRow: { flexDirection: layoutConstants.flexDirection.row, gap: designTokens.spacing.md },
   amountInputContainer: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
     backgroundColor: designTokens.colors.backgroundSecondary,
@@ -146,7 +146,7 @@ export const settingsStyles = StyleSheet.create({
     marginRight: designTokens.spacing.sm,
   },
   amountInput: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     padding: designTokens.spacing.md + designTokens.spacing.xxs,
     fontSize: mobileFontSizes.lg,
     fontWeight: designTokens.fontWeight.semibold,
@@ -302,7 +302,7 @@ export const balanceStyles = StyleSheet.create({
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
     gap: designTokens.spacing.md,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   avatar: {
     width: designTokens.touchTarget.minimum,
@@ -316,7 +316,7 @@ export const balanceStyles = StyleSheet.create({
     fontSize: mobileFontSizes.xl,
     fontWeight: designTokens.fontWeight.bold,
   },
-  memberTextInfo: { flex: flexValues.one },
+  memberTextInfo: { flex: FLEX.ONE },
   name: {
     fontSize: mobileFontSizes.lg,
     fontWeight: designTokens.fontWeight.semibold,
@@ -421,7 +421,7 @@ export const chargeStyles = StyleSheet.create({
     fontSize: mobileFontSizes.lg,
     fontWeight: designTokens.fontWeight.semibold,
     color: designTokens.colors.textPrimary,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     marginRight: designTokens.spacing.md,
   },
   amount: {
@@ -440,7 +440,7 @@ export const chargeStyles = StyleSheet.create({
 
 export const emptyStyles = StyleSheet.create({
   container: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
     paddingVertical: designTokens.spacing['6xl'],

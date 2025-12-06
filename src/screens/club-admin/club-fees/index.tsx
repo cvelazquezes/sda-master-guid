@@ -140,8 +140,7 @@ const ClubFeesScreen = (): React.JSX.Element | null => {
       feeState.setSelectedMonths(club.feeSettings.activeMonths);
       feeState.setFeeSettingsActive(club.feeSettings.isActive);
     }
-    // feeState setters are stable, only re-run when club changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- feeState setters are stable, only re-run when club changes
   }, [club]);
 
   const handleSave = useCallback((): void => {

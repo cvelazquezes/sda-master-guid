@@ -22,11 +22,11 @@ import {
   ICONS,
   LOG_MESSAGES,
   MESSAGES,
-  borderValues,
-  dimensionValues,
-  flexValues,
-  shadowOffsetValues,
-  typographyValues,
+  BORDERS,
+  DIMENSIONS,
+  FLEX,
+  SHADOW_OFFSET,
+  TYPOGRAPHY,
 } from '../../shared/constants';
 
 // Directive positions that can be assigned
@@ -527,7 +527,7 @@ const ClubDirectiveScreen = (): React.JSX.Element => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     backgroundColor: designTokens.colors.backgroundSecondary,
   },
   header: {
@@ -569,12 +569,12 @@ const styles = StyleSheet.create({
     color: designTokens.colors.textPrimary,
   },
   summarySeparator: {
-    width: borderValues.width.thin,
-    height: dimensionValues.height.divider,
+    width: BORDERS.WIDTH.THIN,
+    height: DIMENSIONS.HEIGHT.DIVIDER,
     backgroundColor: designTokens.colors.borderLight,
   },
   content: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   section: {
     padding: designTokens.spacing.xl,
@@ -590,21 +590,21 @@ const styles = StyleSheet.create({
     marginBottom: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.lg,
     shadowColor: designTokens.colors.textPrimary,
-    shadowOffset: shadowOffsetValues.md,
+    shadowOffset: SHADOW_OFFSET.MD,
     shadowOpacity: designTokens.shadows.sm.shadowOpacity,
     shadowRadius: designTokens.shadows.sm.shadowRadius,
     elevation: designTokens.shadows.sm.elevation,
   },
   positionIcon: {
-    width: dimensionValues.size.avatarMedium,
-    height: dimensionValues.size.avatarMedium,
+    width: DIMENSIONS.SIZE.AVATAR_MEDIUM,
+    height: DIMENSIONS.SIZE.AVATAR_MEDIUM,
     borderRadius: designTokens.borderRadius['4xl'],
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
     marginRight: designTokens.spacing.md,
   },
   positionContent: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   positionHeader: {
     marginBottom: designTokens.spacing.sm,
@@ -626,8 +626,8 @@ const styles = StyleSheet.create({
     marginTop: designTokens.spacing.sm,
   },
   memberAvatar: {
-    width: dimensionValues.size.iconButtonSmall,
-    height: dimensionValues.size.iconButtonSmall,
+    width: DIMENSIONS.SIZE.ICON_BUTTON_SMALL,
+    height: DIMENSIONS.SIZE.ICON_BUTTON_SMALL,
     borderRadius: designTokens.borderRadius['3xl'],
     backgroundColor: designTokens.colors.primary,
     justifyContent: layoutConstants.justifyContent.center,
@@ -639,7 +639,7 @@ const styles = StyleSheet.create({
     color: designTokens.colors.textInverse,
   },
   memberInfo: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   memberName: {
     ...mobileTypography.bodyMediumBold,
@@ -661,7 +661,7 @@ const styles = StyleSheet.create({
     borderRadius: designTokens.borderRadius.md,
     borderWidth: designTokens.borderWidth.thin,
     borderColor: designTokens.colors.primary,
-    borderStyle: borderValues.style.dashed,
+    borderStyle: BORDERS.STYLE.DASHED,
     gap: designTokens.spacing.sm,
     marginTop: designTokens.spacing.sm,
   },
@@ -676,14 +676,14 @@ const styles = StyleSheet.create({
     margin: designTokens.spacing.xl,
     borderRadius: designTokens.borderRadius.xl,
     gap: designTokens.spacing.md,
-    borderLeftWidth: borderValues.width.medium,
+    borderLeftWidth: BORDERS.WIDTH.MEDIUM,
     borderLeftColor: designTokens.colors.info,
   },
   infoText: {
     ...mobileTypography.bodySmall,
     color: designTokens.colors.info,
-    flex: flexValues.one,
-    lineHeight: typographyValues.lineHeight.lg,
+    flex: FLEX.ONE,
+    lineHeight: TYPOGRAPHY.LINE_HEIGHT.LG,
   },
   footer: {
     padding: designTokens.spacing.xl,

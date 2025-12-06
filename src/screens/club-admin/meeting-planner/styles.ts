@@ -1,14 +1,9 @@
 import { StyleSheet } from 'react-native';
 import { mobileTypography, designTokens, layoutConstants } from '../../../shared/theme';
-import {
-  flexValues,
-  shadowOffsetValues,
-  dimensionValues,
-  textAlignVertical,
-} from '../../../shared/constants';
+import { FLEX, SHADOW_OFFSET, DIMENSIONS, TEXT_ALIGN_VERTICAL } from '../../../shared/constants';
 
 export const styles = StyleSheet.create({
-  container: { flex: flexValues.one, backgroundColor: designTokens.colors.backgroundSecondary },
+  container: { flex: FLEX.ONE, backgroundColor: designTokens.colors.backgroundSecondary },
   header: {
     flexDirection: layoutConstants.flexDirection.row,
     justifyContent: layoutConstants.justifyContent.spaceBetween,
@@ -22,7 +17,7 @@ export const styles = StyleSheet.create({
   headerTitle: { ...mobileTypography.heading1 },
   headerActions: { flexDirection: layoutConstants.flexDirection.row, gap: designTokens.spacing.md },
   headerButton: { padding: designTokens.spacing.sm },
-  content: { flex: flexValues.one },
+  content: { flex: FLEX.ONE },
   emptyState: {
     alignItems: layoutConstants.alignItems.center,
     justifyContent: layoutConstants.justifyContent.center,
@@ -77,7 +72,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: designTokens.spacing.xl,
     borderRadius: designTokens.borderRadius.xl,
     gap: designTokens.spacing.md,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   shareButtonText: { ...mobileTypography.button, color: designTokens.colors.textInverse },
 });
@@ -100,14 +95,14 @@ export const meetingInfoStyles = StyleSheet.create({
   date: {
     ...mobileTypography.bodyMediumBold,
     color: designTokens.colors.textPrimary,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   quickDateButtons: {
     flexDirection: layoutConstants.flexDirection.row,
     gap: designTokens.spacing.md,
   },
   quickDateButton: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     backgroundColor: designTokens.colors.primaryLight,
     paddingVertical: designTokens.spacing.md,
     paddingHorizontal: designTokens.spacing.lg,
@@ -145,14 +140,14 @@ export const agendaCardStyles = StyleSheet.create({
     marginTop: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.lg,
     shadowColor: designTokens.colors.textPrimary,
-    shadowOffset: shadowOffsetValues.md,
+    shadowOffset: SHADOW_OFFSET.MD,
     shadowOpacity: designTokens.shadows.sm.shadowOpacity,
     shadowRadius: designTokens.shadows.sm.shadowRadius,
     elevation: designTokens.shadows.sm.elevation,
   },
   orderBadge: {
-    width: dimensionValues.size.orderBadge,
-    height: dimensionValues.size.orderBadge,
+    width: DIMENSIONS.SIZE.ORDER_BADGE,
+    height: DIMENSIONS.SIZE.ORDER_BADGE,
     borderRadius: designTokens.borderRadius.xl,
     backgroundColor: designTokens.colors.primary,
     justifyContent: layoutConstants.justifyContent.center,
@@ -160,7 +155,7 @@ export const agendaCardStyles = StyleSheet.create({
     marginRight: designTokens.spacing.md,
   },
   orderText: { ...mobileTypography.labelBold, color: designTokens.colors.textInverse },
-  content: { flex: flexValues.one },
+  content: { flex: FLEX.ONE },
   header: {
     flexDirection: layoutConstants.flexDirection.row,
     justifyContent: layoutConstants.justifyContent.spaceBetween,
@@ -168,7 +163,7 @@ export const agendaCardStyles = StyleSheet.create({
     marginBottom: designTokens.spacing.sm,
     gap: designTokens.spacing.sm,
   },
-  title: { ...mobileTypography.bodyMediumBold, flex: flexValues.one },
+  title: { ...mobileTypography.bodyMediumBold, flex: FLEX.ONE },
   timeChip: {
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
@@ -203,7 +198,7 @@ export const agendaCardStyles = StyleSheet.create({
     ...mobileTypography.label,
     color: designTokens.colors.primary,
     fontWeight: designTokens.fontWeight.semibold,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   actions: { marginLeft: designTokens.spacing.md, gap: designTokens.spacing.sm },
   moveButtons: { gap: designTokens.spacing.xs },
@@ -233,7 +228,7 @@ export const assignButtonStyles = StyleSheet.create({
 
 export const modalStyles = StyleSheet.create({
   overlay: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     backgroundColor: designTokens.overlay.darkMedium,
     justifyContent: layoutConstants.justifyContent.flexEnd,
   },
@@ -268,8 +263,8 @@ export const modalStyles = StyleSheet.create({
     backgroundColor: designTokens.colors.inputBackground,
   },
   textArea: {
-    minHeight: dimensionValues.minHeight.textarea,
-    textAlignVertical: textAlignVertical.top,
+    minHeight: DIMENSIONS.MIN_HEIGHT.TEXTAREA,
+    textAlignVertical: TEXT_ALIGN_VERTICAL.TOP,
   },
   footer: {
     flexDirection: layoutConstants.flexDirection.row,
@@ -279,7 +274,7 @@ export const modalStyles = StyleSheet.create({
     borderTopColor: designTokens.colors.borderLight,
   },
   button: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     paddingVertical: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.md,
     alignItems: layoutConstants.alignItems.center,
@@ -306,7 +301,7 @@ export const modalStyles = StyleSheet.create({
     marginRight: designTokens.spacing.md,
   },
   memberAvatarText: { ...mobileTypography.bodyMediumBold, color: designTokens.colors.textInverse },
-  memberInfo: { flex: flexValues.one },
+  memberInfo: { flex: FLEX.ONE },
   memberOptionName: { ...mobileTypography.bodyMediumBold },
   memberOptionEmail: { ...mobileTypography.caption, color: designTokens.colors.textSecondary },
   noMembersText: {
@@ -326,8 +321,8 @@ export const shareModalStyles = StyleSheet.create({
   },
   header: { alignItems: layoutConstants.alignItems.center, marginBottom: designTokens.spacing.xxl },
   iconContainer: {
-    width: dimensionValues.size.shareIconLarge,
-    height: dimensionValues.size.shareIconLarge,
+    width: DIMENSIONS.SIZE.SHARE_ICON_LARGE,
+    height: DIMENSIONS.SIZE.SHARE_ICON_LARGE,
     borderRadius: designTokens.borderRadius.full,
     backgroundColor: designTokens.colors.primaryLight,
     justifyContent: layoutConstants.justifyContent.center,
@@ -356,7 +351,7 @@ export const shareModalStyles = StyleSheet.create({
     alignItems: layoutConstants.alignItems.center,
     gap: designTokens.spacing.md,
   },
-  infoText: { flex: flexValues.one },
+  infoText: { flex: FLEX.ONE },
   infoLabel: {
     ...mobileTypography.label,
     color: designTokens.colors.textSecondary,
@@ -365,7 +360,7 @@ export const shareModalStyles = StyleSheet.create({
   infoValue: { ...mobileTypography.bodyMediumBold, color: designTokens.colors.textPrimary },
   actions: { flexDirection: layoutConstants.flexDirection.row, gap: designTokens.spacing.md },
   confirmButton: {
-    flex: flexValues.oneAndHalf,
+    flex: FLEX.ONEAndHalf,
     flexDirection: layoutConstants.flexDirection.row,
     gap: designTokens.spacing.sm,
     backgroundColor: designTokens.colors.success,

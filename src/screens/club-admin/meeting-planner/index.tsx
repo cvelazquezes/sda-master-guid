@@ -33,12 +33,11 @@ import { SelectMemberModal } from './SelectMemberModal';
 import { ShareModal } from './ShareModal';
 
 // Meeting agenda time durations (in minutes)
-/* eslint-disable no-magic-numbers -- Domain-specific meeting duration constants */
 const AGENDA_DURATION = {
   VERY_SHORT: MATH.FIVE, // 5 min
   SHORT: MATH.TEN, // 10 min
-  MEDIUM: 15, // 15 min
-  LONG: 45, // 45 min (pathfinder class)
+  MEDIUM: MATH.FIFTEEN, // 15 min
+  LONG: MATH.FORTY_FIVE, // 45 min (pathfinder class)
 } as const;
 
 function useDefaultAgenda(

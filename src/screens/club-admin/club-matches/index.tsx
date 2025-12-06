@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Text } from '../../../shared/components';
 import { useAuth } from '../../../context/AuthContext';
 import { mobileTypography, designTokens } from '../../../shared/theme';
-import { flexValues } from '../../../shared/constants';
+import { FLEX } from '../../../shared/constants';
 import { useClubMatches } from './useClubMatches';
 import { StatsSection } from './StatsSection';
 import { RoundsSection } from './RoundsSection';
@@ -110,7 +110,7 @@ const ClubMatchesScreen = (): React.JSX.Element => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     backgroundColor: designTokens.colors.backgroundSecondary,
   },
   header: {

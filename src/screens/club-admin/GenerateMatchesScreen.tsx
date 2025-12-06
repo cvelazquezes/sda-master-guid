@@ -19,7 +19,7 @@ import {
   ICONS,
   MESSAGES,
   SCREENS,
-  flexValues,
+  FLEX,
 } from '../../shared/constants';
 import { MATH, BORDER_WIDTH } from '../../shared/constants/numbers';
 
@@ -287,7 +287,7 @@ const GenerateMatchesScreen = (): React.JSX.Element => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     backgroundColor: designTokens.colors.backgroundSecondary,
   },
   header: {
@@ -337,7 +337,7 @@ const styles = StyleSheet.create({
   roundInfo: {
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   roundDetails: {
     marginLeft: designTokens.spacing.md,

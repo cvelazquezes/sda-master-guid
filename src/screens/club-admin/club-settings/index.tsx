@@ -7,7 +7,7 @@ import { useTheme } from '../../../contexts/ThemeContext';
 import { MatchFrequency } from '../../../types';
 import { OrganizationHierarchy } from '../../../components/OrganizationHierarchy';
 import { designTokens, mobileTypography, layoutConstants } from '../../../shared/theme';
-import { flexValues } from '../../../shared/constants';
+import { FLEX } from '../../../shared/constants';
 import { useClubSettings } from './useClubSettings';
 import { BasicInfoSection } from './BasicInfoSection';
 import { ActivitySettingsSection } from './ActivitySettingsSection';
@@ -117,7 +117,7 @@ const ClubSettingsScreen = (): React.JSX.Element => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: flexValues.one },
+  container: { flex: FLEX.ONE },
   header: {
     padding: designTokens.spacing.lg,
     borderBottomWidth: designTokens.borderWidth.thin,
