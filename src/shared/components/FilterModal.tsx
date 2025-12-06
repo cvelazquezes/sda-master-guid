@@ -17,14 +17,7 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { mobileTypography, designTokens, layoutConstants } from '../theme';
-import {
-  A11Y_ROLE,
-  ANIMATION,
-  ICONS,
-  borderValues,
-  dimensionValues,
-  flexValues,
-} from '../constants';
+import { A11Y_ROLE, ANIMATION, ICONS, BORDERS, DIMENSIONS, FLEX } from '../constants';
 
 export interface FilterOption {
   id: string;
@@ -251,7 +244,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
 
 const styles = StyleSheet.create({
   overlay: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     backgroundColor: designTokens.overlay.darkMedium,
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
@@ -263,14 +256,14 @@ const styles = StyleSheet.create({
   },
   content: {
     borderRadius: designTokens.borderRadius['2xl'],
-    width: dimensionValues.width.full,
-    maxWidth: dimensionValues.maxWidth.modal,
-    maxHeight: dimensionValues.maxHeight.modalPercent,
+    width: DIMENSIONS.WIDTH.FULL,
+    maxWidth: DIMENSIONS.MAX_WIDTH.MODAL,
+    maxHeight: DIMENSIONS.MAX_HEIGHT.MODAL_PERCENT,
   },
   contentMobile: {
-    maxWidth: dimensionValues.maxWidthPercent.full,
-    borderBottomLeftRadius: borderValues.radius.none,
-    borderBottomRightRadius: borderValues.radius.none,
+    maxWidth: DIMENSIONS.MAX_WIDTH_PERCENT.FULL,
+    borderBottomLeftRadius: BORDERS.RADIUS.NONE,
+    borderBottomRightRadius: BORDERS.RADIUS.NONE,
     borderTopLeftRadius: designTokens.borderRadius['2xl'],
     borderTopRightRadius: designTokens.borderRadius['2xl'],
   },
@@ -297,7 +290,7 @@ const styles = StyleSheet.create({
     padding: designTokens.spacing.xs,
   },
   body: {
-    maxHeight: dimensionValues.maxHeight.modalBodyMedium,
+    maxHeight: DIMENSIONS.MAX_HEIGHT.MODAL_BODY_MEDIUM,
   },
   section: {
     padding: designTokens.spacing.lg,
@@ -315,7 +308,7 @@ const styles = StyleSheet.create({
     gap: designTokens.spacing.sm,
   },
   infoBannerText: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     ...mobileTypography.bodySmall,
     lineHeight: designTokens.lineHeights.body,
   },
@@ -331,7 +324,7 @@ const styles = StyleSheet.create({
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
     gap: designTokens.spacing.md,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   optionText: {
     ...mobileTypography.bodyLarge,
@@ -343,26 +336,26 @@ const styles = StyleSheet.create({
     borderTopWidth: designTokens.borderWidth.thin,
   },
   clearButton: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     paddingVertical: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.lg,
     alignItems: layoutConstants.alignItems.center,
     flexDirection: layoutConstants.flexDirection.row,
     justifyContent: layoutConstants.justifyContent.center,
     gap: designTokens.spacing.xs,
-    minHeight: dimensionValues.minHeight.selectItem,
+    minHeight: DIMENSIONS.MIN_HEIGHT.SELECT_ITEM,
   },
   clearButtonText: {
     fontSize: designTokens.typography.fontSizes.md,
     fontWeight: designTokens.fontWeight.semibold,
   },
   applyButton: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     paddingVertical: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.lg,
     alignItems: layoutConstants.alignItems.center,
     justifyContent: layoutConstants.justifyContent.center,
-    minHeight: dimensionValues.minHeight.selectItem,
+    minHeight: DIMENSIONS.MIN_HEIGHT.SELECT_ITEM,
   },
   applyButtonText: {
     fontSize: designTokens.typography.fontSizes.md,

@@ -9,7 +9,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { View, TouchableOpacity, StyleSheet, ViewProps } from 'react-native';
 import { useTheme, layoutConstants } from '../theme';
 import { designTokens } from '../theme/designTokens';
-import { COMPONENT_VARIANT, flexValues } from '../constants';
+import { COMPONENT_VARIANT, FLEX } from '../constants';
 import { Text } from './Text';
 
 // ============================================================================
@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
     // borderBottomColor is set dynamically via useTheme
   },
   listItemContent: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   listItemName: {
     marginBottom: designTokens.spacing.xs,

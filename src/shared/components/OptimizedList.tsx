@@ -11,7 +11,7 @@ import { FlashList, ListRenderItem } from '@shopify/flash-list';
 import { useTheme, layoutConstants } from '../theme';
 import { designTokens } from '../theme/designTokens';
 import { logger } from '../utils/logger';
-import { LIST_THRESHOLDS, flexValues } from '../constants';
+import { LIST_THRESHOLDS, FLEX } from '../constants';
 import { MATH } from '../constants/numbers';
 import { Text } from './Text';
 
@@ -294,13 +294,13 @@ const styles = StyleSheet.create({
     marginRight: designTokens.spacing.lg,
   },
   userInfo: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   userName: {
     marginBottom: designTokens.spacing.xs,
   },
   emptyContainer: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     alignItems: layoutConstants.alignItems.center,
     justifyContent: layoutConstants.justifyContent.center,
     padding: designTokens.spacing['4xl'],

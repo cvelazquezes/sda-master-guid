@@ -8,7 +8,7 @@ import { View, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { mobileIconSizes, designTokens, layoutConstants } from '../theme';
-import { A11Y_ROLE, ICONS, TEXT_LINES, flexValues } from '../constants';
+import { A11Y_ROLE, ICONS, TEXT_LINES, FLEX } from '../constants';
 import { SPACING, MATH } from '../constants/numbers';
 import { Text } from './Text';
 
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     marginRight: designTokens.spacing.md,
   },
   pickerText: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   messageContainer: {
     flexDirection: layoutConstants.flexDirection.row,
@@ -156,6 +156,6 @@ const styles = StyleSheet.create({
     marginRight: designTokens.spacing.xs,
   },
   errorText: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
 });

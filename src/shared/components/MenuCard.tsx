@@ -9,7 +9,7 @@ import { View, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { designTokens, layoutConstants } from '../theme';
-import { A11Y_ROLE, ICONS, TEXT_LINES, TOUCH_OPACITY, flexValues } from '../constants';
+import { A11Y_ROLE, ICONS, TEXT_LINES, TOUCH_OPACITY, FLEX } from '../constants';
 import { Text } from './Text';
 
 interface MenuCardProps {
@@ -121,10 +121,10 @@ const styles = StyleSheet.create({
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
     marginRight: designTokens.spacing.lg,
-    flexShrink: flexValues.shrinkDisabled,
+    flexShrink: FLEX.SHRINK_DISABLED,
   },
   content: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     marginRight: designTokens.spacing.sm,
   },
   titleRow: {
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     marginBottom: designTokens.spacing.xs,
   },
   title: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   badge: {
     paddingHorizontal: designTokens.spacing.sm,
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     alignItems: layoutConstants.alignItems.center,
   },
   chevron: {
-    flexShrink: flexValues.shrinkDisabled,
+    flexShrink: FLEX.SHRINK_DISABLED,
   },
 });
 

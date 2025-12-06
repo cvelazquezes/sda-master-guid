@@ -10,7 +10,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from './Text';
 import { useTheme } from '../../contexts/ThemeContext';
 import { designTokens, layoutConstants } from '../theme';
-import { ICONS } from '../constants';
+import { ICONS, FLEX } from '../constants';
 
 type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
 
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     // backgroundColor set dynamically via useTheme
   },
   hierarchyInfo: {
-    flex: 1,
+    flex: FLEX.ONE,
     marginLeft: designTokens.spacing.sm,
   },
   filterSection: {

@@ -16,7 +16,7 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../theme';
-import { A11Y_ROLE, ICONS, dimensionValues, flexValues } from '../constants';
+import { A11Y_ROLE, ICONS, DIMENSIONS, FLEX } from '../constants';
 import { Text } from './Text';
 
 interface StandardInputProps extends TextInputProps {
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
     borderWidth: designTokens.borderWidth.thin,
     borderRadius: designTokens.borderRadius.lg,
     paddingHorizontal: designTokens.spacing.md,
-    minHeight: dimensionValues.minHeight.button,
+    minHeight: DIMENSIONS.MIN_HEIGHT.BUTTON,
   },
   inputContainerMultiline: {
     alignItems: layoutConstants.alignItems.flexStart,
@@ -209,9 +209,9 @@ const styles = StyleSheet.create({
     marginTop: designTokens.spacing.xxs,
   },
   input: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     ...mobileTypography.bodyLarge,
-    minHeight: dimensionValues.minHeight.button,
+    minHeight: DIMENSIONS.MIN_HEIGHT.BUTTON,
   },
   secureToggle: {
     padding: designTokens.spacing.sm,
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
     marginRight: designTokens.spacing.xs,
   },
   errorText: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   helperText: {
     marginTop: designTokens.spacing.xs,

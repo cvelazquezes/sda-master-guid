@@ -9,7 +9,7 @@ import { View, TextInput, TouchableOpacity, StyleSheet, ViewStyle } from 'react-
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { mobileTypography, designTokens, layoutConstants } from '../theme';
-import { A11Y_ROLE, EMPTY_VALUE, ICONS, flexValues } from '../constants';
+import { A11Y_ROLE, EMPTY_VALUE, ICONS, FLEX } from '../constants';
 import { Text } from './Text';
 
 interface SearchBarProps {
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: designTokens.borderWidth.thin,
   },
   searchContainer: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
     borderRadius: designTokens.borderRadius.lg,
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     gap: designTokens.spacing.sm,
   },
   searchInput: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     ...mobileTypography.bodyLarge,
   },
   filterButton: {

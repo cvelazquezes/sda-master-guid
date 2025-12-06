@@ -11,7 +11,7 @@ import { useTheme, layoutConstants } from '../theme';
 import { designTokens } from '../theme/designTokens';
 import { LOG_MESSAGES } from '../constants/logMessages';
 import { logger } from '../utils/logger';
-import { A11Y_ROLE, ACTIVITY_INDICATOR_SIZE, TOUCH_OPACITY, flexValues } from '../constants';
+import { A11Y_ROLE, ACTIVITY_INDICATOR_SIZE, TOUCH_OPACITY, FLEX } from '../constants';
 import { Text } from './Text';
 
 /**
@@ -201,7 +201,7 @@ export function preloadScreen<P extends object>(
 
 const styles = StyleSheet.create({
   container: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
     padding: designTokens.spacing.xl,

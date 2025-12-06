@@ -19,14 +19,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { designTokens } from '../theme/designTokens';
 import { layoutConstants } from '../theme';
 import { StandardButton } from './StandardButton';
-import {
-  A11Y_ROLE,
-  BUTTON_SIZE,
-  COMPONENT_VARIANT,
-  ICONS,
-  dimensionValues,
-  flexValues,
-} from '../constants';
+import { A11Y_ROLE, BUTTON_SIZE, COMPONENT_VARIANT, ICONS, DIMENSIONS, FLEX } from '../constants';
 import { Text } from './Text';
 
 export interface EmptyStateProps {
@@ -114,7 +107,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
     padding: designTokens.spacing.xxl,
@@ -128,7 +121,7 @@ const styles = StyleSheet.create({
     marginBottom: designTokens.spacing.sm,
   },
   description: {
-    maxWidth: dimensionValues.maxWidth.message,
+    maxWidth: DIMENSIONS.MAX_WIDTH.MESSAGE,
     marginBottom: designTokens.spacing.lg,
   },
   actionContainer: {

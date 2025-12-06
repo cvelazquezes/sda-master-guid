@@ -125,7 +125,6 @@ export const Pressable: React.FC<PressableProps> = ({
 
   // Build computed style (memoized for performance)
   const computedStyle = useMemo<ViewStyle>(
-    // eslint-disable-next-line complexity
     () => ({
       // Background
       ...(currentBg && { backgroundColor: getInteractiveBackgroundColor(currentBg) }),

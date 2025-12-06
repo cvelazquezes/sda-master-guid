@@ -129,7 +129,6 @@ export const Box: React.FC<BoxProps> = ({
 
   // Build computed style (memoized for performance)
   const computedStyle = useMemo<ViewStyle>(
-    // eslint-disable-next-line complexity
     () => ({
       // Background
       ...(bg && { backgroundColor: getBackgroundColor(bg) }),

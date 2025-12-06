@@ -14,7 +14,7 @@ import {
   COMPONENT_SIZE,
   COMPONENT_VARIANT,
   TOUCH_OPACITY,
-  dimensionValues,
+  DIMENSIONS,
   ICONS,
 } from '../constants';
 
@@ -62,17 +62,17 @@ export const IconButton: React.FC<IconButtonProps> = ({
     switch (size) {
       case COMPONENT_SIZE.sm:
         return {
-          containerSize: dimensionValues.minWidth.iconButtonSmall,
+          containerSize: DIMENSIONS.MIN_WIDTH.ICON_BUTTON_SMALL,
           iconSize: designTokens.icon.sizes.sm,
         };
       case COMPONENT_SIZE.lg:
         return {
-          containerSize: dimensionValues.minHeight.selectItem,
+          containerSize: DIMENSIONS.MIN_HEIGHT.SELECT_ITEM,
           iconSize: designTokens.icon.sizes.lg,
         };
       default:
         return {
-          containerSize: dimensionValues.minHeight.touchTarget,
+          containerSize: DIMENSIONS.MIN_HEIGHT.TOUCH_TARGET,
           iconSize: designTokens.icon.sizes.md,
         };
     }

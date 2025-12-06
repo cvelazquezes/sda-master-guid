@@ -14,7 +14,7 @@ import { View, StyleSheet, ViewStyle } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { designTokens } from '../theme/designTokens';
 import { layoutConstants } from '../theme';
-import { flexValues } from '../constants';
+import { FLEX } from '../constants';
 import { SPACING } from '../constants/numbers';
 import { Text } from './Text';
 
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
     gap: designTokens.spacing.sm,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   badge: {
     paddingHorizontal: designTokens.spacing.sm,

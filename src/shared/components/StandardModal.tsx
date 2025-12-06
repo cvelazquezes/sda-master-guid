@@ -27,9 +27,9 @@ import {
   KEYBOARD_BEHAVIOR,
   MODAL_CONFIG,
   PLATFORM_OS,
-  borderValues,
-  dimensionValues,
-  flexValues,
+  BORDERS,
+  DIMENSIONS,
+  FLEX,
 } from '../constants';
 import { MATH } from '../constants/numbers';
 
@@ -65,7 +65,7 @@ export const StandardModal: React.FC<StandardModalProps> = ({
   iconColor,
   iconBackgroundColor,
   children,
-  maxHeight = dimensionValues.maxHeightPercent.ninety,
+  maxHeight = DIMENSIONS.MAX_HEIGHT_PERCENT.NINETY,
   scrollable = true,
   showCloseButton = true,
   footer,
@@ -99,7 +99,7 @@ export const StandardModal: React.FC<StandardModalProps> = ({
       );
     } else {
       // Mobile - full width for bottom sheet
-      return dimensionValues.maxWidthPercent.full;
+      return DIMENSIONS.MAX_WIDTH_PERCENT.FULL;
     }
   };
 
@@ -227,7 +227,7 @@ export const StandardModal: React.FC<StandardModalProps> = ({
 
 const styles = StyleSheet.create({
   modalOverlay: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
     paddingTop:
@@ -238,13 +238,13 @@ const styles = StyleSheet.create({
     paddingTop: designTokens.spacing.none,
   },
   backdrop: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     backgroundColor: designTokens.overlay.darkMedium,
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
     paddingVertical: designTokens.spacing.xl,
     paddingHorizontal: designTokens.spacing.lg,
-    width: dimensionValues.width.full,
+    width: DIMENSIONS.WIDTH.FULL,
   },
   backdropMobile: {
     justifyContent: layoutConstants.justifyContent.flexEnd,
@@ -260,8 +260,8 @@ const styles = StyleSheet.create({
   modalContentMobile: {
     borderTopLeftRadius: designTokens.borderRadius['2xl'],
     borderTopRightRadius: designTokens.borderRadius['2xl'],
-    borderBottomLeftRadius: borderValues.radius.none,
-    borderBottomRightRadius: borderValues.radius.none,
+    borderBottomLeftRadius: BORDERS.RADIUS.NONE,
+    borderBottomRightRadius: BORDERS.RADIUS.NONE,
   },
   dragHandle: {
     width: designTokens.spacing['4xl'],
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
   headerLeft: {
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     marginRight: designTokens.spacing.md,
   },
   iconContainer: {
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
     marginRight: designTokens.spacing.md,
   },
   headerInfo: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   headerTitle: {
     fontSize: designTokens.typography.fontSizes.lg,
@@ -309,16 +309,16 @@ const styles = StyleSheet.create({
     borderRadius: designTokens.borderRadius.full,
   },
   content: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   contentWrapper: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   scrollContent: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   scrollContentContainer: {
-    flexGrow: 1,
+    flexGrow: FLEX.GROW_ENABLED,
   },
   footer: {
     padding: designTokens.spacing.lg,

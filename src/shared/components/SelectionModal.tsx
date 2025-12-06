@@ -10,7 +10,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { StandardModal } from './StandardModal';
 import { mobileIconSizes, designTokens, layoutConstants } from '../theme';
-import { A11Y_ROLE, ICONS, TOUCH_OPACITY, dimensionValues, flexValues } from '../constants';
+import { A11Y_ROLE, ICONS, TOUCH_OPACITY, DIMENSIONS, FLEX } from '../constants';
 import { Text } from './Text';
 
 export interface SelectionItem {
@@ -151,7 +151,7 @@ export const SelectionModal: React.FC<SelectionModalProps> = ({
       title={title}
       subtitle={subtitle}
       scrollable={false}
-      maxHeight={dimensionValues.maxHeightPercent.eightyFive}
+      maxHeight={DIMENSIONS.MAX_HEIGHT_PERCENT.EIGHTY_FIVE}
       closeButtonLabel={closeButtonLabel}
     >
       {items.length === 0 ? (
@@ -180,7 +180,7 @@ export const SelectionModal: React.FC<SelectionModalProps> = ({
 
 const styles = StyleSheet.create({
   list: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   listContent: {
     padding: designTokens.spacing.md,
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     padding: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.lg,
     marginBottom: designTokens.spacing.sm,
-    minHeight: dimensionValues.minHeight.selectionItem,
+    minHeight: DIMENSIONS.MIN_HEIGHT.SELECTION_ITEM,
   },
   itemDisabled: {
     opacity: designTokens.opacity.medium,
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     marginRight: designTokens.spacing.md,
   },
   itemContent: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     marginRight: designTokens.spacing.md,
   },
   itemSubtitle: {

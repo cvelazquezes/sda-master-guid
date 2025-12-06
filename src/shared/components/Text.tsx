@@ -278,8 +278,11 @@ export const Text: React.FC<TextProps> = ({
 // ============================================================================
 
 /** Heading text - use for section titles */
-type HeadingLevel = 1 | 2 | 3 | 4; // eslint-disable-line no-magic-numbers
-const DEFAULT_HEADING_LEVEL = 2 as HeadingLevel; // eslint-disable-line no-magic-numbers
+// Heading levels are semantic HTML heading levels (h1-h4)
+/* eslint-disable no-magic-numbers */
+type HeadingLevel = 1 | 2 | 3 | 4;
+const DEFAULT_HEADING_LEVEL = 2 as HeadingLevel;
+/* eslint-enable no-magic-numbers */
 export const Heading: React.FC<Omit<TextProps, 'variant'> & { level?: HeadingLevel }> = ({
   level = DEFAULT_HEADING_LEVEL,
   ...props

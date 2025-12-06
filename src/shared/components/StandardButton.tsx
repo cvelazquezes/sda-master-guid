@@ -20,7 +20,7 @@ import { designTokens, layoutConstants } from '../theme';
 import {
   A11Y_ROLE,
   TOUCH_OPACITY,
-  dimensionValues,
+  DIMENSIONS,
   ACTIVITY_INDICATOR_SIZE,
   COMPONENT_VARIANT,
   BUTTON_SIZE,
@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
 
   // Layout styles (colors handled dynamically via useTheme)
   buttonFullWidth: {
-    width: dimensionValues.width.full,
+    width: DIMENSIONS.WIDTH.FULL,
   },
   buttonDisabled: {
     opacity: designTokens.opacity.disabled,

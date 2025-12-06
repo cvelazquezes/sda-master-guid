@@ -12,7 +12,7 @@
 import React from 'react';
 import { View, ViewStyle } from 'react-native';
 import { designTokens } from '../theme/designTokens';
-import { ORIENTATION, SPACING_KEY, dimensionValues } from '../constants';
+import { ORIENTATION, SPACING_KEY, DIMENSIONS } from '../constants';
 import { useThemeColor } from '../hooks/useThemeColor';
 import { DividerColor, SpacingKey } from '../types/theme';
 
@@ -59,13 +59,13 @@ export const Divider: React.FC<DividerProps> = ({
     orientation === ORIENTATION.HORIZONTAL
       ? {
           height: thickness,
-          width: dimensionValues.width.full,
+          width: DIMENSIONS.WIDTH.FULL,
           marginVertical: spacingValue,
           backgroundColor: dividerColor,
         }
       : {
           width: thickness,
-          height: dimensionValues.width.full,
+          height: DIMENSIONS.WIDTH.FULL,
           marginHorizontal: spacingValue,
           backgroundColor: dividerColor,
         };

@@ -9,7 +9,7 @@ import { View, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { designTokens, layoutConstants } from '../theme';
-import { A11Y_ROLE, ICONS, flexValues } from '../constants';
+import { A11Y_ROLE, ICONS, FLEX } from '../constants';
 import { Text } from './Text';
 
 export interface Tab {
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: designTokens.borderWidth.thin,
   },
   tab: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
     justifyContent: layoutConstants.justifyContent.center,
