@@ -7,15 +7,13 @@ import { logger } from '../utils/logger';
 import { MS, MATH, LIST_LIMITS } from '../constants/numbers';
 
 // Rate limit configuration constants
-/* eslint-disable no-magic-numbers -- Rate limit configuration */
 const RATE_LIMIT_CONFIG = {
   API_REQUESTS_PER_MIN: LIST_LIMITS.MAX_CACHE, // 100
   AUTH_ATTEMPTS_PER_MIN: MATH.FIVE, // 5
-  SEARCH_REQUESTS_PER_MIN: 30,
+  SEARCH_REQUESTS_PER_MIN: MATH.THIRTY,
   HEAVY_OPS_PER_MIN: MATH.TEN, // 10
   ONE_MINUTE_MS: MS.MINUTE, // 60000
 } as const;
-/* eslint-enable no-magic-numbers */
 
 // ============================================================================
 // Types

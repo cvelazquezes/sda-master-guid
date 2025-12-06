@@ -10,14 +10,12 @@ import { environment } from '../config/environment';
 import { MATH } from '../constants/numbers';
 
 // Feature flag rollout percentages
-/* eslint-disable no-magic-numbers -- Rollout percentage constants */
 const ROLLOUT_PERCENTAGE = {
   SMALL: MATH.TEN, // 10%
-  MEDIUM: 25, // 25%
+  MEDIUM: MATH.TWENTY_FIVE, // 25%
   FULL: MATH.HUNDRED, // 100%
   HASH_BITSHIFT: MATH.FIVE, // For bit shifting in hash
 } as const;
-/* eslint-enable no-magic-numbers */
 
 // ============================================================================
 // React Hook
