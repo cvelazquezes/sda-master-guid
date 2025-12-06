@@ -35,18 +35,7 @@ export const FLEX = {
   GROW_ENABLED: 1,
 } as const;
 
-// Legacy alias - for backward compatibility (camelCase)
-export const flexValues = {
-  none: FLEX.NONE,
-  one: FLEX.ONE,
-  oneAndHalf: FLEX.ONE_AND_HALF,
-  two: FLEX.TWO,
-  three: FLEX.THREE,
-  shrinkDisabled: FLEX.SHRINK_DISABLED,
-  shrinkEnabled: FLEX.SHRINK_ENABLED,
-  growDisabled: FLEX.GROW_DISABLED,
-  growEnabled: FLEX.GROW_ENABLED,
-} as const;
+// ⚠️ Legacy alias removed - use FLEX directly
 
 // =============================================================================
 // DIMENSIONS
@@ -195,86 +184,7 @@ export const DIMENSIONS = {
   },
 } as const;
 
-// Legacy alias - for backward compatibility (camelCase)
-export const dimensionValues = {
-  width: {
-    full: DIMENSIONS.WIDTH.FULL,
-    half: DIMENSIONS.WIDTH.HALF,
-    auto: DIMENSIONS.WIDTH.AUTO,
-  },
-  maxWidth: {
-    card: DIMENSIONS.MAX_WIDTH.CARD,
-    modal: DIMENSIONS.MAX_WIDTH.MODAL,
-    label: DIMENSIONS.MAX_WIDTH.LABEL,
-    message: DIMENSIONS.MAX_WIDTH.MESSAGE,
-    toast: DIMENSIONS.MAX_WIDTH.TOAST,
-    container: DIMENSIONS.MAX_WIDTH.CONTAINER,
-    modalPercent: DIMENSIONS.MAX_WIDTH.MODAL_PERCENT,
-    full: DIMENSIONS.MAX_WIDTH.FULL,
-  },
-  maxHeight: {
-    errorDetails: DIMENSIONS.MAX_HEIGHT.ERROR_DETAILS,
-    listSmall: DIMENSIONS.MAX_HEIGHT.LIST_SMALL,
-    listMedium: DIMENSIONS.MAX_HEIGHT.LIST_MEDIUM,
-    modalBodySmall: DIMENSIONS.MAX_HEIGHT.MODAL_BODY_SMALL,
-    modalBodyMedium: DIMENSIONS.MAX_HEIGHT.MODAL_BODY_MEDIUM,
-    modalBodyLarge: DIMENSIONS.MAX_HEIGHT.MODAL_BODY_LARGE,
-    modalPercent: DIMENSIONS.MAX_HEIGHT.MODAL_PERCENT,
-  },
-  minWidth: {
-    button: DIMENSIONS.MIN_WIDTH.BUTTON,
-    iconButtonSmall: DIMENSIONS.MIN_WIDTH.ICON_BUTTON_SMALL,
-    badge: DIMENSIONS.MIN_WIDTH.BADGE,
-    toast: DIMENSIONS.MIN_WIDTH.TOAST,
-  },
-  height: {
-    dragHandle: DIMENSIONS.HEIGHT.DRAG_HANDLE,
-    divider: DIMENSIONS.HEIGHT.DIVIDER,
-    input: DIMENSIONS.HEIGHT.INPUT,
-  },
-  size: {
-    badgeSmall: DIMENSIONS.SIZE.BADGE_SMALL,
-    iconButtonSmall: DIMENSIONS.SIZE.ICON_BUTTON_SMALL,
-    touchTarget: DIMENSIONS.SIZE.TOUCH_TARGET,
-    avatarMedium: DIMENSIONS.SIZE.AVATAR_MEDIUM,
-    orderBadge: DIMENSIONS.SIZE.ORDER_BADGE,
-    shareIconLarge: DIMENSIONS.SIZE.SHARE_ICON_LARGE,
-    iconContainerLarge: DIMENSIONS.SIZE.ICON_CONTAINER_LARGE,
-  },
-  skeleton: {
-    titleWidth: DIMENSIONS.SKELETON.TITLE_WIDTH,
-    titleHeight: DIMENSIONS.SKELETON.TITLE_HEIGHT,
-    subtitleWidth: DIMENSIONS.SKELETON.SUBTITLE_WIDTH,
-    subtitleHeight: DIMENSIONS.SKELETON.SUBTITLE_HEIGHT,
-  },
-  progressBar: {
-    standard: DIMENSIONS.PROGRESS_BAR.STANDARD,
-  },
-  offset: {
-    badgeNegative: DIMENSIONS.OFFSET.BADGE_NEGATIVE,
-  },
-  minHeight: {
-    iconButtonSmall: DIMENSIONS.MIN_HEIGHT.ICON_BUTTON_SMALL,
-    badge: DIMENSIONS.MIN_HEIGHT.BADGE,
-    touchTarget: DIMENSIONS.MIN_HEIGHT.TOUCH_TARGET,
-    touchTargetStandard: DIMENSIONS.MIN_HEIGHT.TOUCH_TARGET_STANDARD,
-    selectItem: DIMENSIONS.MIN_HEIGHT.SELECT_ITEM,
-    button: DIMENSIONS.MIN_HEIGHT.BUTTON,
-    filterOption: DIMENSIONS.MIN_HEIGHT.FILTER_OPTION,
-    cardContent: DIMENSIONS.MIN_HEIGHT.CARD_CONTENT,
-    textarea: DIMENSIONS.MIN_HEIGHT.TEXTAREA,
-    selectionItem: DIMENSIONS.MIN_HEIGHT.SELECTION_ITEM,
-  },
-  maxWidthPercent: {
-    full: DIMENSIONS.MAX_WIDTH_PERCENT.FULL,
-    ninety: DIMENSIONS.MAX_WIDTH_PERCENT.NINETY,
-  },
-  maxHeightPercent: {
-    full: DIMENSIONS.MAX_HEIGHT_PERCENT.FULL,
-    ninety: DIMENSIONS.MAX_HEIGHT_PERCENT.NINETY,
-    eightyFive: DIMENSIONS.MAX_HEIGHT_PERCENT.EIGHTY_FIVE,
-  },
-} as const;
+// ⚠️ Legacy alias removed - use DIMENSIONS directly
 
 // =============================================================================
 // TYPOGRAPHY
@@ -298,21 +208,7 @@ export const TYPOGRAPHY = {
   },
 } as const;
 
-// Legacy alias - for backward compatibility (camelCase)
-export const typographyValues = {
-  lineHeight: {
-    sm: TYPOGRAPHY.LINE_HEIGHT.SM,
-    md: TYPOGRAPHY.LINE_HEIGHT.MD,
-    lg: TYPOGRAPHY.LINE_HEIGHT.LG,
-    xl: TYPOGRAPHY.LINE_HEIGHT.XL,
-    '2xl': TYPOGRAPHY.LINE_HEIGHT.XXL,
-  },
-  letterSpacing: {
-    tight: TYPOGRAPHY.LETTER_SPACING.TIGHT,
-    normal: TYPOGRAPHY.LETTER_SPACING.NORMAL,
-    wide: TYPOGRAPHY.LETTER_SPACING.WIDE,
-  },
-} as const;
+// ⚠️ Legacy alias removed - use TYPOGRAPHY directly
 
 // =============================================================================
 // BORDERS
@@ -339,20 +235,7 @@ export const BORDERS = {
   },
 } as const;
 
-// Legacy alias - for backward compatibility (camelCase)
-export const borderValues = {
-  radius: { none: BORDERS.RADIUS.NONE },
-  color: { transparent: BORDERS.COLOR.TRANSPARENT },
-  style: {
-    solid: BORDERS.STYLE.SOLID,
-    dashed: BORDERS.STYLE.DASHED,
-    dotted: BORDERS.STYLE.DOTTED,
-  },
-  width: {
-    thin: BORDERS.WIDTH.THIN,
-    medium: BORDERS.WIDTH.MEDIUM,
-  },
-} as const;
+// ⚠️ Legacy alias removed - use BORDERS directly
 
 // =============================================================================
 // TEXT TRANSFORMS
@@ -368,13 +251,7 @@ export const TEXT_TRANSFORM = {
   NONE: 'none' as const,
 } as const;
 
-// Legacy alias - for backward compatibility (camelCase)
-export const textTransformValues = {
-  uppercase: TEXT_TRANSFORM.UPPERCASE,
-  lowercase: TEXT_TRANSFORM.LOWERCASE,
-  capitalize: TEXT_TRANSFORM.CAPITALIZE,
-  none: TEXT_TRANSFORM.NONE,
-} as const;
+// ⚠️ Legacy alias removed - use TEXT_TRANSFORM directly
 
 // =============================================================================
 // SHADOWS
@@ -392,15 +269,7 @@ export const SHADOW_OFFSET = {
   XXL: { width: 0, height: 12 },
 } as const;
 
-// Legacy alias - for backward compatibility (camelCase)
-export const shadowOffsetValues = {
-  none: SHADOW_OFFSET.NONE,
-  sm: SHADOW_OFFSET.SM,
-  md: SHADOW_OFFSET.MD,
-  lg: SHADOW_OFFSET.LG,
-  xl: SHADOW_OFFSET.XL,
-  '2xl': SHADOW_OFFSET.XXL,
-} as const;
+// ⚠️ Legacy alias removed - use SHADOW_OFFSET directly
 
 // =============================================================================
 // FONTS
@@ -414,11 +283,7 @@ export const FONT_FAMILY = {
   MONO: 'monospace',
 } as const;
 
-// Legacy alias - for backward compatibility (camelCase)
-export const fontFamilyValues = {
-  system: FONT_FAMILY.SYSTEM,
-  mono: FONT_FAMILY.MONO,
-} as const;
+// ⚠️ Legacy alias removed - use FONT_FAMILY directly
 
 // =============================================================================
 // BREAKPOINTS
@@ -450,13 +315,7 @@ export const TEXT_ALIGN_VERTICAL = {
   AUTO: 'auto' as const,
 } as const;
 
-// Legacy alias - for backward compatibility (camelCase)
-export const textAlignVertical = {
-  top: TEXT_ALIGN_VERTICAL.TOP,
-  center: TEXT_ALIGN_VERTICAL.CENTER,
-  bottom: TEXT_ALIGN_VERTICAL.BOTTOM,
-  auto: TEXT_ALIGN_VERTICAL.AUTO,
-} as const;
+// ⚠️ Legacy alias removed - use TEXT_ALIGN_VERTICAL directly
 
 // =============================================================================
 // MODAL CONFIGURATION
