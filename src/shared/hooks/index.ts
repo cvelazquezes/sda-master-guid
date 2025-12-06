@@ -4,6 +4,12 @@
  * Central export for all shared React hooks
  */
 
+// Theme Color Hook (Centralized color resolution)
+export { useThemeColor } from './useThemeColor';
+
+// Shadow Style Hook (Centralized shadow generation)
+export { useShadowStyle } from './useShadowStyle';
+
 // Design Tokens Hook (Primary way to consume design tokens)
 export {
   // Main hook

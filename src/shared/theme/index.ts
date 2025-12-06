@@ -61,6 +61,20 @@ import { designTokens } from './designTokens';
 import { designTokensV2 } from './tokens';
 // Layout Constants - Single Source of Truth for style string values
 import { layoutConstants } from './layoutConstants';
+// Size Presets - Standardized component sizing
+import {
+  SIZE_PRESETS,
+  BADGE_SIZE_PRESETS,
+  STATUS_SIZE_PRESETS,
+  BUTTON_SIZE_PRESETS,
+  getSizePreset,
+  getBadgeSizePreset,
+  getStatusSizePreset,
+  getButtonSizePreset,
+  getSpacing,
+  getIconSize,
+  getFontSize,
+} from './sizePresets';
 
 /**
  * Theme modes
@@ -276,6 +290,19 @@ export {
 
   // Layout Constants - Style string values
   layoutConstants,
+
+  // Size Presets - Component sizing utilities
+  SIZE_PRESETS,
+  BADGE_SIZE_PRESETS,
+  STATUS_SIZE_PRESETS,
+  BUTTON_SIZE_PRESETS,
+  getSizePreset,
+  getBadgeSizePreset,
+  getStatusSizePreset,
+  getButtonSizePreset,
+  getSpacing,
+  getIconSize,
+  getFontSize,
 };
 
 // Note: For Design Tokens V2, import directly from './tokens'

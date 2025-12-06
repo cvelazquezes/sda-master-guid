@@ -38,6 +38,10 @@ export { StandardInput as Input } from './StandardInput';
 // Card primitive
 export { Card } from './Card';
 
+// EntityCard - Generic card for entity displays (ClubCard, UserCard, etc.)
+export { EntityCard } from './EntityCard';
+export type { EntityCardProps, EntityCardRenderProps, EntityCardActionProps } from './EntityCard';
+
 // Badge primitive
 export { Badge } from './Badge';
 

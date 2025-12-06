@@ -14,6 +14,7 @@ import { View, ViewStyle } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { designTokens } from '../theme/designTokens';
 import { ORIENTATION, SPACING_KEY, dimensionValues } from '../constants';
+import { DividerColor, SpacingKey } from '../types/theme';
 
 // ============================================================================
 // TYPES
@@ -21,20 +22,11 @@ import { ORIENTATION, SPACING_KEY, dimensionValues } from '../constants';
 
 type DividerOrientation = typeof ORIENTATION.HORIZONTAL | typeof ORIENTATION.VERTICAL;
 
-export type DividerColor =
-  | 'border'
-  | 'borderLight'
-  | 'borderMedium'
-  | 'borderDark'
-  | 'divider'
-  | 'surface'
-  | 'surfaceLight';
-
 export interface DividerProps {
   /** Orientation of the divider */
   orientation?: DividerOrientation;
   /** Spacing around the divider */
-  spacing?: keyof typeof designTokens.spacing;
+  spacing?: SpacingKey;
   /** Color from theme (defaults to border color) */
   color?: DividerColor;
   /** Thickness in pixels */

@@ -4,24 +4,13 @@
  * Supports dynamic theming (light/dark mode)
  */
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity, ViewStyle, StyleProp } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { designTokens } from '../theme';
+import { useShadowStyle } from '../hooks/useShadowStyle';
 import { A11Y_ROLE, TOUCH_OPACITY, COMPONENT_VARIANT } from '../constants';
-import { MATH, OPACITY_VALUE } from '../constants/numbers';
-
-// Card elevation values for different themes and variants
-/* eslint-disable no-magic-numbers -- Elevation constants for card shadows */
-const CARD_ELEVATION = {
-  ELEVATED_DARK: 10,
-  ELEVATED_LIGHT: 8,
-  OUTLINED_DARK: 3,
-  DEFAULT_DARK: 6,
-  DEFAULT_LIGHT: 4,
-} as const;
-const SHADOW_OPACITY_ADJUSTMENT = OPACITY_VALUE.VERY_LIGHT; // 0.06
-/* eslint-enable no-magic-numbers */
+import { ShadowPreset } from '../types/theme';
 
 type CardVariant =
   | typeof COMPONENT_VARIANT.default
@@ -52,12 +41,22 @@ export const Card: React.FC<CardProps> = ({
   accessibilityLabel,
   accessibilityHint,
 }) => {
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
+  const { getShadow } = useShadowStyle();
 
-  // Get shadow color from theme (falls back to black if not defined)
-  const shadowColor = colors.shadow || '#000000';
+  // Map variant to shadow preset
+  const variantShadowMap: Record<CardVariant, ShadowPreset> = useMemo(
+    () => ({
+      [COMPONENT_VARIANT.elevated]: 'elevated',
+      [COMPONENT_VARIANT.outlined]: 'subtle',
+      [COMPONENT_VARIANT.flat]: 'none',
+      [COMPONENT_VARIANT.default]: 'card',
+    }),
+    []
+  );
 
-  const getVariantStyle = (): ViewStyle => {
+  // Get variant-specific styles (memoized)
+  const variantStyle = useMemo((): ViewStyle => {
     const baseStyle: ViewStyle = {
       backgroundColor: colors.surface,
       borderRadius: designTokens.card.borderRadius,
@@ -65,51 +64,28 @@ export const Card: React.FC<CardProps> = ({
       marginBottom: designTokens.spacing.md,
     };
 
-    switch (variant) {
-      case COMPONENT_VARIANT.elevated:
-        return {
-          ...baseStyle,
-          shadowColor,
-          shadowOffset: { width: 0, height: designTokens.spacing.xs },
-          shadowOpacity: isDark
-            ? designTokens.shadowConfig.darkStrong.opacity
-            : designTokens.shadowConfig.light.opacity,
-          shadowRadius: designTokens.spacing.md,
-          elevation: isDark ? CARD_ELEVATION.ELEVATED_DARK : CARD_ELEVATION.ELEVATED_LIGHT,
-        };
-      case COMPONENT_VARIANT.outlined:
-        return {
-          ...baseStyle,
-          borderWidth: designTokens.card.borderWidth || designTokens.borderWidth.thin,
-          borderColor: colors.border,
-          shadowColor,
-          shadowOffset: { width: 0, height: designTokens.borderWidth.thin },
-          shadowOpacity: isDark
-            ? designTokens.shadowConfig.darkSubtle.opacity
-            : designTokens.shadowConfig.lightSubtle.opacity,
-          shadowRadius: designTokens.spacing.xs,
-          elevation: isDark ? CARD_ELEVATION.OUTLINED_DARK : MATH.HALF,
-        };
-      case COMPONENT_VARIANT.flat:
-        return {
-          ...baseStyle,
-          backgroundColor: 'transparent',
-        };
-      default:
-        return {
-          ...baseStyle,
-          shadowColor,
-          shadowOffset: { width: 0, height: designTokens.borderWidth.thick },
-          shadowOpacity: isDark
-            ? designTokens.shadowConfig.dark.opacity
-            : designTokens.shadowConfig.lightSubtle.opacity + SHADOW_OPACITY_ADJUSTMENT,
-          shadowRadius: designTokens.spacing.sm + designTokens.spacing.xxs,
-          elevation: isDark ? CARD_ELEVATION.DEFAULT_DARK : CARD_ELEVATION.DEFAULT_LIGHT,
-        };
-    }
-  };
+    // Get shadow from preset
+    const shadowPreset = variantShadowMap[variant];
+    const shadowStyle = getShadow(shadowPreset);
 
-  const cardStyle = [getVariantStyle(), disabled && styles.disabled, style];
+    // Handle variant-specific additions
+    if (variant === COMPONENT_VARIANT.flat) {
+      return { ...baseStyle, backgroundColor: 'transparent' };
+    }
+
+    if (variant === COMPONENT_VARIANT.outlined) {
+      return {
+        ...baseStyle,
+        ...shadowStyle,
+        borderWidth: designTokens.card.borderWidth || designTokens.borderWidth.thin,
+        borderColor: colors.border,
+      };
+    }
+
+    return { ...baseStyle, ...shadowStyle };
+  }, [variant, colors.surface, colors.border, getShadow, variantShadowMap]);
+
+  const cardStyle = [variantStyle, disabled && styles.disabled, style];
 
   if (onPress) {
     return (

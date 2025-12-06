@@ -10,14 +10,15 @@
  * <Badge label={t('badge.new')} variant="primary" />
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTheme } from '../../contexts/ThemeContext';
 import { designTokens } from '../theme/designTokens';
-import { mobileFontSizes, layoutConstants } from '../theme';
+import { layoutConstants, getBadgeSizePreset, getSpacing } from '../theme';
+import { useThemeColor } from '../hooks/useThemeColor';
 import { TEXT_LINES, COMPONENT_VARIANT, COMPONENT_SIZE, A11Y_ROLE, ICONS } from '../constants';
 import { Text } from './Text';
+import { StatusType, RoleType, ComponentSize } from '../types/theme';
 
 type BadgeVariant =
   | typeof COMPONENT_VARIANT.primary
@@ -29,20 +30,6 @@ type BadgeVariant =
   | typeof COMPONENT_VARIANT.info
   | typeof COMPONENT_VARIANT.neutral;
 type BadgeSize = typeof COMPONENT_SIZE.sm | typeof COMPONENT_SIZE.md | typeof COMPONENT_SIZE.lg;
-
-// Status types match the keys in statusColors (from ThemeContext)
-type StatusType =
-  | 'active'
-  | 'inactive'
-  | 'paused'
-  | 'pending'
-  | 'completed'
-  | 'scheduled'
-  | 'skipped'
-  | 'cancelled';
-
-// Role types match the keys in roleColors (from ThemeContext)
-type RoleType = 'admin' | 'club_admin' | 'user';
 
 interface BadgeProps {
   // Content
@@ -78,147 +65,103 @@ export const Badge: React.FC<BadgeProps> = ({
   style,
   testID,
 }) => {
-  // Get theme-aware colors from context (includes statusColors and roleColors)
-  const {
-    colors: themeColors,
-    statusColors: themeStatusColors,
-    roleColors: themeRoleColors,
-  } = useTheme();
+  // Use centralized theme color hook
+  const { getStatusColor, getRoleColor, colors: themeColors } = useThemeColor();
 
-  // Determine colors based on status/role or variant (using theme-aware colors)
-  const getColors = (): { bg: string; text: string; border: string } => {
+  // Get size preset (replaces switch statement)
+  const sizePreset = useMemo(() => getBadgeSizePreset(size as ComponentSize), [size]);
+
+  // Determine colors based on status/role or variant (memoized)
+  const badgeColors = useMemo((): { bg: string; text: string; border: string } => {
     // Use theme-aware status colors
     if (status) {
-      const statusConfig = themeStatusColors[status];
-      return {
-        bg: statusConfig.light,
-        text: statusConfig.text,
-        border: statusConfig.primary,
-      };
+      const statusConfig = getStatusColor(status);
+      return { bg: statusConfig.light, text: statusConfig.text, border: statusConfig.primary };
     }
 
     // Use theme-aware role colors
     if (role) {
-      const roleConfig = themeRoleColors[role];
-      return {
-        bg: roleConfig.light,
-        text: roleConfig.text,
-        border: roleConfig.primary,
-      };
+      const roleConfig = getRoleColor(role);
+      return { bg: roleConfig.light, text: roleConfig.text, border: roleConfig.primary };
     }
 
-    // Variant-based colors from theme
-    switch (variant) {
-      case COMPONENT_VARIANT.primary:
-        return {
-          bg: themeColors.primaryLight || themeColors.primaryAlpha10,
-          text: themeColors.primary,
-          border: themeColors.primary,
-        };
-      case COMPONENT_VARIANT.secondary:
-        return {
-          bg: themeColors.secondaryLight || themeColors.secondaryAlpha10,
-          text: themeColors.secondary,
-          border: themeColors.secondary,
-        };
-      case COMPONENT_VARIANT.accent:
-        return {
-          bg: themeColors.accentLight || themeColors.accentAlpha10,
-          text: themeColors.accent,
-          border: themeColors.accent,
-        };
-      case COMPONENT_VARIANT.success:
-        return {
-          bg: themeColors.successLight,
-          text: themeColors.success,
-          border: themeColors.success,
-        };
-      case COMPONENT_VARIANT.warning:
-        return {
-          bg: themeColors.warningLight,
-          text: themeColors.warning,
-          border: themeColors.warning,
-        };
-      case COMPONENT_VARIANT.error:
-        return {
-          bg: themeColors.errorLight,
-          text: themeColors.error,
-          border: themeColors.error,
-        };
-      case COMPONENT_VARIANT.info:
-        return {
-          bg: themeColors.infoLight,
-          text: themeColors.info,
-          border: themeColors.info,
-        };
-      default:
-        return {
-          bg: themeColors.surfaceLight,
-          text: themeColors.textSecondary,
-          border: themeColors.border,
-        };
-    }
-  };
+    // Variant-based colors from theme (using color mapping)
+    const variantColorMap: Record<string, { bg: string; text: string; border: string }> = {
+      [COMPONENT_VARIANT.primary]: {
+        bg: themeColors.primaryLight || themeColors.primaryAlpha10,
+        text: themeColors.primary,
+        border: themeColors.primary,
+      },
+      [COMPONENT_VARIANT.secondary]: {
+        bg: themeColors.secondaryLight || themeColors.secondaryAlpha10,
+        text: themeColors.secondary,
+        border: themeColors.secondary,
+      },
+      [COMPONENT_VARIANT.accent]: {
+        bg: themeColors.accentLight || themeColors.accentAlpha10,
+        text: themeColors.accent,
+        border: themeColors.accent,
+      },
+      [COMPONENT_VARIANT.success]: {
+        bg: themeColors.successLight,
+        text: themeColors.success,
+        border: themeColors.success,
+      },
+      [COMPONENT_VARIANT.warning]: {
+        bg: themeColors.warningLight,
+        text: themeColors.warning,
+        border: themeColors.warning,
+      },
+      [COMPONENT_VARIANT.error]: {
+        bg: themeColors.errorLight,
+        text: themeColors.error,
+        border: themeColors.error,
+      },
+      [COMPONENT_VARIANT.info]: {
+        bg: themeColors.infoLight,
+        text: themeColors.info,
+        border: themeColors.info,
+      },
+    };
 
-  const colors = getColors();
+    return (
+      variantColorMap[variant] || {
+        bg: themeColors.surfaceLight,
+        text: themeColors.textSecondary,
+        border: themeColors.border,
+      }
+    );
+  }, [status, role, variant, getStatusColor, getRoleColor, themeColors]);
 
-  const finalBackgroundColor = backgroundColor || colors.bg;
-  const finalTextColor = textColor || colors.text;
-  const finalBorderColor = borderColor || colors.border;
+  const finalBackgroundColor = backgroundColor || badgeColors.bg;
+  const finalTextColor = textColor || badgeColors.text;
+  const finalBorderColor = borderColor || badgeColors.border;
 
-  // Size-based styles
-  const getSizeStyles = (): { container: ViewStyle; text: TextStyle; iconSize: number } => {
-    switch (size) {
-      case COMPONENT_SIZE.sm:
-        return {
-          container: {
-            paddingVertical: designTokens.spacing.xxs,
-            paddingHorizontal: designTokens.spacing.sm,
-          },
-          text: {
-            fontSize: mobileFontSizes.xs,
-            lineHeight: designTokens.lineHeights.caption,
-          },
-          iconSize: designTokens.iconSize.xs,
-        };
-      case COMPONENT_SIZE.lg:
-        return {
-          container: {
-            paddingVertical: designTokens.spacing.sm,
-            paddingHorizontal: designTokens.spacing.md,
-          },
-          text: {
-            fontSize: mobileFontSizes.xs,
-            lineHeight: designTokens.lineHeights.body,
-          },
-          iconSize: designTokens.iconSize.sm,
-        };
-      default:
-        return {
-          container: {
-            paddingVertical: designTokens.spacing.xs,
-            paddingHorizontal: designTokens.spacing.sm,
-          },
-          text: {
-            fontSize: mobileFontSizes.xs,
-            lineHeight: designTokens.lineHeights.captionLarge,
-          },
-          iconSize: designTokens.iconSize.xs,
-        };
-    }
-  };
+  // Container style using size presets
+  const containerStyle = useMemo<ViewStyle>(
+    () => ({
+      paddingVertical: getSpacing(sizePreset.paddingV),
+      paddingHorizontal: getSpacing(sizePreset.paddingH),
+    }),
+    [sizePreset]
+  );
 
-  const sizeStyles = getSizeStyles();
+  // Text style using size presets
+  const textStyle = useMemo<TextStyle>(
+    () => ({
+      fontSize: sizePreset.fontSize,
+      lineHeight: sizePreset.lineHeight,
+      color: finalTextColor,
+    }),
+    [sizePreset, finalTextColor]
+  );
 
   return (
     <View
       style={[
         styles.container,
-        sizeStyles.container,
-        {
-          backgroundColor: finalBackgroundColor,
-          borderColor: finalBorderColor,
-        },
+        containerStyle,
+        { backgroundColor: finalBackgroundColor, borderColor: finalBorderColor },
         style,
       ]}
       testID={testID}
@@ -229,7 +172,7 @@ export const Badge: React.FC<BadgeProps> = ({
       {icon && (
         <MaterialCommunityIcons
           name={icon as typeof ICONS.CHECK}
-          size={sizeStyles.iconSize}
+          size={sizePreset.iconSize}
           color={finalTextColor}
           style={styles.icon}
         />
@@ -239,7 +182,7 @@ export const Badge: React.FC<BadgeProps> = ({
         weight="bold"
         uppercase
         numberOfLines={TEXT_LINES.single}
-        style={[sizeStyles.text, { color: finalTextColor }]}
+        style={textStyle}
       >
         {label}
       </Text>

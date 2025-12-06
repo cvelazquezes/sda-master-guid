@@ -18,17 +18,7 @@ import { designTokens } from '../theme/designTokens';
 import { layoutConstants } from '../theme';
 import { TEXT_LINES, COMPONENT_SIZE, A11Y_ROLE, ICONS } from '../constants';
 import { Text } from './Text';
-
-// Status types match the keys in statusColors
-type StatusType =
-  | 'active'
-  | 'inactive'
-  | 'paused'
-  | 'pending'
-  | 'completed'
-  | 'scheduled'
-  | 'skipped'
-  | 'cancelled';
+import { StatusType } from '../types/theme';
 
 type StatusSize = typeof COMPONENT_SIZE.sm | typeof COMPONENT_SIZE.md | typeof COMPONENT_SIZE.lg;
 

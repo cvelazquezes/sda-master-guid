@@ -19,7 +19,7 @@
  * </Pressable>
  */
 
-import React, { ReactNode, useCallback, useState } from 'react';
+import React, { ReactNode, useCallback, useState, useMemo } from 'react';
 import {
   TouchableOpacity,
   ViewStyle,
@@ -27,57 +27,16 @@ import {
   StyleSheet,
   GestureResponderEvent,
 } from 'react-native';
-import { useTheme } from '../../contexts/ThemeContext';
 import { designTokens } from '../theme/designTokens';
+import { useThemeColor } from '../hooks/useThemeColor';
 import { A11Y_ROLE, TOUCH_OPACITY } from '../constants';
-
-// ============================================================================
-// TYPES
-// ============================================================================
-
-export type PressableBackgroundColor =
-  | 'background'
-  | 'backgroundPrimary'
-  | 'backgroundSecondary'
-  | 'surface'
-  | 'surfaceLight'
-  | 'surfaceHovered'
-  | 'surfacePressed'
-  | 'primary'
-  | 'primaryHover'
-  | 'primaryActive'
-  | 'primaryLight'
-  | 'primaryAlpha10'
-  | 'primaryAlpha20'
-  | 'secondary'
-  | 'secondaryHover'
-  | 'secondaryLight'
-  | 'accent'
-  | 'accentHover'
-  | 'accentLight'
-  | 'success'
-  | 'successLight'
-  | 'warning'
-  | 'warningLight'
-  | 'error'
-  | 'errorLight'
-  | 'info'
-  | 'infoLight'
-  | 'transparent'
-  | 'none';
-
-export type SpacingKey = keyof typeof designTokens.spacing;
-export type RadiusKey = keyof typeof designTokens.borderRadius;
-export type BorderWidthKey = keyof typeof designTokens.borderWidth;
-
-export type BorderColor =
-  | 'border'
-  | 'borderLight'
-  | 'borderMedium'
-  | 'borderFocus'
-  | 'primary'
-  | 'secondary'
-  | 'transparent';
+import {
+  InteractiveBackgroundColor,
+  PressableBorderColor,
+  SpacingKey,
+  RadiusKey,
+  BorderWidthKey,
+} from '../types/theme';
 
 export interface PressableProps {
   /** Children elements */
@@ -89,9 +48,9 @@ export interface PressableProps {
   /** Disabled state */
   disabled?: boolean;
   /** Background color from theme */
-  bg?: PressableBackgroundColor;
+  bg?: InteractiveBackgroundColor;
   /** Background color when pressed */
-  pressedBg?: PressableBackgroundColor;
+  pressedBg?: InteractiveBackgroundColor;
   /** Padding (all sides) */
   padding?: SpacingKey;
   /** Padding horizontal */
@@ -103,7 +62,7 @@ export interface PressableProps {
   /** Border width */
   borderWidth?: BorderWidthKey;
   /** Border color from theme */
-  borderColor?: BorderColor;
+  borderColor?: PressableBorderColor;
   /** Gap between children */
   gap?: SpacingKey;
   /** Flex direction */
@@ -132,7 +91,6 @@ export interface PressableProps {
 // COMPONENT
 // ============================================================================
 
-/* eslint-disable max-lines-per-function, complexity */
 export const Pressable: React.FC<PressableProps> = ({
   children,
   onPress,
@@ -158,100 +116,58 @@ export const Pressable: React.FC<PressableProps> = ({
   accessibilityHint,
   accessibilityRole = A11Y_ROLE.BUTTON,
 }) => {
-  const { colors } = useTheme();
+  // Use centralized theme color hook
+  const { getInteractiveBackgroundColor, getPressableBorderColor } = useThemeColor();
   const [isPressed, setIsPressed] = useState(false);
-
-  // Background color map
-  const bgColorMap: Record<string, string | undefined> = {
-    background: colors.background,
-    backgroundPrimary: colors.backgroundPrimary,
-    backgroundSecondary: colors.backgroundSecondary,
-    surface: colors.surface,
-    surfaceLight: colors.surfaceLight,
-    surfaceHovered: colors.surfaceHovered,
-    surfacePressed: colors.surfacePressed,
-    primary: colors.primary,
-    primaryHover: colors.primaryHover,
-    primaryActive: colors.primaryActive,
-    primaryLight: colors.primaryLight,
-    primaryAlpha10: colors.primaryAlpha10,
-    primaryAlpha20: colors.primaryAlpha20,
-    secondary: colors.secondary,
-    secondaryHover: colors.secondaryHover,
-    secondaryLight: colors.secondaryLight,
-    accent: colors.accent,
-    accentHover: colors.accentHover,
-    accentLight: colors.accentLight,
-    success: colors.success,
-    successLight: colors.successLight,
-    warning: colors.warning,
-    warningLight: colors.warningLight,
-    error: colors.error,
-    errorLight: colors.errorLight,
-    info: colors.info,
-    infoLight: colors.infoLight,
-  };
-
-  // Border color map
-  const borderColorMap: Record<string, string | undefined> = {
-    border: colors.border,
-    borderLight: colors.borderLight,
-    borderMedium: colors.borderMedium,
-    borderFocus: colors.borderFocus,
-    primary: colors.primary,
-    secondary: colors.secondary,
-  };
-
-  // Get background color from theme
-  const getBackgroundColor = (colorKey?: PressableBackgroundColor): string | undefined => {
-    if (!colorKey || colorKey === 'none') {
-      return undefined;
-    }
-    if (colorKey === 'transparent') {
-      return 'transparent';
-    }
-    return bgColorMap[colorKey];
-  };
-
-  // Get border color from theme
-  const getBorderColor = (): string | undefined => {
-    if (!borderColor) {
-      return undefined;
-    }
-    if (borderColor === 'transparent') {
-      return 'transparent';
-    }
-    return borderColorMap[borderColor];
-  };
 
   // Determine current background based on press state
   const currentBg = isPressed && pressedBg ? pressedBg : bg;
 
-  // Build computed style
-  const computedStyle: ViewStyle = {
-    // Background
-    ...(currentBg && { backgroundColor: getBackgroundColor(currentBg) }),
+  // Build computed style (memoized for performance)
+  const computedStyle = useMemo<ViewStyle>(
+    // eslint-disable-next-line complexity
+    () => ({
+      // Background
+      ...(currentBg && { backgroundColor: getInteractiveBackgroundColor(currentBg) }),
 
-    // Padding
-    ...(padding !== undefined && { padding: designTokens.spacing[padding] }),
-    ...(paddingX !== undefined && { paddingHorizontal: designTokens.spacing[paddingX] }),
-    ...(paddingY !== undefined && { paddingVertical: designTokens.spacing[paddingY] }),
+      // Padding
+      ...(padding !== undefined && { padding: designTokens.spacing[padding] }),
+      ...(paddingX !== undefined && { paddingHorizontal: designTokens.spacing[paddingX] }),
+      ...(paddingY !== undefined && { paddingVertical: designTokens.spacing[paddingY] }),
 
-    // Border
-    ...(radius !== undefined && { borderRadius: designTokens.borderRadius[radius] }),
-    ...(borderWidth !== undefined && { borderWidth: designTokens.borderWidth[borderWidth] }),
-    ...(borderColor && { borderColor: getBorderColor() }),
+      // Border
+      ...(radius !== undefined && { borderRadius: designTokens.borderRadius[radius] }),
+      ...(borderWidth !== undefined && { borderWidth: designTokens.borderWidth[borderWidth] }),
+      ...(borderColor && { borderColor: getPressableBorderColor(borderColor) }),
 
-    // Layout
-    ...(gap !== undefined && { gap: designTokens.spacing[gap] }),
-    ...(direction && { flexDirection: direction }),
-    ...(align && { alignItems: align }),
-    ...(justify && { justifyContent: justify }),
-    ...(flex !== undefined && { flex }),
+      // Layout
+      ...(gap !== undefined && { gap: designTokens.spacing[gap] }),
+      ...(direction && { flexDirection: direction }),
+      ...(align && { alignItems: align }),
+      ...(justify && { justifyContent: justify }),
+      ...(flex !== undefined && { flex }),
 
-    // Disabled state
-    ...(disabled && { opacity: designTokens.opacity.disabled }),
-  };
+      // Disabled state
+      ...(disabled && { opacity: designTokens.opacity.disabled }),
+    }),
+    [
+      currentBg,
+      padding,
+      paddingX,
+      paddingY,
+      radius,
+      borderWidth,
+      borderColor,
+      gap,
+      direction,
+      align,
+      justify,
+      flex,
+      disabled,
+      getInteractiveBackgroundColor,
+      getPressableBorderColor,
+    ]
+  );
 
   // Flatten style prop
   const flattenedStyle = style ? StyleSheet.flatten(style) : undefined;
@@ -285,6 +201,5 @@ export const Pressable: React.FC<PressableProps> = ({
     </TouchableOpacity>
   );
 };
-/* eslint-enable max-lines-per-function, complexity */
 
 export default Pressable;

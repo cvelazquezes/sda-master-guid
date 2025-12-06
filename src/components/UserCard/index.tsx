@@ -1,19 +1,22 @@
-import React, { memo } from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import React, { memo, useCallback } from 'react';
+import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
-import { designTokens } from '../../shared/theme';
+import {
+  EntityCard,
+  EntityCardRenderProps,
+  EntityCardActionProps,
+} from '../../shared/components/EntityCard';
 import { Text, Badge } from '../../shared/components';
 import { formatViewDetailsLabel } from '../../shared/utils/formatters';
 import {
-  A11Y_ROLE,
   COMPONENT_NAMES,
   COMPONENT_SIZE,
   COMPONENT_VARIANT,
   TEXT_LINES,
-  TOUCH_OPACITY,
 } from '../../shared/constants';
-import { UserCardProps } from './types';
+import { User } from '../../types';
+import { UserCardProps, ThemeColors as UserThemeColors } from './types';
 import { getRoleConfig, getRoleLabel, getBalanceColor } from './utils';
 import { UserAvatar } from './UserAvatar';
 import { UserMetaInfo } from './UserMetaInfo';
@@ -30,110 +33,117 @@ const UserCardComponent: React.FC<UserCardProps> = ({
   onToggleStatus,
   onDelete,
 }) => {
-  const { colors, isDark } = useTheme();
   const { t } = useTranslation();
+  // Get theme colors directly for type-safe access
+  const { colors } = useTheme();
+  const themeColors = colors as unknown as UserThemeColors;
 
-  const roleConfig = getRoleConfig(user.role, colors);
-  const shadowConfig = isDark ? designTokens.shadowConfig.dark : designTokens.shadowConfig.light;
-  const inactiveOpacity = designTokens.opacity.disabled + designTokens.opacity.medium;
-  const balanceColor = getBalanceColor(balance, colors);
-
-  const cardStyle = [
-    styles.card,
-    {
-      backgroundColor: colors.surface,
-      shadowColor: colors.shadow || '#000000',
-      shadowOpacity: shadowConfig.opacity,
-      elevation: shadowConfig.elevation,
-    },
-    !user.isActive && { backgroundColor: colors.surfaceLight, opacity: inactiveOpacity },
-  ];
-
-  const CardContent = (
-    <View style={cardStyle}>
-      <UserAvatar
-        name={user.name}
-        isActive={user.isActive}
-        backgroundColor={roleConfig.color}
-        inactiveBackgroundColor={colors.surfaceLight}
-        inactiveTextColor={colors.textTertiary}
-      />
-      <View style={styles.userInfo}>
-        <View style={styles.userHeader}>
-          <Text
-            variant="body"
-            weight="bold"
-            color={user.isActive ? 'primary' : 'tertiary'}
-            numberOfLines={TEXT_LINES.single}
-            style={styles.userName}
-          >
-            {user.name}
-          </Text>
-          <Badge
-            label={getRoleLabel(user.role, t)}
-            variant={COMPONENT_VARIANT.neutral}
-            size={COMPONENT_SIZE.sm}
-            backgroundColor={user.isActive ? roleConfig.bg : colors.surfaceLight}
-            textColor={user.isActive ? roleConfig.color : colors.textTertiary}
-          />
-        </View>
-        <Text
-          variant="bodySmall"
-          color={user.isActive ? 'secondary' : 'tertiary'}
-          numberOfLines={TEXT_LINES.single}
-          style={styles.userEmail}
-        >
-          {user.email}
-        </Text>
-        <UserMetaInfo
-          clubName={clubName}
-          whatsappNumber={user.whatsappNumber}
-          isActive={user.isActive}
-          primaryColor={colors.primary}
-          successColor={colors.success}
-          textSecondaryColor={colors.textSecondary}
-          textTertiaryColor={colors.textTertiary}
+  // Render avatar using render prop pattern
+  const renderIcon = useCallback(
+    ({ isActive }: EntityCardRenderProps<User>) => {
+      const roleConfig = getRoleConfig(user.role, themeColors);
+      return (
+        <UserAvatar
+          name={user.name}
+          isActive={isActive}
+          backgroundColor={roleConfig.color}
+          inactiveBackgroundColor={themeColors.surfaceLight}
+          inactiveTextColor={themeColors.textTertiary}
         />
-        {balance && (
-          <UserBalanceSection
-            balance={balance}
-            balanceColor={balanceColor}
-            borderColor={colors.border}
-            errorColor={colors.error}
-            errorLightColor={colors.errorLight}
+      );
+    },
+    [user.name, user.role, themeColors]
+  );
+
+  // Render user info section
+  const renderInfo = useCallback(
+    ({ entity, isActive }: EntityCardRenderProps<User>) => {
+      const roleConfig = getRoleConfig(entity.role, themeColors);
+      const balanceColor = getBalanceColor(balance, themeColors);
+
+      return (
+        <View style={styles.userInfo}>
+          <View style={styles.userHeader}>
+            <Text
+              variant="body"
+              weight="bold"
+              color={isActive ? 'primary' : 'tertiary'}
+              numberOfLines={TEXT_LINES.single}
+              style={styles.userName}
+            >
+              {entity.name}
+            </Text>
+            <Badge
+              label={getRoleLabel(entity.role, t)}
+              variant={COMPONENT_VARIANT.neutral}
+              size={COMPONENT_SIZE.sm}
+              backgroundColor={isActive ? roleConfig.bg : themeColors.surfaceLight}
+              textColor={isActive ? roleConfig.color : themeColors.textTertiary}
+            />
+          </View>
+          <Text
+            variant="bodySmall"
+            color={isActive ? 'secondary' : 'tertiary'}
+            numberOfLines={TEXT_LINES.single}
+            style={styles.userEmail}
+          >
+            {entity.email}
+          </Text>
+          <UserMetaInfo
+            clubName={clubName}
+            whatsappNumber={entity.whatsappNumber}
+            isActive={isActive}
+            primaryColor={themeColors.primary}
+            successColor={themeColors.success}
+            textSecondaryColor={themeColors.textSecondary}
+            textTertiaryColor={themeColors.textTertiary}
           />
-        )}
-      </View>
+          {balance && (
+            <UserBalanceSection
+              balance={balance}
+              balanceColor={balanceColor}
+              borderColor={themeColors.border}
+              errorColor={themeColors.error}
+              errorLightColor={themeColors.errorLight}
+            />
+          )}
+        </View>
+      );
+    },
+    [clubName, balance, t, themeColors]
+  );
+
+  // Render actions section
+  const renderActions = useCallback(
+    ({ entity, onPress: cardOnPress }: EntityCardActionProps<User>) => (
       <UserActions
-        user={user}
+        user={entity}
         showAdminActions={showAdminActions}
         onToggleStatus={onToggleStatus}
         onDelete={onDelete}
-        onPress={onPress}
-        errorColor={colors.error}
-        successColor={colors.success}
-        textTertiaryColor={colors.textTertiary}
+        onPress={cardOnPress}
+        errorColor={themeColors.error}
+        successColor={themeColors.success}
+        textTertiaryColor={themeColors.textTertiary}
       />
-    </View>
+    ),
+    [showAdminActions, onToggleStatus, onDelete, themeColors]
   );
 
-  if (onPress) {
-    return (
-      <TouchableOpacity
-        onPress={onPress}
-        activeOpacity={TOUCH_OPACITY.default}
-        accessible
-        accessibilityRole={A11Y_ROLE.BUTTON}
-        accessibilityLabel={formatViewDetailsLabel(user.name, t)}
-        accessibilityHint={t('accessibility.doubleTapToOpenUserDetails')}
-        accessibilityState={{ disabled: !user.isActive }}
-      >
-        {CardContent}
-      </TouchableOpacity>
-    );
-  }
-
-  return CardContent;
+  return (
+    <EntityCard
+      entity={user}
+      isActive={user.isActive}
+      onPress={onPress}
+      renderIcon={renderIcon}
+      renderInfo={renderInfo}
+      renderActions={renderActions}
+      accessibilityLabel={formatViewDetailsLabel(user.name, t)}
+      accessibilityHint={t('accessibility.doubleTapToOpenUserDetails')}
+      style={styles.card}
+      testID={`user-card-${user.id}`}
+    />
+  );
 };
 
 export const UserCard = memo(UserCardComponent, (prevProps, nextProps) => {

@@ -1,16 +1,20 @@
 /**
  * ClubCard Component
  * Displays club information in a card format
- * Supports dynamic theming (light/dark mode)
+ * Uses EntityCard for unified card behavior and theming
  */
 
-import React, { memo } from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import React, { memo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
+import {
+  EntityCard,
+  EntityCardRenderProps,
+  EntityCardActionProps,
+} from '../../shared/components/EntityCard';
 import { formatViewDetailsLabel } from '../../shared/utils/formatters';
-import { A11Y_ROLE, COMPONENT_NAMES, TOUCH_OPACITY } from '../../shared/constants';
-import { OPACITY_VALUE, ELEVATION } from '../../shared/constants/numbers';
+import { COMPONENT_NAMES } from '../../shared/constants';
+import { Club } from '../../types';
 import { ClubCardProps } from './types';
 import { ClubIcon } from './ClubIcon';
 import { ClubInfo } from './ClubInfo';
@@ -24,71 +28,66 @@ const ClubCardComponent: React.FC<ClubCardProps> = ({
   onToggleStatus,
   onDelete,
 }) => {
-  const { colors, isDark } = useTheme();
   const { t } = useTranslation();
+  const { colors } = useTheme();
 
-  // Shadow configuration from theme
-  const shadowOpacity = isDark ? OPACITY_VALUE.MEDIUM : OPACITY_VALUE.LIGHT;
-  const shadowElevation = isDark ? ELEVATION.LG : ELEVATION.MD;
-
-  const cardStyle = [
-    styles.card,
-    {
-      backgroundColor: colors.surface,
-      shadowColor: colors.shadow || '#000000',
-      shadowOpacity,
-      elevation: shadowElevation,
-    },
-    !club.isActive && {
-      backgroundColor: colors.surfaceLight,
-      opacity: OPACITY_VALUE.HIGH,
-    },
-  ];
-
-  const CardContent = (
-    <View style={cardStyle}>
+  // Render icon using render prop pattern
+  const renderIcon = useCallback(
+    ({ isActive }: EntityCardRenderProps<Club>) => (
       <ClubIcon
-        isActive={club.isActive}
+        isActive={isActive}
         primaryColor={colors.primary}
         inactiveColor={colors.textTertiary}
         activeBackground={colors.primaryAlpha10}
         inactiveBackground={colors.surfaceLight}
       />
+    ),
+    [colors]
+  );
+
+  // Render info section
+  const renderInfo = useCallback(
+    ({ entity, isActive }: EntityCardRenderProps<Club>) => (
       <ClubInfo
-        club={club}
-        textPrimaryColor={colors.textPrimary}
-        textSecondaryColor={colors.textSecondary}
+        club={entity}
+        textPrimaryColor={isActive ? colors.textPrimary : colors.textTertiary}
+        textSecondaryColor={isActive ? colors.textSecondary : colors.textTertiary}
         textTertiaryColor={colors.textTertiary}
         primaryColor={colors.primary}
       />
+    ),
+    [colors]
+  );
+
+  // Render actions section
+  const renderActions = useCallback(
+    ({ entity, onPress: cardOnPress }: EntityCardActionProps<Club>) => (
       <ClubActions
-        club={club}
+        club={entity}
         showAdminActions={showAdminActions}
         onToggleStatus={onToggleStatus}
         onDelete={onDelete}
-        onPress={onPress}
+        onPress={cardOnPress}
         colors={{ error: colors.error, success: colors.success, textTertiary: colors.textTertiary }}
       />
-    </View>
+    ),
+    [showAdminActions, onToggleStatus, onDelete, colors]
   );
 
-  if (onPress) {
-    return (
-      <TouchableOpacity
-        onPress={onPress}
-        activeOpacity={TOUCH_OPACITY.default}
-        accessible
-        accessibilityRole={A11Y_ROLE.BUTTON}
-        accessibilityLabel={formatViewDetailsLabel(club.name, t)}
-        accessibilityHint={t('accessibility.doubleTapToOpenClubDetails')}
-        accessibilityState={{ disabled: !club.isActive }}
-      >
-        {CardContent}
-      </TouchableOpacity>
-    );
-  }
-
-  return CardContent;
+  return (
+    <EntityCard
+      entity={club}
+      isActive={club.isActive}
+      onPress={onPress}
+      renderIcon={renderIcon}
+      renderInfo={renderInfo}
+      renderActions={renderActions}
+      accessibilityLabel={formatViewDetailsLabel(club.name, t)}
+      accessibilityHint={t('accessibility.doubleTapToOpenClubDetails')}
+      style={styles.card}
+      testID={`club-card-${club.id}`}
+    />
+  );
 };
 
 // Memoize component with custom comparison for performance
