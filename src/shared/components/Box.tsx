@@ -94,6 +94,7 @@ export interface BoxProps {
 // COMPONENT
 // ============================================================================
 
+// eslint-disable-next-line complexity -- Box component requires many conditional style props for flexibility
 export const Box: React.FC<BoxProps> = ({
   children,
   bg,
@@ -129,6 +130,7 @@ export const Box: React.FC<BoxProps> = ({
 
   // Build computed style (memoized for performance)
   const computedStyle = useMemo<ViewStyle>(
+    // eslint-disable-next-line complexity -- Style object requires many conditional props
     () => ({
       // Background
       ...(bg && { backgroundColor: getBackgroundColor(bg) }),

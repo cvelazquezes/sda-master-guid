@@ -91,6 +91,7 @@ export interface PressableProps {
 // COMPONENT
 // ============================================================================
 
+// eslint-disable-next-line complexity -- Pressable component requires many conditional style and press state props
 export const Pressable: React.FC<PressableProps> = ({
   children,
   onPress,
@@ -125,6 +126,7 @@ export const Pressable: React.FC<PressableProps> = ({
 
   // Build computed style (memoized for performance)
   const computedStyle = useMemo<ViewStyle>(
+    // eslint-disable-next-line complexity -- Style object requires many conditional props
     () => ({
       // Background
       ...(currentBg && { backgroundColor: getInteractiveBackgroundColor(currentBg) }),
