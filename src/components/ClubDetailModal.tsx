@@ -10,7 +10,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { mobileTypography, mobileIconSizes, layoutConstants } from '../shared/theme';
 import { designTokens } from '../shared/theme/designTokens';
 import { formatMatchFrequency, formatMembersCount } from '../shared/utils/formatters';
-import { ICONS, flexValues } from '../shared/constants';
+import { ICONS, FLEX } from '../shared/constants';
 
 interface ClubDetailModalProps {
   visible: boolean;
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
   },
   infoContent: {
     marginLeft: designTokens.spacing.md,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   infoLabel: {
     ...mobileTypography.label,

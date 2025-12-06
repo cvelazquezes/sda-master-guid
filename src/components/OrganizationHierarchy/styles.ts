@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { mobileFontSizes, designTokens, layoutConstants } from '../../shared/theme';
-import { dimensionValues } from '../../shared/constants';
+import { DIMENSIONS } from '../../shared/constants';
 
 export const styles = StyleSheet.create({
   container: {
@@ -70,6 +70,6 @@ export const styles = StyleSheet.create({
   compactText: {
     fontSize: mobileFontSizes.xs,
     fontWeight: designTokens.fontWeight.medium,
-    maxWidth: dimensionValues.maxWidth.label,
+    maxWidth: DIMENSIONS.MAX_WIDTH.LABEL,
   },
 });

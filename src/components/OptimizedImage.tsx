@@ -29,7 +29,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import { layoutConstants } from '../shared/theme';
-import { ACTIVITY_INDICATOR_SIZE, dimensionValues } from '../shared/constants';
+import { ACTIVITY_INDICATOR_SIZE, DIMENSIONS } from '../shared/constants';
 
 /**
  * Image loading priority
@@ -148,7 +148,7 @@ interface OptimizedImageProps {
  * />
  * ```
  */
-// eslint-disable-next-line complexity
+// eslint-disable-next-line complexity -- Image component requires handling multiple loading states and source types
 export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   source,
   fallbackSource,
@@ -227,13 +227,13 @@ const styles = StyleSheet.create({
     overflow: layoutConstants.overflow.hidden,
   },
   image: {
-    width: dimensionValues.width.full,
-    height: dimensionValues.width.full,
+    width: DIMENSIONS.WIDTH.FULL,
+    height: DIMENSIONS.WIDTH.FULL,
   },
   placeholder: {
     position: layoutConstants.position.absolute,
-    width: dimensionValues.width.full,
-    height: dimensionValues.width.full,
+    width: DIMENSIONS.WIDTH.FULL,
+    height: DIMENSIONS.WIDTH.FULL,
   },
   loadingContainer: {
     position: layoutConstants.position.absolute,
@@ -330,6 +330,5 @@ export function clearImageCache(): void {
   // For FastImage, use:
   // FastImage.clearMemoryCache();
   // FastImage.clearDiskCache();
-  // eslint-disable-next-line no-console
-  console.log('Image cache clearing (implement with FastImage)');
+  // TODO: Implement with FastImage - FastImage.clearMemoryCache(); FastImage.clearDiskCache();
 }

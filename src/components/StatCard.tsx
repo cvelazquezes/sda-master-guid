@@ -11,7 +11,7 @@ import { Text } from '../shared/components';
 import { useTheme } from '../contexts/ThemeContext';
 import { mobileIconSizes, mobileFontSizes, layoutConstants } from '../shared/theme';
 import { designTokens } from '../shared/theme/designTokens';
-import { ICONS, TOUCH_OPACITY, flexValues } from '../shared/constants';
+import { ICONS, TOUCH_OPACITY, FLEX } from '../shared/constants';
 
 interface StatCardProps {
   icon: string;
@@ -94,7 +94,7 @@ export const StatCard: React.FC<StatCardProps> = ({
 
 const styles = StyleSheet.create({
   touchable: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   card: {
     padding: designTokens.spacing.lg,
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     alignItems: layoutConstants.alignItems.center,
   },
   content: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   value: {
     fontSize: mobileFontSizes['3xl'],

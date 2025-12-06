@@ -24,7 +24,7 @@ export const InfoCard: React.FC<InfoCardProps> = ({ selectedCount, colors }) => 
         color={colors.primary}
       />
       <Text style={[styles.infoText, { color: colors.primary }]}>
-        {t('classes.classInfo')} {selectedCount}/{CLASS_SELECTION.maximum}
+        {t('classes.classInfo')} {selectedCount}/{CLASS_SELECTION.MAX}
       </Text>
     </View>
   );

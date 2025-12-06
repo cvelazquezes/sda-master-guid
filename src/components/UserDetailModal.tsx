@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -16,7 +16,7 @@ import {
 } from '../shared/theme';
 import { designTokens } from '../shared/theme/designTokens';
 import { logger } from '../shared/utils/logger';
-import { ACTIVITY_INDICATOR_SIZE, ICONS, LOG_MESSAGES, flexValues } from '../shared/constants';
+import { ACTIVITY_INDICATOR_SIZE, ICONS, LOG_MESSAGES, FLEX } from '../shared/constants';
 
 interface UserDetailModalProps {
   visible: boolean;
@@ -30,14 +30,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ visible, user,
   const [club, setClub] = useState<Club | null>(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (visible && user?.clubId) {
-      loadClub();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible, user]); // loadClub is stable, omitted to prevent loops
-
-  const loadClub = async (): Promise<void> => {
+  const loadClub = useCallback(async (): Promise<void> => {
     if (!user?.clubId) {
       return;
     }
@@ -50,7 +43,13 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ visible, user,
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.clubId]);
+
+  useEffect(() => {
+    if (visible && user?.clubId) {
+      loadClub();
+    }
+  }, [visible, user?.clubId, loadClub]);
 
   if (!user) {
     return null;
@@ -248,7 +247,7 @@ const styles = StyleSheet.create({
   },
   infoContent: {
     marginLeft: designTokens.spacing.md,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   infoLabel: {
     ...mobileTypography.label,

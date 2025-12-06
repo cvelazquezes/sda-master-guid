@@ -29,8 +29,7 @@ export const useClassSelection = ({
     if (visible) {
       setSelectedClasses(initialClasses);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible]);
+  }, [visible, initialClasses]);
 
   const getModalWidth = (): number => {
     const { breakpoints, responsiveScale } = designTokens;
@@ -49,13 +48,13 @@ export const useClassSelection = ({
 
   const toggleClass = (pathfinderClass: PathfinderClass): void => {
     if (selectedClasses.includes(pathfinderClass)) {
-      if (selectedClasses.length === CLASS_SELECTION.minimum) {
+      if (selectedClasses.length === CLASS_SELECTION.MIN) {
         Alert.alert(MESSAGES.TITLES.MINIMUM_REQUIRED, MESSAGES.ERRORS.MINIMUM_ONE_CLASS_REQUIRED);
         return;
       }
       setSelectedClasses(selectedClasses.filter((c) => c !== pathfinderClass));
     } else {
-      if (selectedClasses.length === CLASS_SELECTION.maximum) {
+      if (selectedClasses.length === CLASS_SELECTION.MAX) {
         Alert.alert(MESSAGES.TITLES.MAXIMUM_REACHED, MESSAGES.ERRORS.MAXIMUM_CLASSES_REACHED);
         return;
       }
@@ -64,7 +63,7 @@ export const useClassSelection = ({
   };
 
   const handleSave = (onSave: (classes: PathfinderClass[]) => void, onClose: () => void): void => {
-    if (selectedClasses.length === CLASS_SELECTION.empty) {
+    if (selectedClasses.length === CLASS_SELECTION.EMPTY) {
       Alert.alert(MESSAGES.TITLES.REQUIRED, MESSAGES.ERRORS.PLEASE_SELECT_ONE_CLASS);
       return;
     }

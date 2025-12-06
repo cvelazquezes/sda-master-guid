@@ -14,7 +14,7 @@ import {
   DATE_FORMATS,
   ICONS,
   TOUCH_OPACITY,
-  flexValues,
+  FLEX,
 } from '../shared/constants';
 
 interface MatchCardProps {
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
     alignItems: layoutConstants.alignItems.center,
   },
   infoTextContainer: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   infoLabel: {
     ...mobileTypography.caption,

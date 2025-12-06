@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { mobileFontSizes, designTokens, layoutConstants } from '../../shared/theme';
-import { flexValues } from '../../shared/constants';
+import { FLEX } from '../../shared/constants';
 
 // Note: Colors should be applied dynamically via useTheme() in the component
 // This file only contains layout-related styles
@@ -26,7 +26,7 @@ export const styles = StyleSheet.create({
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
     marginRight: designTokens.spacing.md,
-    flexShrink: flexValues.shrinkDisabled,
+    flexShrink: FLEX.SHRINK_DISABLED,
   },
   avatarText: {
     // Typography handled by Text primitive variant
@@ -35,7 +35,7 @@ export const styles = StyleSheet.create({
     // Color handled dynamically via useTheme
   },
   userInfo: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     marginRight: designTokens.spacing.md,
     minWidth: designTokens.spacing.none,
   },
@@ -46,7 +46,7 @@ export const styles = StyleSheet.create({
     gap: designTokens.spacing.sm,
   },
   userName: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   textInactive: {
     // Color handled dynamically via useTheme
@@ -75,10 +75,10 @@ export const styles = StyleSheet.create({
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
     gap: designTokens.spacing.xs,
-    flexShrink: flexValues.shrinkDisabled,
+    flexShrink: FLEX.SHRINK_DISABLED,
   },
   chevron: {
-    flexShrink: flexValues.shrinkDisabled,
+    flexShrink: FLEX.SHRINK_DISABLED,
   },
   balanceSection: {
     marginTop: designTokens.spacing.sm,

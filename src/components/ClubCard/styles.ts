@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { mobileTypography, designTokens, layoutConstants } from '../../shared/theme';
-import { flexValues } from '../../shared/constants';
+import { FLEX } from '../../shared/constants';
 
 // Note: shadowColor should be set dynamically via useTheme() in the component
 // Use colors.shadow || '#000000' for theme-aware shadow color
@@ -24,10 +24,10 @@ export const styles = StyleSheet.create({
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
     marginRight: designTokens.spacing.md,
-    flexShrink: flexValues.shrinkDisabled,
+    flexShrink: FLEX.SHRINK_DISABLED,
   },
   clubInfo: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     marginRight: designTokens.spacing.md,
     minWidth: designTokens.spacing.none,
   },
@@ -39,7 +39,7 @@ export const styles = StyleSheet.create({
   },
   clubName: {
     ...mobileTypography.bodyMediumBold,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   clubDescription: {
     ...mobileTypography.bodySmall,
@@ -76,9 +76,9 @@ export const styles = StyleSheet.create({
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
     gap: designTokens.spacing.xs,
-    flexShrink: flexValues.shrinkDisabled,
+    flexShrink: FLEX.SHRINK_DISABLED,
   },
   chevron: {
-    flexShrink: flexValues.shrinkDisabled,
+    flexShrink: FLEX.SHRINK_DISABLED,
   },
 });

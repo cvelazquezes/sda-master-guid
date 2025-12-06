@@ -13,7 +13,7 @@ import { LANGUAGES, changeLanguage, Language } from '../i18n';
 import { useTheme } from '../contexts/ThemeContext';
 import { SelectionModal, SelectionItem } from '../shared/components/SelectionModal';
 import { mobileTypography, designTokens, layoutConstants } from '../shared/theme';
-import { A11Y_ROLE, ICONS, flexValues } from '../shared/constants';
+import { A11Y_ROLE, ICONS, FLEX } from '../shared/constants';
 
 interface LanguageSwitcherProps {
   showLabel?: boolean;
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     justifyContent: layoutConstants.justifyContent.center,
   },
   textContainer: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   label: {
     ...mobileTypography.caption,

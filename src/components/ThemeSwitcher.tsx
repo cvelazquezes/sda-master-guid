@@ -12,7 +12,7 @@ import { Text } from '../shared/components';
 import { useTheme, ThemeMode } from '../contexts/ThemeContext';
 import { SelectionModal, SelectionItem } from '../shared/components/SelectionModal';
 import { mobileTypography, designTokens, layoutConstants } from '../shared/theme';
-import { A11Y_ROLE, ICONS, THEME_MODE, flexValues } from '../shared/constants';
+import { A11Y_ROLE, ICONS, THEME_MODE, FLEX } from '../shared/constants';
 
 interface ThemeSwitcherProps {
   showLabel?: boolean;
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     justifyContent: layoutConstants.justifyContent.center,
   },
   textContainer: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   label: {
     ...mobileTypography.caption,

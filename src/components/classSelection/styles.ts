@@ -1,10 +1,10 @@
 import { StyleSheet } from 'react-native';
 import { mobileFontSizes, designTokens, layoutConstants } from '../../shared/theme';
-import { flexValues } from '../../shared/constants';
+import { FLEX } from '../../shared/constants';
 
 export const styles = StyleSheet.create({
   modalOverlay: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     backgroundColor: designTokens.overlay.darkMedium,
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
@@ -42,12 +42,12 @@ export const styles = StyleSheet.create({
     gap: designTokens.spacing.md,
   },
   infoText: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     fontSize: mobileFontSizes.sm,
     lineHeight: designTokens.lineHeights.bodyLarge,
   },
   classList: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     paddingHorizontal: designTokens.spacing.lg,
     marginBottom: designTokens.spacing.lg,
   },
@@ -105,7 +105,7 @@ export const styles = StyleSheet.create({
     borderTopWidth: designTokens.borderWidth.thin,
   },
   cancelButton: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     paddingVertical: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.lg,
     alignItems: layoutConstants.alignItems.center,
@@ -115,7 +115,7 @@ export const styles = StyleSheet.create({
     fontWeight: designTokens.fontWeight.semibold,
   },
   saveButton: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     flexDirection: layoutConstants.flexDirection.row,
     paddingVertical: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.lg,

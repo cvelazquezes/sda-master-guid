@@ -12,7 +12,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { designTokens } from '../shared/theme/designTokens';
 import { mobileTypography } from '../shared/theme/mobileTypography';
 import { layoutConstants } from '../shared/theme';
-import { flexValues, ACTIVITY_INDICATOR_SIZE } from '../shared/constants';
+import { FLEX, ACTIVITY_INDICATOR_SIZE } from '../shared/constants';
 
 interface LoadingScreenProps {
   message?: string;
@@ -33,7 +33,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ message }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
   },

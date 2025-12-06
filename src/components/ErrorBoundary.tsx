@@ -12,10 +12,10 @@ import { logger } from '../utils/logger';
 import { designTokens, layoutConstants } from '../shared/theme';
 import {
   ICONS,
-  flexValues,
-  dimensionValues,
-  shadowOffsetValues,
-  fontFamilyValues,
+  FLEX,
+  DIMENSIONS,
+  SHADOW_OFFSET,
+  FONT_FAMILY,
   LOG_MESSAGES,
 } from '../shared/constants';
 
@@ -132,7 +132,7 @@ export { ErrorBoundaryWithTranslation as ErrorBoundary };
 
 const styles = StyleSheet.create({
   container: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     backgroundColor: designTokens.colors.backgroundSecondary,
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
@@ -142,11 +142,11 @@ const styles = StyleSheet.create({
     backgroundColor: designTokens.colors.backgroundPrimary,
     borderRadius: designTokens.borderRadius.lg,
     padding: designTokens.spacing.xxl,
-    maxWidth: dimensionValues.maxWidth.card,
-    width: dimensionValues.width.full,
+    maxWidth: DIMENSIONS.MAX_WIDTH.CARD,
+    width: DIMENSIONS.WIDTH.FULL,
     alignItems: layoutConstants.alignItems.center,
     shadowColor: designTokens.colors.textPrimary,
-    shadowOffset: shadowOffsetValues.md,
+    shadowOffset: SHADOW_OFFSET.MD,
     shadowOpacity: designTokens.shadows.md.shadowOpacity,
     shadowRadius: designTokens.shadows.sm.shadowRadius,
     elevation: designTokens.shadows.md.elevation,
@@ -159,8 +159,8 @@ const styles = StyleSheet.create({
     marginBottom: designTokens.spacing.xxl,
   },
   errorDetails: {
-    width: dimensionValues.width.full,
-    maxHeight: dimensionValues.maxHeight.errorDetails,
+    width: DIMENSIONS.WIDTH.FULL,
+    maxHeight: DIMENSIONS.MAX_HEIGHT.ERROR_DETAILS,
     backgroundColor: designTokens.colors.inputBackground,
     borderRadius: designTokens.borderRadius.md,
     padding: designTokens.spacing.md,
@@ -170,14 +170,14 @@ const styles = StyleSheet.create({
     marginBottom: designTokens.spacing.sm,
   },
   errorText: {
-    fontFamily: fontFamilyValues.mono,
+    fontFamily: FONT_FAMILY.MONO,
   },
   button: {
     backgroundColor: designTokens.colors.primary,
     paddingVertical: designTokens.spacing.md,
     paddingHorizontal: designTokens.spacing.xxl,
     borderRadius: designTokens.borderRadius.md,
-    minWidth: dimensionValues.minWidth.button,
+    minWidth: DIMENSIONS.MIN_WIDTH.BUTTON,
     alignItems: layoutConstants.alignItems.center,
   },
 });
