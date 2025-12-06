@@ -7,6 +7,7 @@ import * as Sentry from '@sentry/react-native';
 import { environment } from '../config/environment';
 import { logger } from '../utils/logger';
 import { MS, OPACITY_VALUE } from '../constants/numbers';
+import packageJson from '../../../package.json';
 
 // Sentry configuration constants
 const SENTRY_CONFIG = {
@@ -47,8 +48,7 @@ export function initializeSentry(): void {
       enableTracing: true,
 
       // Release tracking
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      release: `sda-master-guid@${require('../../../package.json').version}`,
+      release: `sda-master-guid@${packageJson.version}`,
       dist: '1',
 
       // Filter sensitive data
@@ -93,15 +93,13 @@ export function initializeSentry(): void {
       enableAutoSessionTracking: true,
       sessionTrackingIntervalMillis: SENTRY_CONFIG.SESSION_TRACKING_INTERVAL_MS,
 
-      // Integrations
+      // Integrations (Sentry SDK 8.x compatible)
       integrations: [
-        new Sentry.ReactNativeTracing({
+        Sentry.reactNativeTracingIntegration({
           routingInstrumentation: Sentry.reactNavigationIntegration(),
-          tracePropagationTargets: [
-            'localhost',
-            environment.api.base,
-            /^https:\/\/api\.example\.com/,
-          ],
+          enableAppStartTracking: true,
+          enableNativeFramesTracking: true,
+          enableStallTracking: true,
         }),
       ],
 
@@ -213,7 +211,7 @@ export function captureMessage(
 // ============================================================================
 
 /**
- * Tracks performance of an async operation
+ * Tracks performance of an async operation (Sentry SDK 8.x compatible)
  */
 export async function trackPerformance<T>(
   operation: string,
@@ -224,40 +222,28 @@ export async function trackPerformance<T>(
     return await fn();
   }
 
-  const transaction = Sentry.startTransaction({
-    name: operation,
-    op: 'performance',
-    data: metadata,
-  });
-
-  try {
-    const result = await fn();
-    transaction.setStatus('ok');
-    return result;
-  } catch (error) {
-    transaction.setStatus('internal_error');
-    throw error;
-  } finally {
-    transaction.finish();
-  }
+  return Sentry.startSpan(
+    { name: operation, op: 'performance', attributes: metadata },
+    async () => {
+      return await fn();
+    }
+  );
 }
 
 /**
- * Creates a manual span for fine-grained performance tracking
+ * Creates a manual span for fine-grained performance tracking (Sentry SDK 8.x compatible)
  */
-export function createSpan(name: string, operation: string): Sentry.Span | undefined {
+export async function createSpan<T>(
+  name: string,
+  operation: string,
+  callback: () => Promise<T>
+): Promise<T> {
   if (!isInitialized) {
-    return undefined;
+    return await callback();
   }
 
-  const transaction = Sentry.getCurrentHub().getScope()?.getTransaction();
-  if (!transaction) {
-    return undefined;
-  }
-
-  return transaction.startChild({
-    op: operation,
-    description: name,
+  return Sentry.startSpan({ name, op: operation }, async () => {
+    return await callback();
   });
 }
 
@@ -380,9 +366,7 @@ export function trackSecurityEvent(
 // Exports
 // ============================================================================
 
-export { Sentry, isInitialized as isSentryInitialized };
+// Alias for backward compatibility with config/sentry.ts consumers
+export { initializeSentry as initSentry };
 
-// Initialize on import if configured
-if (environment.sentry.enabled && environment.sentry.dsn) {
-  initializeSentry();
-}
+export { Sentry, isInitialized as isSentryInitialized };

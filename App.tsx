@@ -5,7 +5,7 @@ import { AuthProvider } from './src/context/AuthContext';
 import { ThemeProvider } from './src/contexts/ThemeContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
-import { initSentry } from './src/shared/config/sentry';
+import { initSentry } from './src/shared/services/sentry';
 import { featureFlagsService } from './src/shared/services/featureFlags';
 import { logger } from './src/shared/utils/logger';
 import './src/i18n'; // Initialize i18n
