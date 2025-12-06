@@ -44,16 +44,16 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
 
   let timeoutId: NodeJS.Timeout | null = null;
   let lastArgs: Parameters<T> | null = null;
-  let lastThis: unknown = null;
+  const context: { value: unknown } = { value: null };
   let lastCallTime: number | null = null;
   let lastInvokeTime = 0;
 
   function invokeFunc(time: number): ReturnType<T> {
     const args = lastArgs ?? ([] as unknown as Parameters<T>);
-    const thisArg = lastThis;
+    const thisArg = context.value;
 
     lastArgs = null;
-    lastThis = null;
+    context.value = null;
     lastInvokeTime = time;
     return func.apply(thisArg, args);
   }
@@ -99,7 +99,7 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
       return invokeFunc(time);
     }
     lastArgs = null;
-    lastThis = null;
+    context.value = null;
     return undefined;
   }
 
@@ -110,7 +110,7 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
     lastInvokeTime = 0;
     lastArgs = null;
     lastCallTime = null;
-    lastThis = null;
+    context.value = null;
     timeoutId = null;
   }
 
@@ -119,8 +119,7 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
     const isInvoking = shouldInvoke(time);
 
     lastArgs = args;
-    // eslint-disable-next-line @typescript-eslint/no-this-alias -- Required for debounce
-    lastThis = this;
+    context.value = this;
     lastCallTime = time;
 
     if (isInvoking) {

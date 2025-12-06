@@ -3,7 +3,7 @@
  * Provides helpers for WCAG 2.1 AA compliance following Google/Apple accessibility guidelines
  */
 
-import { AccessibilityProps, Platform } from 'react-native';
+import { AccessibilityProps, Platform, AccessibilityInfo } from 'react-native';
 import { COLOR, WCAG, TOUCH_TARGET, SPACING, MATH } from '../constants/numbers';
 
 // ============================================================================
@@ -381,8 +381,6 @@ export function createHitSlop(size: number = SPACING.XS): {
  */
 export function announceForAccessibility(message: string): void {
   if (Platform.OS === 'ios' || Platform.OS === 'android') {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const AccessibilityInfo = require('react-native').AccessibilityInfo;
     AccessibilityInfo.announceForAccessibility(message);
   }
 }
@@ -395,8 +393,6 @@ export async function isScreenReaderEnabled(): Promise<boolean> {
     return false; // Not available on web
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const AccessibilityInfo = require('react-native').AccessibilityInfo;
   return await AccessibilityInfo.isScreenReaderEnabled();
 }
 
