@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { clubService } from '../../../services/clubService';
 import { Club, MatchFrequency } from '../../../types';
-import { CLUB_SETTINGS, EMPTY_VALUE, MESSAGES } from '../../../shared/constants';
+import { CLUB, EMPTY_VALUE, MESSAGES } from '../../../shared/constants';
 
 interface FormData {
   name: string;
@@ -24,7 +24,7 @@ export function useClubSettings(clubId?: string): UseClubSettingsReturn {
     name: EMPTY_VALUE,
     description: EMPTY_VALUE,
     matchFrequency: MatchFrequency.WEEKLY,
-    groupSize: CLUB_SETTINGS.defaultGroupSize,
+    groupSize: CLUB.DEFAULT_GROUP_SIZE,
   });
 
   const loadClub = useCallback(async (): Promise<void> => {

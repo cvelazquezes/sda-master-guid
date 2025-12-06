@@ -1,8 +1,7 @@
 import { Alert } from 'react-native';
 import { paymentService } from '../../../services/paymentService';
 import { User } from '../../../types';
-import { MESSAGES, VALIDATION, FORMAT_REGEX, EMPTY_VALUE } from '../../../shared/constants';
-import { NUMERIC } from '../../../shared/constants/http';
+import { MESSAGES, NUMERIC, FORMAT_REGEX, EMPTY_VALUE } from '../../../shared/constants';
 
 interface CreateCustomChargeOptions {
   clubId: string;
@@ -36,7 +35,7 @@ export async function createCustomCharge(options: CreateCustomChargeOptions): Pr
   } = options;
 
   const amount = parseFloat(chargeAmount);
-  if (isNaN(amount) || amount <= VALIDATION.NUMBERS.MIN_AMOUNT) {
+  if (isNaN(amount) || amount <= NUMERIC.MIN_AMOUNT) {
     Alert.alert(MESSAGES.TITLES.INVALID_AMOUNT, MESSAGES.ERRORS.INVALID_AMOUNT);
     return;
   }

@@ -2,7 +2,7 @@ import { Alert, Linking } from 'react-native';
 import { matchService } from '../../../services/matchService';
 import { userService } from '../../../services/userService';
 import { Match, MatchRound, MatchStatus } from '../../../types';
-import { EMPTY_VALUE, EXTERNAL_URLS, MESSAGES, VALIDATION } from '../../../shared/constants';
+import { EMPTY_VALUE, EXTERNAL_URLS, MESSAGES, PHONE } from '../../../shared/constants';
 
 interface MatchesDataResult {
   matches: Match[];
@@ -34,7 +34,7 @@ export async function sendNotification(match: Match, messageText: string): Promi
     const participants = await Promise.all(match.participants.map((id) => userService.getUser(id)));
     const phoneNumbers = participants
       .filter((p) => p.whatsappNumber)
-      .map((p) => p.whatsappNumber.replace(VALIDATION.WHATSAPP.STRIP_NON_DIGITS, EMPTY_VALUE))
+      .map((p) => p.whatsappNumber.replace(PHONE.STRIP_NON_DIGITS, EMPTY_VALUE))
       .join(',');
 
     if (phoneNumbers) {

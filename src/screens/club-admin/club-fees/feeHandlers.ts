@@ -4,7 +4,7 @@ import { paymentService } from '../../../services/paymentService';
 import { User, Club, ClubFeeSettings, MemberBalance } from '../../../types';
 import {
   MESSAGES,
-  VALIDATION,
+  NUMERIC,
   LIMITS,
   ALERT_BUTTON_STYLE,
   LOG_MESSAGES,
@@ -25,7 +25,7 @@ export async function saveFeeSettings(options: SaveFeeSettingsOptions): Promise<
   const { club, feeAmount, currency, selectedMonths, feeSettingsActive, setClub, t } = options;
 
   const amount = parseFloat(feeAmount);
-  if (isNaN(amount) || amount < VALIDATION.NUMBERS.MIN_AMOUNT) {
+  if (isNaN(amount) || amount < NUMERIC.MIN_AMOUNT) {
     Alert.alert(MESSAGES.TITLES.INVALID_AMOUNT, t('screens.clubFees.invalidFeeAmount'));
     return;
   }
