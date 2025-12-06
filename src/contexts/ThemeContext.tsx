@@ -16,8 +16,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
 import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { sdaSemanticColors } from '../shared/theme/sdaColors';
-import { darkColors } from '../shared/theme/darkColors';
+import { sdaSemanticColors, statusColors, roleColors } from '../shared/theme/sdaColors';
+import { darkColors, darkStatusColors, darkRoleColors } from '../shared/theme/darkColors';
 import { storageKeys } from '../shared/config/storage';
 import { THEME_MODE, ThemeModeValue } from '../shared/constants/ui';
 import { logger } from '../utils/logger';
@@ -30,6 +30,41 @@ export type ActiveTheme = typeof THEME_MODE.LIGHT | typeof THEME_MODE.DARK;
 interface LegacyThemeColors {
   [key: string]: string;
 }
+
+// Status color structure (theme-aware)
+interface StatusColorConfig {
+  primary: string;
+  light: string;
+  medium: string;
+  text: string;
+  icon: string;
+}
+
+type StatusColors = {
+  active: StatusColorConfig;
+  inactive: StatusColorConfig;
+  paused: StatusColorConfig;
+  pending: StatusColorConfig;
+  completed: StatusColorConfig;
+  scheduled: StatusColorConfig;
+  skipped: StatusColorConfig;
+  cancelled: StatusColorConfig;
+};
+
+// Role color structure (theme-aware)
+interface RoleColorConfig {
+  primary: string;
+  light: string;
+  medium: string;
+  text: string;
+  icon: string;
+}
+
+type RoleColors = {
+  admin: RoleColorConfig;
+  club_admin: RoleColorConfig;
+  user: RoleColorConfig;
+};
 
 // Theme object structure for backward compatibility
 // with components expecting { theme: { colors, ... } }
@@ -55,6 +90,18 @@ export interface ThemeContextType {
    * Components that do `const { theme } = useTheme()` can still access theme.colors
    */
   theme: ThemeObject;
+
+  /**
+   * Theme-aware status colors (for StatusIndicator, Badge)
+   * These automatically switch between light/dark variants
+   */
+  statusColors: StatusColors;
+
+  /**
+   * Theme-aware role colors (for Badge, user roles)
+   * These automatically switch between light/dark variants
+   */
+  roleColors: RoleColors;
 
   /** Whether the current theme is dark */
   isDark: boolean;
@@ -136,6 +183,17 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     () => (activeTheme === THEME_MODE.DARK ? darkColors : sdaSemanticColors),
     [activeTheme]
   );
+
+  const themeStatusColors = useMemo(
+    () => (activeTheme === THEME_MODE.DARK ? darkStatusColors : statusColors) as StatusColors,
+    [activeTheme]
+  );
+
+  const themeRoleColors = useMemo(
+    () => (activeTheme === THEME_MODE.DARK ? darkRoleColors : roleColors) as RoleColors,
+    [activeTheme]
+  );
+
   const isDark = activeTheme === THEME_MODE.DARK;
   const theme: ThemeObject = useMemo(
     () => ({ colors: colors as unknown as LegacyThemeColors }),
@@ -147,6 +205,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     activeTheme,
     colors: colors as unknown as LegacyThemeColors,
     theme,
+    statusColors: themeStatusColors,
+    roleColors: themeRoleColors,
     isDark,
     setTheme,
     toggleTheme,

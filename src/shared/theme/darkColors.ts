@@ -111,6 +111,135 @@ export const darkColors = {
   transparent: 'transparent',
   white: '#FFFFFF',
   black: '#000000',
+
+  // Interactive surface states (for Pressable)
+  surfaceHovered: '#333333',
+  surfacePressed: '#3D3D3D',
+  surfaceDisabled: '#2C2C2C',
+  primaryHover: '#C99EFF',
+  primaryActive: '#A77EE0',
+  secondaryHover: '#33E6D5',
+  accentHover: '#E07689',
+  accentAlpha10: 'rgba(207, 102, 121, 0.1)',
+  textDisabled: '#666666',
+  textOnAccent: '#121212',
+  link: '#BB86FC',
+  placeholder: '#808080',
+  shadow: '#000000',
+
+  // Border focus/validation states
+  borderFocus: '#BB86FC',
+  borderError: '#CF6679',
+  borderSuccess: '#4CAF50',
+
+  // Background modal
+  backgroundModal: '#1F1F1F',
+  backgroundOverlay: 'rgba(0, 0, 0, 0.7)',
+  surfaceDefault: '#1F1F1F',
+  surfaceSubdued: '#2C2C2C',
+
+  // Interaction states
+  interactivePrimary: '#BB86FC',
+  interactivePrimaryHover: '#C99EFF',
+  interactivePrimaryActive: '#A77EE0',
+  interactiveSecondary: '#03DAC6',
+  interactiveSecondaryHover: '#33E6D5',
+  interactiveSecondaryActive: '#00B5A5',
+  interactiveDisabled: '#4D4D4D',
+
+  // Shadow variants
+  shadowXL: 'rgba(0, 0, 0, 0.8)',
 };
+
+// =============================================================================
+// DARK THEME STATUS COLORS (for StatusIndicator, Badge)
+// =============================================================================
+
+export const darkStatusColors = {
+  active: {
+    primary: '#4CAF50',
+    light: 'rgba(76, 175, 80, 0.15)',
+    medium: 'rgba(76, 175, 80, 0.25)',
+    text: '#80E27E',
+    icon: 'check-circle',
+  },
+  inactive: {
+    primary: '#CF6679',
+    light: 'rgba(207, 102, 121, 0.15)',
+    medium: 'rgba(207, 102, 121, 0.25)',
+    text: '#FF94A9',
+    icon: 'cancel',
+  },
+  paused: {
+    primary: '#FFB74D',
+    light: 'rgba(255, 183, 77, 0.15)',
+    medium: 'rgba(255, 183, 77, 0.25)',
+    text: '#FFE97D',
+    icon: 'pause-circle',
+  },
+  pending: {
+    primary: '#FFB74D',
+    light: 'rgba(255, 183, 77, 0.15)',
+    medium: 'rgba(255, 183, 77, 0.25)',
+    text: '#FFE97D',
+    icon: 'clock-outline',
+  },
+  completed: {
+    primary: '#4CAF50',
+    light: 'rgba(76, 175, 80, 0.15)',
+    medium: 'rgba(76, 175, 80, 0.25)',
+    text: '#80E27E',
+    icon: 'check-circle',
+  },
+  scheduled: {
+    primary: '#4FC3F7',
+    light: 'rgba(79, 195, 247, 0.15)',
+    medium: 'rgba(79, 195, 247, 0.25)',
+    text: '#8BF6FF',
+    icon: 'calendar-clock',
+  },
+  skipped: {
+    primary: '#808080',
+    light: 'rgba(128, 128, 128, 0.15)',
+    medium: 'rgba(128, 128, 128, 0.25)',
+    text: '#B3B3B3',
+    icon: 'cancel',
+  },
+  cancelled: {
+    primary: '#CF6679',
+    light: 'rgba(207, 102, 121, 0.15)',
+    medium: 'rgba(207, 102, 121, 0.25)',
+    text: '#FF94A9',
+    icon: 'close-circle',
+  },
+} as const;
+
+// =============================================================================
+// DARK THEME ROLE COLORS
+// =============================================================================
+
+export const darkRoleColors = {
+  admin: {
+    primary: '#CF6679',
+    light: 'rgba(207, 102, 121, 0.15)',
+    medium: 'rgba(207, 102, 121, 0.25)',
+    text: '#FF94A9',
+    icon: 'shield-crown',
+  },
+  club_admin: {
+    primary: '#FFB74D',
+    light: 'rgba(255, 183, 77, 0.15)',
+    medium: 'rgba(255, 183, 77, 0.25)',
+    text: '#FFE97D',
+    icon: 'shield-account',
+  },
+  user: {
+    primary: '#BB86FC',
+    light: 'rgba(187, 134, 252, 0.15)',
+    medium: 'rgba(187, 134, 252, 0.25)',
+    text: '#DDB3FF',
+    icon: 'account',
+  },
+} as const;
 
 export type DarkColorKey = keyof typeof darkColors;
