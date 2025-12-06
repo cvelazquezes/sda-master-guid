@@ -215,7 +215,7 @@ function OrgList({
           title={t('screens.organizationManagement.noTypeFound', {
             type: getTypeLabel(selectedType, t),
           })}
-          message={emptyMsg}
+          description={emptyMsg}
         />
       </ScrollView>
     );

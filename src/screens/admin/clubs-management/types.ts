@@ -1,10 +1,5 @@
 import { MatchFrequency } from '../../../types';
-import {
-  FILTER_STATUS,
-  EMPTY_VALUE,
-  CLUB_SETTINGS,
-  HIERARCHY_FIELDS,
-} from '../../../shared/constants';
+import { FILTER_STATUS, EMPTY_VALUE, CLUB, HIERARCHY_FIELDS } from '../../../shared/constants';
 
 export interface ClubFilters {
   division: string;
@@ -39,7 +34,7 @@ export const initialFormData: ClubFormData = {
   name: EMPTY_VALUE,
   description: EMPTY_VALUE,
   matchFrequency: MatchFrequency.WEEKLY,
-  groupSize: CLUB_SETTINGS.defaultGroupSize,
+  groupSize: CLUB.DEFAULT_GROUP_SIZE,
   church: EMPTY_VALUE,
   association: EMPTY_VALUE,
   union: EMPTY_VALUE,
