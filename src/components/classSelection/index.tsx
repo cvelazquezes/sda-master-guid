@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Modal, ScrollView } from 'react-native';
 import { PATHFINDER_CLASSES, PathfinderClass } from '../../types';
+import { useTheme } from '../../contexts/ThemeContext';
 import { ANIMATION } from '../../shared/constants';
 import { useClassSelection } from './useClassSelection';
 import { ModalHeader } from './ModalHeader';
@@ -22,15 +23,21 @@ export const ClassSelectionModal: React.FC<ClassSelectionModalProps> = ({
   onSave,
   onClose,
 }) => {
+  const { colors } = useTheme();
   const { selectedClasses, modalWidth, modalMaxHeight, toggleClass, handleSave, isSelected } =
     useClassSelection({ visible, initialClasses });
 
   return (
     <Modal visible={visible} animationType={ANIMATION.SLIDE} transparent onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
-        <View style={[styles.modalContent, { width: modalWidth, maxHeight: modalMaxHeight }]}>
-          <ModalHeader onClose={onClose} />
-          <InfoCard selectedCount={selectedClasses.length} />
+        <View
+          style={[
+            styles.modalContent,
+            { width: modalWidth, maxHeight: modalMaxHeight, backgroundColor: colors.surface },
+          ]}
+        >
+          <ModalHeader onClose={onClose} colors={colors} />
+          <InfoCard selectedCount={selectedClasses.length} colors={colors} />
           <ScrollView style={styles.classList}>
             {PATHFINDER_CLASSES.map((pathfinderClass) => (
               <ClassOptionItem
@@ -39,10 +46,15 @@ export const ClassSelectionModal: React.FC<ClassSelectionModalProps> = ({
                 isSelected={isSelected(pathfinderClass)}
                 selectionIndex={selectedClasses.indexOf(pathfinderClass)}
                 onToggle={toggleClass}
+                colors={colors}
               />
             ))}
           </ScrollView>
-          <ModalFooter onCancel={onClose} onSave={() => handleSave(onSave, onClose)} />
+          <ModalFooter
+            onCancel={onClose}
+            onSave={() => handleSave(onSave, onClose)}
+            colors={colors}
+          />
         </View>
       </View>
     </Modal>

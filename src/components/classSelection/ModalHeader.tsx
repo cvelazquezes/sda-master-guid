@@ -5,24 +5,28 @@ import { useTranslation } from 'react-i18next';
 import { Text } from '../../shared/components';
 import { designTokens } from '../../shared/theme';
 import { A11Y_ROLE, ICONS } from '../../shared/constants';
+import { ThemeColors } from './types';
 import { styles } from './styles';
 
 interface ModalHeaderProps {
   onClose: () => void;
+  colors: ThemeColors;
 }
 
-export const ModalHeader: React.FC<ModalHeaderProps> = ({ onClose }) => {
+export const ModalHeader: React.FC<ModalHeaderProps> = ({ onClose, colors }) => {
   const { t } = useTranslation();
 
   return (
-    <View style={styles.header}>
+    <View style={[styles.header, { borderBottomColor: colors.border }]}>
       <View style={styles.headerLeft}>
         <MaterialCommunityIcons
           name={ICONS.SCHOOL}
           size={designTokens.iconSize.lg}
-          color={designTokens.colors.primary}
+          color={colors.primary}
         />
-        <Text style={styles.title}>{t('classes.selectClasses')}</Text>
+        <Text style={[styles.title, { color: colors.textPrimary }]}>
+          {t('classes.selectClasses')}
+        </Text>
       </View>
       <TouchableOpacity
         onPress={onClose}
@@ -33,7 +37,7 @@ export const ModalHeader: React.FC<ModalHeaderProps> = ({ onClose }) => {
         <MaterialCommunityIcons
           name={ICONS.CLOSE}
           size={designTokens.iconSize.lg}
-          color={designTokens.colors.textSecondary}
+          color={colors.textSecondary}
         />
       </TouchableOpacity>
     </View>

@@ -5,6 +5,7 @@ import { Text } from '../../shared/components';
 import { PathfinderClass } from '../../types';
 import { designTokens } from '../../shared/theme';
 import { ICONS } from '../../shared/constants';
+import { ThemeColors } from './types';
 import { styles } from './styles';
 
 interface ClassOptionItemProps {
@@ -12,6 +13,7 @@ interface ClassOptionItemProps {
   isSelected: boolean;
   selectionIndex: number;
   onToggle: (pathfinderClass: PathfinderClass) => void;
+  colors: ThemeColors;
 }
 
 export const ClassOptionItem: React.FC<ClassOptionItemProps> = ({
@@ -19,29 +21,47 @@ export const ClassOptionItem: React.FC<ClassOptionItemProps> = ({
   isSelected,
   selectionIndex,
   onToggle,
+  colors,
 }) => {
+  const optionStyle = [
+    styles.classOption,
+    { backgroundColor: colors.surfaceLight },
+    isSelected && { backgroundColor: colors.primaryLight, borderColor: colors.primary },
+  ];
+
+  const checkboxStyle = [
+    styles.checkbox,
+    { borderColor: colors.textTertiary },
+    isSelected && { backgroundColor: colors.primary, borderColor: colors.primary },
+  ];
+
   return (
-    <TouchableOpacity
-      style={[styles.classOption, isSelected && styles.classOptionSelected]}
-      onPress={() => onToggle(pathfinderClass)}
-    >
+    <TouchableOpacity style={optionStyle} onPress={() => onToggle(pathfinderClass)}>
       <View style={styles.classOptionContent}>
-        <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
+        <View style={checkboxStyle}>
           {isSelected && (
             <MaterialCommunityIcons
               name={ICONS.CHECK}
               size={designTokens.iconSize.sm}
-              color={designTokens.colors.textInverse}
+              color={colors.textInverse}
             />
           )}
         </View>
-        <Text style={[styles.classOptionText, isSelected && styles.classOptionTextSelected]}>
+        <Text
+          style={[
+            styles.classOptionText,
+            { color: colors.textPrimary },
+            isSelected && { color: colors.primary },
+          ]}
+        >
           {pathfinderClass}
         </Text>
       </View>
       {isSelected && (
-        <View style={styles.selectedBadge}>
-          <Text style={styles.selectedBadgeText}>{selectionIndex + 1}</Text>
+        <View style={[styles.selectedBadge, { backgroundColor: colors.primary }]}>
+          <Text style={[styles.selectedBadgeText, { color: colors.textInverse }]}>
+            {selectionIndex + 1}
+          </Text>
         </View>
       )}
     </TouchableOpacity>

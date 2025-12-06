@@ -5,23 +5,25 @@ import { useTranslation } from 'react-i18next';
 import { Text } from '../../shared/components';
 import { designTokens } from '../../shared/theme';
 import { CLASS_SELECTION, ICONS } from '../../shared/constants';
+import { ThemeColors } from './types';
 import { styles } from './styles';
 
 interface InfoCardProps {
   selectedCount: number;
+  colors: ThemeColors;
 }
 
-export const InfoCard: React.FC<InfoCardProps> = ({ selectedCount }) => {
+export const InfoCard: React.FC<InfoCardProps> = ({ selectedCount, colors }) => {
   const { t } = useTranslation();
 
   return (
-    <View style={styles.infoCard}>
+    <View style={[styles.infoCard, { backgroundColor: colors.primaryLight }]}>
       <MaterialCommunityIcons
         name={ICONS.INFORMATION}
         size={designTokens.iconSize.md}
-        color={designTokens.colors.primary}
+        color={colors.primary}
       />
-      <Text style={styles.infoText}>
+      <Text style={[styles.infoText, { color: colors.primary }]}>
         {t('classes.classInfo')} {selectedCount}/{CLASS_SELECTION.maximum}
       </Text>
     </View>
