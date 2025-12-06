@@ -14,10 +14,10 @@ import {
   NOTIFICATION_TYPE,
   TEXT_LINES,
   TOUCH_OPACITY,
-  borderValues,
-  dimensionValues,
-  flexValues,
-  shadowOffsetValues,
+  BORDERS,
+  DIMENSIONS,
+  FLEX,
+  SHADOW_OFFSET,
 } from '../../shared/constants';
 
 type NotificationType = (typeof NOTIFICATION_TYPE)[keyof typeof NOTIFICATION_TYPE];
@@ -57,12 +57,10 @@ const getNotificationColor = (type: NotificationType): string => {
 type TranslationFn = ReturnType<typeof useTranslation>['t'];
 
 // Time multipliers for mock data
-/* eslint-disable no-magic-numbers */
 const TIME_MULTIPLIER = {
-  TWO: 2,
-  THREE: 3,
+  TWO: MATH.HALF,
+  THREE: MATH.THIRD,
 } as const;
-/* eslint-enable no-magic-numbers */
 
 const formatTimestamp = (date: Date, t: TranslationFn): string => {
   const diffMs = Date.now() - date.getTime();
@@ -244,7 +242,7 @@ const NotificationsScreen = (): React.JSX.Element => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     backgroundColor: designTokens.colors.backgroundSecondary,
   },
   header: {
@@ -282,7 +280,7 @@ const styles = StyleSheet.create({
     fontWeight: designTokens.fontWeight.semibold,
   },
   content: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   notificationCard: {
     flexDirection: layoutConstants.flexDirection.row,
@@ -292,7 +290,7 @@ const styles = StyleSheet.create({
     marginTop: designTokens.spacing.md,
     borderRadius: designTokens.borderRadius.lg,
     shadowColor: designTokens.colors.textPrimary,
-    shadowOffset: shadowOffsetValues.md,
+    shadowOffset: SHADOW_OFFSET.MD,
     shadowOpacity: designTokens.shadows.sm.shadowOpacity,
     shadowRadius: designTokens.shadows.sm.shadowRadius,
     elevation: designTokens.shadows.sm.elevation,
@@ -300,15 +298,15 @@ const styles = StyleSheet.create({
   },
   notificationCardUnread: {
     backgroundColor: designTokens.colors.infoLight,
-    borderLeftWidth: borderValues.width.medium,
+    borderLeftWidth: BORDERS.WIDTH.MEDIUM,
     borderLeftColor: designTokens.colors.primary,
   },
   unreadDot: {
     position: layoutConstants.position.absolute,
     top: designTokens.spacing.md,
     right: designTokens.spacing.md,
-    width: dimensionValues.progressBar.standard,
-    height: dimensionValues.progressBar.standard,
+    width: DIMENSIONS.PROGRESS_BAR.STANDARD,
+    height: DIMENSIONS.PROGRESS_BAR.STANDARD,
     borderRadius: designTokens.borderRadius.xs,
     backgroundColor: designTokens.colors.primary,
   },
@@ -321,7 +319,7 @@ const styles = StyleSheet.create({
     marginRight: designTokens.spacing.md,
   },
   notificationContent: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   notificationHeader: {
     flexDirection: layoutConstants.flexDirection.row,
@@ -332,7 +330,7 @@ const styles = StyleSheet.create({
   },
   notificationTitle: {
     ...mobileTypography.bodyMediumBold,
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   notificationTime: {
     ...mobileTypography.caption,

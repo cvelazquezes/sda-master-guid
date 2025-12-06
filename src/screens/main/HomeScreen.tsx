@@ -24,7 +24,7 @@ import { StatCard } from '../../components/StatCard';
 import { designTokens, layoutConstants } from '../../shared/theme';
 // ✅ GOOD: Import UI primitives (Text, Card, etc.)
 import { Text, EmptyState, Card, SectionHeader } from '../../shared/components';
-import { COMPONENT_VARIANT, ICONS, MESSAGES, TABS, flexValues } from '../../shared/constants';
+import { COMPONENT_VARIANT, ICONS, MESSAGES, TABS, FLEX } from '../../shared/constants';
 import { DISPLAY_LIMITS } from '../../shared/constants/http';
 
 interface HomeStats {
@@ -320,7 +320,7 @@ const HomeScreen = (): React.JSX.Element => {
  */
 const styles = StyleSheet.create({
   container: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   header: {
     padding: designTokens.spacing.lg,
@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
   },
   // Removed memberAvatarText - handled by Text variant="h4" color="onPrimary"
   memberInfo: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     gap: designTokens.spacing.xxs,
   },
   // Removed memberName/memberEmail - handled by Text variant props
@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
     gap: designTokens.spacing.md,
   },
   inactiveBannerText: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     gap: designTokens.spacing.xs,
   },
   // Removed inactiveBannerTitle/Description - handled by Text variant props

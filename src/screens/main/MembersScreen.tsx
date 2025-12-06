@@ -22,8 +22,8 @@ import {
   ICONS,
   MESSAGES,
   PHONE,
-  dimensionValues,
-  flexValues,
+  DIMENSIONS,
+  FLEX,
 } from '../../shared/constants';
 
 // Extracted member card component
@@ -258,7 +258,7 @@ const MembersScreen = (): React.JSX.Element => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     backgroundColor: designTokens.colors.backgroundSecondary,
   },
   // Search container now uses Input primitive which handles its own styling
@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
     marginBottom: designTokens.spacing.lg,
   },
   scrollView: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   content: {
     padding: designTokens.spacing.lg,
@@ -282,8 +282,8 @@ const styles = StyleSheet.create({
     gap: designTokens.spacing.md,
   },
   memberAvatar: {
-    width: dimensionValues.size.avatarMedium,
-    height: dimensionValues.size.avatarMedium,
+    width: DIMENSIONS.SIZE.AVATAR_MEDIUM,
+    height: DIMENSIONS.SIZE.AVATAR_MEDIUM,
     borderRadius: designTokens.borderRadius['4xl'],
     backgroundColor: designTokens.colors.primary,
     justifyContent: layoutConstants.justifyContent.center,
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
     color: designTokens.colors.textInverse,
   },
   memberInfo: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   memberName: {
     ...mobileTypography.bodyLargeBold,

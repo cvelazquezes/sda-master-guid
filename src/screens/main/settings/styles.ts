@@ -1,9 +1,9 @@
 import { StyleSheet } from 'react-native';
 import { mobileFontSizes, designTokens, layoutConstants } from '../../../shared/theme';
-import { flexValues, textTransformValues, typographyValues } from '../../../shared/constants';
+import { FLEX, TEXT_TRANSFORM, TYPOGRAPHY } from '../../../shared/constants';
 
 export const styles = StyleSheet.create({
-  container: { flex: flexValues.one },
+  container: { flex: FLEX.ONE },
   header: {
     paddingTop: designTokens.spacing['6xl'],
     paddingBottom: designTokens.spacing.xxl,
@@ -55,8 +55,8 @@ export const styles = StyleSheet.create({
   roleText: {
     fontSize: mobileFontSizes.sm,
     fontWeight: designTokens.fontWeight.semibold,
-    textTransform: textTransformValues.uppercase,
-    letterSpacing: typographyValues.letterSpacing.normal,
+    textTransform: TEXT_TRANSFORM.UPPERCASE,
+    letterSpacing: TYPOGRAPHY.LETTER_SPACING.NORMAL,
   },
   headerStats: {
     flexDirection: layoutConstants.flexDirection.row,
@@ -92,7 +92,7 @@ export const quickActionStyles = StyleSheet.create({
     gap: designTokens.spacing.md,
   },
   action: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     alignItems: layoutConstants.alignItems.center,
     paddingVertical: designTokens.spacing.lg,
     borderRadius: designTokens.borderRadius.xl,
@@ -132,8 +132,8 @@ export const sectionStyles = StyleSheet.create({
   sectionTitle: {
     fontSize: mobileFontSizes.sm,
     fontWeight: designTokens.fontWeight.bold,
-    textTransform: textTransformValues.uppercase,
-    letterSpacing: typographyValues.letterSpacing.normal,
+    textTransform: TEXT_TRANSFORM.UPPERCASE,
+    letterSpacing: TYPOGRAPHY.LETTER_SPACING.NORMAL,
   },
 });
 
@@ -153,7 +153,7 @@ export const menuItemStyles = StyleSheet.create({
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
   },
-  menuContent: { flex: flexValues.one },
+  menuContent: { flex: FLEX.ONE },
   menuTitle: {
     fontSize: mobileFontSizes.md,
     fontWeight: designTokens.fontWeight.semibold,

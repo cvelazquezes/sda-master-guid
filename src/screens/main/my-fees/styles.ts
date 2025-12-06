@@ -1,9 +1,9 @@
 import { StyleSheet } from 'react-native';
 import { mobileFontSizes, designTokens, layoutConstants } from '../../../shared/theme';
-import { borderValues, dimensionValues, flexValues } from '../../../shared/constants';
+import { BORDERS, DIMENSIONS, FLEX } from '../../../shared/constants';
 
 export const styles = StyleSheet.create({
-  container: { flex: flexValues.one },
+  container: { flex: FLEX.ONE },
   headerGradient: {
     paddingTop: designTokens.spacing['6xl'],
     paddingBottom: designTokens.spacing.xxl,
@@ -19,8 +19,8 @@ export const styles = StyleSheet.create({
   headerClubName: { fontSize: mobileFontSizes.sm, marginBottom: designTokens.spacing.xs },
   headerTitle: { fontSize: mobileFontSizes['3xl'], fontWeight: designTokens.fontWeight.bold },
   headerAction: {
-    width: dimensionValues.size.touchTarget,
-    height: dimensionValues.size.touchTarget,
+    width: DIMENSIONS.SIZE.TOUCH_TARGET,
+    height: DIMENSIONS.SIZE.TOUCH_TARGET,
     borderRadius: designTokens.borderRadius['4xl'],
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
@@ -60,8 +60,8 @@ export const styles = StyleSheet.create({
     fontWeight: designTokens.fontWeight.bold,
   },
   quickStatLabel: { fontSize: mobileFontSizes.xs, marginTop: designTokens.spacing.xs },
-  quickStatDivider: { width: borderValues.width.thin, height: dimensionValues.height.divider },
-  content: { flex: flexValues.one, padding: designTokens.spacing.lg },
+  quickStatDivider: { width: BORDERS.WIDTH.THIN, height: DIMENSIONS.HEIGHT.DIVIDER },
+  content: { flex: FLEX.ONE, padding: designTokens.spacing.lg },
   card: {
     borderRadius: designTokens.borderRadius.xl,
     padding: designTokens.spacing.lg,
@@ -84,19 +84,19 @@ export const styles = StyleSheet.create({
   seeAllLink: { fontSize: mobileFontSizes.sm, fontWeight: designTokens.fontWeight.semibold },
   progressContainer: { marginBottom: designTokens.spacing.lg },
   progressBar: {
-    height: dimensionValues.progressBar.standard,
+    height: DIMENSIONS.PROGRESS_BAR.STANDARD,
     borderRadius: designTokens.borderRadius.full,
     overflow: layoutConstants.overflow.hidden,
     marginBottom: designTokens.spacing.sm,
   },
   progressFill: {
-    height: dimensionValues.maxHeightPercent.full,
+    height: DIMENSIONS.MAX_HEIGHT_PERCENT.FULL,
     borderRadius: designTokens.borderRadius.full,
   },
   progressText: { fontSize: mobileFontSizes.xs, textAlign: layoutConstants.textAlign.right },
   summaryGrid: { flexDirection: layoutConstants.flexDirection.row, gap: designTokens.spacing.md },
   summaryItem: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     alignItems: layoutConstants.alignItems.center,
     padding: designTokens.spacing.lg,
     borderRadius: designTokens.borderRadius.lg,
@@ -114,13 +114,13 @@ export const styles = StyleSheet.create({
     gap: designTokens.spacing.lg,
   },
   infoIconContainer: {
-    width: dimensionValues.size.avatarMedium,
-    height: dimensionValues.size.avatarMedium,
+    width: DIMENSIONS.SIZE.AVATAR_MEDIUM,
+    height: DIMENSIONS.SIZE.AVATAR_MEDIUM,
     borderRadius: designTokens.borderRadius.lg,
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
   },
-  infoTextContainer: { flex: flexValues.one },
+  infoTextContainer: { flex: FLEX.ONE },
   infoTitle: { fontSize: mobileFontSizes.sm, marginBottom: designTokens.spacing.xs },
   infoAmount: { fontSize: mobileFontSizes['2xl'], fontWeight: designTokens.fontWeight.bold },
   infoSubtext: { fontSize: mobileFontSizes.xs, marginTop: designTokens.spacing.xxs },
@@ -145,7 +145,7 @@ export const styles = StyleSheet.create({
     borderRadius: designTokens.borderRadius.lg,
     gap: designTokens.spacing.md,
   },
-  helpContent: { flex: flexValues.one },
+  helpContent: { flex: FLEX.ONE },
   helpTitle: {
     fontSize: mobileFontSizes.md,
     fontWeight: designTokens.fontWeight.semibold,
@@ -161,14 +161,14 @@ export const tabStyles = StyleSheet.create({
     borderBottomWidth: designTokens.borderWidth.thin,
   },
   tab: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     flexDirection: layoutConstants.flexDirection.row,
     alignItems: layoutConstants.alignItems.center,
     justifyContent: layoutConstants.justifyContent.center,
     paddingVertical: designTokens.spacing.md,
     gap: designTokens.spacing.sm,
     borderBottomWidth: designTokens.borderWidth.medium,
-    borderBottomColor: borderValues.color.transparent,
+    borderBottomColor: BORDERS.COLOR.TRANSPARENT,
   },
   tabActive: { borderBottomWidth: designTokens.borderWidth.medium },
   tabText: { fontSize: mobileFontSizes.sm, fontWeight: designTokens.fontWeight.semibold },
@@ -182,13 +182,13 @@ export const itemStyles = StyleSheet.create({
     gap: designTokens.spacing.md,
   },
   activityIcon: {
-    width: dimensionValues.size.touchTarget,
-    height: dimensionValues.size.touchTarget,
+    width: DIMENSIONS.SIZE.TOUCH_TARGET,
+    height: DIMENSIONS.SIZE.TOUCH_TARGET,
     borderRadius: designTokens.borderRadius.lg,
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
   },
-  activityInfo: { flex: flexValues.one },
+  activityInfo: { flex: FLEX.ONE },
   activityTitle: {
     fontSize: mobileFontSizes.md,
     fontWeight: designTokens.fontWeight.semibold,
@@ -228,7 +228,7 @@ export const itemStyles = StyleSheet.create({
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
   },
-  historyInfo: { flex: flexValues.one },
+  historyInfo: { flex: FLEX.ONE },
   historyTitle: {
     fontSize: mobileFontSizes.md,
     fontWeight: designTokens.fontWeight.semibold,
@@ -268,7 +268,7 @@ export const itemStyles = StyleSheet.create({
     justifyContent: layoutConstants.justifyContent.center,
     alignItems: layoutConstants.alignItems.center,
   },
-  chargeInfo: { flex: flexValues.one },
+  chargeInfo: { flex: FLEX.ONE },
   chargeTitle: {
     fontSize: mobileFontSizes.md,
     fontWeight: designTokens.fontWeight.semibold,
@@ -289,16 +289,16 @@ export const loadingStyles = StyleSheet.create({
   skeletonContent: { padding: designTokens.spacing.lg },
   skeleton: { borderRadius: designTokens.borderRadius.md },
   skeletonTitle: {
-    width: dimensionValues.skeleton.titleWidth,
-    height: dimensionValues.skeleton.titleHeight,
+    width: DIMENSIONS.SKELETON.TITLE_WIDTH,
+    height: DIMENSIONS.SKELETON.TITLE_HEIGHT,
     marginBottom: designTokens.spacing.sm,
   },
   skeletonSubtitle: {
-    width: dimensionValues.skeleton.subtitleWidth,
-    height: dimensionValues.skeleton.subtitleHeight,
+    width: DIMENSIONS.SKELETON.SUBTITLE_WIDTH,
+    height: DIMENSIONS.SKELETON.SUBTITLE_HEIGHT,
   },
   skeletonCard: {
-    height: dimensionValues.size.iconContainerLarge,
+    height: DIMENSIONS.SIZE.ICON_CONTAINER_LARGE,
     marginBottom: designTokens.spacing.lg,
     borderRadius: designTokens.borderRadius.xl,
   },

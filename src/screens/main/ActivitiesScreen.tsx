@@ -28,7 +28,7 @@ import {
   ICONS,
   MESSAGES,
   PHONE,
-  flexValues,
+  FLEX,
 } from '../../shared/constants';
 
 type TranslationFn = ReturnType<typeof useTranslation>['t'];
@@ -473,7 +473,7 @@ function ActivityDetailModal({
 
 const styles = StyleSheet.create({
   container: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
     backgroundColor: designTokens.colors.backgroundSecondary,
   },
   content: {
@@ -545,7 +545,7 @@ const styles = StyleSheet.create({
     color: designTokens.colors.textInverse,
   },
   participantInfo: {
-    flex: flexValues.one,
+    flex: FLEX.ONE,
   },
   participantName: {
     ...mobileTypography.bodyLargeBold,
