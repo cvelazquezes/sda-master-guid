@@ -5,8 +5,9 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Text } from '../shared/components';
 import { useTheme } from '../contexts/ThemeContext';
 import {
   mobileTypography,
@@ -52,7 +53,11 @@ export const StatCard: React.FC<StatCardProps> = ({
       ]}
     >
       <View style={[styles.iconContainer, { backgroundColor: `${color}15` }]}>
-        <MaterialCommunityIcons name={icon as string} size={mobileIconSizes.xlarge} color={color} />
+        <MaterialCommunityIcons
+          name={icon as React.ComponentProps<typeof MaterialCommunityIcons>['name']}
+          size={mobileIconSizes.xlarge}
+          color={color}
+        />
       </View>
       <View style={styles.content}>
         <Text style={[styles.value, { color: colors.textPrimary }]}>{value}</Text>

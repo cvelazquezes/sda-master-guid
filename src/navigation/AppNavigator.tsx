@@ -1,12 +1,12 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { TouchableOpacity, View, StyleSheet } from 'react-native';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Text } from '../shared/components';
 import { useAuth } from '../context/AuthContext';
 import { UserRole, ApprovalStatus } from '../types';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
 import { mobileFontSizes, designTokens, layoutConstants } from '../shared/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import {
@@ -20,12 +20,10 @@ import {
   BADGE,
   NAV_KEYS,
 } from '../shared/constants';
-
 // Auth Screens - Direct imports (lazy loading disabled to fix Metro bundler issue)
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import PendingApprovalScreen from '../screens/auth/PendingApprovalScreen';
-
 // Main Screens - Direct imports
 import HomeScreen from '../screens/main/HomeScreen';
 import ActivitiesScreen from '../screens/main/ActivitiesScreen';
@@ -33,17 +31,14 @@ import MembersScreen from '../screens/main/MembersScreen';
 import MyFeesScreen from '../screens/main/MyFeesScreen';
 import NotificationsScreen from '../screens/main/NotificationsScreen';
 import UserMoreScreen from '../screens/main/UserMoreScreen';
-
 // Shared Screens
 import AccountScreen from '../screens/shared/AccountScreen';
-
 // Admin Screens - Direct imports
 import AdminDashboardScreen from '../screens/admin/AdminDashboardScreen';
 import UsersManagementScreen from '../screens/admin/UsersManagementScreen';
 import ClubsManagementScreen from '../screens/admin/ClubsManagementScreen';
 import { OrganizationManagementScreen } from '../screens/admin/OrganizationManagementScreen';
 import AdminMoreScreen from '../screens/admin/AdminMoreScreen';
-
 // Club Admin Screens - Direct imports
 import ClubAdminDashboardScreen from '../screens/club-admin/ClubAdminDashboardScreen';
 import ClubMembersScreen from '../screens/club-admin/ClubMembersScreen';
@@ -59,7 +54,7 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 // Profile Icon Component - opens Account modal
-const ProfileIcon = () => {
+const ProfileIcon = (): React.JSX.Element => {
   const navigation = useNavigation();
   const { colors } = useTheme();
 
@@ -82,7 +77,7 @@ const ProfileIcon = () => {
 };
 
 // Notification Bell Component
-const NotificationBell = () => {
+const NotificationBell = (): React.JSX.Element => {
   const navigation = useNavigation();
   const { colors } = useTheme();
   const unreadCount = 2; // This should come from context/state in a real app
@@ -111,7 +106,7 @@ const NotificationBell = () => {
 };
 
 // Combined Header Right Component
-const HeaderRight = () => {
+const HeaderRight = (): React.JSX.Element => {
   return (
     <View style={headerIconStyles.headerRightContainer}>
       <ProfileIcon />
@@ -155,160 +150,119 @@ const headerIconStyles = StyleSheet.create({
   },
 });
 
-const MainTabs = () => {
+// Tab icon mapping for navigation
+const getTabIcon = (routeName: string): keyof typeof MaterialCommunityIcons.glyphMap => {
+  const iconMap: Record<string, keyof typeof MaterialCommunityIcons.glyphMap> = {
+    [SCREENS.HOME]: ICONS.HOME,
+    [TABS.MEMBERS]: ICONS.ACCOUNT_GROUP,
+    [SCREENS.ACTIVITIES]: ICONS.ACCOUNT_HEART,
+    [TABS.USERS]: ICONS.ACCOUNT_MULTIPLE,
+    [TABS.CLUBS]: ICONS.OFFICE_BUILDING,
+    [TABS.MEETINGS]: ICONS.CALENDAR_CLOCK,
+    [TABS.FINANCES]: ICONS.CASH_MULTIPLE,
+    [TABS.MORE]: ICONS.DOTS_HORIZONTAL,
+  };
+  return iconMap[routeName] || ICONS.HELP;
+};
+
+// Admin-specific tabs
+const AdminTabs = (): React.JSX.Element => (
+  <>
+    <Tab.Screen name={TABS.USERS} options={{ title: SCREEN_TITLES.USERS }}>
+      {(): React.JSX.Element => <UsersManagementScreen />}
+    </Tab.Screen>
+    <Tab.Screen name={TABS.CLUBS} options={{ title: SCREEN_TITLES.CLUBS }}>
+      {(): React.JSX.Element => <ClubsManagementScreen />}
+    </Tab.Screen>
+  </>
+);
+
+// Club Admin-specific tabs
+const ClubAdminTabs = (): React.JSX.Element => (
+  <>
+    <Tab.Screen name={TABS.MEMBERS} options={{ title: SCREEN_TITLES.MEMBERS }}>
+      {(): React.JSX.Element => <ClubMembersScreen />}
+    </Tab.Screen>
+    <Tab.Screen name={TABS.MEETINGS} options={{ title: SCREEN_TITLES.MEETINGS }}>
+      {(): React.JSX.Element => <MeetingPlannerScreen />}
+    </Tab.Screen>
+    <Tab.Screen name={TABS.FINANCES} options={{ title: SCREEN_TITLES.FINANCES }}>
+      {(): React.JSX.Element => <ClubFeesScreen />}
+    </Tab.Screen>
+  </>
+);
+
+// Regular User tabs
+const UserTabs = (): React.JSX.Element => (
+  <>
+    <Tab.Screen name={TABS.MEMBERS} options={{ title: SCREEN_TITLES.MEMBERS }}>
+      {(): React.JSX.Element => <MembersScreen />}
+    </Tab.Screen>
+    <Tab.Screen name={TABS.MEETINGS} options={{ title: SCREEN_TITLES.MEETINGS }}>
+      {(): React.JSX.Element => <ActivitiesScreen />}
+    </Tab.Screen>
+    <Tab.Screen name={TABS.FINANCES} options={{ title: SCREEN_TITLES.FINANCES }}>
+      {(): React.JSX.Element => <MyFeesScreen />}
+    </Tab.Screen>
+  </>
+);
+
+// Role-specific dashboard screens
+const getDashboardScreen = (role?: UserRole): React.JSX.Element => {
+  if (role === UserRole.ADMIN) {
+    return <AdminDashboardScreen />;
+  }
+  if (role === UserRole.CLUB_ADMIN) {
+    return <ClubAdminDashboardScreen />;
+  }
+  return <HomeScreen />;
+};
+
+// Role-specific more screens
+const getMoreScreen = (role?: UserRole): React.JSX.Element => {
+  if (role === UserRole.ADMIN) {
+    return <AdminMoreScreen />;
+  }
+  if (role === UserRole.CLUB_ADMIN) {
+    return <ClubAdminMoreScreen />;
+  }
+  return <UserMoreScreen />;
+};
+
+const MainTabs = (): React.JSX.Element => {
   const { user } = useAuth();
   const { colors } = useTheme();
-
-  const isAdmin = user?.role === UserRole.ADMIN;
-  const isClubAdmin = user?.role === UserRole.CLUB_ADMIN;
-  const isRegularUser = user?.role === UserRole.USER;
-
-  // Tab icon mapping for navigation
-  const getTabIcon = (routeName: string): keyof typeof MaterialCommunityIcons.glyphMap => {
-    switch (routeName) {
-      case SCREENS.HOME:
-        return ICONS.HOME;
-      case TABS.MEMBERS:
-        return ICONS.ACCOUNT_GROUP;
-      case SCREENS.ACTIVITIES:
-        return ICONS.ACCOUNT_HEART;
-      case TABS.USERS:
-        return ICONS.ACCOUNT_MULTIPLE;
-      case TABS.CLUBS:
-        return ICONS.OFFICE_BUILDING;
-      case TABS.MEETINGS:
-        return ICONS.CALENDAR_CLOCK;
-      case TABS.FINANCES:
-        return ICONS.CASH_MULTIPLE;
-      case TABS.MORE:
-        return ICONS.DOTS_HORIZONTAL;
-      default:
-        return ICONS.HELP;
-    }
-  };
-
-  // Get role-specific dashboard/home screen
-  const getDashboardScreen = () => {
-    switch (user?.role) {
-      case UserRole.ADMIN:
-        return <AdminDashboardScreen />;
-      case UserRole.CLUB_ADMIN:
-        return <ClubAdminDashboardScreen />;
-      default:
-        return <HomeScreen />;
-    }
-  };
-
-  // Get role-specific members screen (reserved for future use)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const getMembersScreen = (): React.ReactElement => {
-    switch (user?.role) {
-      case UserRole.CLUB_ADMIN:
-        return <ClubMembersScreen />;
-      default:
-        return <MembersScreen />;
-    }
-  };
-
-  // Get role-specific more screen
-  const getMoreScreen = () => {
-    switch (user?.role) {
-      case UserRole.ADMIN:
-        return <AdminMoreScreen />;
-      case UserRole.CLUB_ADMIN:
-        return <ClubAdminMoreScreen />;
-      default:
-        return <UserMoreScreen />;
-    }
-  };
 
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ color, size }) => {
-          const iconName = getTabIcon(route.name);
-          return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
-        },
+        tabBarIcon: ({ color, size }) => (
+          <MaterialCommunityIcons name={getTabIcon(route.name)} size={size} color={color} />
+        ),
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textTertiary,
-        tabBarStyle: {
-          backgroundColor: colors.surface,
-          borderTopColor: colors.border,
-        },
-        headerStyle: {
-          backgroundColor: colors.surface,
-        },
+        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
+        headerStyle: { backgroundColor: colors.surface },
         headerTintColor: colors.textPrimary,
         headerRight: () => <HeaderRight />,
         headerShown: true,
         headerStatusBarHeight: 0,
       })}
     >
-      {/* Tab 1: Home - Role-specific home screen */}
       <Tab.Screen name={SCREENS.HOME} options={{ title: SCREEN_TITLES.HOME }}>
-        {() => getDashboardScreen()}
+        {(): React.JSX.Element => getDashboardScreen(user?.role)}
       </Tab.Screen>
-
-      {/* Admin-only tabs: Users and Clubs management */}
-      {isAdmin && (
-        <Tab.Screen name={TABS.USERS} options={{ title: SCREEN_TITLES.USERS }}>
-          {() => <UsersManagementScreen />}
-        </Tab.Screen>
-      )}
-
-      {isAdmin && (
-        <Tab.Screen name={TABS.CLUBS} options={{ title: SCREEN_TITLES.CLUBS }}>
-          {() => <ClubsManagementScreen />}
-        </Tab.Screen>
-      )}
-
-      {/* Club Admin tabs: Members and Plan Meetings */}
-      {isClubAdmin && (
-        <Tab.Screen name={TABS.MEMBERS} options={{ title: SCREEN_TITLES.MEMBERS }}>
-          {() => <ClubMembersScreen />}
-        </Tab.Screen>
-      )}
-
-      {isClubAdmin && (
-        <Tab.Screen name={TABS.MEETINGS} options={{ title: SCREEN_TITLES.MEETINGS }}>
-          {() => <MeetingPlannerScreen />}
-        </Tab.Screen>
-      )}
-
-      {isClubAdmin && (
-        <Tab.Screen name={TABS.FINANCES} options={{ title: SCREEN_TITLES.FINANCES }}>
-          {() => <ClubFeesScreen />}
-        </Tab.Screen>
-      )}
-
-      {/* Regular User tabs: Members, Meetings, and Finances */}
-      {isRegularUser && (
-        <Tab.Screen name={TABS.MEMBERS} options={{ title: SCREEN_TITLES.MEMBERS }}>
-          {() => <MembersScreen />}
-        </Tab.Screen>
-      )}
-
-      {isRegularUser && (
-        <Tab.Screen name={TABS.MEETINGS} options={{ title: SCREEN_TITLES.MEETINGS }}>
-          {() => <ActivitiesScreen />}
-        </Tab.Screen>
-      )}
-
-      {isRegularUser && (
-        <Tab.Screen name={TABS.FINANCES} options={{ title: SCREEN_TITLES.FINANCES }}>
-          {() => <MyFeesScreen />}
-        </Tab.Screen>
-      )}
-
-      {/* Tab: More - Role-specific additional options */}
+      {user?.role === UserRole.ADMIN && <AdminTabs />}
+      {user?.role === UserRole.CLUB_ADMIN && <ClubAdminTabs />}
+      {user?.role === UserRole.USER && <UserTabs />}
       <Tab.Screen name={TABS.MORE} options={{ title: SCREEN_TITLES.MORE }}>
-        {() => getMoreScreen()}
+        {(): React.JSX.Element => getMoreScreen(user?.role)}
       </Tab.Screen>
     </Tab.Navigator>
   );
 };
 
-const AuthStack = () => {
+const AuthStack = (): React.JSX.Element => {
   return (
     <Stack.Navigator
       screenOptions={{
@@ -316,109 +270,112 @@ const AuthStack = () => {
         contentStyle: { backgroundColor: designTokens.colors.white },
       }}
     >
-      <Stack.Screen name={SCREENS.LOGIN}>{() => <LoginScreen />}</Stack.Screen>
-      <Stack.Screen name={SCREENS.REGISTER}>{() => <RegisterScreen />}</Stack.Screen>
+      <Stack.Screen name={SCREENS.LOGIN}>{(): React.JSX.Element => <LoginScreen />}</Stack.Screen>
+      <Stack.Screen name={SCREENS.REGISTER}>
+        {(): React.JSX.Element => <RegisterScreen />}
+      </Stack.Screen>
     </Stack.Navigator>
   );
 };
 
-const AppStack = () => {
+// Admin-specific stack screens
+const AdminStackScreens = (): React.JSX.Element => (
+  <>
+    <Stack.Screen
+      name={SCREENS.USERS_MANAGEMENT}
+      options={{ headerShown: true, title: SCREEN_TITLES.USER_MANAGEMENT }}
+    >
+      {(): React.JSX.Element => <UsersManagementScreen />}
+    </Stack.Screen>
+    <Stack.Screen
+      name={SCREENS.CLUBS_MANAGEMENT}
+      options={{ headerShown: true, title: SCREEN_TITLES.CLUB_MANAGEMENT }}
+    >
+      {(): React.JSX.Element => <ClubsManagementScreen />}
+    </Stack.Screen>
+    <Stack.Screen
+      name={SCREENS.ORGANIZATION_MANAGEMENT}
+      options={{ headerShown: true, title: SCREEN_TITLES.ORGANIZATION }}
+    >
+      {(): React.JSX.Element => <OrganizationManagementScreen />}
+    </Stack.Screen>
+  </>
+);
+
+// Club Admin-specific stack screens
+const ClubAdminStackScreens = (): React.JSX.Element => (
+  <>
+    <Stack.Screen
+      name={SCREENS.CLUB_SETTINGS}
+      options={{ headerShown: true, title: SCREEN_TITLES.CLUB_SETTINGS }}
+    >
+      {(): React.JSX.Element => <ClubSettingsScreen />}
+    </Stack.Screen>
+    <Stack.Screen
+      name={SCREENS.CLUB_MATCHES}
+      options={{ headerShown: true, title: SCREEN_TITLES.ACTIVITY_MANAGEMENT }}
+    >
+      {(): React.JSX.Element => <ClubMatchesScreen />}
+    </Stack.Screen>
+    <Stack.Screen
+      name={SCREENS.GENERATE_MATCHES}
+      options={{ headerShown: true, title: SCREEN_TITLES.GENERATE_ACTIVITIES }}
+    >
+      {(): React.JSX.Element => <GenerateMatchesScreen />}
+    </Stack.Screen>
+    <Stack.Screen
+      name={SCREENS.CLUB_DIRECTIVE}
+      options={{ headerShown: true, title: SCREEN_TITLES.CLUB_DIRECTIVE }}
+    >
+      {(): React.JSX.Element => <ClubDirectiveScreen />}
+    </Stack.Screen>
+  </>
+);
+
+const AppStack = (): React.JSX.Element | null => {
   const { user } = useAuth();
+  const showMyFees = user?.role === UserRole.USER || user?.role === UserRole.CLUB_ADMIN;
+
+  const stackScreenOptions = {
+    headerShown: false,
+    contentStyle: { backgroundColor: designTokens.colors.white },
+  };
+
+  const accountOptions = {
+    headerShown: true,
+    title: SCREEN_TITLES.MY_ACCOUNT,
+    presentation: PRESENTATION.MODAL,
+  };
+
+  const notificationsOptions = {
+    headerShown: true,
+    title: SCREEN_TITLES.NOTIFICATIONS,
+    presentation: PRESENTATION.MODAL,
+  };
+
+  const myFeesOptions = { headerShown: true, title: SCREEN_TITLES.MY_FEES };
 
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: designTokens.colors.white },
-      }}
-    >
+    <Stack.Navigator screenOptions={stackScreenOptions}>
       <Stack.Screen name={SCREENS.MAIN} component={MainTabs} />
-      {/* Account - Available for all roles via header icon */}
-      <Stack.Screen
-        name={SCREENS.ACCOUNT}
-        component={AccountScreen}
-        options={{
-          headerShown: true,
-          title: SCREEN_TITLES.MY_ACCOUNT,
-          presentation: PRESENTATION.MODAL,
-        }}
-      />
-      {/* Notifications - Available for all roles */}
+      <Stack.Screen name={SCREENS.ACCOUNT} component={AccountScreen} options={accountOptions} />
       <Stack.Screen
         name={SCREENS.NOTIFICATIONS}
         component={NotificationsScreen}
-        options={{
-          headerShown: true,
-          title: SCREEN_TITLES.NOTIFICATIONS,
-          presentation: PRESENTATION.MODAL,
-        }}
+        options={notificationsOptions}
       />
-      {/* Admin-specific screens */}
-      {user?.role === UserRole.ADMIN && (
-        <>
-          <Stack.Screen
-            name={SCREENS.USERS_MANAGEMENT}
-            options={{ headerShown: true, title: SCREEN_TITLES.USER_MANAGEMENT }}
-          >
-            {() => <UsersManagementScreen />}
-          </Stack.Screen>
-          <Stack.Screen
-            name={SCREENS.CLUBS_MANAGEMENT}
-            options={{ headerShown: true, title: SCREEN_TITLES.CLUB_MANAGEMENT }}
-          >
-            {() => <ClubsManagementScreen />}
-          </Stack.Screen>
-          <Stack.Screen
-            name={SCREENS.ORGANIZATION_MANAGEMENT}
-            options={{ headerShown: true, title: SCREEN_TITLES.ORGANIZATION }}
-          >
-            {() => <OrganizationManagementScreen />}
-          </Stack.Screen>
-        </>
-      )}
-      {/* Club Admin-specific screens */}
-      {user?.role === UserRole.CLUB_ADMIN && (
-        <>
-          <Stack.Screen
-            name={SCREENS.CLUB_SETTINGS}
-            options={{ headerShown: true, title: SCREEN_TITLES.CLUB_SETTINGS }}
-          >
-            {() => <ClubSettingsScreen />}
-          </Stack.Screen>
-          <Stack.Screen
-            name={SCREENS.CLUB_MATCHES}
-            options={{ headerShown: true, title: SCREEN_TITLES.ACTIVITY_MANAGEMENT }}
-          >
-            {() => <ClubMatchesScreen />}
-          </Stack.Screen>
-          <Stack.Screen
-            name={SCREENS.GENERATE_MATCHES}
-            options={{ headerShown: true, title: SCREEN_TITLES.GENERATE_ACTIVITIES }}
-          >
-            {() => <GenerateMatchesScreen />}
-          </Stack.Screen>
-          <Stack.Screen
-            name={SCREENS.CLUB_DIRECTIVE}
-            options={{ headerShown: true, title: SCREEN_TITLES.CLUB_DIRECTIVE }}
-          >
-            {() => <ClubDirectiveScreen />}
-          </Stack.Screen>
-        </>
-      )}
-      {/* User-specific screens (available to regular users and club admins) */}
-      {(user?.role === UserRole.USER || user?.role === UserRole.CLUB_ADMIN) && (
-        <Stack.Screen
-          name={SCREENS.MY_FEES}
-          options={{ headerShown: true, title: SCREEN_TITLES.MY_FEES }}
-        >
-          {() => <MyFeesScreen />}
+      {user?.role === UserRole.ADMIN && <AdminStackScreens />}
+      {user?.role === UserRole.CLUB_ADMIN && <ClubAdminStackScreens />}
+      {showMyFees && (
+        <Stack.Screen name={SCREENS.MY_FEES} options={myFeesOptions}>
+          {(): React.JSX.Element => <MyFeesScreen />}
         </Stack.Screen>
       )}
     </Stack.Navigator>
   );
 };
 
-const PendingStack = () => {
+const PendingStack = (): React.JSX.Element => {
   return (
     <Stack.Navigator
       screenOptions={{
@@ -431,7 +388,7 @@ const PendingStack = () => {
   );
 };
 
-const AppNavigator = () => {
+const AppNavigator = (): React.JSX.Element | null => {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
@@ -439,7 +396,7 @@ const AppNavigator = () => {
   }
 
   // Determine which stack to show based on user state
-  const getNavigationStack = () => {
+  const getNavigationStack = (): React.JSX.Element => {
     if (!user) {
       return <AuthStack />;
     }

@@ -359,7 +359,12 @@ export const getMatchRoundsByClub = (clubId: string): MatchRound[] => {
 };
 
 // Initialize mock data - ensures data is ready
-export const initializeMockData = () => {
+export const initializeMockData = (): {
+  users: typeof mockUsers;
+  clubs: typeof mockClubs;
+  matches: typeof mockMatches;
+  rounds: typeof mockMatchRounds;
+} => {
   // Update club member counts (only count approved members)
   mockClubs.forEach((club) => {
     club.memberCount = getUsersByClub(club.id).filter(

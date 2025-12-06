@@ -1,6 +1,6 @@
 /**
  * TokenStorage - Secure Token Storage Implementation
- * 
+ *
  * Implements the ITokenStorage interface using platform-specific secure storage.
  * This is an adapter that wraps the secure storage utility.
  */
@@ -19,7 +19,7 @@ export class SecureTokenStorage implements ITokenStorage {
 
   /**
    * Store authentication token securely
-   * 
+   *
    * @param token - JWT token or access token
    */
   async setToken(token: string): Promise<void> {
@@ -34,7 +34,7 @@ export class SecureTokenStorage implements ITokenStorage {
 
   /**
    * Retrieve authentication token
-   * 
+   *
    * @returns Token string or null if not found
    */
   async getToken(): Promise<string | null> {
@@ -62,7 +62,7 @@ export class SecureTokenStorage implements ITokenStorage {
 
   /**
    * Store user ID
-   * 
+   *
    * @param userId - User identifier
    */
   async setUserId(userId: string): Promise<void> {
@@ -77,7 +77,7 @@ export class SecureTokenStorage implements ITokenStorage {
 
   /**
    * Retrieve user ID
-   * 
+   *
    * @returns User ID or null if not found
    */
   async getUserId(): Promise<string | null> {
@@ -105,7 +105,7 @@ export class SecureTokenStorage implements ITokenStorage {
 
   /**
    * Store refresh token securely
-   * 
+   *
    * @param refreshToken - Refresh token for session renewal
    */
   async setRefreshToken(refreshToken: string): Promise<void> {
@@ -120,7 +120,7 @@ export class SecureTokenStorage implements ITokenStorage {
 
   /**
    * Retrieve refresh token
-   * 
+   *
    * @returns Refresh token or null if not found
    */
   async getRefreshToken(): Promise<string | null> {
@@ -151,11 +151,7 @@ export class SecureTokenStorage implements ITokenStorage {
    */
   async clearAll(): Promise<void> {
     try {
-      await Promise.all([
-        this.removeToken(),
-        this.removeUserId(),
-        this.removeRefreshToken(),
-      ]);
+      await Promise.all([this.removeToken(), this.removeUserId(), this.removeRefreshToken()]);
       logger.info('All auth data cleared successfully');
     } catch (error) {
       logger.error('Failed to clear all auth data', error instanceof Error ? error : undefined);
@@ -166,4 +162,3 @@ export class SecureTokenStorage implements ITokenStorage {
 
 // Singleton instance
 export const tokenStorage = new SecureTokenStorage();
-

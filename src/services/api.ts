@@ -17,9 +17,10 @@ import {
   toAppError,
 } from '../utils/errors';
 import { apiRateLimiter } from '../shared/services/rateLimit';
+import { HTTP_STATUS } from '../shared/constants/http';
+import { MATH, ID_GENERATION } from '../shared/constants/numbers';
 
-// Constants
-const API_TIMEOUT_MS = 10000;
+// Constants - API_TIMEOUT_MS defined in shared config
 
 // Security headers following OWASP best practices
 const SECURITY_HEADERS = {
@@ -77,7 +78,7 @@ const createApiClient = (): AxiosInstance => {
 
         // Add request ID for tracing
         config.headers['X-Request-ID'] =
-          `req_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+          `req_${Date.now()}_${Math.random().toString(MATH.THIRTY_SIX).substring(MATH.HALF, ID_GENERATION.RANDOM_SUFFIX_LENGTH)}`;
       } catch (error) {
         if (error instanceof RateLimitError) {
           throw error;
@@ -96,7 +97,7 @@ const createApiClient = (): AxiosInstance => {
   client.interceptors.response.use(
     (response) => response,
     async (error: AxiosError) => {
-      if (error.response?.status === 401) {
+      if (error.response?.status === HTTP_STATUS.UNAUTHORIZED) {
         // Unauthorized - clear tokens and let app handle redirect
         logger.warn('Unauthorized request - clearing auth tokens');
         await secureStorage.clearAuth();

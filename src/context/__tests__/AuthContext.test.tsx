@@ -25,7 +25,7 @@ jest.mock('../../utils/logger', () => ({
 }));
 
 // Helper to render hook with provider
-const wrapper = ({ children }: { children: React.ReactNode }) => (
+const wrapper = ({ children }: { children: React.ReactNode }): React.JSX.Element => (
   <AuthProvider>{children}</AuthProvider>
 );
 
@@ -136,7 +136,9 @@ describe('AuthContext', () => {
 
       // Complete login
       await act(async () => {
-        resolveLogin!({ user: mockUser, token: 'mock-token' });
+        if (resolveLogin) {
+          resolveLogin({ user: mockUser, token: 'mock-token' });
+        }
         await loginPromise;
       });
     });

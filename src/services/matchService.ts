@@ -21,6 +21,7 @@ import { NotFoundError, ValidationError } from '../utils/errors';
 import { LOG_MESSAGES } from '../shared/constants/logMessages';
 import { TIMING } from '../shared/constants/timing';
 import { MATCH_ROUND_STATUS } from '../shared/constants/ui';
+import { OPACITY_VALUE } from '../shared/constants/numbers';
 import i18n from '../i18n';
 
 class MatchService {
@@ -275,7 +276,7 @@ class MatchService {
 
     // Simple matching algorithm: pair/group members
     const newMatches: Match[] = [];
-    const shuffled = [...members].sort(() => Math.random() - 0.5);
+    const shuffled = [...members].sort(() => Math.random() - OPACITY_VALUE.MEDIUM);
 
     for (let i = 0; i < shuffled.length; i += club.groupSize) {
       const group = shuffled.slice(i, i + club.groupSize);

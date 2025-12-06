@@ -13,7 +13,7 @@ import './src/i18n'; // Initialize i18n
 // Initialize Sentry for error tracking and performance monitoring
 initSentry();
 
-export default function App() {
+export default function App(): React.JSX.Element {
   useEffect(() => {
     // Initialize feature flags system
     const initializeFeatureFlags = async (): Promise<void> => {
@@ -41,4 +41,3 @@ export default function App() {
     </SafeAreaProvider>
   );
 }
-

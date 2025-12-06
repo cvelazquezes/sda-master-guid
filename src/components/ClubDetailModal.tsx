@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { Text } from '../shared/components';
 import { Club } from '../types';
 import { OrganizationHierarchy } from './OrganizationHierarchy';
 import { StandardModal } from '../shared/components/StandardModal';
@@ -19,7 +20,9 @@ interface ClubDetailModalProps {
 export const ClubDetailModal: React.FC<ClubDetailModalProps> = ({ visible, club, onClose }) => {
   const { t } = useTranslation();
 
-  if (!club) return null;
+  if (!club) {
+    return null;
+  }
 
   return (
     <StandardModal
@@ -134,7 +137,7 @@ export const ClubDetailModal: React.FC<ClubDetailModalProps> = ({ visible, club,
             church: club.church,
           }}
           title={t('components.clubDetail.clubOrganization')}
-          initialExpanded={true}
+          initialExpanded
         />
       </View>
     </StandardModal>

@@ -72,67 +72,73 @@ interface ThemeProviderProps {
   children: ReactNode;
 }
 
+// Helper to resolve active theme from mode and system preference
+const resolveActiveTheme = (
+  mode: ThemeMode,
+  systemColorScheme: ReturnType<typeof useColorScheme>
+): ActiveTheme =>
+  mode === THEME_MODE.SYSTEM
+    ? systemColorScheme === THEME_MODE.DARK
+      ? THEME_MODE.DARK
+      : THEME_MODE.LIGHT
+    : (mode as ActiveTheme);
+
+// Helper to load theme from storage
+const loadThemeFromStorage = async (
+  setMode: React.Dispatch<React.SetStateAction<ThemeMode>>
+): Promise<void> => {
+  try {
+    const savedTheme = await AsyncStorage.getItem(storageKeys.THEME);
+    const validThemes = [THEME_MODE.LIGHT, THEME_MODE.DARK, THEME_MODE.SYSTEM];
+    if (savedTheme && validThemes.includes(savedTheme as ThemeModeValue)) {
+      setMode(savedTheme as ThemeMode);
+    }
+  } catch (error) {
+    logger.error(LOG_MESSAGES.CONTEXTS.THEME.LOAD_ERROR, error as Error);
+  }
+};
+
+// Helper to save theme to storage
+const saveThemeToStorage = async (newMode: ThemeMode): Promise<void> => {
+  try {
+    await AsyncStorage.setItem(storageKeys.THEME, newMode);
+  } catch (error) {
+    logger.error(LOG_MESSAGES.CONTEXTS.THEME.SAVE_ERROR, error as Error);
+  }
+};
+
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const systemColorScheme = useColorScheme();
   const [mode, setMode] = useState<ThemeMode>(THEME_MODE.SYSTEM);
   const [activeTheme, setActiveTheme] = useState<ActiveTheme>(
-    systemColorScheme === THEME_MODE.DARK ? THEME_MODE.DARK : THEME_MODE.LIGHT
+    resolveActiveTheme(THEME_MODE.SYSTEM, systemColorScheme)
   );
 
-  // Load saved theme on mount
   useEffect(() => {
-    loadTheme();
+    loadThemeFromStorage(setMode);
   }, []);
 
-  // Update active theme when mode or system theme changes
   useEffect(() => {
-    const theme: ActiveTheme =
-      mode === THEME_MODE.SYSTEM
-        ? systemColorScheme === THEME_MODE.DARK
-          ? THEME_MODE.DARK
-          : THEME_MODE.LIGHT
-        : (mode as ActiveTheme);
-    setActiveTheme(theme);
+    setActiveTheme(resolveActiveTheme(mode, systemColorScheme));
   }, [mode, systemColorScheme]);
 
-  const loadTheme = async () => {
-    try {
-      const savedTheme = await AsyncStorage.getItem(storageKeys.THEME);
-      const validThemes = [THEME_MODE.LIGHT, THEME_MODE.DARK, THEME_MODE.SYSTEM];
-      if (savedTheme && validThemes.includes(savedTheme as ThemeModeValue)) {
-        setMode(savedTheme as ThemeMode);
-      }
-    } catch (error) {
-      logger.error(LOG_MESSAGES.CONTEXTS.THEME.LOAD_ERROR, error as Error);
-    }
+  const setTheme = async (newMode: ThemeMode): Promise<void> => {
+    setMode(newMode);
+    await saveThemeToStorage(newMode);
   };
 
-  const setTheme = async (newMode: ThemeMode) => {
-    try {
-      setMode(newMode);
-      await AsyncStorage.setItem(storageKeys.THEME, newMode);
-    } catch (error) {
-      logger.error(LOG_MESSAGES.CONTEXTS.THEME.SAVE_ERROR, error as Error);
-    }
-  };
-
-  const toggleTheme = async () => {
+  const toggleTheme = async (): Promise<void> => {
     const newMode = activeTheme === THEME_MODE.LIGHT ? THEME_MODE.DARK : THEME_MODE.LIGHT;
     await setTheme(newMode);
   };
 
-  // Memoize colors (legacy flat structure for backward compatibility)
-  const colors = useMemo(() => {
-    return activeTheme === THEME_MODE.DARK ? darkColors : sdaSemanticColors;
-  }, [activeTheme]);
-
+  const colors = useMemo(
+    () => (activeTheme === THEME_MODE.DARK ? darkColors : sdaSemanticColors),
+    [activeTheme]
+  );
   const isDark = activeTheme === THEME_MODE.DARK;
-
-  // Theme object for backward compatibility
   const theme: ThemeObject = useMemo(
-    () => ({
-      colors: colors as unknown as LegacyThemeColors,
-    }),
+    () => ({ colors: colors as unknown as LegacyThemeColors }),
     [colors]
   );
 
@@ -179,7 +185,7 @@ export const useTheme = (): ThemeContextType => {
  * @deprecated For new code, use useTokenColors() from ../shared/hooks instead
  * @returns Legacy flat colors object for the current theme
  */
-export const useThemeColors = () => {
+export const useThemeColors = (): LegacyThemeColors => {
   const { colors } = useTheme();
   return colors;
 };
@@ -193,7 +199,7 @@ export const useThemeColors = () => {
  * const isDark = useIsDark();
  * const bgColor = isDark ? '#000' : '#FFF';
  */
-export const useIsDark = () => {
+export const useIsDark = (): boolean => {
   const { isDark } = useTheme();
   return isDark;
 };
@@ -203,7 +209,7 @@ export const useIsDark = () => {
  *
  * @returns 'light' or 'dark'
  */
-export const useActiveTheme = () => {
+export const useActiveTheme = (): ThemeModeValue => {
   const { activeTheme } = useTheme();
   return activeTheme;
 };

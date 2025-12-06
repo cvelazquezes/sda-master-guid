@@ -201,7 +201,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         resizeMode={resizeMode}
         onLoad={handleLoad}
         onError={handleError}
-        accessible={true}
+        accessible
         accessibilityLabel={accessibilityLabel || 'Image'}
         accessibilityRole="image"
       />

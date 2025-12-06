@@ -9,6 +9,8 @@ import { environment } from '../config/environment';
 import { logger } from '../utils/logger';
 import { MemberBalance, User } from '../types';
 import { TIMING, ALERT_BUTTON_STYLE, EMPTY_VALUE } from '../shared/constants';
+import { ID_GENERATION } from '../shared/constants/numbers';
+import { NUMERIC } from '../shared/constants/validation';
 import { LOG_MESSAGES } from '../shared/constants/logMessages';
 import {
   NOTIFICATION_CHANNEL,
@@ -133,13 +135,17 @@ class NotificationService {
     messages.push(t('services.notification.paymentReminder.greeting', { userName: user.name }));
     messages.push(t('services.notification.paymentReminder.accountStatusHeader'));
     messages.push(
-      t('services.notification.paymentReminder.totalOwed', { amount: balance.totalOwed.toFixed(2) })
+      t('services.notification.paymentReminder.totalOwed', {
+        amount: balance.totalOwed.toFixed(NUMERIC.DECIMAL_PLACES),
+      })
     );
     messages.push(
-      t('services.notification.paymentReminder.totalPaid', { amount: balance.totalPaid.toFixed(2) })
+      t('services.notification.paymentReminder.totalPaid', {
+        amount: balance.totalPaid.toFixed(NUMERIC.DECIMAL_PLACES),
+      })
     );
 
-    const balanceAmount = Math.abs(balance.balance).toFixed(2);
+    const balanceAmount = Math.abs(balance.balance).toFixed(NUMERIC.DECIMAL_PLACES);
     if (balance.balance < 0) {
       messages.push(
         t('services.notification.paymentReminder.pendingBalance', { amount: balanceAmount })
@@ -153,14 +159,14 @@ class NotificationService {
     if (balance.overdueCharges > 0) {
       messages.push(
         t('services.notification.paymentReminder.overdueCharges', {
-          amount: balance.overdueCharges.toFixed(2),
+          amount: balance.overdueCharges.toFixed(NUMERIC.DECIMAL_PLACES),
         })
       );
       messages.push(t('services.notification.paymentReminder.overdueWarning'));
     } else if (balance.pendingCharges > 0) {
       messages.push(
         t('services.notification.paymentReminder.pendingCharges', {
-          amount: balance.pendingCharges.toFixed(2),
+          amount: balance.pendingCharges.toFixed(NUMERIC.DECIMAL_PLACES),
         })
       );
     }
@@ -199,7 +205,11 @@ class NotificationService {
     messages.push(t('services.notification.customCharge.greeting', { userName: user.name }));
     messages.push(t('services.notification.customCharge.newChargeHeader'));
     messages.push(t('services.notification.customCharge.description', { description }));
-    messages.push(t('services.notification.customCharge.amount', { amount: amount.toFixed(2) }));
+    messages.push(
+      t('services.notification.customCharge.amount', {
+        amount: amount.toFixed(NUMERIC.DECIMAL_PLACES),
+      })
+    );
     messages.push(
       t('services.notification.customCharge.dueDate', { date: due.toLocaleDateString(locale) })
     );
@@ -420,7 +430,7 @@ class NotificationService {
     scheduledDate: Date
   ): Promise<string> {
     // TODO: Implement with expo-notifications
-    const notificationId = `${ID_PREFIX.NOTIFICATION}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const notificationId = `${ID_PREFIX.NOTIFICATION}_${Date.now()}_${Math.random().toString(ID_GENERATION.RADIX).substr(ID_GENERATION.SUBSTRING_START, ID_GENERATION.SUFFIX_LENGTH)}`;
     logger.info(LOG_MESSAGES.NOTIFICATION.MOCK_SCHEDULED, {
       userId,
       notificationId,

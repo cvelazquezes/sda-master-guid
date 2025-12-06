@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { Text } from '../shared/components';
 import { User, Club, UserRole } from '../types';
 import { OrganizationHierarchy } from './OrganizationHierarchy';
 import { clubService } from '../services/clubService';
@@ -31,10 +32,13 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ visible, user,
     if (visible && user?.clubId) {
       loadClub();
     }
-  }, [visible, user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible, user]); // loadClub is stable, omitted to prevent loops
 
-  const loadClub = async () => {
-    if (!user?.clubId) return;
+  const loadClub = async (): Promise<void> => {
+    if (!user?.clubId) {
+      return;
+    }
     setLoading(true);
     try {
       const clubData = await clubService.getClub(user.clubId);
@@ -46,7 +50,9 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ visible, user,
     }
   };
 
-  if (!user) return null;
+  if (!user) {
+    return null;
+  }
 
   const getRoleLabel = (role: UserRole): string => {
     switch (role) {
@@ -130,8 +136,8 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ visible, user,
             {t('components.userDetailModal.pathfinderClasses')}
           </Text>
           <View style={styles.classesContainer}>
-            {user.classes.map((pathfinderClass, index) => (
-              <View key={index} style={styles.classBadge}>
+            {user.classes.map((pathfinderClass) => (
+              <View key={pathfinderClass} style={styles.classBadge}>
                 <MaterialCommunityIcons
                   name={ICONS.SCHOOL}
                   size={mobileIconSizes.small}
@@ -177,7 +183,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ visible, user,
               clubName: club.name,
             }}
             title={t('components.userDetailModal.organizationalHierarchy')}
-            initialExpanded={true}
+            initialExpanded
           />
         </View>
       )}
@@ -265,7 +271,7 @@ const styles = StyleSheet.create({
     backgroundColor: designTokens.colors.primaryLight,
     paddingVertical: designTokens.spacing.md,
     paddingHorizontal: designTokens.spacing.md,
-    borderRadius: designTokens.borderRadius.xxl,
+    borderRadius: designTokens.borderRadius['2xl'],
     gap: designTokens.spacing.sm,
   },
   classBadgeText: {

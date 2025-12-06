@@ -5,9 +5,10 @@
  */
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { Text } from '../shared/components';
 import { useTheme, ThemeMode } from '../contexts/ThemeContext';
 import { SelectionModal, SelectionItem } from '../shared/components/SelectionModal';
 import { mobileTypography, designTokens, layoutConstants } from '../shared/theme';
@@ -54,7 +55,7 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ showLabel = true }
     iconColor: colors.primary,
   }));
 
-  const handleSelect = async (item: SelectionItem) => {
+  const handleSelect = async (item: SelectionItem): Promise<void> => {
     await setTheme(item.id as ThemeMode);
     setModalVisible(false);
   };

@@ -18,8 +18,7 @@ import {
   UpdateUserSchema,
 } from '../utils/validation';
 import { AuthenticationError, ConflictError, NotFoundError } from '../utils/errors';
-import { UserRole, ApprovalStatus, PathfinderClass } from '../types';
-import { User } from '../types';
+import { UserRole, ApprovalStatus, PathfinderClass, User } from '../types';
 import { mockUsers, getUserByEmail } from './mockData';
 
 // Constants

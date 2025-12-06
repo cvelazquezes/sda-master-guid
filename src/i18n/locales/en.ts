@@ -79,7 +79,8 @@ export const en = {
     passwordMismatch: 'Passwords do not match',
     passwordTooShort: 'Password must be at least 6 characters',
     invalidEmail: 'Please enter a valid email address',
-    invalidWhatsapp: 'Please enter a valid WhatsApp number with country code (e.g., +1 555 123 4567)',
+    invalidWhatsapp:
+      'Please enter a valid WhatsApp number with country code (e.g., +1 555 123 4567)',
     invalidAmount: 'Please enter a valid amount',
     missingDescription: 'Please enter a description',
     missingDate: 'Please enter a due date',
@@ -204,19 +205,22 @@ export const en = {
     },
     home: {
       notPartOfClub: 'You are not part of a club',
-      contactAdminDescription: 'Please contact an administrator to join a club and start connecting with other members',
+      contactAdminDescription:
+        'Please contact an administrator to join a club and start connecting with other members',
       accountInactive: 'Account Inactive',
       welcomeBack: 'Welcome back, {{name}}!',
       clubHappenings: "Here's what's happening in your club",
       upcoming: 'upcoming',
       pending: 'pending',
-      inactiveAccountDescription: 'Your account is currently inactive. Contact your club admin to activate it.',
+      inactiveAccountDescription:
+        'Your account is currently inactive. Contact your club admin to activate it.',
     },
     activities: {
       title: 'Club Activities',
       socialMeetupsSubtitle: 'Social meetups and events',
       socialMeetupInfo: 'Social meetup information',
-      noActivitiesDescription: 'Social activities will appear here when they\'re organized by your club admin',
+      noActivitiesDescription:
+        "Social activities will appear here when they're organized by your club admin",
       filterByStatus: 'Filter by status:',
       status: 'Status',
       participants: 'Participants',
@@ -224,8 +228,10 @@ export const en = {
       filterPending: 'Pending',
       filterScheduled: 'Scheduled',
       filterCompleted: 'Completed',
-      whatsappMessageSingle: "Hi {{name}}! Let's schedule our meetup for this week. What day works best for you?",
-      whatsappMessageGroup: "Hi everyone! Let's schedule our club meetup this week. What day and time works for everyone?",
+      whatsappMessageSingle:
+        "Hi {{name}}! Let's schedule our meetup for this week. What day works best for you?",
+      whatsappMessageGroup:
+        "Hi everyone! Let's schedule our club meetup this week. What day and time works for everyone?",
       loadingActivities: 'Loading activities...',
       noActivitiesYet: 'No activities yet',
       cancelMatch: 'Cancel Match',
@@ -324,7 +330,8 @@ export const en = {
       activityTitlePlaceholder: 'e.g., Welcome and Honors',
       minutesPlaceholder: '10',
       meetingSavedSuccess: 'Meeting plan for {{date}} has been saved successfully!',
-      meetingSharedSuccess: 'The meeting plan has been shared with all {{count}} club members. They will receive a notification with the complete agenda and their responsibilities.',
+      meetingSharedSuccess:
+        'The meeting plan has been shared with all {{count}} club members. They will receive a notification with the complete agenda and their responsibilities.',
       sendAgendaToMembers: 'Send this meeting agenda to all {{count}} club members',
       itemsCount: '{{count}} items',
       minutesCount: '{{count}} minutes',
@@ -432,7 +439,8 @@ export const en = {
       noActivitiesFound: 'No activities found',
       currentStatus: 'Current Status',
       adminActions: 'Admin Actions',
-      whatsappGroupMessage: 'Hello! You have a new social activity scheduled. Please coordinate with your group to set up a meetup this week.',
+      whatsappGroupMessage:
+        'Hello! You have a new social activity scheduled. Please coordinate with your group to set up a meetup this week.',
       filterAll: 'All',
       filterPending: 'Pending',
       filterScheduled: 'Scheduled',
@@ -454,9 +462,12 @@ export const en = {
       reassign: 'Reassign',
       remove: 'Remove',
       assignAtLeastOne: 'Please assign at least one member to a directive position before saving.',
-      saveSuccess: 'Club directive with {{count}} member(s) has been saved successfully. All club members will be notified of the directive structure.',
-      infoText: 'Club directive members help organize and lead club activities. Assign members to build a strong leadership team.',
-      noAvailableMembers: 'No available members. All eligible members have been assigned or are inactive.',
+      saveSuccess:
+        'Club directive with {{count}} member(s) has been saved successfully. All club members will be notified of the directive structure.',
+      infoText:
+        'Club directive members help organize and lead club activities. Assign members to build a strong leadership team.',
+      noAvailableMembers:
+        'No available members. All eligible members have been assigned or are inactive.',
       positions: {
         viceDirector: 'Vice Director',
         viceDirectorDesc: 'Assists the director and leads in their absence',
@@ -514,7 +525,8 @@ export const en = {
       userStep1: 'Your club administrator will review your registration',
       userStep2: "Once approved, you'll receive a notification via WhatsApp",
       userStep3: 'You can then log in and start participating in club activities',
-      noteText: 'This approval process typically takes 1-2 business days. If you have any questions, please contact your {{admin}}.',
+      noteText:
+        'This approval process typically takes 1-2 business days. If you have any questions, please contact your {{admin}}.',
       systemAdmin: 'system administrator',
       clubAdmin: 'club administrator',
     },
@@ -613,7 +625,8 @@ export const en = {
       pendingPayments: 'Pending Payments',
       overduePayments: 'Overdue Payments',
       pathfinderClass: 'Pathfinder Class',
-      classFilterInfo: 'Select classes to filter. Members with at least one selected class will be shown.',
+      classFilterInfo:
+        'Select classes to filter. Members with at least one selected class will be shown.',
       rejectMember: 'Reject member',
       approveMember: 'Approve member',
       active: 'Active',
@@ -678,7 +691,8 @@ export const en = {
       notifyMemberConfirm: 'Send balance notification to {{name}}?',
       notificationSent: 'Notification sent',
       failedToSendNotification: 'Failed to send notification',
-      setupDescription: 'Set up recurring monthly fees for your club members. Choose the months that require payment and the amount.',
+      setupDescription:
+        'Set up recurring monthly fees for your club members. Choose the months that require payment and the amount.',
       activateFeeCollection: 'Turn on to activate monthly fee collection',
       generateFeesCurrentYear: 'Generate Fees for Current Year',
       membersCount: '{{count}} members',
@@ -790,17 +804,22 @@ export const en = {
       noAssociationsIn: 'No associations found in {{union}}',
       // Info banners
       divisionInfo: 'Divisions are the top level of your organization hierarchy.',
-      unionInfo: 'Unions belong to a Division. First select the parent Division, then enter the Union name.',
-      associationInfo: 'Associations belong to a Union. First select the parent Union, then enter the Association name.',
-      churchInfo: 'Churches belong to an Association. First select the parent Association, then enter the Church name.',
+      unionInfo:
+        'Unions belong to a Division. First select the parent Division, then enter the Union name.',
+      associationInfo:
+        'Associations belong to a Union. First select the parent Union, then enter the Association name.',
+      churchInfo:
+        'Churches belong to an Association. First select the parent Association, then enter the Church name.',
       // Form labels
       typeName: '{{type}} Name',
       enterTypeName: 'Enter {{type}} name',
       // Warning messages
-      noParentAvailable: 'No parent {{parentType}}s available. Please create a {{parentType}} first.',
+      noParentAvailable:
+        'No parent {{parentType}}s available. Please create a {{parentType}} first.',
       // Delete dialog
       deleteType: 'Delete {{type}}',
-      confirmDeleteMessage: 'Are you sure you want to delete "{{name}}"?\n\nThis {{type}} is used by {{count}} club(s). Deleting it will affect these clubs.',
+      confirmDeleteMessage:
+        'Are you sure you want to delete "{{name}}"?\n\nThis {{type}} is used by {{count}} club(s). Deleting it will affect these clubs.',
       // Success messages
       typeUpdated: '{{type}} "{{name}}" updated successfully',
       typeCreated: '{{type}} "{{name}}" created successfully',
@@ -828,7 +847,8 @@ export const en = {
       descriptionLabel: 'Description',
       groupSizeLabel: 'Group Size',
       filterClubs: 'Filter Clubs',
-      filterDescription: 'Navigate from general (Division) to specific (Church). Each level filters the next.',
+      filterDescription:
+        'Navigate from general (Division) to specific (Church). Each level filters the next.',
       organizationSection: 'Organization',
       clubStatusSection: 'Club Status',
       allClubs: 'All Clubs',
@@ -1137,10 +1157,10 @@ export const en = {
     },
     // Validation Messages
     validation: {
-      notEnoughMembers: 'Not enough active members. Need at least {{required}}, but only have {{count}}',
+      notEnoughMembers:
+        'Not enough active members. Need at least {{required}}, but only have {{count}}',
     },
   },
 };
 
 export type TranslationKeys = typeof en;
-

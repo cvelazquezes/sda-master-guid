@@ -20,7 +20,12 @@ import {
 import { LOG_MESSAGES } from '../shared/constants/logMessages';
 import { storageKeys } from '../shared/config/storage';
 import { LOCALE, LANGUAGE, ID_PREFIX, EMPTY_VALUE } from '../shared/constants/ui';
+import { MATH, ID_GENERATION, MS } from '../shared/constants/numbers';
+import { NUMERIC } from '../shared/constants/validation';
 import i18n from '../i18n';
+
+// Payment service constants
+const PAYMENT_DELAY_MS = MS.FIVE; // Delay for unique ID generation
 
 interface GenerateFeesRequest {
   clubId: string;
@@ -202,8 +207,12 @@ class PaymentService {
   private async mockGetClubPayments(clubId: string, year?: number): Promise<MemberPayment[]> {
     const payments = await this.getPayments();
     const filtered = payments.filter((p) => {
-      if (p.clubId !== clubId) return false;
-      if (year && p.year !== year) return false;
+      if (p.clubId !== clubId) {
+        return false;
+      }
+      if (year && p.year !== year) {
+        return false;
+      }
       return true;
     });
 
@@ -299,8 +308,12 @@ class PaymentService {
     if (payment) {
       payment.status = status;
       payment.updatedAt = new Date().toISOString();
-      if (paidDate) payment.paidDate = paidDate;
-      if (notes !== undefined) payment.notes = notes;
+      if (paidDate) {
+        payment.paidDate = paidDate;
+      }
+      if (notes !== undefined) {
+        payment.notes = notes;
+      }
 
       await this.savePayments(payments);
       logger.info(LOG_MESSAGES.PAYMENT.MOCK_STATUS_UPDATED, { paymentId, status });
@@ -408,7 +421,7 @@ class PaymentService {
     // Create payment record for each selected user
     for (const userId of userIds) {
       const newPayment: MemberPayment = {
-        id: `${ID_PREFIX.PAYMENT}_${charge.id}_${userId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: `${ID_PREFIX.PAYMENT}_${charge.id}_${userId}_${Date.now()}_${Math.random().toString(MATH.THIRTY_SIX).substr(MATH.HALF, ID_GENERATION.RANDOM_SUFFIX_LENGTH)}`,
         userId,
         clubId: charge.clubId,
         year: dueDate.getFullYear(),
@@ -424,7 +437,7 @@ class PaymentService {
       payments.push(newPayment);
 
       // Small delay to ensure unique IDs
-      await new Promise((resolve) => setTimeout(resolve, 5)); // Minimal delay for unique IDs
+      await new Promise((resolve) => setTimeout(resolve, PAYMENT_DELAY_MS));
     }
 
     await this.savePayments(payments);
@@ -538,7 +551,7 @@ class PaymentService {
 
       if (payment.status === PaymentStatus.PAID) {
         totalPaid += payment.amount;
-        if (!lastPaymentDate || payment.paidDate! > lastPaymentDate) {
+        if (payment.paidDate && (!lastPaymentDate || payment.paidDate > lastPaymentDate)) {
           lastPaymentDate = payment.paidDate;
         }
       } else if (payment.status === PaymentStatus.PENDING) {
@@ -620,13 +633,17 @@ class PaymentService {
     messages.push(t('services.notification.paymentReminder.greetingSimple', { userName }));
     messages.push(t('services.notification.paymentReminder.accountStatusHeader'));
     messages.push(
-      t('services.notification.paymentReminder.totalOwed', { amount: balance.totalOwed.toFixed(2) })
+      t('services.notification.paymentReminder.totalOwed', {
+        amount: balance.totalOwed.toFixed(NUMERIC.DECIMAL_PLACES),
+      })
     );
     messages.push(
-      t('services.notification.paymentReminder.totalPaid', { amount: balance.totalPaid.toFixed(2) })
+      t('services.notification.paymentReminder.totalPaid', {
+        amount: balance.totalPaid.toFixed(NUMERIC.DECIMAL_PLACES),
+      })
     );
 
-    const balanceAmount = Math.abs(balance.balance).toFixed(2);
+    const balanceAmount = Math.abs(balance.balance).toFixed(NUMERIC.DECIMAL_PLACES);
     if (balance.balance < 0) {
       messages.push(
         t('services.notification.paymentReminder.currentBalanceOwes', { amount: balanceAmount })
@@ -642,14 +659,14 @@ class PaymentService {
     if (balance.overdueCharges > 0) {
       messages.push(
         t('services.notification.paymentReminder.overdueCharges', {
-          amount: balance.overdueCharges.toFixed(2),
+          amount: balance.overdueCharges.toFixed(NUMERIC.DECIMAL_PLACES),
         })
       );
       messages.push(t('services.notification.paymentReminder.overdueWarningLateFees'));
     } else if (balance.pendingCharges > 0) {
       messages.push(
         t('services.notification.paymentReminder.pendingCharges', {
-          amount: balance.pendingCharges.toFixed(2),
+          amount: balance.pendingCharges.toFixed(NUMERIC.DECIMAL_PLACES),
         })
       );
     }

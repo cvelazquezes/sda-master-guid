@@ -1,6 +1,6 @@
 /**
  * Auth Feature - Domain Types and Interfaces
- * 
+ *
  * This file contains the domain models and repository interfaces
  * following Clean Architecture and Repository Pattern principles.
  */
@@ -54,7 +54,7 @@ export interface AuthResponse {
 
 /**
  * IAuthRepository - Port for authentication operations
- * 
+ *
  * This interface defines the contract for authentication data access.
  * Implementations can be API-based, mock-based, or local storage-based.
  */
@@ -63,27 +63,27 @@ export interface IAuthRepository {
    * Authenticate user with credentials
    */
   login(credentials: LoginCredentials): Promise<AuthResponse>;
-  
+
   /**
    * Register a new user
    */
   register(data: RegisterData): Promise<AuthResponse>;
-  
+
   /**
    * Sign out current user
    */
   logout(): Promise<void>;
-  
+
   /**
    * Get currently authenticated user
    */
   getCurrentUser(): Promise<User | null>;
-  
+
   /**
    * Update user profile
    */
   updateUser(userId: string, data: Partial<User>): Promise<User>;
-  
+
   /**
    * Refresh authentication token
    */
@@ -92,7 +92,7 @@ export interface IAuthRepository {
 
 /**
  * ITokenStorage - Port for token storage operations
- * 
+ *
  * This interface defines the contract for secure token storage.
  * Implementations should use platform-specific secure storage.
  */
@@ -101,47 +101,47 @@ export interface ITokenStorage {
    * Store authentication token securely
    */
   setToken(token: string): Promise<void>;
-  
+
   /**
    * Retrieve authentication token
    */
   getToken(): Promise<string | null>;
-  
+
   /**
    * Remove authentication token
    */
   removeToken(): Promise<void>;
-  
+
   /**
    * Store user ID
    */
   setUserId(userId: string): Promise<void>;
-  
+
   /**
    * Retrieve user ID
    */
   getUserId(): Promise<string | null>;
-  
+
   /**
    * Remove user ID
    */
   removeUserId(): Promise<void>;
-  
+
   /**
    * Store refresh token securely
    */
   setRefreshToken(token: string): Promise<void>;
-  
+
   /**
    * Retrieve refresh token
    */
   getRefreshToken(): Promise<string | null>;
-  
+
   /**
    * Remove refresh token
    */
   removeRefreshToken(): Promise<void>;
-  
+
   /**
    * Clear all auth data
    */
@@ -154,7 +154,7 @@ export interface ITokenStorage {
 
 /**
  * IAuthService - Application use cases for authentication
- * 
+ *
  * This interface defines the business logic layer for authentication.
  * It orchestrates repository calls and implements business rules.
  */
@@ -167,4 +167,3 @@ export interface IAuthService {
   refreshSession(): Promise<void>;
   isAuthenticated(): Promise<boolean>;
 }
-

@@ -81,7 +81,8 @@ export const es: TranslationKeys = {
     passwordMismatch: 'Las contraseñas no coinciden',
     passwordTooShort: 'La contraseña debe tener al menos 6 caracteres',
     invalidEmail: 'Por favor ingresa un correo electrónico válido',
-    invalidWhatsapp: 'Por favor ingresa un número de WhatsApp válido con código de país (ej., +1 555 123 4567)',
+    invalidWhatsapp:
+      'Por favor ingresa un número de WhatsApp válido con código de país (ej., +1 555 123 4567)',
     invalidAmount: 'Por favor ingresa una cantidad válida',
     missingDescription: 'Por favor ingresa una descripción',
     missingDate: 'Por favor ingresa una fecha de vencimiento',
@@ -206,19 +207,22 @@ export const es: TranslationKeys = {
     },
     home: {
       notPartOfClub: 'No eres parte de un club',
-      contactAdminDescription: 'Por favor contacta a un administrador para unirte a un club y comenzar a conectar con otros miembros',
+      contactAdminDescription:
+        'Por favor contacta a un administrador para unirte a un club y comenzar a conectar con otros miembros',
       accountInactive: 'Cuenta Inactiva',
       welcomeBack: '¡Bienvenido de nuevo, {{name}}!',
       clubHappenings: 'Esto es lo que está pasando en tu club',
       upcoming: 'próximamente',
       pending: 'pendiente',
-      inactiveAccountDescription: 'Tu cuenta está actualmente inactiva. Contacta al administrador de tu club para activarla.',
+      inactiveAccountDescription:
+        'Tu cuenta está actualmente inactiva. Contacta al administrador de tu club para activarla.',
     },
     activities: {
       title: 'Actividades del Club',
       socialMeetupsSubtitle: 'Reuniones sociales y eventos',
       socialMeetupInfo: 'Información del encuentro social',
-      noActivitiesDescription: 'Las actividades sociales aparecerán aquí cuando sean organizadas por el administrador de tu club',
+      noActivitiesDescription:
+        'Las actividades sociales aparecerán aquí cuando sean organizadas por el administrador de tu club',
       filterByStatus: 'Filtrar por estado:',
       status: 'Estado',
       participants: 'Participantes',
@@ -226,8 +230,10 @@ export const es: TranslationKeys = {
       filterPending: 'Pendiente',
       filterScheduled: 'Programado',
       filterCompleted: 'Completado',
-      whatsappMessageSingle: '¡Hola {{name}}! Programemos nuestra reunión para esta semana. ¿Qué día te funciona mejor?',
-      whatsappMessageGroup: '¡Hola a todos! Programemos nuestra reunión del club esta semana. ¿Qué día y hora les funciona a todos?',
+      whatsappMessageSingle:
+        '¡Hola {{name}}! Programemos nuestra reunión para esta semana. ¿Qué día te funciona mejor?',
+      whatsappMessageGroup:
+        '¡Hola a todos! Programemos nuestra reunión del club esta semana. ¿Qué día y hora les funciona a todos?',
       loadingActivities: 'Cargando actividades...',
       noActivitiesYet: 'Aún no hay actividades',
       cancelMatch: 'Cancelar Actividad',
@@ -326,7 +332,8 @@ export const es: TranslationKeys = {
       activityTitlePlaceholder: 'ej., Bienvenida y Honores',
       minutesPlaceholder: '10',
       meetingSavedSuccess: '¡El plan de reunión para {{date}} ha sido guardado exitosamente!',
-      meetingSharedSuccess: 'El plan de reunión ha sido compartido con los {{count}} miembros del club. Recibirán una notificación con la agenda completa y sus responsabilidades.',
+      meetingSharedSuccess:
+        'El plan de reunión ha sido compartido con los {{count}} miembros del club. Recibirán una notificación con la agenda completa y sus responsabilidades.',
       sendAgendaToMembers: 'Enviar esta agenda a los {{count}} miembros del club',
       itemsCount: '{{count}} elementos',
       minutesCount: '{{count}} minutos',
@@ -434,7 +441,8 @@ export const es: TranslationKeys = {
       noActivitiesFound: 'No se encontraron actividades',
       currentStatus: 'Estado Actual',
       adminActions: 'Acciones de Administrador',
-      whatsappGroupMessage: '¡Hola! Tienes una nueva actividad social programada. Por favor coordina con tu grupo para organizar un encuentro esta semana.',
+      whatsappGroupMessage:
+        '¡Hola! Tienes una nueva actividad social programada. Por favor coordina con tu grupo para organizar un encuentro esta semana.',
       filterAll: 'Todos',
       filterPending: 'Pendiente',
       filterScheduled: 'Programado',
@@ -455,10 +463,14 @@ export const es: TranslationKeys = {
       vacant: 'Vacantes',
       reassign: 'Reasignar',
       remove: 'Eliminar',
-      assignAtLeastOne: 'Por favor asigna al menos un miembro a una posición directiva antes de guardar.',
-      saveSuccess: 'La directiva del club con {{count}} miembro(s) ha sido guardada exitosamente. Todos los miembros del club serán notificados de la estructura directiva.',
-      infoText: 'Los miembros de la directiva del club ayudan a organizar y liderar las actividades del club. Asigna miembros para construir un equipo de liderazgo sólido.',
-      noAvailableMembers: 'No hay miembros disponibles. Todos los miembros elegibles han sido asignados o están inactivos.',
+      assignAtLeastOne:
+        'Por favor asigna al menos un miembro a una posición directiva antes de guardar.',
+      saveSuccess:
+        'La directiva del club con {{count}} miembro(s) ha sido guardada exitosamente. Todos los miembros del club serán notificados de la estructura directiva.',
+      infoText:
+        'Los miembros de la directiva del club ayudan a organizar y liderar las actividades del club. Asigna miembros para construir un equipo de liderazgo sólido.',
+      noAvailableMembers:
+        'No hay miembros disponibles. Todos los miembros elegibles han sido asignados o están inactivos.',
       positions: {
         viceDirector: 'Subdirector',
         viceDirectorDesc: 'Asiste al director y lidera en su ausencia',
@@ -492,7 +504,8 @@ export const es: TranslationKeys = {
       findYourClub: 'Encuentra Tu Club',
       pathfinderClasses: 'Clases de Conquistadores',
       iAmClubAdmin: 'Soy administrador de club',
-      clubAdminApprovalNote: 'Las cuentas de administrador de club requieren aprobación de un administrador del sistema.',
+      clubAdminApprovalNote:
+        'Las cuentas de administrador de club requieren aprobación de un administrador del sistema.',
       navigateOrganization: 'Navega a través de tu organización para encontrar tu club',
       selectDivision: '1. Seleccionar División *',
       selectUnion: '2. Seleccionar Unión *',
@@ -516,7 +529,8 @@ export const es: TranslationKeys = {
       userStep1: 'El administrador de tu club revisará tu registro',
       userStep2: 'Una vez aprobado, recibirás una notificación por WhatsApp',
       userStep3: 'Luego podrás iniciar sesión y participar en las actividades del club',
-      noteText: 'Este proceso de aprobación generalmente toma 1-2 días hábiles. Si tienes alguna pregunta, contacta a tu {{admin}}.',
+      noteText:
+        'Este proceso de aprobación generalmente toma 1-2 días hábiles. Si tienes alguna pregunta, contacta a tu {{admin}}.',
       systemAdmin: 'administrador del sistema',
       clubAdmin: 'administrador de club',
     },
@@ -615,7 +629,8 @@ export const es: TranslationKeys = {
       pendingPayments: 'Pagos Pendientes',
       overduePayments: 'Pagos Vencidos',
       pathfinderClass: 'Clase de Conquistador',
-      classFilterInfo: 'Selecciona clases para filtrar. Se mostrarán miembros con al menos una clase seleccionada.',
+      classFilterInfo:
+        'Selecciona clases para filtrar. Se mostrarán miembros con al menos una clase seleccionada.',
       rejectMember: 'Rechazar miembro',
       approveMember: 'Aprobar miembro',
       active: 'Activo',
@@ -680,7 +695,8 @@ export const es: TranslationKeys = {
       notifyMemberConfirm: '¿Enviar notificación de saldo a {{name}}?',
       notificationSent: 'Notificación enviada',
       failedToSendNotification: 'Error al enviar notificación',
-      setupDescription: 'Configura cuotas mensuales recurrentes para los miembros de tu club. Elige los meses que requieren pago y el monto.',
+      setupDescription:
+        'Configura cuotas mensuales recurrentes para los miembros de tu club. Elige los meses que requieren pago y el monto.',
       activateFeeCollection: 'Activa para habilitar la recaudación de cuotas mensuales',
       generateFeesCurrentYear: 'Generar Cuotas del Año Actual',
       membersCount: '{{count}} miembros',
@@ -792,17 +808,22 @@ export const es: TranslationKeys = {
       noAssociationsIn: 'No se encontraron asociaciones en {{union}}',
       // Info banners
       divisionInfo: 'Las divisiones son el nivel superior de tu jerarquía organizacional.',
-      unionInfo: 'Las uniones pertenecen a una División. Primero selecciona la División padre, luego ingresa el nombre de la Unión.',
-      associationInfo: 'Las asociaciones pertenecen a una Unión. Primero selecciona la Unión padre, luego ingresa el nombre de la Asociación.',
-      churchInfo: 'Las iglesias pertenecen a una Asociación. Primero selecciona la Asociación padre, luego ingresa el nombre de la Iglesia.',
+      unionInfo:
+        'Las uniones pertenecen a una División. Primero selecciona la División padre, luego ingresa el nombre de la Unión.',
+      associationInfo:
+        'Las asociaciones pertenecen a una Unión. Primero selecciona la Unión padre, luego ingresa el nombre de la Asociación.',
+      churchInfo:
+        'Las iglesias pertenecen a una Asociación. Primero selecciona la Asociación padre, luego ingresa el nombre de la Iglesia.',
       // Form labels
       typeName: 'Nombre de {{type}}',
       enterTypeName: 'Ingresa el nombre de {{type}}',
       // Warning messages
-      noParentAvailable: 'No hay {{parentType}}s padre disponibles. Por favor crea un {{parentType}} primero.',
+      noParentAvailable:
+        'No hay {{parentType}}s padre disponibles. Por favor crea un {{parentType}} primero.',
       // Delete dialog
       deleteType: 'Eliminar {{type}}',
-      confirmDeleteMessage: '¿Estás seguro de que deseas eliminar "{{name}}"?\n\nEste {{type}} es utilizado por {{count}} club(es). Eliminarlo afectará estos clubes.',
+      confirmDeleteMessage:
+        '¿Estás seguro de que deseas eliminar "{{name}}"?\n\nEste {{type}} es utilizado por {{count}} club(es). Eliminarlo afectará estos clubes.',
       // Success messages
       typeUpdated: '{{type}} "{{name}}" actualizado exitosamente',
       typeCreated: '{{type}} "{{name}}" creado exitosamente',
@@ -830,7 +851,8 @@ export const es: TranslationKeys = {
       descriptionLabel: 'Descripción',
       groupSizeLabel: 'Tamaño del Grupo',
       filterClubs: 'Filtrar Clubes',
-      filterDescription: 'Navegue desde general (División) hasta específico (Iglesia). Cada nivel filtra el siguiente.',
+      filterDescription:
+        'Navegue desde general (División) hasta específico (Iglesia). Cada nivel filtra el siguiente.',
       organizationSection: 'Organización',
       clubStatusSection: 'Estado del Club',
       allClubs: 'Todos los Clubes',
@@ -1139,8 +1161,8 @@ export const es: TranslationKeys = {
     },
     // Mensajes de Validación
     validation: {
-      notEnoughMembers: 'No hay suficientes miembros activos. Se necesitan al menos {{required}}, pero solo hay {{count}}',
+      notEnoughMembers:
+        'No hay suficientes miembros activos. Se necesitan al menos {{required}}, pero solo hay {{count}}',
     },
   },
 };
-

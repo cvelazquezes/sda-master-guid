@@ -3,6 +3,7 @@
  * Configures i18next for internationalization
  */
 
+/* eslint-disable import/no-named-as-default, import/no-named-as-default-member */
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -30,7 +31,7 @@ const languageDetector = {
       callback(DEFAULT_LANGUAGE);
     }
   },
-  init: () => {},
+  init: (): void => undefined,
   cacheUserLanguage: async (language: string) => {
     try {
       await AsyncStorage.setItem(storageKeys.LANGUAGE, language);
@@ -58,7 +59,7 @@ i18n
 export default i18n;
 
 // Helper to change language
-export const changeLanguage = async (language: Language) => {
+export const changeLanguage = async (language: Language): Promise<void> => {
   try {
     await i18n.changeLanguage(language);
     await AsyncStorage.setItem(storageKeys.LANGUAGE, language);
@@ -71,4 +72,3 @@ export const changeLanguage = async (language: Language) => {
 export const getCurrentLanguage = (): Language => {
   return (i18n.language || DEFAULT_LANGUAGE) as Language;
 };
-

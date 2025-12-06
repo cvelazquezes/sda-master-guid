@@ -1,9 +1,10 @@
 import React, { memo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { Match, MatchStatus } from '../types';
 import { format } from 'date-fns';
+import { Text } from '../shared/components';
+import { Match, MatchStatus } from '../types';
 import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../shared/theme';
 import { formatMembersCount } from '../shared/utils/formatters';
 import {
@@ -32,7 +33,7 @@ const MatchCardComponent: React.FC<MatchCardProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  const getStatusConfig = (status: MatchStatus) => {
+  const getStatusConfig = (status: MatchStatus): (typeof designTokens.status)[MatchStatus] => {
     return designTokens.status[status] || designTokens.status.pending;
   };
 
@@ -42,13 +43,13 @@ const MatchCardComponent: React.FC<MatchCardProps> = ({
     <View style={styles.card}>
       {/* Header with Status */}
       <View style={styles.header}>
-        <View style={[styles.statusBadge, { backgroundColor: statusConfig.bg }]}>
+        <View style={[styles.statusBadge, { backgroundColor: statusConfig.light }]}>
           <MaterialCommunityIcons
             name={statusConfig.icon as typeof ICONS.CHECK}
             size={mobileIconSizes.small}
-            color={statusConfig.color}
+            color={statusConfig.text}
           />
-          <Text style={[styles.statusText, { color: statusConfig.color }]}>
+          <Text style={[styles.statusText, { color: statusConfig.text }]}>
             {match.status.charAt(0).toUpperCase() + match.status.slice(1)}
           </Text>
         </View>
@@ -139,7 +140,7 @@ const MatchCardComponent: React.FC<MatchCardProps> = ({
       <TouchableOpacity
         onPress={onPress}
         activeOpacity={TOUCH_OPACITY.default}
-        accessible={true}
+        accessible
         accessibilityRole={A11Y_ROLE.BUTTON}
         accessibilityLabel={t('accessibility.viewActivityDetails')}
       >
@@ -167,7 +168,7 @@ const styles = StyleSheet.create({
   card: {
     ...designTokens.card,
     ...designTokens.card.shadow,
-    backgroundColor: designTokens.colors.background.primary,
+    backgroundColor: designTokens.colors.backgroundPrimary,
   },
   header: {
     flexDirection: layoutConstants.flexDirection.row,
@@ -220,12 +221,12 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     ...mobileTypography.caption,
-    color: designTokens.colors.text.tertiary,
+    color: designTokens.colors.textTertiary,
     marginBottom: designTokens.spacing.xxs,
   },
   infoValue: {
     ...mobileTypography.bodyMediumBold,
-    color: designTokens.colors.text.primary,
+    color: designTokens.colors.textPrimary,
   },
   scheduleButton: {
     flexDirection: layoutConstants.flexDirection.row,

@@ -1,6 +1,6 @@
 /**
  * Authentication E2E Tests
- * 
+ *
  * Tests the complete authentication flow including:
  * - Login
  * - Registration
@@ -25,7 +25,7 @@ describe('Authentication Flow', () => {
 
     it('should show validation errors for empty fields', async () => {
       await element(by.id('login-button')).tap();
-      
+
       await detoxExpect(element(by.text('Email is required'))).toBeVisible();
       await detoxExpect(element(by.text('Password is required'))).toBeVisible();
     });
@@ -34,7 +34,7 @@ describe('Authentication Flow', () => {
       await element(by.id('email-input')).typeText('invalid-email');
       await element(by.id('password-input')).typeText('password123');
       await element(by.id('login-button')).tap();
-      
+
       await detoxExpect(element(by.text('Invalid email format'))).toBeVisible();
     });
 
@@ -42,7 +42,7 @@ describe('Authentication Flow', () => {
       await element(by.id('email-input')).typeText('test@example.com');
       await element(by.id('password-input')).typeText('password123');
       await element(by.id('login-button')).tap();
-      
+
       // Wait for navigation to home screen
       await waitFor(element(by.id('home-screen')))
         .toBeVisible()
@@ -53,7 +53,7 @@ describe('Authentication Flow', () => {
       await element(by.id('email-input')).typeText('wrong@example.com');
       await element(by.id('password-input')).typeText('wrongpassword');
       await element(by.id('login-button')).tap();
-      
+
       await detoxExpect(element(by.text('Invalid credentials'))).toBeVisible();
     });
   });
@@ -78,7 +78,7 @@ describe('Authentication Flow', () => {
       await element(by.id('password-input')).typeText('password123');
       await element(by.id('confirm-password-input')).typeText('different123');
       await element(by.id('register-button')).tap();
-      
+
       await detoxExpect(element(by.text('Passwords do not match'))).toBeVisible();
     });
 
@@ -88,7 +88,7 @@ describe('Authentication Flow', () => {
       await element(by.id('password-input')).typeText('password123');
       await element(by.id('confirm-password-input')).typeText('password123');
       await element(by.id('register-button')).tap();
-      
+
       // Should navigate to home screen after registration
       await waitFor(element(by.id('home-screen')))
         .toBeVisible()
@@ -102,7 +102,7 @@ describe('Authentication Flow', () => {
       await element(by.id('email-input')).typeText('test@example.com');
       await element(by.id('password-input')).typeText('password123');
       await element(by.id('login-button')).tap();
-      
+
       await waitFor(element(by.id('home-screen')))
         .toBeVisible()
         .withTimeout(5000);
@@ -112,10 +112,10 @@ describe('Authentication Flow', () => {
       // Navigate to settings
       await element(by.id('settings-tab')).tap();
       await detoxExpect(element(by.id('settings-screen'))).toBeVisible();
-      
+
       // Tap logout button
       await element(by.id('logout-button')).tap();
-      
+
       // Should return to login screen
       await waitFor(element(by.id('login-screen')))
         .toBeVisible()
@@ -129,18 +129,17 @@ describe('Authentication Flow', () => {
       await element(by.id('email-input')).typeText('test@example.com');
       await element(by.id('password-input')).typeText('password123');
       await element(by.id('login-button')).tap();
-      
+
       await waitFor(element(by.id('home-screen')))
         .toBeVisible()
         .withTimeout(5000);
-      
+
       // Terminate and relaunch app
       await device.terminateApp();
       await device.launchApp({ newInstance: false });
-      
+
       // Should still be logged in
       await detoxExpect(element(by.id('home-screen'))).toBeVisible();
     });
   });
 });
-

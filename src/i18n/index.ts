@@ -9,4 +9,3 @@ export { useTranslation } from 'react-i18next';
 
 // Re-export for convenience
 export { default } from './config';
-

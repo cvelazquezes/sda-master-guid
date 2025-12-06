@@ -17,6 +17,8 @@ import { loginSchema, registerSchema, updateUserSchema } from '../utils/validati
 import { AuthError, AppError } from '../../../shared/utils/errors';
 import { logger } from '../../../shared/utils/logger';
 import api from '../../../shared/api/api';
+import { HTTP_STATUS } from '../../../shared/constants/http';
+import { MOCK_DELAY, CACHE } from '../../../shared/constants/timing';
 
 // ============================================================================
 // API Repository Implementation
@@ -49,11 +51,11 @@ export class ApiAuthRepository implements IAuthRepository {
       logger.error('API login error:', error);
 
       const axiosError = error as { response?: { status?: number } };
-      if (axiosError.response?.status === 401) {
-        throw new AuthError('Invalid credentials', error);
+      if (axiosError.response?.status === HTTP_STATUS.UNAUTHORIZED) {
+        throw new AuthError('Invalid credentials', error instanceof Error ? error : undefined);
       }
 
-      throw new AuthError('Login failed', error);
+      throw new AuthError('Login failed', error instanceof Error ? error : undefined);
     }
   }
 
@@ -78,11 +80,11 @@ export class ApiAuthRepository implements IAuthRepository {
       logger.error('API registration error:', error);
 
       const axiosError = error as { response?: { status?: number } };
-      if (axiosError.response?.status === 409) {
-        throw new AuthError('User already exists', error);
+      if (axiosError.response?.status === HTTP_STATUS.CONFLICT) {
+        throw new AuthError('User already exists', error instanceof Error ? error : undefined);
       }
 
-      throw new AuthError('Registration failed', error);
+      throw new AuthError('Registration failed', error instanceof Error ? error : undefined);
     }
   }
 
@@ -137,7 +139,12 @@ export class ApiAuthRepository implements IAuthRepository {
       return user;
     } catch (error) {
       logger.error('API update user error:', error instanceof Error ? error : undefined);
-      throw new AppError('Failed to update user', 'UPDATE_ERROR', 500, error);
+      throw new AppError(
+        'Failed to update user',
+        'UPDATE_ERROR',
+        HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        error
+      );
     }
   }
 
@@ -209,7 +216,7 @@ export class MockAuthRepository implements IAuthRepository {
     loginSchema.parse(credentials);
 
     // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY.NORMAL));
 
     const user = this.mockUsers.find((u) => u.email === credentials.email);
 
@@ -231,7 +238,7 @@ export class MockAuthRepository implements IAuthRepository {
     registerSchema.parse(data);
 
     // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY.NORMAL));
 
     // Check if user already exists
     if (this.mockUsers.find((u) => u.email === data.email)) {
@@ -264,7 +271,7 @@ export class MockAuthRepository implements IAuthRepository {
    */
   async logout(): Promise<void> {
     // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY.FAST));
     logger.info('Mock logout');
   }
 
@@ -274,7 +281,7 @@ export class MockAuthRepository implements IAuthRepository {
   async getCurrentUser(): Promise<User | null> {
     // In a real mock, this would use stored user ID
     // For simplicity, return first user
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY.FAST));
     return this.mockUsers[0] || null;
   }
 
@@ -286,12 +293,12 @@ export class MockAuthRepository implements IAuthRepository {
     updateUserSchema.parse(data);
 
     // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY.FAST));
 
     const userIndex = this.mockUsers.findIndex((u) => u.id === userId);
 
     if (userIndex === -1) {
-      throw new AppError('User not found', 'USER_NOT_FOUND', 404);
+      throw new AppError('User not found', 'USER_NOT_FOUND', HTTP_STATUS.NOT_FOUND);
     }
 
     this.mockUsers[userIndex] = {
@@ -308,7 +315,7 @@ export class MockAuthRepository implements IAuthRepository {
    * Mock token refresh
    */
   async refreshToken(_refreshToken: string): Promise<AuthToken> {
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY.FAST));
 
     const token = `mock_token_refreshed_${Date.now()}`;
     logger.info('Mock token refreshed');
@@ -316,7 +323,7 @@ export class MockAuthRepository implements IAuthRepository {
     return {
       token,
       refreshToken: `mock_refresh_${Date.now()}`,
-      expiresAt: Date.now() + 3600000, // 1 hour
+      expiresAt: Date.now() + CACHE.VERY_LONG, // 1 hour
     };
   }
 }

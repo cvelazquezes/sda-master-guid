@@ -1,26 +1,21 @@
 /**
  * AuthService - Authentication Business Logic
- * 
+ *
  * Implements the IAuthService interface, orchestrating authentication operations
  * using the repository pattern. This is the Use Case layer in Clean Architecture.
  */
 
-import {
-  IAuthService,
-  IAuthRepository,
-  ITokenStorage,
-  User,
-  AuthResponse,
-} from '../types';
+import { IAuthService, IAuthRepository, ITokenStorage, User, AuthResponse } from '../types';
 import { ApiAuthRepository, MockAuthRepository } from './AuthRepository';
 import { tokenStorage } from './TokenStorage';
 import { logger } from '../../../shared/utils/logger';
 import { AuthError, AppError } from '../../../shared/utils/errors';
 import { environment } from '../../../shared/config/environment';
+import { HTTP_STATUS } from '../../../shared/constants/http';
 
 /**
  * AuthService - Main authentication service implementation
- * 
+ *
  * This service implements business logic for authentication,
  * orchestrating repository and storage operations.
  */
@@ -30,7 +25,7 @@ export class AuthService implements IAuthService {
 
   /**
    * Creates an instance of AuthService
-   * 
+   *
    * @param repository - Auth repository implementation (API or Mock)
    * @param storage - Token storage implementation
    */
@@ -42,12 +37,12 @@ export class AuthService implements IAuthService {
 
   /**
    * Authenticate user with email and password
-   * 
+   *
    * @param email - User email address
    * @param password - User password
    * @returns User data and authentication token
    * @throws AuthError if authentication fails
-   * 
+   *
    * @example
    * ```typescript
    * const { user, token } = await authService.login('user@example.com', 'SecurePass123!');
@@ -61,10 +56,7 @@ export class AuthService implements IAuthService {
       const { user, token } = await this.repository.login({ email, password });
 
       // Store credentials securely
-      await Promise.all([
-        this.storage.setToken(token),
-        this.storage.setUserId(user.id),
-      ]);
+      await Promise.all([this.storage.setToken(token), this.storage.setUserId(user.id)]);
 
       logger.info(`User ${email} logged in successfully`);
       return { user, token };
@@ -76,14 +68,14 @@ export class AuthService implements IAuthService {
 
   /**
    * Register a new user account
-   * 
+   *
    * @param email - User email address
    * @param password - User password
    * @param name - User display name
    * @param clubId - Associated club ID
    * @returns User data and authentication token
    * @throws AuthError if registration fails
-   * 
+   *
    * @example
    * ```typescript
    * const { user, token } = await authService.register(
@@ -112,10 +104,7 @@ export class AuthService implements IAuthService {
       });
 
       // Store credentials securely
-      await Promise.all([
-        this.storage.setToken(token),
-        this.storage.setUserId(user.id),
-      ]);
+      await Promise.all([this.storage.setToken(token), this.storage.setUserId(user.id)]);
 
       logger.info(`User ${email} registered successfully`);
       return { user, token };
@@ -127,11 +116,11 @@ export class AuthService implements IAuthService {
 
   /**
    * Sign out the current user
-   * 
+   *
    * Clears local authentication state and notifies the backend.
-   * 
+   *
    * @throws AppError if logout fails
-   * 
+   *
    * @example
    * ```typescript
    * await authService.logout();
@@ -152,15 +141,15 @@ export class AuthService implements IAuthService {
       logger.error('Logout error:', error instanceof Error ? error : undefined);
       // Ensure local state is cleared even if API call fails
       await this.storage.clearAll();
-      throw new AppError('Logout failed', 'LOGOUT_ERROR', 500, error);
+      throw new AppError('Logout failed', 'LOGOUT_ERROR', HTTP_STATUS.INTERNAL_SERVER_ERROR, error);
     }
   }
 
   /**
    * Get the currently authenticated user
-   * 
+   *
    * @returns Current user or null if not authenticated
-   * 
+   *
    * @example
    * ```typescript
    * const user = await authService.getCurrentUser();
@@ -180,7 +169,7 @@ export class AuthService implements IAuthService {
 
       // Fetch user from repository
       const user = await this.repository.getCurrentUser();
-      
+
       if (user) {
         logger.debug(`Current user: ${user.email}`);
       } else {
@@ -200,11 +189,11 @@ export class AuthService implements IAuthService {
 
   /**
    * Update user profile information
-   * 
+   *
    * @param userData - Partial user data to update
    * @returns Updated user data
    * @throws AppError if update fails
-   * 
+   *
    * @example
    * ```typescript
    * const updatedUser = await authService.updateUser({
@@ -216,15 +205,15 @@ export class AuthService implements IAuthService {
   async updateUser(userData: Partial<User>): Promise<User> {
     try {
       const userId = await this.storage.getUserId();
-      
+
       if (!userId) {
         throw new AuthError('User not authenticated');
       }
 
       logger.info(`Updating user ${userId}`);
-      
+
       const updatedUser = await this.repository.updateUser(userId, userData);
-      
+
       logger.info(`User ${userId} updated successfully`);
       return updatedUser;
     } catch (error) {
@@ -235,12 +224,12 @@ export class AuthService implements IAuthService {
 
   /**
    * Refresh the authentication session
-   * 
+   *
    * Attempts to refresh the authentication token using a refresh token.
    * If refresh fails, the user will need to login again.
-   * 
+   *
    * @throws AuthError if refresh fails
-   * 
+   *
    * @example
    * ```typescript
    * try {
@@ -253,16 +242,15 @@ export class AuthService implements IAuthService {
   async refreshSession(): Promise<void> {
     try {
       const refreshToken = await this.storage.getRefreshToken();
-      
+
       if (!refreshToken) {
         throw new AuthError('No refresh token available');
       }
 
       logger.info('Refreshing session');
-      
-      const { token, refreshToken: newRefreshToken } = await this.repository.refreshToken(
-        refreshToken
-      );
+
+      const { token, refreshToken: newRefreshToken } =
+        await this.repository.refreshToken(refreshToken);
 
       // Store new tokens
       await Promise.all([
@@ -281,9 +269,9 @@ export class AuthService implements IAuthService {
 
   /**
    * Check if user is currently authenticated
-   * 
+   *
    * @returns True if authenticated, false otherwise
-   * 
+   *
    * @example
    * ```typescript
    * if (await authService.isAuthenticated()) {
@@ -307,29 +295,24 @@ export class AuthService implements IAuthService {
 
 /**
  * Create AuthService instance with appropriate repository
- * 
+ *
  * Based on environment configuration, creates either an API-based
  * or mock-based authentication service.
- * 
+ *
  * @returns Configured AuthService instance
- * 
+ *
  * @example
  * ```typescript
  * const authService = createAuthService();
  * ```
  */
 export function createAuthService(): AuthService {
-  const repository = environment.useMockData
-    ? new MockAuthRepository()
-    : new ApiAuthRepository();
+  const repository = environment.useMockData ? new MockAuthRepository() : new ApiAuthRepository();
 
-  logger.info(
-    `AuthService created with ${environment.useMockData ? 'Mock' : 'API'} repository`
-  );
+  logger.info(`AuthService created with ${environment.useMockData ? 'Mock' : 'API'} repository`);
 
   return new AuthService(repository, tokenStorage);
 }
 
 // Export singleton instance
 export const authService = createAuthService();
-

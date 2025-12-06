@@ -5,9 +5,10 @@
  */
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { Text } from '../shared/components';
 import { LANGUAGES, changeLanguage, Language } from '../i18n';
 import { useTheme } from '../contexts/ThemeContext';
 import { SelectionModal, SelectionItem } from '../shared/components/SelectionModal';
@@ -40,7 +41,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ showLabel = 
     iconColor: colors.info,
   }));
 
-  const handleSelect = async (item: SelectionItem) => {
+  const handleSelect = async (item: SelectionItem): Promise<void> => {
     await changeLanguage(item.id as Language);
     setModalVisible(false);
   };

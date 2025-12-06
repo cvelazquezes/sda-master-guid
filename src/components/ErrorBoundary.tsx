@@ -4,9 +4,10 @@
  */
 
 import React, { Component, ReactNode } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { withTranslation, WithTranslation } from 'react-i18next';
+import { Text } from '../shared/components';
 import { logger } from '../utils/logger';
 import { mobileFontSizes, designTokens, layoutConstants } from '../shared/theme';
 import {

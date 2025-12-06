@@ -17,4 +17,3 @@ beforeEach(async () => {
 });
 
 export { device, element, by, detoxExpect };
-
