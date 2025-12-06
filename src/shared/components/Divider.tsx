@@ -11,9 +11,9 @@
 
 import React from 'react';
 import { View, ViewStyle } from 'react-native';
-import { useTheme } from '../../contexts/ThemeContext';
 import { designTokens } from '../theme/designTokens';
 import { ORIENTATION, SPACING_KEY, dimensionValues } from '../constants';
+import { useThemeColor } from '../hooks/useThemeColor';
 import { DividerColor, SpacingKey } from '../types/theme';
 
 // ============================================================================
@@ -49,24 +49,11 @@ export const Divider: React.FC<DividerProps> = ({
   style,
   testID,
 }) => {
-  const { colors } = useTheme();
-
-  // Get color from theme
-  const getDividerColor = (): string => {
-    const colorMap: Record<DividerColor, string | undefined> = {
-      border: colors.border,
-      borderLight: colors.borderLight,
-      borderMedium: colors.borderMedium,
-      borderDark: colors.borderDark,
-      divider: colors.border, // Fallback to border if divider not defined
-      surface: colors.surface,
-      surfaceLight: colors.surfaceLight,
-    };
-
-    return colorMap[color] || colors.border;
-  };
+  // Use centralized theme color hook
+  const { getDividerColor } = useThemeColor();
 
   const spacingValue = designTokens.spacing[spacing];
+  const dividerColor = getDividerColor(color);
 
   const dividerStyle: ViewStyle =
     orientation === ORIENTATION.HORIZONTAL
@@ -74,13 +61,13 @@ export const Divider: React.FC<DividerProps> = ({
           height: thickness,
           width: dimensionValues.width.full,
           marginVertical: spacingValue,
-          backgroundColor: getDividerColor(),
+          backgroundColor: dividerColor,
         }
       : {
           width: thickness,
           height: dimensionValues.width.full,
           marginHorizontal: spacingValue,
-          backgroundColor: getDividerColor(),
+          backgroundColor: dividerColor,
         };
 
   return <View style={[dividerStyle, style]} testID={testID} accessible={false} />;

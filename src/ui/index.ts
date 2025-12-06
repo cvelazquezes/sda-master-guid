@@ -78,10 +78,17 @@ export type {
   RadiusKey,
   // Pressable types
   PressableProps,
-  PressableBackgroundColor,
+  InteractiveBackgroundColor,
+  InteractiveBackgroundColor as PressableBackgroundColor, // Alias for backward compatibility
+  PressableBorderColor,
   // Divider types
   DividerProps,
   DividerColor,
+  // Status/Role types
+  StatusType,
+  RoleType,
+  ComponentSize,
+  ShadowPreset,
   // Other component types
   SelectionItem,
   FilterOption,

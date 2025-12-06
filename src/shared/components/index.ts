@@ -23,11 +23,26 @@ export type { TextProps, TextVariant, TextColor, TextWeight, TextAlign } from '.
 
 // Box primitive - themed View wrapper for backgrounds
 export { Box } from './Box';
-export type { BoxProps, BackgroundColor, BorderColor, SpacingKey, RadiusKey } from './Box';
+export type { BoxProps } from './Box';
 
 // Pressable primitive - themed TouchableOpacity with press states
 export { Pressable } from './Pressable';
-export type { PressableProps, PressableBackgroundColor } from './Pressable';
+export type { PressableProps } from './Pressable';
+
+// Re-export theme types from unified types file
+export type {
+  BackgroundColor,
+  BorderColor,
+  SpacingKey,
+  RadiusKey,
+  InteractiveBackgroundColor,
+  PressableBorderColor,
+  DividerColor,
+  StatusType,
+  RoleType,
+  ComponentSize,
+  ShadowPreset,
+} from '../types/theme';
 
 // Button primitive
 export { StandardButton as Button } from './StandardButton';
@@ -50,7 +65,7 @@ export { IconButton } from './IconButton';
 
 // Divider primitive - themed divider
 export { Divider } from './Divider';
-export type { DividerProps, DividerColor } from './Divider';
+export type { DividerProps } from './Divider';
 
 // Status indicator primitive
 export { StatusIndicator } from './StatusIndicator';

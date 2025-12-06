@@ -9,16 +9,14 @@
  * <StatusIndicator status="pending" label={t('status.pending')} />
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
-import { mobileFontSizes } from '../theme/mobileTypography';
-import { designTokens } from '../theme/designTokens';
-import { layoutConstants } from '../theme';
+import { layoutConstants, getStatusSizePreset, getSpacing } from '../theme';
 import { TEXT_LINES, COMPONENT_SIZE, A11Y_ROLE, ICONS } from '../constants';
 import { Text } from './Text';
-import { StatusType } from '../types/theme';
+import { StatusType, ComponentSize } from '../types/theme';
 
 type StatusSize = typeof COMPONENT_SIZE.sm | typeof COMPONENT_SIZE.md | typeof COMPONENT_SIZE.lg;
 
@@ -48,36 +46,14 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
   const { statusColors } = useTheme();
   const statusConfig = statusColors[status];
 
+  // Use size preset (replaces inline switch statement)
+  const sizePreset = useMemo(() => getStatusSizePreset(size as ComponentSize), [size]);
+
   const displayLabel = label || status.charAt(0).toUpperCase() + status.slice(1);
-
-  const getSizeStyles = (): { iconSize: number; fontSize: number; gap: number } => {
-    switch (size) {
-      case COMPONENT_SIZE.sm:
-        return {
-          iconSize: designTokens.icon.sizes.xs,
-          fontSize: mobileFontSizes.xs,
-          gap: designTokens.spacing.xxs,
-        };
-      case COMPONENT_SIZE.lg:
-        return {
-          iconSize: designTokens.icon.sizes.md,
-          fontSize: mobileFontSizes.md,
-          gap: designTokens.spacing.sm,
-        };
-      default:
-        return {
-          iconSize: designTokens.icon.sizes.sm,
-          fontSize: mobileFontSizes.xs,
-          gap: designTokens.spacing.xs,
-        };
-    }
-  };
-
-  const sizeStyles = getSizeStyles();
 
   return (
     <View
-      style={[styles.container, { gap: sizeStyles.gap }, style]}
+      style={[styles.container, { gap: getSpacing(sizePreset.gap) }, style]}
       testID={testID}
       accessible
       accessibilityRole={A11Y_ROLE.TEXT}
@@ -86,7 +62,7 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
       {showIcon && (
         <MaterialCommunityIcons
           name={statusConfig.icon as typeof ICONS.CHECK}
-          size={sizeStyles.iconSize}
+          size={sizePreset.iconSize}
           color={statusConfig.primary}
         />
       )}
@@ -95,7 +71,7 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
           variant="label"
           weight="bold"
           numberOfLines={TEXT_LINES.single}
-          style={{ color: statusConfig.text, fontSize: sizeStyles.fontSize }}
+          style={{ color: statusConfig.text, fontSize: sizePreset.fontSize }}
         >
           {displayLabel}
         </Text>
