@@ -7,25 +7,32 @@
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { logger } from './logger';
+import {
+  ERROR_MESSAGES,
+  ERROR_NAME,
+  LOG_MESSAGES,
+  PLATFORM_OS,
+  STORAGE_KEYS,
+} from '../shared/constants';
 
 export class SecureStorageError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'SecureStorageError';
+    this.name = ERROR_NAME.SECURE_STORAGE_ERROR;
   }
 }
 
 class SecureStorage {
-  private static readonly AUTH_TOKEN_KEY = 'auth_token';
-  private static readonly REFRESH_TOKEN_KEY = 'refresh_token';
-  private static readonly USER_ID_KEY = 'auth_user_id';
-  private static readonly CSRF_TOKEN_KEY = 'csrf_token';
+  private static readonly AUTH_TOKEN_KEY = STORAGE_KEYS.AUTH.TOKEN;
+  private static readonly REFRESH_TOKEN_KEY = STORAGE_KEYS.AUTH.REFRESH_TOKEN;
+  private static readonly USER_ID_KEY = STORAGE_KEYS.AUTH.USER_ID;
+  private static readonly CSRF_TOKEN_KEY = STORAGE_KEYS.CSRF.TOKEN;
 
   /**
    * Checks if secure storage is available (native platforms only)
    */
   private isAvailable(): boolean {
-    return Platform.OS !== 'web';
+    return Platform.OS !== PLATFORM_OS.WEB;
   }
 
   /**
@@ -33,10 +40,7 @@ class SecureStorage {
    */
   private ensureNativePlatform(): void {
     if (!this.isAvailable()) {
-      throw new SecureStorageError(
-        'Secure storage is not available on web platform. ' +
-          'Use server-side sessions with httpOnly cookies instead.'
-      );
+      throw new SecureStorageError(ERROR_MESSAGES.SECURE_STORAGE.NOT_AVAILABLE);
     }
   }
 
@@ -51,10 +55,10 @@ class SecureStorage {
         SecureStore.setItemAsync(SecureStorage.AUTH_TOKEN_KEY, accessToken),
         SecureStore.setItemAsync(SecureStorage.REFRESH_TOKEN_KEY, refreshToken),
       ]);
-      logger.debug('Tokens saved securely');
+      logger.debug(LOG_MESSAGES.SECURE_STORAGE.ITEM_STORED);
     } catch (error) {
-      logger.error('Failed to save tokens', error as Error);
-      throw new SecureStorageError('Failed to save authentication tokens');
+      logger.error(LOG_MESSAGES.SECURE_STORAGE.ITEM_STORE_FAILED, error as Error);
+      throw new SecureStorageError(ERROR_MESSAGES.SECURE_STORAGE.SAVE_TOKENS_FAILED);
     }
   }
 
@@ -67,7 +71,7 @@ class SecureStorage {
     try {
       return await SecureStore.getItemAsync(SecureStorage.AUTH_TOKEN_KEY);
     } catch (error) {
-      logger.error('Failed to retrieve access token', error as Error);
+      logger.error(LOG_MESSAGES.SECURE_STORAGE.ITEM_RETRIEVE_FAILED, error as Error);
       return null;
     }
   }
@@ -81,7 +85,7 @@ class SecureStorage {
     try {
       return await SecureStore.getItemAsync(SecureStorage.REFRESH_TOKEN_KEY);
     } catch (error) {
-      logger.error('Failed to retrieve refresh token', error as Error);
+      logger.error(LOG_MESSAGES.SECURE_STORAGE.ITEM_RETRIEVE_FAILED, error as Error);
       return null;
     }
   }
@@ -95,8 +99,8 @@ class SecureStorage {
     try {
       await SecureStore.setItemAsync(SecureStorage.USER_ID_KEY, userId);
     } catch (error) {
-      logger.error('Failed to save user ID', error as Error);
-      throw new SecureStorageError('Failed to save user ID');
+      logger.error(LOG_MESSAGES.SECURE_STORAGE.ITEM_STORE_FAILED, error as Error);
+      throw new SecureStorageError(ERROR_MESSAGES.SECURE_STORAGE.SAVE_USER_ID_FAILED);
     }
   }
 
@@ -109,7 +113,7 @@ class SecureStorage {
     try {
       return await SecureStore.getItemAsync(SecureStorage.USER_ID_KEY);
     } catch (error) {
-      logger.error('Failed to retrieve user ID', error as Error);
+      logger.error(LOG_MESSAGES.SECURE_STORAGE.ITEM_RETRIEVE_FAILED, error as Error);
       return null;
     }
   }
@@ -122,10 +126,10 @@ class SecureStorage {
 
     try {
       await SecureStore.setItemAsync(SecureStorage.CSRF_TOKEN_KEY, csrfToken);
-      logger.debug('CSRF token saved securely');
+      logger.debug(LOG_MESSAGES.SECURE_STORAGE.ITEM_STORED);
     } catch (error) {
-      logger.error('Failed to save CSRF token', error as Error);
-      throw new SecureStorageError('Failed to save CSRF token');
+      logger.error(LOG_MESSAGES.SECURE_STORAGE.ITEM_STORE_FAILED, error as Error);
+      throw new SecureStorageError(ERROR_MESSAGES.SECURE_STORAGE.SAVE_CSRF_TOKEN_FAILED);
     }
   }
 
@@ -138,7 +142,7 @@ class SecureStorage {
     try {
       return await SecureStore.getItemAsync(SecureStorage.CSRF_TOKEN_KEY);
     } catch (error) {
-      logger.error('Failed to retrieve CSRF token', error as Error);
+      logger.error(LOG_MESSAGES.SECURE_STORAGE.ITEM_RETRIEVE_FAILED, error as Error);
       return null;
     }
   }
@@ -156,9 +160,9 @@ class SecureStorage {
         SecureStore.deleteItemAsync(SecureStorage.USER_ID_KEY),
         SecureStore.deleteItemAsync(SecureStorage.CSRF_TOKEN_KEY),
       ]);
-      logger.debug('Auth data cleared');
+      logger.debug(LOG_MESSAGES.SECURE_STORAGE.AUTH_CLEARED);
     } catch (error) {
-      logger.error('Failed to clear auth data', error as Error);
+      logger.error(LOG_MESSAGES.SECURE_STORAGE.STORAGE_CLEAR_FAILED, error as Error);
       // Don't throw - best effort to clear
     }
   }
@@ -172,8 +176,8 @@ class SecureStorage {
     try {
       await SecureStore.setItemAsync(key, value);
     } catch (error) {
-      logger.error(`Failed to save item: ${key}`, error as Error);
-      throw new SecureStorageError(`Failed to save item: ${key}`);
+      logger.error(ERROR_MESSAGES.SECURE_STORAGE.SAVE_ITEM_FAILED(key), error as Error);
+      throw new SecureStorageError(ERROR_MESSAGES.SECURE_STORAGE.SAVE_ITEM_FAILED(key));
     }
   }
 
@@ -186,7 +190,7 @@ class SecureStorage {
     try {
       return await SecureStore.getItemAsync(key);
     } catch (error) {
-      logger.error(`Failed to retrieve item: ${key}`, error as Error);
+      logger.error(ERROR_MESSAGES.SECURE_STORAGE.RETRIEVE_ITEM_FAILED(key), error as Error);
       return null;
     }
   }
@@ -200,7 +204,7 @@ class SecureStorage {
     try {
       await SecureStore.deleteItemAsync(key);
     } catch (error) {
-      logger.error(`Failed to remove item: ${key}`, error as Error);
+      logger.error(ERROR_MESSAGES.SECURE_STORAGE.REMOVE_ITEM_FAILED(key), error as Error);
       // Don't throw - best effort to remove
     }
   }

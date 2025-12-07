@@ -5,11 +5,17 @@
 
 import { logger } from '../logger';
 import { CIRCUIT_BREAKER } from '../../shared/constants/validation';
+import {
+  LOG_MESSAGES,
+  ERROR_MESSAGES,
+  CIRCUIT_STATE,
+  CIRCUIT_BREAKER_SERVICE,
+} from '../../shared/constants';
 
 export enum CircuitState {
-  CLOSED = 'CLOSED', // Normal operation
-  OPEN = 'OPEN', // Failing, reject requests
-  HALF_OPEN = 'HALF_OPEN', // Testing if service recovered
+  CLOSED = CIRCUIT_STATE.CLOSED, // Normal operation
+  OPEN = CIRCUIT_STATE.OPEN, // Failing, reject requests
+  HALF_OPEN = CIRCUIT_STATE.HALF_OPEN, // Testing if service recovered
 }
 
 interface CircuitBreakerOptions {
@@ -48,7 +54,7 @@ export class CircuitBreaker {
     // Check if circuit is open
     if (this.state === CircuitState.OPEN) {
       if (Date.now() < this.nextAttempt) {
-        throw new Error(`Circuit breaker is OPEN for ${this.name}`);
+        throw new Error(ERROR_MESSAGES.CIRCUIT_BREAKER.IS_OPEN(this.name));
       }
       // Transition to half-open
       this.transitionToHalfOpen();
@@ -57,7 +63,7 @@ export class CircuitBreaker {
     // Check half-open call limit
     if (this.state === CircuitState.HALF_OPEN) {
       if (this.halfOpenCalls >= this.options.halfOpenMaxCalls) {
-        throw new Error(`Circuit breaker half-open limit reached for ${this.name}`);
+        throw new Error(ERROR_MESSAGES.CIRCUIT_BREAKER.HALF_OPEN_LIMIT(this.name));
       }
       this.halfOpenCalls++;
     }
@@ -108,7 +114,7 @@ export class CircuitBreaker {
     this.failureCount = 0;
     this.successCount = 0;
     this.halfOpenCalls = 0;
-    logger.info(`Circuit breaker CLOSED: ${this.name} - service recovered`);
+    logger.info(LOG_MESSAGES.FORMATTED.CIRCUIT_CLOSED(this.name));
   }
 
   /**
@@ -118,7 +124,7 @@ export class CircuitBreaker {
     this.state = CircuitState.OPEN;
     this.nextAttempt = Date.now() + this.options.timeout;
     this.halfOpenCalls = 0;
-    logger.warn(`Circuit breaker OPEN: ${this.name} - service unhealthy`);
+    logger.warn(LOG_MESSAGES.FORMATTED.CIRCUIT_OPENED(this.name));
   }
 
   /**
@@ -128,7 +134,7 @@ export class CircuitBreaker {
     this.state = CircuitState.HALF_OPEN;
     this.successCount = 0;
     this.halfOpenCalls = 0;
-    logger.info(`Circuit breaker HALF_OPEN: ${this.name} - testing recovery`);
+    logger.info(LOG_MESSAGES.FORMATTED.CIRCUIT_HALF_OPEN(this.name));
   }
 
   /**
@@ -162,5 +168,5 @@ export class CircuitBreaker {
 }
 
 // Global circuit breakers for different services
-export const apiCircuitBreaker = new CircuitBreaker('API');
-export const authCircuitBreaker = new CircuitBreaker('Auth');
+export const apiCircuitBreaker = new CircuitBreaker(CIRCUIT_BREAKER_SERVICE.API);
+export const authCircuitBreaker = new CircuitBreaker(CIRCUIT_BREAKER_SERVICE.AUTH);

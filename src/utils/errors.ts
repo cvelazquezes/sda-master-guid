@@ -4,6 +4,7 @@
  */
 
 import { HTTP_STATUS } from '../shared/constants/http';
+import { ERROR_MESSAGES, ERROR_CODES, ERROR_NAME, TYPEOF } from '../shared/constants';
 
 /**
  * Base application error
@@ -11,11 +12,11 @@ import { HTTP_STATUS } from '../shared/constants/http';
 export class AppError extends Error {
   constructor(
     message: string,
-    public code: string,
+    public code: string = ERROR_CODES.GENERAL.APP_ERROR,
     public statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR
   ) {
     super(message);
-    this.name = 'AppError';
+    this.name = ERROR_NAME.APP_ERROR;
   }
 }
 
@@ -23,9 +24,9 @@ export class AppError extends Error {
  * Authentication errors
  */
 export class AuthenticationError extends AppError {
-  constructor(message: string = 'Authentication failed') {
-    super(message, 'AUTHENTICATION_ERROR', HTTP_STATUS.UNAUTHORIZED);
-    this.name = 'AuthenticationError';
+  constructor(message: string = ERROR_MESSAGES.AUTH.AUTHENTICATION_FAILED) {
+    super(message, ERROR_CODES.GENERAL.AUTHENTICATION_ERROR, HTTP_STATUS.UNAUTHORIZED);
+    this.name = ERROR_NAME.AUTHENTICATION_ERROR;
   }
 }
 
@@ -36,9 +37,9 @@ export const AuthError = AuthenticationError;
  * Authorization errors
  */
 export class AuthorizationError extends AppError {
-  constructor(message: string = 'Insufficient permissions') {
-    super(message, 'AUTHORIZATION_ERROR', HTTP_STATUS.FORBIDDEN);
-    this.name = 'AuthorizationError';
+  constructor(message: string = ERROR_MESSAGES.AUTH.INSUFFICIENT_PERMISSIONS) {
+    super(message, ERROR_CODES.GENERAL.AUTHORIZATION_ERROR, HTTP_STATUS.FORBIDDEN);
+    this.name = ERROR_NAME.AUTHORIZATION_ERROR;
   }
 }
 
@@ -51,8 +52,8 @@ export class ValidationError extends AppError {
     public field?: string,
     public value?: unknown
   ) {
-    super(message, 'VALIDATION_ERROR', HTTP_STATUS.UNPROCESSABLE_ENTITY);
-    this.name = 'ValidationError';
+    super(message, ERROR_CODES.GENERAL.VALIDATION_ERROR, HTTP_STATUS.UNPROCESSABLE_ENTITY);
+    this.name = ERROR_NAME.VALIDATION_ERROR;
   }
 }
 
@@ -61,11 +62,11 @@ export class ValidationError extends AppError {
  */
 export class NetworkError extends AppError {
   constructor(
-    message: string = 'Network request failed',
+    message: string = ERROR_MESSAGES.NETWORK.REQUEST_FAILED,
     public endpoint?: string
   ) {
-    super(message, 'NETWORK_ERROR', HTTP_STATUS.SERVICE_UNAVAILABLE);
-    this.name = 'NetworkError';
+    super(message, ERROR_CODES.GENERAL.NETWORK_ERROR, HTTP_STATUS.SERVICE_UNAVAILABLE);
+    this.name = ERROR_NAME.NETWORK_ERROR;
   }
 }
 
@@ -73,9 +74,9 @@ export class NetworkError extends AppError {
  * Timeout errors
  */
 export class TimeoutError extends AppError {
-  constructor(message: string = 'Request timed out') {
-    super(message, 'TIMEOUT_ERROR', HTTP_STATUS.REQUEST_TIMEOUT);
-    this.name = 'TimeoutError';
+  constructor(message: string = ERROR_MESSAGES.TIMEOUT.REQUEST_TIMEOUT) {
+    super(message, ERROR_CODES.GENERAL.TIMEOUT_ERROR, HTTP_STATUS.REQUEST_TIMEOUT);
+    this.name = ERROR_NAME.TIMEOUT_ERROR;
   }
 }
 
@@ -84,11 +85,11 @@ export class TimeoutError extends AppError {
  */
 export class NotFoundError extends AppError {
   constructor(
-    message: string = 'Resource not found',
+    message: string = ERROR_MESSAGES.NOT_FOUND.RESOURCE,
     public resource?: string
   ) {
-    super(message, 'NOT_FOUND_ERROR', HTTP_STATUS.NOT_FOUND);
-    this.name = 'NotFoundError';
+    super(message, ERROR_CODES.GENERAL.NOT_FOUND_ERROR, HTTP_STATUS.NOT_FOUND);
+    this.name = ERROR_NAME.NOT_FOUND_ERROR;
   }
 }
 
@@ -96,9 +97,9 @@ export class NotFoundError extends AppError {
  * Conflict errors (e.g., duplicate entries)
  */
 export class ConflictError extends AppError {
-  constructor(message: string = 'Resource conflict') {
-    super(message, 'CONFLICT_ERROR', HTTP_STATUS.CONFLICT);
-    this.name = 'ConflictError';
+  constructor(message: string = ERROR_MESSAGES.CONFLICT.RESOURCE) {
+    super(message, ERROR_CODES.GENERAL.CONFLICT_ERROR, HTTP_STATUS.CONFLICT);
+    this.name = ERROR_NAME.CONFLICT_ERROR;
   }
 }
 
@@ -107,11 +108,11 @@ export class ConflictError extends AppError {
  */
 export class RateLimitError extends AppError {
   constructor(
-    message: string = 'Rate limit exceeded',
+    message: string = ERROR_MESSAGES.RATE_LIMIT.TOO_MANY_REQUESTS,
     public retryAfter?: number
   ) {
-    super(message, 'RATE_LIMIT_ERROR', HTTP_STATUS.TOO_MANY_REQUESTS);
-    this.name = 'RateLimitError';
+    super(message, ERROR_CODES.GENERAL.RATE_LIMIT_ERROR, HTTP_STATUS.TOO_MANY_REQUESTS);
+    this.name = ERROR_NAME.RATE_LIMIT_ERROR;
   }
 }
 
@@ -129,10 +130,10 @@ export function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }
-  if (typeof error === 'string') {
+  if (typeof error === TYPEOF.STRING) {
     return error;
   }
-  return 'An unknown error occurred';
+  return ERROR_MESSAGES.APP.UNKNOWN_ERROR;
 }
 
 /**
@@ -144,8 +145,8 @@ export function toAppError(error: unknown): AppError {
   }
 
   if (error instanceof Error) {
-    return new AppError(error.message, 'UNKNOWN_ERROR');
+    return new AppError(error.message, ERROR_CODES.GENERAL.UNKNOWN_ERROR);
   }
 
-  return new AppError('An unknown error occurred', 'UNKNOWN_ERROR');
+  return new AppError(ERROR_MESSAGES.APP.UNKNOWN_ERROR, ERROR_CODES.GENERAL.UNKNOWN_ERROR);
 }

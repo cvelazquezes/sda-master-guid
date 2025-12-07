@@ -10,6 +10,7 @@ import {
 import { User, AuthContextType } from '../types';
 import { authService } from '../services/authService';
 import { logger } from '../utils/logger';
+import { LOG_MESSAGES } from '../shared/constants';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -38,7 +39,7 @@ const createAuthOperations = (
       const { user: loggedInUser } = await authService.login(email, password);
       setUser(loggedInUser);
     } catch (error) {
-      logger.error('Login error', error as Error, { email });
+      logger.error(LOG_MESSAGES.AUTH.LOGIN_ERROR, error as Error, { email });
       throw error;
     }
   },
@@ -64,20 +65,20 @@ const createAuthOperations = (
       );
       setUser(registeredUser);
     } catch (error) {
-      logger.error('Registration error', error as Error, { email });
+      logger.error(LOG_MESSAGES.AUTH.REGISTRATION_ERROR, error as Error, { email });
       throw error;
     }
   },
 
   logout: async (): Promise<void> => {
     try {
-      logger.info('Starting logout process');
+      logger.info(LOG_MESSAGES.AUTH.LOGOUT_STARTED);
       await authService.logout();
-      logger.info('Storage cleared');
+      logger.info(LOG_MESSAGES.AUTH.LOGOUT_STORAGE_CLEARED);
       setUser(null);
-      logger.info('User state cleared - logout complete');
+      logger.info(LOG_MESSAGES.AUTH.LOGOUT_COMPLETE);
     } catch (error) {
-      logger.error('Logout error', error as Error);
+      logger.error(LOG_MESSAGES.AUTH.LOGOUT_ERROR, error as Error);
       setUser(null);
     }
   },
@@ -87,7 +88,7 @@ const createAuthOperations = (
       const updatedUser = await authService.updateUser(userData);
       setUser(updatedUser);
     } catch (error) {
-      logger.error('Update user error', error as Error);
+      logger.error(LOG_MESSAGES.AUTH.UPDATE_USER_ERROR, error as Error);
       throw error;
     }
   },
@@ -102,7 +103,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const currentUser = await authService.getCurrentUser();
       setUser(currentUser);
     } catch (error) {
-      logger.error('Error loading user', error as Error);
+      logger.error(LOG_MESSAGES.AUTH.USER_LOAD_ERROR, error as Error);
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -123,7 +124,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error(LOG_MESSAGES.CONTEXTS.AUTH.USE_OUTSIDE_PROVIDER);
   }
   return context;
 };
