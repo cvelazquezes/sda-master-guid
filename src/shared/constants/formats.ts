@@ -6,8 +6,15 @@
 
 // External Service URLs
 export const EXTERNAL_URLS = {
-  WHATSAPP_BASE: 'https://wa.me/',
-  WHATSAPP_GROUP: 'https://wa.me/',
+  WHATSAPP: {
+    BASE: 'https://wa.me/',
+    // Deep link for native app: whatsapp://send?phone=XXX&text=YYY
+    SEND: (phone: string, message: string) =>
+      `whatsapp://send?phone=${phone}&text=${encodeURIComponent(message)}`,
+    // Web fallback: https://wa.me/XXX?text=YYY
+    WEB: (phone: string, message: string) =>
+      `https://wa.me/${phone}?text=${encodeURIComponent(message)}`,
+  },
 } as const;
 
 /**

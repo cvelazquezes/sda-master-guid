@@ -112,6 +112,82 @@ export const TOUCH_OPACITY = {
 } as const;
 
 /**
+ * Text Variant - Typography variants for Text component
+ */
+export const TEXT_VARIANT = {
+  // Display variants
+  DISPLAY_LARGE: 'displayLarge',
+  DISPLAY_MEDIUM: 'displayMedium',
+  DISPLAY_SMALL: 'displaySmall',
+  // Heading variants
+  H1: 'h1',
+  H2: 'h2',
+  H3: 'h3',
+  H4: 'h4',
+  HEADING: 'heading',
+  // Body variants
+  BODY_LARGE: 'bodyLarge',
+  BODY: 'body',
+  BODY_SMALL: 'bodySmall',
+  // Label variants
+  LABEL_LARGE: 'labelLarge',
+  LABEL: 'label',
+  LABEL_SMALL: 'labelSmall',
+  // Caption variants
+  CAPTION: 'caption',
+  CAPTION_BOLD: 'captionBold',
+  // UI variants
+  BUTTON: 'button',
+  BUTTON_SMALL: 'buttonSmall',
+  BADGE: 'badge',
+  HELPER: 'helper',
+} as const;
+
+/**
+ * Text Color - Semantic color tokens for Text component
+ */
+export const TEXT_COLOR = {
+  PRIMARY: 'primary',
+  SECONDARY: 'secondary',
+  TERTIARY: 'tertiary',
+  QUATERNARY: 'quaternary',
+  DISABLED: 'disabled',
+  PLACEHOLDER: 'placeholder',
+  INVERSE: 'inverse',
+  ON_PRIMARY: 'onPrimary',
+  ON_SECONDARY: 'onSecondary',
+  ON_ACCENT: 'onAccent',
+  LINK: 'link',
+  SUCCESS: 'success',
+  WARNING: 'warning',
+  ERROR: 'error',
+  INFO: 'info',
+  INHERIT: 'inherit',
+} as const;
+
+/**
+ * Text Weight - Font weight values for Text component
+ */
+export const TEXT_WEIGHT = {
+  LIGHT: 'light',
+  REGULAR: 'regular',
+  MEDIUM: 'medium',
+  SEMIBOLD: 'semibold',
+  BOLD: 'bold',
+  EXTRABOLD: 'extrabold',
+} as const;
+
+/**
+ * Text Align - Text alignment values
+ */
+export const TEXT_ALIGN = {
+  LEFT: 'left',
+  CENTER: 'center',
+  RIGHT: 'right',
+  AUTO: 'auto',
+} as const;
+
+/**
  * Text Line Limits - numberOfLines prop values
  */
 export const TEXT_LINES = {
@@ -183,3 +259,7 @@ export type TouchOpacity = (typeof TOUCH_OPACITY)[keyof typeof TOUCH_OPACITY];
 export type TextLines = (typeof TEXT_LINES)[keyof typeof TEXT_LINES];
 export type IconPosition = (typeof ICON_POSITION)[keyof typeof ICON_POSITION];
 export type Orientation = (typeof ORIENTATION)[keyof typeof ORIENTATION];
+export type TextVariantValue = (typeof TEXT_VARIANT)[keyof typeof TEXT_VARIANT];
+export type TextColorValue = (typeof TEXT_COLOR)[keyof typeof TEXT_COLOR];
+export type TextWeightValue = (typeof TEXT_WEIGHT)[keyof typeof TEXT_WEIGHT];
+export type TextAlignValue = (typeof TEXT_ALIGN)[keyof typeof TEXT_ALIGN];

@@ -39,30 +39,84 @@ export const ANIMATION = ANIMATION_TYPE;
  * Accessibility Roles - Used for accessibilityRole prop
  */
 export const A11Y_ROLE = {
+  NONE: 'none',
   BUTTON: 'button',
   LINK: 'link',
-  HEADER: 'header',
   SEARCH: 'search',
   IMAGE: 'image',
+  IMAGEBUTTON: 'imagebutton',
+  KEYBOARDKEY: 'keyboardkey',
   TEXT: 'text',
   ADJUSTABLE: 'adjustable',
+  HEADER: 'header',
+  SUMMARY: 'summary',
+  ALERT: 'alert',
   CHECKBOX: 'checkbox',
+  COMBOBOX: 'combobox',
+  MENU: 'menu',
+  MENUBAR: 'menubar',
+  MENUITEM: 'menuitem',
+  PROGRESSBAR: 'progressbar',
   RADIO: 'radio',
+  RADIOGROUP: 'radiogroup',
+  SCROLLBAR: 'scrollbar',
+  SPINBUTTON: 'spinbutton',
   SWITCH: 'switch',
   TAB: 'tab',
   TABLIST: 'tablist',
   TIMER: 'timer',
   TOOLBAR: 'toolbar',
-  ALERT: 'alert',
-  MENU: 'menu',
-  MENUITEM: 'menuitem',
-  PROGRESSBAR: 'progressbar',
-  SCROLLBAR: 'scrollbar',
-  SPINBUTTON: 'spinbutton',
-  SUMMARY: 'summary',
   LIST: 'list',
   LISTITEM: 'listitem',
-  NONE: 'none',
+} as const;
+
+/** Type for accessibility roles derived from constants */
+export type AccessibilityRoleType = (typeof A11Y_ROLE)[keyof typeof A11Y_ROLE];
+
+/**
+ * Accessibility checked state
+ */
+export const A11Y_CHECKED = {
+  TRUE: true,
+  FALSE: false,
+  MIXED: 'mixed',
+} as const;
+
+/**
+ * Alert/notification types for accessibility
+ */
+export const A11Y_ALERT_TYPE = {
+  INFO: 'info',
+  SUCCESS: 'success',
+  WARNING: 'warning',
+  ERROR: 'error',
+} as const;
+
+export type A11yAlertType = (typeof A11Y_ALERT_TYPE)[keyof typeof A11Y_ALERT_TYPE];
+
+/**
+ * Accessibility label templates
+ */
+export const A11Y_LABEL = {
+  LOADING: 'Loading',
+  REQUIRED_FIELD: 'Required field',
+  REQUIRED_SUFFIX: '(required)',
+  HEADING_LEVEL: (level: number) => `Heading level ${level}`,
+  TAB_POSITION: (label: string, index: number, total: number) =>
+    `${label}, tab ${index + 1} of ${total}`,
+  ITEM_POSITION: (title: string, index: number, total: number, description?: string) => {
+    const parts = [title, `item ${index + 1} of ${total}`, description];
+    return parts.filter(Boolean).join(', ');
+  },
+  ALERT_MESSAGE: (type: string, message: string) => `${type}: ${message}`,
+} as const;
+
+/**
+ * Accessibility number format labels
+ */
+export const A11Y_NUMBER_LABEL = {
+  MILLION: 'million',
+  THOUSAND: 'thousand',
 } as const;
 
 // =============================================================================
@@ -260,13 +314,7 @@ export const PLATFORM = {
   ANDROID: 'android',
 } as const;
 
-/**
- * Platform OS - Used for platform-specific behavior
- */
-export const PLATFORM_OS = {
-  IOS: 'ios',
-  ANDROID: 'android',
-} as const;
+// PLATFORM_OS is defined in app.ts
 
 // =============================================================================
 // THEME
@@ -286,14 +334,15 @@ export const THEME_MODE = {
 // =============================================================================
 
 /**
- * Language - Used for i18n configuration
+ * i18n Language - Used for i18n configuration
+ * Note: LANGUAGE for validation is exported from app.ts
  */
-export const LANGUAGE = {
+export const I18N_LANGUAGE = {
   ENGLISH: 'en',
   SPANISH: 'es',
 } as const;
 
-export const DEFAULT_LANGUAGE = LANGUAGE.ENGLISH;
+export const DEFAULT_LANGUAGE = I18N_LANGUAGE.ENGLISH;
 
 /**
  * i18n Configuration - Settings for i18next
@@ -305,13 +354,7 @@ export const I18N_CONFIG = {
   USE_SUSPENSE: false,
 } as const;
 
-/**
- * Locale Configuration - Date/time locale identifiers
- */
-export const LOCALE = {
-  ENGLISH_US: 'en-US',
-  SPANISH_MX: 'es-MX',
-} as const;
+// Note: LOCALE moved to locale.ts
 
 // =============================================================================
 // PRESENTATION & NAVIGATION UI
@@ -457,6 +500,10 @@ export const TEST_IDS = {
   PASSWORD_INPUT: 'password-input',
   LOGIN_BUTTON: 'login-button',
   REGISTER_BUTTON: 'register-button',
+  // Dynamic test ID generators
+  USER_CARD: (userId: string) => `user-card-${userId}`,
+  CLUB_CARD: (clubId: string) => `club-card-${clubId}`,
+  MATCH_CARD: (matchId: string) => `match-card-${matchId}`,
 } as const;
 
 // =============================================================================

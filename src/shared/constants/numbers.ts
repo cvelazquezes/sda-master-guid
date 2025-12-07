@@ -341,6 +341,27 @@ export const OPACITY_VALUE = {
   FULL: 1,
 } as const;
 
+/**
+ * Hex opacity suffixes for color strings
+ * Usage: `${color}${HEX_OPACITY.SUBTLE}` → "#FF000015"
+ */
+export const HEX_OPACITY = {
+  /** 0% opacity */
+  TRANSPARENT: '00',
+  /** ~3% opacity */
+  VERY_LIGHT: '08',
+  /** ~6% opacity */
+  LIGHT: '0F',
+  /** ~8% opacity - Good for icon backgrounds */
+  SUBTLE: '15',
+  /** ~10% opacity */
+  LIGHT_MEDIUM: '1A',
+  /** ~20% opacity */
+  MEDIUM_LIGHT: '33',
+  /** ~50% opacity */
+  MEDIUM: '80',
+} as const;
+
 // =============================================================================
 // Z-INDEX LAYERS
 // =============================================================================
@@ -619,6 +640,14 @@ export const SHADOW_BLUR = {
   CARD: 4,
   ELEVATED: 8,
   MODAL: 16,
+} as const;
+
+/**
+ * Shadow color values
+ */
+export const SHADOW_COLOR = {
+  NONE: 'transparent',
+  DEFAULT: '#000000',
 } as const;
 
 /**

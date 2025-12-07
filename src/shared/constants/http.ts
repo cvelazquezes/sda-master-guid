@@ -89,6 +89,24 @@ export const HTTP_METHOD = {
   OPTIONS: 'OPTIONS',
 } as const;
 
+/** Derived type for HTTP methods */
+export type HttpMethodType = (typeof HTTP_METHOD)[keyof typeof HTTP_METHOD];
+
+/**
+ * Encoding formats
+ */
+export const ENCODING = {
+  BASE64: 'base64',
+  UTF8: 'utf8',
+  HEX: 'hex',
+  ASCII: 'ascii',
+} as const;
+
+/**
+ * CSRF Cookie name (secure prefix)
+ */
+export const CSRF_COOKIE_NAME = '__Host-csrf-token';
+
 // =============================================================================
 // CONTENT TYPES
 // =============================================================================
@@ -111,10 +129,50 @@ export const HEADER = {
   ACCEPT: 'Accept',
   ACCEPT_LANGUAGE: 'Accept-Language',
   CACHE_CONTROL: 'Cache-Control',
+  COOKIE: 'Cookie',
   X_REQUEST_ID: 'X-Request-ID',
   X_CSRF_TOKEN: 'X-CSRF-Token',
   X_API_KEY: 'X-API-Key',
+  X_APP_VERSION: 'X-App-Version',
+  IDEMPOTENCY_KEY: 'Idempotency-Key',
+
+  // Pagination headers (lowercase for response parsing)
+  X_TOTAL_COUNT: 'x-total-count',
+  X_TOTAL_COUNT_UPPER: 'X-Total-Count',
+  X_PAGE: 'x-page',
+  X_PAGE_UPPER: 'X-Page',
+  X_PAGE_SIZE: 'x-page-size',
+  X_PAGE_SIZE_UPPER: 'X-Page-Size',
+
+  // Security headers
+  X_CONTENT_TYPE_OPTIONS: 'X-Content-Type-Options',
+  X_FRAME_OPTIONS: 'X-Frame-Options',
+  X_XSS_PROTECTION: 'X-XSS-Protection',
+  STRICT_TRANSPORT_SECURITY: 'Strict-Transport-Security',
+  REFERRER_POLICY: 'Referrer-Policy',
 } as const;
+
+// =============================================================================
+// SECURITY HEADER VALUES
+// =============================================================================
+
+export const SECURITY_HEADER_VALUE = {
+  NOSNIFF: 'nosniff',
+  DENY: 'DENY',
+  SAMEORIGIN: 'SAMEORIGIN',
+  XSS_MODE_BLOCK: '1; mode=block',
+  HSTS_MAX_AGE: 'max-age=31536000; includeSubDomains',
+  REFERRER_STRICT_ORIGIN: 'strict-origin-when-cross-origin',
+} as const;
+
+// =============================================================================
+// STATE-CHANGING HTTP METHODS (require CSRF protection)
+// =============================================================================
+
+export const STATE_CHANGING_METHODS = ['post', 'put', 'patch', 'delete'] as const;
+
+/** State changing methods in uppercase (for validation) */
+export const STATE_CHANGING_METHODS_UPPER = ['POST', 'PUT', 'PATCH', 'DELETE'] as const;
 
 // =============================================================================
 // AUTHORIZATION
@@ -123,6 +181,14 @@ export const HEADER = {
 export const AUTH_SCHEME = {
   BEARER: 'Bearer',
   BASIC: 'Basic',
+} as const;
+
+/**
+ * Auth constants for headers
+ */
+export const AUTH_CONSTANTS = {
+  BEARER_PREFIX: 'Bearer ',
+  ANONYMOUS: 'anonymous',
 } as const;
 
 // =============================================================================
