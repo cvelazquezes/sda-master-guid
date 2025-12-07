@@ -11,7 +11,15 @@
  */
 
 import { PAGE, ID_GENERATION, MATH } from '../constants/numbers';
-import { TYPEOF, SORT_ORDER, ARRAY_FORMAT, HEADER } from '../constants';
+import {
+  EMPTY_VALUE,
+  TYPEOF,
+  SORT_ORDER,
+  SORT_PARSE,
+  ARRAY_FORMAT,
+  HEADER,
+  STRING_DELIMITER,
+} from '../constants';
 import type { ArrayFormatType } from '../constants';
 
 // ============================================================================
@@ -206,7 +214,7 @@ function handleArrayValue(
   } else if (arrayFormat === ARRAY_FORMAT.BRACKET) {
     params[`${fullKey}[]`] = stringValues;
   } else if (arrayFormat === ARRAY_FORMAT.COMMA) {
-    params[fullKey] = stringValues.join(',');
+    params[fullKey] = stringValues.join(STRING_DELIMITER.COMMA);
   }
 }
 
@@ -226,11 +234,11 @@ export function createFilterParams(
   filters: FilterParams,
   options: { prefix?: string; arrayFormat?: ArrayFormatType } = {}
 ): Record<string, string | string[]> {
-  const { prefix = '', arrayFormat = ARRAY_FORMAT.REPEAT } = options;
+  const { prefix = EMPTY_VALUE, arrayFormat = ARRAY_FORMAT.REPEAT } = options;
   const params: Record<string, string | string[]> = {};
 
   for (const [key, value] of Object.entries(filters)) {
-    if (value === null || value === undefined || value === '') {
+    if (value === null || value === undefined || value === EMPTY_VALUE) {
       continue;
     }
 
@@ -294,7 +302,7 @@ export function parseSortString(sortString: string): SortParams {
   }
 
   // Handle "-fieldName" format
-  if (sortString.startsWith('-')) {
+  if (sortString.startsWith(SORT_PARSE.DESC_PREFIX)) {
     return {
       sortBy: sortString.substring(1),
       sortOrder: SORT_ORDER.DESC,
@@ -302,8 +310,8 @@ export function parseSortString(sortString: string): SortParams {
   }
 
   // Handle "fieldName:order" format
-  if (sortString.includes(':')) {
-    const [sortBy, sortOrder] = sortString.split(':');
+  if (sortString.includes(SORT_PARSE.DELIMITER)) {
+    const [sortBy, sortOrder] = sortString.split(SORT_PARSE.DELIMITER);
     return {
       sortBy,
       sortOrder: sortOrder === SORT_ORDER.DESC ? SORT_ORDER.DESC : SORT_ORDER.ASC,
@@ -342,7 +350,7 @@ export function buildQueryString(params: Record<string, unknown>): string {
   const searchParams = new URLSearchParams();
 
   for (const [key, value] of Object.entries(params)) {
-    if (value === null || value === undefined || value === '') {
+    if (value === null || value === undefined || value === EMPTY_VALUE) {
       continue;
     }
 

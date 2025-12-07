@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { PASSWORD, TEXT, NUMERIC, MATCH } from '../constants/validation';
 import { PAGE } from '../constants/numbers';
 import {
+  EMPTY_VALUE,
   ERROR_MESSAGES,
   ERROR_NAME,
   USER_ROLES,
@@ -15,17 +16,13 @@ import {
   LANGUAGES_SUPPORTED,
   TIME_REGEX,
   IDEMPOTENCY_KEY_REGEX,
+  EMAIL_REGEX,
+  PHONE_REGEX,
+  UUID_REGEX,
   SORT_ORDER,
   VALIDATION_PATH,
+  STRING_DELIMITER,
 } from '../constants';
-
-// ============================================================================
-// Common Validation Rules
-// ============================================================================
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_REGEX = /^\+?[1-9]\d{1,14}$/;
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 // ============================================================================
 // Reusable Field Schemas
@@ -44,16 +41,16 @@ export const CommonSchemas = {
     .string()
     .min(PASSWORD.MIN_LENGTH, ERROR_MESSAGES.VALIDATION.PASSWORD_MIN_LENGTH(PASSWORD.MIN_LENGTH))
     .max(PASSWORD.MAX_LENGTH, ERROR_MESSAGES.VALIDATION.PASSWORD_TOO_LONG)
-    .regex(/[A-Z]/, ERROR_MESSAGES.VALIDATION.PASSWORD_UPPERCASE)
-    .regex(/[a-z]/, ERROR_MESSAGES.VALIDATION.PASSWORD_LOWERCASE)
-    .regex(/[0-9]/, ERROR_MESSAGES.VALIDATION.PASSWORD_NUMBER)
-    .regex(/[^A-Za-z0-9]/, ERROR_MESSAGES.VALIDATION.PASSWORD_SPECIAL),
+    .regex(PASSWORD.REGEX.UPPERCASE, ERROR_MESSAGES.VALIDATION.PASSWORD_UPPERCASE)
+    .regex(PASSWORD.REGEX.LOWERCASE, ERROR_MESSAGES.VALIDATION.PASSWORD_LOWERCASE)
+    .regex(PASSWORD.REGEX.NUMBER, ERROR_MESSAGES.VALIDATION.PASSWORD_NUMBER)
+    .regex(PASSWORD.REGEX.SPECIAL, ERROR_MESSAGES.VALIDATION.PASSWORD_SPECIAL),
 
   phone: z
     .string()
     .regex(PHONE_REGEX, ERROR_MESSAGES.VALIDATION.PHONE_INVALID)
     .optional()
-    .or(z.literal('')),
+    .or(z.literal(EMPTY_VALUE)),
 
   name: z
     .string()
@@ -70,7 +67,7 @@ export const CommonSchemas = {
 
   timezone: z
     .string()
-    .min(1, ERROR_MESSAGES.VALIDATION.TIMEZONE_REQUIRED)
+    .min(NUMERIC.MIN_REQUIRED, ERROR_MESSAGES.VALIDATION.TIMEZONE_REQUIRED)
     .refine(
       (tz) => {
         try {
@@ -105,7 +102,7 @@ export const CommonSchemas = {
 export const AuthSchemas = {
   login: z.object({
     email: CommonSchemas.email,
-    password: z.string().min(1, ERROR_MESSAGES.VALIDATION.PASSWORD_REQUIRED),
+    password: z.string().min(NUMERIC.MIN_REQUIRED, ERROR_MESSAGES.VALIDATION.PASSWORD_REQUIRED),
   }),
 
   register: z.object({
@@ -113,7 +110,7 @@ export const AuthSchemas = {
     password: CommonSchemas.password,
     name: CommonSchemas.name,
     whatsappNumber: CommonSchemas.phone,
-    clubId: z.string().min(1, ERROR_MESSAGES.VALIDATION.CLUB_ID_REQUIRED),
+    clubId: z.string().min(NUMERIC.MIN_REQUIRED, ERROR_MESSAGES.VALIDATION.CLUB_ID_REQUIRED),
   }),
 
   updateProfile: z.object({
@@ -125,9 +122,13 @@ export const AuthSchemas = {
 
   changePassword: z
     .object({
-      currentPassword: z.string().min(1, ERROR_MESSAGES.VALIDATION.CURRENT_PASSWORD_REQUIRED),
+      currentPassword: z
+        .string()
+        .min(NUMERIC.MIN_REQUIRED, ERROR_MESSAGES.VALIDATION.CURRENT_PASSWORD_REQUIRED),
       newPassword: CommonSchemas.password,
-      confirmPassword: z.string().min(1, ERROR_MESSAGES.VALIDATION.PASSWORD_CONFIRMATION_REQUIRED),
+      confirmPassword: z
+        .string()
+        .min(NUMERIC.MIN_REQUIRED, ERROR_MESSAGES.VALIDATION.PASSWORD_CONFIRMATION_REQUIRED),
     })
     .refine((data) => data.newPassword === data.confirmPassword, {
       message: ERROR_MESSAGES.VALIDATION.PASSWORDS_DO_NOT_MATCH,
@@ -148,7 +149,7 @@ export const UserSchemas = {
     email: CommonSchemas.email,
     name: CommonSchemas.name,
     role: z.enum(USER_ROLES),
-    clubId: z.string().min(1, ERROR_MESSAGES.VALIDATION.CLUB_ID_REQUIRED),
+    clubId: z.string().min(NUMERIC.MIN_REQUIRED, ERROR_MESSAGES.VALIDATION.CLUB_ID_REQUIRED),
     whatsappNumber: CommonSchemas.phone,
     timezone: CommonSchemas.timezone,
     language: CommonSchemas.language,
@@ -346,7 +347,7 @@ export class ValidationError extends Error {
   getFormattedErrors(): Record<string, string> {
     const formatted: Record<string, string> = {};
     for (const error of this.errors) {
-      const path = error.path.join('.');
+      const path = error.path.join(STRING_DELIMITER.DOT);
       formatted[path] = error.message;
     }
     return formatted;

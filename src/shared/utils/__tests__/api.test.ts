@@ -15,6 +15,7 @@ import {
   createPaginatedResponse,
   createCursorPaginatedResponse,
 } from '../api';
+import { EMPTY_VALUE } from '../../constants';
 
 describe('API Utilities', () => {
   describe('createPaginationParams', () => {
@@ -128,7 +129,7 @@ describe('API Utilities', () => {
         status: 'active',
         name: null,
         age: undefined,
-        email: '',
+        email: EMPTY_VALUE,
       });
 
       expect(params.status).toBe('active');
@@ -190,7 +191,7 @@ describe('API Utilities', () => {
     });
 
     it('should handle empty string', () => {
-      const params = parseSortString('');
+      const params = parseSortString(EMPTY_VALUE);
 
       expect(params).toEqual({});
     });

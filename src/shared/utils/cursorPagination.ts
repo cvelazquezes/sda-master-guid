@@ -6,7 +6,14 @@
 import { useState, useCallback } from 'react';
 import { logger } from './logger';
 import { LIST_LIMITS } from '../constants/numbers';
-import { LOG_MESSAGES, SORT_ORDERS, SORT_ORDER, ENCODING, QUERY_PARAM } from '../constants';
+import {
+  EMPTY_VALUE,
+  LOG_MESSAGES,
+  SORT_ORDERS,
+  SORT_ORDER,
+  ENCODING,
+  QUERY_PARAM,
+} from '../constants';
 
 /** Derived type for sort order */
 type SortOrderType = (typeof SORT_ORDER)[keyof typeof SORT_ORDER];
@@ -388,7 +395,7 @@ export function validatePaginationParams(params: Partial<CursorPaginationParams>
     }
   }
 
-  if (params.cursor !== undefined && params.cursor !== '') {
+  if (params.cursor !== undefined && params.cursor !== EMPTY_VALUE) {
     try {
       decodeCursor(params.cursor);
     } catch {
