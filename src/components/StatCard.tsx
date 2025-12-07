@@ -11,7 +11,16 @@ import { Text } from '../shared/components';
 import { useTheme } from '../contexts/ThemeContext';
 import { mobileIconSizes, mobileFontSizes, layoutConstants } from '../shared/theme';
 import { designTokens } from '../shared/theme/designTokens';
-import { ICONS, TOUCH_OPACITY, FLEX } from '../shared/constants';
+import {
+  ICONS,
+  TOUCH_OPACITY,
+  FLEX,
+  SHADOW_COLOR,
+  TEXT_VARIANT,
+  TEXT_WEIGHT,
+  TEXT_COLOR,
+  HEX_OPACITY,
+} from '../shared/constants';
 
 interface StatCardProps {
   icon: string;
@@ -40,14 +49,14 @@ export const StatCard: React.FC<StatCardProps> = ({
         styles.card,
         {
           backgroundColor: colors.surface,
-          shadowColor: colors.shadow || '#000000',
+          shadowColor: colors.shadow || SHADOW_COLOR.DEFAULT,
           shadowOpacity: shadowConfig.opacity,
           elevation: shadowConfig.elevation,
         },
         onPress && styles.cardTouchable,
       ]}
     >
-      <View style={[styles.iconContainer, { backgroundColor: `${color}15` }]}>
+      <View style={[styles.iconContainer, { backgroundColor: `${color}${HEX_OPACITY.SUBTLE}` }]}>
         <MaterialCommunityIcons
           name={icon as React.ComponentProps<typeof MaterialCommunityIcons>['name']}
           size={mobileIconSizes.xlarge}
@@ -55,14 +64,14 @@ export const StatCard: React.FC<StatCardProps> = ({
         />
       </View>
       <View style={styles.content}>
-        <Text variant="displaySmall" style={styles.value}>
+        <Text variant={TEXT_VARIANT.DISPLAY_SMALL} style={styles.value}>
           {value}
         </Text>
-        <Text variant="label" weight="bold" color="secondary">
+        <Text variant={TEXT_VARIANT.LABEL} weight={TEXT_WEIGHT.BOLD} color={TEXT_COLOR.SECONDARY}>
           {label}
         </Text>
         {subtitle && (
-          <Text variant="caption" color="tertiary" style={styles.subtitle}>
+          <Text variant={TEXT_VARIANT.CAPTION} color={TEXT_COLOR.TERTIARY} style={styles.subtitle}>
             {subtitle}
           </Text>
         )}

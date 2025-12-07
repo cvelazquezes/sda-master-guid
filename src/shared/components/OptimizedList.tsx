@@ -11,7 +11,14 @@ import { FlashList, ListRenderItem } from '@shopify/flash-list';
 import { useTheme, layoutConstants } from '../theme';
 import { designTokens } from '../theme/designTokens';
 import { logger } from '../utils/logger';
-import { LIST_THRESHOLDS, FLEX } from '../constants';
+import {
+  LIST_THRESHOLDS,
+  FLEX,
+  TEXT_VARIANT,
+  TEXT_COLOR,
+  TEXT_WEIGHT,
+  LOG_MESSAGES,
+} from '../constants';
 import { MATH } from '../constants/numbers';
 import { Text } from './Text';
 
@@ -70,7 +77,10 @@ export function OptimizedList<T>({
   const onViewableItemsChanged = useCallback(
     (info: { viewableItems: ViewToken[]; changed: ViewToken[] }) => {
       // Track which items are visible for analytics
-      logger.debug('Viewable items:', { items: info.viewableItems.map((v) => v.key) });
+      logger.debug(LOG_MESSAGES.LIST.VIEWABLE_ITEMS, {
+        count: info.viewableItems.length,
+        items: info.viewableItems.map((v) => v.key),
+      });
     },
     []
   );
@@ -128,15 +138,15 @@ const UserListItem = memo<UserListItemProps>(function UserListItem({ user, onPre
       ]}
     >
       <View style={[styles.avatar, { backgroundColor: colors.info }]}>
-        <Text variant="body" color="onPrimary">
+        <Text variant={TEXT_VARIANT.BODY} color={TEXT_COLOR.ON_PRIMARY}>
           {user.name.charAt(0).toUpperCase()}
         </Text>
       </View>
       <View style={styles.userInfo}>
-        <Text variant="body" weight="semibold" style={styles.userName}>
+        <Text variant={TEXT_VARIANT.BODY} weight={TEXT_WEIGHT.SEMIBOLD} style={styles.userName}>
           {user.name}
         </Text>
-        <Text variant="bodySmall" color="secondary">
+        <Text variant={TEXT_VARIANT.BODY_SMALL} color={TEXT_COLOR.SECONDARY}>
           {user.email}
         </Text>
       </View>
@@ -186,7 +196,7 @@ export const OptimizedUserList = memo<OptimizedUserListProps>(function Optimized
   const ListEmptyComponent = useCallback(
     () => (
       <View style={styles.emptyContainer}>
-        <Text variant="bodyLarge" color="secondary">
+        <Text variant={TEXT_VARIANT.BODY_LARGE} color={TEXT_COLOR.SECONDARY}>
           {emptyMessage}
         </Text>
       </View>

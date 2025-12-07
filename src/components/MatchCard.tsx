@@ -15,6 +15,7 @@ import {
   ICONS,
   TOUCH_OPACITY,
   FLEX,
+  SHADOW_COLOR,
 } from '../shared/constants';
 
 interface MatchCardProps {
@@ -51,7 +52,7 @@ const MatchCardComponent: React.FC<MatchCardProps> = ({
     styles.card,
     {
       backgroundColor: colors.surface,
-      shadowColor: colors.shadow || '#000000',
+      shadowColor: colors.shadow || SHADOW_COLOR.DEFAULT,
       shadowOpacity: shadowConfig.opacity,
       elevation: shadowConfig.elevation,
     },

@@ -19,7 +19,17 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { designTokens } from '../theme/designTokens';
 import { layoutConstants } from '../theme';
 import { StandardButton } from './StandardButton';
-import { A11Y_ROLE, BUTTON_SIZE, COMPONENT_VARIANT, ICONS, DIMENSIONS, FLEX } from '../constants';
+import {
+  A11Y_ROLE,
+  BUTTON_SIZE,
+  COMPONENT_VARIANT,
+  ICONS,
+  DIMENSIONS,
+  FLEX,
+  TEXT_VARIANT,
+  TEXT_ALIGN,
+  TEXT_COLOR,
+} from '../constants';
 import { Text } from './Text';
 
 export interface EmptyStateProps {
@@ -75,13 +85,18 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       </View>
 
       {/* Title */}
-      <Text variant="h3" align="center" style={styles.title}>
+      <Text variant={TEXT_VARIANT.H3} align={TEXT_ALIGN.CENTER} style={styles.title}>
         {title}
       </Text>
 
       {/* Description */}
       {description && (
-        <Text variant="bodySmall" color="secondary" align="center" style={styles.description}>
+        <Text
+          variant={TEXT_VARIANT.BODY_SMALL}
+          color={TEXT_COLOR.SECONDARY}
+          align={TEXT_ALIGN.CENTER}
+          style={styles.description}
+        >
           {description}
         </Text>
       )}

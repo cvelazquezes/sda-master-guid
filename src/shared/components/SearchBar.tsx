@@ -9,7 +9,7 @@ import { View, TextInput, TouchableOpacity, StyleSheet, ViewStyle } from 'react-
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { mobileTypography, designTokens, layoutConstants } from '../theme';
-import { A11Y_ROLE, EMPTY_VALUE, ICONS, FLEX } from '../constants';
+import { A11Y_ROLE, EMPTY_VALUE, ICONS, FLEX, TEXT_VARIANT, TEXT_WEIGHT } from '../constants';
 import { Text } from './Text';
 
 interface SearchBarProps {
@@ -103,7 +103,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             size={designTokens.icon.sizes.md}
             color={colors.primary}
           />
-          <Text variant="label" weight="bold" style={{ color: colors.primary }}>
+          <Text
+            variant={TEXT_VARIANT.LABEL}
+            weight={TEXT_WEIGHT.BOLD}
+            style={{ color: colors.primary }}
+          >
             {filterLabel}
           </Text>
           {filterActive && <View style={[styles.filterBadge, { backgroundColor: colors.error }]} />}

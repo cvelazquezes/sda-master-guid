@@ -17,6 +17,10 @@ import {
   SHADOW_OFFSET,
   FONT_FAMILY,
   LOG_MESSAGES,
+  TEXT_VARIANT,
+  TEXT_COLOR,
+  TEXT_WEIGHT,
+  TEXT_ALIGN,
 } from '../shared/constants';
 
 interface Props extends WithTranslation {
@@ -88,23 +92,41 @@ class ErrorBoundaryClass extends Component<Props, State> {
               size={designTokens.iconSize['3xl']}
               color={designTokens.colors.error}
             />
-            <Text variant="h1" style={styles.title}>
+            <Text variant={TEXT_VARIANT.H1} style={styles.title}>
               {t('components.errorBoundary.title')}
             </Text>
-            <Text variant="bodyLarge" color="secondary" align="center" style={styles.message}>
+            <Text
+              variant={TEXT_VARIANT.BODY_LARGE}
+              color={TEXT_COLOR.SECONDARY}
+              align={TEXT_ALIGN.CENTER}
+              style={styles.message}
+            >
               {t('components.errorBoundary.message')}
             </Text>
 
             {__DEV__ && this.state.error && (
               <ScrollView style={styles.errorDetails}>
-                <Text variant="label" weight="semibold" color="error" style={styles.errorTitle}>
+                <Text
+                  variant={TEXT_VARIANT.LABEL}
+                  weight={TEXT_WEIGHT.SEMIBOLD}
+                  color={TEXT_COLOR.ERROR}
+                  style={styles.errorTitle}
+                >
                   {t('components.errorBoundary.errorDetailsTitle')}
                 </Text>
-                <Text variant="caption" color="secondary" style={styles.errorText}>
+                <Text
+                  variant={TEXT_VARIANT.CAPTION}
+                  color={TEXT_COLOR.SECONDARY}
+                  style={styles.errorText}
+                >
                   {this.state.error.toString()}
                 </Text>
                 {this.state.errorInfo && (
-                  <Text variant="caption" color="secondary" style={styles.errorText}>
+                  <Text
+                    variant={TEXT_VARIANT.CAPTION}
+                    color={TEXT_COLOR.SECONDARY}
+                    style={styles.errorText}
+                  >
                     {this.state.errorInfo.componentStack}
                   </Text>
                 )}
@@ -112,7 +134,11 @@ class ErrorBoundaryClass extends Component<Props, State> {
             )}
 
             <TouchableOpacity style={styles.button} onPress={this.handleReset}>
-              <Text variant="bodyLarge" weight="semibold" color="onPrimary">
+              <Text
+                variant={TEXT_VARIANT.BODY_LARGE}
+                weight={TEXT_WEIGHT.SEMIBOLD}
+                color={TEXT_COLOR.ON_PRIMARY}
+              >
                 {t('components.errorBoundary.tryAgain')}
               </Text>
             </TouchableOpacity>

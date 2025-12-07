@@ -14,6 +14,10 @@ import {
   COMPONENT_SIZE,
   COMPONENT_VARIANT,
   TEXT_LINES,
+  TEXT_VARIANT,
+  TEXT_WEIGHT,
+  TEXT_COLOR,
+  TEST_IDS,
 } from '../../shared/constants';
 import { User } from '../../types';
 import { UserCardProps, ThemeColors as UserThemeColors } from './types';
@@ -65,9 +69,9 @@ const UserCardComponent: React.FC<UserCardProps> = ({
         <View style={styles.userInfo}>
           <View style={styles.userHeader}>
             <Text
-              variant="body"
-              weight="bold"
-              color={isActive ? 'primary' : 'tertiary'}
+              variant={TEXT_VARIANT.BODY}
+              weight={TEXT_WEIGHT.BOLD}
+              color={isActive ? TEXT_COLOR.PRIMARY : TEXT_COLOR.TERTIARY}
               numberOfLines={TEXT_LINES.single}
               style={styles.userName}
             >
@@ -82,8 +86,8 @@ const UserCardComponent: React.FC<UserCardProps> = ({
             />
           </View>
           <Text
-            variant="bodySmall"
-            color={isActive ? 'secondary' : 'tertiary'}
+            variant={TEXT_VARIANT.BODY_SMALL}
+            color={isActive ? TEXT_COLOR.SECONDARY : TEXT_COLOR.TERTIARY}
             numberOfLines={TEXT_LINES.single}
             style={styles.userEmail}
           >
@@ -141,7 +145,7 @@ const UserCardComponent: React.FC<UserCardProps> = ({
       accessibilityLabel={formatViewDetailsLabel(user.name, t)}
       accessibilityHint={t('accessibility.doubleTapToOpenUserDetails')}
       style={styles.card}
-      testID={`user-card-${user.id}`}
+      testID={TEST_IDS.USER_CARD(user.id)}
     />
   );
 };

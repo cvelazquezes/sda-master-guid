@@ -10,7 +10,17 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { StandardModal } from './StandardModal';
 import { mobileIconSizes, designTokens, layoutConstants } from '../theme';
-import { A11Y_ROLE, ICONS, TOUCH_OPACITY, DIMENSIONS, FLEX } from '../constants';
+import {
+  A11Y_ROLE,
+  ICONS,
+  TOUCH_OPACITY,
+  DIMENSIONS,
+  FLEX,
+  TEXT_VARIANT,
+  TEXT_COLOR,
+  TEXT_WEIGHT,
+  TEXT_ALIGN,
+} from '../constants';
 import { Text } from './Text';
 
 export interface SelectionItem {
@@ -94,7 +104,11 @@ export const SelectionModal: React.FC<SelectionModalProps> = ({
 
         {item.avatar && (
           <View style={[styles.avatar, { backgroundColor: iconColor }]}>
-            <Text variant="body" weight="bold" color="onPrimary">
+            <Text
+              variant={TEXT_VARIANT.BODY}
+              weight={TEXT_WEIGHT.BOLD}
+              color={TEXT_COLOR.ON_PRIMARY}
+            >
               {item.avatar}
             </Text>
           </View>
@@ -102,13 +116,17 @@ export const SelectionModal: React.FC<SelectionModalProps> = ({
 
         {/* Content */}
         <View style={styles.itemContent}>
-          <Text variant="body" weight="bold" color={isDisabled ? 'tertiary' : 'primary'}>
+          <Text
+            variant={TEXT_VARIANT.BODY}
+            weight={TEXT_WEIGHT.BOLD}
+            color={isDisabled ? TEXT_COLOR.TERTIARY : TEXT_COLOR.PRIMARY}
+          >
             {item.title}
           </Text>
           {item.subtitle && (
             <Text
-              variant="caption"
-              color={isDisabled ? 'tertiary' : 'secondary'}
+              variant={TEXT_VARIANT.CAPTION}
+              color={isDisabled ? TEXT_COLOR.TERTIARY : TEXT_COLOR.SECONDARY}
               style={styles.itemSubtitle}
             >
               {item.subtitle}
@@ -124,8 +142,8 @@ export const SelectionModal: React.FC<SelectionModalProps> = ({
                 color={item.badgeColor || colors.primary}
               />
               <Text
-                variant="caption"
-                weight="semibold"
+                variant={TEXT_VARIANT.CAPTION}
+                weight={TEXT_WEIGHT.SEMIBOLD}
                 style={{ color: item.badgeColor || colors.primary }}
               >
                 {item.badge}
@@ -161,7 +179,12 @@ export const SelectionModal: React.FC<SelectionModalProps> = ({
             size={designTokens.iconSize['3xl']}
             color={colors.textTertiary}
           />
-          <Text variant="body" color="tertiary" align="center" style={styles.emptyText}>
+          <Text
+            variant={TEXT_VARIANT.BODY}
+            color={TEXT_COLOR.TERTIARY}
+            align={TEXT_ALIGN.CENTER}
+            style={styles.emptyText}
+          >
             {displayEmptyMessage}
           </Text>
         </View>

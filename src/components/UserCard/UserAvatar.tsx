@@ -2,6 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { Text } from '../../shared/components';
 import { useTheme } from '../../contexts/ThemeContext';
+import { TEXT_VARIANT } from '../../shared/constants';
 import { styles } from './styles';
 
 interface UserAvatarProps {
@@ -29,7 +30,7 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
       ]}
     >
       <Text
-        variant="h3"
+        variant={TEXT_VARIANT.H3}
         style={[{ color: colors.textOnPrimary }, !isActive && { color: inactiveTextColor }]}
       >
         {name.charAt(0).toUpperCase()}
