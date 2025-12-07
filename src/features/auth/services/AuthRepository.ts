@@ -19,6 +19,19 @@ import { logger } from '../../../shared/utils/logger';
 import api from '../../../shared/api/api';
 import { HTTP_STATUS } from '../../../shared/constants/http';
 import { MOCK_DELAY, CACHE } from '../../../shared/constants/timing';
+import {
+  LOG_MESSAGES,
+  ERROR_MESSAGES,
+  ERROR_CODES,
+  TIMEZONES,
+  LANGUAGES,
+  API_ENDPOINTS,
+  MOCK_DATA,
+  generateMockToken,
+  generateMockRefreshToken,
+  generateRefreshedMockToken,
+} from '../../../shared/constants';
+import { UserRole } from '../../../types';
 
 // ============================================================================
 // API Repository Implementation
@@ -42,20 +55,26 @@ export class ApiAuthRepository implements IAuthRepository {
     loginSchema.parse(credentials);
 
     try {
-      const response = await api.post('/auth/login', credentials);
+      const response = await api.post(API_ENDPOINTS.AUTH.LOGIN, credentials);
       const { user, token } = response.data;
 
-      logger.info(`User ${user.email} logged in successfully`);
+      logger.info(LOG_MESSAGES.FORMATTED.USER_LOGIN_SUCCESS(user.email));
       return { user, token };
     } catch (error: unknown) {
-      logger.error('API login error:', error);
+      logger.error(LOG_MESSAGES.API_REPOSITORY.LOGIN_ERROR, error);
 
       const axiosError = error as { response?: { status?: number } };
       if (axiosError.response?.status === HTTP_STATUS.UNAUTHORIZED) {
-        throw new AuthError('Invalid credentials', error instanceof Error ? error : undefined);
+        throw new AuthError(
+          ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS,
+          error instanceof Error ? error : undefined
+        );
       }
 
-      throw new AuthError('Login failed', error instanceof Error ? error : undefined);
+      throw new AuthError(
+        ERROR_MESSAGES.AUTH.LOGIN_FAILED,
+        error instanceof Error ? error : undefined
+      );
     }
   }
 
@@ -71,20 +90,26 @@ export class ApiAuthRepository implements IAuthRepository {
     registerSchema.parse(data);
 
     try {
-      const response = await api.post('/auth/register', data);
+      const response = await api.post(API_ENDPOINTS.AUTH.REGISTER, data);
       const { user, token } = response.data;
 
-      logger.info(`User ${user.email} registered successfully`);
+      logger.info(LOG_MESSAGES.FORMATTED.USER_REGISTERED_SUCCESS(user.email));
       return { user, token };
     } catch (error: unknown) {
-      logger.error('API registration error:', error);
+      logger.error(LOG_MESSAGES.API_REPOSITORY.REGISTRATION_ERROR, error);
 
       const axiosError = error as { response?: { status?: number } };
       if (axiosError.response?.status === HTTP_STATUS.CONFLICT) {
-        throw new AuthError('User already exists', error instanceof Error ? error : undefined);
+        throw new AuthError(
+          ERROR_MESSAGES.AUTH.USER_ALREADY_EXISTS,
+          error instanceof Error ? error : undefined
+        );
       }
 
-      throw new AuthError('Registration failed', error instanceof Error ? error : undefined);
+      throw new AuthError(
+        ERROR_MESSAGES.AUTH.REGISTRATION_FAILED,
+        error instanceof Error ? error : undefined
+      );
     }
   }
 
@@ -93,10 +118,13 @@ export class ApiAuthRepository implements IAuthRepository {
    */
   async logout(): Promise<void> {
     try {
-      await api.post('/auth/logout');
-      logger.info('User logged out successfully');
+      await api.post(API_ENDPOINTS.AUTH.LOGOUT);
+      logger.info(LOG_MESSAGES.AUTH.LOGOUT_SUCCESS);
     } catch (error) {
-      logger.error('API logout error:', error instanceof Error ? error : undefined);
+      logger.error(
+        LOG_MESSAGES.API_REPOSITORY.LOGOUT_ERROR,
+        error instanceof Error ? error : undefined
+      );
       // Don't throw - logout should succeed even if API call fails
     }
   }
@@ -108,13 +136,16 @@ export class ApiAuthRepository implements IAuthRepository {
    */
   async getCurrentUser(): Promise<User | null> {
     try {
-      const response = await api.get('/auth/me');
+      const response = await api.get(API_ENDPOINTS.AUTH.ME);
       const user = response.data.user;
 
-      logger.debug(`Fetched current user: ${user.email}`);
+      logger.debug(LOG_MESSAGES.FORMATTED.USER_FETCHED(user.email));
       return user;
     } catch (error) {
-      logger.error('Failed to fetch current user:', error instanceof Error ? error : undefined);
+      logger.error(
+        LOG_MESSAGES.API_REPOSITORY.FETCH_USER_FAILED,
+        error instanceof Error ? error : undefined
+      );
       return null;
     }
   }
@@ -132,16 +163,19 @@ export class ApiAuthRepository implements IAuthRepository {
     updateUserSchema.parse(data);
 
     try {
-      const response = await api.patch(`/auth/users/${userId}`, data);
+      const response = await api.patch(API_ENDPOINTS.AUTH.USERS(userId), data);
       const user = response.data.user;
 
-      logger.info(`User ${userId} updated successfully`);
+      logger.info(LOG_MESSAGES.FORMATTED.USER_UPDATED_SUCCESS(userId));
       return user;
     } catch (error) {
-      logger.error('API update user error:', error instanceof Error ? error : undefined);
+      logger.error(
+        LOG_MESSAGES.API_REPOSITORY.UPDATE_USER_ERROR,
+        error instanceof Error ? error : undefined
+      );
       throw new AppError(
-        'Failed to update user',
-        'UPDATE_ERROR',
+        ERROR_MESSAGES.USER.UPDATE_FAILED,
+        ERROR_CODES.CRUD.UPDATE_ERROR,
         HTTP_STATUS.INTERNAL_SERVER_ERROR,
         error
       );
@@ -157,14 +191,17 @@ export class ApiAuthRepository implements IAuthRepository {
    */
   async refreshToken(refreshToken: string): Promise<AuthToken> {
     try {
-      const response = await api.post('/auth/refresh', { refreshToken });
+      const response = await api.post(API_ENDPOINTS.AUTH.REFRESH, { refreshToken });
       const { token, refreshToken: newRefreshToken, expiresAt } = response.data;
 
-      logger.info('Token refreshed successfully');
+      logger.info(LOG_MESSAGES.AUTH.TOKEN_REFRESH_SUCCESS);
       return { token, refreshToken: newRefreshToken, expiresAt };
     } catch (error) {
-      logger.error('API refresh token error:', error instanceof Error ? error : undefined);
-      throw new AuthError('Token refresh failed', error);
+      logger.error(
+        LOG_MESSAGES.API_REPOSITORY.REFRESH_TOKEN_ERROR,
+        error instanceof Error ? error : undefined
+      );
+      throw new AuthError(ERROR_MESSAGES.AUTH.TOKEN_REFRESH_FAILED, error);
     }
   }
 }
@@ -181,28 +218,28 @@ export class ApiAuthRepository implements IAuthRepository {
 export class MockAuthRepository implements IAuthRepository {
   private mockUsers: User[] = [
     {
-      id: '1',
-      email: 'admin@example.com',
-      name: 'Admin User',
-      role: 'admin',
-      clubId: 'club1',
+      id: MOCK_DATA.USERS.ADMIN.ID,
+      email: MOCK_DATA.USERS.ADMIN.EMAIL,
+      name: MOCK_DATA.USERS.ADMIN.NAME,
+      role: UserRole.ADMIN,
+      clubId: MOCK_DATA.CLUBS.DEFAULT.ID,
       isActive: true,
       isPaused: false,
-      timezone: 'America/New_York',
-      language: 'en',
+      timezone: TIMEZONES.DEFAULT,
+      language: LANGUAGES.DEFAULT,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     },
     {
-      id: '2',
-      email: 'user@example.com',
-      name: 'Regular User',
-      role: 'user',
-      clubId: 'club1',
+      id: MOCK_DATA.USERS.REGULAR.ID,
+      email: MOCK_DATA.USERS.REGULAR.EMAIL,
+      name: MOCK_DATA.USERS.REGULAR.NAME,
+      role: UserRole.USER,
+      clubId: MOCK_DATA.CLUBS.DEFAULT.ID,
       isActive: true,
       isPaused: false,
-      timezone: 'America/New_York',
-      language: 'en',
+      timezone: TIMEZONES.DEFAULT,
+      language: LANGUAGES.DEFAULT,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     },
@@ -221,11 +258,11 @@ export class MockAuthRepository implements IAuthRepository {
     const user = this.mockUsers.find((u) => u.email === credentials.email);
 
     if (!user) {
-      throw new AuthError('Invalid credentials');
+      throw new AuthError(ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS);
     }
 
-    const token = `mock_token_${user.id}_${Date.now()}`;
-    logger.info(`Mock login: ${user.email}`);
+    const token = generateMockToken(user.id);
+    logger.info(LOG_MESSAGES.FORMATTED.MOCK_LOGIN(user.email));
 
     return { user, token };
   }
@@ -242,27 +279,27 @@ export class MockAuthRepository implements IAuthRepository {
 
     // Check if user already exists
     if (this.mockUsers.find((u) => u.email === data.email)) {
-      throw new AuthError('User already exists');
+      throw new AuthError(ERROR_MESSAGES.AUTH.USER_ALREADY_EXISTS);
     }
 
     const newUser: User = {
       id: String(this.mockUsers.length + 1),
       email: data.email,
       name: data.name,
-      role: 'user',
+      role: UserRole.USER,
       clubId: data.clubId,
       isActive: true,
       isPaused: false,
-      timezone: 'America/New_York',
-      language: 'en',
+      timezone: TIMEZONES.DEFAULT,
+      language: LANGUAGES.DEFAULT,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
 
     this.mockUsers.push(newUser);
-    const token = `mock_token_${newUser.id}_${Date.now()}`;
+    const token = generateMockToken(newUser.id);
 
-    logger.info(`Mock registration: ${newUser.email}`);
+    logger.info(LOG_MESSAGES.FORMATTED.MOCK_REGISTRATION(newUser.email));
     return { user: newUser, token };
   }
 
@@ -272,7 +309,7 @@ export class MockAuthRepository implements IAuthRepository {
   async logout(): Promise<void> {
     // Simulate network delay
     await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY.FAST));
-    logger.info('Mock logout');
+    logger.info(LOG_MESSAGES.MOCK.LOGOUT);
   }
 
   /**
@@ -298,7 +335,11 @@ export class MockAuthRepository implements IAuthRepository {
     const userIndex = this.mockUsers.findIndex((u) => u.id === userId);
 
     if (userIndex === -1) {
-      throw new AppError('User not found', 'USER_NOT_FOUND', HTTP_STATUS.NOT_FOUND);
+      throw new AppError(
+        ERROR_MESSAGES.NOT_FOUND.USER,
+        ERROR_CODES.RESOURCE.USER_NOT_FOUND,
+        HTTP_STATUS.NOT_FOUND
+      );
     }
 
     this.mockUsers[userIndex] = {
@@ -307,7 +348,7 @@ export class MockAuthRepository implements IAuthRepository {
       updatedAt: new Date().toISOString(),
     };
 
-    logger.info(`Mock user ${userId} updated`);
+    logger.info(LOG_MESSAGES.FORMATTED.MOCK_USER_UPDATED(userId));
     return this.mockUsers[userIndex];
   }
 
@@ -317,12 +358,12 @@ export class MockAuthRepository implements IAuthRepository {
   async refreshToken(_refreshToken: string): Promise<AuthToken> {
     await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY.FAST));
 
-    const token = `mock_token_refreshed_${Date.now()}`;
-    logger.info('Mock token refreshed');
+    const token = generateRefreshedMockToken();
+    logger.info(LOG_MESSAGES.MOCK.TOKEN_REFRESHED);
 
     return {
       token,
-      refreshToken: `mock_refresh_${Date.now()}`,
+      refreshToken: generateMockRefreshToken(),
       expiresAt: Date.now() + CACHE.VERY_LONG, // 1 hour
     };
   }

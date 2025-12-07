@@ -8,14 +8,15 @@
 import { ITokenStorage } from '../types';
 import { secureStorage } from '../../../shared/utils/secureStorage';
 import { logger } from '../../../shared/utils/logger';
+import { LOG_MESSAGES, STORAGE_KEYS } from '../../../shared/constants';
 
 /**
  * SecureTokenStorage - Production implementation using expo-secure-store
  */
 export class SecureTokenStorage implements ITokenStorage {
-  private readonly TOKEN_KEY = 'auth_token';
-  private readonly USER_ID_KEY = 'auth_user_id';
-  private readonly REFRESH_TOKEN_KEY = 'auth_refresh_token';
+  private readonly TOKEN_KEY = STORAGE_KEYS.AUTH.TOKEN;
+  private readonly USER_ID_KEY = STORAGE_KEYS.AUTH.USER_ID;
+  private readonly REFRESH_TOKEN_KEY = STORAGE_KEYS.AUTH.REFRESH_TOKEN;
 
   /**
    * Store authentication token securely
@@ -25,9 +26,12 @@ export class SecureTokenStorage implements ITokenStorage {
   async setToken(token: string): Promise<void> {
     try {
       await secureStorage.setItem(this.TOKEN_KEY, token);
-      logger.debug('Token stored successfully');
+      logger.debug(LOG_MESSAGES.TOKEN_STORAGE.TOKEN_STORED);
     } catch (error) {
-      logger.error('Failed to store token', error instanceof Error ? error : undefined);
+      logger.error(
+        LOG_MESSAGES.TOKEN_STORAGE.TOKEN_STORE_FAILED,
+        error instanceof Error ? error : undefined
+      );
       throw error;
     }
   }
@@ -42,7 +46,10 @@ export class SecureTokenStorage implements ITokenStorage {
       const token = await secureStorage.getItem(this.TOKEN_KEY);
       return token;
     } catch (error) {
-      logger.error('Failed to retrieve token', error instanceof Error ? error : undefined);
+      logger.error(
+        LOG_MESSAGES.TOKEN_STORAGE.TOKEN_RETRIEVE_FAILED,
+        error instanceof Error ? error : undefined
+      );
       return null;
     }
   }
@@ -53,9 +60,12 @@ export class SecureTokenStorage implements ITokenStorage {
   async removeToken(): Promise<void> {
     try {
       await secureStorage.removeItem(this.TOKEN_KEY);
-      logger.debug('Token removed successfully');
+      logger.debug(LOG_MESSAGES.TOKEN_STORAGE.TOKEN_REMOVED);
     } catch (error) {
-      logger.error('Failed to remove token', error instanceof Error ? error : undefined);
+      logger.error(
+        LOG_MESSAGES.TOKEN_STORAGE.TOKEN_REMOVE_FAILED,
+        error instanceof Error ? error : undefined
+      );
       throw error;
     }
   }
@@ -68,9 +78,12 @@ export class SecureTokenStorage implements ITokenStorage {
   async setUserId(userId: string): Promise<void> {
     try {
       await secureStorage.setItem(this.USER_ID_KEY, userId);
-      logger.debug('User ID stored successfully');
+      logger.debug(LOG_MESSAGES.TOKEN_STORAGE.USER_ID_STORED);
     } catch (error) {
-      logger.error('Failed to store user ID', error instanceof Error ? error : undefined);
+      logger.error(
+        LOG_MESSAGES.TOKEN_STORAGE.USER_ID_STORE_FAILED,
+        error instanceof Error ? error : undefined
+      );
       throw error;
     }
   }
@@ -85,7 +98,10 @@ export class SecureTokenStorage implements ITokenStorage {
       const userId = await secureStorage.getItem(this.USER_ID_KEY);
       return userId;
     } catch (error) {
-      logger.error('Failed to retrieve user ID', error instanceof Error ? error : undefined);
+      logger.error(
+        LOG_MESSAGES.TOKEN_STORAGE.USER_ID_RETRIEVE_FAILED,
+        error instanceof Error ? error : undefined
+      );
       return null;
     }
   }
@@ -96,9 +112,12 @@ export class SecureTokenStorage implements ITokenStorage {
   async removeUserId(): Promise<void> {
     try {
       await secureStorage.removeItem(this.USER_ID_KEY);
-      logger.debug('User ID removed successfully');
+      logger.debug(LOG_MESSAGES.TOKEN_STORAGE.USER_ID_REMOVED);
     } catch (error) {
-      logger.error('Failed to remove user ID', error instanceof Error ? error : undefined);
+      logger.error(
+        LOG_MESSAGES.TOKEN_STORAGE.USER_ID_REMOVE_FAILED,
+        error instanceof Error ? error : undefined
+      );
       throw error;
     }
   }
@@ -111,9 +130,12 @@ export class SecureTokenStorage implements ITokenStorage {
   async setRefreshToken(refreshToken: string): Promise<void> {
     try {
       await secureStorage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
-      logger.debug('Refresh token stored successfully');
+      logger.debug(LOG_MESSAGES.TOKEN_STORAGE.REFRESH_TOKEN_STORED);
     } catch (error) {
-      logger.error('Failed to store refresh token', error instanceof Error ? error : undefined);
+      logger.error(
+        LOG_MESSAGES.TOKEN_STORAGE.REFRESH_TOKEN_STORE_FAILED,
+        error instanceof Error ? error : undefined
+      );
       throw error;
     }
   }
@@ -128,7 +150,10 @@ export class SecureTokenStorage implements ITokenStorage {
       const refreshToken = await secureStorage.getItem(this.REFRESH_TOKEN_KEY);
       return refreshToken;
     } catch (error) {
-      logger.error('Failed to retrieve refresh token', error instanceof Error ? error : undefined);
+      logger.error(
+        LOG_MESSAGES.TOKEN_STORAGE.REFRESH_TOKEN_RETRIEVE_FAILED,
+        error instanceof Error ? error : undefined
+      );
       return null;
     }
   }
@@ -139,9 +164,12 @@ export class SecureTokenStorage implements ITokenStorage {
   async removeRefreshToken(): Promise<void> {
     try {
       await secureStorage.removeItem(this.REFRESH_TOKEN_KEY);
-      logger.debug('Refresh token removed successfully');
+      logger.debug(LOG_MESSAGES.TOKEN_STORAGE.REFRESH_TOKEN_REMOVED);
     } catch (error) {
-      logger.error('Failed to remove refresh token', error instanceof Error ? error : undefined);
+      logger.error(
+        LOG_MESSAGES.TOKEN_STORAGE.REFRESH_TOKEN_REMOVE_FAILED,
+        error instanceof Error ? error : undefined
+      );
       throw error;
     }
   }
@@ -152,9 +180,12 @@ export class SecureTokenStorage implements ITokenStorage {
   async clearAll(): Promise<void> {
     try {
       await Promise.all([this.removeToken(), this.removeUserId(), this.removeRefreshToken()]);
-      logger.info('All auth data cleared successfully');
+      logger.info(LOG_MESSAGES.TOKEN_STORAGE.ALL_DATA_CLEARED);
     } catch (error) {
-      logger.error('Failed to clear all auth data', error instanceof Error ? error : undefined);
+      logger.error(
+        LOG_MESSAGES.TOKEN_STORAGE.CLEAR_ALL_FAILED,
+        error instanceof Error ? error : undefined
+      );
       throw error;
     }
   }

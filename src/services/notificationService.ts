@@ -8,7 +8,13 @@ import { apiService } from './api';
 import { environment } from '../config/environment';
 import { logger } from '../utils/logger';
 import { MemberBalance, User } from '../types';
-import { DEBOUNCE, ALERT_BUTTON_STYLE, EMPTY_VALUE } from '../shared/constants';
+import {
+  DEBOUNCE,
+  ALERT_BUTTON_STYLE,
+  EMPTY_VALUE,
+  API_ENDPOINTS,
+  EXTERNAL_URLS,
+} from '../shared/constants';
 import { ID_GENERATION } from '../shared/constants/numbers';
 import { NUMERIC } from '../shared/constants/validation';
 import { LOG_MESSAGES } from '../shared/constants/logMessages';
@@ -67,7 +73,7 @@ class NotificationService {
         message,
         type: NOTIFICATION_CHANNEL.WHATSAPP,
       };
-      await apiService.post<void>('/notifications/send', request);
+      await apiService.post<void>(API_ENDPOINTS.NOTIFICATIONS.SEND, request);
       logger.info(LOG_MESSAGES.NOTIFICATION.WHATSAPP_SENT, { userId: user.id });
       return true;
     } catch (error) {
@@ -95,11 +101,8 @@ class NotificationService {
       // Clean phone number (remove spaces, dashes, etc.)
       const cleanNumber = user.whatsappNumber.replace(REGEX_PATTERN.NON_PHONE_CHARS, EMPTY_VALUE);
 
-      // Encode message for URL
-      const encodedMessage = encodeURIComponent(message);
-
       // WhatsApp deep link URL
-      const whatsappUrl = `${NOTIFICATION_CHANNEL.WHATSAPP}://send?phone=${cleanNumber}&text=${encodedMessage}`;
+      const whatsappUrl = EXTERNAL_URLS.WHATSAPP.SEND(cleanNumber, message);
 
       // Check if WhatsApp can be opened
       const canOpen = await Linking.canOpenURL(whatsappUrl);
@@ -110,7 +113,7 @@ class NotificationService {
         return true;
       } else {
         // Fallback to web WhatsApp (wa.me is WhatsApp's web redirect)
-        const webWhatsappUrl = `https://wa.me/${cleanNumber}?text=${encodedMessage}`;
+        const webWhatsappUrl = EXTERNAL_URLS.WHATSAPP.WEB(cleanNumber, message);
         await Linking.openURL(webWhatsappUrl);
         logger.info(LOG_MESSAGES.NOTIFICATION.MOCK_WEB_WHATSAPP_OPENED, { userId: user.id });
         return true;
@@ -236,7 +239,7 @@ class NotificationService {
         message: `${title}\n${body}`,
         type: NOTIFICATION_CHANNEL.PUSH,
       };
-      await apiService.post<void>('/notifications/send', request);
+      await apiService.post<void>(API_ENDPOINTS.NOTIFICATIONS.SEND, request);
       logger.info(LOG_MESSAGES.NOTIFICATION.PUSH_SENT, { userId, title });
       return true;
     } catch (error) {
@@ -328,7 +331,7 @@ class NotificationService {
         type: NOTIFICATION_CHANNEL.WHATSAPP,
       };
 
-      await apiService.post<void>('/notifications/bulk', request);
+      await apiService.post<void>(API_ENDPOINTS.NOTIFICATIONS.BULK, request);
       logger.info(LOG_MESSAGES.NOTIFICATION.BULK_SENT, { userCount: users.length });
 
       // Simulate progress for UI
@@ -405,7 +408,7 @@ class NotificationService {
         scheduledDate: scheduledDate.toISOString(),
       };
       const response = await apiService.post<{ notificationId: string }>(
-        '/notifications/schedule',
+        API_ENDPOINTS.NOTIFICATIONS.SCHEDULE,
         request
       );
       logger.info(LOG_MESSAGES.NOTIFICATION.SCHEDULED, {
@@ -450,7 +453,7 @@ class NotificationService {
     }
 
     try {
-      await apiService.delete<void>(`/notifications/scheduled/${notificationId}`);
+      await apiService.delete<void>(API_ENDPOINTS.NOTIFICATIONS.SCHEDULED(notificationId));
       logger.info(LOG_MESSAGES.NOTIFICATION.CANCELLED, { notificationId });
     } catch (error) {
       logger.error(LOG_MESSAGES.NOTIFICATION.CANCEL_FAILED, error as Error, {

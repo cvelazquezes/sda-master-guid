@@ -18,7 +18,16 @@ import {
   UpdateUserSchema,
 } from '../utils/validation';
 import { AuthenticationError, ConflictError, NotFoundError } from '../utils/errors';
-import { UserRole, ApprovalStatus, PathfinderClass, User } from '../types';
+import {
+  LOG_MESSAGES,
+  ERROR_MESSAGES,
+  TIMEZONES,
+  LANGUAGES,
+  generateMockToken,
+  API_ENDPOINTS,
+  PLATFORM_OS,
+} from '../shared/constants';
+import { UserRole, ApprovalStatus, PathfinderClass, User, PATHFINDER_CLASSES } from '../types';
 import { mockUsers, getUserByEmail } from './mockData';
 
 // Constants
@@ -42,19 +51,19 @@ class AuthService {
       password,
     });
 
-    logger.info('Login attempt', { email: credentials.email });
+    logger.info(LOG_MESSAGES.AUTH.LOGIN_ATTEMPT, { email: credentials.email });
 
     if (this.useMockData) {
       return await this.mockLogin(credentials);
     }
 
     try {
-      const response = await apiService.post<AuthResponse>('/auth/login', credentials);
+      const response = await apiService.post<AuthResponse>(API_ENDPOINTS.AUTH.LOGIN, credentials);
       await this.saveAuthData(response);
-      logger.info('Login successful', { userId: response.user.id });
+      logger.info(LOG_MESSAGES.AUTH.LOGIN_SUCCESS, { userId: response.user.id });
       return response;
     } catch (error) {
-      logger.error('Login failed', error as Error, { email: credentials.email });
+      logger.error(LOG_MESSAGES.AUTH.LOGIN_FAILED, error as Error, { email: credentials.email });
       throw error;
     }
   }
@@ -67,16 +76,16 @@ class AuthService {
 
     const user = getUserByEmail(credentials.email);
     if (!user) {
-      throw new AuthenticationError('Invalid credentials');
+      throw new AuthenticationError(ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS);
     }
 
     // In mock mode, any password works for testing
     // In production, this would verify password hash
-    const token = `mock_token_${user.id}`;
+    const token = generateMockToken(user.id);
 
     await this.saveAuthData({ user, token });
 
-    logger.info('Mock login successful', { userId: user.id });
+    logger.info(LOG_MESSAGES.AUTH.MOCK_LOGIN_SUCCESS, { userId: user.id });
     return { user, token };
   }
 
@@ -101,22 +110,22 @@ class AuthService {
       clubId,
     });
 
-    logger.info('Registration attempt', { email: data.email, isClubAdmin });
+    logger.info(LOG_MESSAGES.AUTH.REGISTRATION_ATTEMPT, { email: data.email, isClubAdmin });
 
     if (this.useMockData) {
       return await this.mockRegister(data, classes, isClubAdmin);
     }
 
     try {
-      const response = await apiService.post<AuthResponse>('/auth/register', {
+      const response = await apiService.post<AuthResponse>(API_ENDPOINTS.AUTH.REGISTER, {
         ...data,
         isClubAdmin,
       });
       await this.saveAuthData(response);
-      logger.info('Registration successful', { userId: response.user.id });
+      logger.info(LOG_MESSAGES.AUTH.REGISTRATION_SUCCESS, { userId: response.user.id });
       return response;
     } catch (error) {
-      logger.error('Registration failed', error as Error, { email: data.email });
+      logger.error(LOG_MESSAGES.AUTH.REGISTRATION_FAILED, error as Error, { email: data.email });
       throw error;
     }
   }
@@ -133,7 +142,7 @@ class AuthService {
 
     // Check if user already exists
     if (getUserByEmail(data.email)) {
-      throw new ConflictError('User already exists');
+      throw new ConflictError(ERROR_MESSAGES.AUTH.USER_ALREADY_EXISTS);
     }
 
     // Determine role based on isClubAdmin flag
@@ -150,19 +159,19 @@ class AuthService {
       isActive: false, // Inactive until approved
       // Pending approval (admin for club_admin, club admin for regular users)
       approvalStatus: ApprovalStatus.PENDING,
-      classes: isClubAdmin ? [] : ((classes || ['Friend']) as PathfinderClass[]), // No classes for club admins
-      timezone: 'America/New_York',
-      language: 'en',
+      classes: isClubAdmin ? [] : ((classes || [PATHFINDER_CLASSES[0]]) as PathfinderClass[]), // No classes for club admins
+      timezone: TIMEZONES.DEFAULT,
+      language: LANGUAGES.DEFAULT,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
 
     mockUsers.push(newUser);
 
-    const token = `mock_token_${newUser.id}`;
+    const token = generateMockToken(newUser.id);
     await this.saveAuthData({ user: newUser, token });
 
-    logger.info('Mock registration successful - pending approval', { userId: newUser.id, role });
+    logger.info(LOG_MESSAGES.AUTH.MOCK_REGISTRATION_SUCCESS, { userId: newUser.id, role });
     return { user: newUser, token };
   }
 
@@ -170,18 +179,18 @@ class AuthService {
    * Logs out current user
    */
   async logout(): Promise<void> {
-    logger.info('Logout initiated');
+    logger.info(LOG_MESSAGES.AUTH.LOGOUT_INITIATED);
 
     try {
       await secureStorage.clearAuth();
-      logger.info('Logout successful');
+      logger.info(LOG_MESSAGES.AUTH.LOGOUT_SUCCESS);
     } catch (error) {
-      logger.error('Logout error', error as Error);
+      logger.error(LOG_MESSAGES.AUTH.LOGOUT_ERROR, error as Error);
       // Attempt to clear anyway
       try {
         await secureStorage.clearAuth();
       } catch (fallbackError) {
-        logger.error('Fallback logout error', fallbackError as Error);
+        logger.error(LOG_MESSAGES.AUTH.LOGOUT_ERROR, fallbackError as Error);
       }
     }
   }
@@ -197,15 +206,15 @@ class AuthService {
     try {
       const token = await secureStorage.getAccessToken();
       if (!token) {
-        logger.debug('No auth token found');
+        logger.debug(LOG_MESSAGES.AUTH.NO_TOKEN_FOUND);
         return null;
       }
 
-      const user = await apiService.get<User>('/auth/me');
-      logger.debug('Current user loaded', { userId: user.id });
+      const user = await apiService.get<User>(API_ENDPOINTS.AUTH.ME);
+      logger.debug(LOG_MESSAGES.AUTH.USER_VALIDATED, { userId: user.id });
       return user;
     } catch (error) {
-      logger.error('Failed to get current user', error as Error);
+      logger.error(LOG_MESSAGES.AUTH.USER_VALIDATION_FAILED, error as Error);
       return null;
     }
   }
@@ -220,20 +229,20 @@ class AuthService {
 
       // Both must exist for user to be considered logged in
       if (!userId || !token) {
-        logger.debug('No user ID or token found');
+        logger.debug(LOG_MESSAGES.AUTH.NO_TOKEN_FOUND);
         return null;
       }
 
       const user = mockUsers.find((u) => u.id === userId);
       if (!user) {
-        logger.warn('User not found in mock data', { userId });
+        logger.warn(LOG_MESSAGES.USER.NOT_FOUND, { userId });
         return null;
       }
 
-      logger.debug('Current user loaded from mock', { userId: user.id });
+      logger.debug(LOG_MESSAGES.AUTH.USER_VALIDATED, { userId: user.id });
       return user;
     } catch (error) {
-      logger.error('Error getting current user from mock', error as Error);
+      logger.error(LOG_MESSAGES.AUTH.USER_LOAD_ERROR, error as Error);
       return null;
     }
   }
@@ -250,11 +259,11 @@ class AuthService {
     }
 
     try {
-      const updatedUser = await apiService.patch<User>('/auth/me', validatedData);
-      logger.info('User updated', { userId: updatedUser.id });
+      const updatedUser = await apiService.patch<User>(API_ENDPOINTS.AUTH.ME, validatedData);
+      logger.info(LOG_MESSAGES.USER.UPDATED, { userId: updatedUser.id });
       return updatedUser;
     } catch (error) {
-      logger.error('Failed to update user', error as Error);
+      logger.error(LOG_MESSAGES.USER.UPDATE_FAILED, error as Error);
       throw error;
     }
   }
@@ -265,12 +274,12 @@ class AuthService {
   private async mockUpdateUser(userData: Partial<User>): Promise<User> {
     const userId = await secureStorage.getUserId();
     if (!userId) {
-      throw new NotFoundError('User not found');
+      throw new NotFoundError(ERROR_MESSAGES.NOT_FOUND.USER);
     }
 
     const userIndex = mockUsers.findIndex((u) => u.id === userId);
     if (userIndex === -1) {
-      throw new NotFoundError('User not found');
+      throw new NotFoundError(ERROR_MESSAGES.NOT_FOUND.USER);
     }
 
     mockUsers[userIndex] = {
@@ -279,7 +288,7 @@ class AuthService {
       updatedAt: new Date().toISOString(),
     };
 
-    logger.info('Mock user updated', { userId });
+    logger.info(LOG_MESSAGES.MOCK.USER_UPDATED, { userId });
     return mockUsers[userIndex];
   }
 
@@ -289,8 +298,8 @@ class AuthService {
   private async saveAuthData(authResponse: AuthResponse): Promise<void> {
     try {
       // Check platform before saving
-      if (Platform.OS === 'web') {
-        logger.warn('Web platform. Use server-side sessions with httpOnly cookies.');
+      if (Platform.OS === PLATFORM_OS.WEB) {
+        logger.warn(LOG_MESSAGES.AUTH.WEB_PLATFORM_WARNING);
         // For development/testing on web, we'll skip secure storage
         // In production, this should use server-side session management
         return;
@@ -302,8 +311,8 @@ class AuthService {
         secureStorage.saveUserId(authResponse.user.id),
       ]);
     } catch (error) {
-      logger.error('Failed to save auth data', error as Error);
-      throw new Error('Failed to save authentication data');
+      logger.error(LOG_MESSAGES.CONTEXTS.AUTH.FAILED_TO_SAVE_AUTH_DATA, error as Error);
+      throw new Error(LOG_MESSAGES.CONTEXTS.AUTH.FAILED_TO_SAVE_AUTH_DATA);
     }
   }
 

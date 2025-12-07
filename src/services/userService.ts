@@ -9,6 +9,7 @@ import { logger } from '../utils/logger';
 import { User, UserRole, ApprovalStatus } from '../types';
 import { mockUsers } from './mockData';
 import { NotFoundError } from '../utils/errors';
+import { LOG_MESSAGES, ERROR_MESSAGES, API_ENDPOINTS } from '../shared/constants';
 
 // Constants
 const MOCK_API_DELAY_MS = 300;
@@ -20,18 +21,18 @@ class UserService {
    * Get all users
    */
   async getAllUsers(): Promise<User[]> {
-    logger.debug('Fetching all users');
+    logger.debug(LOG_MESSAGES.USER.FETCHING_ALL);
 
     if (this.useMockData) {
       return this.mockGetAllUsers();
     }
 
     try {
-      const users = await apiService.get<User[]>('/users');
-      logger.debug('Users fetched', { count: users.length });
+      const users = await apiService.get<User[]>(API_ENDPOINTS.USERS.BASE);
+      logger.debug(LOG_MESSAGES.USER.FETCHED_ALL, { count: users.length });
       return users;
     } catch (error) {
-      logger.error('Failed to fetch users', error as Error);
+      logger.error(LOG_MESSAGES.USER.FETCH_FAILED, error as Error);
       throw error;
     }
   }
@@ -41,7 +42,7 @@ class UserService {
    */
   private async mockGetAllUsers(): Promise<User[]> {
     // Return immediately without delay for better UX
-    logger.debug('Mock: Getting all users', { count: mockUsers.length });
+    logger.debug(LOG_MESSAGES.USER.MOCK_GETTING_ALL, { count: mockUsers.length });
     return [...mockUsers];
   }
 
@@ -49,18 +50,18 @@ class UserService {
    * Get user by ID
    */
   async getUser(userId: string): Promise<User> {
-    logger.debug('Fetching user', { userId });
+    logger.debug(LOG_MESSAGES.USER.FETCHING_ONE, { userId });
 
     if (this.useMockData) {
       return this.mockGetUser(userId);
     }
 
     try {
-      const user = await apiService.get<User>(`/users/${userId}`);
-      logger.debug('User fetched', { userId: user.id });
+      const user = await apiService.get<User>(API_ENDPOINTS.USERS.BY_ID(userId));
+      logger.debug(LOG_MESSAGES.USER.FETCHED_ONE, { userId: user.id });
       return user;
     } catch (error) {
-      logger.error('Failed to fetch user', error as Error, { userId });
+      logger.error(LOG_MESSAGES.USER.FETCH_ONE_FAILED, error as Error, { userId });
       throw error;
     }
   }
@@ -73,11 +74,11 @@ class UserService {
 
     const user = mockUsers.find((u) => u.id === userId);
     if (!user) {
-      logger.warn('Mock: User not found', { userId });
-      throw new NotFoundError('User not found');
+      logger.warn(LOG_MESSAGES.USER.MOCK_NOT_FOUND, { userId });
+      throw new NotFoundError(ERROR_MESSAGES.NOT_FOUND.USER);
     }
 
-    logger.debug('Mock: User fetched', { userId });
+    logger.debug(LOG_MESSAGES.USER.MOCK_FETCHED, { userId });
     return user;
   }
 
@@ -85,18 +86,18 @@ class UserService {
    * Update user
    */
   async updateUser(userId: string, data: Partial<User>): Promise<User> {
-    logger.info('Updating user', { userId, fields: Object.keys(data) });
+    logger.info(LOG_MESSAGES.USER.UPDATING, { userId, fields: Object.keys(data) });
 
     if (this.useMockData) {
       return this.mockUpdateUser(userId, data);
     }
 
     try {
-      const updatedUser = await apiService.patch<User>(`/users/${userId}`, data);
-      logger.info('User updated', { userId: updatedUser.id });
+      const updatedUser = await apiService.patch<User>(API_ENDPOINTS.USERS.BY_ID(userId), data);
+      logger.info(LOG_MESSAGES.USER.UPDATED, { userId: updatedUser.id });
       return updatedUser;
     } catch (error) {
-      logger.error('Failed to update user', error as Error, { userId });
+      logger.error(LOG_MESSAGES.USER.UPDATE_FAILED, error as Error, { userId });
       throw error;
     }
   }
@@ -109,8 +110,8 @@ class UserService {
 
     const userIndex = mockUsers.findIndex((u) => u.id === userId);
     if (userIndex === -1) {
-      logger.warn('Mock: User not found for update', { userId });
-      throw new NotFoundError('User not found');
+      logger.warn(LOG_MESSAGES.USER.MOCK_NOT_FOUND_UPDATE, { userId });
+      throw new NotFoundError(ERROR_MESSAGES.NOT_FOUND.USER);
     }
 
     mockUsers[userIndex] = {
@@ -119,7 +120,7 @@ class UserService {
       updatedAt: new Date().toISOString(),
     };
 
-    logger.info('Mock: User updated', { userId });
+    logger.info(LOG_MESSAGES.USER.MOCK_UPDATED, { userId });
     return mockUsers[userIndex];
   }
 
@@ -127,17 +128,17 @@ class UserService {
    * Delete user
    */
   async deleteUser(userId: string): Promise<void> {
-    logger.info('Deleting user', { userId });
+    logger.info(LOG_MESSAGES.USER.DELETING, { userId });
 
     if (this.useMockData) {
       return this.mockDeleteUser(userId);
     }
 
     try {
-      await apiService.delete<void>(`/users/${userId}`);
-      logger.info('User deleted', { userId });
+      await apiService.delete<void>(API_ENDPOINTS.USERS.BY_ID(userId));
+      logger.info(LOG_MESSAGES.USER.DELETED, { userId });
     } catch (error) {
-      logger.error('Failed to delete user', error as Error, { userId });
+      logger.error(LOG_MESSAGES.USER.DELETE_FAILED, error as Error, { userId });
       throw error;
     }
   }
@@ -151,9 +152,9 @@ class UserService {
     const userIndex = mockUsers.findIndex((u) => u.id === userId);
     if (userIndex !== -1) {
       mockUsers.splice(userIndex, 1);
-      logger.info('Mock: User deleted', { userId });
+      logger.info(LOG_MESSAGES.USER.MOCK_DELETED, { userId });
     } else {
-      logger.warn('Mock: User not found for deletion', { userId });
+      logger.warn(LOG_MESSAGES.USER.MOCK_NOT_FOUND_DELETE, { userId });
     }
   }
 
@@ -161,7 +162,7 @@ class UserService {
    * Update user role
    */
   async updateUserRole(userId: string, role: UserRole): Promise<User> {
-    logger.info('Updating user role', { userId, role });
+    logger.info(LOG_MESSAGES.USER.UPDATING_ROLE, { userId, role });
     return this.updateUser(userId, { role });
   }
 
@@ -169,7 +170,7 @@ class UserService {
    * Deactivate user
    */
   async deactivateUser(userId: string): Promise<User> {
-    logger.info('Deactivating user', { userId });
+    logger.info(LOG_MESSAGES.USER.DEACTIVATING, { userId });
     return this.updateUser(userId, { isActive: false });
   }
 
@@ -177,7 +178,7 @@ class UserService {
    * Activate user
    */
   async activateUser(userId: string): Promise<User> {
-    logger.info('Activating user', { userId });
+    logger.info(LOG_MESSAGES.USER.ACTIVATING, { userId });
     return this.updateUser(userId, { isActive: true });
   }
 
@@ -185,7 +186,7 @@ class UserService {
    * Approve user
    */
   async approveUser(userId: string): Promise<User> {
-    logger.info('Approving user', { userId });
+    logger.info(LOG_MESSAGES.USER.APPROVING, { userId });
     return this.updateUser(userId, {
       approvalStatus: ApprovalStatus.APPROVED,
       isActive: true,
@@ -196,7 +197,7 @@ class UserService {
    * Reject user
    */
   async rejectUser(userId: string): Promise<User> {
-    logger.info('Rejecting user', { userId });
+    logger.info(LOG_MESSAGES.USER.REJECTING, { userId });
     return this.updateUser(userId, {
       approvalStatus: ApprovalStatus.REJECTED,
       isActive: false,
@@ -207,7 +208,7 @@ class UserService {
    * Update user active status
    */
   async updateUserActiveStatus(userId: string, isActive: boolean): Promise<User> {
-    logger.debug('Updating user active status', { userId, isActive });
+    logger.debug(LOG_MESSAGES.USER.UPDATING_STATUS, { userId, isActive });
     return this.updateUser(userId, { isActive });
   }
 
@@ -215,18 +216,18 @@ class UserService {
    * Get users by club ID
    */
   async getUsersByClub(clubId: string): Promise<User[]> {
-    logger.debug('Fetching users by club', { clubId });
+    logger.debug(LOG_MESSAGES.USER.FETCHING_BY_CLUB, { clubId });
 
     if (this.useMockData) {
       return this.mockGetUsersByClub(clubId);
     }
 
     try {
-      const users = await apiService.get<User[]>(`/clubs/${clubId}/users`);
-      logger.debug('Users fetched for club', { clubId, count: users.length });
+      const users = await apiService.get<User[]>(API_ENDPOINTS.CLUBS.USERS(clubId));
+      logger.debug(LOG_MESSAGES.USER.FETCHED_BY_CLUB, { clubId, count: users.length });
       return users;
     } catch (error) {
-      logger.error('Failed to fetch users for club', error as Error, { clubId });
+      logger.error(LOG_MESSAGES.USER.FETCH_BY_CLUB_FAILED, error as Error, { clubId });
       throw error;
     }
   }
@@ -238,7 +239,7 @@ class UserService {
     await this.sleep(MOCK_API_DELAY_MS);
 
     const users = mockUsers.filter((u) => u.clubId === clubId);
-    logger.debug('Mock: Users fetched for club', { clubId, count: users.length });
+    logger.debug(LOG_MESSAGES.USER.MOCK_FETCHED_BY_CLUB, { clubId, count: users.length });
     return users;
   }
 

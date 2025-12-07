@@ -12,6 +12,13 @@ import { logger } from '../../../shared/utils/logger';
 import { AuthError, AppError } from '../../../shared/utils/errors';
 import { environment } from '../../../shared/config/environment';
 import { HTTP_STATUS } from '../../../shared/constants/http';
+import {
+  LOG_MESSAGES,
+  ERROR_MESSAGES,
+  ERROR_CODES,
+  SERVICE_NAMES,
+  REPOSITORY_TYPES,
+} from '../../../shared/constants';
 
 /**
  * AuthService - Main authentication service implementation
@@ -32,7 +39,7 @@ export class AuthService implements IAuthService {
   constructor(repository: IAuthRepository, storage: ITokenStorage) {
     this.repository = repository;
     this.storage = storage;
-    logger.debug('AuthService initialized');
+    logger.debug(LOG_MESSAGES.SERVICE.INITIALIZED);
   }
 
   /**
@@ -50,7 +57,7 @@ export class AuthService implements IAuthService {
    */
   async login(email: string, password: string): Promise<AuthResponse> {
     try {
-      logger.info(`Login attempt for: ${email}`);
+      logger.info(LOG_MESSAGES.FORMATTED.LOGIN_ATTEMPT(email));
 
       // Authenticate via repository
       const { user, token } = await this.repository.login({ email, password });
@@ -58,10 +65,13 @@ export class AuthService implements IAuthService {
       // Store credentials securely
       await Promise.all([this.storage.setToken(token), this.storage.setUserId(user.id)]);
 
-      logger.info(`User ${email} logged in successfully`);
+      logger.info(LOG_MESSAGES.FORMATTED.LOGIN_SUCCESS(email));
       return { user, token };
     } catch (error) {
-      logger.error(`Login failed for ${email}:`, error instanceof Error ? error : undefined);
+      logger.error(
+        LOG_MESSAGES.FORMATTED.LOGIN_FAILED(email),
+        error instanceof Error ? error : undefined
+      );
       throw error;
     }
   }
@@ -93,7 +103,7 @@ export class AuthService implements IAuthService {
     clubId: string
   ): Promise<AuthResponse> {
     try {
-      logger.info(`Registration attempt for: ${email}`);
+      logger.info(LOG_MESSAGES.FORMATTED.REGISTRATION_ATTEMPT(email));
 
       // Register via repository
       const { user, token } = await this.repository.register({
@@ -106,10 +116,13 @@ export class AuthService implements IAuthService {
       // Store credentials securely
       await Promise.all([this.storage.setToken(token), this.storage.setUserId(user.id)]);
 
-      logger.info(`User ${email} registered successfully`);
+      logger.info(LOG_MESSAGES.FORMATTED.REGISTRATION_SUCCESS(email));
       return { user, token };
     } catch (error) {
-      logger.error(`Registration failed for ${email}:`, error instanceof Error ? error : undefined);
+      logger.error(
+        LOG_MESSAGES.FORMATTED.REGISTRATION_FAILED(email),
+        error instanceof Error ? error : undefined
+      );
       throw error;
     }
   }
@@ -128,7 +141,7 @@ export class AuthService implements IAuthService {
    */
   async logout(): Promise<void> {
     try {
-      logger.info('Starting logout process');
+      logger.info(LOG_MESSAGES.SERVICE.LOGOUT_STARTED);
 
       // Clear tokens first (before API call in case it fails)
       await this.storage.clearAll();
@@ -136,12 +149,17 @@ export class AuthService implements IAuthService {
       // Notify backend (don't throw if this fails)
       await this.repository.logout();
 
-      logger.info('Logout completed successfully');
+      logger.info(LOG_MESSAGES.SERVICE.LOGOUT_COMPLETED);
     } catch (error) {
-      logger.error('Logout error:', error instanceof Error ? error : undefined);
+      logger.error(LOG_MESSAGES.SERVICE.LOGOUT_ERROR, error instanceof Error ? error : undefined);
       // Ensure local state is cleared even if API call fails
       await this.storage.clearAll();
-      throw new AppError('Logout failed', 'LOGOUT_ERROR', HTTP_STATUS.INTERNAL_SERVER_ERROR, error);
+      throw new AppError(
+        ERROR_MESSAGES.APP.LOGOUT_FAILED,
+        ERROR_CODES.GENERAL.LOGOUT_ERROR,
+        HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        error
+      );
     }
   }
 
@@ -163,7 +181,7 @@ export class AuthService implements IAuthService {
       // Check if we have a token
       const token = await this.storage.getToken();
       if (!token) {
-        logger.debug('No token found - user not authenticated');
+        logger.debug(LOG_MESSAGES.SERVICE.NO_TOKEN);
         return null;
       }
 
@@ -171,16 +189,16 @@ export class AuthService implements IAuthService {
       const user = await this.repository.getCurrentUser();
 
       if (user) {
-        logger.debug(`Current user: ${user.email}`);
+        logger.debug(LOG_MESSAGES.FORMATTED.USER_FETCHED(user.email));
       } else {
-        logger.debug('User not found - token may be invalid');
+        logger.debug(LOG_MESSAGES.SERVICE.USER_NOT_FOUND);
         // Clear invalid token
         await this.storage.clearAll();
       }
 
       return user;
     } catch (error) {
-      logger.error('Error getting current user:', error instanceof Error ? error : undefined);
+      logger.error(LOG_MESSAGES.SERVICE.GET_USER_ERROR, error instanceof Error ? error : undefined);
       // Clear potentially invalid tokens
       await this.storage.clearAll();
       return null;
@@ -207,17 +225,20 @@ export class AuthService implements IAuthService {
       const userId = await this.storage.getUserId();
 
       if (!userId) {
-        throw new AuthError('User not authenticated');
+        throw new AuthError(ERROR_MESSAGES.AUTH.UNAUTHORIZED);
       }
 
-      logger.info(`Updating user ${userId}`);
+      logger.info(LOG_MESSAGES.USER.UPDATING, { userId });
 
       const updatedUser = await this.repository.updateUser(userId, userData);
 
-      logger.info(`User ${userId} updated successfully`);
+      logger.info(LOG_MESSAGES.FORMATTED.USER_UPDATED_SUCCESS(userId));
       return updatedUser;
     } catch (error) {
-      logger.error('Error updating user:', error instanceof Error ? error : undefined);
+      logger.error(
+        LOG_MESSAGES.SERVICE.UPDATE_USER_ERROR,
+        error instanceof Error ? error : undefined
+      );
       throw error;
     }
   }
@@ -244,10 +265,10 @@ export class AuthService implements IAuthService {
       const refreshToken = await this.storage.getRefreshToken();
 
       if (!refreshToken) {
-        throw new AuthError('No refresh token available');
+        throw new AuthError(ERROR_MESSAGES.AUTH.TOKEN_REFRESH_FAILED);
       }
 
-      logger.info('Refreshing session');
+      logger.info(LOG_MESSAGES.SERVICE.REFRESHING_SESSION);
 
       const { token, refreshToken: newRefreshToken } =
         await this.repository.refreshToken(refreshToken);
@@ -258,12 +279,15 @@ export class AuthService implements IAuthService {
         newRefreshToken && this.storage.setRefreshToken(newRefreshToken),
       ]);
 
-      logger.info('Session refreshed successfully');
+      logger.info(LOG_MESSAGES.SERVICE.SESSION_REFRESHED);
     } catch (error) {
-      logger.error('Session refresh failed:', error instanceof Error ? error : undefined);
+      logger.error(
+        LOG_MESSAGES.SERVICE.SESSION_REFRESH_FAILED,
+        error instanceof Error ? error : undefined
+      );
       // Clear invalid tokens
       await this.storage.clearAll();
-      throw new AuthError('Session refresh failed', error);
+      throw new AuthError(ERROR_MESSAGES.AUTH.TOKEN_REFRESH_FAILED, error);
     }
   }
 
@@ -311,9 +335,8 @@ export function createAuthService(): AuthService {
     ? new MockAuthRepository()
     : new ApiAuthRepository();
 
-  logger.info(
-    `AuthService created with ${environment.mock.useMockApi ? 'Mock' : 'API'} repository`
-  );
+  const repositoryType = environment.mock.useMockApi ? REPOSITORY_TYPES.MOCK : REPOSITORY_TYPES.API;
+  logger.info(LOG_MESSAGES.FORMATTED.SERVICE_CREATED(SERVICE_NAMES.AUTH, repositoryType));
 
   return new AuthService(repository, tokenStorage);
 }

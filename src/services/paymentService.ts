@@ -17,7 +17,7 @@ import {
   User,
   ApprovalStatus,
 } from '../types';
-import { LOG_MESSAGES } from '../shared/constants/logMessages';
+import { LOG_MESSAGES, API_ENDPOINTS } from '../shared/constants';
 import { storageKeys } from '../shared/config/storage';
 import { LOCALE, LANGUAGE, ID_PREFIX, EMPTY_VALUE } from '../shared/constants/ui';
 import { MATH, ID_GENERATION, MS } from '../shared/constants/numbers';
@@ -106,7 +106,7 @@ class PaymentService {
 
     try {
       const request: GenerateFeesRequest = { clubId, year };
-      await apiService.post<void>('/payments/generate', request);
+      await apiService.post<void>(API_ENDPOINTS.PAYMENTS.GENERATE, request);
       logger.info(LOG_MESSAGES.PAYMENT.FEES_GENERATED, { clubId, year });
     } catch (error) {
       logger.error(LOG_MESSAGES.PAYMENT.GENERATE_FEES_FAILED, error as Error, { clubId, year });
@@ -184,8 +184,9 @@ class PaymentService {
     }
 
     try {
-      const url = year ? `/payments?clubId=${clubId}&year=${year}` : `/payments?clubId=${clubId}`;
-      const payments = await apiService.get<MemberPayment[]>(url);
+      const payments = await apiService.get<MemberPayment[]>(
+        API_ENDPOINTS.PAYMENTS.BY_CLUB(clubId, year)
+      );
       logger.debug(LOG_MESSAGES.PAYMENT.CLUB_PAYMENTS_FETCHED, {
         clubId,
         year,
@@ -233,7 +234,7 @@ class PaymentService {
 
     try {
       const payments = await apiService.get<MemberPayment[]>(
-        `/payments/member/${userId}?clubId=${clubId}`
+        API_ENDPOINTS.PAYMENTS.BY_MEMBER(userId, clubId)
       );
       logger.debug(LOG_MESSAGES.PAYMENT.MEMBER_PAYMENTS_FETCHED, {
         userId,
@@ -278,7 +279,7 @@ class PaymentService {
     }
 
     try {
-      await apiService.patch<void>(`/payments/${paymentId}`, {
+      await apiService.patch<void>(API_ENDPOINTS.PAYMENTS.BY_ID(paymentId), {
         status,
         paidDate,
         notes,
@@ -360,7 +361,7 @@ class PaymentService {
         dueDate,
         appliedToUserIds,
       };
-      const charge = await apiService.post<CustomCharge>('/charges/custom', request);
+      const charge = await apiService.post<CustomCharge>(API_ENDPOINTS.CHARGES.CUSTOM, request);
       logger.info(LOG_MESSAGES.PAYMENT.CUSTOM_CHARGE_CREATED, { chargeId: charge.id, clubId });
       return charge;
     } catch (error) {
@@ -451,7 +452,7 @@ class PaymentService {
     }
 
     try {
-      const charges = await apiService.get<CustomCharge[]>(`/charges/custom?clubId=${clubId}`);
+      const charges = await apiService.get<CustomCharge[]>(API_ENDPOINTS.CHARGES.BY_CLUB(clubId));
       logger.debug(LOG_MESSAGES.PAYMENT.CUSTOM_CHARGES_FETCHED, { clubId, count: charges.length });
       return charges;
     } catch (error) {
@@ -482,7 +483,7 @@ class PaymentService {
     }
 
     try {
-      await apiService.delete<void>(`/charges/custom/${chargeId}`);
+      await apiService.delete<void>(API_ENDPOINTS.CHARGES.BY_ID(chargeId));
       logger.info(LOG_MESSAGES.PAYMENT.CUSTOM_CHARGE_DELETED, { chargeId });
     } catch (error) {
       logger.error(LOG_MESSAGES.PAYMENT.DELETE_CUSTOM_CHARGE_FAILED, error as Error, { chargeId });
@@ -519,7 +520,7 @@ class PaymentService {
 
     try {
       const balance = await apiService.get<MemberBalance>(
-        `/payments/balance/${userId}?clubId=${clubId}`
+        API_ENDPOINTS.PAYMENTS.BALANCE(userId, clubId)
       );
       logger.debug(LOG_MESSAGES.PAYMENT.BALANCE_FETCHED, {
         userId,

@@ -9,7 +9,7 @@ import { logger } from '../utils/logger';
 import { Club, MatchFrequency, User, ApprovalStatus } from '../types';
 import { mockClubs, getUsersByClub } from './mockData';
 import { NotFoundError } from '../utils/errors';
-import { LOG_MESSAGES } from '../shared/constants/logMessages';
+import { LOG_MESSAGES, API_ENDPOINTS } from '../shared/constants';
 import { MOCK_DELAY } from '../shared/constants/timing';
 
 interface CreateClubData {
@@ -37,7 +37,7 @@ class ClubService {
     }
 
     try {
-      const clubs = await apiService.get<Club[]>('/clubs');
+      const clubs = await apiService.get<Club[]>(API_ENDPOINTS.CLUBS.BASE);
       logger.debug(LOG_MESSAGES.CLUB.FETCHED_ALL, { count: clubs.length });
       return clubs;
     } catch (error) {
@@ -65,7 +65,7 @@ class ClubService {
     }
 
     try {
-      const club = await apiService.get<Club>(`/clubs/${clubId}`);
+      const club = await apiService.get<Club>(API_ENDPOINTS.CLUBS.BY_ID(clubId));
       logger.debug(LOG_MESSAGES.CLUB.FETCHED_ONE, { clubId: club.id });
       return club;
     } catch (error) {
@@ -131,7 +131,7 @@ class ClubService {
     }
 
     try {
-      const newClub = await apiService.post<Club>('/clubs', clubData);
+      const newClub = await apiService.post<Club>(API_ENDPOINTS.CLUBS.BASE, clubData);
       logger.info(LOG_MESSAGES.CLUB.CREATED, { clubId: newClub.id, name: newClub.name });
       return newClub;
     } catch (error) {
@@ -172,7 +172,7 @@ class ClubService {
     }
 
     try {
-      const updatedClub = await apiService.patch<Club>(`/clubs/${clubId}`, data);
+      const updatedClub = await apiService.patch<Club>(API_ENDPOINTS.CLUBS.BY_ID(clubId), data);
       logger.info(LOG_MESSAGES.CLUB.UPDATED, { clubId: updatedClub.id });
       return updatedClub;
     } catch (error) {
@@ -214,7 +214,7 @@ class ClubService {
     }
 
     try {
-      await apiService.delete<void>(`/clubs/${clubId}`);
+      await apiService.delete<void>(API_ENDPOINTS.CLUBS.BY_ID(clubId));
       logger.info(LOG_MESSAGES.CLUB.DELETED, { clubId });
     } catch (error) {
       logger.error(LOG_MESSAGES.CLUB.DELETE_FAILED, error as Error, { clubId });
@@ -248,7 +248,7 @@ class ClubService {
     }
 
     try {
-      await apiService.post<void>(`/clubs/${clubId}/join`, {});
+      await apiService.post<void>(API_ENDPOINTS.CLUBS.JOIN(clubId), {});
       logger.info(LOG_MESSAGES.CLUB.JOINED, { clubId });
     } catch (error) {
       logger.error(LOG_MESSAGES.CLUB.JOIN_FAILED, error as Error, { clubId });
@@ -276,7 +276,7 @@ class ClubService {
     }
 
     try {
-      await apiService.post<void>(`/clubs/${clubId}/leave`, {});
+      await apiService.post<void>(API_ENDPOINTS.CLUBS.LEAVE(clubId), {});
       logger.info(LOG_MESSAGES.CLUB.LEFT, { clubId });
     } catch (error) {
       logger.error(LOG_MESSAGES.CLUB.LEAVE_FAILED, error as Error, { clubId });
@@ -303,7 +303,7 @@ class ClubService {
     }
 
     try {
-      const members = await apiService.get<User[]>(`/clubs/${clubId}/members`);
+      const members = await apiService.get<User[]>(API_ENDPOINTS.CLUBS.MEMBERS(clubId));
       logger.debug(LOG_MESSAGES.CLUB.FETCHED_MEMBERS, { clubId, count: members.length });
       return members;
     } catch (error) {

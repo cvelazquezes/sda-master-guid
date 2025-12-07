@@ -18,7 +18,7 @@ import {
   getUsersByClub,
 } from './mockData';
 import { NotFoundError, ValidationError } from '../utils/errors';
-import { LOG_MESSAGES } from '../shared/constants/logMessages';
+import { LOG_MESSAGES, API_ENDPOINTS } from '../shared/constants';
 import { MOCK_DELAY } from '../shared/constants/timing';
 import { MS, OPACITY_VALUE } from '../shared/constants/numbers';
 import { MATCH_ROUND_STATUS } from '../shared/constants/ui';
@@ -38,7 +38,7 @@ class MatchService {
     }
 
     try {
-      const matches = await apiService.get<Match[]>(`/matches?clubId=${clubId}`);
+      const matches = await apiService.get<Match[]>(API_ENDPOINTS.MATCHES.BY_CLUB(clubId));
       logger.debug(LOG_MESSAGES.MATCH.FETCHED, { clubId, count: matches.length });
       return matches;
     } catch (error) {
@@ -67,7 +67,7 @@ class MatchService {
     }
 
     try {
-      const matches = await apiService.get<Match[]>('/matches/me');
+      const matches = await apiService.get<Match[]>(API_ENDPOINTS.MATCHES.ME);
       logger.debug(LOG_MESSAGES.MATCH.FETCHED_MY, { count: matches.length });
       return matches;
     } catch (error) {
@@ -102,7 +102,7 @@ class MatchService {
     }
 
     try {
-      const match = await apiService.get<Match>(`/matches/${matchId}`);
+      const match = await apiService.get<Match>(API_ENDPOINTS.MATCHES.BY_ID(matchId));
       logger.debug(LOG_MESSAGES.MATCH.FETCHED_ONE, { matchId });
       return match;
     } catch (error) {
@@ -138,7 +138,7 @@ class MatchService {
     }
 
     try {
-      const updatedMatch = await apiService.patch<Match>(`/matches/${matchId}/status`, {
+      const updatedMatch = await apiService.patch<Match>(API_ENDPOINTS.MATCHES.STATUS(matchId), {
         status,
       });
       logger.info(LOG_MESSAGES.MATCH.STATUS_UPDATED, { matchId, status });
@@ -182,7 +182,7 @@ class MatchService {
     }
 
     try {
-      const updatedMatch = await apiService.patch<Match>(`/matches/${matchId}`, {
+      const updatedMatch = await apiService.patch<Match>(API_ENDPOINTS.MATCHES.BY_ID(matchId), {
         scheduledDate,
       });
       logger.info(LOG_MESSAGES.MATCH.SCHEDULED, { matchId, scheduledDate });
@@ -235,7 +235,9 @@ class MatchService {
     }
 
     try {
-      const matchRound = await apiService.post<MatchRound>('/matches/generate', { clubId });
+      const matchRound = await apiService.post<MatchRound>(API_ENDPOINTS.MATCHES.GENERATE, {
+        clubId,
+      });
       logger.info(LOG_MESSAGES.MATCH.GENERATED, { clubId, matchCount: matchRound.matches.length });
       return matchRound;
     } catch (error) {
@@ -319,7 +321,7 @@ class MatchService {
     }
 
     try {
-      const rounds = await apiService.get<MatchRound[]>(`/matches/rounds?clubId=${clubId}`);
+      const rounds = await apiService.get<MatchRound[]>(API_ENDPOINTS.MATCHES.ROUNDS(clubId));
       logger.debug(LOG_MESSAGES.MATCH.FETCHED_ROUNDS, { clubId, count: rounds.length });
       return rounds;
     } catch (error) {
@@ -348,7 +350,7 @@ class MatchService {
     }
 
     try {
-      const matches = await apiService.get<Match[]>(`/matches/club/${clubId}`);
+      const matches = await apiService.get<Match[]>(API_ENDPOINTS.MATCHES.BY_CLUB_ALT(clubId));
       logger.debug(LOG_MESSAGES.MATCH.FETCHED_CLUB_MATCHES, { clubId, count: matches.length });
       return matches;
     } catch (error) {
