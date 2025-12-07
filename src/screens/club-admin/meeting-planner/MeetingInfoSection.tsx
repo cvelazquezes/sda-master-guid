@@ -3,7 +3,7 @@ import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, Input } from '../../../shared/components';
 import { mobileIconSizes, designTokens } from '../../../shared/theme';
-import { DATE_LOCALE_OPTIONS, ICONS } from '../../../shared/constants';
+import { DATE_LOCALE_OPTIONS, ICONS, SINGLE_SPACE } from '../../../shared/constants';
 import { meetingInfoStyles } from './styles';
 import { getNextSaturday, getNextSunday } from './dateUtils';
 
@@ -69,7 +69,7 @@ export function MeetingInfoSection({
           color={designTokens.colors.primary}
         />
         <Text style={meetingInfoStyles.totalTimeText}>
-          Total Meeting Time:{' '}
+          Total Meeting Time:{SINGLE_SPACE}
           <Text style={meetingInfoStyles.totalTimeBold}>{totalTime} minutes</Text>
         </Text>
       </View>

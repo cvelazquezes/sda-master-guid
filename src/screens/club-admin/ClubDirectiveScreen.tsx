@@ -26,6 +26,7 @@ import {
   DIMENSIONS,
   FLEX,
   SHADOW_OFFSET,
+  SINGLE_SPACE,
   TYPOGRAPHY,
 } from '../../shared/constants';
 
@@ -153,7 +154,8 @@ function SummaryBanner({
           color={designTokens.colors.success}
         />
         <Text style={styles.summaryText}>
-          <Text style={styles.summaryBold}>{assignedCount}</Text>{' '}
+          <Text style={styles.summaryBold}>{assignedCount}</Text>
+          {SINGLE_SPACE}
           {t('screens.clubDirective.assigned')}
         </Text>
       </View>
@@ -165,7 +167,9 @@ function SummaryBanner({
           color={designTokens.colors.warning}
         />
         <Text style={styles.summaryText}>
-          <Text style={styles.summaryBold}>{vacantCount}</Text> {t('screens.clubDirective.vacant')}
+          <Text style={styles.summaryBold}>{vacantCount}</Text>
+          {SINGLE_SPACE}
+          {t('screens.clubDirective.vacant')}
         </Text>
       </View>
     </View>
@@ -314,7 +318,10 @@ function useDirectiveHandlers(
       setSelectMemberModalVisible(false);
       Alert.alert(
         MESSAGES.TITLES.MEMBER_ASSIGNED_TO_POSITION,
-        `${member.name} assigned as ${t(currentPosition.titleKey)}.`
+        t('screens.clubDirective.memberAssignedMessage', {
+          memberName: member.name,
+          positionTitle: t(currentPosition.titleKey),
+        })
       );
       setCurrentPosition(null);
     },

@@ -3,11 +3,9 @@ import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../shared/components';
 import { designTokens } from '../../../shared/theme';
-import { ICONS } from '../../../shared/constants';
+import { ICONS, IconName } from '../../../shared/constants';
 import { MODAL_OPACITY } from '../../../shared/constants/http';
 import { menuItemStyles as styles } from './styles';
-
-type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
 
 interface MenuColors {
   border: string;

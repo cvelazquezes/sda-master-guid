@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Text } from '../../shared/components';
 import { MemberBalance } from '../../types';
 import { designTokens } from '../../shared/theme';
-import { ICONS } from '../../shared/constants';
+import { EMPTY_VALUE, ICONS, SINGLE_SPACE } from '../../shared/constants';
 import { NUMERIC } from '../../shared/constants/validation';
 import { styles } from './styles';
 
@@ -36,8 +36,9 @@ export const UserBalanceSection: React.FC<UserBalanceSectionProps> = ({
         />
         <Text style={[styles.balanceText, { color: balanceColor }]}>
           {t('components.userCard.balance.label')}: $
-          {Math.abs(balance.balance).toFixed(NUMERIC.DECIMAL_PLACES)}{' '}
-          {balance.balance < 0 ? t('components.userCard.balance.owes') : ''}
+          {Math.abs(balance.balance).toFixed(NUMERIC.DECIMAL_PLACES)}
+          {SINGLE_SPACE}
+          {balance.balance < 0 ? t('components.userCard.balance.owes') : EMPTY_VALUE}
         </Text>
       </View>
       {balance.overdueCharges > 0 && (
@@ -48,7 +49,8 @@ export const UserBalanceSection: React.FC<UserBalanceSectionProps> = ({
             color={errorColor}
           />
           <Text style={[styles.overdueWarningText, { color: errorColor }]}>
-            ${balance.overdueCharges.toFixed(NUMERIC.DECIMAL_PLACES)}{' '}
+            ${balance.overdueCharges.toFixed(NUMERIC.DECIMAL_PLACES)}
+            {SINGLE_SPACE}
             {t('components.userCard.balance.overdue')}
           </Text>
         </View>

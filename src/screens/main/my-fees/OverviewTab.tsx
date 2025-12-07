@@ -4,7 +4,14 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../shared/components';
 import { Club, MemberBalance, MemberPayment } from '../../../types';
 import { designTokens } from '../../../shared/theme';
-import { ICONS, MY_FEES_TAB, DISPLAY_LIMITS } from '../../../shared/constants';
+import {
+  DEFAULT_DISPLAY,
+  EMPTY_VALUE,
+  ICONS,
+  MY_FEES_TAB,
+  DISPLAY_LIMITS,
+  SINGLE_SPACE,
+} from '../../../shared/constants';
 import { NUMERIC, MATH } from '../../../shared/constants/http';
 import { DATE_LOCALE_OPTIONS } from '../../../shared/constants/formats';
 import { styles, itemStyles } from './styles';
@@ -203,8 +210,11 @@ function MonthlyFeeInfo({
             {t('screens.myFees.monthlyFee')}
           </Text>
           <Text style={[styles.infoAmount, { color: colors.info }]}>
-            ${club.feeSettings?.monthlyFeeAmount.toFixed(NUMERIC.DECIMAL_PLACES) ?? '0.00'}{' '}
-            {club.feeSettings?.currency ?? ''}
+            $
+            {club.feeSettings?.monthlyFeeAmount.toFixed(NUMERIC.DECIMAL_PLACES) ??
+              DEFAULT_DISPLAY.AMOUNT_ZERO}
+            {SINGLE_SPACE}
+            {club.feeSettings?.currency ?? EMPTY_VALUE}
           </Text>
           <Text style={[styles.infoSubtext, { color: colors.textTertiary }]}>
             {t('screens.myFees.activeMonths', {

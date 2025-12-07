@@ -5,7 +5,13 @@ import { Text, Card } from '../../../shared/components';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { User, UserRole } from '../../../types';
 import { designTokens } from '../../../shared/theme';
-import { ICONS, COMPONENT_VARIANT } from '../../../shared/constants';
+import {
+  ICONS,
+  COMPONENT_VARIANT,
+  TEXT_ALIGN,
+  TEXT_VARIANT,
+  TEXT_WEIGHT,
+} from '../../../shared/constants';
 import { getRoleIcon, getRoleLabel, getRoleColor } from './profileUtils';
 import { profileHeaderStyles as styles } from './styles';
 
@@ -31,10 +37,18 @@ export function ProfileHeader({
       <Card variant={COMPONENT_VARIANT.elevated} style={cardStyle}>
         <View style={styles.profileHeader}>
           <AvatarSection roleColor={roleColor} role={user?.role} />
-          <Text variant="h2" style={{ color: themeColors.textOnPrimary }} align="center">
+          <Text
+            variant={TEXT_VARIANT.H2}
+            style={{ color: themeColors.textOnPrimary }}
+            align={TEXT_ALIGN.CENTER}
+          >
             {user?.name || t('roles.user')}
           </Text>
-          <Text variant="body" style={{ color: designTokens.overlay.lightStrong }} align="center">
+          <Text
+            variant={TEXT_VARIANT.BODY}
+            style={{ color: designTokens.overlay.lightStrong }}
+            align={TEXT_ALIGN.CENTER}
+          >
             {user?.email || t('screens.account.defaultEmail')}
           </Text>
           <RoleBadge role={user?.role} t={t} />
@@ -82,7 +96,11 @@ function RoleBadge({
         size={designTokens.iconSize.xs}
         color={designTokens.overlay.lightStrong}
       />
-      <Text variant="caption" weight="bold" style={{ color: themeColors.textOnPrimary }}>
+      <Text
+        variant={TEXT_VARIANT.CAPTION}
+        weight={TEXT_WEIGHT.BOLD}
+        style={{ color: themeColors.textOnPrimary }}
+      >
         {getRoleLabel(role, t)}
       </Text>
     </View>

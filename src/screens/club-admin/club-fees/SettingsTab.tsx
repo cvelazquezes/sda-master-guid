@@ -4,7 +4,15 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, Input } from '../../../shared/components';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { designTokens } from '../../../shared/theme';
-import { ICONS, TOUCH_OPACITY, KEYBOARD_TYPE, ALL_MONTHS } from '../../../shared/constants';
+import {
+  ICONS,
+  TOUCH_OPACITY,
+  KEYBOARD_TYPE,
+  ALL_MONTHS,
+  TEXT_COLOR,
+  TEXT_VARIANT,
+  TEXT_WEIGHT,
+} from '../../../shared/constants';
 import { DISPLAY_LIMITS } from '../../../shared/constants/http';
 import { styles, settingsStyles } from './styles';
 import { MONTH_KEYS } from './types';
@@ -273,7 +281,11 @@ function ActionButtons({
           size={designTokens.iconSize.md}
           color={colors.textOnPrimary}
         />
-        <Text variant="body" weight="semibold" color="onPrimary">
+        <Text
+          variant={TEXT_VARIANT.BODY}
+          weight={TEXT_WEIGHT.SEMIBOLD}
+          color={TEXT_COLOR.ON_PRIMARY}
+        >
           {t('screens.clubFees.saveSettings')}
         </Text>
       </TouchableOpacity>
@@ -291,7 +303,11 @@ function ActionButtons({
             size={designTokens.iconSize.md}
             color={colors.primary}
           />
-          <Text variant="body" weight="semibold" style={{ color: colors.primary }}>
+          <Text
+            variant={TEXT_VARIANT.BODY}
+            weight={TEXT_WEIGHT.SEMIBOLD}
+            style={{ color: colors.primary }}
+          >
             {t('screens.clubFees.generateFeesCurrentYear')}
           </Text>
         </TouchableOpacity>

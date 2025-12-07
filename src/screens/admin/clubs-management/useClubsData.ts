@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { Club } from '../../../types';
 import { clubService } from '../../../services/clubService';
-import { MESSAGES } from '../../../shared/constants';
+import { EMPTY_VALUE, MESSAGES } from '../../../shared/constants';
 import { ClubFilters, ClubFormData, initialFilters, initialFormData } from './types';
 
 interface UseClubsDataReturn {
@@ -27,7 +27,7 @@ export function useClubsData(): UseClubsDataReturn {
   const [refreshing, setRefreshing] = useState(false);
   const [filters, setFilters] = useState<ClubFilters>(initialFilters);
   const [formData, setFormData] = useState<ClubFormData>(initialFormData);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(EMPTY_VALUE);
 
   const loadClubs = useCallback(async (): Promise<void> => {
     try {
@@ -56,7 +56,7 @@ export function useClubsData(): UseClubsDataReturn {
 
   const clearFilters = (): void => {
     setFilters(initialFilters);
-    setSearchQuery('');
+    setSearchQuery(EMPTY_VALUE);
   };
 
   return {

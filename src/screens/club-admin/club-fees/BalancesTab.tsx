@@ -5,7 +5,14 @@ import { Text } from '../../../shared/components';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { User, MemberBalance } from '../../../types';
 import { designTokens } from '../../../shared/theme';
-import { ICONS, EMPTY_VALUE } from '../../../shared/constants';
+import {
+  ICONS,
+  EMPTY_VALUE,
+  TEXT_ALIGN,
+  TEXT_COLOR,
+  TEXT_VARIANT,
+  TEXT_WEIGHT,
+} from '../../../shared/constants';
 import { NUMERIC } from '../../../shared/constants/http';
 import { styles, balanceStyles, emptyStyles } from './styles';
 
@@ -71,10 +78,10 @@ function BalancesHeader({ count, onNotifyAll, t }: BalancesHeaderProps): React.J
       ]}
     >
       <View>
-        <Text variant="h3" color="primary">
+        <Text variant={TEXT_VARIANT.H3} color={TEXT_COLOR.PRIMARY}>
           {t('screens.clubFees.memberBalances')}
         </Text>
-        <Text variant="caption" color="secondary">
+        <Text variant={TEXT_VARIANT.CAPTION} color={TEXT_COLOR.SECONDARY}>
           {t('screens.clubFees.membersCount', { count })}
         </Text>
       </View>
@@ -87,7 +94,11 @@ function BalancesHeader({ count, onNotifyAll, t }: BalancesHeaderProps): React.J
           size={designTokens.iconSize.md}
           color={colors.textOnPrimary}
         />
-        <Text variant="label" weight="semibold" color="onPrimary">
+        <Text
+          variant={TEXT_VARIANT.LABEL}
+          weight={TEXT_WEIGHT.SEMIBOLD}
+          color={TEXT_COLOR.ON_PRIMARY}
+        >
           {t('screens.clubFees.notifyAll')}
         </Text>
       </TouchableOpacity>
@@ -125,15 +136,15 @@ function CardHeader({
     <View style={balanceStyles.cardHeader}>
       <View style={balanceStyles.memberInfo}>
         <View style={[balanceStyles.avatar, { backgroundColor: statusColor }]}>
-          <Text variant="h3" color="onPrimary">
+          <Text variant={TEXT_VARIANT.H3} color={TEXT_COLOR.ON_PRIMARY}>
             {member.name.charAt(0).toUpperCase()}
           </Text>
         </View>
         <View style={balanceStyles.memberTextInfo}>
-          <Text variant="body" weight="semibold">
+          <Text variant={TEXT_VARIANT.BODY} weight={TEXT_WEIGHT.SEMIBOLD}>
             {member.name}
           </Text>
-          <Text variant="caption" color="secondary">
+          <Text variant={TEXT_VARIANT.CAPTION} color={TEXT_COLOR.SECONDARY}>
             {member.email}
           </Text>
         </View>
@@ -174,28 +185,32 @@ function BalanceCard({
       />
       <View style={balanceStyles.details}>
         <View style={balanceStyles.row}>
-          <Text variant="bodySmall" color="secondary">
+          <Text variant={TEXT_VARIANT.BODY_SMALL} color={TEXT_COLOR.SECONDARY}>
             {t('screens.clubFees.totalOwed')}
           </Text>
-          <Text variant="body" weight="semibold">
+          <Text variant={TEXT_VARIANT.BODY} weight={TEXT_WEIGHT.SEMIBOLD}>
             ${balance.totalOwed.toFixed(NUMERIC.DECIMAL_PLACES)}
           </Text>
         </View>
         <View style={balanceStyles.row}>
-          <Text variant="bodySmall" color="secondary">
+          <Text variant={TEXT_VARIANT.BODY_SMALL} color={TEXT_COLOR.SECONDARY}>
             {t('screens.clubFees.totalPaid')}
           </Text>
-          <Text variant="body" weight="semibold" style={{ color: colors.success }}>
+          <Text
+            variant={TEXT_VARIANT.BODY}
+            weight={TEXT_WEIGHT.SEMIBOLD}
+            style={{ color: colors.success }}
+          >
             ${balance.totalPaid.toFixed(NUMERIC.DECIMAL_PLACES)}
           </Text>
         </View>
         <View
           style={[balanceStyles.row, balanceStyles.totalRow, { borderTopColor: colors.border }]}
         >
-          <Text variant="body" weight="bold">
+          <Text variant={TEXT_VARIANT.BODY} weight={TEXT_WEIGHT.BOLD}>
             {t('screens.clubFees.currentBalance')}
           </Text>
-          <Text variant="h3" style={{ color: statusColor }}>
+          <Text variant={TEXT_VARIANT.H3} style={{ color: statusColor }}>
             ${Math.abs(balance.balance).toFixed(NUMERIC.DECIMAL_PLACES)} {statusText}
           </Text>
         </View>
@@ -206,7 +221,11 @@ function BalanceCard({
               size={designTokens.iconSize.sm}
               color={colors.error}
             />
-            <Text variant="caption" weight="semibold" color="error">
+            <Text
+              variant={TEXT_VARIANT.CAPTION}
+              weight={TEXT_WEIGHT.SEMIBOLD}
+              color={TEXT_COLOR.ERROR}
+            >
               {t('screens.clubFees.overdueAmount', {
                 amount: balance.overdueCharges.toFixed(NUMERIC.DECIMAL_PLACES),
               })}
@@ -227,10 +246,20 @@ function EmptyBalances({ t }: { t: (key: string) => string }): React.JSX.Element
         size={designTokens.iconSize['4xl']}
         color={colors.border}
       />
-      <Text variant="body" weight="semibold" color="tertiary" align="center">
+      <Text
+        variant={TEXT_VARIANT.BODY}
+        weight={TEXT_WEIGHT.SEMIBOLD}
+        color={TEXT_COLOR.TERTIARY}
+        align={TEXT_ALIGN.CENTER}
+      >
         {t('screens.clubFees.noBalances')}
       </Text>
-      <Text variant="bodySmall" color="tertiary" align="center" style={emptyStyles.subtext}>
+      <Text
+        variant={TEXT_VARIANT.BODY_SMALL}
+        color={TEXT_COLOR.TERTIARY}
+        align={TEXT_ALIGN.CENTER}
+        style={emptyStyles.subtext}
+      >
         {t('screens.clubFees.generateFeesToSeeBalances')}
       </Text>
     </View>

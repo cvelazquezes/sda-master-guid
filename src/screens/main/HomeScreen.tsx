@@ -24,7 +24,16 @@ import { StatCard } from '../../components/StatCard';
 import { designTokens, layoutConstants } from '../../shared/theme';
 // ✅ GOOD: Import UI primitives (Text, Card, etc.)
 import { Text, EmptyState, Card, SectionHeader } from '../../shared/components';
-import { COMPONENT_VARIANT, ICONS, MESSAGES, TABS, FLEX } from '../../shared/constants';
+import {
+  COMPONENT_VARIANT,
+  ICONS,
+  MESSAGES,
+  TABS,
+  FLEX,
+  TEXT_COLOR,
+  TEXT_VARIANT,
+  TEXT_WEIGHT,
+} from '../../shared/constants';
 import { DISPLAY_LIMITS } from '../../shared/constants/http';
 
 interface HomeStats {
@@ -170,15 +179,15 @@ function RecentMembersSection({
         <Card key={m.id} variant={COMPONENT_VARIANT.elevated} style={styles.memberCard}>
           <View style={styles.memberRow}>
             <View style={[styles.memberAvatar, { backgroundColor: colors.primary }]}>
-              <Text variant="h4" color="onPrimary">
+              <Text variant={TEXT_VARIANT.H4} color={TEXT_COLOR.ON_PRIMARY}>
                 {m.name.charAt(0).toUpperCase()}
               </Text>
             </View>
             <View style={styles.memberInfo}>
-              <Text variant="bodyLarge" weight="bold">
+              <Text variant={TEXT_VARIANT.BODY_LARGE} weight={TEXT_WEIGHT.BOLD}>
                 {m.name}
               </Text>
-              <Text variant="caption" color="secondary">
+              <Text variant={TEXT_VARIANT.CAPTION} color={TEXT_COLOR.SECONDARY}>
                 {m.email}
               </Text>
             </View>
@@ -231,10 +240,10 @@ function WelcomeHeader({ user, colors, t }: WelcomeHeaderProps): React.JSX.Eleme
   ];
   return (
     <View style={headerStyle}>
-      <Text variant="h1" style={styles.welcomeText}>
+      <Text variant={TEXT_VARIANT.H1} style={styles.welcomeText}>
         {t('screens.home.welcomeBack', { name: user.name })}
       </Text>
-      <Text variant="body" color="secondary">
+      <Text variant={TEXT_VARIANT.BODY} color={TEXT_COLOR.SECONDARY}>
         {t('screens.home.clubHappenings')}
       </Text>
     </View>
@@ -258,10 +267,14 @@ function InactiveBanner({ colors, t }: InactiveBannerProps): React.JSX.Element {
           color={colors.error}
         />
         <View style={styles.inactiveBannerText}>
-          <Text variant="bodyLarge" weight="bold" color="error">
+          <Text
+            variant={TEXT_VARIANT.BODY_LARGE}
+            weight={TEXT_WEIGHT.BOLD}
+            color={TEXT_COLOR.ERROR}
+          >
             {t('screens.home.accountInactive')}
           </Text>
-          <Text variant="bodySmall" color="secondary">
+          <Text variant={TEXT_VARIANT.BODY_SMALL} color={TEXT_COLOR.SECONDARY}>
             {t('screens.home.inactiveAccountDescription')}
           </Text>
         </View>

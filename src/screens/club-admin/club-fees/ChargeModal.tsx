@@ -12,6 +12,9 @@ import {
   TOUCH_OPACITY,
   TEXT_LINES,
   KEYBOARD_TYPE,
+  TEXT_COLOR,
+  TEXT_VARIANT,
+  TEXT_WEIGHT,
 } from '../../../shared/constants';
 import { modalStyles } from './modalStyles';
 
@@ -269,10 +272,10 @@ function MemberItem({
           )}
         </View>
         <View style={modalStyles.memberItemInfo}>
-          <Text variant="body" weight="semibold">
+          <Text variant={TEXT_VARIANT.BODY} weight={TEXT_WEIGHT.SEMIBOLD}>
             {member.name}
           </Text>
-          <Text variant="caption" color="secondary">
+          <Text variant={TEXT_VARIANT.CAPTION} color={TEXT_COLOR.SECONDARY}>
             {member.email}
           </Text>
         </View>
@@ -353,7 +356,11 @@ function ModalFooter({ onClose, onCreate, t }: ModalFooterProps): React.JSX.Elem
         onPress={onClose}
         activeOpacity={TOUCH_OPACITY.default}
       >
-        <Text variant="body" weight="semibold" color="secondary">
+        <Text
+          variant={TEXT_VARIANT.BODY}
+          weight={TEXT_WEIGHT.SEMIBOLD}
+          color={TEXT_COLOR.SECONDARY}
+        >
           {t('common.cancel')}
         </Text>
       </TouchableOpacity>
@@ -367,7 +374,11 @@ function ModalFooter({ onClose, onCreate, t }: ModalFooterProps): React.JSX.Elem
           size={designTokens.iconSize.md}
           color={colors.textOnPrimary}
         />
-        <Text variant="body" weight="semibold" color="onPrimary">
+        <Text
+          variant={TEXT_VARIANT.BODY}
+          weight={TEXT_WEIGHT.SEMIBOLD}
+          color={TEXT_COLOR.ON_PRIMARY}
+        >
           {t('screens.clubFees.createCharge')}
         </Text>
       </TouchableOpacity>

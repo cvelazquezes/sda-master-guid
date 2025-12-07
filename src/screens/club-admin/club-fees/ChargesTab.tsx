@@ -5,7 +5,13 @@ import { Text } from '../../../shared/components';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { CustomCharge } from '../../../types';
 import { designTokens } from '../../../shared/theme';
-import { ICONS } from '../../../shared/constants';
+import {
+  ICONS,
+  TEXT_ALIGN,
+  TEXT_COLOR,
+  TEXT_VARIANT,
+  TEXT_WEIGHT,
+} from '../../../shared/constants';
 import { NUMERIC } from '../../../shared/constants/http';
 import { styles, chargeStyles, emptyStyles } from './styles';
 
@@ -59,10 +65,10 @@ function ChargesHeader({
   return (
     <View style={[chargeStyles.header, { backgroundColor: colors.surface }]}>
       <View>
-        <Text variant="h3" color="primary">
+        <Text variant={TEXT_VARIANT.H3} color={TEXT_COLOR.PRIMARY}>
           {t('screens.clubFees.customCharges')}
         </Text>
-        <Text variant="caption" color="secondary">
+        <Text variant={TEXT_VARIANT.CAPTION} color={TEXT_COLOR.SECONDARY}>
           {count} active charges
         </Text>
       </View>
@@ -75,7 +81,11 @@ function ChargesHeader({
           size={designTokens.iconSize.md}
           color={colors.textOnPrimary}
         />
-        <Text variant="label" weight="semibold" color="onPrimary">
+        <Text
+          variant={TEXT_VARIANT.LABEL}
+          weight={TEXT_WEIGHT.SEMIBOLD}
+          color={TEXT_COLOR.ON_PRIMARY}
+        >
           {t('screens.clubFees.newCharge')}
         </Text>
       </TouchableOpacity>
@@ -106,10 +116,14 @@ function ChargeCard({
       ]}
     >
       <View style={chargeStyles.cardHeader}>
-        <Text variant="body" weight="semibold" style={chargeStyles.description}>
+        <Text
+          variant={TEXT_VARIANT.BODY}
+          weight={TEXT_WEIGHT.SEMIBOLD}
+          style={chargeStyles.description}
+        >
           {charge.description}
         </Text>
-        <Text variant="h3" style={{ color: colors.primary }}>
+        <Text variant={TEXT_VARIANT.H3} style={{ color: colors.primary }}>
           ${charge.amount.toFixed(NUMERIC.DECIMAL_PLACES)}
         </Text>
       </View>
@@ -120,7 +134,7 @@ function ChargeCard({
             size={designTokens.iconSize.sm}
             color={colors.textSecondary}
           />
-          <Text variant="bodySmall" color="secondary">
+          <Text variant={TEXT_VARIANT.BODY_SMALL} color={TEXT_COLOR.SECONDARY}>
             Due: {new Date(charge.dueDate).toLocaleDateString()}
           </Text>
         </View>
@@ -130,7 +144,7 @@ function ChargeCard({
             size={designTokens.iconSize.sm}
             color={colors.textSecondary}
           />
-          <Text variant="bodySmall" color="secondary">
+          <Text variant={TEXT_VARIANT.BODY_SMALL} color={TEXT_COLOR.SECONDARY}>
             {memberText}
           </Text>
         </View>
@@ -148,10 +162,20 @@ function EmptyCharges({ t }: { t: (key: string) => string }): React.JSX.Element 
         size={designTokens.iconSize['4xl']}
         color={colors.border}
       />
-      <Text variant="body" weight="semibold" color="tertiary" align="center">
+      <Text
+        variant={TEXT_VARIANT.BODY}
+        weight={TEXT_WEIGHT.SEMIBOLD}
+        color={TEXT_COLOR.TERTIARY}
+        align={TEXT_ALIGN.CENTER}
+      >
         {t('screens.clubFees.noCustomCharges')}
       </Text>
-      <Text variant="bodySmall" color="tertiary" align="center" style={emptyStyles.subtext}>
+      <Text
+        variant={TEXT_VARIANT.BODY_SMALL}
+        color={TEXT_COLOR.TERTIARY}
+        align={TEXT_ALIGN.CENTER}
+        style={emptyStyles.subtext}
+      >
         {t('screens.clubFees.createChargesDescription')}
       </Text>
     </View>

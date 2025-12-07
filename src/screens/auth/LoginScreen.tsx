@@ -41,7 +41,11 @@ import {
   PLATFORM_OS,
   SAFE_AREA_EDGES,
   SCREENS,
+  SINGLE_SPACE,
   TEST_IDS,
+  TEXT_COLOR,
+  TEXT_VARIANT,
+  TEXT_WEIGHT,
   DIMENSIONS,
   FLEX,
 } from '../../shared/constants';
@@ -106,13 +110,13 @@ function QuickLoginCard({
   return (
     <Card onPress={onPress} style={cardStyle}>
       <View style={styles.quickLoginInfo}>
-        <Text variant="bodySmall" weight="bold">
+        <Text variant={TEXT_VARIANT.BODY_SMALL} weight={TEXT_WEIGHT.BOLD}>
           {user.name}
         </Text>
-        <Text variant="label" color="secondary">
+        <Text variant={TEXT_VARIANT.LABEL} color={TEXT_COLOR.SECONDARY}>
           {user.role}
         </Text>
-        <Text variant="caption" color="tertiary">
+        <Text variant={TEXT_VARIANT.CAPTION} color={TEXT_COLOR.TERTIARY}>
           {user.email}
         </Text>
       </View>
@@ -142,14 +146,18 @@ function QuickLoginSection({
   return (
     <View style={[styles.quickLoginSection, { borderTopColor: colors.border }]}>
       <View style={styles.quickLoginHeader}>
-        <Text variant="h4">{t('screens.login.quickLoginTitle')}</Text>
+        <Text variant={TEXT_VARIANT.H4}>{t('screens.login.quickLoginTitle')}</Text>
         <Badge
           label={t('screens.login.quickLoginBadge')}
           variant="warning"
           size={COMPONENT_SIZE.sm}
         />
       </View>
-      <Text variant="label" color="secondary" style={styles.quickLoginSubtitle}>
+      <Text
+        variant={TEXT_VARIANT.LABEL}
+        color={TEXT_COLOR.SECONDARY}
+        style={styles.quickLoginSubtitle}
+      >
         {t('screens.login.quickLoginSubtitle')}
       </Text>
       <View style={styles.quickLoginGrid}>
@@ -180,10 +188,10 @@ function LoginHeader({ colors, t }: LoginHeaderProps): React.JSX.Element {
         size={designTokens.iconSize['4xl']}
         color={colors.primary}
       />
-      <Text variant="displayMedium" style={styles.title}>
+      <Text variant={TEXT_VARIANT.DISPLAY_MEDIUM} style={styles.title}>
         {t('screens.login.appTitle')}
       </Text>
-      <Text variant="h3" color="secondary" style={styles.subtitle}>
+      <Text variant={TEXT_VARIANT.H3} color={TEXT_COLOR.SECONDARY} style={styles.subtitle}>
         {t('screens.login.appSubtitle')}
       </Text>
     </View>
@@ -272,9 +280,10 @@ function RegisterLink({
 }): React.JSX.Element {
   return (
     <TouchableOpacity style={styles.linkButton} onPress={onPress} disabled={disabled}>
-      <Text variant="bodySmall" color="secondary">
-        {t('screens.login.noAccount')}{' '}
-        <Text variant="bodySmall" color="link" weight="bold">
+      <Text variant={TEXT_VARIANT.BODY_SMALL} color={TEXT_COLOR.SECONDARY}>
+        {t('screens.login.noAccount')}
+        {SINGLE_SPACE}
+        <Text variant={TEXT_VARIANT.BODY_SMALL} color={TEXT_COLOR.LINK} weight={TEXT_WEIGHT.BOLD}>
           {t('screens.login.registerLink')}
         </Text>
       </Text>

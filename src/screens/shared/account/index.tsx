@@ -5,6 +5,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { UserRole } from '../../../types';
 import { ScreenHeader } from '../../../shared/components';
+import { EMPTY_VALUE } from '../../../shared/constants';
 import { styles } from './styles';
 import { getRoleConfig, getApprovalStatusLabel } from './roleUtils';
 import { useAccountData, handleToggleActive, handleLogout } from './useAccountData';
@@ -38,8 +39,8 @@ const AccountScreen = (): React.JSX.Element => {
       <ScreenHeader title={t('screens.account.title')} subtitle={t('screens.account.subtitle')} />
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <ProfileHeader
-          name={user?.name || ''}
-          email={user?.email || ''}
+          name={user?.name || EMPTY_VALUE}
+          email={user?.email || EMPTY_VALUE}
           roleLabel={roleConfig.label}
           roleIcon={roleConfig.icon}
           roleColor={roleConfig.color}
