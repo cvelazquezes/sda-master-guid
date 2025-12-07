@@ -17,6 +17,8 @@ const {
   typescriptRules,
   reactRules,
   importRules,
+  stringsRules,
+  loggingRules,
   overridesConfig,
 } = require('./config/lint');
 
@@ -71,6 +73,8 @@ module.exports = {
     ...typescriptRules.rules,
     ...reactRules.rules,
     ...importRules.rules,
+    ...stringsRules.rules,
+    ...loggingRules.rules,
   },
 
   // === OVERRIDES ===

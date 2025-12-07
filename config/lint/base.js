@@ -59,10 +59,9 @@ module.exports = {
     'prefer-promise-reject-errors': 'error',
 
     // =========================================================================
-    // CONSOLE & DEBUG
+    // DEBUG - Console rules moved to logging.js
     // =========================================================================
 
-    'no-console': ['error', { allow: ['warn', 'error', 'info'] }],
     'no-debugger': 'error',
     'no-alert': 'error',
 
