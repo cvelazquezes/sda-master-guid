@@ -301,6 +301,16 @@ export const FILTER_STATUS = {
   INACTIVE: 'inactive',
 } as const;
 
+/**
+ * Filter Status Labels - Display labels for filter status values
+ * Use these as fallback labels when i18n is not available
+ */
+export const FILTER_STATUS_LABEL = {
+  ALL: 'All',
+  ACTIVE: 'Active',
+  INACTIVE: 'Inactive',
+} as const;
+
 // =============================================================================
 // PLATFORM
 // =============================================================================
@@ -327,6 +337,22 @@ export const THEME_MODE = {
   LIGHT: 'light',
   DARK: 'dark',
   SYSTEM: 'system',
+} as const;
+
+/**
+ * Color Shade - Standard color palette shade levels
+ */
+export const COLOR_SHADE = {
+  50: 50,
+  100: 100,
+  200: 200,
+  300: 300,
+  400: 400,
+  500: 500,
+  600: 600,
+  700: 700,
+  800: 800,
+  900: 900,
 } as const;
 
 // =============================================================================
@@ -413,6 +439,26 @@ export const NOTIFICATION_TYPE = {
   FEE: 'fee',
   CLUB: 'club',
   SYSTEM: 'system',
+} as const;
+
+/**
+ * Digest Frequency - Email digest frequency options
+ */
+export const DIGEST_FREQUENCY = {
+  DAILY: 'daily',
+  WEEKLY: 'weekly',
+  MONTHLY: 'monthly',
+  NEVER: 'never',
+} as const;
+
+/**
+ * A/B Test Variants - Standard A/B test variant names
+ */
+export const AB_TEST_VARIANT = {
+  CONTROL: 'control',
+  VARIANT_A: 'variant_a',
+  VARIANT_B: 'variant_b',
+  VARIANT_C: 'variant_c',
 } as const;
 
 // =============================================================================
@@ -554,6 +600,12 @@ export const REGEX_PATTERN = {
  * Note: Typed as string to allow use in state that accepts other string values
  */
 export const EMPTY_VALUE: string = '';
+
+/**
+ * Single Space - Use for spacing between JSX elements
+ * Example: {SINGLE_SPACE} instead of {' '}
+ */
+export const SINGLE_SPACE = ' ' as const;
 
 /**
  * Ellipsis - Used for text truncation

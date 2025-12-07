@@ -94,6 +94,9 @@ export const STORAGE_KEYS = {
   IDEMPOTENCY: {
     PREFIX: '@idempotency:',
   },
+  AB_TEST: {
+    ASSIGNMENTS: '@ab_test_assignments',
+  },
 } as const;
 
 export const MOCK_DATA = {

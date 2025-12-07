@@ -22,6 +22,28 @@ export const PASSWORD = {
   MAX_LENGTH: 128,
   MIN_LENGTH_STRONG: 10,
   MIN_STRENGTH_REQUIREMENTS: 3,
+  REGEX: {
+    UPPERCASE: /[A-Z]/,
+    LOWERCASE: /[a-z]/,
+    NUMBER: /[0-9]/,
+    DIGIT: /\d/,
+    SPECIAL: /[^A-Za-z0-9]/,
+    SPECIAL_CHARS: /[@$!%*?&]/,
+    /** Combined: requires lowercase, uppercase, digit, and special char */
+    COMBINED: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+  },
+  STRENGTH: {
+    WEAK: 'weak',
+    MEDIUM: 'medium',
+    STRONG: 'strong',
+  },
+} as const;
+
+export type PasswordStrength = (typeof PASSWORD.STRENGTH)[keyof typeof PASSWORD.STRENGTH];
+
+export const TIMEZONE = {
+  /** IANA timezone format: Region/City */
+  REGEX: /^[A-Za-z_]+\/[A-Za-z_]+$/,
 } as const;
 
 // =============================================================================
@@ -60,6 +82,10 @@ export const TEXT = {
   LONG_TEXT_MAX: 2048,
   EMAIL_MAX: 255,
   LANGUAGE_CODE_LENGTH: 2,
+} as const;
+
+export const NAME = {
+  REGEX: /^[a-zA-Z\s'-]+$/,
 } as const;
 
 // =============================================================================

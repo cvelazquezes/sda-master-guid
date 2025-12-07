@@ -76,8 +76,12 @@ export const ERROR_MESSAGES = {
     PASSWORD_MUST_BE_DIFFERENT: 'New password must be different from current password',
     CURRENT_PASSWORD_REQUIRED: 'Current password is required',
     PHONE_INVALID: 'Invalid phone number format',
+    WHATSAPP_REQUIRED: 'WhatsApp number is required',
+    WHATSAPP_INVALID: 'WhatsApp number must include country code (e.g., +1 555 123 4567)',
     NAME_REQUIRED: 'Name is required',
     NAME_TOO_LONG: 'Name is too long',
+    NAME_MIN_LENGTH: (min: number) => `Name must be at least ${min} characters`,
+    NAME_INVALID_CHARACTERS: 'Name contains invalid characters',
     ID_INVALID: 'Invalid ID format',
     URL_INVALID: 'Invalid URL format',
     URL_TOO_LONG: 'URL is too long',
@@ -90,6 +94,7 @@ export const ERROR_MESSAGES = {
     ADDRESS_REQUIRED: 'Address is required',
     CITY_REQUIRED: 'City is required',
     COUNTRY_REQUIRED: 'Country is required',
+    CLUB_REQUIRED: 'Club is required',
     CLUB_ID_REQUIRED: 'Club ID is required',
     DATE_INVALID: 'Invalid date format',
     TIME_INVALID: 'Invalid time format',
@@ -294,6 +299,16 @@ export const SORT_ORDER = {
 } as const;
 
 export const SORT_ORDERS = Object.values(SORT_ORDER);
+
+/**
+ * Sort string parsing delimiters
+ */
+export const SORT_PARSE = {
+  /** Prefix for descending sort (e.g., "-createdAt") */
+  DESC_PREFIX: '-',
+  /** Delimiter between field and order (e.g., "createdAt:desc") */
+  DELIMITER: ':',
+} as const;
 
 export type ErrorMessageCategory = keyof typeof ERROR_MESSAGES;
 export type ErrorCodeCategory = keyof typeof ERROR_CODES;

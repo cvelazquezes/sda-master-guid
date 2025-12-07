@@ -87,6 +87,14 @@ export const DATE_FORMATS = {
   DATE_FNS_TIME_12H: 'h:mm a',
 } as const;
 
+/**
+ * Default Display Values - Used for fallback/placeholder amounts
+ */
+export const DEFAULT_DISPLAY = {
+  /** Default zero amount with 2 decimal places */
+  AMOUNT_ZERO: '0.00',
+} as const;
+
 export const NUMBER_FORMATS = {
   // Currency
   CURRENCY_USD: {
