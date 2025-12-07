@@ -8,6 +8,7 @@ import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { initSentry } from './src/shared/services/sentry';
 import { featureFlagsService } from './src/shared/services/featureFlags';
 import { logger } from './src/shared/utils/logger';
+import { LOG_MESSAGES, STATUS_BAR_STYLE } from './src/shared/constants';
 import './src/i18n'; // Initialize i18n
 
 // Initialize Sentry for error tracking and performance monitoring
@@ -19,9 +20,9 @@ export default function App(): React.JSX.Element {
     const initializeFeatureFlags = async (): Promise<void> => {
       try {
         await featureFlagsService.initialize();
-        logger.info('Feature flags initialized successfully');
+        logger.info(LOG_MESSAGES.APP.FEATURE_FLAGS_INITIALIZED);
       } catch (error) {
-        logger.error('Failed to initialize feature flags', error as Error);
+        logger.error(LOG_MESSAGES.APP.FEATURE_FLAGS_INIT_FAILED, error as Error);
       }
     };
 
@@ -33,7 +34,7 @@ export default function App(): React.JSX.Element {
       <ErrorBoundary>
         <ThemeProvider>
           <AuthProvider>
-            <StatusBar style="auto" translucent={false} />
+            <StatusBar style={STATUS_BAR_STYLE.AUTO} translucent={false} />
             <AppNavigator />
           </AuthProvider>
         </ThemeProvider>

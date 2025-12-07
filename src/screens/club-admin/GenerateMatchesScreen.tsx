@@ -80,8 +80,9 @@ function useMatchRoundsData(clubId?: string): UseMatchRoundsDataReturn {
 
 // Round card component
 function RoundCard({ round }: { round: MatchRound }): React.JSX.Element {
+  const { t } = useTranslation();
   const activityCount = round.matches.length;
-  const activityLabel = activityCount === 1 ? 'activity' : 'activities';
+  const activityLabel = t('common.activity', { count: activityCount });
   return (
     <View style={styles.roundCard}>
       <View style={styles.roundHeader}>
@@ -195,7 +196,7 @@ function ActionButtonsSection({
         onPress={onGenerate}
       />
       <StandardButton
-        title="View All Activities"
+        title={t('screens.generateMatches.viewAllActivities')}
         icon={ICONS.VIEW_LIST}
         variant={COMPONENT_VARIANT.secondary}
         size={BUTTON_SIZE.large}

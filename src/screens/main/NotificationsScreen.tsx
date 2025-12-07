@@ -18,6 +18,7 @@ import {
   DIMENSIONS,
   FLEX,
   SHADOW_OFFSET,
+  MOCK_DATA,
 } from '../../shared/constants';
 
 type NotificationType = (typeof NOTIFICATION_TYPE)[keyof typeof NOTIFICATION_TYPE];
@@ -129,7 +130,7 @@ const createMockNotifications = (t: TranslationFn): Notification[] => {
   const now = Date.now();
   return [
     {
-      id: '1',
+      id: MOCK_DATA.NOTIFICATIONS.IDS.ACTIVITY,
       type: NOTIFICATION_TYPE.ACTIVITY,
       title: t('screens.notifications.mockTitles.newActivity'),
       message: t('screens.notifications.mockMessages.newActivity'),
@@ -137,7 +138,7 @@ const createMockNotifications = (t: TranslationFn): Notification[] => {
       read: false,
     },
     {
-      id: '2',
+      id: MOCK_DATA.NOTIFICATIONS.IDS.FEE,
       type: NOTIFICATION_TYPE.FEE,
       title: t('screens.notifications.mockTitles.paymentDue'),
       message: t('screens.notifications.mockMessages.paymentDue'),
@@ -145,7 +146,7 @@ const createMockNotifications = (t: TranslationFn): Notification[] => {
       read: false,
     },
     {
-      id: '3',
+      id: MOCK_DATA.NOTIFICATIONS.IDS.CLUB,
       type: NOTIFICATION_TYPE.CLUB,
       title: t('screens.notifications.mockTitles.clubUpdate'),
       message: t('screens.notifications.mockMessages.clubUpdate'),
@@ -153,7 +154,7 @@ const createMockNotifications = (t: TranslationFn): Notification[] => {
       read: true,
     },
     {
-      id: '4',
+      id: MOCK_DATA.NOTIFICATIONS.IDS.SYSTEM,
       type: NOTIFICATION_TYPE.SYSTEM,
       title: t('screens.notifications.mockTitles.welcome'),
       message: t('screens.notifications.mockMessages.welcome'),
