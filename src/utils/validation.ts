@@ -4,29 +4,30 @@
  */
 
 import { z } from 'zod';
-import { PASSWORD, TEXT } from '../shared/constants/validation';
+import { PASSWORD, TEXT, PHONE, NAME, NUMERIC } from '../shared/constants/validation';
+import { EMPTY_VALUE, ERROR_MESSAGES, ERROR_NAME, STRING_DELIMITER } from '../shared/constants';
 
 // Password validation schema
 export const PasswordSchema = z
   .string()
-  .min(PASSWORD.MIN_LENGTH, `Password must be at least ${PASSWORD.MIN_LENGTH} characters`)
-  .max(PASSWORD.MAX_LENGTH, 'Password too long')
-  .regex(/[A-Z]/, 'Must contain at least one uppercase letter')
-  .regex(/[a-z]/, 'Must contain at least one lowercase letter')
-  .regex(/[0-9]/, 'Must contain at least one number')
-  .regex(/[^A-Za-z0-9]/, 'Must contain at least one special character');
+  .min(PASSWORD.MIN_LENGTH, ERROR_MESSAGES.VALIDATION.PASSWORD_MIN_LENGTH(PASSWORD.MIN_LENGTH))
+  .max(PASSWORD.MAX_LENGTH, ERROR_MESSAGES.VALIDATION.PASSWORD_TOO_LONG)
+  .regex(PASSWORD.REGEX.UPPERCASE, ERROR_MESSAGES.VALIDATION.PASSWORD_UPPERCASE)
+  .regex(PASSWORD.REGEX.LOWERCASE, ERROR_MESSAGES.VALIDATION.PASSWORD_LOWERCASE)
+  .regex(PASSWORD.REGEX.NUMBER, ERROR_MESSAGES.VALIDATION.PASSWORD_NUMBER)
+  .regex(PASSWORD.REGEX.SPECIAL, ERROR_MESSAGES.VALIDATION.PASSWORD_SPECIAL);
 
 // Email validation schema
 export const EmailSchema = z
   .string()
-  .email('Invalid email address')
-  .max(TEXT.MEDIUM_TEXT_MAX, 'Email too long')
+  .email(ERROR_MESSAGES.VALIDATION.EMAIL_INVALID)
+  .max(TEXT.MEDIUM_TEXT_MAX, ERROR_MESSAGES.VALIDATION.EMAIL_TOO_LONG)
   .toLowerCase();
 
 // Login credentials schema
 export const LoginSchema = z.object({
   email: EmailSchema,
-  password: z.string().min(1, 'Password is required'),
+  password: z.string().min(NUMERIC.MIN_REQUIRED, ERROR_MESSAGES.VALIDATION.PASSWORD_REQUIRED),
 });
 
 export type LoginCredentials = z.infer<typeof LoginSchema>;
@@ -34,9 +35,9 @@ export type LoginCredentials = z.infer<typeof LoginSchema>;
 // WhatsApp number validation schema
 export const WhatsAppSchema = z
   .string()
-  .min(1, 'WhatsApp number is required')
-  .regex(/^\+?[1-9]\d{1,14}$/, 'WhatsApp number must include country code (e.g., +1 555 123 4567)')
-  .transform((val) => val.replace(/[\s()-]/g, '')); // Remove formatting characters
+  .min(NUMERIC.MIN_REQUIRED, ERROR_MESSAGES.VALIDATION.WHATSAPP_REQUIRED)
+  .regex(PHONE.REGEX, ERROR_MESSAGES.VALIDATION.WHATSAPP_INVALID)
+  .transform((val) => val.replace(PHONE.NORMALIZE_PATTERN, EMPTY_VALUE)); // Remove formatting characters
 
 // Registration schema
 export const RegisterSchema = z.object({
@@ -44,11 +45,11 @@ export const RegisterSchema = z.object({
   password: PasswordSchema,
   name: z
     .string()
-    .min(TEXT.NAME_MIN, `Name must be at least ${TEXT.NAME_MIN} characters`)
-    .max(TEXT.NAME_MAX, 'Name too long')
-    .regex(/^[a-zA-Z\s'-]+$/, 'Name contains invalid characters'),
+    .min(TEXT.NAME_MIN, ERROR_MESSAGES.VALIDATION.NAME_MIN_LENGTH(TEXT.NAME_MIN))
+    .max(TEXT.NAME_MAX, ERROR_MESSAGES.VALIDATION.NAME_TOO_LONG)
+    .regex(NAME.REGEX, ERROR_MESSAGES.VALIDATION.NAME_INVALID_CHARACTERS),
   whatsappNumber: WhatsAppSchema,
-  clubId: z.string().min(1, 'Club is required'), // User gets hierarchy from club
+  clubId: z.string().min(NUMERIC.MIN_REQUIRED, ERROR_MESSAGES.VALIDATION.CLUB_REQUIRED), // User gets hierarchy from club
 });
 
 export type RegisterData = z.infer<typeof RegisterSchema>;
@@ -57,8 +58,8 @@ export type RegisterData = z.infer<typeof RegisterSchema>;
 export const UpdateUserSchema = z.object({
   name: z
     .string()
-    .min(TEXT.NAME_MIN, `Name must be at least ${TEXT.NAME_MIN} characters`)
-    .max(TEXT.NAME_MAX, 'Name too long')
+    .min(TEXT.NAME_MIN, ERROR_MESSAGES.VALIDATION.NAME_MIN_LENGTH(TEXT.NAME_MIN))
+    .max(TEXT.NAME_MAX, ERROR_MESSAGES.VALIDATION.NAME_TOO_LONG)
     .optional(),
   timezone: z.string().optional(),
   language: z.string().length(TEXT.LANGUAGE_CODE_LENGTH).optional(),
@@ -77,7 +78,7 @@ export class ValidationError extends Error {
     public value?: unknown
   ) {
     super(message);
-    this.name = 'ValidationError';
+    this.name = ERROR_NAME.VALIDATION_ERROR;
   }
 }
 
@@ -90,7 +91,11 @@ export function validateOrThrow<T>(schema: z.ZodSchema<T>, data: unknown): T {
   } catch (error) {
     if (error instanceof z.ZodError) {
       const firstError = error.errors[0];
-      throw new ValidationError(firstError.message, firstError.path.join('.'), data);
+      throw new ValidationError(
+        firstError.message,
+        firstError.path.join(STRING_DELIMITER.DOT),
+        data
+      );
     }
     throw error;
   }

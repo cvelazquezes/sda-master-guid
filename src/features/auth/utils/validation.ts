@@ -6,7 +6,15 @@
  */
 
 import { z } from 'zod';
-import { PASSWORD, TEXT, MESSAGES } from '../../../shared/constants';
+import {
+  PASSWORD,
+  TEXT,
+  MESSAGES,
+  NUMERIC,
+  TIMEZONE,
+  VALIDATION_PATH,
+} from '../../../shared/constants';
+import type { PasswordStrength } from '../../../shared/constants/validation';
 
 /**
  * Login credentials validation schema
@@ -21,10 +29,7 @@ export const loginSchema = z.object({
   password: z
     .string()
     .min(PASSWORD.MIN_LENGTH, MESSAGES.ERRORS.PASSWORD_TOO_SHORT_8)
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-      MESSAGES.ERRORS.PASSWORD_REQUIREMENTS
-    ),
+    .regex(PASSWORD.REGEX.COMBINED, MESSAGES.ERRORS.PASSWORD_REQUIREMENTS),
 });
 
 /**
@@ -40,16 +45,13 @@ export const registerSchema = z.object({
   password: z
     .string()
     .min(PASSWORD.MIN_LENGTH, MESSAGES.ERRORS.PASSWORD_TOO_SHORT_8)
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-      MESSAGES.ERRORS.PASSWORD_REQUIREMENTS
-    ),
+    .regex(PASSWORD.REGEX.COMBINED, MESSAGES.ERRORS.PASSWORD_REQUIREMENTS),
   name: z
     .string()
     .min(TEXT.NAME_MIN, MESSAGES.ERRORS.NAME_TOO_SHORT)
     .max(TEXT.NAME_MAX, MESSAGES.ERRORS.NAME_TOO_LONG)
     .trim(),
-  clubId: z.string().min(1, MESSAGES.ERRORS.CLUB_ID_REQUIRED).trim(),
+  clubId: z.string().min(NUMERIC.MIN_REQUIRED, MESSAGES.ERRORS.CLUB_ID_REQUIRED).trim(),
 });
 
 /**
@@ -71,10 +73,7 @@ export const updateUserSchema = z
       .trim()
       .optional(),
     email: z.string().email(MESSAGES.ERRORS.INVALID_EMAIL_ADDRESS).toLowerCase().trim().optional(),
-    timezone: z
-      .string()
-      .regex(/^[A-Za-z_]+\/[A-Za-z_]+$/, MESSAGES.ERRORS.INVALID_TIMEZONE)
-      .optional(),
+    timezone: z.string().regex(TIMEZONE.REGEX, MESSAGES.ERRORS.INVALID_TIMEZONE).optional(),
     language: z
       .string()
       .length(TEXT.LANGUAGE_CODE_LENGTH, MESSAGES.ERRORS.INVALID_LANGUAGE_CODE)
@@ -95,18 +94,17 @@ export const updateUserSchema = z
  */
 export const changePasswordSchema = z
   .object({
-    currentPassword: z.string().min(1, MESSAGES.ERRORS.CURRENT_PASSWORD_REQUIRED),
+    currentPassword: z
+      .string()
+      .min(NUMERIC.MIN_REQUIRED, MESSAGES.ERRORS.CURRENT_PASSWORD_REQUIRED),
     newPassword: z
       .string()
       .min(PASSWORD.MIN_LENGTH, MESSAGES.ERRORS.PASSWORD_TOO_SHORT_8)
-      .regex(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-        MESSAGES.ERRORS.PASSWORD_REQUIREMENTS
-      ),
+      .regex(PASSWORD.REGEX.COMBINED, MESSAGES.ERRORS.PASSWORD_REQUIREMENTS),
   })
   .refine((data) => data.currentPassword !== data.newPassword, {
     message: MESSAGES.ERRORS.PASSWORD_MUST_DIFFER,
-    path: ['newPassword'],
+    path: [VALIDATION_PATH.NEW_PASSWORD],
   });
 
 /**
@@ -130,15 +128,15 @@ export function isValidEmail(email: string): boolean {
  * @param password - Password to check
  * @returns Strength level: weak, medium, strong
  */
-export function getPasswordStrength(password: string): 'weak' | 'medium' | 'strong' {
+export function getPasswordStrength(password: string): PasswordStrength {
   if (password.length < PASSWORD.MIN_LENGTH) {
-    return 'weak';
+    return PASSWORD.STRENGTH.WEAK;
   }
 
-  const hasLower = /[a-z]/.test(password);
-  const hasUpper = /[A-Z]/.test(password);
-  const hasNumber = /\d/.test(password);
-  const hasSpecial = /[@$!%*?&]/.test(password);
+  const hasLower = PASSWORD.REGEX.LOWERCASE.test(password);
+  const hasUpper = PASSWORD.REGEX.UPPERCASE.test(password);
+  const hasNumber = PASSWORD.REGEX.DIGIT.test(password);
+  const hasSpecial = PASSWORD.REGEX.SPECIAL_CHARS.test(password);
 
   const strength = [hasLower, hasUpper, hasNumber, hasSpecial].filter(Boolean).length;
 
@@ -146,7 +144,7 @@ export function getPasswordStrength(password: string): 'weak' | 'medium' | 'stro
     strength < PASSWORD.MIN_STRENGTH_REQUIREMENTS ||
     password.length < PASSWORD.MIN_LENGTH_STRONG
   ) {
-    return 'medium';
+    return PASSWORD.STRENGTH.MEDIUM;
   }
-  return 'strong';
+  return PASSWORD.STRENGTH.STRONG;
 }

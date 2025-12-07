@@ -8,6 +8,7 @@ import {
   MatchStatus,
   ApprovalStatus,
 } from '../types';
+import { EMPTY_VALUE } from '../shared/constants';
 
 // Mock Users - One of each type
 // Note: Users get their organizational hierarchy from their club
@@ -16,7 +17,7 @@ export const mockUsers: User[] = [
     id: '1',
     email: 'admin@sda.com',
     name: 'Admin User',
-    whatsappNumber: '', // Admin doesn't need WhatsApp
+    whatsappNumber: EMPTY_VALUE, // Admin doesn't need WhatsApp
     role: UserRole.ADMIN,
     clubId: null, // Admin doesn't need a club
     isActive: true,
