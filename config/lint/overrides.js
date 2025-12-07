@@ -7,13 +7,25 @@
 module.exports = {
   overrides: [
     // =========================================================================
-    // CONSTANT/CONFIG DEFINITION FILES - Magic numbers AND strings are allowed
-    // These files DEFINE the values used throughout the app
+    // CONSTANTS ONLY - All string rules disabled (including empty strings)
+    // This is the ONLY place where empty string literals are allowed
+    // =========================================================================
+    {
+      files: ['src/shared/constants/**/*.ts'],
+      rules: {
+        'no-magic-numbers': 'off',
+        'no-restricted-syntax': 'off',
+        'no-console': 'off',
+        'no-restricted-globals': 'off',
+      },
+    },
+
+    // =========================================================================
+    // CONFIG/DEFINITION FILES - Magic strings allowed, but NOT empty strings
+    // These files define values but must use EMPTY_VALUE constant
     // =========================================================================
     {
       files: [
-        // Constants
-        'src/shared/constants/**/*.ts',
         // Type definitions (define enums, constants, type unions)
         'src/types/**/*.ts',
         'src/shared/types/**/*.ts',
@@ -28,26 +40,67 @@ module.exports = {
         // Logger files (define sensitive fields, log levels)
         'src/shared/utils/logger.ts',
         'src/utils/logger.ts',
-        // Note: sentry.ts now uses constants
-        // Note: errors.ts now uses constants
         // Validation utilities (define ValidationError name)
         'src/shared/utils/validation.ts',
         'src/utils/validation.ts',
-        // Note: circuitBreaker.ts now uses constants
-        // Note: secureStorage.ts, rateLimit.ts, requestBatcher.ts now use constants
         // Infrastructure services (define types and internal error handling)
         'src/shared/services/offline.ts',
-        // Note: csrfProtection.ts and cursorPagination.ts now use constants
         // Component config files (define property key arrays)
         'src/components/**/config.ts',
       ],
       rules: {
         'no-magic-numbers': 'off',
-        // Magic strings are allowed in definition files
-        'no-restricted-syntax': 'off',
-        // Console allowed for development warnings in config/theme files
+        // Only enforce empty/space string rules - other magic strings allowed
+        'no-restricted-syntax': [
+          'error',
+          {
+            selector: 'Literal[value=""]',
+            message:
+              'Empty string literal should be a constant. Use EMPTY_VALUE from @/shared/constants',
+          },
+          {
+            selector: 'Literal[value=" "]',
+            message:
+              'Single space literal should be a constant. Use SINGLE_SPACE from @/shared/constants',
+          },
+        ],
         'no-console': 'off',
         'no-restricted-globals': 'off',
+      },
+    },
+
+    // =========================================================================
+    // TEXT COMPONENT DEFINITION - The Text.tsx file DEFINES variants/colors
+    // It should NOT use constants for its internal string-based API definitions
+    // =========================================================================
+    {
+      files: ['src/shared/components/Text.tsx'],
+      rules: {
+        'no-restricted-imports': 'off',
+        'max-lines-per-function': ['error', { max: 200, skipBlankLines: true, skipComments: true }],
+        complexity: ['error', 25],
+        // No variant/color/weight rules - this file DEFINES those values
+        'no-restricted-syntax': [
+          'error',
+          {
+            selector:
+              'CallExpression[callee.object.name="Alert"][callee.property.name="alert"] > Literal:first-child',
+            message:
+              'Use MESSAGES.TITLES.* constant for Alert title instead of string literal. Import from @/shared/constants',
+          },
+          // Empty string rule - always enforced
+          {
+            selector: 'Literal[value=""]',
+            message:
+              'Empty string literal should be a constant. Use EMPTY_VALUE from @/shared/constants',
+          },
+          // Single space rule - always enforced
+          {
+            selector: 'Literal[value=" "]',
+            message:
+              'Single space literal should be a constant. Use SINGLE_SPACE from @/shared/constants',
+          },
+        ],
       },
     },
 
@@ -58,7 +111,6 @@ module.exports = {
     // =========================================================================
     {
       files: [
-        'src/shared/components/Text.tsx',
         'src/shared/components/StandardInput.tsx',
         'src/shared/components/StandardButton.tsx',
         'src/shared/components/StandardModal.tsx',
@@ -88,12 +140,47 @@ module.exports = {
         // Allow template literals in logger calls for component debugging
         'no-restricted-syntax': [
           'error',
-          // Keep all rules except template literal restrictions for loggers
           {
             selector:
               'CallExpression[callee.object.name="Alert"][callee.property.name="alert"] > Literal:first-child',
             message:
               'Use MESSAGES.TITLES.* constant for Alert title instead of string literal. Import from @/shared/constants',
+          },
+          // Empty string rule - always enforced
+          {
+            selector: 'Literal[value=""]',
+            message:
+              'Empty string literal should be a constant. Use EMPTY_VALUE from @/shared/constants',
+          },
+          // Single space rule - always enforced
+          {
+            selector: 'Literal[value=" "]',
+            message:
+              'Single space literal should be a constant. Use SINGLE_SPACE from @/shared/constants',
+          },
+          // Text variant rule - always enforced
+          {
+            selector:
+              "JSXAttribute[name.name='variant'] > Literal[value=/^(body|bodySmall|bodyLarge|h[1-4]|heading|label|labelLarge|labelSmall|caption|captionBold|button|buttonSmall|badge|helper|display)/]",
+            message: 'Use TEXT_VARIANT.* constant for variant prop. Import from @/shared/constants',
+          },
+          // Text color rule - always enforced
+          {
+            selector:
+              "JSXAttribute[name.name='color'] > Literal[value=/^(primary|secondary|tertiary|quaternary|disabled|placeholder|inverse|onPrimary|onSecondary|onAccent|link|success|warning|error|info|inherit)/]",
+            message: 'Use TEXT_COLOR.* constant for color prop. Import from @/shared/constants',
+          },
+          // Text weight rule - always enforced
+          {
+            selector:
+              "JSXAttribute[name.name='weight'] > Literal[value=/^(light|regular|medium|semibold|bold|extrabold)$/]",
+            message: 'Use TEXT_WEIGHT.* constant for weight prop. Import from @/shared/constants',
+          },
+          // Text align rule - always enforced
+          {
+            selector:
+              "JSXAttribute[name.name='align'] > Literal[value=/^(left|center|right|auto)$/]",
+            message: 'Use TEXT_ALIGN.* constant for align prop. Import from @/shared/constants',
           },
         ],
       },
@@ -231,6 +318,18 @@ module.exports = {
             selector: 'Literal[value=/^[A-Z][a-z]+([A-Z][a-z]+)+$/]',
             message: 'PascalCase string should be a constant. Import from @/shared/constants',
           },
+          // Empty string rule - always enforced
+          {
+            selector: 'Literal[value=""]',
+            message:
+              'Empty string literal should be a constant. Use EMPTY_VALUE from @/shared/constants',
+          },
+          // Single space rule - always enforced
+          {
+            selector: 'Literal[value=" "]',
+            message:
+              'Single space literal should be a constant. Use SINGLE_SPACE from @/shared/constants',
+          },
         ],
       },
     },
@@ -243,8 +342,20 @@ module.exports = {
       files: ['src/shared/patterns/**/*.ts'],
       rules: {
         '@typescript-eslint/no-non-null-assertion': 'off',
-        // Infrastructure code may use inline error messages
-        'no-restricted-syntax': 'off',
+        // Infrastructure code may use inline error messages, but NOT empty/space strings
+        'no-restricted-syntax': [
+          'error',
+          {
+            selector: 'Literal[value=""]',
+            message:
+              'Empty string literal should be a constant. Use EMPTY_VALUE from @/shared/constants',
+          },
+          {
+            selector: 'Literal[value=" "]',
+            message:
+              'Single space literal should be a constant. Use SINGLE_SPACE from @/shared/constants',
+          },
+        ],
       },
     },
 
@@ -345,8 +456,20 @@ module.exports = {
         'no-magic-numbers': 'off',
         'max-lines-per-function': 'off',
         'max-nested-callbacks': 'off',
-        // Magic strings allowed in tests for readability
-        'no-restricted-syntax': 'off',
+        // Magic strings allowed in tests, but NOT empty/space strings
+        'no-restricted-syntax': [
+          'error',
+          {
+            selector: 'Literal[value=""]',
+            message:
+              'Empty string literal should be a constant. Use EMPTY_VALUE from @/shared/constants',
+          },
+          {
+            selector: 'Literal[value=" "]',
+            message:
+              'Single space literal should be a constant. Use SINGLE_SPACE from @/shared/constants',
+          },
+        ],
         // Console allowed in tests for debugging
         'no-console': 'off',
         'no-restricted-globals': 'off',
@@ -367,15 +490,57 @@ module.exports = {
         // Allow template literals in screens for dynamic content
         'no-restricted-syntax': [
           'error',
-          // Only enforce Alert and Error rules in screens
           {
             selector:
               'CallExpression[callee.object.name="Alert"][callee.property.name="alert"] > Literal',
             message: 'Alert messages must use MESSAGES.* constants or t()',
           },
+          // Alert template literals - must use t() or MESSAGES.FORMATTED.*
+          {
+            selector:
+              'CallExpression[callee.object.name="Alert"][callee.property.name="alert"] > TemplateLiteral',
+            message:
+              'Alert messages with template literals must use t() with interpolation. Import from i18n',
+          },
           {
             selector: 'ThrowStatement NewExpression[callee.name=/Error$/] > Literal',
             message: 'Error messages must use ERROR_MESSAGES.* constants',
+          },
+          // Empty string rule - always enforced
+          {
+            selector: 'Literal[value=""]',
+            message:
+              'Empty string literal should be a constant. Use EMPTY_VALUE from @/shared/constants',
+          },
+          // Single space rule - always enforced
+          {
+            selector: 'Literal[value=" "]',
+            message:
+              'Single space literal should be a constant. Use SINGLE_SPACE from @/shared/constants',
+          },
+          // Text variant rule - always enforced
+          {
+            selector:
+              "JSXAttribute[name.name='variant'] > Literal[value=/^(body|bodySmall|bodyLarge|h[1-4]|heading|label|labelLarge|labelSmall|caption|captionBold|button|buttonSmall|badge|helper|display)/]",
+            message: 'Use TEXT_VARIANT.* constant for variant prop. Import from @/shared/constants',
+          },
+          // Text color rule - always enforced
+          {
+            selector:
+              "JSXAttribute[name.name='color'] > Literal[value=/^(primary|secondary|tertiary|quaternary|disabled|placeholder|inverse|onPrimary|onSecondary|onAccent|link|success|warning|error|info|inherit)/]",
+            message: 'Use TEXT_COLOR.* constant for color prop. Import from @/shared/constants',
+          },
+          // Text weight rule - always enforced
+          {
+            selector:
+              "JSXAttribute[name.name='weight'] > Literal[value=/^(light|regular|medium|semibold|bold|extrabold)$/]",
+            message: 'Use TEXT_WEIGHT.* constant for weight prop. Import from @/shared/constants',
+          },
+          // Text align rule - always enforced
+          {
+            selector:
+              "JSXAttribute[name.name='align'] > Literal[value=/^(left|center|right|auto)$/]",
+            message: 'Use TEXT_ALIGN.* constant for align prop. Import from @/shared/constants',
           },
         ],
       },
@@ -388,8 +553,20 @@ module.exports = {
       files: ['**/mockData.ts', '**/mock*.ts', '**/*Mock*.ts', '**/fixtures/**/*.ts'],
       rules: {
         'no-magic-numbers': 'off',
-        // Magic strings allowed in mock data
-        'no-restricted-syntax': 'off',
+        // Magic strings allowed in mock data, but NOT empty/space strings
+        'no-restricted-syntax': [
+          'error',
+          {
+            selector: 'Literal[value=""]',
+            message:
+              'Empty string literal should be a constant. Use EMPTY_VALUE from @/shared/constants',
+          },
+          {
+            selector: 'Literal[value=" "]',
+            message:
+              'Single space literal should be a constant. Use SINGLE_SPACE from @/shared/constants',
+          },
+        ],
       },
     },
   ],

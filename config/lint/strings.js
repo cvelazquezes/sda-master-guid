@@ -188,7 +188,8 @@ module.exports = {
       {
         selector:
           "BinaryExpression[left.object.name='Platform'][left.property.name='OS'] > Literal[value=/^(web|ios|android)$/]",
-        message: 'Use PLATFORM_OS.* constant for platform comparison. Import from @/shared/constants',
+        message:
+          'Use PLATFORM_OS.* constant for platform comparison. Import from @/shared/constants',
       },
 
       // -----------------------------------------------------------------------
@@ -197,8 +198,9 @@ module.exports = {
       // -----------------------------------------------------------------------
       {
         selector:
-          "CallExpression[callee.property.name=/^(get|append|set|has|delete)$/] > Literal[value=/^(limit|cursor|order|page|pageSize|sortBy|sortOrder)$/]",
-        message: 'Use QUERY_PARAM.* constant for query parameter names. Import from @/shared/constants',
+          'CallExpression[callee.property.name=/^(get|append|set|has|delete)$/] > Literal[value=/^(limit|cursor|order|page|pageSize|sortBy|sortOrder)$/]',
+        message:
+          'Use QUERY_PARAM.* constant for query parameter names. Import from @/shared/constants',
       },
 
       // -----------------------------------------------------------------------
@@ -206,7 +208,7 @@ module.exports = {
       //     Catches: toString('base64'), from(x, 'utf-8')
       // -----------------------------------------------------------------------
       {
-        selector: "CallExpression > Literal[value=/^(base64|utf-8|utf8|hex|ascii|binary)$/]",
+        selector: 'CallExpression > Literal[value=/^(base64|utf-8|utf8|hex|ascii|binary)$/]',
         message: 'Use ENCODING.* constant for encoding type. Import from @/shared/constants',
       },
 
@@ -215,7 +217,7 @@ module.exports = {
       //     Catches: order: 'asc', sortOrder: 'desc'
       // -----------------------------------------------------------------------
       {
-        selector: "Property[key.name=/order$/i] > Literal[value=/^(asc|desc)$/]",
+        selector: 'Property[key.name=/order$/i] > Literal[value=/^(asc|desc)$/]',
         message: 'Use SORT_ORDER.* constant for sort order. Import from @/shared/constants',
       },
 
@@ -225,7 +227,8 @@ module.exports = {
       // -----------------------------------------------------------------------
       {
         selector: "JSXAttribute[name.name='style'] > Literal[value=/^(auto|light|dark|inverted)$/]",
-        message: 'Use STATUS_BAR_STYLE.* constant for StatusBar style. Import from @/shared/constants',
+        message:
+          'Use STATUS_BAR_STYLE.* constant for StatusBar style. Import from @/shared/constants',
       },
 
       // -----------------------------------------------------------------------
@@ -261,7 +264,7 @@ module.exports = {
       //     Catches: language: 'en', lang: 'es'
       // -----------------------------------------------------------------------
       {
-        selector: "Property[key.name=/^(language|lang)$/] > Literal[value=/^(en|es|pt|fr)$/]",
+        selector: 'Property[key.name=/^(language|lang)$/] > Literal[value=/^(en|es|pt|fr)$/]',
         message: 'Use LANGUAGE.* constant for language code. Import from @/shared/constants',
       },
 
@@ -464,7 +467,8 @@ module.exports = {
       {
         selector:
           "BinaryExpression[operator='in'] > Literal[value=/^(response|message|code|status|data|error)$/]:first-child",
-        message: 'Use OBJECT_PROPERTY.* constant for property check. Import from @/shared/constants',
+        message:
+          'Use OBJECT_PROPERTY.* constant for property check. Import from @/shared/constants',
       },
 
       // =========================================================================
@@ -477,6 +481,170 @@ module.exports = {
       {
         selector: "CallExpression[callee.property.name='regex'] > Literal[value=/^\\^\\\\d/]",
         message: 'Use TIME_REGEX or define pattern constant for time/date regex',
+      },
+
+      // =========================================================================
+      // EMPTY STRING LITERALS
+      // =========================================================================
+
+      // -----------------------------------------------------------------------
+      // Empty string literals ('' or "")
+      // Catches: || '', ?? '', === '', !== '', = ''
+      // Use EMPTY_VALUE constant instead
+      // -----------------------------------------------------------------------
+      {
+        selector: 'Literal[value=""]',
+        message:
+          'Empty string literal should be a constant. Use EMPTY_VALUE from @/shared/constants',
+      },
+
+      // -----------------------------------------------------------------------
+      // Single space string literals (' ')
+      // Catches: {' '} in JSX for spacing between elements
+      // Use SINGLE_SPACE constant instead
+      // -----------------------------------------------------------------------
+      {
+        selector: 'Literal[value=" "]',
+        message:
+          'Single space literal should be a constant. Use SINGLE_SPACE from @/shared/constants',
+      },
+
+      // =========================================================================
+      // TYPE DEFINITIONS THAT SHOULD BE IMPORTED
+      // =========================================================================
+
+      // -----------------------------------------------------------------------
+      // Local IconName type definition
+      // Catches: type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name']
+      // Use shared IconName type instead
+      // -----------------------------------------------------------------------
+      {
+        selector: "TSTypeAliasDeclaration[id.name='IconName']",
+        message:
+          'IconName type should be imported from @/shared/constants, not defined locally. Import { IconName } from @/shared/constants',
+      },
+
+      // =========================================================================
+      // REGEX CONSTANTS THAT SHOULD BE IMPORTED
+      // =========================================================================
+
+      // -----------------------------------------------------------------------
+      // Local regex constant definitions
+      // Catches: const EMAIL_REGEX = /.../, const PHONE_REGEX = /.../, etc.
+      // Use shared regex constants from @/shared/constants
+      // -----------------------------------------------------------------------
+      {
+        selector:
+          "VariableDeclarator[id.name=/^(EMAIL_REGEX|PHONE_REGEX|UUID_REGEX|TIME_REGEX|IDEMPOTENCY_KEY_REGEX)$/][init.type='Literal']",
+        message:
+          'Regex constant should be imported from @/shared/constants, not defined locally. Import { EMAIL_REGEX, PHONE_REGEX, UUID_REGEX } from @/shared/constants',
+      },
+
+      // =========================================================================
+      // ZOD VALIDATION PATTERNS
+      // =========================================================================
+
+      // -----------------------------------------------------------------------
+      // Inline regex in Zod .regex() calls
+      // Catches: .regex(/[A-Z]/, ...), .regex(/^\+?[1-9]/, ...)
+      // Use PASSWORD.REGEX.*, PHONE.REGEX, NAME.REGEX from @/shared/constants/validation
+      // -----------------------------------------------------------------------
+      {
+        selector: "CallExpression[callee.property.name='regex'] > Literal[regex]",
+        message:
+          'Inline regex in Zod validation should be a constant. Use PASSWORD.REGEX.*, PHONE.REGEX, NAME.REGEX from @/shared/constants/validation',
+      },
+
+      // -----------------------------------------------------------------------
+      // Number literals in Zod .min() calls
+      // Catches: .min(1, ...), .min(8, ...)
+      // Use NUMERIC.MIN_REQUIRED, PASSWORD.MIN_LENGTH, TEXT.NAME_MIN from @/shared/constants/validation
+      // -----------------------------------------------------------------------
+      {
+        selector: "CallExpression[callee.property.name='min'] > Literal[value]",
+        message:
+          'Number literal in .min() should be a constant. Use NUMERIC.MIN_REQUIRED, PASSWORD.MIN_LENGTH, TEXT.* from @/shared/constants/validation',
+      },
+
+      // -----------------------------------------------------------------------
+      // Number literals in Zod .max() calls
+      // Catches: .max(100, ...), .max(128, ...)
+      // Use PASSWORD.MAX_LENGTH, TEXT.NAME_MAX, TEXT.MEDIUM_TEXT_MAX from @/shared/constants/validation
+      // -----------------------------------------------------------------------
+      {
+        selector: "CallExpression[callee.property.name='max'] > Literal[value]",
+        message:
+          'Number literal in .max() should be a constant. Use PASSWORD.MAX_LENGTH, TEXT.* from @/shared/constants/validation',
+      },
+
+      // -----------------------------------------------------------------------
+      // Number literals in Zod .length() calls
+      // Catches: .length(2), .length(36)
+      // Use TEXT.LANGUAGE_CODE_LENGTH, UUID.LENGTH from @/shared/constants/validation
+      // -----------------------------------------------------------------------
+      {
+        selector: "CallExpression[callee.property.name='length'] > Literal[value]",
+        message:
+          'Number literal in .length() should be a constant. Use TEXT.LANGUAGE_CODE_LENGTH, UUID.LENGTH from @/shared/constants/validation',
+      },
+
+      // =========================================================================
+      // STRING DELIMITER PATTERNS
+      // =========================================================================
+
+      // -----------------------------------------------------------------------
+      // Dot delimiter in .join() calls
+      // Catches: .join('.')
+      // Use STRING_DELIMITER.DOT from @/shared/constants
+      // -----------------------------------------------------------------------
+      {
+        selector: "CallExpression[callee.property.name='join'] > Literal[value='.']",
+        message:
+          'Dot delimiter should be a constant. Use STRING_DELIMITER.DOT from @/shared/constants',
+      },
+
+      // -----------------------------------------------------------------------
+      // Comma delimiter in .join() calls
+      // Catches: .join(',')
+      // Use STRING_DELIMITER.COMMA from @/shared/constants
+      // -----------------------------------------------------------------------
+      {
+        selector: "CallExpression[callee.property.name='join'] > Literal[value=',']",
+        message:
+          'Comma delimiter should be a constant. Use STRING_DELIMITER.COMMA from @/shared/constants',
+      },
+
+      // -----------------------------------------------------------------------
+      // Colon delimiter in .split()/.join() calls
+      // Catches: .split(':'), .join(':')
+      // Use SORT_PARSE.DELIMITER from @/shared/constants
+      // -----------------------------------------------------------------------
+      {
+        selector: "CallExpression[callee.property.name=/^(split|join)$/] > Literal[value=':']",
+        message:
+          'Colon delimiter should be a constant. Use SORT_PARSE.DELIMITER from @/shared/constants',
+      },
+
+      // -----------------------------------------------------------------------
+      // Hyphen/dash prefix in .startsWith() calls
+      // Catches: .startsWith('-')
+      // Use SORT_PARSE.DESC_PREFIX from @/shared/constants
+      // -----------------------------------------------------------------------
+      {
+        selector: "CallExpression[callee.property.name='startsWith'] > Literal[value='-']",
+        message:
+          'Hyphen prefix should be a constant. Use SORT_PARSE.DESC_PREFIX from @/shared/constants',
+      },
+
+      // -----------------------------------------------------------------------
+      // Common delimiters in .includes() calls
+      // Catches: .includes(':'), .includes('/')
+      // Use appropriate delimiter constant from @/shared/constants
+      // -----------------------------------------------------------------------
+      {
+        selector: "CallExpression[callee.property.name='includes'] > Literal[value=':']",
+        message:
+          'Colon in .includes() should be a constant. Use SORT_PARSE.DELIMITER from @/shared/constants',
       },
     ],
   },
