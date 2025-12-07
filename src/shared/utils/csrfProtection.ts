@@ -9,6 +9,14 @@ import { secureStorage } from './secureStorage';
 import { logger } from './logger';
 import { CACHE } from '../constants/timing';
 import { MATH, CRYPTO } from '../constants/numbers';
+import {
+  LOG_MESSAGES,
+  STORAGE_KEYS,
+  ENCODING,
+  CSRF_COOKIE_NAME,
+  STATE_CHANGING_METHODS_UPPER,
+  HEADER,
+} from '../constants';
 
 // ============================================================================
 // React Hook for CSRF Token
@@ -37,8 +45,8 @@ interface CSRFConfig {
  * Manages CSRF tokens for state-changing operations
  */
 export class CSRFTokenService {
-  private static readonly TOKEN_KEY = 'csrf_token';
-  private static readonly TOKEN_TIMESTAMP_KEY = 'csrf_token_timestamp';
+  private static readonly TOKEN_KEY = STORAGE_KEYS.CSRF.TOKEN;
+  private static readonly TOKEN_TIMESTAMP_KEY = STORAGE_KEYS.CSRF.TOKEN_TIMESTAMP;
 
   private static readonly config: CSRFConfig = {
     expirationTime: CACHE.VERY_LONG, // 1 hour
@@ -51,7 +59,7 @@ export class CSRFTokenService {
   static generateToken(): string {
     // Generate cryptographically secure random token
     const randomBytes = crypto.randomBytes(CRYPTO.TOKEN_BYTES);
-    return randomBytes.toString('base64');
+    return randomBytes.toString(ENCODING.BASE64);
   }
 
   /**
@@ -64,10 +72,10 @@ export class CSRFTokenService {
         secureStorage.setItem(this.TOKEN_KEY, token),
         secureStorage.setItem(this.TOKEN_TIMESTAMP_KEY, timestamp.toString()),
       ]);
-      logger.debug('CSRF token stored');
+      logger.debug(LOG_MESSAGES.SECURITY.CSRF.TOKEN_STORED);
     } catch (error) {
-      logger.error('Failed to store CSRF token', error as Error);
-      throw new Error('Failed to store CSRF token');
+      logger.error(LOG_MESSAGES.SECURITY.CSRF.STORE_FAILED, error as Error);
+      throw new Error(LOG_MESSAGES.SECURITY.CSRF.FAILED_TO_STORE_TOKEN);
     }
   }
 
@@ -88,14 +96,14 @@ export class CSRFTokenService {
 
       // Check if token is expired
       if (now - timestamp > this.config.expirationTime) {
-        logger.debug('CSRF token expired');
+        logger.debug(LOG_MESSAGES.SECURITY.CSRF.TOKEN_EXPIRED);
         await this.clearToken();
         return null;
       }
 
       return token;
     } catch (error) {
-      logger.error('Failed to get CSRF token', error as Error);
+      logger.error(LOG_MESSAGES.SECURITY.CSRF.RETRIEVE_FAILED, error as Error);
       return null;
     }
   }
@@ -117,7 +125,7 @@ export class CSRFTokenService {
         const age = Date.now() - timestamp;
 
         if (age > this.config.expirationTime - this.config.refreshThreshold) {
-          logger.debug('Refreshing CSRF token');
+          logger.debug(LOG_MESSAGES.SECURITY.CSRF.TOKEN_REFRESHING);
           token = this.generateToken();
           await this.storeToken(token);
         }
@@ -134,7 +142,7 @@ export class CSRFTokenService {
     const storedToken = await this.getToken();
 
     if (!storedToken) {
-      logger.warn('No CSRF token stored');
+      logger.warn(LOG_MESSAGES.SECURITY.CSRF.NO_TOKEN);
       return false;
     }
 
@@ -151,9 +159,9 @@ export class CSRFTokenService {
         secureStorage.removeItem(this.TOKEN_KEY),
         secureStorage.removeItem(this.TOKEN_TIMESTAMP_KEY),
       ]);
-      logger.debug('CSRF token cleared');
+      logger.debug(LOG_MESSAGES.SECURITY.CSRF.TOKEN_CLEARED);
     } catch (error) {
-      logger.error('Failed to clear CSRF token', error as Error);
+      logger.error(LOG_MESSAGES.SECURITY.CSRF.CLEAR_FAILED, error as Error);
     }
   }
 
@@ -204,7 +212,7 @@ export function useCSRFToken(): {
       const currentToken = await CSRFTokenService.getOrGenerateToken();
       setToken(currentToken);
     } catch (error) {
-      logger.error('Failed to load CSRF token', error as Error);
+      logger.error(LOG_MESSAGES.SECURITY.CSRF.LOAD_FAILED, error as Error);
     } finally {
       setIsLoading(false);
     }
@@ -239,7 +247,7 @@ export function useCSRFToken(): {
  * - Backend validates both match
  */
 export class DoubleSubmitCookieService {
-  private static readonly COOKIE_NAME = '__Host-csrf-token';
+  private static readonly COOKIE_NAME = CSRF_COOKIE_NAME;
 
   /**
    * Sets CSRF token in cookie
@@ -249,7 +257,7 @@ export class DoubleSubmitCookieService {
    */
   static setCookie(token: string): void {
     if (__DEV__) {
-      logger.debug('CSRF cookie would be set', { token });
+      logger.debug(LOG_MESSAGES.SECURITY.CSRF.COOKIE_SET, { token });
     }
     // In React Native, cookies are managed by the HTTP client
     // This method is for documentation and web compatibility
@@ -273,8 +281,9 @@ export class DoubleSubmitCookieService {
  * Validates if a request requires CSRF protection
  */
 export function requiresCSRFProtection(method: string): boolean {
-  const protectedMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];
-  return protectedMethods.includes(method.toUpperCase());
+  return STATE_CHANGING_METHODS_UPPER.includes(
+    method.toUpperCase() as (typeof STATE_CHANGING_METHODS_UPPER)[number]
+  );
 }
 
 /**
@@ -287,7 +296,7 @@ export async function addCSRFHeader(
 
   return {
     ...headers,
-    'X-CSRF-Token': token,
+    [HEADER.X_CSRF_TOKEN]: token,
   };
 }
 
@@ -296,7 +305,7 @@ export async function addCSRFHeader(
  */
 export async function validateCSRFToken(token: string | null): Promise<boolean> {
   if (!token) {
-    logger.warn('Missing CSRF token in request');
+    logger.warn(LOG_MESSAGES.SECURITY.CSRF.MISSING_TOKEN);
     return false;
   }
 

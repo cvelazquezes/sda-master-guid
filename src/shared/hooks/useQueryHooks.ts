@@ -18,6 +18,7 @@ import { authService } from '../../features/auth/services/AuthService';
 import { matchService } from '../../services/matchService';
 import { User, Match } from '../../types';
 import { CACHE } from '../constants/timing';
+import { QUERY_KEY, QUERY_SCOPE } from '../constants/errorMessages';
 
 // ============================================================================
 // Auth Hooks
@@ -104,10 +105,14 @@ export function useUpdateUser(): ReturnType<typeof useMutation<User, Error, Part
 export function useMyMatches(
   options?: UseQueryOptions<Match[]>
 ): ReturnType<typeof useQuery<Match[]>> {
-  return useQuery(queryKeys.matches.list({ scope: 'my' }), () => matchService.getMyMatches(), {
-    staleTime: CACHE.SHORT, // ~1 minute
-    ...options,
-  });
+  return useQuery(
+    queryKeys.matches.list({ scope: QUERY_SCOPE.MY }),
+    () => matchService.getMyMatches(),
+    {
+      staleTime: CACHE.SHORT, // ~1 minute
+      ...options,
+    }
+  );
 }
 
 /**
@@ -235,7 +240,7 @@ export function useInfiniteMatches(
   options?: UseInfiniteQueryOptions<Match[]>
 ): ReturnType<typeof useInfiniteQuery<Match[]>> {
   return useInfiniteQuery(
-    [...queryKeys.matches.list({ clubId }), 'infinite'],
+    [...queryKeys.matches.list({ clubId }), QUERY_KEY.INFINITE],
     async ({ pageParam: _pageParam = 1 }) => {
       // In real implementation, pass page to API
       const matches = await matchService.getMatches(clubId);
@@ -266,7 +271,7 @@ export function useInfiniteMatches(
  */
 export async function prefetchMyMatches(): Promise<void> {
   await queryClient.prefetchQuery({
-    queryKey: queryKeys.matches.list({ scope: 'my' }),
+    queryKey: queryKeys.matches.list({ scope: QUERY_SCOPE.MY }),
     queryFn: matchService.getMyMatches,
   });
 }

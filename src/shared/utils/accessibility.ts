@@ -5,39 +5,23 @@
 
 import { AccessibilityProps, Platform, AccessibilityInfo } from 'react-native';
 import { COLOR, WCAG, TOUCH_TARGET, SPACING, MATH } from '../constants/numbers';
+import { PLATFORM_OS } from '../constants/app';
+import {
+  A11Y_ROLE,
+  A11Y_CHECKED,
+  A11Y_ALERT_TYPE,
+  A11Y_LABEL,
+  A11Y_NUMBER_LABEL,
+  AccessibilityRoleType,
+  A11yAlertType,
+} from '../constants/ui';
+import { LOCALE, DATE_FORMAT, STRING_JOINER } from '../constants/locale';
 
 // ============================================================================
-// Accessibility Role Mapping
+// Accessibility Role Mapping (derived from A11Y_ROLE constants)
 // ============================================================================
 
-export type AccessibilityRole =
-  | 'none'
-  | 'button'
-  | 'link'
-  | 'search'
-  | 'image'
-  | 'keyboardkey'
-  | 'text'
-  | 'adjustable'
-  | 'imagebutton'
-  | 'header'
-  | 'summary'
-  | 'alert'
-  | 'checkbox'
-  | 'combobox'
-  | 'menu'
-  | 'menubar'
-  | 'menuitem'
-  | 'progressbar'
-  | 'radio'
-  | 'radiogroup'
-  | 'scrollbar'
-  | 'spinbutton'
-  | 'switch'
-  | 'tab'
-  | 'tablist'
-  | 'timer'
-  | 'toolbar';
+export type AccessibilityRole = AccessibilityRoleType;
 
 // ============================================================================
 // Accessibility State
@@ -46,7 +30,7 @@ export type AccessibilityRole =
 export interface AccessibilityState {
   disabled?: boolean;
   selected?: boolean;
-  checked?: boolean | 'mixed';
+  checked?: boolean | typeof A11Y_CHECKED.MIXED;
   busy?: boolean;
   expanded?: boolean;
 }
@@ -68,7 +52,7 @@ export function createButtonA11yProps(
 ): AccessibilityProps {
   return {
     accessible: true,
-    accessibilityRole: options?.role || 'button',
+    accessibilityRole: options?.role || A11Y_ROLE.BUTTON,
     accessibilityLabel: label,
     accessibilityHint: options?.hint,
     accessibilityState: {
@@ -88,7 +72,7 @@ export function createLinkA11yProps(
 ): AccessibilityProps {
   return {
     accessible: true,
-    accessibilityRole: 'link',
+    accessibilityRole: A11Y_ROLE.LINK,
     accessibilityLabel: label,
     accessibilityHint: options?.hint,
   };
@@ -109,7 +93,7 @@ export function createInputA11yProps(
   let hint = options?.placeholder;
 
   if (options?.required) {
-    hint = hint ? `${hint} (required)` : 'Required field';
+    hint = hint ? `${hint} ${A11Y_LABEL.REQUIRED_SUFFIX}` : A11Y_LABEL.REQUIRED_FIELD;
   }
 
   if (options?.error) {
@@ -137,7 +121,7 @@ export function createCheckboxA11yProps(
 ): AccessibilityProps {
   return {
     accessible: true,
-    accessibilityRole: 'checkbox',
+    accessibilityRole: A11Y_ROLE.CHECKBOX,
     accessibilityLabel: label,
     accessibilityHint: options?.hint,
     accessibilityState: {
@@ -160,7 +144,7 @@ export function createSwitchA11yProps(
 ): AccessibilityProps {
   return {
     accessible: true,
-    accessibilityRole: 'switch',
+    accessibilityRole: A11Y_ROLE.SWITCH,
     accessibilityLabel: label,
     accessibilityHint: options?.hint,
     accessibilityState: {
@@ -183,7 +167,7 @@ export function createRadioA11yProps(
 ): AccessibilityProps {
   return {
     accessible: true,
-    accessibilityRole: 'radio',
+    accessibilityRole: A11Y_ROLE.RADIO,
     accessibilityLabel: label,
     accessibilityHint: options?.hint,
     accessibilityState: {
@@ -199,9 +183,9 @@ export function createRadioA11yProps(
 export function createHeaderA11yProps(label: string, level: number = 1): AccessibilityProps {
   return {
     accessible: true,
-    accessibilityRole: 'header',
+    accessibilityRole: A11Y_ROLE.HEADER,
     accessibilityLabel: label,
-    accessibilityHint: `Heading level ${level}`,
+    accessibilityHint: A11Y_LABEL.HEADING_LEVEL(level),
   };
 }
 
@@ -222,7 +206,7 @@ export function createImageA11yProps(
 
   return {
     accessible: true,
-    accessibilityRole: 'image',
+    accessibilityRole: A11Y_ROLE.IMAGE,
     accessibilityLabel: altText,
   };
 }
@@ -230,10 +214,10 @@ export function createImageA11yProps(
 /**
  * Creates accessibility props for a loading indicator
  */
-export function createLoadingA11yProps(message: string = 'Loading'): AccessibilityProps {
+export function createLoadingA11yProps(message: string = A11Y_LABEL.LOADING): AccessibilityProps {
   return {
     accessible: true,
-    accessibilityRole: 'progressbar',
+    accessibilityRole: A11Y_ROLE.PROGRESSBAR,
     accessibilityLabel: message,
     accessibilityState: {
       busy: true,
@@ -246,12 +230,12 @@ export function createLoadingA11yProps(message: string = 'Loading'): Accessibili
  */
 export function createAlertA11yProps(
   message: string,
-  type: 'info' | 'success' | 'warning' | 'error' = 'info'
+  type: A11yAlertType = A11Y_ALERT_TYPE.INFO
 ): AccessibilityProps {
   return {
     accessible: true,
-    accessibilityRole: 'alert',
-    accessibilityLabel: `${type}: ${message}`,
+    accessibilityRole: A11Y_ROLE.ALERT,
+    accessibilityLabel: A11Y_LABEL.ALERT_MESSAGE(type, message),
     accessibilityLiveRegion: 'assertive',
   };
 }
@@ -267,8 +251,8 @@ export function createTabA11yProps(
 ): AccessibilityProps {
   return {
     accessible: true,
-    accessibilityRole: 'tab',
-    accessibilityLabel: `${label}, tab ${index + 1} of ${total}`,
+    accessibilityRole: A11Y_ROLE.TAB,
+    accessibilityLabel: A11Y_LABEL.TAB_POSITION(label, index, total),
     accessibilityState: {
       selected,
     },
@@ -283,7 +267,7 @@ export function createTabA11yProps(
  * Combines multiple text strings into a single accessibility label
  */
 export function combineA11yLabel(...parts: (string | undefined | null)[]): string {
-  return parts.filter(Boolean).join(', ');
+  return parts.filter(Boolean).join(STRING_JOINER.COMMA_SPACE);
 }
 
 /**
@@ -291,10 +275,10 @@ export function combineA11yLabel(...parts: (string | undefined | null)[]): strin
  */
 export function formatNumberA11y(value: number): string {
   if (value >= MATH.MILLION) {
-    return `${(value / MATH.MILLION).toFixed(1)} million`;
+    return `${(value / MATH.MILLION).toFixed(1)} ${A11Y_NUMBER_LABEL.MILLION}`;
   }
   if (value >= MATH.THOUSAND) {
-    return `${(value / MATH.THOUSAND).toFixed(1)} thousand`;
+    return `${(value / MATH.THOUSAND).toFixed(1)} ${A11Y_NUMBER_LABEL.THOUSAND}`;
   }
   return value.toString();
 }
@@ -303,23 +287,14 @@ export function formatNumberA11y(value: number): string {
  * Formats a date for screen readers
  */
 export function formatDateA11y(date: Date): string {
-  return date.toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  return date.toLocaleDateString(LOCALE.EN_US, DATE_FORMAT.FULL_DATE);
 }
 
 /**
  * Formats a time for screen readers
  */
 export function formatTimeA11y(date: Date): string {
-  return date.toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  });
+  return date.toLocaleTimeString(LOCALE.EN_US, DATE_FORMAT.TIME_12H);
 }
 
 /**
@@ -331,8 +306,7 @@ export function createListItemA11y(
   total: number,
   description?: string
 ): string {
-  const parts = [title, `item ${index + 1} of ${total}`, description];
-  return combineA11yLabel(...parts);
+  return A11Y_LABEL.ITEM_POSITION(title, index, total, description);
 }
 
 // ============================================================================
@@ -380,7 +354,7 @@ export function createHitSlop(size: number = SPACING.XS): {
  * Announces a message to screen readers
  */
 export function announceForAccessibility(message: string): void {
-  if (Platform.OS === 'ios' || Platform.OS === 'android') {
+  if (Platform.OS === PLATFORM_OS.IOS || Platform.OS === PLATFORM_OS.ANDROID) {
     AccessibilityInfo.announceForAccessibility(message);
   }
 }
@@ -389,7 +363,7 @@ export function announceForAccessibility(message: string): void {
  * Checks if screen reader is enabled
  */
 export async function isScreenReaderEnabled(): Promise<boolean> {
-  if (Platform.OS === 'web') {
+  if (Platform.OS === PLATFORM_OS.WEB) {
     return false; // Not available on web
   }
 

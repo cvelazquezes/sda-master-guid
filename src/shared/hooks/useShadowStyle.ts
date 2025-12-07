@@ -16,7 +16,14 @@ import { ViewStyle, Platform } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { designTokens } from '../theme/designTokens';
 import { ShadowPreset } from '../types/theme';
-import { SHADOW_HEIGHT, SHADOW_BLUR, SHADOW_OPACITY, MODAL_ELEVATION } from '../constants/numbers';
+import {
+  SHADOW_HEIGHT,
+  SHADOW_BLUR,
+  SHADOW_OPACITY,
+  MODAL_ELEVATION,
+  SHADOW_COLOR,
+} from '../constants/numbers';
+import { PLATFORM_OS } from '../constants/app';
 
 interface ShadowConfig {
   shadowColor: string;
@@ -41,14 +48,14 @@ interface UseShadowStyleReturn {
 const SHADOW_PRESETS: Record<ShadowPreset, { light: ShadowConfig; dark: ShadowConfig }> = {
   none: {
     light: {
-      shadowColor: 'transparent',
+      shadowColor: SHADOW_COLOR.NONE,
       shadowOffset: { width: 0, height: 0 },
       shadowOpacity: 0,
       shadowRadius: 0,
       elevation: 0,
     },
     dark: {
-      shadowColor: 'transparent',
+      shadowColor: SHADOW_COLOR.NONE,
       shadowOffset: { width: 0, height: 0 },
       shadowOpacity: 0,
       shadowRadius: 0,
@@ -57,14 +64,14 @@ const SHADOW_PRESETS: Record<ShadowPreset, { light: ShadowConfig; dark: ShadowCo
   },
   subtle: {
     light: {
-      shadowColor: '#000000',
+      shadowColor: SHADOW_COLOR.DEFAULT,
       shadowOffset: { width: 0, height: SHADOW_HEIGHT.SUBTLE },
       shadowOpacity: designTokens.shadowConfig.lightSubtle.opacity,
       shadowRadius: SHADOW_BLUR.SUBTLE,
       elevation: designTokens.shadowConfig.lightSubtle.elevation,
     },
     dark: {
-      shadowColor: '#000000',
+      shadowColor: SHADOW_COLOR.DEFAULT,
       shadowOffset: { width: 0, height: SHADOW_HEIGHT.SUBTLE },
       shadowOpacity: designTokens.shadowConfig.darkSubtle.opacity,
       shadowRadius: SHADOW_BLUR.SUBTLE,
@@ -73,14 +80,14 @@ const SHADOW_PRESETS: Record<ShadowPreset, { light: ShadowConfig; dark: ShadowCo
   },
   card: {
     light: {
-      shadowColor: '#000000',
+      shadowColor: SHADOW_COLOR.DEFAULT,
       shadowOffset: { width: 0, height: SHADOW_HEIGHT.CARD },
       shadowOpacity: designTokens.shadowConfig.light.opacity,
       shadowRadius: SHADOW_BLUR.CARD,
       elevation: designTokens.shadowConfig.light.elevation,
     },
     dark: {
-      shadowColor: '#000000',
+      shadowColor: SHADOW_COLOR.DEFAULT,
       shadowOffset: { width: 0, height: SHADOW_HEIGHT.CARD },
       shadowOpacity: designTokens.shadowConfig.dark.opacity,
       shadowRadius: SHADOW_BLUR.CARD,
@@ -89,14 +96,14 @@ const SHADOW_PRESETS: Record<ShadowPreset, { light: ShadowConfig; dark: ShadowCo
   },
   elevated: {
     light: {
-      shadowColor: '#000000',
+      shadowColor: SHADOW_COLOR.DEFAULT,
       shadowOffset: { width: 0, height: SHADOW_HEIGHT.ELEVATED },
       shadowOpacity: designTokens.shadowConfig.lightStrong.opacity,
       shadowRadius: SHADOW_BLUR.ELEVATED,
       elevation: designTokens.shadowConfig.lightStrong.elevation,
     },
     dark: {
-      shadowColor: '#000000',
+      shadowColor: SHADOW_COLOR.DEFAULT,
       shadowOffset: { width: 0, height: SHADOW_HEIGHT.ELEVATED },
       shadowOpacity: designTokens.shadowConfig.darkStrong.opacity,
       shadowRadius: SHADOW_BLUR.ELEVATED,
@@ -105,14 +112,14 @@ const SHADOW_PRESETS: Record<ShadowPreset, { light: ShadowConfig; dark: ShadowCo
   },
   modal: {
     light: {
-      shadowColor: '#000000',
+      shadowColor: SHADOW_COLOR.DEFAULT,
       shadowOffset: { width: 0, height: SHADOW_HEIGHT.MODAL },
       shadowOpacity: SHADOW_OPACITY.MODAL_LIGHT,
       shadowRadius: SHADOW_BLUR.MODAL,
       elevation: MODAL_ELEVATION,
     },
     dark: {
-      shadowColor: '#000000',
+      shadowColor: SHADOW_COLOR.DEFAULT,
       shadowOffset: { width: 0, height: SHADOW_HEIGHT.MODAL },
       shadowOpacity: SHADOW_OPACITY.MODAL_DARK,
       shadowRadius: SHADOW_BLUR.MODAL,
@@ -155,7 +162,7 @@ export const useShadowStyle = (): UseShadowStyleReturn => {
 
       // For Android, elevation is the primary shadow mechanism
       // For iOS, we use the full shadow properties
-      if (Platform.OS === 'android') {
+      if (Platform.OS === PLATFORM_OS.ANDROID) {
         return {
           elevation: config.elevation,
           // Android needs shadowColor for elevation tint

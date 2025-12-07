@@ -5,6 +5,7 @@
 
 import { logger } from '../utils/logger';
 import { BATCH } from '../constants/numbers';
+import { LOG_MESSAGES, ERROR_MESSAGES, DEDUP_KEY_PREFIX } from '../constants';
 
 // ============================================================================
 // Types
@@ -116,7 +117,7 @@ export class RequestBatcher<K = string, V = unknown> {
       }
     }
 
-    logger.debug(`Executing batch of ${batchKeys.length} requests`);
+    logger.debug(LOG_MESSAGES.REQUEST_BATCHER.EXECUTING_BATCH(batchKeys.length));
 
     try {
       // Execute batch function
@@ -125,7 +126,7 @@ export class RequestBatcher<K = string, V = unknown> {
       // Validate results
       if (results.length !== batchKeys.length) {
         throw new Error(
-          `Batch function returned ${results.length} results for ${batchKeys.length} keys`
+          ERROR_MESSAGES.REQUEST_BATCHER.BATCH_SIZE_MISMATCH(results.length, batchKeys.length)
         );
       }
 
@@ -138,7 +139,7 @@ export class RequestBatcher<K = string, V = unknown> {
         }
       });
     } catch (error) {
-      logger.error('Batch execution failed', error as Error);
+      logger.error(LOG_MESSAGES.REQUEST_BATCHER.BATCH_FAILED, error as Error);
 
       // Reject all pending requests
       batchPending.forEach((requests) => {
@@ -165,7 +166,9 @@ export class RequestBatcher<K = string, V = unknown> {
 
     // Reject all pending
     this.pending.forEach((requests) => {
-      requests.forEach((req) => req.reject(new Error('Batch cleared')));
+      requests.forEach((req) =>
+        req.reject(new Error(ERROR_MESSAGES.REQUEST_BATCHER.BATCH_CLEARED))
+      );
     });
 
     this.pending.clear();
@@ -201,7 +204,7 @@ export class RequestDeduplicator<T = unknown> {
     const existing = this.inFlight.get(key);
 
     if (existing) {
-      logger.debug(`Request deduplicated: ${key}`);
+      logger.debug(LOG_MESSAGES.REQUEST_BATCHER.REQUEST_DEDUPLICATED(key));
       return existing;
     }
 
@@ -326,5 +329,5 @@ export async function fetchUserWithDedup<T>(
   userId: string,
   apiFn: (id: string) => Promise<T>
 ): Promise<T> {
-  return withDeduplication(() => apiFn(userId), `user:${userId}`);
+  return withDeduplication(() => apiFn(userId), `${DEDUP_KEY_PREFIX.USER}${userId}`);
 }

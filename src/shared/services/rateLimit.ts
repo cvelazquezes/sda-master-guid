@@ -5,6 +5,7 @@
 
 import { logger } from '../utils/logger';
 import { MS, MATH, LIST_LIMITS } from '../constants/numbers';
+import { ERROR_MESSAGES, ERROR_NAME, LOG_MESSAGES, RATE_LIMITER_NAME } from '../constants';
 
 // Rate limit configuration constants
 const RATE_LIMIT_CONFIG = {
@@ -80,7 +81,7 @@ export class RateLimiter {
       const tokensNeededToRefill = tokensNeeded - bucket.tokens;
       const timeToWait = (tokensNeededToRefill / this.options.refillRate) * MS.SECOND;
 
-      logger.debug(`Rate limit: waiting ${timeToWait}ms for tokens`);
+      logger.debug(LOG_MESSAGES.RATE_LIMIT.WAITING(timeToWait));
       await this.sleep(Math.min(timeToWait, this.options.interval));
     }
   }
@@ -181,7 +182,7 @@ class RateLimitService {
 
     if (!limiter) {
       if (!options) {
-        throw new Error(`Rate limiter ${name} not found and no options provided`);
+        throw new Error(LOG_MESSAGES.RATE_LIMIT.NOT_FOUND_ERROR(name));
       }
       limiter = new RateLimiter(options);
       this.limiters.set(name, limiter);
@@ -196,7 +197,7 @@ class RateLimitService {
   async tryConsume(limiterName: string, key: string, tokensNeeded: number = 1): Promise<boolean> {
     const limiter = this.limiters.get(limiterName);
     if (!limiter) {
-      logger.warn(`Rate limiter not found: ${limiterName}`);
+      logger.warn(LOG_MESSAGES.RATE_LIMIT.NOT_FOUND(limiterName));
       return true; // Allow if limiter not configured
     }
 
@@ -225,28 +226,28 @@ class RateLimitService {
 export const rateLimitService = new RateLimitService();
 
 // API request limiter - 100 requests per minute
-export const apiRateLimiter = rateLimitService.getLimiter('api', {
+export const apiRateLimiter = rateLimitService.getLimiter(RATE_LIMITER_NAME.API, {
   tokensPerInterval: RATE_LIMIT_CONFIG.API_REQUESTS_PER_MIN,
   interval: RATE_LIMIT_CONFIG.ONE_MINUTE_MS,
   maxTokens: RATE_LIMIT_CONFIG.API_REQUESTS_PER_MIN,
 });
 
 // Auth limiter - 5 attempts per minute
-export const authRateLimiter = rateLimitService.getLimiter('auth', {
+export const authRateLimiter = rateLimitService.getLimiter(RATE_LIMITER_NAME.AUTH, {
   tokensPerInterval: RATE_LIMIT_CONFIG.AUTH_ATTEMPTS_PER_MIN,
   interval: RATE_LIMIT_CONFIG.ONE_MINUTE_MS,
   maxTokens: RATE_LIMIT_CONFIG.AUTH_ATTEMPTS_PER_MIN,
 });
 
 // Search limiter - 30 requests per minute
-export const searchRateLimiter = rateLimitService.getLimiter('search', {
+export const searchRateLimiter = rateLimitService.getLimiter(RATE_LIMITER_NAME.SEARCH, {
   tokensPerInterval: RATE_LIMIT_CONFIG.SEARCH_REQUESTS_PER_MIN,
   interval: RATE_LIMIT_CONFIG.ONE_MINUTE_MS,
   maxTokens: RATE_LIMIT_CONFIG.SEARCH_REQUESTS_PER_MIN,
 });
 
 // Heavy operations limiter - 10 per minute
-export const heavyOperationsLimiter = rateLimitService.getLimiter('heavy', {
+export const heavyOperationsLimiter = rateLimitService.getLimiter(RATE_LIMITER_NAME.HEAVY, {
   tokensPerInterval: RATE_LIMIT_CONFIG.HEAVY_OPS_PER_MIN,
   interval: RATE_LIMIT_CONFIG.ONE_MINUTE_MS,
   maxTokens: RATE_LIMIT_CONFIG.HEAVY_OPS_PER_MIN,
@@ -261,7 +262,7 @@ export const heavyOperationsLimiter = rateLimitService.getLimiter('heavy', {
  */
 export function rateLimit(
   limiterName: string,
-  keyExtractor: (...args: unknown[]) => string = () => 'default'
+  keyExtractor: (...args: unknown[]) => string = () => RATE_LIMITER_NAME.DEFAULT
 ) {
   return function (target: object, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
@@ -271,7 +272,7 @@ export function rateLimit(
       const allowed = await rateLimitService.tryConsume(limiterName, key);
 
       if (!allowed) {
-        throw new RateLimitError(`Rate limit exceeded for ${propertyKey}`);
+        throw new RateLimitError(LOG_MESSAGES.RATE_LIMIT.EXCEEDED(propertyKey));
       }
 
       return await originalMethod.apply(this, args);
@@ -288,7 +289,7 @@ export function rateLimit(
 export class RateLimitError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'RateLimitError';
+    this.name = ERROR_NAME.RATE_LIMIT_ERROR;
   }
 }
 
@@ -302,14 +303,14 @@ export class RateLimitError extends Error {
 export function withRateLimit<T extends (...args: unknown[]) => Promise<unknown>>(
   fn: T,
   limiter: RateLimiter,
-  keyExtractor: (...args: Parameters<T>) => string = () => 'default'
+  keyExtractor: (...args: Parameters<T>) => string = () => RATE_LIMITER_NAME.DEFAULT
 ): T {
   return (async (...args: Parameters<T>) => {
     const key = keyExtractor(...args);
     const allowed = await limiter.tryConsume(key);
 
     if (!allowed) {
-      throw new RateLimitError('Rate limit exceeded');
+      throw new RateLimitError(ERROR_MESSAGES.RATE_LIMIT.TOO_MANY_REQUESTS);
     }
 
     return await fn(...args);

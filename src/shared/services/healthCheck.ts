@@ -7,6 +7,8 @@ import { logger } from '../utils/logger';
 import { environment } from '../config/environment';
 import { RETRY, TIMEOUT } from '../constants/timing';
 import { MATH } from '../constants/numbers';
+import { HTTP_METHOD } from '../constants/http';
+import { LOG_MESSAGES, HEALTH_STATUS, HEALTH_CHECK_NAME, API_ENDPOINTS } from '../constants';
 import packageJson from '../../../package.json';
 
 // ============================================================================
@@ -15,9 +17,12 @@ import packageJson from '../../../package.json';
 
 export type HealthCheckFunction = () => Promise<boolean>;
 
+/** Derived type from HEALTH_STATUS constant */
+type HealthStatusValue = (typeof HEALTH_STATUS)[keyof typeof HEALTH_STATUS];
+
 export interface HealthCheckResult {
   name: string;
-  status: 'healthy' | 'unhealthy';
+  status: HealthStatusValue;
   isHealthy: boolean;
   responseTime?: number;
   error?: string;
@@ -25,7 +30,7 @@ export interface HealthCheckResult {
 }
 
 export interface HealthStatus {
-  status: 'healthy' | 'degraded' | 'unhealthy';
+  status: HealthStatusValue;
   timestamp: string;
   checks: HealthCheckResult[];
   uptime: number;
@@ -46,11 +51,11 @@ class HealthCheckService {
    */
   register(name: string, check: HealthCheckFunction): void {
     if (this.dependencies.has(name)) {
-      logger.warn(`Health check ${name} already registered, overwriting`);
+      logger.warn(LOG_MESSAGES.HEALTH_CHECK.ALREADY_REGISTERED(name));
     }
 
     this.dependencies.set(name, check);
-    logger.debug(`Registered health check: ${name}`);
+    logger.debug(LOG_MESSAGES.HEALTH_CHECK.REGISTERED(name));
   }
 
   /**
@@ -59,7 +64,7 @@ class HealthCheckService {
   unregister(name: string): void {
     this.dependencies.delete(name);
     this.lastResults.delete(name);
-    logger.debug(`Unregistered health check: ${name}`);
+    logger.debug(LOG_MESSAGES.HEALTH_CHECK.UNREGISTERED(name));
   }
 
   /**
@@ -81,13 +86,13 @@ class HealthCheckService {
     const allHealthy = results.every((r) => r.isHealthy);
     const someUnhealthy = results.some((r) => !r.isHealthy);
 
-    let status: 'healthy' | 'degraded' | 'unhealthy';
+    let status: HealthStatusValue;
     if (allHealthy) {
-      status = 'healthy';
+      status = HEALTH_STATUS.HEALTHY;
     } else if (someUnhealthy && !allHealthy) {
-      status = 'degraded';
+      status = HEALTH_STATUS.DEGRADED;
     } else {
-      status = 'unhealthy';
+      status = HEALTH_STATUS.UNHEALTHY;
     }
 
     return {
@@ -115,7 +120,7 @@ class HealthCheckService {
 
       return {
         name,
-        status: isHealthy ? 'healthy' : 'unhealthy',
+        status: isHealthy ? HEALTH_STATUS.HEALTHY : HEALTH_STATUS.UNHEALTHY,
         isHealthy,
         responseTime,
         lastChecked: new Date().toISOString(),
@@ -123,11 +128,11 @@ class HealthCheckService {
     } catch (error) {
       const responseTime = Date.now() - startTime;
 
-      logger.error(`Health check failed: ${name}`, error as Error);
+      logger.error(LOG_MESSAGES.HEALTH_CHECK.CHECK_FAILED(name), error as Error);
 
       return {
         name,
-        status: 'unhealthy',
+        status: HEALTH_STATUS.UNHEALTHY,
         isHealthy: false,
         responseTime,
         error: (error as Error).message,
@@ -144,7 +149,7 @@ class HealthCheckService {
 
     if (results.length === 0) {
       return {
-        status: 'healthy',
+        status: HEALTH_STATUS.HEALTHY,
         timestamp: new Date().toISOString(),
         checks: [],
         uptime: Date.now() - this.startTime,
@@ -156,7 +161,11 @@ class HealthCheckService {
     const someUnhealthy = results.some((r) => !r.isHealthy);
 
     return {
-      status: allHealthy ? 'healthy' : someUnhealthy ? 'degraded' : 'unhealthy',
+      status: allHealthy
+        ? HEALTH_STATUS.HEALTHY
+        : someUnhealthy
+          ? HEALTH_STATUS.DEGRADED
+          : HEALTH_STATUS.UNHEALTHY,
       timestamp: new Date().toISOString(),
       checks: results,
       uptime: Date.now() - this.startTime,
@@ -169,7 +178,7 @@ class HealthCheckService {
    */
   async checkReadiness(): Promise<boolean> {
     const health = await this.checkHealth();
-    return health.status === 'healthy' || health.status === 'degraded';
+    return health.status === HEALTH_STATUS.HEALTHY || health.status === HEALTH_STATUS.DEGRADED;
   }
 
   /**
@@ -198,7 +207,7 @@ class HealthCheckService {
    */
   private timeout(ms: number): Promise<never> {
     return new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Health check timeout')), ms);
+      setTimeout(() => reject(new Error(LOG_MESSAGES.HEALTH_CHECK.TIMEOUT)), ms);
     });
   }
 
@@ -234,12 +243,12 @@ export const healthCheckService = new HealthCheckService();
  */
 export function registerDefaultHealthChecks(): void {
   // API health check
-  healthCheckService.register('api', async () => {
+  healthCheckService.register(HEALTH_CHECK_NAME.API, async () => {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), TIMEOUT.TOAST);
-      const response = await fetch(`${environment.api.base}/health`, {
-        method: 'GET',
+      const response = await fetch(`${environment.api.base}${API_ENDPOINTS.HEALTH.CHECK}`, {
+        method: HTTP_METHOD.GET,
         signal: controller.signal,
       });
       clearTimeout(timeoutId);
@@ -250,7 +259,7 @@ export function registerDefaultHealthChecks(): void {
   });
 
   // Memory health check (React Native)
-  healthCheckService.register('memory', async () => {
+  healthCheckService.register(HEALTH_CHECK_NAME.MEMORY, async () => {
     try {
       // Basic memory check - if we can allocate, we're okay
       const testArray = new Array(MATH.THOUSAND);
@@ -262,7 +271,7 @@ export function registerDefaultHealthChecks(): void {
   });
 
   // Environment configuration check
-  healthCheckService.register('config', async () => {
+  healthCheckService.register(HEALTH_CHECK_NAME.CONFIG, async () => {
     try {
       // Verify critical config is present
       return !!(environment.api.base && environment.api.websocket && environment.name);
@@ -271,7 +280,7 @@ export function registerDefaultHealthChecks(): void {
     }
   });
 
-  logger.info('Default health checks registered');
+  logger.info(LOG_MESSAGES.HEALTH.CHECKS_REGISTERED);
 }
 
 // ============================================================================
@@ -291,7 +300,7 @@ export function createHttpHealthCheck(
       const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
       const response = await fetch(url, {
-        method: 'GET',
+        method: HTTP_METHOD.GET,
         signal: controller.signal,
       });
 

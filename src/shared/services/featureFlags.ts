@@ -6,8 +6,9 @@
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { logger } from '../utils/logger';
-import { environment } from '../config/environment';
+import { environment, isDevelopment } from '../config/environment';
 import { MATH } from '../constants/numbers';
+import { LOG_MESSAGES, STORAGE_KEYS, FEATURE_FLAG_KEY, USER_GROUP, TYPEOF } from '../constants';
 
 // Feature flag rollout percentages
 const ROLLOUT_PERCENTAGE = {
@@ -49,7 +50,7 @@ export interface FeatureFlagConfig {
 
 class FeatureFlagsService {
   private flags = new Map<string, FeatureFlag>();
-  private readonly STORAGE_KEY = '@feature_flags';
+  private readonly STORAGE_KEY = STORAGE_KEYS.FEATURE_FLAGS.DATA;
   private userId: string | null = null;
   private userGroups: string[] = [];
 
@@ -66,7 +67,7 @@ class FeatureFlagsService {
     // Load default flags
     this.loadDefaultFlags();
 
-    logger.info('Feature flags initialized', {
+    logger.info(LOG_MESSAGES.FEATURE_FLAGS.INITIALIZED, {
       flagCount: this.flags.size,
       userId: this.userId,
       groups: this.userGroups.length,
@@ -79,57 +80,57 @@ class FeatureFlagsService {
   private loadDefaultFlags(): void {
     const defaultFlags: Record<string, FeatureFlag> = {
       // Performance features
-      enableOfflineMode: {
-        key: 'enableOfflineMode',
+      [FEATURE_FLAG_KEY.ENABLE_OFFLINE_MODE]: {
+        key: FEATURE_FLAG_KEY.ENABLE_OFFLINE_MODE,
         value: environment.features.enableOfflineMode,
         enabled: true,
       },
-      enablePerformanceMonitoring: {
-        key: 'enablePerformanceMonitoring',
+      [FEATURE_FLAG_KEY.ENABLE_PERFORMANCE_MONITORING]: {
+        key: FEATURE_FLAG_KEY.ENABLE_PERFORMANCE_MONITORING,
         value: environment.features.enablePerformanceMonitoring,
         enabled: true,
       },
 
       // Security features
-      enableBiometrics: {
-        key: 'enableBiometrics',
+      [FEATURE_FLAG_KEY.ENABLE_BIOMETRICS]: {
+        key: FEATURE_FLAG_KEY.ENABLE_BIOMETRICS,
         value: environment.features.enableBiometrics,
         enabled: true,
       },
 
       // Communication features
-      enablePushNotifications: {
-        key: 'enablePushNotifications',
+      [FEATURE_FLAG_KEY.ENABLE_PUSH_NOTIFICATIONS]: {
+        key: FEATURE_FLAG_KEY.ENABLE_PUSH_NOTIFICATIONS,
         value: environment.features.enablePushNotifications,
         enabled: true,
       },
 
       // Experimental features (disabled by default)
-      enableABTesting: {
-        key: 'enableABTesting',
+      [FEATURE_FLAG_KEY.ENABLE_AB_TESTING]: {
+        key: FEATURE_FLAG_KEY.ENABLE_AB_TESTING,
         value: false,
         enabled: false,
         rolloutPercentage: ROLLOUT_PERCENTAGE.SMALL, // 10% rollout
       },
-      enableAdvancedAnalytics: {
-        key: 'enableAdvancedAnalytics',
+      [FEATURE_FLAG_KEY.ENABLE_ADVANCED_ANALYTICS]: {
+        key: FEATURE_FLAG_KEY.ENABLE_ADVANCED_ANALYTICS,
         value: false,
         enabled: false,
-        userGroups: ['beta', 'internal'],
+        userGroups: [USER_GROUP.BETA, USER_GROUP.INTERNAL],
       },
-      enableNewMatchUI: {
-        key: 'enableNewMatchUI',
+      [FEATURE_FLAG_KEY.ENABLE_NEW_MATCH_UI]: {
+        key: FEATURE_FLAG_KEY.ENABLE_NEW_MATCH_UI,
         value: false,
         enabled: false,
         rolloutPercentage: ROLLOUT_PERCENTAGE.MEDIUM, // 25% rollout
       },
 
       // Admin features
-      enableAdminDebugTools: {
-        key: 'enableAdminDebugTools',
-        value: environment.name === 'development',
-        enabled: environment.name === 'development',
-        userGroups: ['super_admin'],
+      [FEATURE_FLAG_KEY.ENABLE_ADMIN_DEBUG_TOOLS]: {
+        key: FEATURE_FLAG_KEY.ENABLE_ADMIN_DEBUG_TOOLS,
+        value: isDevelopment(),
+        enabled: isDevelopment(),
+        userGroups: [USER_GROUP.SUPER_ADMIN],
       },
     };
 
@@ -143,7 +144,7 @@ class FeatureFlagsService {
 
   private isExpired(flag: FeatureFlag, featureKey: string): boolean {
     if (flag.expiresAt && Date.now() > flag.expiresAt) {
-      logger.debug(`Feature flag expired: ${featureKey}`);
+      logger.debug(LOG_MESSAGES.FEATURE_FLAGS.FLAG_EXPIRED(featureKey));
       return true;
     }
     return false;
@@ -177,7 +178,7 @@ class FeatureFlagsService {
   isEnabled(featureKey: string): boolean {
     const flag = this.flags.get(featureKey);
     if (!flag) {
-      logger.warn(`Feature flag not found: ${featureKey}`);
+      logger.warn(LOG_MESSAGES.FEATURE_FLAGS.FLAG_NOT_FOUND, { featureKey });
       return false;
     }
     if (!flag.enabled || this.isExpired(flag, featureKey)) {
@@ -198,7 +199,7 @@ class FeatureFlagsService {
       return rollout;
     }
 
-    return typeof flag.value === 'boolean' ? flag.value : flag.enabled;
+    return typeof flag.value === TYPEOF.BOOLEAN ? flag.value : flag.enabled;
   }
 
   /**
@@ -223,7 +224,7 @@ class FeatureFlagsService {
   async setFlag(flag: FeatureFlag): Promise<void> {
     this.flags.set(flag.key, flag);
     await this.saveToStorage();
-    logger.debug(`Feature flag set: ${flag.key}`, flag);
+    logger.debug(LOG_MESSAGES.FEATURE_FLAGS.FLAG_SET(flag.key), flag);
   }
 
   /**
@@ -234,7 +235,7 @@ class FeatureFlagsService {
       this.flags.set(flag.key, flag);
     }
     await this.saveToStorage();
-    logger.info(`Updated ${flags.length} feature flags`);
+    logger.info(LOG_MESSAGES.FEATURE_FLAGS.FLAGS_UPDATED(flags.length));
   }
 
   /**
@@ -243,7 +244,7 @@ class FeatureFlagsService {
   async removeFlag(featureKey: string): Promise<void> {
     this.flags.delete(featureKey);
     await this.saveToStorage();
-    logger.debug(`Feature flag removed: ${featureKey}`);
+    logger.debug(LOG_MESSAGES.FEATURE_FLAGS.FLAG_REMOVED(featureKey));
   }
 
   /**
@@ -266,7 +267,7 @@ class FeatureFlagsService {
   async setUserContext(userId: string, userGroups: string[] = []): Promise<void> {
     this.userId = userId;
     this.userGroups = userGroups;
-    logger.debug('User context updated', { userId, groups: userGroups });
+    logger.debug(LOG_MESSAGES.FEATURE_FLAGS.USER_CONTEXT_UPDATED, { userId, groups: userGroups });
   }
 
   /**
@@ -290,7 +291,7 @@ class FeatureFlagsService {
 
       await AsyncStorage.setItem(this.STORAGE_KEY, JSON.stringify(config));
     } catch (error) {
-      logger.error('Failed to save feature flags', error as Error);
+      logger.error(LOG_MESSAGES.FEATURE_FLAGS.SAVE_FAILED, error as Error);
     }
   }
 
@@ -308,13 +309,13 @@ class FeatureFlagsService {
           this.flags.set(key, flag);
         }
 
-        logger.debug('Feature flags loaded from storage', {
+        logger.debug(LOG_MESSAGES.FEATURE_FLAGS.LOADED, {
           count: this.flags.size,
           version: config.version,
         });
       }
     } catch (error) {
-      logger.warn('Failed to load feature flags from storage', error as Error);
+      logger.warn(LOG_MESSAGES.FEATURE_FLAGS.LOAD_FAILED, error as Error);
     }
   }
 
@@ -337,7 +338,7 @@ class FeatureFlagsService {
   async clear(): Promise<void> {
     this.flags.clear();
     await AsyncStorage.removeItem(this.STORAGE_KEY);
-    logger.info('Feature flags cleared');
+    logger.info(LOG_MESSAGES.FEATURE_FLAGS.CLEARED);
   }
 
   /**

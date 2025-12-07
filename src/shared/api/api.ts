@@ -11,7 +11,8 @@ import { retryPolicy } from './api/retryPolicy';
 import { apiCircuitBreaker } from './api/circuitBreaker';
 import { NetworkError, TimeoutError, AuthenticationError, toAppError } from '../utils/errors';
 import { TIMEOUT } from '../constants/timing';
-import { HTTP_STATUS } from '../constants/http';
+import { HTTP_STATUS, HEADER, CONTENT_TYPE, AUTH_CONSTANTS } from '../constants/http';
+import { LOG_MESSAGES, ERROR_MESSAGES, APP_VERSION, AXIOS_ERROR_CODE } from '../constants';
 
 // Constants
 const API_TIMEOUT_MS = TIMEOUT.API_DEFAULT;
@@ -24,8 +25,8 @@ const createApiClient = (): AxiosInstance => {
     baseURL: environment.api.base,
     timeout: API_TIMEOUT_MS,
     headers: {
-      'Content-Type': 'application/json',
-      'X-App-Version': '1.0.0',
+      [HEADER.CONTENT_TYPE]: CONTENT_TYPE.JSON,
+      [HEADER.X_APP_VERSION]: APP_VERSION,
     },
   });
 
@@ -35,15 +36,15 @@ const createApiClient = (): AxiosInstance => {
       try {
         const token = await secureStorage.getAccessToken();
         if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
+          config.headers[HEADER.AUTHORIZATION] = `${AUTH_CONSTANTS.BEARER_PREFIX}${token}`;
         }
       } catch (error) {
-        logger.warn('Failed to get auth token', { error });
+        logger.warn(LOG_MESSAGES.API_CLIENT.AUTH_TOKEN_FAILED, { error });
       }
       return config;
     },
     (error: AxiosError) => {
-      logger.error('Request interceptor error', error);
+      logger.error(LOG_MESSAGES.API_CLIENT.REQUEST_INTERCEPTOR_ERROR, error);
       return Promise.reject(toAppError(error));
     }
   );
@@ -54,17 +55,17 @@ const createApiClient = (): AxiosInstance => {
     async (error: AxiosError) => {
       if (error.response?.status === HTTP_STATUS.UNAUTHORIZED) {
         // Unauthorized - clear tokens and let app handle redirect
-        logger.warn('Unauthorized request - clearing auth tokens');
+        logger.warn(LOG_MESSAGES.API_CLIENT.UNAUTHORIZED);
         await secureStorage.clearAuth();
-        throw new AuthenticationError('Session expired. Please login again.');
+        throw new AuthenticationError(ERROR_MESSAGES.AUTH.SESSION_EXPIRED);
       }
 
-      if (error.code === 'ECONNABORTED') {
-        throw new TimeoutError('Request timed out');
+      if (error.code === AXIOS_ERROR_CODE.ECONNABORTED) {
+        throw new TimeoutError(ERROR_MESSAGES.TIMEOUT.REQUEST_TIMEOUT);
       }
 
       if (!error.response) {
-        throw new NetworkError('Network request failed', error.config?.url);
+        throw new NetworkError(ERROR_MESSAGES.NETWORK.REQUEST_FAILED, error.config?.url);
       }
 
       throw toAppError(error);
@@ -96,7 +97,7 @@ export const apiService = {
    * GET request
    */
   async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    logger.debug(`GET ${url}`);
+    logger.debug(LOG_MESSAGES.FORMATTED.HTTP_GET(url));
     const response = await makeRequest(() => api.get<T>(url, config));
     return response.data;
   },
@@ -105,7 +106,7 @@ export const apiService = {
    * POST request
    */
   async post<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
-    logger.debug(`POST ${url}`);
+    logger.debug(LOG_MESSAGES.FORMATTED.HTTP_POST(url));
     const response = await makeRequest(() => api.post<T>(url, data, config));
     return response.data;
   },
@@ -114,7 +115,7 @@ export const apiService = {
    * PUT request
    */
   async put<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
-    logger.debug(`PUT ${url}`);
+    logger.debug(LOG_MESSAGES.FORMATTED.HTTP_PUT(url));
     const response = await makeRequest(() => api.put<T>(url, data, config));
     return response.data;
   },
@@ -123,7 +124,7 @@ export const apiService = {
    * PATCH request
    */
   async patch<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
-    logger.debug(`PATCH ${url}`);
+    logger.debug(LOG_MESSAGES.FORMATTED.HTTP_PATCH(url));
     const response = await makeRequest(() => api.patch<T>(url, data, config));
     return response.data;
   },
@@ -132,7 +133,7 @@ export const apiService = {
    * DELETE request
    */
   async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    logger.debug(`DELETE ${url}`);
+    logger.debug(LOG_MESSAGES.FORMATTED.HTTP_DELETE(url));
     const response = await makeRequest(() => api.delete<T>(url, config));
     return response.data;
   },

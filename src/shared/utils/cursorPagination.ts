@@ -6,6 +6,10 @@
 import { useState, useCallback } from 'react';
 import { logger } from './logger';
 import { LIST_LIMITS } from '../constants/numbers';
+import { LOG_MESSAGES, SORT_ORDERS, SORT_ORDER, ENCODING, QUERY_PARAM } from '../constants';
+
+/** Derived type for sort order */
+type SortOrderType = (typeof SORT_ORDER)[keyof typeof SORT_ORDER];
 
 // ============================================================================
 // React Hook for Cursor Pagination
@@ -24,7 +28,7 @@ export interface CursorPaginationParams {
   /** Cursor for pagination (base64 encoded) */
   cursor?: string;
   /** Sort order */
-  order?: 'asc' | 'desc';
+  order?: SortOrderType;
 }
 
 /**
@@ -55,7 +59,7 @@ interface CursorData {
   /** Timestamp for ordering */
   timestamp: string | number;
   /** Sort direction */
-  direction: 'asc' | 'desc';
+  direction: SortOrderType;
 }
 
 /**
@@ -80,11 +84,11 @@ export interface PaginatedQueryOptions<T> extends CursorPaginationParams {
 export function encodeCursor(data: CursorData): string {
   try {
     const json = JSON.stringify(data);
-    const base64 = Buffer.from(json).toString('base64');
+    const base64 = Buffer.from(json).toString(ENCODING.BASE64);
     return base64;
   } catch (error) {
-    logger.error('Failed to encode cursor', error as Error, { data });
-    throw new Error('Invalid cursor data');
+    logger.error(LOG_MESSAGES.PAGINATION.ENCODE_FAILED, error as Error, { data });
+    throw new Error(LOG_MESSAGES.PAGINATION.INVALID_CURSOR_DATA);
   }
 }
 
@@ -93,18 +97,18 @@ export function encodeCursor(data: CursorData): string {
  */
 export function decodeCursor(cursor: string): CursorData {
   try {
-    const json = Buffer.from(cursor, 'base64').toString('utf-8');
+    const json = Buffer.from(cursor, ENCODING.BASE64).toString(ENCODING.UTF8);
     const data = JSON.parse(json) as CursorData;
 
     // Validate cursor data
     if (!data.id || !data.timestamp || !data.direction) {
-      throw new Error('Invalid cursor structure');
+      throw new Error(LOG_MESSAGES.PAGINATION.INVALID_CURSOR_STRUCTURE);
     }
 
     return data;
   } catch (error) {
-    logger.error('Failed to decode cursor', error as Error, { cursor });
-    throw new Error('Invalid cursor');
+    logger.error(LOG_MESSAGES.PAGINATION.DECODE_FAILED, error as Error, { cursor });
+    throw new Error(LOG_MESSAGES.PAGINATION.INVALID_CURSOR);
   }
 }
 
@@ -115,7 +119,7 @@ export function createCursor<T>(
   item: T,
   getId: (item: T) => string,
   getTimestamp: (item: T) => string | number,
-  direction: 'asc' | 'desc' = 'desc'
+  direction: SortOrderType = SORT_ORDER.DESC
 ): string {
   const cursorData: CursorData = {
     id: getId(item),
@@ -151,7 +155,14 @@ export class CursorPaginationService {
   static async paginate<T>(
     options: PaginatedQueryOptions<T>
   ): Promise<CursorPaginationResponse<T>> {
-    const { limit: requestedLimit, cursor, order = 'desc', fetcher, getId, getTimestamp } = options;
+    const {
+      limit: requestedLimit,
+      cursor,
+      order = SORT_ORDER.DESC,
+      fetcher,
+      getId,
+      getTimestamp,
+    } = options;
 
     // Validate and normalize limit
     const limit = Math.min(Math.max(1, requestedLimit || this.DEFAULT_LIMIT), this.MAX_LIMIT);
@@ -164,7 +175,7 @@ export class CursorPaginationService {
 
         // Validate direction matches
         if (cursorData.direction !== order) {
-          throw new Error('Cursor direction mismatch');
+          throw new Error(LOG_MESSAGES.PAGINATION.CURSOR_DIRECTION_MISMATCH);
         }
       }
 
@@ -199,7 +210,7 @@ export class CursorPaginationService {
         },
       };
     } catch (error) {
-      logger.error('Pagination failed', error as Error, {
+      logger.error(LOG_MESSAGES.PAGINATION.FETCH_FAILED, error as Error, {
         limit,
         cursor,
         order,
@@ -214,14 +225,14 @@ export class CursorPaginationService {
   static createQueryParams(params: CursorPaginationParams): URLSearchParams {
     const queryParams = new URLSearchParams();
 
-    queryParams.append('limit', params.limit.toString());
+    queryParams.append(QUERY_PARAM.LIMIT, params.limit.toString());
 
     if (params.cursor) {
-      queryParams.append('cursor', params.cursor);
+      queryParams.append(QUERY_PARAM.CURSOR, params.cursor);
     }
 
     if (params.order) {
-      queryParams.append('order', params.order);
+      queryParams.append(QUERY_PARAM.ORDER, params.order);
     }
 
     return queryParams;
@@ -235,9 +246,9 @@ export class CursorPaginationService {
     const params = urlObj.searchParams;
 
     return {
-      limit: parseInt(params.get('limit') || `${this.DEFAULT_LIMIT}`, 10),
-      cursor: params.get('cursor') || undefined,
-      order: (params.get('order') as 'asc' | 'desc') || 'desc',
+      limit: parseInt(params.get(QUERY_PARAM.LIMIT) || `${this.DEFAULT_LIMIT}`, 10),
+      cursor: params.get(QUERY_PARAM.CURSOR) || undefined,
+      order: (params.get(QUERY_PARAM.ORDER) as SortOrderType) || SORT_ORDER.DESC,
     };
   }
 }
@@ -293,7 +304,7 @@ export function useCursorPagination<T>(
       const result = await fetcher({
         limit,
         cursor: state.cursor || undefined,
-        order: 'desc',
+        order: SORT_ORDER.DESC,
         fetcher: async () => [], // Placeholder
         getId,
         getTimestamp,
@@ -331,7 +342,7 @@ export function useCursorPagination<T>(
       const result = await fetcher({
         limit,
         cursor: undefined,
-        order: 'desc',
+        order: SORT_ORDER.DESC,
         fetcher: async () => [], // Placeholder
         getId,
         getTimestamp,
@@ -370,10 +381,10 @@ export function useCursorPagination<T>(
 export function validatePaginationParams(params: Partial<CursorPaginationParams>): string | null {
   if (params.limit !== undefined) {
     if (params.limit < 1) {
-      return 'Limit must be at least 1';
+      return LOG_MESSAGES.VALIDATION.LIMIT_AT_LEAST;
     }
-    if (params.limit > CursorPaginationService['MAX_LIMIT']) {
-      return `Limit cannot exceed ${CursorPaginationService['MAX_LIMIT']}`;
+    if (params.limit > LIST_LIMITS.PAGE_SIZE_MAX) {
+      return LOG_MESSAGES.VALIDATION.LIMIT_EXCEEDED(LIST_LIMITS.PAGE_SIZE_MAX);
     }
   }
 
@@ -381,12 +392,12 @@ export function validatePaginationParams(params: Partial<CursorPaginationParams>
     try {
       decodeCursor(params.cursor);
     } catch {
-      return 'Invalid cursor';
+      return LOG_MESSAGES.VALIDATION.INVALID_CURSOR;
     }
   }
 
-  if (params.order !== undefined && !['asc', 'desc'].includes(params.order)) {
-    return 'Order must be "asc" or "desc"';
+  if (params.order !== undefined && !SORT_ORDERS.includes(params.order)) {
+    return LOG_MESSAGES.VALIDATION.ORDER_INVALID;
   }
 
   return null;
@@ -405,11 +416,11 @@ export function createPaginationLinks<T>(
   prev: string | null;
 } {
   const selfParams = new URLSearchParams({
-    limit: params.limit.toString(),
-    order: params.order || 'desc',
+    [QUERY_PARAM.LIMIT]: params.limit.toString(),
+    [QUERY_PARAM.ORDER]: params.order || SORT_ORDER.DESC,
   });
   if (params.cursor) {
-    selfParams.append('cursor', params.cursor);
+    selfParams.append(QUERY_PARAM.CURSOR, params.cursor);
   }
 
   const links = {
@@ -421,9 +432,9 @@ export function createPaginationLinks<T>(
   // Next link
   if (pagination.nextCursor) {
     const nextParams = new URLSearchParams({
-      limit: params.limit.toString(),
-      order: params.order || 'desc',
-      cursor: pagination.nextCursor,
+      [QUERY_PARAM.LIMIT]: params.limit.toString(),
+      [QUERY_PARAM.ORDER]: params.order || SORT_ORDER.DESC,
+      [QUERY_PARAM.CURSOR]: pagination.nextCursor,
     });
     links.next = `${baseUrl}?${nextParams.toString()}`;
   }
@@ -431,9 +442,9 @@ export function createPaginationLinks<T>(
   // Previous link
   if (pagination.prevCursor) {
     const prevParams = new URLSearchParams({
-      limit: params.limit.toString(),
-      order: params.order === 'asc' ? 'desc' : 'asc',
-      cursor: pagination.prevCursor,
+      [QUERY_PARAM.LIMIT]: params.limit.toString(),
+      [QUERY_PARAM.ORDER]: params.order === SORT_ORDER.ASC ? SORT_ORDER.DESC : SORT_ORDER.ASC,
+      [QUERY_PARAM.CURSOR]: pagination.prevCursor,
     });
     links.prev = `${baseUrl}?${prevParams.toString()}`;
   }

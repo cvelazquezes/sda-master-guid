@@ -11,6 +11,8 @@
  */
 
 import { PAGE, ID_GENERATION, MATH } from '../constants/numbers';
+import { TYPEOF, SORT_ORDER, ARRAY_FORMAT, HEADER } from '../constants';
+import type { ArrayFormatType } from '../constants';
 
 // ============================================================================
 // Types
@@ -34,12 +36,15 @@ export interface CursorPaginationParams {
   limit?: number;
 }
 
+/** Derived type for sort order */
+type SortOrderType = (typeof SORT_ORDER)[keyof typeof SORT_ORDER];
+
 /**
  * Sorting parameters
  */
 export interface SortParams {
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: SortOrderType;
 }
 
 /**
@@ -189,8 +194,6 @@ export function calculatePaginationMeta(
  * // Returns: "status=active&role=admin&role=user&createdAt[gte]=2024-01-01"
  * ```
  */
-type ArrayFormatType = 'repeat' | 'bracket' | 'comma';
-
 function handleArrayValue(
   params: Record<string, string | string[]>,
   fullKey: string,
@@ -198,11 +201,11 @@ function handleArrayValue(
   arrayFormat: ArrayFormatType
 ): void {
   const stringValues = value.map(String);
-  if (arrayFormat === 'repeat') {
+  if (arrayFormat === ARRAY_FORMAT.REPEAT) {
     params[fullKey] = stringValues;
-  } else if (arrayFormat === 'bracket') {
+  } else if (arrayFormat === ARRAY_FORMAT.BRACKET) {
     params[`${fullKey}[]`] = stringValues;
-  } else if (arrayFormat === 'comma') {
+  } else if (arrayFormat === ARRAY_FORMAT.COMMA) {
     params[fullKey] = stringValues.join(',');
   }
 }
@@ -223,7 +226,7 @@ export function createFilterParams(
   filters: FilterParams,
   options: { prefix?: string; arrayFormat?: ArrayFormatType } = {}
 ): Record<string, string | string[]> {
-  const { prefix = '', arrayFormat = 'repeat' } = options;
+  const { prefix = '', arrayFormat = ARRAY_FORMAT.REPEAT } = options;
   const params: Record<string, string | string[]> = {};
 
   for (const [key, value] of Object.entries(filters)) {
@@ -235,7 +238,7 @@ export function createFilterParams(
 
     if (Array.isArray(value)) {
       handleArrayValue(params, fullKey, value, arrayFormat);
-    } else if (typeof value === 'object' && value !== null) {
+    } else if (typeof value === TYPEOF.OBJECT && value !== null) {
       handleNestedObject(params, fullKey, value as Record<string, unknown>);
     } else {
       params[fullKey] = String(value);
@@ -260,7 +263,7 @@ export function createFilterParams(
  */
 export function createSortParams(
   sortBy?: string,
-  sortOrder: 'asc' | 'desc' = 'asc'
+  sortOrder: SortOrderType = SORT_ORDER.ASC
 ): Record<string, string> {
   if (!sortBy) {
     return {};
@@ -294,7 +297,7 @@ export function parseSortString(sortString: string): SortParams {
   if (sortString.startsWith('-')) {
     return {
       sortBy: sortString.substring(1),
-      sortOrder: 'desc',
+      sortOrder: SORT_ORDER.DESC,
     };
   }
 
@@ -303,14 +306,14 @@ export function parseSortString(sortString: string): SortParams {
     const [sortBy, sortOrder] = sortString.split(':');
     return {
       sortBy,
-      sortOrder: sortOrder === 'desc' ? 'desc' : 'asc',
+      sortOrder: sortOrder === SORT_ORDER.DESC ? SORT_ORDER.DESC : SORT_ORDER.ASC,
     };
   }
 
   // Default to ascending
   return {
     sortBy: sortString,
-    sortOrder: 'asc',
+    sortOrder: SORT_ORDER.ASC,
   };
 }
 
@@ -427,9 +430,9 @@ export function createGetUrl(baseUrl: string, params?: QueryParams): string {
 export function extractPaginationFromHeaders(
   headers: Record<string, string>
 ): Partial<PaginatedResponse<unknown>['pagination']> {
-  const total = headers['x-total-count'] || headers['X-Total-Count'];
-  const page = headers['x-page'] || headers['X-Page'];
-  const pageSize = headers['x-page-size'] || headers['X-Page-Size'];
+  const total = headers[HEADER.X_TOTAL_COUNT] || headers[HEADER.X_TOTAL_COUNT_UPPER];
+  const page = headers[HEADER.X_PAGE] || headers[HEADER.X_PAGE_UPPER];
+  const pageSize = headers[HEADER.X_PAGE_SIZE] || headers[HEADER.X_PAGE_SIZE_UPPER];
 
   const result: Partial<PaginatedResponse<unknown>['pagination']> = {};
 
@@ -496,7 +499,7 @@ export function generateIdempotencyKey(prefix?: string): string {
  */
 export function createIdempotencyHeaders(key: string): Record<string, string> {
   return {
-    'Idempotency-Key': key,
+    [HEADER.IDEMPOTENCY_KEY]: key,
   };
 }
 

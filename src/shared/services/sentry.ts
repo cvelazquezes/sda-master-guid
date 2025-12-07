@@ -4,10 +4,22 @@
  */
 
 import * as Sentry from '@sentry/react-native';
-import { environment } from '../config/environment';
+import { environment, isDevelopment, isProduction } from '../config/environment';
 import { logger } from '../utils/logger';
 import { MS, OPACITY_VALUE } from '../constants/numbers';
 import packageJson from '../../../package.json';
+import {
+  LOG_MESSAGES,
+  HEADER,
+  SENTRY_LEVEL,
+  SENTRY_OP,
+  SENTRY_CATEGORY,
+  SENTRY_TAG,
+  SENTRY_TAG_VALUE,
+  SECURITY_EVENT,
+  SENTRY_DIST,
+  SENTRY_RELEASE_PREFIX,
+} from '../constants';
 
 // Sentry configuration constants
 const SENTRY_CONFIG = {
@@ -26,12 +38,12 @@ let isInitialized = false;
  */
 export function initializeSentry(): void {
   if (!environment.sentry.enabled || !environment.sentry.dsn) {
-    logger.info('Sentry is disabled or DSN not configured');
+    logger.info(LOG_MESSAGES.SENTRY.DISABLED);
     return;
   }
 
   if (isInitialized) {
-    logger.warn('Sentry already initialized');
+    logger.warn(LOG_MESSAGES.SENTRY.ALREADY_INITIALIZED);
     return;
   }
 
@@ -41,22 +53,19 @@ export function initializeSentry(): void {
       environment: environment.name,
 
       // Performance Monitoring
-      tracesSampleRate:
-        environment.name === 'production'
-          ? SENTRY_CONFIG.PRODUCTION_SAMPLE_RATE
-          : OPACITY_VALUE.FULL,
+      tracesSampleRate: isProduction() ? SENTRY_CONFIG.PRODUCTION_SAMPLE_RATE : OPACITY_VALUE.FULL,
       enableTracing: true,
 
       // Release tracking
-      release: `sda-master-guid@${packageJson.version}`,
-      dist: '1',
+      release: `${SENTRY_RELEASE_PREFIX}${packageJson.version}`,
+      dist: SENTRY_DIST,
 
       // Filter sensitive data
       beforeSend(event) {
         // Remove sensitive headers
         if (event.request?.headers) {
-          delete event.request.headers['Authorization'];
-          delete event.request.headers['Cookie'];
+          delete event.request.headers[HEADER.AUTHORIZATION];
+          delete event.request.headers[HEADER.COOKIE];
         }
 
         // Remove sensitive cookies
@@ -79,7 +88,7 @@ export function initializeSentry(): void {
       // Breadcrumb filtering
       beforeBreadcrumb(breadcrumb) {
         // Don't log sensitive navigation data
-        if (breadcrumb.category === 'navigation' && breadcrumb.data) {
+        if (breadcrumb.category === SENTRY_CATEGORY.NAVIGATION && breadcrumb.data) {
           const sanitized = { ...breadcrumb.data };
           delete sanitized.token;
           delete sanitized.password;
@@ -104,16 +113,16 @@ export function initializeSentry(): void {
       ],
 
       // Debug mode in development
-      debug: environment.name === 'development',
+      debug: isDevelopment(),
 
       // Attach stack traces
       attachStacktrace: true,
     });
 
     isInitialized = true;
-    logger.info('Sentry initialized successfully');
+    logger.info(LOG_MESSAGES.SENTRY.INITIALIZED);
   } catch (error) {
-    logger.error('Failed to initialize Sentry', error as Error);
+    logger.error(LOG_MESSAGES.SENTRY.INIT_FAILED, error as Error);
   }
 }
 
@@ -138,7 +147,7 @@ export function captureError(
   }
 ): void {
   if (!isInitialized) {
-    logger.error('Sentry not initialized, logging error locally', error);
+    logger.error(LOG_MESSAGES.SENTRY.NOT_INITIALIZED, error);
     return;
   }
 
@@ -176,14 +185,14 @@ export function captureError(
  */
 export function captureMessage(
   message: string,
-  level: Sentry.SeverityLevel = 'info',
+  level: Sentry.SeverityLevel = SENTRY_LEVEL.INFO as Sentry.SeverityLevel,
   context?: {
     tags?: Record<string, string>;
     extra?: Record<string, unknown>;
   }
 ): void {
   if (!isInitialized) {
-    logger.info(`Sentry message: ${message}`);
+    logger.info(LOG_MESSAGES.SENTRY.MESSAGE(message));
     return;
   }
 
@@ -223,7 +232,7 @@ export async function trackPerformance<T>(
   }
 
   return Sentry.startSpan(
-    { name: operation, op: 'performance', attributes: metadata },
+    { name: operation, op: SENTRY_OP.PERFORMANCE, attributes: metadata },
     async () => {
       return await fn();
     }
@@ -293,7 +302,7 @@ export function clearUserContext(): void {
 export function addBreadcrumb(
   message: string,
   category: string,
-  level: Sentry.SeverityLevel = 'info',
+  level: Sentry.SeverityLevel = SENTRY_LEVEL.INFO as Sentry.SeverityLevel,
   data?: Record<string, unknown>
 ): void {
   if (!isInitialized) {
@@ -314,15 +323,15 @@ export function addBreadcrumb(
 // ============================================================================
 
 export enum SecurityEvent {
-  LOGIN_ATTEMPT = 'login_attempt',
-  LOGIN_SUCCESS = 'login_success',
-  LOGIN_FAILURE = 'login_failure',
-  LOGOUT = 'logout',
-  UNAUTHORIZED_ACCESS = 'unauthorized_access',
-  PERMISSION_DENIED = 'permission_denied',
-  SUSPICIOUS_ACTIVITY = 'suspicious_activity',
-  TOKEN_REFRESH = 'token_refresh',
-  TOKEN_EXPIRED = 'token_expired',
+  LOGIN_ATTEMPT = SECURITY_EVENT.LOGIN_ATTEMPT,
+  LOGIN_SUCCESS = SECURITY_EVENT.LOGIN_SUCCESS,
+  LOGIN_FAILURE = SECURITY_EVENT.LOGIN_FAILURE,
+  LOGOUT = SECURITY_EVENT.LOGOUT,
+  UNAUTHORIZED_ACCESS = SECURITY_EVENT.UNAUTHORIZED_ACCESS,
+  PERMISSION_DENIED = SECURITY_EVENT.PERMISSION_DENIED,
+  SUSPICIOUS_ACTIVITY = SECURITY_EVENT.SUSPICIOUS_ACTIVITY,
+  TOKEN_REFRESH = SECURITY_EVENT.TOKEN_REFRESH,
+  TOKEN_EXPIRED = SECURITY_EVENT.TOKEN_EXPIRED,
 }
 
 /**
@@ -341,25 +350,31 @@ export function trackSecurityEvent(
 ): void {
   // Add breadcrumb for debugging
   addBreadcrumb(
-    `Security event: ${event}`,
-    'security',
-    metadata.success === false ? 'warning' : 'info',
+    LOG_MESSAGES.SENTRY.SECURITY_EVENT(event),
+    SENTRY_CATEGORY.SECURITY,
+    metadata.success === false
+      ? (SENTRY_LEVEL.WARNING as Sentry.SeverityLevel)
+      : (SENTRY_LEVEL.INFO as Sentry.SeverityLevel),
     metadata
   );
 
   // Capture failed auth attempts as errors
   if (event === SecurityEvent.LOGIN_FAILURE || event === SecurityEvent.UNAUTHORIZED_ACCESS) {
-    captureMessage(`Security Event: ${event}`, 'warning', {
-      tags: {
-        event_type: event,
-        security: 'true',
-      },
-      extra: metadata,
-    });
+    captureMessage(
+      LOG_MESSAGES.SENTRY.SECURITY_EVENT_CAPTURED(event),
+      SENTRY_LEVEL.WARNING as Sentry.SeverityLevel,
+      {
+        tags: {
+          [SENTRY_TAG.EVENT_TYPE]: event,
+          [SENTRY_TAG.SECURITY]: SENTRY_TAG_VALUE.TRUE,
+        },
+        extra: metadata,
+      }
+    );
   }
 
   // Log locally
-  logger.log('security', event, metadata);
+  logger.log(SENTRY_CATEGORY.SECURITY, event, metadata);
 }
 
 // ============================================================================

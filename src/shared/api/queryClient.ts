@@ -17,6 +17,7 @@ import { logger } from '../utils/logger';
 import { AppError } from '../utils/errors';
 import { CACHE, RETRY } from '../constants/timing';
 import { LIST_LIMITS } from '../constants/numbers';
+import { LOG_MESSAGES, QUERY_KEY, AXIOS_ERROR_CODE } from '../constants';
 
 /**
  * Default query options
@@ -60,10 +61,10 @@ const defaultQueryOptions = {
  */
 const queryCache = new QueryCache({
   onError: (error, query) => {
-    logger.error(`Query error [${query.queryHash}]:`, error);
+    logger.error(LOG_MESSAGES.FORMATTED.QUERY_ERROR(query.queryHash), error);
 
     // Don't log user-initiated cancellations
-    if (error instanceof Error && error.name === 'CanceledError') {
+    if (error instanceof Error && error.name === AXIOS_ERROR_CODE.CANCELED_ERROR) {
       return;
     }
 
@@ -75,7 +76,7 @@ const queryCache = new QueryCache({
   },
 
   onSuccess: (data, query) => {
-    logger.debug(`Query success [${query.queryHash}]`);
+    logger.debug(LOG_MESSAGES.FORMATTED.QUERY_SUCCESS(query.queryHash));
   },
 });
 
@@ -86,7 +87,7 @@ const queryCache = new QueryCache({
  */
 const mutationCache = new MutationCache({
   onError: (error, _variables, _context, mutation) => {
-    logger.error(`Mutation error [${mutation.mutationId}]:`, error);
+    logger.error(LOG_MESSAGES.FORMATTED.MUTATION_ERROR(String(mutation.mutationId)), error);
 
     // Report non-operational errors
     if (error instanceof AppError && !error.isOperational) {
@@ -95,7 +96,7 @@ const mutationCache = new MutationCache({
   },
 
   onSuccess: (_data, _variables, _context, mutation) => {
-    logger.debug(`Mutation success [${mutation.mutationId}]`);
+    logger.debug(LOG_MESSAGES.FORMATTED.MUTATION_SUCCESS(String(mutation.mutationId)));
   },
 });
 
@@ -131,37 +132,37 @@ export const queryClient = new QueryClient({
 export const queryKeys = {
   // Auth queries
   auth: {
-    all: ['auth'] as const,
-    currentUser: () => [...queryKeys.auth.all, 'current-user'] as const,
+    all: [QUERY_KEY.AUTH] as const,
+    currentUser: () => [...queryKeys.auth.all, QUERY_KEY.CURRENT_USER] as const,
   },
 
   // User queries
   users: {
-    all: ['users'] as const,
-    lists: () => [...queryKeys.users.all, 'list'] as const,
+    all: [QUERY_KEY.USERS] as const,
+    lists: () => [...queryKeys.users.all, QUERY_KEY.LIST] as const,
     list: (filters: Record<string, unknown>) => [...queryKeys.users.lists(), filters] as const,
-    details: () => [...queryKeys.users.all, 'detail'] as const,
+    details: () => [...queryKeys.users.all, QUERY_KEY.DETAIL] as const,
     detail: (id: string) => [...queryKeys.users.details(), id] as const,
   },
 
   // Match queries
   matches: {
-    all: ['matches'] as const,
-    lists: () => [...queryKeys.matches.all, 'list'] as const,
+    all: [QUERY_KEY.MATCHES] as const,
+    lists: () => [...queryKeys.matches.all, QUERY_KEY.LIST] as const,
     list: (filters: Record<string, unknown>) => [...queryKeys.matches.lists(), filters] as const,
-    details: () => [...queryKeys.matches.all, 'detail'] as const,
+    details: () => [...queryKeys.matches.all, QUERY_KEY.DETAIL] as const,
     detail: (id: string) => [...queryKeys.matches.details(), id] as const,
-    rounds: (clubId: string) => [...queryKeys.matches.all, 'rounds', clubId] as const,
+    rounds: (clubId: string) => [...queryKeys.matches.all, QUERY_KEY.ROUNDS, clubId] as const,
   },
 
   // Club queries
   clubs: {
-    all: ['clubs'] as const,
-    lists: () => [...queryKeys.clubs.all, 'list'] as const,
+    all: [QUERY_KEY.CLUBS] as const,
+    lists: () => [...queryKeys.clubs.all, QUERY_KEY.LIST] as const,
     list: (filters: Record<string, unknown>) => [...queryKeys.clubs.lists(), filters] as const,
-    details: () => [...queryKeys.clubs.all, 'detail'] as const,
+    details: () => [...queryKeys.clubs.all, QUERY_KEY.DETAIL] as const,
     detail: (id: string) => [...queryKeys.clubs.details(), id] as const,
-    members: (id: string) => [...queryKeys.clubs.detail(id), 'members'] as const,
+    members: (id: string) => [...queryKeys.clubs.detail(id), QUERY_KEY.MEMBERS] as const,
   },
 } as const;
 

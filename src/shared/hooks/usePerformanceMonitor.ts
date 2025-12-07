@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { InteractionManager } from 'react-native';
 import { logger } from '../utils/logger';
 import { MS, MATH, OPACITY_VALUE, LIST_LIMITS, FPS } from '../constants/numbers';
+import { LOG_MESSAGES } from '../constants';
 
 // Performance thresholds
 const PERF_THRESHOLD = {
@@ -125,7 +126,7 @@ export function usePerformanceMonitor(
 
       // Check against budget
       if (budget?.maxTTI && tti > budget.maxTTI) {
-        logger.warn('Performance budget exceeded: TTI', {
+        logger.warn(LOG_MESSAGES.PERFORMANCE.BUDGET_EXCEEDED_TTI, {
           component: componentName,
           tti,
           budget: budget.maxTTI,
@@ -134,7 +135,7 @@ export function usePerformanceMonitor(
       }
 
       if (budget?.maxMountTime && mountTime > budget.maxMountTime) {
-        logger.warn('Performance budget exceeded: Mount Time', {
+        logger.warn(LOG_MESSAGES.PERFORMANCE.BUDGET_EXCEEDED_MOUNT, {
           component: componentName,
           mountTime,
           budget: budget.maxMountTime,
@@ -163,7 +164,7 @@ export function usePerformanceMonitor(
 
     // Check render time against budget
     if (budget?.maxRenderTime && renderTime > budget.maxRenderTime) {
-      logger.warn('Performance budget exceeded: Render Time', {
+      logger.warn(LOG_MESSAGES.PERFORMANCE.BUDGET_EXCEEDED_RENDER, {
         component: componentName,
         renderTime,
         budget: budget.maxRenderTime,
@@ -230,14 +231,14 @@ export function usePerformanceMeasure(): {
 
         // Log if budget exceeded
         if (exceeded) {
-          logger.warn('Performance budget exceeded', {
+          logger.warn(LOG_MESSAGES.PERFORMANCE.BUDGET_EXCEEDED, {
             operation: name,
             duration,
             budget: options?.budget,
             exceeded: duration - (options?.budget || 0),
           });
         } else {
-          logger.debug('Performance measurement', {
+          logger.debug(LOG_MESSAGES.PERFORMANCE.MEASUREMENT_RECORDED, {
             operation: name,
             duration,
           });
@@ -248,7 +249,7 @@ export function usePerformanceMeasure(): {
         const endTime = performance.now();
         const duration = endTime - startTime;
 
-        logger.error('Performance measurement failed', error as Error, {
+        logger.error(LOG_MESSAGES.PERFORMANCE.MEASUREMENT_FAILED, error as Error, {
           operation: name,
           duration,
         });
@@ -324,7 +325,7 @@ export function useFPSMonitor(sampleInterval: number = MS.SECOND): number {
 
       // Warn if FPS is low
       if (currentFPS < PERF_THRESHOLD.LOW_FPS_WARNING) {
-        logger.warn('Low FPS detected', {
+        logger.warn(LOG_MESSAGES.PERFORMANCE.LOW_FPS, {
           fps: currentFPS,
           target: PERF_THRESHOLD.TARGET_FPS,
         });
@@ -391,7 +392,7 @@ export function useMemoryMonitor(interval: number = 5000): {
 
         // Warn if using > 90% of heap
         if (usedJSHeapSize > jsHeapSizeLimit * PERF_THRESHOLD.MEMORY_WARNING_RATIO) {
-          logger.warn('High memory usage detected', {
+          logger.warn(LOG_MESSAGES.PERFORMANCE.HIGH_MEMORY, {
             used: usedJSHeapSize,
             limit: jsHeapSizeLimit,
             percentage: (usedJSHeapSize / jsHeapSizeLimit) * MATH.HUNDRED,
@@ -449,7 +450,7 @@ export function useRenderTracker<T extends Record<string, unknown>>(
       }
 
       if (changedProps.length > 0) {
-        logger.debug('Component re-rendered', {
+        logger.debug(LOG_MESSAGES.PERFORMANCE.COMPONENT_RERENDERED, {
           component: componentName,
           renderCount: renderCount.current,
           changedProps,
@@ -458,7 +459,7 @@ export function useRenderTracker<T extends Record<string, unknown>>(
 
       // Warn if too many renders
       if (renderCount.current > PERF_THRESHOLD.EXCESSIVE_RENDERS) {
-        logger.warn('Excessive re-renders detected', {
+        logger.warn(LOG_MESSAGES.PERFORMANCE.EXCESSIVE_RERENDERS, {
           component: componentName,
           renderCount: renderCount.current,
         });
@@ -542,7 +543,7 @@ export function useNetworkMonitor(): {
 
         // Check budget
         if (options?.budget && duration > options.budget) {
-          logger.warn('Network request exceeded budget', {
+          logger.warn(LOG_MESSAGES.PERFORMANCE.NETWORK_BUDGET_EXCEEDED, {
             request: name,
             duration,
             budget: options.budget,
@@ -552,7 +553,7 @@ export function useNetworkMonitor(): {
 
         return result;
       } catch (error) {
-        logger.error('Network request failed', error as Error, {
+        logger.error(LOG_MESSAGES.PERFORMANCE.NETWORK_REQUEST_FAILED, error as Error, {
           request: name,
         });
         throw error;

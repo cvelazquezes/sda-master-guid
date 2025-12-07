@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { logger } from '../utils/logger';
 import { CACHE } from '../constants/timing';
 import { TIME_UNIT, OPACITY_VALUE, ID_GENERATION, LIST_LIMITS } from '../constants/numbers';
+import { LOG_MESSAGES, STORAGE_KEYS, TYPEOF } from '../constants';
 
 // ============================================================================
 // Types
@@ -25,7 +26,7 @@ interface IdempotencyRecord<T = unknown> {
 
 class IdempotencyService {
   private memoryCache = new Map<string, IdempotencyRecord>();
-  private readonly STORAGE_KEY_PREFIX = '@idempotency:';
+  private readonly STORAGE_KEY_PREFIX = STORAGE_KEYS.IDEMPOTENCY.PREFIX;
   private readonly DEFAULT_TTL = TIME_UNIT.SECONDS_PER_HOUR; // 1 hour in seconds
   private readonly MAX_MEMORY_CACHE_SIZE = LIST_LIMITS.MAX_CACHE;
   private cleanupInterval: NodeJS.Timeout | null = null;
@@ -46,19 +47,19 @@ class IdempotencyService {
     ttlSeconds: number = this.DEFAULT_TTL
   ): Promise<T> {
     // Validate key
-    if (!idempotencyKey || typeof idempotencyKey !== 'string') {
-      throw new Error('Idempotency key must be a non-empty string');
+    if (!idempotencyKey || typeof idempotencyKey !== TYPEOF.STRING) {
+      throw new Error(LOG_MESSAGES.VALIDATION.IDEMPOTENCY_KEY_REQUIRED);
     }
 
     // Check memory cache first
     const cachedRecord = await this.get<T>(idempotencyKey);
     if (cachedRecord) {
-      logger.debug(`Idempotency: Returning cached result for key: ${idempotencyKey}`);
+      logger.debug(LOG_MESSAGES.IDEMPOTENCY.CACHED_RESULT(idempotencyKey));
       return cachedRecord.result;
     }
 
     // Execute operation
-    logger.debug(`Idempotency: Executing operation for key: ${idempotencyKey}`);
+    logger.debug(LOG_MESSAGES.IDEMPOTENCY.EXECUTING(idempotencyKey));
 
     try {
       const result = await operation();
@@ -68,7 +69,7 @@ class IdempotencyService {
 
       return result;
     } catch (error) {
-      logger.error(`Idempotency: Operation failed for key: ${idempotencyKey}`, error as Error);
+      logger.error(LOG_MESSAGES.IDEMPOTENCY.OPERATION_FAILED(idempotencyKey), error as Error);
       throw error;
     }
   }
@@ -99,7 +100,7 @@ class IdempotencyService {
     try {
       await AsyncStorage.setItem(this.getStorageKey(key), JSON.stringify(record));
     } catch (error) {
-      logger.warn('Failed to store idempotency key in persistent storage', error as Error);
+      logger.warn(LOG_MESSAGES.IDEMPOTENCY.STORE_FAILED, error as Error);
       // Continue anyway - memory cache will work
     }
   }
@@ -137,7 +138,7 @@ class IdempotencyService {
         }
       }
     } catch (error) {
-      logger.warn('Failed to retrieve idempotency key from persistent storage', error as Error);
+      logger.warn(LOG_MESSAGES.IDEMPOTENCY.RETRIEVE_FAILED, error as Error);
     }
 
     return null;
@@ -160,7 +161,7 @@ class IdempotencyService {
     try {
       await AsyncStorage.removeItem(this.getStorageKey(key));
     } catch (error) {
-      logger.warn('Failed to remove idempotency key from persistent storage', error as Error);
+      logger.warn(LOG_MESSAGES.IDEMPOTENCY.REMOVE_FAILED, error as Error);
     }
   }
 
@@ -175,7 +176,7 @@ class IdempotencyService {
       const idempotencyKeys = keys.filter((k) => k.startsWith(this.STORAGE_KEY_PREFIX));
       await AsyncStorage.multiRemove(idempotencyKeys);
     } catch (error) {
-      logger.warn('Failed to clear idempotency keys from persistent storage', error as Error);
+      logger.warn(LOG_MESSAGES.IDEMPOTENCY.CLEAR_FAILED, error as Error);
     }
   }
 
@@ -194,7 +195,7 @@ class IdempotencyService {
       this.memoryCache.delete(entries[i][0]);
     }
 
-    logger.debug(`Idempotency: Evicted ${toRemove} oldest entries`);
+    logger.debug(LOG_MESSAGES.IDEMPOTENCY.EVICTED(toRemove));
   }
 
   /**
@@ -234,11 +235,11 @@ class IdempotencyService {
         }
       }
     } catch (error) {
-      logger.warn('Failed to cleanup expired idempotency keys', error as Error);
+      logger.warn(LOG_MESSAGES.IDEMPOTENCY.CLEANUP_FAILED, error as Error);
     }
 
     if (removedCount > 0) {
-      logger.debug(`Idempotency: Cleaned up ${removedCount} expired entries`);
+      logger.debug(LOG_MESSAGES.IDEMPOTENCY.CLEANED_UP(removedCount));
     }
   }
 

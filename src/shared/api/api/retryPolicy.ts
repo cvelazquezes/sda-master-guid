@@ -8,6 +8,7 @@ import { NetworkError, TimeoutError } from '../../utils/errors';
 import { RETRY_CONFIG } from '../../constants/validation';
 import { RETRYABLE_STATUS_CODES } from '../../constants/http';
 import { OPACITY_VALUE } from '../../constants/numbers';
+import { LOG_MESSAGES, TYPEOF, AXIOS_ERROR_CODE, OBJECT_PROPERTY } from '../../constants';
 
 interface RetryOptions {
   maxRetries: number;
@@ -58,7 +59,10 @@ export class RetryPolicy {
 
         // Calculate delay and wait
         const delay = this.calculateDelay(attempt);
-        logger.warn(`Retry attempt ${attempt + 1} after ${delay}ms`, { error });
+        logger.warn(LOG_MESSAGES.FORMATTED.RETRY_ATTEMPT(attempt + 1, this.options.maxRetries), {
+          error,
+          delay,
+        });
         await this.sleep(delay);
       }
     }
@@ -85,7 +89,7 @@ export class RetryPolicy {
 
     // ECONNRESET, ETIMEDOUT errors
     const errorCode = (error as { code?: string })?.code;
-    if (errorCode === 'ECONNRESET' || errorCode === 'ETIMEDOUT') {
+    if (errorCode === AXIOS_ERROR_CODE.ECONNRESET || errorCode === AXIOS_ERROR_CODE.ETIMEDOUT) {
       return true;
     }
 
@@ -113,7 +117,7 @@ export class RetryPolicy {
    * Type guard for Axios errors
    */
   private isAxiosError(error: unknown): error is { response?: { status: number } } {
-    return typeof error === 'object' && error !== null && 'response' in error;
+    return typeof error === TYPEOF.OBJECT && error !== null && OBJECT_PROPERTY.RESPONSE in error;
   }
 
   /**
