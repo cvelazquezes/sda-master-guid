@@ -5,8 +5,7 @@
  * These are the tokens that should be used in components and layouts.
  *
  * USAGE:
- * - Import these tokens directly OR
- * - Use the useDesignTokens() hook for reactive theme changes
+ * Use useTheme() from ThemeContext to access theme colors.
  */
 
 import {
@@ -16,8 +15,9 @@ import {
   opacityPrimitives,
   typographyPrimitives,
 } from './primitives';
+import { THEME_MODE } from '../../constants';
 
-export type ThemeMode = 'light' | 'dark';
+export type ThemeMode = (typeof THEME_MODE)[keyof typeof THEME_MODE];
 
 // ============================================================================
 // SEMANTIC COLOR TOKENS
@@ -35,13 +35,14 @@ export interface SemanticColors {
   icon: Record<string, string>;
   role: Record<string, { primary: string; subtle: string; text: string }>;
   status: Record<string, { primary: string; subtle: string; text: string }>;
+  hierarchy: Record<string, { primary: string; subtle: string }>;
 }
 
 /**
  * Creates theme-aware semantic color tokens
  */
 export const createSemanticColors = (theme: ThemeMode): SemanticColors => {
-  const isLight = theme === 'light';
+  const isLight = theme === THEME_MODE.LIGHT;
   const c = colorPrimitives;
 
   return {

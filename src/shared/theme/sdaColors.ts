@@ -6,6 +6,8 @@
  * NOTE: This file intentionally contains literal numbers as it DEFINES color tokens.
  */
 
+import { EMPTY_VALUE } from '../constants';
+
 export const sdaBrandColors = {
   // Primary Brand Colors - Based on SDA Identity
   primary: {
@@ -375,7 +377,7 @@ export const sdaColorUtils = {
    * Get contrast text color (black or white) for background
    */
   getContrastText(backgroundColor: string): string {
-    const hex = backgroundColor.replace('#', '');
+    const hex = backgroundColor.replace('#', EMPTY_VALUE);
     const r = parseInt(hex.slice(0, 2), 16);
     const g = parseInt(hex.slice(2, 4), 16);
     const b = parseInt(hex.slice(4, 6), 16);

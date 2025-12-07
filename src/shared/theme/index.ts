@@ -12,13 +12,12 @@
  * - Tailwind CSS
  * - Chakra UI
  *
- * DESIGN TOKENS (Recommended - Single Source of Truth):
- * Import from './tokens' for the new unified token system:
+ * THEME USAGE (Recommended - Single Source of Truth):
+ * Use the useTheme() hook from ThemeContext for all theme colors:
  *
  * ```typescript
- * import { useDesignTokens } from '../hooks/useDesignTokens';
- * // or
- * import { designTokensV2, resolveTokens } from '../theme/tokens';
+ * import { useTheme } from '../contexts/ThemeContext';
+ * const { colors } = useTheme();
  * ```
  */
 
@@ -75,17 +74,18 @@ import {
   getIconSize,
   getFontSize,
 } from './sizePresets';
+import { THEME_MODE, COLOR_SHADE } from '../constants';
 
 /**
  * Theme modes
  */
-export type ThemeMode = 'light' | 'dark' | 'system';
+export type ThemeMode = (typeof THEME_MODE)[keyof typeof THEME_MODE];
 
 /**
  * Light theme
  */
 export const lightTheme = {
-  mode: 'light' as ThemeMode,
+  mode: THEME_MODE.LIGHT as ThemeMode,
 
   // Colors
   colors: {
@@ -104,16 +104,16 @@ export const lightTheme = {
     placeholder: colors.light.placeholder,
 
     // Semantic colors
-    primary: colors.primary[500],
-    primaryLight: colors.primary[300],
-    primaryDark: colors.primary[700],
-    secondary: colors.secondary[500],
-    secondaryLight: colors.secondary[300],
-    secondaryDark: colors.secondary[700],
-    success: colors.success[500],
-    warning: colors.warning[500],
-    error: colors.error[500],
-    info: colors.info[500],
+    primary: colors.primary[COLOR_SHADE[500]],
+    primaryLight: colors.primary[COLOR_SHADE[300]],
+    primaryDark: colors.primary[COLOR_SHADE[700]],
+    secondary: colors.secondary[COLOR_SHADE[500]],
+    secondaryLight: colors.secondary[COLOR_SHADE[300]],
+    secondaryDark: colors.secondary[COLOR_SHADE[700]],
+    success: colors.success[COLOR_SHADE[500]],
+    warning: colors.warning[COLOR_SHADE[500]],
+    error: colors.error[COLOR_SHADE[500]],
+    info: colors.info[COLOR_SHADE[500]],
   },
 
   // Typography
@@ -148,7 +148,7 @@ export const lightTheme = {
  * Dark theme
  */
 export const darkTheme = {
-  mode: 'dark' as ThemeMode,
+  mode: THEME_MODE.DARK as ThemeMode,
 
   // Colors
   colors: {
@@ -167,16 +167,16 @@ export const darkTheme = {
     placeholder: colors.dark.placeholder,
 
     // Semantic colors (adjusted for dark mode)
-    primary: colors.primary[400],
-    primaryLight: colors.primary[300],
-    primaryDark: colors.primary[600],
-    secondary: colors.secondary[400],
-    secondaryLight: colors.secondary[300],
-    secondaryDark: colors.secondary[600],
-    success: colors.success[400],
-    warning: colors.warning[400],
-    error: colors.error[400],
-    info: colors.info[400],
+    primary: colors.primary[COLOR_SHADE[400]],
+    primaryLight: colors.primary[COLOR_SHADE[300]],
+    primaryDark: colors.primary[COLOR_SHADE[600]],
+    secondary: colors.secondary[COLOR_SHADE[400]],
+    secondaryLight: colors.secondary[COLOR_SHADE[300]],
+    secondaryDark: colors.secondary[COLOR_SHADE[600]],
+    success: colors.success[COLOR_SHADE[400]],
+    warning: colors.warning[COLOR_SHADE[400]],
+    error: colors.error[COLOR_SHADE[400]],
+    info: colors.info[COLOR_SHADE[400]],
   },
 
   // Typography
@@ -215,7 +215,7 @@ export const theme = lightTheme;
 /**
  * Theme type
  */
-export type Theme = typeof lightTheme;
+export type Theme = typeof lightTheme | typeof darkTheme;
 
 /**
  * Get theme by mode
@@ -225,11 +225,11 @@ export type Theme = typeof lightTheme;
  *
  * @example
  * ```typescript
- * const currentTheme = getTheme('dark');
+ * const currentTheme = getTheme(THEME_MODE.DARK);
  * ```
  */
 export function getTheme(mode: ThemeMode): Theme {
-  if (mode === 'dark') {
+  if (mode === THEME_MODE.DARK) {
     return darkTheme;
   }
   return lightTheme;

@@ -11,67 +11,34 @@
  * ✅ ALWAYS use: if (featureConfig.flags.newFeature) { ... }
  */
 
-// ============================================================================
-// COUNTRY CODES (ISO 3166-1 alpha-3)
-// ============================================================================
-
-export const countryCodes = {
-  // North America
-  USA: 'USA',
-  CANADA: 'CAN',
-  MEXICO: 'MEX',
-
-  // Central America
-  GUATEMALA: 'GTM',
-  HONDURAS: 'HND',
-  EL_SALVADOR: 'SLV',
-  NICARAGUA: 'NIC',
-  COSTA_RICA: 'CRI',
-  PANAMA: 'PAN',
-  BELIZE: 'BLZ',
-
-  // Caribbean
-  CUBA: 'CUB',
-  DOMINICAN_REPUBLIC: 'DOM',
-  HAITI: 'HTI',
-  JAMAICA: 'JAM',
-  PUERTO_RICO: 'PRI',
-
-  // South America
-  BRAZIL: 'BRA',
-  ARGENTINA: 'ARG',
-  CHILE: 'CHL',
-  COLOMBIA: 'COL',
-  PERU: 'PER',
-  VENEZUELA: 'VEN',
-  ECUADOR: 'ECU',
-  BOLIVIA: 'BOL',
-  PARAGUAY: 'PRY',
-  URUGUAY: 'URY',
-
-  // Europe
-  SPAIN: 'ESP',
-  PORTUGAL: 'PRT',
-  FRANCE: 'FRA',
-  GERMANY: 'DEU',
-  UNITED_KINGDOM: 'GBR',
-  ITALY: 'ITA',
-
-  // Other
-  PHILIPPINES: 'PHL',
-} as const;
+import {
+  EMPTY_VALUE,
+  STORAGE_KEYS,
+  DIGEST_FREQUENCY,
+  AB_TEST_VARIANT,
+  LANGUAGE,
+  COUNTRY_CODE,
+  DIVISION_CODE,
+  APP_VERSION,
+} from '../constants';
 
 // ============================================================================
-// LANGUAGE CODES (ISO 639-1)
+// COUNTRY CODES - Re-exported from constants for feature config
+// ============================================================================
+
+export const countryCodes = COUNTRY_CODE;
+
+// ============================================================================
+// LANGUAGE CODES - Re-exported from constants for feature config
 // ============================================================================
 
 export const languageCodes = {
-  ENGLISH: 'en',
-  SPANISH: 'es',
-  PORTUGUESE: 'pt',
-  FRENCH: 'fr',
-  GERMAN: 'de',
-  ITALIAN: 'it',
+  ENGLISH: LANGUAGE.EN,
+  SPANISH: LANGUAGE.ES,
+  PORTUGUESE: LANGUAGE.PT,
+  FRENCH: LANGUAGE.FR,
+  GERMAN: LANGUAGE.DE,
+  ITALIAN: LANGUAGE.IT,
 } as const;
 
 // ============================================================================
@@ -80,17 +47,11 @@ export const languageCodes = {
 
 export const regionConfig = {
   /** Inter-American Division regions */
-  divisions: {
-    INTER_AMERICAN: 'iad',
-    SOUTH_AMERICAN: 'sad',
-    NORTH_AMERICAN: 'nad',
-    EURO_AFRICA: 'eud',
-    SOUTHERN_ASIA: 'sud',
-  } as const,
+  divisions: DIVISION_CODE,
 
   /** Countries by region */
   countriesByDivision: {
-    iad: [
+    [DIVISION_CODE.INTER_AMERICAN]: [
       countryCodes.MEXICO,
       countryCodes.GUATEMALA,
       countryCodes.HONDURAS,
@@ -107,7 +68,7 @@ export const regionConfig = {
       countryCodes.COLOMBIA,
       countryCodes.VENEZUELA,
     ],
-    sad: [
+    [DIVISION_CODE.SOUTH_AMERICAN]: [
       countryCodes.BRAZIL,
       countryCodes.ARGENTINA,
       countryCodes.CHILE,
@@ -117,7 +78,7 @@ export const regionConfig = {
       countryCodes.PARAGUAY,
       countryCodes.URUGUAY,
     ],
-    nad: [countryCodes.USA, countryCodes.CANADA],
+    [DIVISION_CODE.NORTH_AMERICAN]: [countryCodes.USA, countryCodes.CANADA],
   } as const,
 
   /** Default language by country */
@@ -222,7 +183,7 @@ export const businessRules = {
     allowEmailNotifications: true,
     allowPushNotifications: true,
     allowSmsNotifications: false,
-    digestEmailFrequency: 'weekly' as const,
+    digestEmailFrequency: DIGEST_FREQUENCY.WEEKLY,
   },
 } as const;
 
@@ -235,18 +196,22 @@ export const abTestConfig = {
   experiments: {
     newOnboarding: {
       enabled: false,
-      variants: ['control', 'variant_a', 'variant_b'] as const,
+      variants: [
+        AB_TEST_VARIANT.CONTROL,
+        AB_TEST_VARIANT.VARIANT_A,
+        AB_TEST_VARIANT.VARIANT_B,
+      ] as const,
       distribution: [50, 25, 25] as const,
     },
     redesignedDashboard: {
       enabled: false,
-      variants: ['control', 'variant_a'] as const,
+      variants: [AB_TEST_VARIANT.CONTROL, AB_TEST_VARIANT.VARIANT_A] as const,
       distribution: [50, 50] as const,
     },
   },
 
   /** User assignment persistence key */
-  persistenceKey: '@ab_test_assignments',
+  persistenceKey: STORAGE_KEYS.AB_TEST.ASSIGNMENTS,
 } as const;
 
 // ============================================================================
@@ -257,7 +222,7 @@ export const maintenanceConfig = {
   /** Is maintenance mode active */
   isActive: false,
   /** Maintenance message to display */
-  message: '',
+  message: EMPTY_VALUE,
   /** Expected end time (ISO string or null) */
   expectedEndTime: null as string | null,
   /** Features disabled during maintenance */
@@ -272,13 +237,13 @@ export const maintenanceConfig = {
 
 export const versionConfig = {
   /** Minimum supported app version */
-  minSupportedVersion: '1.0.0',
+  minSupportedVersion: APP_VERSION,
   /** Current app version */
-  currentVersion: '1.0.0',
+  currentVersion: APP_VERSION,
   /** Force update if below this version */
-  forceUpdateBelowVersion: '1.0.0',
+  forceUpdateBelowVersion: APP_VERSION,
   /** Show update prompt if below this version */
-  suggestUpdateBelowVersion: '1.0.0',
+  suggestUpdateBelowVersion: APP_VERSION,
 } as const;
 
 // ============================================================================

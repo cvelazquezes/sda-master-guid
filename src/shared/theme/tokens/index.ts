@@ -29,6 +29,7 @@ import { createComponentTokens } from './components';
 import { motionTokens } from './motion';
 import { layoutTokens } from './layout';
 import { behaviorTokens } from './behavior';
+import { THEME_MODE } from '../../constants';
 
 export * from './primitives';
 
@@ -55,14 +56,14 @@ export { resolveTokens, getTokenValue, type ResolvedTokens } from './resolver';
 
 /**
  * Default design tokens (light theme)
- * For theme-aware tokens, use useDesignTokens() hook or resolveTokens()
+ * For theme-aware tokens, use useTheme() hook from ThemeContext or resolveTokens()
  *
  * This is the SINGLE SOURCE OF TRUTH for all UI decisions.
  */
 export const designTokensV2 = {
   primitives: primitiveTokens,
-  semantic: createSemanticTokens('light'),
-  components: createComponentTokens('light'),
+  semantic: createSemanticTokens(THEME_MODE.LIGHT),
+  components: createComponentTokens(THEME_MODE.LIGHT),
   motion: motionTokens,
   layout: layoutTokens,
   behavior: behaviorTokens,

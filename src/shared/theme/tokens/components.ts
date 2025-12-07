@@ -5,8 +5,7 @@
  * These tokens combine semantic tokens into ready-to-use component configurations.
  *
  * USAGE:
- * const tokens = useDesignTokens();
- * const buttonStyle = tokens.components.button.primary;
+ * const { colors } = useTheme();
  *
  * NOTE: This file intentionally contains literal numbers as it DEFINES component tokens.
  */
@@ -19,7 +18,9 @@ import {
   opacityPrimitives,
   sizePrimitives,
   borderWidthPrimitives,
+  typographyPrimitives,
 } from './primitives';
+import { THEME_MODE, BORDERS } from '../../constants';
 
 // ============================================================================
 // BUTTON TOKENS
@@ -65,8 +66,8 @@ const createButtonTokens = (
       small: {
         paddingVertical: spacingPrimitives.sm,
         paddingHorizontal: spacingPrimitives.md,
-        minHeight: 36,
-        fontSize: 14,
+        minHeight: sizePrimitives.touchTarget.minimum,
+        fontSize: typographyPrimitives.fontSize.sm,
         iconSize: sizePrimitives.icon.sm,
         borderRadius: semanticBorder.radius.button,
       },
@@ -74,7 +75,7 @@ const createButtonTokens = (
         paddingVertical: spacingPrimitives.md,
         paddingHorizontal: spacingPrimitives.lg,
         minHeight: sizePrimitives.touchTarget.comfortable,
-        fontSize: 16,
+        fontSize: typographyPrimitives.fontSize.lg,
         iconSize: sizePrimitives.icon.md,
         borderRadius: semanticBorder.radius.button,
       },
@@ -82,7 +83,7 @@ const createButtonTokens = (
         paddingVertical: spacingPrimitives.lg,
         paddingHorizontal: spacingPrimitives.xl,
         minHeight: sizePrimitives.touchTarget.spacious,
-        fontSize: 18,
+        fontSize: typographyPrimitives.fontSize.xl,
         iconSize: sizePrimitives.icon.lg,
         borderRadius: semanticBorder.radius.button,
       },
@@ -91,37 +92,37 @@ const createButtonTokens = (
       primary: {
         backgroundColor: colors.brand.primary,
         color: colors.text.onPrimary,
-        borderColor: 'transparent',
+        borderColor: BORDERS.COLOR.TRANSPARENT,
       },
       secondary: {
         backgroundColor: colors.brand.secondary,
         color: colors.text.onSecondary,
-        borderColor: 'transparent',
+        borderColor: BORDERS.COLOR.TRANSPARENT,
       },
       accent: {
         backgroundColor: colors.brand.accent,
         color: colors.text.onAccent,
-        borderColor: 'transparent',
+        borderColor: BORDERS.COLOR.TRANSPARENT,
       },
       danger: {
         backgroundColor: colors.feedback.error,
         color: colors.text.onPrimary,
-        borderColor: 'transparent',
+        borderColor: BORDERS.COLOR.TRANSPARENT,
       },
       success: {
         backgroundColor: colors.feedback.success,
         color: colors.text.onPrimary,
-        borderColor: 'transparent',
+        borderColor: BORDERS.COLOR.TRANSPARENT,
       },
       outline: {
-        backgroundColor: 'transparent',
+        backgroundColor: BORDERS.COLOR.TRANSPARENT,
         color: colors.brand.primary,
         borderColor: colors.brand.primary,
       },
       ghost: {
-        backgroundColor: 'transparent',
+        backgroundColor: BORDERS.COLOR.TRANSPARENT,
         color: colors.brand.primary,
-        borderColor: 'transparent',
+        borderColor: BORDERS.COLOR.TRANSPARENT,
       },
     },
     states: {
@@ -149,14 +150,16 @@ const createCardTokens = (
       backgroundColor: string;
       borderRadius: number;
       padding: number;
-      shadow: object;
-      border?: { width: number; color: string };
+      shadow?: object;
+      borderWidth?: number;
+      borderColor?: string;
     }
   >;
-  interactive: { opacity: number };
+  gap: number;
+  marginBottom: number;
 } => {
   const colors = createSemanticColors(theme);
-  const isLight = theme === 'light';
+  const isLight = theme === THEME_MODE.LIGHT;
 
   return {
     variants: {
@@ -193,7 +196,7 @@ const createCardTokens = (
         },
       },
       flat: {
-        backgroundColor: 'transparent',
+        backgroundColor: BORDERS.COLOR.TRANSPARENT,
         borderRadius: semanticBorder.radius.card,
         padding: spacingPrimitives.lg,
       },
@@ -285,7 +288,7 @@ const createModalTokens = (
   footer: { marginTop: number; gap: number };
 } => {
   const colors = createSemanticColors(theme);
-  const isLight = theme === 'light';
+  const isLight = theme === THEME_MODE.LIGHT;
 
   return {
     container: {
@@ -327,7 +330,8 @@ const createBadgeTokens = (
     paddingHorizontal: number;
     borderRadius: number;
     fontSize: number;
-    fontWeight: string;
+    fontWeight: TextStyle['fontWeight'];
+    letterSpacing: number;
   };
   variants: Record<string, { backgroundColor: string; color: string }>;
   sizes: Record<string, { paddingVertical: number; paddingHorizontal: number; fontSize: number }>;
@@ -341,7 +345,7 @@ const createBadgeTokens = (
       paddingHorizontal: spacingPrimitives.sm,
       fontSize: semanticTypography.ui.badge.fontSize,
       fontWeight: semanticTypography.ui.badge.fontWeight as TextStyle['fontWeight'],
-      letterSpacing: semanticTypography.ui.badge.letterSpacing,
+      letterSpacing: semanticTypography.ui.badge.letterSpacing ?? 0,
     },
     variants: {
       default: {
@@ -377,7 +381,7 @@ const createBadgeTokens = (
       small: {
         paddingVertical: spacingPrimitives.xxs,
         paddingHorizontal: spacingPrimitives.xs,
-        fontSize: 10,
+        fontSize: typographyPrimitives.fontSize['2xs'],
       },
       medium: {
         paddingVertical: spacingPrimitives.xs,
@@ -387,7 +391,7 @@ const createBadgeTokens = (
       large: {
         paddingVertical: spacingPrimitives.sm,
         paddingHorizontal: spacingPrimitives.md,
-        fontSize: 14,
+        fontSize: typographyPrimitives.fontSize.sm,
       },
     },
   } as const;
@@ -418,13 +422,13 @@ const createAvatarTokens = (
     borderWidth: borderWidthPrimitives.medium,
     borderColor: colors.border.default,
     fontSize: {
-      xs: 10,
-      sm: 13,
-      md: 16,
-      lg: 20,
-      xl: 28,
-      '2xl': 36,
-      '3xl': 40,
+      xs: typographyPrimitives.fontSize['2xs'],
+      sm: typographyPrimitives.fontSize.xs,
+      md: typographyPrimitives.fontSize.lg,
+      lg: typographyPrimitives.fontSize['2xl'],
+      xl: typographyPrimitives.fontSize['4xl'],
+      '2xl': typographyPrimitives.fontSize['6xl'],
+      '3xl': typographyPrimitives.fontSize['7xl'],
     },
   } as const;
 };
@@ -564,7 +568,7 @@ const createIconButtonTokens = (
     },
     variants: {
       default: {
-        backgroundColor: 'transparent',
+        backgroundColor: BORDERS.COLOR.TRANSPARENT,
         color: colors.icon.primary,
       },
       primary: {
@@ -647,7 +651,7 @@ const createToastTokens = (
   gap: number;
 } => {
   const colors = createSemanticColors(theme);
-  const isLight = theme === 'light';
+  const isLight = theme === THEME_MODE.LIGHT;
 
   return {
     container: {
@@ -721,9 +725,12 @@ const createEmptyStateTokens = (
       ...semanticTypography.heading.h3,
       color: colors.text.primary,
     },
-    message: {
+    description: {
       ...semanticTypography.body.medium,
       color: colors.text.secondary,
+    },
+    action: {
+      marginTop: spacingPrimitives.lg,
     },
   } as const;
 };

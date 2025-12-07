@@ -14,7 +14,7 @@
  * import { Text, View } from 'react-native';
  *
  * // ✅ GOOD - Import from ui
- * import { Text, Card, Button, useDesignTokens } from '@/ui';
+ * import { Text, Card, Button, useTheme } from '@/ui';
  */
 
 // =============================================================================
@@ -158,9 +158,3 @@ export type {
 export { useTheme, ThemeProvider } from '../contexts/ThemeContext';
 export { lightTheme, darkTheme, getTheme } from '../shared/theme';
 export type { Theme, ThemeMode as ThemeModeType } from '../shared/theme';
-
-// =============================================================================
-// HOOKS
-// Utility hooks for UI
-// =============================================================================
-export { useDesignTokens } from '../shared/hooks/useDesignTokens';

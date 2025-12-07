@@ -1,16 +1,14 @@
 /**
  * Theme Context
  *
- * Provides theme switching and management integrated with the design token system.
+ * Provides theme switching and management for the application.
  * This context is the central hub for theme state throughout the application.
  *
- * BACKWARD COMPATIBILITY:
- * - `colors` property maintains the old flat structure for existing components
- * - Use `useDesignTokens()` hook for the new semantic token structure
+ * USAGE:
+ * Use the useTheme() hook to access theme colors and state.
  *
- * MIGRATION PATH:
- * 1. Existing code continues to work with colors.primary, colors.surface, etc.
- * 2. New code should use useDesignTokens() for colors.brand.primary, colors.background.surface
+ * @example
+ * const { colors, isDark, toggleTheme } = useTheme();
  */
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
@@ -79,10 +77,7 @@ export interface ThemeContextType {
   /** The resolved active theme (always light or dark) */
   activeTheme: ActiveTheme;
 
-  /**
-   * Colors object (flat structure)
-   * NOTE: For new semantic token structure, use useDesignTokens() hook
-   */
+  /** Colors object for theming */
   colors: LegacyThemeColors;
 
   /**
@@ -218,18 +213,10 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 /**
  * Hook to access the theme context
  *
- * NOTE: For new code using design tokens, prefer useDesignTokens() hook
- * which provides the semantic token structure (colors.background.surface, etc.)
- *
  * @returns Theme context with mode, activeTheme, colors, isDark, setTheme, and toggleTheme
  *
  * @example
- * // Legacy usage (still works)
  * const { colors, isDark, toggleTheme } = useTheme();
- *
- * // New recommended usage
- * import { useDesignTokens } from '../shared/hooks';
- * const { colors } = useDesignTokens();
  */
 export const useTheme = (): ThemeContextType => {
   const context = useContext(ThemeContext);
