@@ -462,6 +462,7 @@ export const en = {
       reassign: 'Reassign',
       remove: 'Remove',
       assignAtLeastOne: 'Please assign at least one member to a directive position before saving.',
+      memberAssignedMessage: '{{memberName}} assigned as {{positionTitle}}.',
       saveSuccess:
         'Club directive with {{count}} member(s) has been saved successfully. All club members will be notified of the directive structure.',
       infoText:

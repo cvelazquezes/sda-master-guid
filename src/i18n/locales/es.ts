@@ -465,6 +465,7 @@ export const es: TranslationKeys = {
       remove: 'Eliminar',
       assignAtLeastOne:
         'Por favor asigna al menos un miembro a una posición directiva antes de guardar.',
+      memberAssignedMessage: '{{memberName}} asignado como {{positionTitle}}.',
       saveSuccess:
         'La directiva del club con {{count}} miembro(s) ha sido guardada exitosamente. Todos los miembros del club serán notificados de la estructura directiva.',
       infoText:
