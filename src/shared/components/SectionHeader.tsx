@@ -14,7 +14,7 @@ import { View, StyleSheet, ViewStyle } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { designTokens } from '../theme/designTokens';
 import { layoutConstants } from '../theme';
-import { FLEX } from '../constants';
+import { FLEX, TEXT_VARIANT, TEXT_WEIGHT } from '../constants';
 import { SPACING } from '../constants/numbers';
 import { Text } from './Text';
 
@@ -38,10 +38,14 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
   return (
     <View style={[styles.container, style]} testID={testID}>
       <View style={styles.titleContainer}>
-        <Text variant="h2">{title}</Text>
+        <Text variant={TEXT_VARIANT.H2}>{title}</Text>
         {badge !== undefined && (
           <View style={[styles.badge, { backgroundColor: colors.primaryAlpha10 }]}>
-            <Text variant="caption" weight="bold" style={{ color: colors.primary }}>
+            <Text
+              variant={TEXT_VARIANT.CAPTION}
+              weight={TEXT_WEIGHT.BOLD}
+              style={{ color: colors.primary }}
+            >
               {badge}
             </Text>
           </View>

@@ -16,7 +16,15 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../theme';
-import { A11Y_ROLE, ICONS, DIMENSIONS, FLEX } from '../constants';
+import {
+  A11Y_ROLE,
+  ICONS,
+  DIMENSIONS,
+  FLEX,
+  TEXT_COLOR,
+  TEXT_VARIANT,
+  TEXT_WEIGHT,
+} from '../constants';
 import { Text } from './Text';
 
 interface StandardInputProps extends TextInputProps {
@@ -103,9 +111,9 @@ export const StandardInput: React.FC<StandardInputProps> = ({
       {/* Label */}
       {label && (
         <View style={styles.labelContainer}>
-          <Text variant="label" weight="bold">
+          <Text variant={TEXT_VARIANT.LABEL} weight={TEXT_WEIGHT.BOLD}>
             {label}
-            {required && <Text color="error"> *</Text>}
+            {required && <Text color={TEXT_COLOR.ERROR}> *</Text>}
           </Text>
         </View>
       )}
@@ -167,7 +175,7 @@ export const StandardInput: React.FC<StandardInputProps> = ({
             color={colors.error}
             style={styles.messageIcon}
           />
-          <Text variant="caption" color="error" style={styles.errorText}>
+          <Text variant={TEXT_VARIANT.CAPTION} color={TEXT_COLOR.ERROR} style={styles.errorText}>
             {error}
           </Text>
         </View>
@@ -175,7 +183,7 @@ export const StandardInput: React.FC<StandardInputProps> = ({
 
       {/* Helper Text */}
       {!error && helperText && (
-        <Text variant="caption" color="tertiary" style={styles.helperText}>
+        <Text variant={TEXT_VARIANT.CAPTION} color={TEXT_COLOR.TERTIARY} style={styles.helperText}>
           {helperText}
         </Text>
       )}

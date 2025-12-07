@@ -16,7 +16,15 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { designTokens } from '../theme/designTokens';
 import { layoutConstants, getBadgeSizePreset, getSpacing } from '../theme';
 import { useThemeColor } from '../hooks/useThemeColor';
-import { TEXT_LINES, COMPONENT_VARIANT, COMPONENT_SIZE, A11Y_ROLE, ICONS } from '../constants';
+import {
+  TEXT_LINES,
+  COMPONENT_VARIANT,
+  COMPONENT_SIZE,
+  A11Y_ROLE,
+  ICONS,
+  TEXT_VARIANT,
+  TEXT_WEIGHT,
+} from '../constants';
 import { Text } from './Text';
 import { StatusType, RoleType, ComponentSize } from '../types/theme';
 
@@ -178,8 +186,8 @@ export const Badge: React.FC<BadgeProps> = ({
         />
       )}
       <Text
-        variant="caption"
-        weight="bold"
+        variant={TEXT_VARIANT.CAPTION}
+        weight={TEXT_WEIGHT.BOLD}
         uppercase
         numberOfLines={TEXT_LINES.single}
         style={textStyle}

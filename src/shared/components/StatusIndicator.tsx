@@ -14,7 +14,14 @@ import { View, StyleSheet, ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { layoutConstants, getStatusSizePreset, getSpacing } from '../theme';
-import { TEXT_LINES, COMPONENT_SIZE, A11Y_ROLE, ICONS } from '../constants';
+import {
+  TEXT_LINES,
+  COMPONENT_SIZE,
+  A11Y_ROLE,
+  ICONS,
+  TEXT_VARIANT,
+  TEXT_WEIGHT,
+} from '../constants';
 import { Text } from './Text';
 import { StatusType, ComponentSize } from '../types/theme';
 
@@ -68,8 +75,8 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
       )}
       {showLabel && (
         <Text
-          variant="label"
-          weight="bold"
+          variant={TEXT_VARIANT.LABEL}
+          weight={TEXT_WEIGHT.BOLD}
           numberOfLines={TEXT_LINES.single}
           style={{ color: statusConfig.text, fontSize: sizePreset.fontSize }}
         >

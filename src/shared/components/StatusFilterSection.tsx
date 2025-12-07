@@ -9,10 +9,17 @@ import { View, TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from './Text';
 import { designTokens, layoutConstants } from '../theme';
-import { ICONS, FILTER_STATUS } from '../constants';
+import {
+  ICONS,
+  FILTER_STATUS,
+  FILTER_STATUS_LABEL,
+  TEXT_COLOR,
+  TEXT_VARIANT,
+  TEXT_WEIGHT,
+  IconName,
+} from '../constants';
 import { useTheme } from '../../contexts/ThemeContext';
 
-type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
 type StatusValue =
   | typeof FILTER_STATUS.ALL
   | typeof FILTER_STATUS.ACTIVE
@@ -67,16 +74,20 @@ export function StatusFilterSection({
   const { colors: themeColors } = useTheme();
 
   const defaultOptions: StatusOption[] = [
-    { value: FILTER_STATUS.ALL, label: 'All', icon: DEFAULT_ICONS[FILTER_STATUS.ALL] },
+    {
+      value: FILTER_STATUS.ALL,
+      label: FILTER_STATUS_LABEL.ALL,
+      icon: DEFAULT_ICONS[FILTER_STATUS.ALL],
+    },
     {
       value: FILTER_STATUS.ACTIVE,
-      label: 'Active',
+      label: FILTER_STATUS_LABEL.ACTIVE,
       icon: DEFAULT_ICONS[FILTER_STATUS.ACTIVE],
       activeColor: colors.success,
     },
     {
       value: FILTER_STATUS.INACTIVE,
-      label: 'Inactive',
+      label: FILTER_STATUS_LABEL.INACTIVE,
       icon: DEFAULT_ICONS[FILTER_STATUS.INACTIVE],
       activeColor: colors.error,
     },
@@ -86,7 +97,7 @@ export function StatusFilterSection({
 
   return (
     <View style={[styles.container, style]}>
-      <Text variant="label" color="secondary" style={styles.label}>
+      <Text variant={TEXT_VARIANT.LABEL} color={TEXT_COLOR.SECONDARY} style={styles.label}>
         {label}
       </Text>
       {statusOptions.map((option) => {
@@ -114,8 +125,8 @@ export function StatusFilterSection({
                 color={iconColor}
               />
               <Text
-                variant="bodySmall"
-                weight={isSelected ? 'semibold' : 'normal'}
+                variant={TEXT_VARIANT.BODY_SMALL}
+                weight={isSelected ? TEXT_WEIGHT.SEMIBOLD : TEXT_WEIGHT.NORMAL}
                 style={{ color: isSelected ? colors.primary : colors.textPrimary }}
               >
                 {option.label}

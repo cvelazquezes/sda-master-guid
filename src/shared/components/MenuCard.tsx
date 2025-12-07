@@ -9,7 +9,16 @@ import { View, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { designTokens, layoutConstants } from '../theme';
-import { A11Y_ROLE, ICONS, TEXT_LINES, TOUCH_OPACITY, FLEX } from '../constants';
+import {
+  A11Y_ROLE,
+  ICONS,
+  TEXT_LINES,
+  TOUCH_OPACITY,
+  FLEX,
+  TEXT_COLOR,
+  TEXT_VARIANT,
+  TEXT_WEIGHT,
+} from '../constants';
 import { Text } from './Text';
 
 interface MenuCardProps {
@@ -76,18 +85,26 @@ export const MenuCard: React.FC<MenuCardProps> = ({
       {/* Content */}
       <View style={styles.content}>
         <View style={styles.titleRow}>
-          <Text variant="h4" numberOfLines={TEXT_LINES.single} style={styles.title}>
+          <Text variant={TEXT_VARIANT.H4} numberOfLines={TEXT_LINES.single} style={styles.title}>
             {title}
           </Text>
           {badge !== undefined && (
             <View style={[styles.badge, { backgroundColor: iconColor }]}>
-              <Text variant="caption" weight="bold" color="onPrimary">
+              <Text
+                variant={TEXT_VARIANT.CAPTION}
+                weight={TEXT_WEIGHT.BOLD}
+                color={TEXT_COLOR.ON_PRIMARY}
+              >
                 {badge}
               </Text>
             </View>
           )}
         </View>
-        <Text variant="bodySmall" color="secondary" numberOfLines={TEXT_LINES.double}>
+        <Text
+          variant={TEXT_VARIANT.BODY_SMALL}
+          color={TEXT_COLOR.SECONDARY}
+          numberOfLines={TEXT_LINES.double}
+        >
           {description}
         </Text>
       </View>

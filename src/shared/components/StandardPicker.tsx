@@ -8,7 +8,16 @@ import { View, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { mobileIconSizes, designTokens, layoutConstants } from '../theme';
-import { A11Y_ROLE, ICONS, TEXT_LINES, FLEX } from '../constants';
+import {
+  A11Y_ROLE,
+  EMPTY_VALUE,
+  ICONS,
+  TEXT_LINES,
+  FLEX,
+  TEXT_VARIANT,
+  TEXT_WEIGHT,
+  TEXT_COLOR,
+} from '../constants';
 import { SPACING, MATH } from '../constants/numbers';
 import { Text } from './Text';
 
@@ -39,7 +48,7 @@ export const StandardPicker: React.FC<StandardPickerProps> = ({
   accessibilityHint,
 }) => {
   const { colors } = useTheme();
-  const displayPlaceholder = placeholder || '';
+  const displayPlaceholder = placeholder || EMPTY_VALUE;
   const hasError = !!error;
   const hasValue = !!value;
 
@@ -62,9 +71,9 @@ export const StandardPicker: React.FC<StandardPickerProps> = ({
       {/* Label */}
       {label && (
         <View style={styles.labelContainer}>
-          <Text variant="label" weight="bold">
+          <Text variant={TEXT_VARIANT.LABEL} weight={TEXT_WEIGHT.BOLD}>
             {label}
-            {required && <Text color="error"> *</Text>}
+            {required && <Text color={TEXT_COLOR.ERROR}> *</Text>}
           </Text>
         </View>
       )}
@@ -91,8 +100,8 @@ export const StandardPicker: React.FC<StandardPickerProps> = ({
 
         {/* Value/Placeholder */}
         <Text
-          variant="bodyLarge"
-          color={hasValue ? 'primary' : 'tertiary'}
+          variant={TEXT_VARIANT.BODY_LARGE}
+          color={hasValue ? TEXT_COLOR.PRIMARY : TEXT_COLOR.TERTIARY}
           numberOfLines={TEXT_LINES.single}
           style={styles.pickerText}
         >
@@ -116,7 +125,7 @@ export const StandardPicker: React.FC<StandardPickerProps> = ({
             color={colors.error}
             style={styles.messageIcon}
           />
-          <Text variant="caption" color="error" style={styles.errorText}>
+          <Text variant={TEXT_VARIANT.CAPTION} color={TEXT_COLOR.ERROR} style={styles.errorText}>
             {error}
           </Text>
         </View>

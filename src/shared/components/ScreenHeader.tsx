@@ -15,6 +15,7 @@ import React, { ReactNode } from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { designTokens } from '../theme/designTokens';
+import { TEXT_COLOR, TEXT_VARIANT } from '../constants';
 import { Text } from './Text';
 
 interface ScreenHeaderProps {
@@ -47,9 +48,13 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
       testID={testID}
     >
       <View style={styles.textContainer}>
-        <Text variant="displayMedium">{title}</Text>
+        <Text variant={TEXT_VARIANT.DISPLAY_MEDIUM}>{title}</Text>
         {subtitle && (
-          <Text variant="bodyLarge" color="secondary" style={styles.subtitle}>
+          <Text
+            variant={TEXT_VARIANT.BODY_LARGE}
+            color={TEXT_COLOR.SECONDARY}
+            style={styles.subtitle}
+          >
             {subtitle}
           </Text>
         )}

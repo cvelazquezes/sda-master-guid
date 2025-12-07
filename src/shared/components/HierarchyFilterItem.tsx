@@ -10,9 +10,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from './Text';
 import { useTheme } from '../../contexts/ThemeContext';
 import { designTokens, layoutConstants } from '../theme';
-import { ICONS, FLEX } from '../constants';
-
-type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
+import { ICONS, FLEX, TEXT_COLOR, TEXT_VARIANT, TEXT_WEIGHT, IconName } from '../constants';
 
 interface HierarchyFilterItemProps {
   /** Label text for the filter section */
@@ -70,10 +68,10 @@ export function HierarchyFilterItem({
           color={colors.primary}
         />
         <View style={styles.hierarchyInfo}>
-          <Text variant="caption" color="secondary">
+          <Text variant={TEXT_VARIANT.CAPTION} color={TEXT_COLOR.SECONDARY}>
             {label}
           </Text>
-          <Text variant="bodySmall" weight="semibold">
+          <Text variant={TEXT_VARIANT.BODY_SMALL} weight={TEXT_WEIGHT.SEMIBOLD}>
             {options[0]}
           </Text>
         </View>
@@ -89,7 +87,7 @@ export function HierarchyFilterItem({
   // Multiple options - show selectable list
   return (
     <View style={[styles.filterSection, style]}>
-      <Text variant="label" color="secondary" style={styles.filterLabel}>
+      <Text variant={TEXT_VARIANT.LABEL} color={TEXT_COLOR.SECONDARY} style={styles.filterLabel}>
         {label}
       </Text>
       {options.map((option) => {
@@ -110,8 +108,8 @@ export function HierarchyFilterItem({
             activeOpacity={0.7}
           >
             <Text
-              variant="bodySmall"
-              weight={isSelected ? 'semibold' : 'normal'}
+              variant={TEXT_VARIANT.BODY_SMALL}
+              weight={isSelected ? TEXT_WEIGHT.SEMIBOLD : TEXT_WEIGHT.NORMAL}
               style={{ color: isSelected ? colors.primary : colors.textPrimary }}
             >
               {option}

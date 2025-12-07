@@ -12,6 +12,7 @@ import { StandardModal } from './StandardModal';
 import { mobileIconSizes, designTokens, layoutConstants } from '../theme';
 import {
   A11Y_ROLE,
+  EMPTY_VALUE,
   ICONS,
   TOUCH_OPACITY,
   DIMENSIONS,
@@ -65,7 +66,7 @@ export const SelectionModal: React.FC<SelectionModalProps> = ({
   closeButtonLabel,
 }) => {
   const { colors } = useTheme();
-  const displayEmptyMessage = emptyMessage || '';
+  const displayEmptyMessage = emptyMessage || EMPTY_VALUE;
 
   const renderItem = ({ item }: { item: SelectionItem }): React.JSX.Element => {
     const isSelected = item.id === selectedItemId;
@@ -88,7 +89,7 @@ export const SelectionModal: React.FC<SelectionModalProps> = ({
         disabled={isDisabled}
         activeOpacity={TOUCH_OPACITY.default}
         accessibilityRole={A11Y_ROLE.BUTTON}
-        accessibilityLabel={`${item.title}${item.subtitle ? `. ${item.subtitle}` : ''}`}
+        accessibilityLabel={`${item.title}${item.subtitle ? `. ${item.subtitle}` : EMPTY_VALUE}`}
         accessibilityState={{ selected: isSelected, disabled: isDisabled }}
       >
         {/* Icon or Avatar */}

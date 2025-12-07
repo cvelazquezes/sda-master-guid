@@ -9,7 +9,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { View, TouchableOpacity, StyleSheet, ViewProps } from 'react-native';
 import { useTheme, layoutConstants } from '../theme';
 import { designTokens } from '../theme/designTokens';
-import { COMPONENT_VARIANT, FLEX } from '../constants';
+import { COMPONENT_VARIANT, FLEX, TEXT_COLOR, TEXT_VARIANT, TEXT_WEIGHT } from '../constants';
 import { Text } from './Text';
 
 // ============================================================================
@@ -54,7 +54,11 @@ export const OptimizedButton = memo<ButtonProps>(function OptimizedButton({
       onPress={onPress}
       disabled={disabled}
     >
-      <Text variant="bodyLarge" weight="semibold" color="onPrimary">
+      <Text
+        variant={TEXT_VARIANT.BODY_LARGE}
+        weight={TEXT_WEIGHT.SEMIBOLD}
+        color={TEXT_COLOR.ON_PRIMARY}
+      >
         {title}
       </Text>
     </TouchableOpacity>
@@ -95,13 +99,17 @@ export const OptimizedCard = memo<CardProps>(
         style={[styles.card, { backgroundColor: theme.colors.surface }]}
         onPress={handlePress}
       >
-        <Text variant="h3" style={styles.cardTitle}>
+        <Text variant={TEXT_VARIANT.H3} style={styles.cardTitle}>
           {title}
         </Text>
-        <Text variant="bodySmall" color="secondary" style={styles.cardDescription}>
+        <Text
+          variant={TEXT_VARIANT.BODY_SMALL}
+          color={TEXT_COLOR.SECONDARY}
+          style={styles.cardDescription}
+        >
           {description}
         </Text>
-        <Text variant="caption" color="secondary">
+        <Text variant={TEXT_VARIANT.CAPTION} color={TEXT_COLOR.SECONDARY}>
           {formattedDate}
         </Text>
       </TouchableOpacity>
@@ -173,10 +181,10 @@ export const OptimizedListItem = memo<ListItemProps>(function OptimizedListItem(
       onPress={handlePress}
     >
       <View style={styles.listItemContent}>
-        <Text variant="body" weight="semibold" style={styles.listItemName}>
+        <Text variant={TEXT_VARIANT.BODY} weight={TEXT_WEIGHT.SEMIBOLD} style={styles.listItemName}>
           {name}
         </Text>
-        <Text variant="bodySmall" color="secondary">
+        <Text variant={TEXT_VARIANT.BODY_SMALL} color={TEXT_COLOR.SECONDARY}>
           {email}
         </Text>
       </View>

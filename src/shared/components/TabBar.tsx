@@ -9,7 +9,7 @@ import { View, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { designTokens, layoutConstants } from '../theme';
-import { A11Y_ROLE, ICONS, FLEX } from '../constants';
+import { A11Y_ROLE, ICONS, FLEX, TEXT_COLOR, TEXT_VARIANT, TEXT_WEIGHT } from '../constants';
 import { Text } from './Text';
 
 export interface Tab {
@@ -58,15 +58,19 @@ export const TabBar: React.FC<TabBarProps> = ({ tabs, activeTabId, onTabChange, 
               />
             )}
             <Text
-              variant="label"
-              weight="bold"
+              variant={TEXT_VARIANT.LABEL}
+              weight={TEXT_WEIGHT.BOLD}
               style={{ color: isActive ? colors.primary : colors.textTertiary }}
             >
               {tab.label}
             </Text>
             {tab.badge !== undefined && tab.badge > 0 && (
               <View style={[styles.badge, { backgroundColor: colors.error }]}>
-                <Text variant="caption" weight="bold" color="onPrimary">
+                <Text
+                  variant={TEXT_VARIANT.CAPTION}
+                  weight={TEXT_WEIGHT.BOLD}
+                  color={TEXT_COLOR.ON_PRIMARY}
+                >
                   {tab.badge}
                 </Text>
               </View>

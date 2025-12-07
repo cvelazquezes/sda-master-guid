@@ -17,7 +17,7 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { mobileTypography, designTokens, layoutConstants } from '../theme';
-import { A11Y_ROLE, ANIMATION, ICONS, BORDERS, DIMENSIONS, FLEX } from '../constants';
+import { A11Y_ROLE, ANIMATION, EMPTY_VALUE, ICONS, BORDERS, DIMENSIONS, FLEX } from '../constants';
 
 export interface FilterOption {
   id: string;
@@ -69,7 +69,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
   cancelLabel,
   applyLabel,
 }) => {
-  const displayTitle = title || '';
+  const displayTitle = title || EMPTY_VALUE;
   const { colors } = useTheme();
   const { width: windowWidth } = useWindowDimensions();
   const isMobile = windowWidth < designTokens.breakpoints.tablet;

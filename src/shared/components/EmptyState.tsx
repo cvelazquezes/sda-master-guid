@@ -23,6 +23,7 @@ import {
   A11Y_ROLE,
   BUTTON_SIZE,
   COMPONENT_VARIANT,
+  EMPTY_VALUE,
   ICONS,
   DIMENSIONS,
   FLEX,
@@ -72,7 +73,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       style={[styles.container, { backgroundColor: colors.surface }, style]}
       testID={testID}
       accessible
-      accessibilityLabel={`${title}${description ? `. ${description}` : ''}`}
+      accessibilityLabel={`${title}${description ? `. ${description}` : EMPTY_VALUE}`}
       accessibilityRole={A11Y_ROLE.TEXT}
     >
       {/* Icon */}

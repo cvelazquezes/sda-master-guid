@@ -44,7 +44,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   filterLabel,
 }) => {
   const { colors } = useTheme();
-  const displayPlaceholder = placeholder || '';
+  const displayPlaceholder = placeholder || EMPTY_VALUE;
 
   return (
     <View

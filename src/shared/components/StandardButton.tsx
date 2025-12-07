@@ -26,6 +26,9 @@ import {
   BUTTON_SIZE,
   ICON_POSITION,
   ICONS,
+  TEXT_ALIGN,
+  TEXT_VARIANT,
+  BORDERS,
 } from '../constants';
 import { Text } from './Text';
 
@@ -84,7 +87,7 @@ export const StandardButton: React.FC<StandardButtonProps> = ({
         return colors.error;
       case COMPONENT_VARIANT.outline:
       case COMPONENT_VARIANT.ghost:
-        return colors.transparent || 'transparent';
+        return colors.transparent || BORDERS.COLOR.TRANSPARENT;
       default:
         return colors.primary;
     }
@@ -224,8 +227,8 @@ export const StandardButton: React.FC<StandardButtonProps> = ({
             />
           )}
           <Text
-            variant={size === BUTTON_SIZE.small ? 'buttonSmall' : 'button'}
-            align="center"
+            variant={size === BUTTON_SIZE.small ? TEXT_VARIANT.BUTTON_SMALL : TEXT_VARIANT.BUTTON}
+            align={TEXT_ALIGN.CENTER}
             style={getTextStyle()}
           >
             {title}

@@ -11,7 +11,16 @@ import { useTheme, layoutConstants } from '../theme';
 import { designTokens } from '../theme/designTokens';
 import { LOG_MESSAGES } from '../constants/logMessages';
 import { logger } from '../utils/logger';
-import { A11Y_ROLE, ACTIVITY_INDICATOR_SIZE, TOUCH_OPACITY, FLEX } from '../constants';
+import {
+  A11Y_ROLE,
+  ACTIVITY_INDICATOR_SIZE,
+  TOUCH_OPACITY,
+  FLEX,
+  TEXT_ALIGN,
+  TEXT_COLOR,
+  TEXT_VARIANT,
+  TEXT_WEIGHT,
+} from '../constants';
 import { Text } from './Text';
 
 /**
@@ -32,7 +41,7 @@ function LoadingFallback({ loadingText }: { loadingText?: string }): React.JSX.E
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <ActivityIndicator size={ACTIVITY_INDICATOR_SIZE.large} color={theme.colors.primary} />
-      <Text variant="bodyLarge" style={styles.text}>
+      <Text variant={TEXT_VARIANT.BODY_LARGE} style={styles.text}>
         {loadingText}
       </Text>
     </View>
@@ -59,10 +68,15 @@ function ErrorFallback({
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <Text variant="h2" color="error" style={styles.errorTitle}>
+      <Text variant={TEXT_VARIANT.H2} color={TEXT_COLOR.ERROR} style={styles.errorTitle}>
         {errorTitle}
       </Text>
-      <Text variant="bodySmall" color="secondary" align="center" style={styles.errorMessage}>
+      <Text
+        variant={TEXT_VARIANT.BODY_SMALL}
+        color={TEXT_COLOR.SECONDARY}
+        align={TEXT_ALIGN.CENTER}
+        style={styles.errorMessage}
+      >
         {error.message}
       </Text>
       <TouchableOpacity
@@ -72,8 +86,8 @@ function ErrorFallback({
         accessibilityLabel={retryText}
       >
         <Text
-          variant="bodyLarge"
-          weight="semibold"
+          variant={TEXT_VARIANT.BODY_LARGE}
+          weight={TEXT_WEIGHT.SEMIBOLD}
           style={[styles.retryButton, { color: colors.primary }]}
         >
           {retryText}
