@@ -22,6 +22,7 @@ export const es: TranslationKeys = {
     submit: 'Enviar',
     retry: 'Reintentar',
     close: 'Cerrar',
+    skip: 'Saltar',
     loading: 'Cargando...',
     filters: 'Filtros',
     failedToLoadScreen: 'Error al cargar pantalla',
@@ -74,6 +75,10 @@ export const es: TranslationKeys = {
     failedToLoadData: 'Error al cargar datos',
     failedToLoadClubs: 'Error al cargar clubes',
     failedToLoadMembers: 'Error al cargar miembros',
+    failedToLoadDirective: 'Error al cargar datos de la directiva del club',
+    failedToLoadActivities: 'Error al cargar actividades',
+    failedToSkipActivity: 'Error al saltar actividad',
+    couldNotOpenWhatsapp: 'No se pudo abrir WhatsApp',
     missingFields: 'Por favor completa todos los campos',
     missingRequiredFields: 'Por favor completa todos los campos requeridos',
     missingClubSelection: 'Por favor completa todos los campos incluyendo la selección del club',
@@ -111,6 +116,7 @@ export const es: TranslationKeys = {
     confirmDelete: '¿Estás seguro de que deseas eliminar?',
     confirmAction: '¿Estás seguro de que deseas continuar?',
     accountInactive: 'Tu cuenta está inactiva',
+    confirmSkip: '¿Saltar esta actividad? Esta acción no se puede deshacer.',
   },
 
   // Marcadores de posición
@@ -465,7 +471,15 @@ export const es: TranslationKeys = {
       remove: 'Eliminar',
       assignAtLeastOne:
         'Por favor asigna al menos un miembro a una posición directiva antes de guardar.',
+      memberAssignedTitle: 'Miembro Asignado',
       memberAssignedMessage: '{{memberName}} asignado como {{positionTitle}}.',
+      memberAlreadyAssignedTitle: 'Miembro Ya Asignado',
+      memberAlreadyAssignedMessage:
+        'Este miembro ya está asignado a una posición. ¿Deseas reasignarlo?',
+      removeMemberTitle: 'Eliminar Miembro',
+      confirmRemoveMember: '¿Estás seguro de que deseas eliminar a este miembro de la posición?',
+      noAssignmentsTitle: 'Sin Asignaciones',
+      directiveSavedTitle: 'Directiva Guardada',
       saveSuccess:
         'La directiva del club con {{count}} miembro(s) ha sido guardada exitosamente. Todos los miembros del club serán notificados de la estructura directiva.',
       infoText:

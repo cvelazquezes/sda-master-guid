@@ -20,6 +20,7 @@ export const en = {
     submit: 'Submit',
     retry: 'Retry',
     close: 'Close',
+    skip: 'Skip',
     loading: 'Loading...',
     filters: 'Filters',
     failedToLoadScreen: 'Failed to load screen',
@@ -72,6 +73,10 @@ export const en = {
     failedToLoadData: 'Failed to load data',
     failedToLoadClubs: 'Failed to load clubs',
     failedToLoadMembers: 'Failed to load members',
+    failedToLoadDirective: 'Failed to load club directive data',
+    failedToLoadActivities: 'Failed to load activities',
+    failedToSkipActivity: 'Failed to skip activity',
+    couldNotOpenWhatsapp: 'Could not open WhatsApp',
     missingFields: 'Please fill in all fields',
     missingRequiredFields: 'Please fill in all required fields',
     missingClubSelection: 'Please fill in all fields including club selection',
@@ -109,6 +114,7 @@ export const en = {
     confirmDelete: 'Are you sure you want to delete?',
     confirmAction: 'Are you sure you want to proceed?',
     accountInactive: 'Your account is inactive',
+    confirmSkip: 'Skip this activity? This cannot be undone.',
   },
 
   // Placeholders
@@ -462,7 +468,15 @@ export const en = {
       reassign: 'Reassign',
       remove: 'Remove',
       assignAtLeastOne: 'Please assign at least one member to a directive position before saving.',
+      memberAssignedTitle: 'Member Assigned',
       memberAssignedMessage: '{{memberName}} assigned as {{positionTitle}}.',
+      memberAlreadyAssignedTitle: 'Member Already Assigned',
+      memberAlreadyAssignedMessage:
+        'This member is already assigned to a position. Would you like to reassign them?',
+      removeMemberTitle: 'Remove Member',
+      confirmRemoveMember: 'Are you sure you want to remove this member from the position?',
+      noAssignmentsTitle: 'No Assignments',
+      directiveSavedTitle: 'Directive Saved',
       saveSuccess:
         'Club directive with {{count}} member(s) has been saved successfully. All club members will be notified of the directive structure.',
       infoText:
