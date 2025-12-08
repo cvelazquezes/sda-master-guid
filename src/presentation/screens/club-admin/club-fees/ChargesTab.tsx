@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity, FlatList, RefreshControl } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../components/primitives';
@@ -12,7 +12,7 @@ import {
   TEXT_WEIGHT,
 } from '../../../../shared/constants';
 import { NUMERIC } from '../../../../shared/constants/validation';
-import { styles, chargeStyles, emptyStyles } from './styles';
+import { createStyles, createChargeStyles, createEmptyStyles } from './styles';
 
 interface ChargesTabProps {
   customCharges: CustomCharge[];
@@ -29,20 +29,32 @@ export function ChargesTab({
   onAddCharge,
   t,
 }: ChargesTabProps): React.JSX.Element {
-  const { colors } = useTheme();
+  const { colors, spacing, radii, typography } = useTheme();
+  const styles = useMemo(
+    () => createStyles(colors, spacing, typography),
+    [colors, spacing, typography]
+  );
+  const chargeStyles = useMemo(
+    () => createChargeStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+  const emptyStyles = useMemo(
+    () => createEmptyStyles(colors, spacing, typography),
+    [colors, spacing, typography]
+  );
 
   return (
     <View style={styles.tabContent}>
       <ChargesHeader count={customCharges.length} onAddCharge={onAddCharge} t={t} />
       {customCharges.length === 0 ? (
-        <EmptyCharges t={t} />
+        <EmptyCharges t={t} emptyStyles={emptyStyles} />
       ) : (
         <FlatList
           data={customCharges}
           keyExtractor={(item): string => item.id}
           contentContainerStyle={chargeStyles.header}
           renderItem={({ item }): React.JSX.Element => (
-            <ChargeCard charge={item} colors={colors} t={t} />
+            <ChargeCard charge={item} colors={colors} t={t} chargeStyles={chargeStyles} />
           )}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         />
@@ -60,7 +72,11 @@ function ChargesHeader({
   onAddCharge: () => void;
   t: (key: string) => string;
 }): React.JSX.Element {
-  const { colors, iconSizes } = useTheme();
+  const { colors, spacing, radii, typography, iconSizes } = useTheme();
+  const chargeStyles = useMemo(
+    () => createChargeStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
   return (
     <View style={[chargeStyles.header, { backgroundColor: colors.surface }]}>
       <View>
@@ -96,10 +112,12 @@ function ChargeCard({
   charge,
   colors,
   t,
+  chargeStyles,
 }: {
   charge: CustomCharge;
   colors: Record<string, string>;
   t: (key: string, opts?: Record<string, unknown>) => string;
+  chargeStyles: ReturnType<typeof createChargeStyles>;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   const memberCount = charge.appliedToUserIds.length;
@@ -153,7 +171,13 @@ function ChargeCard({
   );
 }
 
-function EmptyCharges({ t }: { t: (key: string) => string }): React.JSX.Element {
+function EmptyCharges({
+  t,
+  emptyStyles,
+}: {
+  t: (key: string) => string;
+  emptyStyles: ReturnType<typeof createEmptyStyles>;
+}): React.JSX.Element {
   const { colors, iconSizes } = useTheme();
   return (
     <View style={emptyStyles.container}>

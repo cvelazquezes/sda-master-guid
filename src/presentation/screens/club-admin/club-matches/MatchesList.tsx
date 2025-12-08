@@ -1,18 +1,16 @@
-import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { createEmptyStyles } from './styles';
 import { Text } from '../../../components/primitives';
-import { Match } from '../../../../types';
 import { MatchCard } from '../../../components/features/MatchCard';
-import {
-  mobileTypography,
-  mobileIconSizes,
-  designTokens,
-  layoutConstants,
-} from '../../../theme';
+import { useTheme } from '../../../state/ThemeContext';
 import { FILTER_STATUS, ICONS, MATH } from '../../../../shared/constants';
+import type { Match } from '../../../../types';
 
-interface MatchesListProps {
+type EmptyStylesType = ReturnType<typeof createEmptyStyles>;
+
+type MatchesListProps = {
   matches: Match[];
   filterStatus: string;
   onViewDetails: (match: Match) => void;
@@ -21,28 +19,30 @@ interface MatchesListProps {
     generateHint: string;
     noFiltered: string;
   };
-}
+};
 
-interface EmptyStateProps {
+type EmptyStateProps = {
   filterStatus: string;
   labels: MatchesListProps['labels'];
-}
+  emptyStyles: EmptyStylesType;
+};
 
-function EmptyState({ filterStatus, labels }: EmptyStateProps): React.JSX.Element {
+function EmptyState({ filterStatus, labels, emptyStyles }: EmptyStateProps): React.JSX.Element {
+  const { iconSizes, colors } = useTheme();
   const isAllFilter = filterStatus === FILTER_STATUS.ALL;
   const subtext = isAllFilter
     ? labels.generateHint
     : labels.noFiltered.replace('{status}', filterStatus);
 
   return (
-    <View style={styles.emptyContainer}>
+    <View style={emptyStyles.container}>
       <MaterialCommunityIcons
         name={ICONS.ACCOUNT_HEART_OUTLINE}
-        size={mobileIconSizes.xxlarge * MATH.HALF}
-        color={designTokens.colors.textTertiary}
+        size={iconSizes['4xl'] * MATH.HALF}
+        color={colors.textTertiary}
       />
-      <Text style={styles.emptyText}>{labels.noActivities}</Text>
-      <Text style={styles.emptySubtext}>{subtext}</Text>
+      <Text style={emptyStyles.text}>{labels.noActivities}</Text>
+      <Text style={emptyStyles.subtext}>{subtext}</Text>
     </View>
   );
 }
@@ -53,8 +53,15 @@ export function MatchesList({
   onViewDetails,
   labels,
 }: MatchesListProps): React.JSX.Element {
+  const { colors, spacing, radii, typography } = useTheme();
+
+  const emptyStyles = useMemo(
+    () => createEmptyStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+
   if (matches.length === 0) {
-    return <EmptyState filterStatus={filterStatus} labels={labels} />;
+    return <EmptyState filterStatus={filterStatus} labels={labels} emptyStyles={emptyStyles} />;
   }
 
   return (
@@ -68,21 +75,3 @@ export function MatchesList({
   );
 }
 
-const styles = StyleSheet.create({
-  emptyContainer: {
-    alignItems: layoutConstants.alignItems.center,
-    justifyContent: layoutConstants.justifyContent.center,
-    padding: designTokens.spacing['4xl'],
-    marginTop: designTokens.spacing['4xl'],
-  },
-  emptyText: {
-    ...mobileTypography.heading3,
-    marginTop: designTokens.spacing.lg,
-  },
-  emptySubtext: {
-    ...mobileTypography.bodySmall,
-    color: designTokens.colors.textSecondary,
-    marginTop: designTokens.spacing.sm,
-    textAlign: layoutConstants.textAlign.center,
-  },
-});

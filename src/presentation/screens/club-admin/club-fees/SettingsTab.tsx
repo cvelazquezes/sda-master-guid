@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, ScrollView, TouchableOpacity, Switch } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, Input } from '../../../components/primitives';
@@ -13,7 +13,7 @@ import {
   TEXT_WEIGHT,
 } from '../../../../shared/constants';
 import { DISPLAY_LIMITS } from '../../../../shared/constants/ui';
-import { styles, settingsStyles } from './styles';
+import { createStyles, createSettingsStyles } from './styles';
 import { MONTH_KEYS } from './types';
 
 interface SettingsTabProps {
@@ -43,7 +43,15 @@ export function SettingsTab({
   onGenerateFees,
   t,
 }: SettingsTabProps): React.JSX.Element {
-  const { colors } = useTheme();
+  const { colors, spacing, radii, typography } = useTheme();
+  const styles = useMemo(
+    () => createStyles(colors, spacing, typography),
+    [colors, spacing, typography]
+  );
+  const settingsStyles = useMemo(
+    () => createSettingsStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
 
   const toggleMonth = (monthIndex: number): void => {
     if (selectedMonths.includes(monthIndex)) {
@@ -56,12 +64,13 @@ export function SettingsTab({
   return (
     <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
       <View style={styles.section}>
-        <InfoCard t={t} />
+        <InfoCard t={t} settingsStyles={settingsStyles} />
         <ActiveToggleCard
           active={feeSettingsActive}
           setActive={setFeeSettingsActive}
           colors={colors}
           t={t}
+          settingsStyles={settingsStyles}
         />
         <AmountInputCard
           feeAmount={feeAmount}
@@ -69,6 +78,7 @@ export function SettingsTab({
           currency={currency}
           setCurrency={setCurrency}
           t={t}
+          settingsStyles={settingsStyles}
         />
         <MonthSelectionCard
           selectedMonths={selectedMonths}
@@ -76,6 +86,7 @@ export function SettingsTab({
           selectAll={(): void => setSelectedMonths([...ALL_MONTHS])}
           clearAll={(): void => setSelectedMonths([])}
           t={t}
+          settingsStyles={settingsStyles}
         />
         <ActionButtons
           onSave={onSave}
@@ -83,13 +94,20 @@ export function SettingsTab({
           onGenerateFees={onGenerateFees}
           colors={colors}
           t={t}
+          settingsStyles={settingsStyles}
         />
       </View>
     </ScrollView>
   );
 }
 
-function InfoCard({ t }: { t: (key: string) => string }): React.JSX.Element {
+function InfoCard({
+  t,
+  settingsStyles,
+}: {
+  t: (key: string) => string;
+  settingsStyles: ReturnType<typeof createSettingsStyles>;
+}): React.JSX.Element {
   const { iconSizes, colors } = useTheme();
   return (
     <View style={settingsStyles.infoCard}>
@@ -113,6 +131,7 @@ interface ActiveToggleCardProps {
   setActive: (v: boolean) => void;
   colors: Record<string, string>;
   t: (key: string) => string;
+  settingsStyles: ReturnType<typeof createSettingsStyles>;
 }
 
 function ActiveToggleCard({
@@ -120,6 +139,7 @@ function ActiveToggleCard({
   setActive,
   colors,
   t,
+  settingsStyles,
 }: ActiveToggleCardProps): React.JSX.Element {
   const trackColors = {
     false: colors.borderLight,
@@ -152,8 +172,8 @@ interface AmountInputCardProps {
   setFeeAmount: (v: string) => void;
   currency: string;
   setCurrency: (v: string) => void;
-  colors: Record<string, string>;
   t: (key: string) => string;
+  settingsStyles: ReturnType<typeof createSettingsStyles>;
 }
 
 function AmountInputCard({
@@ -162,7 +182,8 @@ function AmountInputCard({
   currency,
   setCurrency,
   t,
-}: Omit<AmountInputCardProps, 'colors'>): React.JSX.Element {
+  settingsStyles,
+}: AmountInputCardProps): React.JSX.Element {
   const currencyMaxLength = 3;
   return (
     <View style={settingsStyles.inputCard}>
@@ -196,6 +217,7 @@ interface MonthSelectionCardProps {
   selectAll: () => void;
   clearAll: () => void;
   t: (key: string) => string;
+  settingsStyles: ReturnType<typeof createSettingsStyles>;
 }
 
 function MonthSelectionCard({
@@ -204,6 +226,7 @@ function MonthSelectionCard({
   selectAll,
   clearAll,
   t,
+  settingsStyles,
 }: MonthSelectionCardProps): React.JSX.Element {
   return (
     <View style={settingsStyles.inputCard}>
@@ -260,6 +283,7 @@ interface ActionButtonsProps {
   onGenerateFees: () => void;
   colors: Record<string, string>;
   t: (key: string) => string;
+  settingsStyles: ReturnType<typeof createSettingsStyles>;
 }
 
 function ActionButtons({
@@ -268,6 +292,7 @@ function ActionButtons({
   onGenerateFees,
   colors,
   t,
+  settingsStyles,
 }: ActionButtonsProps): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (

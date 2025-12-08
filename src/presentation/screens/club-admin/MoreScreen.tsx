@@ -126,7 +126,7 @@ const MoreScreen = (): React.JSX.Element => {
     },
   ];
 
-  const containerStyle = { flex: FLEX.ONE, backgroundColor: colors.background };
+  const containerStyle = { flex: FLEX.ONE, backgroundColor: colors.backgroundSecondary };
   const contentStyle = { padding: spacing.lg, paddingTop: spacing.sm };
 
   return (

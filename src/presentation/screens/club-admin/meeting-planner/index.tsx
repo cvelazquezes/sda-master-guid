@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { View, ScrollView, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -23,7 +23,7 @@ import {
 import { MeetingInfoSection } from './MeetingInfoSection';
 import { SelectMemberModal } from './SelectMemberModal';
 import { ShareModal } from './ShareModal';
-import { styles } from './styles';
+import { createStyles } from './styles';
 import { useMeetingPlanner } from './useMeetingPlanner';
 import { ICONS, MODAL_WIDTH, EMPTY_VALUE } from '../../../../shared/constants';
 import { Text, PageHeader } from '../../../components/primitives';
@@ -145,6 +145,11 @@ function getShareModalWidth(windowWidth: number): number {
 const MeetingPlannerScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { colors, spacing, radii, typography } = useTheme();
+  const styles = useMemo(
+    () => createStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const getDefaultAgenda = useDefaultAgenda(t);
   const defaultTitle = t('screens.meetingPlanner.defaultMeetingTitle');
@@ -207,6 +212,7 @@ const MeetingPlannerScreen = (): React.JSX.Element => {
         setAgendaItems={setAgendaItems}
         editState={editState}
         t={t}
+        styles={styles}
       />
       {agendaItems.length > 0 && (
         <Footer
@@ -223,6 +229,7 @@ const MeetingPlannerScreen = (): React.JSX.Element => {
             )
           }
           onShare={(): void => editState.setShareModalVisible(true)}
+          styles={styles}
         />
       )}
       <EditItemModal
@@ -292,16 +299,18 @@ function AgendaList({
   setAgendaItems,
   editState,
   t,
+  styles,
 }: {
   agendaItems: AgendaItem[];
   setAgendaItems: (v: AgendaItem[]) => void;
   editState: ReturnType<typeof useEditState>;
   t: (k: string) => string;
+  styles: ReturnType<typeof createStyles>;
 }): React.JSX.Element {
   return (
     <ScrollView style={styles.content}>
       {agendaItems.length === 0 ? (
-        <EmptyState t={t} />
+        <EmptyState t={t} styles={styles} />
       ) : (
         agendaItems.map((item, index) => (
           <AgendaCard
@@ -374,7 +383,13 @@ function MeetingHeaderActions({
   );
 }
 
-function EmptyState({ t }: { t: (key: string) => string }): React.JSX.Element {
+function EmptyState({
+  t,
+  styles,
+}: {
+  t: (key: string) => string;
+  styles: ReturnType<typeof createStyles>;
+}): React.JSX.Element {
   const { iconSizes, colors } = useTheme();
   return (
     <View style={styles.emptyState}>
@@ -395,9 +410,10 @@ type FooterProps = {
   onSave: () => void;
   onShare: () => void;
   t: (key: string) => string;
+  styles: ReturnType<typeof createStyles>;
 };
 
-function Footer({ isSaved, setIsSaved, onSave, onShare, t }: FooterProps): React.JSX.Element {
+function Footer({ isSaved, setIsSaved, onSave, onShare, t, styles }: FooterProps): React.JSX.Element {
   const { iconSizes, colors } = useTheme();
   if (!isSaved) {
     return (

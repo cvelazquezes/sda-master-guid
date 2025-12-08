@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../components/primitives';
-import { User } from '../../../../types';
 import { useTheme } from '../../../state/ThemeContext';
 import { ANIMATION_TYPE, ICONS } from '../../../../shared/constants';
 import { MODAL_HEIGHT_RATIO } from '../../../../shared/constants/components';
-import { modalStyles } from './styles';
+import { createModalStyles } from './styles';
+import type { User } from '../../../../types';
 
-interface SelectMemberModalProps {
+type ModalStylesType = ReturnType<typeof createModalStyles>;
+
+type SelectMemberModalProps = {
   visible: boolean;
   onClose: () => void;
   modalWidth: number;
@@ -16,7 +18,7 @@ interface SelectMemberModalProps {
   clubMembers: User[];
   onSelectMember: (member: User) => void;
   t: (key: string) => string;
-}
+};
 
 export function SelectMemberModal({
   visible,
@@ -27,7 +29,13 @@ export function SelectMemberModal({
   onSelectMember,
   t,
 }: SelectMemberModalProps): React.JSX.Element {
-  const { iconSizes, colors } = useTheme();
+  const { iconSizes, colors, spacing, radii, typography } = useTheme();
+
+  const modalStyles = useMemo(
+    () => createModalStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+
   const contentStyle = [
     modalStyles.content,
     {
@@ -62,6 +70,7 @@ export function SelectMemberModal({
                   key={member.id}
                   member={member}
                   onSelect={(): void => onSelectMember(member)}
+                  modalStyles={modalStyles}
                 />
               ))
             )}
@@ -72,12 +81,13 @@ export function SelectMemberModal({
   );
 }
 
-interface MemberOptionProps {
+type MemberOptionProps = {
   member: User;
   onSelect: () => void;
-}
+  modalStyles: ModalStylesType;
+};
 
-function MemberOption({ member, onSelect }: MemberOptionProps): React.JSX.Element {
+function MemberOption({ member, onSelect, modalStyles }: MemberOptionProps): React.JSX.Element {
   const { iconSizes, colors } = useTheme();
   return (
     <TouchableOpacity style={modalStyles.memberOption} onPress={onSelect}>

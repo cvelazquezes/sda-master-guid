@@ -1,13 +1,13 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity, Modal } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
 import { ANIMATION_TYPE, DATE_LOCALE_OPTIONS, ICONS } from '../../../../shared/constants';
-import { modalStyles, shareModalStyles } from './styles';
-import { AgendaItem } from './types';
+import { createModalStyles, createShareModalStyles } from './styles';
+import type { AgendaItem } from './types';
 
-interface ShareModalProps {
+type ShareModalProps = {
   visible: boolean;
   onClose: () => void;
   shareModalWidth: number;
@@ -17,7 +17,10 @@ interface ShareModalProps {
   clubMembersCount: number;
   onConfirmShare: () => void;
   t: (key: string, opts?: Record<string, unknown>) => string;
-}
+};
+
+type ModalStylesType = ReturnType<typeof createModalStyles>;
+type ShareModalStylesType = ReturnType<typeof createShareModalStyles>;
 
 export function ShareModal({
   visible,
@@ -30,6 +33,17 @@ export function ShareModal({
   onConfirmShare,
   t,
 }: ShareModalProps): React.JSX.Element {
+  const { colors, spacing, radii, typography } = useTheme();
+
+  const modalStyles = useMemo(
+    () => createModalStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+  const shareModalStyles = useMemo(
+    () => createShareModalStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+
   const overlayStyle = [modalStyles.overlay, { justifyContent: 'center' as const }];
   const contentStyle = [shareModalStyles.content, { width: shareModalWidth }];
 
@@ -37,26 +51,28 @@ export function ShareModal({
     <Modal visible={visible} animationType={ANIMATION_TYPE.FADE} transparent onRequestClose={onClose}>
       <View style={overlayStyle}>
         <View style={contentStyle}>
-          <ShareHeader membersCount={clubMembersCount} t={t} />
+          <ShareHeader membersCount={clubMembersCount} t={t} shareModalStyles={shareModalStyles} />
           <ShareInfo
             meetingDate={meetingDate}
             totalTime={totalTime}
             itemsCount={agendaItems.length}
             t={t}
+            shareModalStyles={shareModalStyles}
           />
-          <ShareActions onClose={onClose} onConfirmShare={onConfirmShare} t={t} />
+          <ShareActions onClose={onClose} onConfirmShare={onConfirmShare} t={t} modalStyles={modalStyles} shareModalStyles={shareModalStyles} />
         </View>
       </View>
     </Modal>
   );
 }
 
-interface ShareHeaderProps {
+type ShareHeaderProps = {
   membersCount: number;
   t: (key: string, opts?: Record<string, unknown>) => string;
-}
+  shareModalStyles: ShareModalStylesType;
+};
 
-function ShareHeader({ membersCount, t }: ShareHeaderProps): React.JSX.Element {
+function ShareHeader({ membersCount, t, shareModalStyles }: ShareHeaderProps): React.JSX.Element {
   const { iconSizes, colors } = useTheme();
   return (
     <View style={shareModalStyles.header}>
@@ -75,14 +91,15 @@ function ShareHeader({ membersCount, t }: ShareHeaderProps): React.JSX.Element {
   );
 }
 
-interface ShareInfoProps {
+type ShareInfoProps = {
   meetingDate: Date;
   totalTime: number;
   itemsCount: number;
   t: (key: string) => string;
-}
+  shareModalStyles: ShareModalStylesType;
+};
 
-function ShareInfo({ meetingDate, totalTime, itemsCount, t }: ShareInfoProps): React.JSX.Element {
+function ShareInfo({ meetingDate, totalTime, itemsCount, t, shareModalStyles }: ShareInfoProps): React.JSX.Element {
   const dateStr = meetingDate.toLocaleDateString(undefined, DATE_LOCALE_OPTIONS.DATE_WITHOUT_YEAR);
   return (
     <View style={shareModalStyles.info}>
@@ -90,28 +107,32 @@ function ShareInfo({ meetingDate, totalTime, itemsCount, t }: ShareInfoProps): R
         icon={ICONS.CALENDAR}
         label={t('screens.meetingPlanner.meetingDate')}
         value={dateStr}
+        shareModalStyles={shareModalStyles}
       />
       <InfoRow
         icon={ICONS.CLOCK_OUTLINE}
         label={t('screens.meetingPlanner.totalDuration')}
         value={`${totalTime} minutes`}
+        shareModalStyles={shareModalStyles}
       />
       <InfoRow
         icon={ICONS.FORMAT_LIST_NUMBERED}
         label={t('screens.meetingPlanner.activities')}
         value={`${itemsCount} items`}
+        shareModalStyles={shareModalStyles}
       />
     </View>
   );
 }
 
-interface InfoRowProps {
+type InfoRowProps = {
   icon: string;
   label: string;
   value: string;
-}
+  shareModalStyles: ShareModalStylesType;
+};
 
-function InfoRow({ icon, label, value }: InfoRowProps): React.JSX.Element {
+function InfoRow({ icon, label, value, shareModalStyles }: InfoRowProps): React.JSX.Element {
   const { iconSizes, colors } = useTheme();
   return (
     <View style={shareModalStyles.infoRow}>
@@ -128,13 +149,15 @@ function InfoRow({ icon, label, value }: InfoRowProps): React.JSX.Element {
   );
 }
 
-interface ShareActionsProps {
+type ShareActionsProps = {
   onClose: () => void;
   onConfirmShare: () => void;
   t: (key: string) => string;
-}
+  modalStyles: ModalStylesType;
+  shareModalStyles: ShareModalStylesType;
+};
 
-function ShareActions({ onClose, onConfirmShare, t }: ShareActionsProps): React.JSX.Element {
+function ShareActions({ onClose, onConfirmShare, t, modalStyles, shareModalStyles }: ShareActionsProps): React.JSX.Element {
   const { iconSizes, colors } = useTheme();
   const confirmStyle = [
     modalStyles.button,

@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, Input } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
 import { ANIMATION_TYPE, ICONS, KEYBOARD_TYPE, TEXT_INPUT } from '../../../../shared/constants';
 import { MODAL_HEIGHT_RATIO } from '../../../../shared/constants/components';
-import { modalStyles } from './styles';
-import { AgendaItem } from './types';
+import { createModalStyles } from './styles';
+import type { AgendaItem } from './types';
 
-interface EditItemModalProps {
+type ModalStylesType = ReturnType<typeof createModalStyles>;
+
+type EditItemModalProps = {
   visible: boolean;
   onClose: () => void;
   modalWidth: number;
@@ -23,7 +25,7 @@ interface EditItemModalProps {
   setEditedDescription: (d: string) => void;
   onSave: () => void;
   t: (key: string) => string;
-}
+};
 
 export function EditItemModal({
   visible,
@@ -41,6 +43,13 @@ export function EditItemModal({
   onSave,
   t,
 }: EditItemModalProps): React.JSX.Element {
+  const { colors, spacing, radii, typography } = useTheme();
+
+  const modalStyles = useMemo(
+    () => createModalStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+
   const isEditing = currentItem && agendaItems.find((i) => i.id === currentItem.id);
   const modalTitle = isEditing
     ? t('screens.meetingPlanner.editActivity')
@@ -58,7 +67,7 @@ export function EditItemModal({
     <Modal visible={visible} animationType={ANIMATION_TYPE.SLIDE} transparent onRequestClose={onClose}>
       <View style={modalStyles.overlay}>
         <View style={contentStyle}>
-          <ModalHeader title={modalTitle} onClose={onClose} />
+          <ModalHeader title={modalTitle} onClose={onClose} modalStyles={modalStyles} />
           <ScrollView style={modalStyles.body}>
             <InputField
               label={t('screens.meetingPlanner.activityTitleLabel')}
@@ -82,7 +91,7 @@ export function EditItemModal({
               numberOfLines={TEXT_INPUT.NUMBER_OF_LINES.MULTI}
             />
           </ScrollView>
-          <ModalFooter onClose={onClose} onSave={onSave} t={t} />
+          <ModalFooter onClose={onClose} onSave={onSave} t={t} modalStyles={modalStyles} />
         </View>
       </View>
     </Modal>
@@ -92,9 +101,11 @@ export function EditItemModal({
 function ModalHeader({
   title,
   onClose,
+  modalStyles,
 }: {
   title: string;
   onClose: () => void;
+  modalStyles: ModalStylesType;
 }): React.JSX.Element {
   const { iconSizes, colors } = useTheme();
   return (
@@ -111,7 +122,7 @@ function ModalHeader({
   );
 }
 
-interface InputFieldProps {
+type InputFieldProps = {
   label: string;
   value: string;
   onChangeText: (t: string) => void;
@@ -119,7 +130,7 @@ interface InputFieldProps {
   keyboardType?: string;
   multiline?: boolean;
   numberOfLines?: number;
-}
+};
 
 function InputField({
   label,
@@ -143,13 +154,14 @@ function InputField({
   );
 }
 
-interface ModalFooterProps {
+type ModalFooterProps = {
   onClose: () => void;
   onSave: () => void;
   t: (key: string) => string;
-}
+  modalStyles: ModalStylesType;
+};
 
-function ModalFooter({ onClose, onSave, t }: ModalFooterProps): React.JSX.Element {
+function ModalFooter({ onClose, onSave, t, modalStyles }: ModalFooterProps): React.JSX.Element {
   return (
     <View style={modalStyles.footer}>
       <TouchableOpacity style={[modalStyles.button, modalStyles.cancelButton]} onPress={onClose}>

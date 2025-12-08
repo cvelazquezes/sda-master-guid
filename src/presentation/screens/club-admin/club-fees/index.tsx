@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, useWindowDimensions } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -14,7 +14,7 @@ import {
 } from './feeHandlers';
 import { FeeTabs } from './FeeTabs';
 import { SettingsTab } from './SettingsTab';
-import { styles } from './styles';
+import { createStyles } from './styles';
 import { BREAKPOINTS, MODAL_WIDTH_CONFIG } from './types';
 import { useClubFees } from './useClubFees';
 import { ICONS, EMPTY_VALUE, FEE_TABS } from '../../../../shared/constants';
@@ -116,7 +116,11 @@ function getModalWidth(windowWidth: number): number {
 const ClubFeesScreen = (): React.JSX.Element | null => {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { colors } = useTheme();
+  const { colors, spacing, typography, iconSizes } = useTheme();
+  const styles = useMemo(
+    () => createStyles(colors, spacing, typography),
+    [colors, spacing, typography]
+  );
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const {
     club,
@@ -183,8 +187,6 @@ const ClubFeesScreen = (): React.JSX.Element | null => {
       );
     }
   }, [user, members, chargeState, loadData, t]);
-
-  const { iconSizes } = useTheme();
 
   if (loading) {
     return (

@@ -103,13 +103,13 @@ export const modalStyles = StyleSheet.create({
   selectAllButton: {
     paddingVertical: designTokens.spacing.xs,
     paddingHorizontal: designTokens.spacing.md,
-    backgroundColor: designTokens.colors.infoLight,
+    backgroundColor: designTokens.colors.infoAlpha20,
     borderRadius: designTokens.borderRadius.sm,
   },
   selectAllText: {
     fontSize: mobileFontSizes.xs,
     fontWeight: designTokens.fontWeight.semibold,
-    color: designTokens.colors.info,
+    color: designTokens.colors.textPrimary,
   },
   membersList: { gap: designTokens.spacing.sm },
   memberItem: {

@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text } from '../../../components/primitives';
-import { Match, MatchStatus, User } from '../../../../types';
-import { Modal, Button } from '../../../components/primitives';
-import { useTheme } from '../../../state/ThemeContext';
+import { useTranslation } from 'react-i18next';
+import { createModalStyles } from './styles';
 import { COMPONENT_VARIANT, ICONS } from '../../../../shared/constants';
-import { modalStyles as styles } from './styles';
+import { MatchStatus } from '../../../../types';
+import { Text, Modal, Button } from '../../../components/primitives';
+import { useThemeColor } from '../../../hooks/useThemeColor';
+import { useTheme } from '../../../state/ThemeContext';
+import type { Match, User } from '../../../../types';
 
-interface ModalLabels {
+type ModalLabels = {
   title: string;
   subtitle: string;
   status: string;
@@ -17,9 +19,9 @@ interface ModalLabels {
   scheduled: string;
   completed: string;
   cancel: string;
-}
+};
 
-interface MatchDetailModalProps {
+type MatchDetailModalProps = {
   visible: boolean;
   match: Match | null;
   participants: User[];
@@ -27,9 +29,15 @@ interface MatchDetailModalProps {
   onNotify: (match: Match) => void;
   onUpdateStatus: (matchId: string, status: MatchStatus) => Promise<void>;
   labels: ModalLabels;
-}
+};
 
-function ParticipantRow({ participant }: { participant: User }): React.JSX.Element {
+function ParticipantRow({
+  participant,
+  styles,
+}: {
+  participant: User;
+  styles: ReturnType<typeof createModalStyles>;
+}): React.JSX.Element {
   const avatarInitial = participant.name.charAt(0).toUpperCase();
   return (
     <View style={styles.participantRow}>
@@ -47,9 +55,16 @@ function ParticipantRow({ participant }: { participant: User }): React.JSX.Eleme
   );
 }
 
-function StatusBadge({ status }: { status: MatchStatus }): React.JSX.Element {
-  const { colors, iconSizes } = useTheme();
-  const config = colors.status[status] || colors.status.pending;
+function StatusBadge({
+  status,
+  styles,
+}: {
+  status: MatchStatus;
+  styles: ReturnType<typeof createModalStyles>;
+}): React.JSX.Element {
+  const { iconSizes } = useTheme();
+  const { getStatusColor } = useThemeColor();
+  const config = getStatusColor(status);
   const displayText = status.charAt(0).toUpperCase() + status.slice(1);
   return (
     <View style={[styles.statusBadge, { backgroundColor: config.light }]}>
@@ -63,18 +78,20 @@ function StatusBadge({ status }: { status: MatchStatus }): React.JSX.Element {
   );
 }
 
-interface ActionButtonsProps {
+type ActionButtonsProps = {
   match: Match;
   onNotify: (match: Match) => void;
   onUpdateStatus: (matchId: string, status: MatchStatus) => Promise<void>;
   labels: ModalLabels;
-}
+  styles: ReturnType<typeof createModalStyles>;
+};
 
 function ActionButtons({
   match,
   onNotify,
   onUpdateStatus,
   labels,
+  styles,
 }: ActionButtonsProps): React.JSX.Element {
   const isPending = match.status === MatchStatus.PENDING;
   const isScheduled = match.status === MatchStatus.SCHEDULED;
@@ -85,36 +102,36 @@ function ActionButtons({
     <View style={styles.modalSection}>
       <Text style={styles.modalSectionTitle}>{labels.adminActions}</Text>
       <Button
+        fullWidth
         title={labels.notify}
         icon={ICONS.WHATSAPP}
         variant={COMPONENT_VARIANT.secondary}
-        fullWidth
         onPress={(): void => onNotify(match)}
       />
       {isPending && (
         <Button
+          fullWidth
           title={labels.scheduled}
           icon={ICONS.CALENDAR_CHECK}
           variant={COMPONENT_VARIANT.primary}
-          fullWidth
           onPress={toScheduled}
         />
       )}
       {isScheduled && (
         <Button
+          fullWidth
           title={labels.completed}
           icon={ICONS.CHECK_CIRCLE}
           variant={COMPONENT_VARIANT.primary}
-          fullWidth
           onPress={toCompleted}
         />
       )}
       {(isPending || isScheduled) && (
         <Button
+          fullWidth
           title={labels.cancel}
           icon={ICONS.CLOSE_CIRCLE}
           variant={COMPONENT_VARIANT.danger}
-          fullWidth
           onPress={toCancel}
         />
       )}
@@ -131,36 +148,44 @@ export function MatchDetailModal({
   onUpdateStatus,
   labels,
 }: MatchDetailModalProps): React.JSX.Element | null {
-  const { colors } = useTheme();
+  const { colors, spacing, radii, typography } = useTheme();
+  const styles = useMemo(
+    () => createModalStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+  const { t } = useTranslation();
   if (!match) {
     return null;
   }
   return (
     <Modal
       visible={visible}
-      onClose={onClose}
       title={labels.title}
       subtitle={labels.subtitle}
       icon={ICONS.ACCOUNT_HEART}
       iconColor={colors.primary}
       iconBackgroundColor={colors.primaryLight}
+      onClose={onClose}
     >
       <View style={styles.modalContent}>
         <View style={styles.modalSection}>
           <Text style={styles.modalSectionTitle}>{labels.status}</Text>
-          <StatusBadge status={match.status} />
+          <StatusBadge status={match.status} styles={styles} />
         </View>
         <View style={styles.modalSection}>
-          <Text style={styles.modalSectionTitle}>Participants ({participants.length})</Text>
+          <Text style={styles.modalSectionTitle}>
+            {t('screens.clubMatches.participants', { count: participants.length })}
+          </Text>
           {participants.map((p) => (
-            <ParticipantRow key={p.id} participant={p} />
+            <ParticipantRow key={p.id} participant={p} styles={styles} />
           ))}
         </View>
         <ActionButtons
           match={match}
+          labels={labels}
           onNotify={onNotify}
           onUpdateStatus={onUpdateStatus}
-          labels={labels}
+          styles={styles}
         />
       </View>
     </Modal>

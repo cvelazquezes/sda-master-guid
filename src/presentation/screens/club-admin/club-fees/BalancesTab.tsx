@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity, FlatList, RefreshControl } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../components/primitives';
@@ -13,7 +13,7 @@ import {
   TEXT_WEIGHT,
 } from '../../../../shared/constants';
 import { NUMERIC } from '../../../../shared/constants/validation';
-import { styles, balanceStyles, emptyStyles } from './styles';
+import { createStyles, createBalanceStyles, createEmptyStyles } from './styles';
 
 interface BalancesTabProps {
   balances: MemberBalance[];
@@ -34,7 +34,19 @@ export function BalancesTab({
   onNotifySingle,
   t,
 }: BalancesTabProps): React.JSX.Element {
-  const { colors } = useTheme();
+  const { colors, spacing, radii, typography } = useTheme();
+  const styles = useMemo(
+    () => createStyles(colors, spacing, typography),
+    [colors, spacing, typography]
+  );
+  const balanceStyles = useMemo(
+    () => createBalanceStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+  const emptyStyles = useMemo(
+    () => createEmptyStyles(colors, spacing, typography),
+    [colors, spacing, typography]
+  );
 
   const renderItem = ({ item }: { item: MemberBalance }): React.JSX.Element | null => {
     const member = members.find((m) => m.id === item.userId);
@@ -42,7 +54,7 @@ export function BalancesTab({
       return null;
     }
     return (
-      <BalanceCard member={member} balance={item} onNotify={onNotifySingle} colors={colors} t={t} />
+      <BalanceCard member={member} balance={item} onNotify={onNotifySingle} colors={colors} t={t} balanceStyles={balanceStyles} />
     );
   };
 
@@ -55,7 +67,7 @@ export function BalancesTab({
         contentContainerStyle={balanceStyles.listContainer}
         renderItem={renderItem}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        ListEmptyComponent={<EmptyBalances t={t} />}
+        ListEmptyComponent={<EmptyBalances t={t} emptyStyles={emptyStyles} />}
       />
     </View>
   );
@@ -68,7 +80,11 @@ interface BalancesHeaderProps {
 }
 
 function BalancesHeader({ count, onNotifyAll, t }: BalancesHeaderProps): React.JSX.Element {
-  const { colors, iconSizes } = useTheme();
+  const { colors, spacing, radii, typography, iconSizes } = useTheme();
+  const balanceStyles = useMemo(
+    () => createBalanceStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
   return (
     <View
       style={[
@@ -111,6 +127,7 @@ interface BalanceCardProps {
   onNotify: (m: User, b: MemberBalance) => void;
   colors: Record<string, string>;
   t: (key: string, opts?: Record<string, unknown>) => string;
+  balanceStyles: ReturnType<typeof createBalanceStyles>;
 }
 
 function getBalanceStatusColor(balance: MemberBalance, colors: Record<string, string>): string {
@@ -125,11 +142,13 @@ function CardHeader({
   statusColor,
   onPress,
   primaryColor,
+  balanceStyles,
 }: {
   member: User;
   statusColor: string;
   onPress: () => void;
   primaryColor: string;
+  balanceStyles: ReturnType<typeof createBalanceStyles>;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (
@@ -166,6 +185,7 @@ function BalanceCard({
   onNotify,
   colors,
   t,
+  balanceStyles,
 }: BalanceCardProps): React.JSX.Element {
   const statusColor = getBalanceStatusColor(balance, colors);
   const statusText =
@@ -182,6 +202,7 @@ function BalanceCard({
         statusColor={statusColor}
         onPress={(): void => onNotify(member, balance)}
         primaryColor={colors.primary}
+        balanceStyles={balanceStyles}
       />
       <View style={balanceStyles.details}>
         <View style={balanceStyles.row}>
@@ -214,7 +235,7 @@ function BalanceCard({
             ${Math.abs(balance.balance).toFixed(NUMERIC.DECIMAL_PLACES)} {statusText}
           </Text>
         </View>
-        {balance.overdueCharges > 0 && <OverdueNotice balance={balance} colors={colors} t={t} />}
+        {balance.overdueCharges > 0 && <OverdueNotice balance={balance} colors={colors} t={t} balanceStyles={balanceStyles} />}
       </View>
     </View>
   );
@@ -224,10 +245,12 @@ function OverdueNotice({
   balance,
   colors,
   t,
+  balanceStyles,
 }: {
   balance: MemberBalance;
   colors: Record<string, string>;
   t: (key: string, opts?: Record<string, unknown>) => string;
+  balanceStyles: ReturnType<typeof createBalanceStyles>;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (
@@ -242,7 +265,13 @@ function OverdueNotice({
   );
 }
 
-function EmptyBalances({ t }: { t: (key: string) => string }): React.JSX.Element {
+function EmptyBalances({
+  t,
+  emptyStyles,
+}: {
+  t: (key: string) => string;
+  emptyStyles: ReturnType<typeof createEmptyStyles>;
+}): React.JSX.Element {
   const { colors, iconSizes } = useTheme();
   return (
     <View style={emptyStyles.container}>

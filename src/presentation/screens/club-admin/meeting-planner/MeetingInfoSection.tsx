@@ -1,20 +1,20 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, Input } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
 import { DATE_LOCALE_OPTIONS, ICONS, SINGLE_SPACE } from '../../../../shared/constants';
-import { meetingInfoStyles } from './styles';
+import { createMeetingInfoStyles } from './styles';
 import { getNextSaturday, getNextSunday } from './dateUtils';
 
-interface MeetingInfoSectionProps {
+type MeetingInfoSectionProps = {
   meetingDate: Date;
   setMeetingDate: (d: Date) => void;
   meetingTitle: string;
   setMeetingTitle: (t: string) => void;
   totalTime: number;
   t: (key: string) => string;
-}
+};
 
 export function MeetingInfoSection({
   meetingDate,
@@ -24,7 +24,13 @@ export function MeetingInfoSection({
   totalTime,
   t,
 }: MeetingInfoSectionProps): React.JSX.Element {
-  const { iconSizes, colors } = useTheme();
+  const { iconSizes, colors, spacing, radii, typography } = useTheme();
+
+  const meetingInfoStyles = useMemo(
+    () => createMeetingInfoStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+
   const dateStr = meetingDate.toLocaleDateString(undefined, DATE_LOCALE_OPTIONS.FULL_DATE);
 
   return (

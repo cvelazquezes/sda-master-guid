@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, IconButton } from '../../../components/primitives';
@@ -13,7 +13,7 @@ import {
   ELLIPSIS,
   EMPTY_VALUE,
 } from '../../../../shared/constants';
-import { pendingCardStyles as styles } from './styles';
+import { createPendingCardStyles } from './styles';
 
 interface PendingMemberCardProps {
   member: User;
@@ -51,7 +51,13 @@ function MetaItem({ icon, color, children }: MetaItemProps): React.JSX.Element {
   );
 }
 
-function PendingAvatar({ initial }: { initial: string }): React.JSX.Element {
+function PendingAvatar({
+  initial,
+  styles,
+}: {
+  initial: string;
+  styles: ReturnType<typeof createPendingCardStyles>;
+}): React.JSX.Element {
   const { iconSizes, colors } = useTheme();
   return (
     <View style={styles.avatar}>
@@ -67,9 +73,10 @@ interface PendingInfoProps {
   member: User;
   classesText: string | null;
   labels: PendingMemberCardProps['labels'];
+  styles: ReturnType<typeof createPendingCardStyles>;
 }
 
-function PendingInfo({ member, classesText, labels }: PendingInfoProps): React.JSX.Element {
+function PendingInfo({ member, classesText, labels, styles }: PendingInfoProps): React.JSX.Element {
   const { iconSizes, colors } = useTheme();
   return (
     <View style={styles.info}>
@@ -111,7 +118,11 @@ export function PendingMemberCard({
   onReject,
   labels,
 }: PendingMemberCardProps): React.JSX.Element {
-  const { colors } = useTheme();
+  const { colors, spacing, radii, typography } = useTheme();
+  const styles = useMemo(
+    () => createPendingCardStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
   const initial = member.name.charAt(0).toUpperCase();
   const hasClasses = member.classes && member.classes.length > 0;
   const classesText = hasClasses
@@ -121,8 +132,8 @@ export function PendingMemberCard({
 
   return (
     <View style={styles.card}>
-      <PendingAvatar initial={initial} />
-      <PendingInfo member={member} classesText={classesText} labels={labels} />
+      <PendingAvatar initial={initial} styles={styles} />
+      <PendingInfo member={member} classesText={classesText} labels={labels} styles={styles} />
       <View style={styles.actionsContainer}>
         <IconButton
           icon={ICONS.CLOSE_CIRCLE}

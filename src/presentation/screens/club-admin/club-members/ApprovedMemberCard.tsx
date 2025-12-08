@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, IconButton } from '../../../components/primitives';
@@ -15,7 +15,7 @@ import {
   EMPTY_VALUE,
 } from '../../../../shared/constants';
 import { NUMERIC } from '../../../../shared/constants/validation';
-import { memberCardStyles as styles } from './styles';
+import { createMemberCardStyles } from './styles';
 
 interface ApprovedMemberCardProps {
   member: User;
@@ -72,7 +72,11 @@ export function ApprovedMemberCard({
   onDelete,
   labels,
 }: ApprovedMemberCardProps): React.JSX.Element {
-  const { colors, iconSizes } = useTheme();
+  const { colors, iconSizes, spacing, radii, typography } = useTheme();
+  const styles = useMemo(
+    () => createMemberCardStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
   const themeColors: ThemeColors = {
     textSecondary: colors.textSecondary,
     success: colors.success,
@@ -91,9 +95,9 @@ export function ApprovedMemberCard({
 
   return (
     <TouchableOpacity style={cardStyle} onPress={onPress} activeOpacity={TOUCH_OPACITY.default}>
-      <Avatar initial={member.name.charAt(0)} color={avatarBg} isActive={isActive} />
+      <Avatar initial={member.name.charAt(0)} color={avatarBg} isActive={isActive} styles={styles} />
       <View style={styles.info}>
-        <MemberHeader name={member.name} role={roleLabel} isActive={isActive} />
+        <MemberHeader name={member.name} role={roleLabel} isActive={isActive} styles={styles} />
         <Text
           style={[styles.email, !isActive && styles.textInactive]}
           numberOfLines={TEXT_LINES.single}
@@ -106,6 +110,7 @@ export function ApprovedMemberCard({
           labels={labels}
           colors={themeColors}
           iconSizes={iconSizes}
+          styles={styles}
         />
         {balance && (
           <BalanceRow
@@ -114,6 +119,7 @@ export function ApprovedMemberCard({
             labels={labels}
             colors={themeColors}
             iconSizes={iconSizes}
+            styles={styles}
           />
         )}
       </View>
@@ -124,6 +130,7 @@ export function ApprovedMemberCard({
         onDelete={onDelete}
         labels={labels}
         colors={themeColors}
+        styles={styles}
       />
     </TouchableOpacity>
   );
@@ -133,10 +140,12 @@ function Avatar({
   initial,
   color,
   isActive,
+  styles,
 }: {
   initial: string;
   color: string;
   isActive: boolean;
+  styles: ReturnType<typeof createMemberCardStyles>;
 }): React.JSX.Element {
   return (
     <View style={[styles.avatar, { backgroundColor: color }]}>
@@ -151,10 +160,12 @@ function MemberHeader({
   name,
   role,
   isActive,
+  styles,
 }: {
   name: string;
   role: string;
   isActive: boolean;
+  styles: ReturnType<typeof createMemberCardStyles>;
 }): React.JSX.Element {
   return (
     <View style={styles.header}>
@@ -177,6 +188,7 @@ interface MemberDetailsProps {
   labels: ApprovedMemberCardProps['labels'];
   colors: ThemeColors;
   iconSizes: Record<string, number>;
+  styles: ReturnType<typeof createMemberCardStyles>;
 }
 
 function MemberDetails({
@@ -185,6 +197,7 @@ function MemberDetails({
   labels,
   colors,
   iconSizes,
+  styles,
 }: MemberDetailsProps): React.JSX.Element {
   const hasClasses = member.classes && member.classes.length > 0;
   const classesText = hasClasses
@@ -241,12 +254,14 @@ function BalanceRow({
   labels,
   colors,
   iconSizes,
+  styles,
 }: {
   balance: MemberBalance;
   color: string;
   labels: ApprovedMemberCardProps['labels'];
   colors: ThemeColors;
   iconSizes: Record<string, number>;
+  styles: ReturnType<typeof createMemberCardStyles>;
 }): React.JSX.Element {
   const isNegative = balance.balance < 0;
   const statusLabel = isNegative
@@ -274,6 +289,7 @@ interface MemberActionsProps {
   onDelete: () => void;
   labels: ApprovedMemberCardProps['labels'];
   colors: ThemeColors;
+  styles: ReturnType<typeof createMemberCardStyles>;
 }
 
 function MemberActions({
@@ -283,6 +299,7 @@ function MemberActions({
   onDelete,
   labels,
   colors,
+  styles,
 }: MemberActionsProps): React.JSX.Element {
   const toggleIcon = isActive ? ICONS.CANCEL : ICONS.CHECK_CIRCLE;
   const toggleColor = isActive ? colors.error : colors.success;

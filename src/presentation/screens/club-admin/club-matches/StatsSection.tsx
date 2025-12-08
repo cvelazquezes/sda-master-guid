@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
-import { statsStyles as styles } from './styles';
+import { createStatsStyles } from './styles';
 
 interface StatsSectionProps {
   stats: { total: number; pending: number; scheduled: number; completed: number };
@@ -19,9 +19,10 @@ interface StatCardProps {
   value: number;
   label: string;
   color?: string;
+  styles: ReturnType<typeof createStatsStyles>;
 }
 
-function StatCard({ value, label, color }: StatCardProps): React.JSX.Element {
+function StatCard({ value, label, color, styles }: StatCardProps): React.JSX.Element {
   return (
     <View style={styles.statCard}>
       <Text style={[styles.statValue, color ? { color } : undefined]}>{value}</Text>
@@ -31,17 +32,21 @@ function StatCard({ value, label, color }: StatCardProps): React.JSX.Element {
 }
 
 export function StatsSection({ stats, labels }: StatsSectionProps): React.JSX.Element {
-  const { colors } = useTheme();
+  const { colors, spacing, radii, typography } = useTheme();
+  const styles = useMemo(
+    () => createStatsStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
   return (
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>{labels.overview}</Text>
       <View style={styles.statsGrid}>
-        <StatCard value={stats.total} label={labels.total} />
-        <StatCard value={stats.pending} label={labels.pending} color={colors.warning} />
+        <StatCard value={stats.total} label={labels.total} styles={styles} />
+        <StatCard value={stats.pending} label={labels.pending} color={colors.warning} styles={styles} />
       </View>
       <View style={styles.statsGrid}>
-        <StatCard value={stats.scheduled} label={labels.scheduled} color={colors.info} />
-        <StatCard value={stats.completed} label={labels.completed} color={colors.success} />
+        <StatCard value={stats.scheduled} label={labels.scheduled} color={colors.info} styles={styles} />
+        <StatCard value={stats.completed} label={labels.completed} color={colors.success} styles={styles} />
       </View>
     </View>
   );

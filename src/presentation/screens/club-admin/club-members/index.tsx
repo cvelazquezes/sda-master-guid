@@ -2,12 +2,13 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { View, ScrollView, RefreshControl } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../state/AuthContext';
+import { useTheme } from '../../../state/ThemeContext';
 import { UserDetailModal } from '../../../components/features/UserDetailModal';
 import { User, PathfinderClass } from '../../../../types';
 import { ClassSelectionModal } from '../../../components/features/ClassSelectionModal';
 import { PageHeader, SearchBar, TabBar, FilterModal } from '../../../components/primitives';
 import { MEMBER_TAB } from '../../../../shared/constants';
-import { styles } from './styles';
+import { createStyles } from './styles';
 import { useClubMembers } from './useClubMembers';
 import { useFilterState } from './useFilterState';
 import {
@@ -90,6 +91,11 @@ function useMemberModals(): {
 const ClubMembersScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { colors, spacing } = useTheme();
+  const styles = useMemo(
+    () => createStyles(colors, spacing),
+    [colors, spacing]
+  );
   const { members, balances, refreshing, loadData, onRefresh } = useClubMembers(user?.clubId, t);
   const filterState = useFilterState();
   const modals = useMemberModals();

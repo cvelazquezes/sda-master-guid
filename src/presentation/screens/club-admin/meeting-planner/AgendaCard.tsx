@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
 import { ICONS, TEXT_LINES, MOVE_DIRECTION } from '../../../../shared/constants';
-import { agendaCardStyles, assignButtonStyles } from './styles';
-import { AgendaItem } from './types';
+import { createAgendaCardStyles, createAssignButtonStyles } from './styles';
+import type { AgendaItem } from './types';
 
-interface AgendaCardProps {
+type AgendaCardStylesType = ReturnType<typeof createAgendaCardStyles>;
+type AssignButtonStylesType = ReturnType<typeof createAssignButtonStyles>;
+
+type AgendaCardProps = {
   item: AgendaItem;
   index: number;
   totalItems: number;
@@ -17,7 +20,7 @@ interface AgendaCardProps {
   onRemoveMember: () => void;
   onMove: (direction: typeof MOVE_DIRECTION.UP | typeof MOVE_DIRECTION.DOWN) => void;
   t: (key: string) => string;
-}
+};
 
 export function AgendaCard({
   item,
@@ -30,35 +33,51 @@ export function AgendaCard({
   onMove,
   t,
 }: AgendaCardProps): React.JSX.Element {
+  const { colors, spacing, radii, typography } = useTheme();
+
+  const agendaCardStyles = useMemo(
+    () => createAgendaCardStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+  const assignButtonStyles = useMemo(
+    () => createAssignButtonStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+
   return (
     <View style={agendaCardStyles.card}>
       <View style={agendaCardStyles.orderBadge}>
         <Text style={agendaCardStyles.orderText}>{index + 1}</Text>
       </View>
-      <AgendaContent item={item} onAssign={onAssign} onRemoveMember={onRemoveMember} t={t} />
+      <AgendaContent item={item} onAssign={onAssign} onRemoveMember={onRemoveMember} t={t} agendaCardStyles={agendaCardStyles} assignButtonStyles={assignButtonStyles} />
       <AgendaActions
         index={index}
         totalItems={totalItems}
         onEdit={onEdit}
         onDelete={onDelete}
         onMove={onMove}
+        agendaCardStyles={agendaCardStyles}
       />
     </View>
   );
 }
 
-interface AgendaContentProps {
+type AgendaContentProps = {
   item: AgendaItem;
   onAssign: () => void;
   onRemoveMember: () => void;
   t: (key: string) => string;
-}
+  agendaCardStyles: AgendaCardStylesType;
+  assignButtonStyles: AssignButtonStylesType;
+};
 
 function AgendaContent({
   item,
   onAssign,
   onRemoveMember,
   t,
+  agendaCardStyles,
+  assignButtonStyles,
 }: AgendaContentProps): React.JSX.Element {
   const { iconSizes, colors } = useTheme();
   return (
@@ -81,23 +100,27 @@ function AgendaContent({
           {item.description}
         </Text>
       )}
-      <ResponsibleSection item={item} onAssign={onAssign} onRemoveMember={onRemoveMember} t={t} />
+      <ResponsibleSection item={item} onAssign={onAssign} onRemoveMember={onRemoveMember} t={t} agendaCardStyles={agendaCardStyles} assignButtonStyles={assignButtonStyles} />
     </View>
   );
 }
 
-interface ResponsibleSectionProps {
+type ResponsibleSectionProps = {
   item: AgendaItem;
   onAssign: () => void;
   onRemoveMember: () => void;
   t: (key: string) => string;
-}
+  agendaCardStyles: AgendaCardStylesType;
+  assignButtonStyles: AssignButtonStylesType;
+};
 
 function ResponsibleSection({
   item,
   onAssign,
   onRemoveMember,
   t,
+  agendaCardStyles,
+  assignButtonStyles,
 }: ResponsibleSectionProps): React.JSX.Element {
   const { iconSizes, colors } = useTheme();
   return (
@@ -130,13 +153,14 @@ function ResponsibleSection({
   );
 }
 
-interface AgendaActionsProps {
+type AgendaActionsProps = {
   index: number;
   totalItems: number;
   onEdit: () => void;
   onDelete: () => void;
   onMove: (direction: typeof MOVE_DIRECTION.UP | typeof MOVE_DIRECTION.DOWN) => void;
-}
+  agendaCardStyles: AgendaCardStylesType;
+};
 
 function AgendaActions({
   index,
@@ -144,6 +168,7 @@ function AgendaActions({
   onEdit,
   onDelete,
   onMove,
+  agendaCardStyles,
 }: AgendaActionsProps): React.JSX.Element {
   const { iconSizes, colors } = useTheme();
   const isFirst = index === 0;
