@@ -2,7 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../shared/components';
-import { designTokens } from '../../shared/theme';
+import { useTheme } from '../../contexts/ThemeContext';
 import { ICONS, TEXT_LINES } from '../../shared/constants';
 import { HierarchyData, ThemeColors } from './types';
 import { styles } from './styles';
@@ -19,6 +19,7 @@ const COMPACT_ITEMS: { key: keyof HierarchyData; icon: string }[] = [
 ];
 
 export const CompactView: React.FC<CompactViewProps> = ({ data, colors }) => {
+  const { iconSizes } = useTheme();
   return (
     <View style={styles.compactContainer}>
       {COMPACT_ITEMS.map(
@@ -27,7 +28,7 @@ export const CompactView: React.FC<CompactViewProps> = ({ data, colors }) => {
             <View key={key} style={[styles.compactItem, { backgroundColor: colors.surfaceLight }]}>
               <MaterialCommunityIcons
                 name={icon as keyof typeof MaterialCommunityIcons.glyphMap}
-                size={designTokens.iconSize.xs}
+                size={iconSizes.xs}
                 color={colors.textSecondary}
               />
               <Text

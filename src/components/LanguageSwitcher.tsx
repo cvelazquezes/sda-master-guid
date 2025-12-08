@@ -1,18 +1,17 @@
 /**
  * Language Switcher Component
  * Allows users to change the app language
- * Uses SelectionModal for consistent UI across the app
+ * ✅ COMPLIANT: Uses theme values via useTheme() hook
  */
 
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity, ViewStyle, TextStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Text } from '../shared/components';
 import { LANGUAGES, changeLanguage, Language } from '../i18n';
 import { useTheme } from '../contexts/ThemeContext';
 import { SelectionModal, SelectionItem } from '../shared/components/SelectionModal';
-import { mobileTypography, designTokens, layoutConstants } from '../shared/theme';
 import { A11Y_ROLE, ICONS, FLEX } from '../shared/constants';
 
 interface LanguageSwitcherProps {
@@ -27,7 +26,7 @@ const FLAG_AVATARS: Record<string, string> = {
 
 export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ showLabel = true }) => {
   const { i18n, t } = useTranslation();
-  const { colors } = useTheme();
+  const { colors, spacing, radii, iconSizes, componentSizes, typography } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
 
   const currentLanguage = LANGUAGES.find((lang) => lang.code === i18n.language) || LANGUAGES[0];
@@ -46,34 +45,53 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ showLabel = 
     setModalVisible(false);
   };
 
+  const buttonStyle: ViewStyle = {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.md,
+    gap: spacing.md,
+  };
+
+  const iconContainerStyle: ViewStyle = {
+    width: componentSizes.iconContainer.md,
+    height: componentSizes.iconContainer.md,
+    borderRadius: radii['3xl'],
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.info + '20',
+  };
+
+  const labelStyle: TextStyle = {
+    fontSize: typography.fontSizes.xs,
+    color: colors.textSecondary,
+    marginBottom: spacing.xxs,
+  };
+
+  const valueStyle: TextStyle = {
+    fontSize: typography.fontSizes.lg,
+    color: colors.textPrimary,
+  };
+
   return (
     <View>
       <TouchableOpacity
-        style={styles.button}
+        style={buttonStyle}
         onPress={() => setModalVisible(true)}
         accessibilityLabel={t('accessibility.changeLanguage')}
         accessibilityRole={A11Y_ROLE.BUTTON}
       >
-        <View style={[styles.iconContainer, { backgroundColor: colors.info + '20' }]}>
-          <MaterialCommunityIcons
-            name={ICONS.TRANSLATE}
-            size={designTokens.iconSize.md}
-            color={colors.info}
-          />
+        <View style={iconContainerStyle}>
+          <MaterialCommunityIcons name={ICONS.TRANSLATE} size={iconSizes.md} color={colors.info} />
         </View>
         {showLabel && (
-          <View style={styles.textContainer}>
-            <Text style={[styles.label, { color: colors.textSecondary }]}>
-              {t('settings.language')}
-            </Text>
-            <Text style={[styles.value, { color: colors.textPrimary }]}>
-              {currentLanguage.nativeName}
-            </Text>
+          <View style={{ flex: FLEX.ONE }}>
+            <Text style={labelStyle}>{t('settings.language')}</Text>
+            <Text style={valueStyle}>{currentLanguage.nativeName}</Text>
           </View>
         )}
         <MaterialCommunityIcons
           name={ICONS.CHEVRON_DOWN}
-          size={designTokens.iconSize.md}
+          size={iconSizes.md}
           color={colors.textTertiary}
         />
       </TouchableOpacity>
@@ -90,29 +108,3 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ showLabel = 
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  button: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    paddingVertical: designTokens.spacing.md,
-    gap: designTokens.spacing.md,
-  },
-  iconContainer: {
-    width: designTokens.componentSizes.iconContainer.md,
-    height: designTokens.componentSizes.iconContainer.md,
-    borderRadius: designTokens.borderRadius['3xl'],
-    alignItems: layoutConstants.alignItems.center,
-    justifyContent: layoutConstants.justifyContent.center,
-  },
-  textContainer: {
-    flex: FLEX.ONE,
-  },
-  label: {
-    ...mobileTypography.caption,
-    marginBottom: designTokens.spacing.xxs,
-  },
-  value: {
-    ...mobileTypography.bodyLarge,
-  },
-});

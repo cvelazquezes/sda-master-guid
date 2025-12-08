@@ -4,7 +4,6 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Text } from '../../shared/components';
 import { useTheme } from '../../contexts/ThemeContext';
-import { designTokens } from '../../shared/theme';
 import { ICONS, TOUCH_OPACITY } from '../../shared/constants';
 import { OrganizationHierarchyProps } from './types';
 import { CompactView } from './CompactView';
@@ -18,7 +17,7 @@ export const OrganizationHierarchy: React.FC<OrganizationHierarchyProps> = ({
   compact = false,
 }) => {
   const { t } = useTranslation();
-  const { colors } = useTheme();
+  const { colors, iconSizes } = useTheme();
   const [expanded, setExpanded] = useState(initialExpanded);
   const displayTitle = title ?? t('components.organizationHierarchy.defaultTitle');
 
@@ -42,16 +41,12 @@ export const OrganizationHierarchy: React.FC<OrganizationHierarchyProps> = ({
         activeOpacity={TOUCH_OPACITY.default}
       >
         <View style={styles.headerLeft}>
-          <MaterialCommunityIcons
-            name={ICONS.SITEMAP}
-            size={designTokens.iconSize.md}
-            color={colors.primary}
-          />
+          <MaterialCommunityIcons name={ICONS.SITEMAP} size={iconSizes.md} color={colors.primary} />
           <Text style={[styles.title, { color: colors.primary }]}>{displayTitle}</Text>
         </View>
         <MaterialCommunityIcons
           name={expanded ? ICONS.CHEVRON_UP : ICONS.CHEVRON_DOWN}
-          size={designTokens.iconSize.lg}
+          size={iconSizes.lg}
           color={colors.textSecondary}
         />
       </TouchableOpacity>

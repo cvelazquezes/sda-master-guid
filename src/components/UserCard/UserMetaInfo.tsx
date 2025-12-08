@@ -2,7 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, StatusIndicator } from '../../shared/components';
-import { designTokens } from '../../shared/theme';
+import { useTheme } from '../../contexts/ThemeContext';
 import { ICONS, STATUS, TEXT_LINES } from '../../shared/constants';
 import { styles } from './styles';
 
@@ -25,6 +25,7 @@ export const UserMetaInfo: React.FC<UserMetaInfoProps> = ({
   textSecondaryColor,
   textTertiaryColor,
 }) => {
+  const { iconSizes } = useTheme();
   const textColor = isActive ? textSecondaryColor : textTertiaryColor;
 
   return (
@@ -33,7 +34,7 @@ export const UserMetaInfo: React.FC<UserMetaInfoProps> = ({
         <View style={styles.metaItem}>
           <MaterialCommunityIcons
             name={ICONS.ACCOUNT_GROUP}
-            size={designTokens.icon.sizes.xs}
+            size={iconSizes.xs}
             color={isActive ? primaryColor : textTertiaryColor}
           />
           <Text style={[styles.metaText, { color: textColor }]} numberOfLines={TEXT_LINES.single}>
@@ -45,7 +46,7 @@ export const UserMetaInfo: React.FC<UserMetaInfoProps> = ({
         <View style={styles.metaItem}>
           <MaterialCommunityIcons
             name={ICONS.WHATSAPP}
-            size={designTokens.icon.sizes.xs}
+            size={iconSizes.xs}
             color={isActive ? successColor : textTertiaryColor}
           />
           <Text style={[styles.metaText, { color: textColor }]} numberOfLines={TEXT_LINES.single}>

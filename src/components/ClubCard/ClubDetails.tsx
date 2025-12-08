@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Text } from '../../shared/components';
-import { designTokens } from '../../shared/theme';
+import { useTheme } from '../../contexts/ThemeContext';
 import { ICONS } from '../../shared/constants';
 import {
   formatMatchFrequency,
@@ -26,15 +26,12 @@ export const ClubDetails: React.FC<ClubDetailsProps> = ({
   textColor,
 }) => {
   const { t } = useTranslation();
+  const { iconSizes } = useTheme();
 
   return (
     <View style={styles.clubDetails}>
       <View style={styles.detailItem}>
-        <MaterialCommunityIcons
-          name={ICONS.CALENDAR_CLOCK}
-          size={designTokens.icon.sizes.xs}
-          color={textColor}
-        />
+        <MaterialCommunityIcons name={ICONS.CALENDAR_CLOCK} size={iconSizes.xs} color={textColor} />
         <Text style={[styles.detailText, { color: textColor }]}>
           {formatMatchFrequency(matchFrequency, t)}
         </Text>
@@ -42,7 +39,7 @@ export const ClubDetails: React.FC<ClubDetailsProps> = ({
       <View style={styles.detailItem}>
         <MaterialCommunityIcons
           name={ICONS.ACCOUNT_MULTIPLE}
-          size={designTokens.icon.sizes.xs}
+          size={iconSizes.xs}
           color={textColor}
         />
         <Text style={[styles.detailText, { color: textColor }]}>
@@ -53,7 +50,7 @@ export const ClubDetails: React.FC<ClubDetailsProps> = ({
         <View style={styles.detailItem}>
           <MaterialCommunityIcons
             name={ICONS.ACCOUNT_GROUP}
-            size={designTokens.icon.sizes.xs}
+            size={iconSizes.xs}
             color={textColor}
           />
           <Text style={[styles.detailText, { color: textColor }]}>

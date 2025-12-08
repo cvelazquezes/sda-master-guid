@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { IconButton } from '../../shared/components';
-import { designTokens } from '../../shared/theme';
+import { useTheme } from '../../contexts/ThemeContext';
 import { COMPONENT_SIZE, ICONS } from '../../shared/constants';
 import { formatDeleteLabel } from '../../shared/utils/formatters';
 import { ClubActionsProps } from './types';
@@ -18,6 +18,7 @@ export const ClubActions: React.FC<ClubActionsProps> = ({
   colors,
 }) => {
   const { t } = useTranslation();
+  const { iconSizes } = useTheme();
 
   if (showAdminActions && (onToggleStatus || onDelete)) {
     return (
@@ -50,7 +51,7 @@ export const ClubActions: React.FC<ClubActionsProps> = ({
     return (
       <MaterialCommunityIcons
         name={ICONS.CHEVRON_RIGHT}
-        size={designTokens.icon.sizes.lg}
+        size={iconSizes.lg}
         color={colors.textTertiary}
         style={styles.chevron}
       />

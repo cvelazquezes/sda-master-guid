@@ -2,7 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../shared/components';
-import { designTokens } from '../../shared/theme';
+import { useTheme } from '../../contexts/ThemeContext';
 import { ICONS, TEXT_LINES } from '../../shared/constants';
 import { styles } from './styles';
 
@@ -21,6 +21,8 @@ export const ClubHierarchy: React.FC<ClubHierarchyProps> = ({
   primaryColor,
   textColor,
 }) => {
+  const { iconSizes } = useTheme();
+
   if (!church && !association) {
     return null;
   }
@@ -31,11 +33,7 @@ export const ClubHierarchy: React.FC<ClubHierarchyProps> = ({
     <View style={styles.hierarchyContainer}>
       {church && (
         <View style={styles.hierarchyItem}>
-          <MaterialCommunityIcons
-            name={ICONS.CHURCH}
-            size={designTokens.icon.sizes.xs}
-            color={iconColor}
-          />
+          <MaterialCommunityIcons name={ICONS.CHURCH} size={iconSizes.xs} color={iconColor} />
           <Text
             style={[styles.hierarchyText, { color: textColor }]}
             numberOfLines={TEXT_LINES.single}
@@ -48,7 +46,7 @@ export const ClubHierarchy: React.FC<ClubHierarchyProps> = ({
         <View style={styles.hierarchyItem}>
           <MaterialCommunityIcons
             name={ICONS.OFFICE_BUILDING}
-            size={designTokens.icon.sizes.xs}
+            size={iconSizes.xs}
             color={iconColor}
           />
           <Text

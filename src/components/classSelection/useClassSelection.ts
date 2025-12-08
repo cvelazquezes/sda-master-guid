@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Alert, useWindowDimensions } from 'react-native';
 import { PathfinderClass } from '../../types';
-import { designTokens } from '../../shared/theme';
-import { CLASS_SELECTION, MESSAGES } from '../../shared/constants';
+import { useTheme } from '../../contexts/ThemeContext';
+import { CLASS_SELECTION } from '../../shared/constants';
+
+type TranslationFn = (key: string, options?: Record<string, unknown>) => string;
 
 interface UseClassSelectionProps {
   visible: boolean;
   initialClasses: PathfinderClass[];
+  t: TranslationFn;
 }
 
 interface UseClassSelectionReturn {
@@ -21,7 +24,9 @@ interface UseClassSelectionReturn {
 export const useClassSelection = ({
   visible,
   initialClasses,
+  t,
 }: UseClassSelectionProps): UseClassSelectionReturn => {
+  const { breakpoints, responsiveScale } = useTheme();
   const [selectedClasses, setSelectedClasses] = useState<PathfinderClass[]>(initialClasses);
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
 
@@ -32,7 +37,6 @@ export const useClassSelection = ({
   }, [visible, initialClasses]);
 
   const getModalWidth = (): number => {
-    const { breakpoints, responsiveScale } = designTokens;
     if (windowWidth > breakpoints.desktop) {
       return Math.min(responsiveScale.maxWidth.modal, windowWidth * responsiveScale.modal.desktop);
     } else if (windowWidth > breakpoints.tablet) {
@@ -49,13 +53,13 @@ export const useClassSelection = ({
   const toggleClass = (pathfinderClass: PathfinderClass): void => {
     if (selectedClasses.includes(pathfinderClass)) {
       if (selectedClasses.length === CLASS_SELECTION.MIN) {
-        Alert.alert(MESSAGES.TITLES.MINIMUM_REQUIRED, MESSAGES.ERRORS.MINIMUM_ONE_CLASS_REQUIRED);
+        Alert.alert(t('titles.minimumRequired'), t('errors.minimumOneClassRequired'));
         return;
       }
       setSelectedClasses(selectedClasses.filter((c) => c !== pathfinderClass));
     } else {
       if (selectedClasses.length === CLASS_SELECTION.MAX) {
-        Alert.alert(MESSAGES.TITLES.MAXIMUM_REACHED, MESSAGES.ERRORS.MAXIMUM_CLASSES_REACHED);
+        Alert.alert(t('titles.maximumReached'), t('errors.maximumClassesReached'));
         return;
       }
       setSelectedClasses([...selectedClasses, pathfinderClass]);
@@ -64,7 +68,7 @@ export const useClassSelection = ({
 
   const handleSave = (onSave: (classes: PathfinderClass[]) => void, onClose: () => void): void => {
     if (selectedClasses.length === CLASS_SELECTION.EMPTY) {
-      Alert.alert(MESSAGES.TITLES.REQUIRED, MESSAGES.ERRORS.PLEASE_SELECT_ONE_CLASS);
+      Alert.alert(t('titles.required'), t('errors.pleaseSelectOneClass'));
       return;
     }
     onSave(selectedClasses);
@@ -78,7 +82,7 @@ export const useClassSelection = ({
   return {
     selectedClasses,
     modalWidth: getModalWidth(),
-    modalMaxHeight: windowHeight * designTokens.responsiveScale.maxHeight.modal,
+    modalMaxHeight: windowHeight * responsiveScale.maxHeight.modal,
     toggleClass,
     handleSave,
     isSelected,

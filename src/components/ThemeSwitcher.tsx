@@ -1,17 +1,16 @@
 /**
  * Theme Switcher Component
  * Allows users to change between light/dark/system theme
- * Uses SelectionModal for consistent UI across the app
+ * ✅ COMPLIANT: Uses theme values via useTheme() hook
  */
 
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity, ViewStyle, TextStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Text } from '../shared/components';
 import { useTheme, ThemeMode } from '../contexts/ThemeContext';
 import { SelectionModal, SelectionItem } from '../shared/components/SelectionModal';
-import { mobileTypography, designTokens, layoutConstants } from '../shared/theme';
 import { A11Y_ROLE, ICONS, THEME_MODE, FLEX } from '../shared/constants';
 
 interface ThemeSwitcherProps {
@@ -41,7 +40,8 @@ const THEME_OPTIONS: { mode: ThemeMode; icon: string; labelKey: string; subtitle
 
 export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ showLabel = true }) => {
   const { t } = useTranslation();
-  const { mode, colors, setTheme } = useTheme();
+  const { mode, colors, spacing, radii, iconSizes, componentSizes, typography, setTheme } =
+    useTheme();
   const [modalVisible, setModalVisible] = useState(false);
 
   const currentOption = THEME_OPTIONS.find((opt) => opt.mode === mode) || THEME_OPTIONS[2];
@@ -60,34 +60,57 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ showLabel = true }
     setModalVisible(false);
   };
 
+  const buttonStyle: ViewStyle = {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.md,
+    gap: spacing.md,
+  };
+
+  const iconContainerStyle: ViewStyle = {
+    width: componentSizes.iconContainer.md,
+    height: componentSizes.iconContainer.md,
+    borderRadius: radii['3xl'],
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary + '20',
+  };
+
+  const labelStyle: TextStyle = {
+    fontSize: typography.fontSizes.xs,
+    color: colors.textSecondary,
+    marginBottom: spacing.xxs,
+  };
+
+  const valueStyle: TextStyle = {
+    fontSize: typography.fontSizes.lg,
+    color: colors.textPrimary,
+  };
+
   return (
     <View>
       <TouchableOpacity
-        style={styles.button}
+        style={buttonStyle}
         onPress={() => setModalVisible(true)}
         accessibilityLabel={t('accessibility.changeTheme')}
         accessibilityRole={A11Y_ROLE.BUTTON}
       >
-        <View style={[styles.iconContainer, { backgroundColor: colors.primary + '20' }]}>
+        <View style={iconContainerStyle}>
           <MaterialCommunityIcons
             name={currentOption.icon as typeof ICONS.CHECK}
-            size={designTokens.iconSize.md}
+            size={iconSizes.md}
             color={colors.primary}
           />
         </View>
         {showLabel && (
-          <View style={styles.textContainer}>
-            <Text style={[styles.label, { color: colors.textSecondary }]}>
-              {t('settings.theme')}
-            </Text>
-            <Text style={[styles.value, { color: colors.textPrimary }]}>
-              {t(currentOption.labelKey)}
-            </Text>
+          <View style={{ flex: FLEX.ONE }}>
+            <Text style={labelStyle}>{t('settings.theme')}</Text>
+            <Text style={valueStyle}>{t(currentOption.labelKey)}</Text>
           </View>
         )}
         <MaterialCommunityIcons
           name={ICONS.CHEVRON_DOWN}
-          size={designTokens.iconSize.md}
+          size={iconSizes.md}
           color={colors.textTertiary}
         />
       </TouchableOpacity>
@@ -104,29 +127,3 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ showLabel = true }
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  button: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    paddingVertical: designTokens.spacing.md,
-    gap: designTokens.spacing.md,
-  },
-  iconContainer: {
-    width: designTokens.componentSizes.iconContainer.md,
-    height: designTokens.componentSizes.iconContainer.md,
-    borderRadius: designTokens.borderRadius['3xl'],
-    alignItems: layoutConstants.alignItems.center,
-    justifyContent: layoutConstants.justifyContent.center,
-  },
-  textContainer: {
-    flex: FLEX.ONE,
-  },
-  label: {
-    ...mobileTypography.caption,
-    marginBottom: designTokens.spacing.xxs,
-  },
-  value: {
-    ...mobileTypography.bodyLarge,
-  },
-});

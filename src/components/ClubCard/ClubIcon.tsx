@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { designTokens } from '../../shared/theme';
+import { useTheme } from '../../contexts/ThemeContext';
 import { ICONS } from '../../shared/constants';
 import { ClubIconProps } from './types';
 import { styles } from './styles';
@@ -13,13 +13,14 @@ export const ClubIcon: React.FC<ClubIconProps> = ({
   activeBackground,
   inactiveBackground,
 }) => {
+  const { iconSizes } = useTheme();
   return (
     <View
       style={[styles.icon, { backgroundColor: isActive ? activeBackground : inactiveBackground }]}
     >
       <MaterialCommunityIcons
         name={ICONS.ACCOUNT_GROUP}
-        size={designTokens.icon.sizes.lg}
+        size={iconSizes.lg}
         color={isActive ? primaryColor : inactiveColor}
       />
     </View>

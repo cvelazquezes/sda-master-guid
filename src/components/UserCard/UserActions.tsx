@@ -4,7 +4,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { IconButton } from '../../shared/components';
 import { User } from '../../types';
-import { designTokens } from '../../shared/theme';
+import { useTheme } from '../../contexts/ThemeContext';
 import { COMPONENT_SIZE, ICONS } from '../../shared/constants';
 import { formatDeleteLabel } from '../../shared/utils/formatters';
 import { styles } from './styles';
@@ -31,6 +31,7 @@ export const UserActions: React.FC<UserActionsProps> = ({
   textTertiaryColor,
 }) => {
   const { t } = useTranslation();
+  const { iconSizes } = useTheme();
 
   if (showAdminActions && (onToggleStatus || onDelete)) {
     return (
@@ -63,7 +64,7 @@ export const UserActions: React.FC<UserActionsProps> = ({
     return (
       <MaterialCommunityIcons
         name={ICONS.CHEVRON_RIGHT}
-        size={designTokens.icon.sizes.lg}
+        size={iconSizes.lg}
         color={textTertiaryColor}
         style={styles.chevron}
       />

@@ -3,7 +3,7 @@ import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../shared/components';
 import { PathfinderClass } from '../../types';
-import { designTokens } from '../../shared/theme';
+import { useTheme } from '../../contexts/ThemeContext';
 import { ICONS } from '../../shared/constants';
 import { ThemeColors } from './types';
 import { styles } from './styles';
@@ -23,6 +23,8 @@ export const ClassOptionItem: React.FC<ClassOptionItemProps> = ({
   onToggle,
   colors,
 }) => {
+  const { iconSizes } = useTheme();
+
   const optionStyle = [
     styles.classOption,
     { backgroundColor: colors.surfaceLight },
@@ -42,7 +44,7 @@ export const ClassOptionItem: React.FC<ClassOptionItemProps> = ({
           {isSelected && (
             <MaterialCommunityIcons
               name={ICONS.CHECK}
-              size={designTokens.iconSize.sm}
+              size={iconSizes.sm}
               color={colors.textInverse}
             />
           )}

@@ -4,7 +4,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Text } from '../../shared/components';
 import { MemberBalance } from '../../types';
-import { designTokens } from '../../shared/theme';
+import { useTheme } from '../../contexts/ThemeContext';
 import { EMPTY_VALUE, ICONS, SINGLE_SPACE } from '../../shared/constants';
 import { NUMERIC } from '../../shared/constants/validation';
 import { styles } from './styles';
@@ -25,15 +25,12 @@ export const UserBalanceSection: React.FC<UserBalanceSectionProps> = ({
   errorLightColor,
 }) => {
   const { t } = useTranslation();
+  const { iconSizes } = useTheme();
 
   return (
     <View style={[styles.balanceSection, { borderTopColor: borderColor }]}>
       <View style={styles.balanceRow}>
-        <MaterialCommunityIcons
-          name={ICONS.WALLET}
-          size={designTokens.icon.sizes.sm}
-          color={balanceColor}
-        />
+        <MaterialCommunityIcons name={ICONS.WALLET} size={iconSizes.sm} color={balanceColor} />
         <Text style={[styles.balanceText, { color: balanceColor }]}>
           {t('components.userCard.balance.label')}: $
           {Math.abs(balance.balance).toFixed(NUMERIC.DECIMAL_PLACES)}
@@ -45,7 +42,7 @@ export const UserBalanceSection: React.FC<UserBalanceSectionProps> = ({
         <View style={[styles.overdueWarning, { backgroundColor: errorLightColor }]}>
           <MaterialCommunityIcons
             name={ICONS.ALERT_CIRCLE}
-            size={designTokens.icon.sizes.xs}
+            size={iconSizes.xs}
             color={errorColor}
           />
           <Text style={[styles.overdueWarningText, { color: errorColor }]}>

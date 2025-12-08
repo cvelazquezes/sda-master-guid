@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Text } from '../../shared/components';
-import { designTokens } from '../../shared/theme';
+import { useTheme } from '../../contexts/ThemeContext';
 import { ThemeColors } from './types';
 import { styles } from './styles';
 
@@ -23,13 +23,14 @@ export const HierarchyItem: React.FC<HierarchyItemProps> = ({
   colors,
 }) => {
   const { t } = useTranslation();
+  const { iconSizes } = useTheme();
 
   return (
     <View style={styles.hierarchyItem}>
       <View style={styles.levelContainer}>
         <MaterialCommunityIcons
           name={icon as keyof typeof MaterialCommunityIcons.glyphMap}
-          size={designTokens.iconSize.sm}
+          size={iconSizes.sm}
           color={colors.textSecondary}
         />
         <Text style={[styles.levelLabel, { color: colors.textPrimary }]}>{t(labelKey)}</Text>
