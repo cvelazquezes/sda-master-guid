@@ -13,11 +13,11 @@
  */
 
 import { QueryClient, QueryCache, MutationCache } from '@tanstack/react-query';
-import { logger } from '../utils/logger';
-import { AppError } from '../utils/errors';
-import { CACHE, RETRY } from '../constants/timing';
-import { LIST_LIMITS } from '../constants/numbers';
-import { LOG_MESSAGES, QUERY_KEY, AXIOS_ERROR_CODE } from '../constants';
+import { logger } from '../../shared/utils/logger';
+import { AppError } from '../../shared/utils/errors';
+import { CACHE, RETRY } from '../../shared/constants/timing';
+import { LIST_LIMITS } from '../../shared/constants/numbers';
+import { LOG_MESSAGES, QUERY_KEY, AXIOS_ERROR_CODE } from '../../shared/constants';
 
 /**
  * Default query options

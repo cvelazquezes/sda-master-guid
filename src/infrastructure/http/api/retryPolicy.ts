@@ -3,12 +3,12 @@
  * Implements resilient API call retry logic
  */
 
-import { logger } from '../../utils/logger';
-import { NetworkError, TimeoutError } from '../../utils/errors';
-import { RETRY_CONFIG } from '../../constants/validation';
-import { RETRYABLE_STATUS_CODES } from '../../constants/http';
-import { OPACITY_VALUE } from '../../constants/numbers';
-import { LOG_MESSAGES, TYPEOF, AXIOS_ERROR_CODE, OBJECT_PROPERTY } from '../../constants';
+import { logger } from '../../../shared/utils/logger';
+import { NetworkError, TimeoutError } from '../../../shared/utils/errors';
+import { RETRY_CONFIG } from '../../../shared/constants/validation';
+import { RETRYABLE_STATUS_CODES } from '../../../shared/constants/http';
+import { OPACITY_VALUE } from '../../../shared/constants/numbers';
+import { LOG_MESSAGES, TYPEOF, AXIOS_ERROR_CODE, OBJECT_PROPERTY } from '../../../shared/constants';
 
 interface RetryOptions {
   maxRetries: number;

@@ -3,14 +3,14 @@
  * Prevents cascading failures by failing fast when service is down
  */
 
-import { logger } from '../../utils/logger';
-import { CIRCUIT_BREAKER } from '../../constants/validation';
+import { logger } from '../../../shared/utils/logger';
+import { CIRCUIT_BREAKER } from '../../../shared/constants/validation';
 import {
   LOG_MESSAGES,
   ERROR_MESSAGES,
   CIRCUIT_STATE,
   CIRCUIT_BREAKER_SERVICE,
-} from '../../constants';
+} from '../../../shared/constants';
 
 export enum CircuitState {
   CLOSED = CIRCUIT_STATE.CLOSED, // Normal operation

@@ -5,14 +5,14 @@
 
 import axios, { AxiosInstance, AxiosError, AxiosRequestConfig } from 'axios';
 import { environment } from '../config/environment';
-import { secureStorage } from '../utils/secureStorage';
-import { logger } from '../utils/logger';
+import { secureStorage } from '../../shared/utils/secureStorage';
+import { logger } from '../../shared/utils/logger';
 import { retryPolicy } from './api/retryPolicy';
 import { apiCircuitBreaker } from './api/circuitBreaker';
-import { NetworkError, TimeoutError, AuthenticationError, toAppError } from '../utils/errors';
-import { TIMEOUT } from '../constants/timing';
-import { HTTP_STATUS, HEADER, CONTENT_TYPE, AUTH_CONSTANTS } from '../constants/http';
-import { LOG_MESSAGES, ERROR_MESSAGES, APP_VERSION, AXIOS_ERROR_CODE } from '../constants';
+import { NetworkError, TimeoutError, AuthenticationError, toAppError } from '../../shared/utils/errors';
+import { TIMEOUT } from '../../shared/constants/timing';
+import { HTTP_STATUS, HEADER, CONTENT_TYPE, AUTH_CONSTANTS } from '../../shared/constants/http';
+import { LOG_MESSAGES, ERROR_MESSAGES, APP_VERSION, AXIOS_ERROR_CODE } from '../../shared/constants';
 
 // Constants
 const API_TIMEOUT_MS = TIMEOUT.API_DEFAULT;
