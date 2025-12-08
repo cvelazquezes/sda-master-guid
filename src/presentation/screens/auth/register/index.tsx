@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { View, ScrollView, KeyboardAvoidingView, StyleSheet, Platform } from 'react-native';
+import { View, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
+import { createScreenStyles } from './styles';
 import { ClassSelectionModal } from '../../../components/features/ClassSelectionModal';
 import { Button } from '../../../components/primitives';
-import { useTheme, ThemeContextType } from '../../../state/ThemeContext';
+import { useTheme } from '../../../state/ThemeContext';
 import {
   COMPONENT_VARIANT,
   ICONS,
@@ -13,8 +14,6 @@ import {
   PLATFORM_OS,
   SAFE_AREA_EDGES,
   SCREENS,
-  DIMENSIONS,
-  FLEX,
 } from '../../../../shared/constants';
 import { useRegisterForm } from './useRegisterForm';
 import { useClubHierarchy } from './useClubHierarchy';
@@ -58,7 +57,7 @@ const RegisterScreen = (): React.JSX.Element => {
   const formHook = useRegisterForm();
   const clubHierarchy = useClubHierarchy();
   const labels = useRegisterLabels(t);
-  const styles = useMemo(() => createStyles(colors, spacing), [colors, spacing]);
+  const styles = useMemo(() => createScreenStyles(colors, spacing), [colors, spacing]);
 
   if (clubHierarchy.loadingClubs) {
     return <LoadingState message={t('common.loadingClubs')} />;
@@ -203,32 +202,5 @@ function RegisterFormContent(props: FormContentProps): React.JSX.Element {
     </View>
   );
 }
-
-/**
- * Styles factory - Creates styles using theme values
- * ✅ COMPLIANT: Uses theme values via useTheme() hook
- */
-const createStyles = (
-  colors: ThemeContextType['colors'],
-  spacing: ThemeContextType['spacing']
-): ReturnType<typeof StyleSheet.create> =>
-  StyleSheet.create({
-    safeArea: {
-      flex: FLEX.ONE,
-      backgroundColor: colors.backgroundPrimary,
-    },
-    container: {
-      flex: FLEX.ONE,
-      backgroundColor: colors.backgroundPrimary,
-    },
-    scrollContent: {
-      flexGrow: FLEX.ONE,
-      padding: spacing.lg,
-      paddingTop: spacing['3xl'],
-    },
-    form: {
-      width: DIMENSIONS.MAX_WIDTH_PERCENT.FULL,
-    },
-  });
 
 export default RegisterScreen;

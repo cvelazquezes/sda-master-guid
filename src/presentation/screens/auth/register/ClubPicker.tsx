@@ -1,22 +1,18 @@
-import React from 'react';
-import { View, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, TouchableOpacity, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { createClubPickerStyles } from './styles';
 import { Text } from '../../../components/primitives';
-import { Club } from '../../../../types';
-import {
-  mobileTypography,
-  mobileIconSizes,
-  designTokens,
-  layoutConstants,
-} from '../../../theme';
-import { ICONS, DIMENSIONS, FLEX } from '../../../../shared/constants';
+import { useTheme } from '../../../state/ThemeContext';
+import { ICONS } from '../../../../shared/constants';
+import type { Club } from '../../../../types';
 
-interface ClubPickerProps {
+type ClubPickerProps = {
   label: string;
   clubs: Club[];
   selectedClubId: string;
   onSelect: (clubId: string) => void;
-}
+};
 
 export function ClubPicker({
   label,
@@ -24,30 +20,34 @@ export function ClubPicker({
   selectedClubId,
   onSelect,
 }: ClubPickerProps): React.JSX.Element {
+  const { colors, spacing, radii, typography, iconSizes } = useTheme();
+
+  const clubPickerStyles = useMemo(
+    () => createClubPickerStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>{label}</Text>
-      <ScrollView style={styles.clubsList}>
+    <View style={clubPickerStyles.container}>
+      <Text style={clubPickerStyles.label}>{label}</Text>
+      <ScrollView style={clubPickerStyles.clubsList}>
         {clubs.map((club) => {
           const isSelected = selectedClubId === club.id;
           const iconName = isSelected ? ICONS.RADIOBOX_MARKED : ICONS.RADIOBOX_BLANK;
-          const iconColor = isSelected
-            ? designTokens.colors.primary
-            : designTokens.colors.textSecondary;
+          const iconColor = isSelected ? colors.primary : colors.textSecondary;
           return (
             <TouchableOpacity
               key={club.id}
-              style={[styles.clubOption, isSelected && styles.clubOptionSelected]}
-              onPress={() => onSelect(club.id)}
+              style={[
+                clubPickerStyles.clubOption,
+                isSelected && clubPickerStyles.clubOptionSelected,
+              ]}
+              onPress={(): void => onSelect(club.id)}
             >
-              <MaterialCommunityIcons
-                name={iconName}
-                size={mobileIconSizes.medium}
-                color={iconColor}
-              />
-              <View style={styles.clubInfo}>
-                <Text style={styles.clubName}>{club.name}</Text>
-                <Text style={styles.clubDescription}>{club.description}</Text>
+              <MaterialCommunityIcons name={iconName} size={iconSizes.md} color={iconColor} />
+              <View style={clubPickerStyles.clubInfo}>
+                <Text style={clubPickerStyles.clubName}>{club.name}</Text>
+                <Text style={clubPickerStyles.clubDescription}>{club.description}</Text>
               </View>
             </TouchableOpacity>
           );
@@ -56,41 +56,3 @@ export function ClubPicker({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: designTokens.spacing.md,
-  },
-  label: {
-    ...mobileTypography.bodyLargeBold,
-    marginBottom: designTokens.spacing.md,
-  },
-  clubsList: {
-    maxHeight: DIMENSIONS.MAX_HEIGHT.LIST_MEDIUM,
-    borderWidth: designTokens.borderWidth.thin,
-    borderColor: designTokens.colors.borderMedium,
-    borderRadius: designTokens.borderRadius.md,
-    backgroundColor: designTokens.colors.inputBackground,
-  },
-  clubOption: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    padding: designTokens.spacing.md,
-    borderBottomWidth: designTokens.borderWidth.thin,
-    borderBottomColor: designTokens.colors.borderLight,
-  },
-  clubOptionSelected: {
-    backgroundColor: designTokens.colors.primaryLight,
-  },
-  clubInfo: {
-    marginLeft: designTokens.spacing.md,
-    flex: FLEX.ONE,
-  },
-  clubName: {
-    ...mobileTypography.bodyLargeBold,
-  },
-  clubDescription: {
-    ...mobileTypography.bodySmall,
-    marginTop: designTokens.spacing.xs,
-  },
-});

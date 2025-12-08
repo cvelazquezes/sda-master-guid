@@ -1,22 +1,18 @@
-import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { createSectionStyles, createAccountTypeStyles } from './styles';
 import { Text } from '../../../components/primitives';
-import {
-  mobileTypography,
-  mobileIconSizes,
-  designTokens,
-  layoutConstants,
-} from '../../../theme';
-import { ICONS, FLEX } from '../../../../shared/constants';
+import { useTheme } from '../../../state/ThemeContext';
+import { ICONS } from '../../../../shared/constants';
 
-interface AccountTypeSectionProps {
+type AccountTypeSectionProps = {
   isClubAdmin: boolean;
   onToggle: () => void;
   sectionTitle: string;
   checkboxLabel: string;
   infoText: string;
-}
+};
 
 export function AccountTypeSection({
   isClubAdmin,
@@ -25,74 +21,39 @@ export function AccountTypeSection({
   checkboxLabel,
   infoText,
 }: AccountTypeSectionProps): React.JSX.Element {
+  const { colors, spacing, radii, typography, iconSizes } = useTheme();
+
+  const sectionStyles = useMemo(
+    () => createSectionStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+  const accountTypeStyles = useMemo(
+    () => createAccountTypeStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+
   const checkboxIcon = isClubAdmin ? ICONS.CHECKBOX_MARKED : ICONS.CHECKBOX_BLANK_OUTLINE;
 
   return (
     <>
-      <View style={styles.sectionHeader}>
+      <View style={sectionStyles.header}>
         <MaterialCommunityIcons
           name={ICONS.ACCOUNT_COG}
-          size={mobileIconSizes.medium}
-          color={designTokens.colors.primary}
+          size={iconSizes.md}
+          color={colors.primary}
         />
-        <Text style={styles.sectionTitle}>{sectionTitle}</Text>
+        <Text style={sectionStyles.title}>{sectionTitle}</Text>
       </View>
-      <TouchableOpacity style={styles.checkboxContainer} onPress={onToggle}>
-        <MaterialCommunityIcons
-          name={checkboxIcon}
-          size={mobileIconSizes.large}
-          color={designTokens.colors.primary}
-        />
-        <Text style={styles.checkboxLabel}>{checkboxLabel}</Text>
+      <TouchableOpacity style={accountTypeStyles.checkboxContainer} onPress={onToggle}>
+        <MaterialCommunityIcons name={checkboxIcon} size={iconSizes.lg} color={colors.primary} />
+        <Text style={accountTypeStyles.checkboxLabel}>{checkboxLabel}</Text>
       </TouchableOpacity>
       {isClubAdmin && (
-        <View style={styles.infoBox}>
-          <MaterialCommunityIcons
-            name={ICONS.INFORMATION}
-            size={mobileIconSizes.medium}
-            color={designTokens.colors.info}
-          />
-          <Text style={styles.infoText}>{infoText}</Text>
+        <View style={accountTypeStyles.infoBox}>
+          <MaterialCommunityIcons name={ICONS.INFORMATION} size={iconSizes.md} color={colors.info} />
+          <Text style={accountTypeStyles.infoText}>{infoText}</Text>
         </View>
       )}
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  sectionHeader: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    marginTop: designTokens.spacing.sm,
-    marginBottom: designTokens.spacing.md,
-    gap: designTokens.spacing.sm,
-  },
-  sectionTitle: {
-    ...mobileTypography.heading3,
-    color: designTokens.colors.primary,
-  },
-  checkboxContainer: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    marginBottom: designTokens.spacing.lg,
-    paddingVertical: designTokens.spacing.sm,
-  },
-  checkboxLabel: {
-    ...mobileTypography.bodyLarge,
-    marginLeft: designTokens.spacing.md,
-    color: designTokens.colors.textPrimary,
-  },
-  infoBox: {
-    flexDirection: layoutConstants.flexDirection.row,
-    backgroundColor: designTokens.colors.infoLight,
-    borderRadius: designTokens.borderRadius.md,
-    padding: designTokens.spacing.md,
-    marginBottom: designTokens.spacing.lg,
-    gap: designTokens.spacing.md,
-  },
-  infoText: {
-    ...mobileTypography.bodySmall,
-    color: designTokens.colors.info,
-    flex: FLEX.ONE,
-  },
-});

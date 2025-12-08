@@ -1,19 +1,17 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useMemo } from 'react';
+import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { createSectionStyles } from './styles';
 import { Text } from '../../../components/primitives';
-import { Club } from '../../../../types';
+import { useTheme } from '../../../state/ThemeContext';
 import { HierarchyPicker } from './HierarchyPicker';
 import { ClubPicker } from './ClubPicker';
-import {
-  mobileTypography,
-  mobileIconSizes,
-  designTokens,
-  layoutConstants,
-} from '../../../theme';
 import { ICONS } from '../../../../shared/constants';
+import type { Club } from '../../../../types';
 
-interface ClubHierarchySectionProps {
+type SectionStylesType = ReturnType<typeof createSectionStyles>;
+
+type ClubHierarchySectionProps = {
   sectionTitle: string;
   description: string;
   labels: {
@@ -40,23 +38,33 @@ interface ClubHierarchySectionProps {
   onAssociationChange: (v: string) => void;
   onChurchChange: (v: string) => void;
   onClubSelect: (id: string) => void;
-}
+};
 
 // Section header
-function SectionHeaderRow({ title }: { title: string }): React.JSX.Element {
+function SectionHeaderRow({
+  title,
+  sectionStyles,
+}: {
+  title: string;
+  sectionStyles: SectionStylesType;
+}): React.JSX.Element {
+  const { iconSizes, colors } = useTheme();
   return (
-    <View style={styles.sectionHeader}>
-      <MaterialCommunityIcons
-        name={ICONS.SITEMAP}
-        size={mobileIconSizes.medium}
-        color={designTokens.colors.primary}
-      />
-      <Text style={styles.sectionTitle}>{title}</Text>
+    <View style={sectionStyles.header}>
+      <MaterialCommunityIcons name={ICONS.SITEMAP} size={iconSizes.md} color={colors.primary} />
+      <Text style={sectionStyles.title}>{title}</Text>
     </View>
   );
 }
 
 export function ClubHierarchySection(props: ClubHierarchySectionProps): React.JSX.Element {
+  const { colors, spacing, radii, typography } = useTheme();
+
+  const sectionStyles = useMemo(
+    () => createSectionStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+
   const {
     sectionTitle,
     description,
@@ -73,8 +81,8 @@ export function ClubHierarchySection(props: ClubHierarchySectionProps): React.JS
 
   return (
     <>
-      <SectionHeaderRow title={sectionTitle} />
-      <Text style={styles.description}>{description}</Text>
+      <SectionHeaderRow title={sectionTitle} sectionStyles={sectionStyles} />
+      <Text style={sectionStyles.description}>{description}</Text>
       <HierarchyPicker
         label={labels.division}
         options={divisions}
@@ -116,23 +124,3 @@ export function ClubHierarchySection(props: ClubHierarchySectionProps): React.JS
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  sectionHeader: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    marginTop: designTokens.spacing.sm,
-    marginBottom: designTokens.spacing.md,
-    gap: designTokens.spacing.sm,
-  },
-  sectionTitle: {
-    ...mobileTypography.heading3,
-    color: designTokens.colors.primary,
-  },
-  description: {
-    ...mobileTypography.bodySmall,
-    color: designTokens.colors.textSecondary,
-    marginBottom: designTokens.spacing.md,
-    marginTop: -designTokens.spacing.sm,
-  },
-});

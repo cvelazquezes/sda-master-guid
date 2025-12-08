@@ -13,7 +13,6 @@ import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   TouchableOpacity,
-  StyleSheet,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -23,6 +22,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { createStyles } from './login/styles';
 import {
   COMPONENT_SIZE,
   COMPONENT_VARIANT,
@@ -38,7 +38,6 @@ import {
   TEXT_COLOR,
   TEXT_VARIANT,
   TEXT_WEIGHT,
-  DIMENSIONS,
   FLEX,
 } from '../../../shared/constants';
 import { BORDER_WIDTH } from '../../../shared/constants/numbers';
@@ -46,9 +45,7 @@ import { getErrorMessage } from '../../../shared/utils/errors';
 import { validate, LoginSchema } from '../../../shared/utils/validation';
 import { Text, Button, Input, Card, Badge } from '../../components/primitives';
 import { useAuth } from '../../state/AuthContext';
-import { useTheme } from '../../state/ThemeContext';
-import type { ThemeContextType } from '../../state/ThemeContext';
-// ✅ GOOD: Import UI primitives (Text, Button, Input, Card, Badge)
+import { useTheme, type ThemeContextType } from '../../state/ThemeContext';
 
 const DEFAULT_TEST_PASSWORD = 'password123';
 
@@ -267,13 +264,14 @@ function EmailInput({
 }): React.JSX.Element {
   return (
     <Input
-      label={t('screens.login.email')}
+      accessibilityLabel={t('screens.login.email')}
       icon={ICONS.EMAIL}
+      label={t('screens.login.email')}
       placeholder={t('auth.enterEmail')}
-      value={email}
-      error={error}
-      disabled={disabled}
       testID={TEST_IDS.EMAIL_INPUT}
+      value={email}
+      disabled={disabled}
+      error={error}
       onChangeText={onChange}
     />
   );
@@ -296,13 +294,14 @@ function PasswordInput({
   return (
     <Input
       secureTextEntry
-      label={t('screens.login.password')}
+      accessibilityLabel={t('screens.login.password')}
       icon={ICONS.LOCK}
+      label={t('screens.login.password')}
       placeholder={t('auth.enterPassword')}
-      value={password}
-      error={error}
-      disabled={disabled}
       testID={TEST_IDS.PASSWORD_INPUT}
+      value={password}
+      disabled={disabled}
+      error={error}
       onChangeText={onChange}
     />
   );
@@ -322,8 +321,10 @@ function RegisterLink({
 }): React.JSX.Element {
   return (
     <TouchableOpacity
-      style={{ marginTop: spacing.lg, alignItems: 'center', padding: spacing.sm }}
+      accessibilityRole="button"
+      accessibilityState={{ disabled }}
       disabled={disabled}
+      style={{ marginTop: spacing.lg, alignItems: 'center', padding: spacing.sm }}
       onPress={onPress}
     >
       <Text variant={TEXT_VARIANT.BODY_SMALL} color={TEXT_COLOR.SECONDARY}>
@@ -356,24 +357,24 @@ function LoginForm(props: LoginFormProps): React.JSX.Element {
       <EmailInput
         t={t}
         email={email}
-        error={errors.email}
         disabled={loading}
+        error={errors.email}
         onChange={onEmailChange}
       />
       <PasswordInput
         t={t}
         password={password}
-        error={errors.password}
         disabled={loading}
+        error={errors.password}
         onChange={onPasswordChange}
       />
       <Button
         fullWidth
+        disabled={loading}
+        loading={loading}
+        testID={TEST_IDS.LOGIN_BUTTON}
         title={title}
         variant={COMPONENT_VARIANT.primary}
-        loading={loading}
-        disabled={loading}
-        testID={TEST_IDS.LOGIN_BUTTON}
         onPress={onLogin}
       />
       <RegisterLink t={t} disabled={loading} spacing={spacing} onPress={onRegister} />
@@ -389,8 +390,8 @@ type UseLoginHandlersReturn = {
   setPassword: (v: string) => void;
   loading: boolean;
   errors: { email?: string; password?: string };
-  handleLogin: () => Promise<void>;
-  handleQuickLogin: (email: string) => Promise<void>;
+  handleLogin: () => void;
+  handleQuickLogin: (email: string) => void;
 };
 
 function useLoginHandlers(login: (e: string, p: string) => Promise<void>): UseLoginHandlersReturn {
@@ -400,33 +401,33 @@ function useLoginHandlers(login: (e: string, p: string) => Promise<void>): UseLo
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
-  const handleLogin = useCallback(async () => {
+  const handleLogin = useCallback(() => {
     if (!validateLoginForm(email, password, setErrors)) {
       return;
     }
     setLoading(true);
-    try {
-      await login(email, password);
-    } catch (error) {
-      Alert.alert(t('auth.loginFailed'), getErrorMessage(error));
-    } finally {
-      setLoading(false);
-    }
+    login(email, password)
+      .catch((error) => {
+        Alert.alert(t('auth.loginFailed'), getErrorMessage(error));
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [email, password, login, t]);
 
   const handleQuickLogin = useCallback(
-    async (userEmail: string) => {
+    (userEmail: string) => {
       setEmail(userEmail);
       setPassword(DEFAULT_TEST_PASSWORD);
       setErrors({});
       setLoading(true);
-      try {
-        await login(userEmail, DEFAULT_TEST_PASSWORD);
-      } catch (error) {
-        Alert.alert(t('auth.loginFailed'), getErrorMessage(error));
-      } finally {
-        setLoading(false);
-      }
+      login(userEmail, DEFAULT_TEST_PASSWORD)
+        .catch((error) => {
+          Alert.alert(t('auth.loginFailed'), getErrorMessage(error));
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     },
     [login, t]
   );
@@ -457,39 +458,33 @@ const LoginScreen: React.FC = () => {
   const keyboardBehavior =
     Platform.OS === PLATFORM_OS.IOS ? KEYBOARD_BEHAVIOR.PADDING : KEYBOARD_BEHAVIOR.HEIGHT;
 
-  const styles = useMemo(() => createStyles(spacing), [spacing]);
+  const styles = useMemo(() => createStyles(colors, spacing), [colors, spacing]);
 
   return (
-    <SafeAreaView
-      style={[styles.safeArea, { backgroundColor: colors.background }]}
-      edges={SAFE_AREA_EDGES.TOP_LEFT_RIGHT}
-    >
-      <KeyboardAvoidingView
-        style={[styles.container, { backgroundColor: colors.background }]}
-        behavior={keyboardBehavior}
-      >
+    <SafeAreaView style={styles.safeArea} edges={SAFE_AREA_EDGES.TOP_LEFT_RIGHT}>
+      <KeyboardAvoidingView behavior={keyboardBehavior} style={styles.container}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          <LoginHeader colors={colors} spacing={spacing} iconSizes={iconSizes} t={t} />
+          <LoginHeader colors={colors} iconSizes={iconSizes} spacing={spacing} t={t} />
           <View style={styles.form}>
             <LoginForm
               email={handlers.email}
-              password={handlers.password}
-              loading={handlers.loading}
               errors={handlers.errors}
+              loading={handlers.loading}
+              password={handlers.password}
               spacing={spacing}
               t={t}
               onEmailChange={handlers.setEmail}
-              onPasswordChange={handlers.setPassword}
               onLogin={handlers.handleLogin}
+              onPasswordChange={handlers.setPassword}
               onRegister={navigateToRegister}
             />
             {__DEV__ && (
               <QuickLoginSection
-                testUsers={testUsers}
                 colors={colors}
-                spacing={spacing}
                 iconSizes={iconSizes}
+                spacing={spacing}
                 t={t}
+                testUsers={testUsers}
                 onQuickLogin={handlers.handleQuickLogin}
               />
             )}
@@ -499,28 +494,5 @@ const LoginScreen: React.FC = () => {
     </SafeAreaView>
   );
 };
-
-/**
- * Styles factory - Creates styles using theme values
- * ✅ COMPLIANT: Uses theme values via useTheme() hook
- */
-const createStyles = (spacing: ThemeContextType['spacing']): ReturnType<typeof StyleSheet.create> =>
-  StyleSheet.create({
-    safeArea: {
-      flex: FLEX.ONE,
-    },
-    container: {
-      flex: FLEX.ONE,
-    },
-    scrollContent: {
-      flexGrow: FLEX.GROW_ENABLED,
-      justifyContent: 'center',
-      padding: spacing.lg,
-    },
-    form: {
-      width: DIMENSIONS.WIDTH.FULL,
-      gap: spacing.md,
-    },
-  });
 
 export default LoginScreen;
