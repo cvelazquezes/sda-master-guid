@@ -8,27 +8,39 @@
  * import { BackgroundColor, BorderColor, StatusType } from '@shared/types/theme';
  */
 
-import { designTokens } from '../../presentation/theme/designTokens';
-
 // =============================================================================
-// SPACING & SIZE TYPES (derived from designTokens)
+// SPACING & SIZE TYPES
 // =============================================================================
 
 /**
  * Valid spacing keys from design tokens
  * Used for padding, margin, gap
  */
-export type SpacingKey = keyof typeof designTokens.spacing;
+export type SpacingKey =
+  | 'none'
+  | 'xxs'
+  | 'xs'
+  | 'sm'
+  | 'md'
+  | 'lg'
+  | 'xl'
+  | 'xxl'
+  | '3xl'
+  | '4xl'
+  | '5xl'
+  | '6xl'
+  | '7xl'
+  | '8xl';
 
 /**
  * Valid border radius keys from design tokens
  */
-export type RadiusKey = keyof typeof designTokens.borderRadius;
+export type RadiusKey = 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'full';
 
 /**
  * Valid border width keys from design tokens
  */
-export type BorderWidthKey = keyof typeof designTokens.borderWidth;
+export type BorderWidthKey = 'none' | 'hairline' | 'thin' | 'base' | 'medium' | 'thick';
 
 /**
  * Component size variants

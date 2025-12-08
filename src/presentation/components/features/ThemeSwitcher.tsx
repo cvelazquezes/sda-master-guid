@@ -31,6 +31,12 @@ const THEME_OPTIONS: { mode: ThemeMode; icon: string; labelKey: string; subtitle
     subtitleKey: 'components.themeSwitcher.darkSubtitle',
   },
   {
+    mode: THEME_MODE.DARK_BLUE,
+    icon: ICONS.CHURCH,
+    labelKey: 'settings.sdaDarkMode',
+    subtitleKey: 'components.themeSwitcher.sdaDarkSubtitle',
+  },
+  {
     mode: THEME_MODE.SYSTEM,
     icon: ICONS.THEME_LIGHT_DARK,
     labelKey: 'settings.systemDefault',
@@ -44,7 +50,7 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ showLabel = true }
     useTheme();
   const [modalVisible, setModalVisible] = useState(false);
 
-  const currentOption = THEME_OPTIONS.find((opt) => opt.mode === mode) || THEME_OPTIONS[2];
+  const currentOption = THEME_OPTIONS.find((opt) => opt.mode === mode) || THEME_OPTIONS[3];
 
   // Convert theme options to SelectionItem format
   const selectionItems: SelectionItem[] = THEME_OPTIONS.map((option) => ({

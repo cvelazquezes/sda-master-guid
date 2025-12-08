@@ -146,6 +146,8 @@ export const sdaSemanticColors = {
   secondaryActive: sdaBrandColors.secondary[700],
   secondaryLight: sdaBrandColors.secondary[50],
   secondaryMedium: sdaBrandColors.secondary[100],
+  secondaryAlpha10: 'rgba(198, 40, 40, 0.1)', // 10% opacity secondary
+  secondaryAlpha20: 'rgba(198, 40, 40, 0.2)', // 20% opacity secondary
 
   // Accent highlights
   accent: sdaBrandColors.accent[500],
@@ -153,23 +155,33 @@ export const sdaSemanticColors = {
   accentActive: sdaBrandColors.accent[700],
   accentLight: sdaBrandColors.accent[50],
   accentMedium: sdaBrandColors.accent[100],
+  accentAlpha10: 'rgba(253, 185, 19, 0.1)', // 10% opacity accent
+  accentAlpha20: 'rgba(253, 185, 19, 0.2)', // 20% opacity accent
 
   // Status colors
   success: sdaBrandColors.success[500],
   successLight: sdaBrandColors.success[50],
   successMedium: sdaBrandColors.success[100],
+  successAlpha10: 'rgba(67, 160, 71, 0.1)', // 10% opacity success
+  successAlpha20: 'rgba(67, 160, 71, 0.2)', // 20% opacity success
 
   warning: sdaBrandColors.warning[500],
   warningLight: sdaBrandColors.warning[50],
   warningMedium: sdaBrandColors.warning[100],
+  warningAlpha10: 'rgba(251, 140, 0, 0.1)', // 10% opacity warning
+  warningAlpha20: 'rgba(251, 140, 0, 0.2)', // 20% opacity warning
 
   error: sdaBrandColors.error[500],
   errorLight: sdaBrandColors.error[100], // Changed from [50] to [100] for better visibility
   errorMedium: sdaBrandColors.error[200], // Changed from [100] to [200]
+  errorAlpha10: 'rgba(211, 47, 47, 0.1)', // 10% opacity error
+  errorAlpha20: 'rgba(211, 47, 47, 0.2)', // 20% opacity error
 
   info: sdaBrandColors.info[500],
   infoLight: sdaBrandColors.info[50],
   infoMedium: sdaBrandColors.info[100],
+  infoAlpha10: 'rgba(2, 136, 209, 0.1)', // 10% opacity info
+  infoAlpha20: 'rgba(2, 136, 209, 0.2)', // 20% opacity info
 
   // Text colors
   textPrimary: sdaBrandColors.neutral[900],

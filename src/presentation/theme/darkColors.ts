@@ -121,6 +121,7 @@ export const darkColors = {
   secondaryHover: '#33E6D5',
   accentHover: '#E07689',
   accentAlpha10: 'rgba(207, 102, 121, 0.1)',
+  accentAlpha20: 'rgba(207, 102, 121, 0.2)',
   textDisabled: '#666666',
   textOnAccent: '#121212',
   link: '#BB86FC',
