@@ -3,7 +3,7 @@ import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../shared/components';
 import { Club, MemberBalance } from '../../../types';
-import { designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { BALANCE_STATUS, ICONS } from '../../../shared/constants';
 import { NUMERIC } from '../../../shared/constants/http';
 import { styles } from './styles';
@@ -62,6 +62,7 @@ function HeaderTop({
   colors: Record<string, string>;
   t: (key: string) => string;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <View style={styles.headerTop}>
       <View>
@@ -77,7 +78,7 @@ function HeaderTop({
       >
         <MaterialCommunityIcons
           name={ICONS.HISTORY}
-          size={designTokens.iconSize.lg}
+          size={iconSizes.lg}
           color={colors.textInverse}
         />
       </TouchableOpacity>
@@ -147,6 +148,7 @@ function BalanceTag({
   colors: Record<string, string>;
   t: (key: string) => string;
 }): React.JSX.Element | null {
+  const { iconSizes } = useTheme();
   if (!balance) {
     return null;
   }
@@ -163,11 +165,7 @@ function BalanceTag({
     : t('screens.myFees.allPaidUp');
   return (
     <View style={[styles.balanceTag, { backgroundColor: `${colors.textInverse}25` }]}>
-      <MaterialCommunityIcons
-        name={icon}
-        size={designTokens.iconSize.xs}
-        color={colors.textInverse}
-      />
+      <MaterialCommunityIcons name={icon} size={iconSizes.xs} color={colors.textInverse} />
       <Text style={[styles.balanceTagText, { color: colors.textInverse }]}>{label}</Text>
     </View>
   );

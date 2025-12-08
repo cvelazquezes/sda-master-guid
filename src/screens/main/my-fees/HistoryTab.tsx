@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../shared/components';
 import { MemberPayment } from '../../../types';
-import { designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { ICONS } from '../../../shared/constants';
 import { NUMERIC } from '../../../shared/constants/http';
 import { DATE_LOCALE_OPTIONS } from '../../../shared/constants/formats';
@@ -56,18 +56,17 @@ function HistoryItem({
   colors: Record<string, string>;
   t: (key: string, opts?: Record<string, unknown>) => string;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const config = getStatusConfig(payment.status, colors, t);
   const borderStyle =
-    index < total - 1
-      ? { borderBottomWidth: designTokens.borderWidth.thin, borderBottomColor: colors.border }
-      : {};
+    index < total - 1 ? { borderBottomWidth: 1, borderBottomColor: colors.border } : {};
 
   return (
     <View style={[itemStyles.historyItem, borderStyle]}>
       <View style={[itemStyles.historyIcon, { backgroundColor: config.bg }]}>
         <MaterialCommunityIcons
           name={config.icon as typeof ICONS.CHECK_CIRCLE}
-          size={designTokens.iconSize.lg}
+          size={iconSizes.lg}
           color={config.color}
         />
       </View>
@@ -108,11 +107,12 @@ function EmptyHistory({
   colors: Record<string, string>;
   t: (key: string) => string;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <View style={styles.emptyState}>
       <MaterialCommunityIcons
         name={ICONS.FILE_DOCUMENT_OUTLINE}
-        size={designTokens.iconSize['3xl']}
+        size={iconSizes['3xl']}
         color={colors.border}
       />
       <Text style={[styles.emptyStateTitle, { color: colors.textPrimary }]}>

@@ -5,7 +5,7 @@ import { Text } from '../../../shared/components';
 import { ThemeSwitcher } from '../../../components/ThemeSwitcher';
 import { LanguageSwitcher } from '../../../components/LanguageSwitcher';
 import { Club, UserRole } from '../../../types';
-import { designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { ICONS } from '../../../shared/constants';
 import { sectionStyles, menuItemStyles } from './styles';
 import { MenuItem } from './MenuItem';
@@ -24,6 +24,7 @@ interface AccountSectionProps extends SectionProps {
 }
 
 export function AppearanceSection({ colors, t }: SectionProps): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const sectionBg = [sectionStyles.section, { backgroundColor: colors.surface }];
   const itemBorder = [menuItemStyles.menuItem, { borderBottomColor: colors.border }];
   const primaryBg = `${colors.primary}15`;
@@ -40,7 +41,7 @@ export function AppearanceSection({ colors, t }: SectionProps): React.JSX.Elemen
         <View style={[menuItemStyles.menuIcon, { backgroundColor: primaryBg }]}>
           <MaterialCommunityIcons
             name={ICONS.THEME_LIGHT_DARK}
-            size={designTokens.iconSize.md}
+            size={iconSizes.md}
             color={colors.primary}
           />
         </View>
@@ -56,11 +57,7 @@ export function AppearanceSection({ colors, t }: SectionProps): React.JSX.Elemen
       </View>
       <View style={[menuItemStyles.menuItem, { borderBottomWidth: 0 }]}>
         <View style={[menuItemStyles.menuIcon, { backgroundColor: infoBg }]}>
-          <MaterialCommunityIcons
-            name={ICONS.TRANSLATE}
-            size={designTokens.iconSize.md}
-            color={colors.info}
-          />
+          <MaterialCommunityIcons name={ICONS.TRANSLATE} size={iconSizes.md} color={colors.info} />
         </View>
         <View style={menuItemStyles.menuContent}>
           <Text style={[menuItemStyles.menuTitle, { color: colors.textPrimary }]}>
@@ -148,12 +145,13 @@ function AccountStatusSwitch({
   colors: Record<string, string>;
   t: (k: string) => string;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <View style={[menuItemStyles.menuItem, { borderBottomWidth: 0 }]}>
       <View style={[menuItemStyles.menuIcon, { backgroundColor: `${statusColor}15` }]}>
         <MaterialCommunityIcons
           name={statusIcon as typeof ICONS.CHECK_CIRCLE}
-          size={designTokens.iconSize.md}
+          size={iconSizes.md}
           color={statusColor}
         />
       </View>
@@ -217,6 +215,7 @@ function NotificationToggle({
   colors: Record<string, string>;
   hasBorder?: boolean;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const itemStyle = hasBorder
     ? [menuItemStyles.menuItem, { borderBottomColor: colors.border }]
     : [menuItemStyles.menuItem, { borderBottomWidth: 0 }];
@@ -225,7 +224,7 @@ function NotificationToggle({
       <View style={[menuItemStyles.menuIcon, { backgroundColor: `${color}15` }]}>
         <MaterialCommunityIcons
           name={icon as typeof ICONS.BELL_RING_OUTLINE}
-          size={designTokens.iconSize.md}
+          size={iconSizes.md}
           color={color}
         />
       </View>
@@ -310,11 +309,12 @@ interface SectionHeaderProps {
 }
 
 function SectionHeader({ icon, title, colors }: SectionHeaderProps): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <View style={sectionStyles.sectionHeader}>
       <MaterialCommunityIcons
         name={icon as typeof ICONS.PALETTE_OUTLINE}
-        size={designTokens.iconSize.md}
+        size={iconSizes.md}
         color={colors.primary}
       />
       <Text style={[sectionStyles.sectionTitle, { color: colors.textPrimary }]}>{title}</Text>

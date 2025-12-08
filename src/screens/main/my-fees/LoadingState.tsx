@@ -2,7 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../shared/components';
-import { designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { ICONS } from '../../../shared/constants';
 import { styles, loadingStyles } from './styles';
 
@@ -57,13 +57,14 @@ interface NotAMemberStateProps {
 }
 
 export function NotAMemberState({ colors, t }: NotAMemberStateProps): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.headerGradient, { backgroundColor: colors.textTertiary }]}>
         <View style={loadingStyles.emptyHeader}>
           <MaterialCommunityIcons
             name={ICONS.ACCOUNT_OFF_OUTLINE}
-            size={designTokens.iconSize['3xl']}
+            size={iconSizes['3xl']}
             color={`${colors.textInverse}50`}
           />
           <Text style={[loadingStyles.emptyHeaderTitle, { color: colors.textInverse }]}>

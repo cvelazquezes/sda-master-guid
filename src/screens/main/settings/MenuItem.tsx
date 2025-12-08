@@ -2,9 +2,8 @@ import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../shared/components';
-import { designTokens } from '../../../shared/theme';
-import { ICONS, IconName } from '../../../shared/constants';
-import { MODAL_OPACITY } from '../../../shared/constants/http';
+import { useTheme } from '../../../contexts/ThemeContext';
+import { ICONS, IconName, TOUCH_OPACITY } from '../../../shared/constants';
 import { menuItemStyles as styles } from './styles';
 
 interface MenuColors {
@@ -57,6 +56,7 @@ export function MenuItem({
   colors,
   noBorder = false,
 }: MenuItemProps): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const defaults = getColors(danger, colors);
   const borderStyle = noBorder ? { borderBottomWidth: 0 } : undefined;
   const hasInteraction = Boolean(onPress || rightComponent);
@@ -66,12 +66,12 @@ export function MenuItem({
       style={[styles.menuItem, { borderBottomColor: colors.border }, borderStyle]}
       onPress={onPress}
       disabled={!hasInteraction}
-      activeOpacity={onPress ? MODAL_OPACITY.DIM : 1}
+      activeOpacity={onPress ? TOUCH_OPACITY.default : 1}
     >
       <View style={[styles.menuIcon, { backgroundColor: iconBg ?? defaults.iconBg }]}>
         <MaterialCommunityIcons
-          name={icon}
-          size={designTokens.iconSize.md}
+          name={icon as typeof ICONS.CHECK}
+          size={iconSizes.md}
           color={iconColor ?? defaults.iconColor}
         />
       </View>
@@ -85,7 +85,7 @@ export function MenuItem({
       {showChevron && onPress && (
         <MaterialCommunityIcons
           name={ICONS.CHEVRON_RIGHT}
-          size={designTokens.iconSize.lg}
+          size={iconSizes.lg}
           color={colors.textTertiary}
         />
       )}

@@ -1,6 +1,6 @@
 import { Alert } from 'react-native';
 import { userService } from '../../../services/userService';
-import { ALERT_BUTTON_STYLE, MESSAGES } from '../../../shared/constants';
+import { ALERT_BUTTON_STYLE } from '../../../shared/constants';
 
 export function showToggleActiveAlert(
   userId: string,
@@ -24,12 +24,12 @@ export function showToggleActiveAlert(
           await userService.updateUserActiveStatus(userId, newValue);
           setIsActive(newValue);
           Alert.alert(
-            MESSAGES.TITLES.SUCCESS,
+            t('common.success'),
             newValue ? t('screens.settings.accountActivated') : t('screens.settings.accountPaused')
           );
         } catch {
           Alert.alert(
-            MESSAGES.TITLES.ERROR,
+            t('common.error'),
             newValue ? t('screens.settings.failedToActivate') : t('screens.settings.failedToPause')
           );
         }

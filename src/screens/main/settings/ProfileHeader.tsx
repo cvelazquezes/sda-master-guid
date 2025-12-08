@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../shared/components';
 import { User, Club } from '../../../types';
-import { designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { ICONS } from '../../../shared/constants';
 import { styles } from './styles';
 
@@ -24,6 +24,7 @@ export function ProfileHeader({
   colors,
   t,
 }: ProfileHeaderProps): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const initial = user?.name?.charAt(0)?.toUpperCase() || '?';
   const avatarContainerBg = `${colors.textInverse}20`;
   const emailColor = `${colors.textInverse}BB`;
@@ -50,7 +51,7 @@ export function ProfileHeader({
         <View style={[styles.roleBadge, { backgroundColor: badgeBg }]}>
           <MaterialCommunityIcons
             name={roleConfig.icon as typeof ICONS.ACCOUNT}
-            size={designTokens.iconSize.sm}
+            size={iconSizes.sm}
             color={colors.textInverse}
           />
           <Text style={[styles.roleText, { color: colors.textInverse }]}>{roleConfig.label}</Text>
@@ -69,6 +70,7 @@ interface HeaderStatsProps {
 }
 
 function HeaderStats({ club, isActive, colors, t }: HeaderStatsProps): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const borderColor = `${colors.textInverse}30`;
   const dotBg = `${colors.textInverse}50`;
   const statusColor = isActive ? colors.success : colors.warning;
@@ -79,7 +81,7 @@ function HeaderStats({ club, isActive, colors, t }: HeaderStatsProps): React.JSX
       <View style={styles.headerStat}>
         <MaterialCommunityIcons
           name={ICONS.CHURCH}
-          size={designTokens.iconSize.md}
+          size={iconSizes.md}
           color={colors.textInverse}
         />
         <Text style={[styles.headerStatText, { color: colors.textInverse }]}>{club.name}</Text>

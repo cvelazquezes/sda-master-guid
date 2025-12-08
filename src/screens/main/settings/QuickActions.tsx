@@ -3,7 +3,7 @@ import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../shared/components';
 import { UserRole } from '../../../types';
-import { designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { ICONS } from '../../../shared/constants';
 import { quickActionStyles as styles } from './styles';
 
@@ -82,6 +82,7 @@ function QuickActionButton({
   colors,
   textColor,
 }: QuickActionButtonProps): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const actionStyle = [styles.action, { backgroundColor: colors.surface }];
   const labelColor = textColor || colors.textPrimary;
 
@@ -90,7 +91,7 @@ function QuickActionButton({
       <View style={[styles.actionIcon, { backgroundColor: iconBg }]}>
         <MaterialCommunityIcons
           name={icon as typeof ICONS.ACCOUNT_CIRCLE}
-          size={designTokens.iconSize.lg}
+          size={iconSizes.lg}
           color={iconColor}
         />
       </View>

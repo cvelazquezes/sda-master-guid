@@ -9,25 +9,24 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, RefreshControl, Alert } from 'react-native';
+import { View, ScrollView, RefreshControl, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import i18next from 'i18next';
 import { useAuth } from '../../context/AuthContext';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme, ThemeContextType } from '../../contexts/ThemeContext';
 import { matchService } from '../../services/matchService';
 import { clubService } from '../../services/clubService';
 import { Club, User, MatchStatus } from '../../types';
 import { ClubDetailModal } from '../../components/ClubDetailModal';
 import { ClubCard } from '../../components/ClubCard';
 import { StatCard } from '../../components/StatCard';
-import { designTokens, layoutConstants } from '../../shared/theme';
 // ✅ GOOD: Import UI primitives (Text, Card, etc.)
 import { Text, EmptyState, Card, SectionHeader } from '../../shared/components';
 import {
   COMPONENT_VARIANT,
   ICONS,
-  MESSAGES,
   TABS,
   FLEX,
   TEXT_COLOR,
@@ -35,6 +34,7 @@ import {
   TEXT_WEIGHT,
 } from '../../shared/constants';
 import { DISPLAY_LIMITS } from '../../shared/constants/http';
+import { BORDER_WIDTH } from '../../shared/constants/numbers';
 
 interface HomeStats {
   totalMembers: number;
@@ -89,7 +89,7 @@ function useHomeData(clubId?: string): UseHomeDataReturn {
       );
       setRecentMembers(sorted.slice(0, DISPLAY_LIMITS.MAX_PREVIEW_ITEMS));
     } catch {
-      Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_LOAD_DATA);
+      Alert.alert(i18next.t('common.error'), i18next.t('errors.failedToLoadData'));
     } finally {
       setRefreshing(false);
     }
@@ -110,16 +110,25 @@ function useHomeData(clubId?: string): UseHomeDataReturn {
 // Stats grid component
 interface HomeStatsGridProps {
   stats: HomeStats;
-  colors: ReturnType<typeof useTheme>['colors'];
+  colors: ThemeContextType['colors'];
+  spacing: ThemeContextType['spacing'];
   t: ReturnType<typeof useTranslation>['t'];
   navigation: ReturnType<typeof useNavigation>;
 }
 
-function HomeStatsGrid({ stats, colors, t, navigation }: HomeStatsGridProps): React.JSX.Element {
+function HomeStatsGrid({
+  stats,
+  colors,
+  spacing,
+  t,
+  navigation,
+}: HomeStatsGridProps): React.JSX.Element {
+  const gridStyle = { flexDirection: 'row' as const, gap: spacing.md, marginBottom: spacing.md };
+
   return (
-    <View style={styles.section}>
+    <View style={{ padding: spacing.lg }}>
       <SectionHeader title={t('sections.clubOverview')} />
-      <View style={styles.statsGrid}>
+      <View style={gridStyle}>
         <StatCard
           icon={ICONS.ACCOUNT_GROUP}
           label={t('stats.members')}
@@ -135,7 +144,7 @@ function HomeStatsGrid({ stats, colors, t, navigation }: HomeStatsGridProps): Re
           subtitle={t('screens.home.upcoming')}
         />
       </View>
-      <View style={styles.statsGrid}>
+      <View style={gridStyle}>
         <StatCard
           icon={ICONS.CALENDAR_CLOCK}
           label={t('stats.meetings')}
@@ -160,30 +169,48 @@ function HomeStatsGrid({ stats, colors, t, navigation }: HomeStatsGridProps): Re
 // Recent members section
 interface RecentMembersSectionProps {
   members: User[];
-  colors: ReturnType<typeof useTheme>['colors'];
+  colors: ThemeContextType['colors'];
+  spacing: ThemeContextType['spacing'];
+  radii: ThemeContextType['radii'];
+  iconSizes: ThemeContextType['iconSizes'];
+  componentSizes: ThemeContextType['componentSizes'];
   t: ReturnType<typeof useTranslation>['t'];
 }
 
 function RecentMembersSection({
   members,
   colors,
+  spacing,
+  radii,
+  iconSizes,
+  componentSizes,
   t,
 }: RecentMembersSectionProps): React.JSX.Element | null {
   if (members.length === 0) {
     return null;
   }
+
+  const memberAvatarStyle = {
+    width: componentSizes.iconContainer.md,
+    height: componentSizes.iconContainer.md,
+    borderRadius: radii['2xl'],
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
+    backgroundColor: colors.primary,
+  };
+
   return (
-    <View style={styles.section}>
+    <View style={{ padding: spacing.lg }}>
       <SectionHeader title={t('sections.recentMembers')} />
       {members.map((m) => (
-        <Card key={m.id} variant={COMPONENT_VARIANT.elevated} style={styles.memberCard}>
-          <View style={styles.memberRow}>
-            <View style={[styles.memberAvatar, { backgroundColor: colors.primary }]}>
+        <Card key={m.id} variant={COMPONENT_VARIANT.elevated} style={{ marginBottom: spacing.md }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+            <View style={memberAvatarStyle}>
               <Text variant={TEXT_VARIANT.H4} color={TEXT_COLOR.ON_PRIMARY}>
                 {m.name.charAt(0).toUpperCase()}
               </Text>
             </View>
-            <View style={styles.memberInfo}>
+            <View style={{ flex: FLEX.ONE, gap: spacing.xxs }}>
               <Text variant={TEXT_VARIANT.BODY_LARGE} weight={TEXT_WEIGHT.BOLD}>
                 {m.name}
               </Text>
@@ -193,7 +220,7 @@ function RecentMembersSection({
             </View>
             <MaterialCommunityIcons
               name={ICONS.ACCOUNT_CHECK}
-              size={designTokens.iconSize.lg}
+              size={iconSizes.lg}
               color={colors.success}
             />
           </View>
@@ -204,7 +231,8 @@ function RecentMembersSection({
 }
 
 // Common prop types
-type HomeColors = HomeStatsGridProps['colors'];
+type HomeColors = ThemeContextType['colors'];
+type HomeSpacing = ThemeContextType['spacing'];
 type HomeT = HomeStatsGridProps['t'];
 
 // No club empty state
@@ -215,7 +243,7 @@ interface NoClubEmptyStateProps {
 
 function NoClubEmptyState({ colors, t }: NoClubEmptyStateProps): React.JSX.Element {
   return (
-    <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
+    <View style={{ flex: FLEX.ONE, backgroundColor: colors.backgroundSecondary }}>
       <EmptyState
         icon={ICONS.ACCOUNT_ALERT}
         title={t('screens.home.notPartOfClub')}
@@ -230,17 +258,22 @@ function NoClubEmptyState({ colors, t }: NoClubEmptyStateProps): React.JSX.Eleme
 interface WelcomeHeaderProps {
   user: User;
   colors: HomeColors;
+  spacing: HomeSpacing;
   t: HomeT;
 }
 
-function WelcomeHeader({ user, colors, t }: WelcomeHeaderProps): React.JSX.Element {
-  const headerStyle = [
-    styles.header,
-    { backgroundColor: colors.background, borderBottomColor: colors.border },
-  ];
+function WelcomeHeader({ user, colors, spacing, t }: WelcomeHeaderProps): React.JSX.Element {
+  const headerStyle = {
+    padding: spacing.lg,
+    paddingBottom: spacing.md,
+    borderBottomWidth: BORDER_WIDTH.THIN,
+    backgroundColor: colors.background,
+    borderBottomColor: colors.border,
+  };
+
   return (
     <View style={headerStyle}>
-      <Text variant={TEXT_VARIANT.H1} style={styles.welcomeText}>
+      <Text variant={TEXT_VARIANT.H1} style={{ marginBottom: spacing.xs }}>
         {t('screens.home.welcomeBack', { name: user.name })}
       </Text>
       <Text variant={TEXT_VARIANT.BODY} color={TEXT_COLOR.SECONDARY}>
@@ -253,20 +286,27 @@ function WelcomeHeader({ user, colors, t }: WelcomeHeaderProps): React.JSX.Eleme
 // Inactive account banner
 interface InactiveBannerProps {
   colors: HomeColors;
+  spacing: HomeSpacing;
+  iconSizes: ThemeContextType['iconSizes'];
   t: HomeT;
 }
 
-function InactiveBanner({ colors, t }: InactiveBannerProps): React.JSX.Element {
-  const bannerStyle = [styles.inactiveBanner, { borderLeftColor: colors.error }];
+function InactiveBanner({ colors, spacing, iconSizes, t }: InactiveBannerProps): React.JSX.Element {
+  const bannerStyle = {
+    margin: spacing.lg,
+    borderLeftWidth: BORDER_WIDTH.HEAVY,
+    borderLeftColor: colors.error,
+  };
+
   return (
     <Card variant={COMPONENT_VARIANT.outlined} style={bannerStyle}>
-      <View style={styles.inactiveBannerContent}>
+      <View style={{ flexDirection: 'row', gap: spacing.md }}>
         <MaterialCommunityIcons
           name={ICONS.ALERT_CIRCLE}
-          size={designTokens.icon.sizes.lg}
+          size={iconSizes.lg}
           color={colors.error}
         />
-        <View style={styles.inactiveBannerText}>
+        <View style={{ flex: FLEX.ONE, gap: spacing.xs }}>
           <Text
             variant={TEXT_VARIANT.BODY_LARGE}
             weight={TEXT_WEIGHT.BOLD}
@@ -285,7 +325,7 @@ function InactiveBanner({ colors, t }: InactiveBannerProps): React.JSX.Element {
 
 const HomeScreen = (): React.JSX.Element => {
   const { user } = useAuth();
-  const { colors } = useTheme();
+  const { colors, spacing, radii, iconSizes, componentSizes } = useTheme();
   const { t } = useTranslation();
   const navigation = useNavigation();
   const [clubDetailVisible, setClubDetailVisible] = useState(false);
@@ -295,7 +335,7 @@ const HomeScreen = (): React.JSX.Element => {
     return <NoClubEmptyState colors={colors} t={t} />;
   }
 
-  const containerStyle = [styles.container, { backgroundColor: colors.backgroundSecondary }];
+  const containerStyle = { flex: FLEX.ONE, backgroundColor: colors.backgroundSecondary };
   const refreshControl = (
     <RefreshControl
       refreshing={homeData.refreshing}
@@ -307,15 +347,31 @@ const HomeScreen = (): React.JSX.Element => {
 
   return (
     <ScrollView style={containerStyle} refreshControl={refreshControl}>
-      <WelcomeHeader user={user} colors={colors} t={t} />
+      <WelcomeHeader user={user} colors={colors} spacing={spacing} t={t} />
       {homeData.club && (
-        <View style={styles.clubSection}>
+        <View style={{ padding: spacing.lg, paddingBottom: spacing.none }}>
           <ClubCard club={homeData.club} onPress={() => setClubDetailVisible(true)} />
         </View>
       )}
-      <HomeStatsGrid stats={homeData.stats} colors={colors} t={t} navigation={navigation} />
-      <RecentMembersSection members={homeData.recentMembers} colors={colors} t={t} />
-      {!user.isActive && <InactiveBanner colors={colors} t={t} />}
+      <HomeStatsGrid
+        stats={homeData.stats}
+        colors={colors}
+        spacing={spacing}
+        t={t}
+        navigation={navigation}
+      />
+      <RecentMembersSection
+        members={homeData.recentMembers}
+        colors={colors}
+        spacing={spacing}
+        radii={radii}
+        iconSizes={iconSizes}
+        componentSizes={componentSizes}
+        t={t}
+      />
+      {!user.isActive && (
+        <InactiveBanner colors={colors} spacing={spacing} iconSizes={iconSizes} t={t} />
+      )}
       <ClubDetailModal
         visible={clubDetailVisible}
         club={homeData.club}
@@ -325,72 +381,7 @@ const HomeScreen = (): React.JSX.Element => {
   );
 };
 
-/**
- * Styles - Simplified since Text primitive handles typography
- *
- * ✅ GOOD: Only layout styles (flex, margin, padding) are defined here
- * ❌ BAD: No inline colors, font sizes, or typography - use tokens/primitives
- */
-const styles = StyleSheet.create({
-  container: {
-    flex: FLEX.ONE,
-  },
-  header: {
-    padding: designTokens.spacing.lg,
-    paddingBottom: designTokens.spacing.md,
-    borderBottomWidth: designTokens.borderWidth.thin,
-  },
-  // Typography handled by Text variant="h1"
-  welcomeText: {
-    marginBottom: designTokens.spacing.xs,
-  },
-  // Removed subtitleText - handled by Text variant="body" color="secondary"
-  clubSection: {
-    padding: designTokens.spacing.lg,
-    paddingBottom: designTokens.spacing.none,
-  },
-  section: {
-    padding: designTokens.spacing.lg,
-  },
-  statsGrid: {
-    flexDirection: layoutConstants.flexDirection.row,
-    gap: designTokens.spacing.md,
-    marginBottom: designTokens.spacing.md,
-  },
-  memberCard: {
-    marginBottom: designTokens.spacing.md,
-  },
-  memberRow: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    gap: designTokens.spacing.md,
-  },
-  memberAvatar: {
-    width: designTokens.componentSizes.iconContainer.md,
-    height: designTokens.componentSizes.iconContainer.md,
-    borderRadius: designTokens.borderRadius['2xl'],
-    justifyContent: layoutConstants.justifyContent.center,
-    alignItems: layoutConstants.alignItems.center,
-  },
-  // Removed memberAvatarText - handled by Text variant="h4" color="onPrimary"
-  memberInfo: {
-    flex: FLEX.ONE,
-    gap: designTokens.spacing.xxs,
-  },
-  // Removed memberName/memberEmail - handled by Text variant props
-  inactiveBanner: {
-    margin: designTokens.spacing.lg,
-    borderLeftWidth: designTokens.borderWidth.heavy,
-  },
-  inactiveBannerContent: {
-    flexDirection: layoutConstants.flexDirection.row,
-    gap: designTokens.spacing.md,
-  },
-  inactiveBannerText: {
-    flex: FLEX.ONE,
-    gap: designTokens.spacing.xs,
-  },
-  // Removed inactiveBannerTitle/Description - handled by Text variant props
-});
+// Note: Styles are now inline using theme values from useTheme()
+// This ensures proper theme compliance and removes designTokens imports
 
 export default HomeScreen;
