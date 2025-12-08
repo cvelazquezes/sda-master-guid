@@ -3,9 +3,9 @@
  * Optimizes API calls by batching and deduplicating requests following DataLoader patterns
  */
 
-import { logger } from '../utils/logger';
-import { BATCH } from '../constants/numbers';
-import { LOG_MESSAGES, ERROR_MESSAGES, DEDUP_KEY_PREFIX } from '../constants';
+import { logger } from '../../shared/utils/logger';
+import { BATCH } from '../../shared/constants/numbers';
+import { LOG_MESSAGES, ERROR_MESSAGES, DEDUP_KEY_PREFIX } from '../../shared/constants';
 
 // ============================================================================
 // Types

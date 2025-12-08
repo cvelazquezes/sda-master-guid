@@ -4,10 +4,10 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { logger } from '../utils/logger';
-import { CACHE } from '../constants/timing';
-import { TIME_UNIT, OPACITY_VALUE, ID_GENERATION, LIST_LIMITS } from '../constants/numbers';
-import { LOG_MESSAGES, STORAGE_KEYS, TYPEOF } from '../constants';
+import { logger } from '../../shared/utils/logger';
+import { CACHE } from '../../shared/constants/timing';
+import { TIME_UNIT, OPACITY_VALUE, ID_GENERATION, LIST_LIMITS } from '../../shared/constants/numbers';
+import { LOG_MESSAGES, STORAGE_KEYS, TYPEOF } from '../../shared/constants';
 
 // ============================================================================
 // Types

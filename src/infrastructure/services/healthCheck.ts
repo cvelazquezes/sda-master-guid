@@ -3,12 +3,12 @@
  * Monitors application and dependency health following Kubernetes/Google SRE patterns
  */
 
-import { logger } from '../utils/logger';
+import { logger } from '../../shared/utils/logger';
 import { environment } from '../config/environment';
-import { RETRY, TIMEOUT } from '../constants/timing';
-import { MATH } from '../constants/numbers';
-import { HTTP_METHOD } from '../constants/http';
-import { LOG_MESSAGES, HEALTH_STATUS, HEALTH_CHECK_NAME, API_ENDPOINTS } from '../constants';
+import { RETRY, TIMEOUT } from '../../shared/constants/timing';
+import { MATH } from '../../shared/constants/numbers';
+import { HTTP_METHOD } from '../../shared/constants/http';
+import { LOG_MESSAGES, HEALTH_STATUS, HEALTH_CHECK_NAME, API_ENDPOINTS } from '../../shared/constants';
 import packageJson from '../../../package.json';
 
 // ============================================================================

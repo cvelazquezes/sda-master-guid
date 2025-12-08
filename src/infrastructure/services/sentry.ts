@@ -5,8 +5,8 @@
 
 import * as Sentry from '@sentry/react-native';
 import { environment, isDevelopment, isProduction } from '../config/environment';
-import { logger } from '../utils/logger';
-import { MS, OPACITY_VALUE } from '../constants/numbers';
+import { logger } from '../../shared/utils/logger';
+import { MS, OPACITY_VALUE } from '../../shared/constants/numbers';
 import packageJson from '../../../package.json';
 import {
   LOG_MESSAGES,
@@ -19,12 +19,12 @@ import {
   SECURITY_EVENT,
   SENTRY_DIST,
   SENTRY_RELEASE_PREFIX,
-} from '../constants';
+} from '../../shared/constants';
 
 // Sentry configuration constants
 const SENTRY_CONFIG = {
   PRODUCTION_SAMPLE_RATE: OPACITY_VALUE.LIGHT_MEDIUM, // 0.2
-  SESSION_TRACKING_INTERVAL_MS: MS.THIRTY_SECONDS, // 30000
+  SESSION_TRACKING_INTERVAL_MS: 30000, // 30 seconds in ms
 } as const;
 
 // ============================================================================
@@ -37,7 +37,9 @@ let isInitialized = false;
  * Initialize Sentry with proper configuration
  */
 export function initializeSentry(): void {
-  if (!environment.sentry.enabled || !environment.sentry.dsn) {
+  // Check if Sentry config exists in environment
+  const sentryConfig = (environment as Record<string, unknown>).sentry as { enabled?: boolean; dsn?: string } | undefined;
+  if (!sentryConfig?.enabled || !sentryConfig?.dsn) {
     logger.info(LOG_MESSAGES.SENTRY.DISABLED);
     return;
   }
@@ -49,7 +51,7 @@ export function initializeSentry(): void {
 
   try {
     Sentry.init({
-      dsn: environment.sentry.dsn,
+      dsn: sentryConfig.dsn,
       environment: environment.name,
 
       // Performance Monitoring
@@ -381,7 +383,4 @@ export function trackSecurityEvent(
 // Exports
 // ============================================================================
 
-// Alias for backward compatibility with config/sentry.ts consumers
-export { initializeSentry as initSentry };
-
-export { Sentry, isInitialized as isSentryInitialized };
+export { Sentry, isInitialized as isSentryInitialized, initializeSentry };

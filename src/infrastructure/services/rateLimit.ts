@@ -3,16 +3,17 @@
  * Implements token bucket algorithm following Stripe/AWS API Gateway patterns
  */
 
-import { logger } from '../utils/logger';
-import { MS, MATH, LIST_LIMITS } from '../constants/numbers';
-import { ERROR_MESSAGES, ERROR_NAME, LOG_MESSAGES, RATE_LIMITER_NAME } from '../constants';
+import { logger } from '../../shared/utils/logger';
+import { MS, LIST_LIMITS } from '../../shared/constants/numbers';
+import { ERROR_MESSAGES, ERROR_NAME, LOG_MESSAGES, RATE_LIMITER_NAME } from '../../shared/constants';
 
 // Rate limit configuration constants
+// Note: Using literal values to avoid module initialization order issues
 const RATE_LIMIT_CONFIG = {
   API_REQUESTS_PER_MIN: LIST_LIMITS.MAX_CACHE, // 100
-  AUTH_ATTEMPTS_PER_MIN: MATH.FIVE, // 5
-  SEARCH_REQUESTS_PER_MIN: MATH.THIRTY,
-  HEAVY_OPS_PER_MIN: MATH.TEN, // 10
+  AUTH_ATTEMPTS_PER_MIN: 5,
+  SEARCH_REQUESTS_PER_MIN: 30,
+  HEAVY_OPS_PER_MIN: 10,
   ONE_MINUTE_MS: MS.MINUTE, // 60000
 } as const;
 

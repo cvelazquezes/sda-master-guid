@@ -5,17 +5,23 @@
 
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { logger } from '../utils/logger';
+import { logger } from '../../shared/utils/logger';
 import { environment, isDevelopment } from '../config/environment';
-import { MATH } from '../constants/numbers';
-import { LOG_MESSAGES, STORAGE_KEYS, FEATURE_FLAG_KEY, USER_GROUP, TYPEOF } from '../constants';
+import {
+  LOG_MESSAGES,
+  STORAGE_KEYS,
+  FEATURE_FLAG_KEY,
+  USER_GROUP,
+  TYPEOF,
+} from '../../shared/constants';
 
 // Feature flag rollout percentages
+// Note: Using literal values here to avoid module initialization order issues
 const ROLLOUT_PERCENTAGE = {
-  SMALL: MATH.TEN, // 10%
-  MEDIUM: MATH.TWENTY_FIVE, // 25%
-  FULL: MATH.HUNDRED, // 100%
-  HASH_BITSHIFT: MATH.FIVE, // For bit shifting in hash
+  SMALL: 10, // 10%
+  MEDIUM: 25, // 25%
+  FULL: 100, // 100%
+  HASH_BITSHIFT: 5, // For bit shifting in hash
 } as const;
 
 // ============================================================================

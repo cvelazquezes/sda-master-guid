@@ -6,10 +6,10 @@
 import { useState, useEffect } from 'react';
 import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { logger } from '../utils/logger';
+import { logger } from '../../shared/utils/logger';
 import { addBreadcrumb } from './sentry';
-import { POLLING } from '../constants/timing';
-import { LIST_LIMITS, ID_GENERATION } from '../constants/numbers';
+import { POLLING } from '../../shared/constants/timing';
+import { LIST_LIMITS, ID_GENERATION } from '../../shared/constants/numbers';
 import {
   LOG_MESSAGES,
   STORAGE_KEYS,
@@ -19,8 +19,8 @@ import {
   HEADER,
   BREADCRUMB_CATEGORY,
   BREADCRUMB_LEVEL,
-} from '../constants';
-import type { NetworkStatusType, HttpMethodType } from '../constants';
+} from '../../shared/constants';
+import type { NetworkStatusType, HttpMethodType } from '../../shared/constants';
 
 // ============================================================================
 // React Hooks
