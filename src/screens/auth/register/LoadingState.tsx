@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ActivityIndicator, TextStyle, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from '../../../shared/components';
-import { mobileTypography, designTokens, layoutConstants } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { ACTIVITY_INDICATOR_SIZE, SAFE_AREA_EDGES, FLEX } from '../../../shared/constants';
 
 interface LoadingStateProps {
@@ -10,32 +10,31 @@ interface LoadingStateProps {
 }
 
 export function LoadingState({ message }: LoadingStateProps): React.JSX.Element {
+  const { colors, spacing, typography } = useTheme();
+
+  const safeAreaStyle: ViewStyle = {
+    flex: FLEX.ONE,
+    backgroundColor: colors.backgroundPrimary,
+  };
+
+  const containerStyle: ViewStyle = {
+    flex: FLEX.ONE,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.backgroundPrimary,
+  };
+
+  const textStyle: TextStyle = {
+    fontSize: typography.fontSizes.md,
+    marginTop: spacing.md,
+  };
+
   return (
-    <SafeAreaView style={styles.safeArea} edges={SAFE_AREA_EDGES.TOP_LEFT_RIGHT}>
-      <View style={styles.container}>
-        <ActivityIndicator
-          size={ACTIVITY_INDICATOR_SIZE.large}
-          color={designTokens.colors.primary}
-        />
-        <Text style={styles.text}>{message}</Text>
+    <SafeAreaView style={safeAreaStyle} edges={SAFE_AREA_EDGES.TOP_LEFT_RIGHT}>
+      <View style={containerStyle}>
+        <ActivityIndicator size={ACTIVITY_INDICATOR_SIZE.large} color={colors.primary} />
+        <Text style={textStyle}>{message}</Text>
       </View>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: FLEX.ONE,
-    backgroundColor: designTokens.colors.backgroundPrimary,
-  },
-  container: {
-    flex: FLEX.ONE,
-    justifyContent: layoutConstants.justifyContent.center,
-    alignItems: layoutConstants.alignItems.center,
-    backgroundColor: designTokens.colors.backgroundPrimary,
-  },
-  text: {
-    ...mobileTypography.bodyMedium,
-    marginTop: designTokens.spacing.md,
-  },
-});

@@ -1,6 +1,8 @@
 import { Alert } from 'react-native';
 import { PathfinderClass } from '../../../types';
-import { LIMITS, MESSAGES, PHONE, PASSWORD, EMPTY_VALUE } from '../../../shared/constants';
+import { LIMITS, PHONE, PASSWORD, EMPTY_VALUE } from '../../../shared/constants';
+
+type TranslationFn = (key: string, options?: Record<string, unknown>) => string;
 
 interface FormData {
   name: string;
@@ -13,8 +15,8 @@ interface FormData {
   clubId: string;
 }
 
-function showError(message: string): boolean {
-  Alert.alert(MESSAGES.TITLES.ERROR, message);
+function showError(t: TranslationFn, messageKey: string): boolean {
+  Alert.alert(t('common.error'), t(messageKey));
   return false;
 }
 
@@ -27,21 +29,21 @@ function isValidWhatsapp(number: string): boolean {
   return PHONE.REGEX.test(normalized);
 }
 
-export function validateRegistration(form: FormData): boolean {
+export function validateRegistration(form: FormData, t: TranslationFn): boolean {
   if (!hasRequiredFields(form)) {
-    return showError(MESSAGES.ERRORS.MISSING_CLUB_SELECTION);
+    return showError(t, 'errors.missingClubSelection');
   }
   if (!form.isClubAdmin && form.selectedClasses.length === LIMITS.MIN_ARRAY_LENGTH) {
-    return showError(MESSAGES.ERRORS.MISSING_CLASS_SELECTION);
+    return showError(t, 'errors.missingClassSelection');
   }
   if (!isValidWhatsapp(form.whatsappNumber)) {
-    return showError(MESSAGES.ERRORS.INVALID_WHATSAPP);
+    return showError(t, 'errors.invalidWhatsapp');
   }
   if (form.password !== form.confirmPassword) {
-    return showError(MESSAGES.ERRORS.PASSWORD_MISMATCH);
+    return showError(t, 'errors.passwordMismatch');
   }
   if (form.password.length < PASSWORD.MIN_LENGTH) {
-    return showError(MESSAGES.ERRORS.PASSWORD_TOO_SHORT);
+    return showError(t, 'errors.passwordTooShort');
   }
   return true;
 }

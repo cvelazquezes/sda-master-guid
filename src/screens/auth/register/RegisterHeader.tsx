@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, TextStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../shared/components';
-import { mobileTypography, designTokens, layoutConstants } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { ICONS } from '../../../shared/constants';
 
 interface RegisterHeaderProps {
@@ -11,31 +11,34 @@ interface RegisterHeaderProps {
 }
 
 export function RegisterHeader({ title, subtitle }: RegisterHeaderProps): React.JSX.Element {
+  const { colors, spacing, iconSizes, typography } = useTheme();
+
+  const headerStyle = {
+    alignItems: 'center' as const,
+    marginBottom: spacing.xxl,
+  };
+
+  const titleStyle: TextStyle = {
+    fontSize: typography.fontSizes['3xl'],
+    fontWeight: typography.fontWeights.bold as TextStyle['fontWeight'],
+    marginTop: spacing.md,
+  };
+
+  const subtitleStyle: TextStyle = {
+    fontSize: typography.fontSizes.lg,
+    color: colors.textSecondary,
+    marginTop: spacing.sm,
+  };
+
   return (
-    <View style={styles.header}>
+    <View style={headerStyle}>
       <MaterialCommunityIcons
         name={ICONS.ACCOUNT_PLUS}
-        size={designTokens.iconSize['3xl']}
-        color={designTokens.colors.primary}
+        size={iconSizes['3xl']}
+        color={colors.primary}
       />
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.subtitle}>{subtitle}</Text>
+      <Text style={titleStyle}>{title}</Text>
+      <Text style={subtitleStyle}>{subtitle}</Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  header: {
-    alignItems: layoutConstants.alignItems.center,
-    marginBottom: designTokens.spacing.xxl,
-  },
-  title: {
-    ...mobileTypography.displayMedium,
-    marginTop: designTokens.spacing.md,
-  },
-  subtitle: {
-    ...mobileTypography.bodyLarge,
-    color: designTokens.colors.textSecondary,
-    marginTop: designTokens.spacing.sm,
-  },
-});

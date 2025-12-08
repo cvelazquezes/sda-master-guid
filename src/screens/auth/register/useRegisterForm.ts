@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../context/AuthContext';
 import { PathfinderClass, PATHFINDER_CLASSES } from '../../../types';
-import { EMPTY_VALUE, MESSAGES } from '../../../shared/constants';
+import { EMPTY_VALUE } from '../../../shared/constants';
 import { validateRegistration } from './registerValidation';
 
 interface FormState {
@@ -29,6 +30,7 @@ export interface UseRegisterFormReturn {
 }
 
 export function useRegisterForm(): UseRegisterFormReturn {
+  const { t } = useTranslation();
   const [name, setName] = useState(EMPTY_VALUE);
   const [email, setEmail] = useState(EMPTY_VALUE);
   const [whatsappNumber, setWhatsappNumber] = useState(EMPTY_VALUE);
@@ -52,7 +54,7 @@ export function useRegisterForm(): UseRegisterFormReturn {
       selectedClasses,
       clubId,
     };
-    if (!validateRegistration(formData)) {
+    if (!validateRegistration(formData, t)) {
       return;
     }
     setLoading(true);
@@ -60,7 +62,7 @@ export function useRegisterForm(): UseRegisterFormReturn {
     try {
       await register(email, password, name, whatsappNumber, clubId, classes, isClubAdmin);
     } catch {
-      Alert.alert(MESSAGES.TITLES.REGISTRATION_FAILED, MESSAGES.ERRORS.REGISTRATION_FAILED);
+      Alert.alert(t('titles.registrationFailed'), t('errors.registrationFailed'));
     } finally {
       setLoading(false);
     }

@@ -9,7 +9,7 @@
  * - View kept for layout only (no colors/styles defined here)
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -24,12 +24,12 @@ import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme, ThemeContextType } from '../../contexts/ThemeContext';
 import { validate, LoginSchema } from '../../utils/validation';
 import { getErrorMessage } from '../../utils/errors';
-import { designTokens, layoutConstants } from '../../shared/theme';
 // ✅ GOOD: Import UI primitives (Text, Button, Input, Card, Badge)
 import { Text, Button, Input, Card, Badge } from '../../shared/components';
+import { BORDER_WIDTH } from '../../shared/constants/numbers';
 import {
   COMPONENT_SIZE,
   COMPONENT_VARIANT,
@@ -37,7 +37,6 @@ import {
   FORM_FIELDS,
   ICONS,
   KEYBOARD_BEHAVIOR,
-  MESSAGES,
   PLATFORM_OS,
   SAFE_AREA_EDGES,
   SCREENS,
@@ -97,19 +96,26 @@ function QuickLoginCard({
   user,
   onPress,
   colors,
+  iconSizes,
+  spacing,
 }: {
   user: TestUser;
   onPress: () => void;
   colors: ThemeColors;
+  iconSizes: ThemeContextType['iconSizes'];
+  spacing: ThemeContextType['spacing'];
 }): React.JSX.Element {
   const cardStyle = {
-    ...styles.quickLoginCard,
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'space-between' as const,
+    marginBottom: spacing.none,
     borderLeftColor: user.color,
-    borderLeftWidth: designTokens.borderWidth.heavy,
+    borderLeftWidth: BORDER_WIDTH.HEAVY,
   };
   return (
     <Card onPress={onPress} style={cardStyle}>
-      <View style={styles.quickLoginInfo}>
+      <View style={{ flex: FLEX.ONE, gap: spacing.xxs }}>
         <Text variant={TEXT_VARIANT.BODY_SMALL} weight={TEXT_WEIGHT.BOLD}>
           {user.name}
         </Text>
@@ -122,7 +128,7 @@ function QuickLoginCard({
       </View>
       <MaterialCommunityIcons
         name={ICONS.CHEVRON_RIGHT}
-        size={designTokens.icon.sizes.md}
+        size={iconSizes.md}
         color={colors.textTertiary}
       />
     </Card>
@@ -134,6 +140,8 @@ interface QuickLoginSectionProps {
   testUsers: TestUser[];
   onQuickLogin: (email: string) => void;
   colors: ThemeColors;
+  spacing: ThemeContextType['spacing'];
+  iconSizes: ThemeContextType['iconSizes'];
   t: TranslationFn;
 }
 
@@ -141,11 +149,27 @@ function QuickLoginSection({
   testUsers,
   onQuickLogin,
   colors,
+  spacing,
+  iconSizes,
   t,
 }: QuickLoginSectionProps): React.JSX.Element {
+  const sectionStyle = {
+    marginTop: spacing['3xl'],
+    paddingTop: spacing.xxl,
+    borderTopWidth: BORDER_WIDTH.THIN,
+    borderTopColor: colors.border,
+  };
+
+  const headerStyle = {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: spacing.sm,
+    marginBottom: spacing.xs,
+  };
+
   return (
-    <View style={[styles.quickLoginSection, { borderTopColor: colors.border }]}>
-      <View style={styles.quickLoginHeader}>
+    <View style={sectionStyle}>
+      <View style={headerStyle}>
         <Text variant={TEXT_VARIANT.H4}>{t('screens.login.quickLoginTitle')}</Text>
         <Badge
           label={t('screens.login.quickLoginBadge')}
@@ -156,17 +180,19 @@ function QuickLoginSection({
       <Text
         variant={TEXT_VARIANT.LABEL}
         color={TEXT_COLOR.SECONDARY}
-        style={styles.quickLoginSubtitle}
+        style={{ marginBottom: spacing.lg }}
       >
         {t('screens.login.quickLoginSubtitle')}
       </Text>
-      <View style={styles.quickLoginGrid}>
+      <View style={{ gap: spacing.sm }}>
         {testUsers.map((user) => (
           <QuickLoginCard
             key={user.email}
             user={user}
             onPress={() => onQuickLogin(user.email)}
             colors={colors}
+            iconSizes={iconSizes}
+            spacing={spacing}
           />
         ))}
       </View>
@@ -177,21 +203,29 @@ function QuickLoginSection({
 // Login header props
 interface LoginHeaderProps {
   colors: ThemeColors;
+  spacing: ThemeContextType['spacing'];
+  iconSizes: ThemeContextType['iconSizes'];
   t: TranslationFn;
 }
 
-function LoginHeader({ colors, t }: LoginHeaderProps): React.JSX.Element {
+function LoginHeader({ colors, spacing, iconSizes, t }: LoginHeaderProps): React.JSX.Element {
+  const headerStyle = { alignItems: 'center' as const, marginBottom: spacing['4xl'] };
+
   return (
-    <View style={styles.header}>
+    <View style={headerStyle}>
       <MaterialCommunityIcons
         name={ICONS.ACCOUNT_GROUP}
-        size={designTokens.iconSize['4xl']}
+        size={iconSizes['4xl']}
         color={colors.primary}
       />
-      <Text variant={TEXT_VARIANT.DISPLAY_MEDIUM} style={styles.title}>
+      <Text variant={TEXT_VARIANT.DISPLAY_MEDIUM} style={{ marginTop: spacing.lg }}>
         {t('screens.login.appTitle')}
       </Text>
-      <Text variant={TEXT_VARIANT.H3} color={TEXT_COLOR.SECONDARY} style={styles.subtitle}>
+      <Text
+        variant={TEXT_VARIANT.H3}
+        color={TEXT_COLOR.SECONDARY}
+        style={{ marginTop: spacing.sm }}
+      >
         {t('screens.login.appSubtitle')}
       </Text>
     </View>
@@ -208,6 +242,7 @@ interface LoginFormProps {
   onPasswordChange: (v: string) => void;
   onLogin: () => void;
   onRegister: () => void;
+  spacing: ThemeContextType['spacing'];
   t: TranslationFn;
 }
 
@@ -229,7 +264,7 @@ function EmailInput({
     <Input
       label={t('screens.login.email')}
       icon={ICONS.EMAIL}
-      placeholder={MESSAGES.PLACEHOLDERS.EMAIL}
+      placeholder={t('auth.enterEmail')}
       value={email}
       onChangeText={onChange}
       error={error}
@@ -257,7 +292,7 @@ function PasswordInput({
     <Input
       label={t('screens.login.password')}
       icon={ICONS.LOCK}
-      placeholder={MESSAGES.PLACEHOLDERS.PASSWORD}
+      placeholder={t('auth.enterPassword')}
       value={password}
       onChangeText={onChange}
       secureTextEntry
@@ -273,13 +308,19 @@ function RegisterLink({
   t,
   onPress,
   disabled,
+  spacing,
 }: {
   t: TranslationFn;
   onPress: () => void;
   disabled: boolean;
+  spacing: ThemeContextType['spacing'];
 }): React.JSX.Element {
   return (
-    <TouchableOpacity style={styles.linkButton} onPress={onPress} disabled={disabled}>
+    <TouchableOpacity
+      style={{ marginTop: spacing.lg, alignItems: 'center', padding: spacing.sm }}
+      onPress={onPress}
+      disabled={disabled}
+    >
       <Text variant={TEXT_VARIANT.BODY_SMALL} color={TEXT_COLOR.SECONDARY}>
         {t('screens.login.noAccount')}
         {SINGLE_SPACE}
@@ -301,6 +342,7 @@ function LoginForm(props: LoginFormProps): React.JSX.Element {
     onPasswordChange,
     onLogin,
     onRegister,
+    spacing,
     t,
   } = props;
   const title = loading ? t('screens.login.loggingIn') : t('screens.login.loginButton');
@@ -329,7 +371,7 @@ function LoginForm(props: LoginFormProps): React.JSX.Element {
         fullWidth
         testID={TEST_IDS.LOGIN_BUTTON}
       />
-      <RegisterLink t={t} onPress={onRegister} disabled={loading} />
+      <RegisterLink t={t} onPress={onRegister} disabled={loading} spacing={spacing} />
     </>
   );
 }
@@ -347,6 +389,7 @@ interface UseLoginHandlersReturn {
 }
 
 function useLoginHandlers(login: (e: string, p: string) => Promise<void>): UseLoginHandlersReturn {
+  const { t } = useTranslation();
   const [email, setEmail] = useState(EMPTY_VALUE);
   const [password, setPassword] = useState(EMPTY_VALUE);
   const [loading, setLoading] = useState(false);
@@ -360,11 +403,11 @@ function useLoginHandlers(login: (e: string, p: string) => Promise<void>): UseLo
     try {
       await login(email, password);
     } catch (error) {
-      Alert.alert(MESSAGES.TITLES.LOGIN_FAILED, getErrorMessage(error));
+      Alert.alert(t('auth.loginFailed'), getErrorMessage(error));
     } finally {
       setLoading(false);
     }
-  }, [email, password, login]);
+  }, [email, password, login, t]);
 
   const handleQuickLogin = useCallback(
     async (userEmail: string) => {
@@ -375,12 +418,12 @@ function useLoginHandlers(login: (e: string, p: string) => Promise<void>): UseLo
       try {
         await login(userEmail, DEFAULT_TEST_PASSWORD);
       } catch (error) {
-        Alert.alert(MESSAGES.TITLES.LOGIN_FAILED, getErrorMessage(error));
+        Alert.alert(t('auth.loginFailed'), getErrorMessage(error));
       } finally {
         setLoading(false);
       }
     },
-    [login]
+    [login, t]
   );
 
   return {
@@ -398,7 +441,7 @@ function useLoginHandlers(login: (e: string, p: string) => Promise<void>): UseLo
 const LoginScreen: React.FC = () => {
   const { t } = useTranslation();
   const { login } = useAuth();
-  const { colors } = useTheme();
+  const { colors, spacing, iconSizes } = useTheme();
   const navigation = useNavigation();
   const handlers = useLoginHandlers(login);
   const testUsers = createTestUsers(colors);
@@ -408,6 +451,8 @@ const LoginScreen: React.FC = () => {
   );
   const keyboardBehavior =
     Platform.OS === PLATFORM_OS.IOS ? KEYBOARD_BEHAVIOR.PADDING : KEYBOARD_BEHAVIOR.HEIGHT;
+
+  const styles = useMemo(() => createStyles(spacing), [spacing]);
 
   return (
     <SafeAreaView
@@ -419,7 +464,7 @@ const LoginScreen: React.FC = () => {
         behavior={keyboardBehavior}
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          <LoginHeader colors={colors} t={t} />
+          <LoginHeader colors={colors} spacing={spacing} iconSizes={iconSizes} t={t} />
           <View style={styles.form}>
             <LoginForm
               email={handlers.email}
@@ -430,6 +475,7 @@ const LoginScreen: React.FC = () => {
               onPasswordChange={handlers.setPassword}
               onLogin={handlers.handleLogin}
               onRegister={navigateToRegister}
+              spacing={spacing}
               t={t}
             />
             {__DEV__ && (
@@ -437,6 +483,8 @@ const LoginScreen: React.FC = () => {
                 testUsers={testUsers}
                 onQuickLogin={handlers.handleQuickLogin}
                 colors={colors}
+                spacing={spacing}
+                iconSizes={iconSizes}
                 t={t}
               />
             )}
@@ -448,75 +496,26 @@ const LoginScreen: React.FC = () => {
 };
 
 /**
- * Styles - Now simplified since Text primitive handles typography
- *
- * ✅ GOOD: Only layout styles (flex, margin, padding) are defined here
- * ❌ BAD: No inline colors, font sizes, or typography - use tokens/primitives
+ * Styles factory - Creates styles using theme values
+ * ✅ COMPLIANT: Uses theme values via useTheme() hook
  */
-const styles = StyleSheet.create({
-  // Layout styles only - no colors or typography
-  safeArea: {
-    flex: FLEX.ONE,
-  },
-  container: {
-    flex: FLEX.ONE,
-  },
-  scrollContent: {
-    flexGrow: FLEX.GROW_ENABLED,
-    justifyContent: layoutConstants.justifyContent.center,
-    padding: designTokens.spacing.lg,
-  },
-  header: {
-    alignItems: layoutConstants.alignItems.center,
-    marginBottom: designTokens.spacing['4xl'],
-  },
-  // Title spacing only - typography handled by Text variant="displayMedium"
-  title: {
-    marginTop: designTokens.spacing.lg,
-  },
-  // Subtitle spacing only - typography handled by Text variant="h3"
-  subtitle: {
-    marginTop: designTokens.spacing.sm,
-  },
-  form: {
-    width: DIMENSIONS.WIDTH.FULL,
-    gap: designTokens.spacing.md,
-  },
-  linkButton: {
-    marginTop: designTokens.spacing.lg,
-    alignItems: layoutConstants.alignItems.center,
-    padding: designTokens.spacing.sm,
-  },
-  // Removed linkText/linkTextBold - handled by Text variant props
-  quickLoginSection: {
-    marginTop: designTokens.spacing['3xl'],
-    paddingTop: designTokens.spacing.xxl,
-    borderTopWidth: designTokens.borderWidth.thin,
-  },
-  quickLoginHeader: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    gap: designTokens.spacing.sm,
-    marginBottom: designTokens.spacing.xs,
-  },
-  // Removed quickLoginTitle - handled by Text variant="h4"
-  quickLoginSubtitle: {
-    marginBottom: designTokens.spacing.lg,
-  },
-  quickLoginGrid: {
-    gap: designTokens.spacing.sm,
-  },
-  quickLoginCard: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    justifyContent: layoutConstants.justifyContent.spaceBetween,
-    marginBottom: designTokens.spacing.none,
-  },
-  quickLoginInfo: {
-    flex: FLEX.ONE,
-    gap: designTokens.spacing.xxs,
-  },
-  // Removed quickLoginName/Role/Email - handled by Text variant props
-});
+const createStyles = (spacing: ThemeContextType['spacing']): ReturnType<typeof StyleSheet.create> =>
+  StyleSheet.create({
+    safeArea: {
+      flex: FLEX.ONE,
+    },
+    container: {
+      flex: FLEX.ONE,
+    },
+    scrollContent: {
+      flexGrow: FLEX.GROW_ENABLED,
+      justifyContent: 'center',
+      padding: spacing.lg,
+    },
+    form: {
+      width: DIMENSIONS.WIDTH.FULL,
+      gap: spacing.md,
+    },
+  });
 
 export default LoginScreen;

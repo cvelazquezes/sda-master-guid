@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { clubService } from '../../../services/clubService';
 import { Club } from '../../../types';
-import { EMPTY_VALUE, MESSAGES } from '../../../shared/constants';
+import { EMPTY_VALUE } from '../../../shared/constants';
 import * as utils from './clubHierarchyUtils';
 import { useHierarchyHandlers, HierarchyHandlers } from './hierarchyHandlers';
 
@@ -85,6 +86,7 @@ export interface UseClubHierarchyReturn extends HierarchyHandlers {
 }
 
 export function useClubHierarchy(): UseClubHierarchyReturn {
+  const { t } = useTranslation();
   const [clubs, setClubs] = useState<Club[]>([]);
   const [loadingClubs, setLoadingClubs] = useState(true);
   const [division, setDivision] = useState(EMPTY_VALUE);
@@ -98,9 +100,9 @@ export function useClubHierarchy(): UseClubHierarchyReturn {
     clubService
       .getAllClubs()
       .then((list) => setClubs(list.filter((c) => c.isActive)))
-      .catch(() => Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_LOAD_CLUBS))
+      .catch(() => Alert.alert(t('common.error'), t('errors.failedToLoadClubs')))
       .finally(() => setLoadingClubs(false));
-  }, []);
+  }, [t]);
 
   const setters = { setDivision, setUnion, setAssociation, setChurch, setClubId };
   useAutoSelect(clubs, hierarchy, setters);

@@ -1,16 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, ScrollView, KeyboardAvoidingView, StyleSheet, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import { ClassSelectionModal } from '../../../components/ClassSelectionModal';
 import { StandardButton } from '../../../shared/components';
-import { designTokens } from '../../../shared/theme';
+import { useTheme, ThemeContextType } from '../../../contexts/ThemeContext';
 import {
   COMPONENT_VARIANT,
   ICONS,
   KEYBOARD_BEHAVIOR,
-  MESSAGES,
   PLATFORM_OS,
   SAFE_AREA_EDGES,
   SCREENS,
@@ -54,13 +53,15 @@ function useRegisterLabels(t: ReturnType<typeof useTranslation>['t']): {
 const RegisterScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
   const navigation = useNavigation();
+  const { colors, spacing } = useTheme();
   const [classModalVisible, setClassModalVisible] = useState(false);
   const formHook = useRegisterForm();
   const clubHierarchy = useClubHierarchy();
   const labels = useRegisterLabels(t);
+  const styles = useMemo(() => createStyles(colors, spacing), [colors, spacing]);
 
   if (clubHierarchy.loadingClubs) {
-    return <LoadingState message={MESSAGES.INFO.LOADING_CLUBS} />;
+    return <LoadingState message={t('common.loadingClubs')} />;
   }
 
   const { form } = formHook;
@@ -203,23 +204,31 @@ function RegisterFormContent(props: FormContentProps): React.JSX.Element {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: FLEX.ONE,
-    backgroundColor: designTokens.colors.backgroundPrimary,
-  },
-  container: {
-    flex: FLEX.ONE,
-    backgroundColor: designTokens.colors.backgroundPrimary,
-  },
-  scrollContent: {
-    flexGrow: FLEX.ONE,
-    padding: designTokens.spacing.lg,
-    paddingTop: designTokens.spacing['3xl'],
-  },
-  form: {
-    width: DIMENSIONS.MAX_WIDTH_PERCENT.FULL,
-  },
-});
+/**
+ * Styles factory - Creates styles using theme values
+ * ✅ COMPLIANT: Uses theme values via useTheme() hook
+ */
+const createStyles = (
+  colors: ThemeContextType['colors'],
+  spacing: ThemeContextType['spacing']
+): ReturnType<typeof StyleSheet.create> =>
+  StyleSheet.create({
+    safeArea: {
+      flex: FLEX.ONE,
+      backgroundColor: colors.backgroundPrimary,
+    },
+    container: {
+      flex: FLEX.ONE,
+      backgroundColor: colors.backgroundPrimary,
+    },
+    scrollContent: {
+      flexGrow: FLEX.ONE,
+      padding: spacing.lg,
+      paddingTop: spacing['3xl'],
+    },
+    form: {
+      width: DIMENSIONS.MAX_WIDTH_PERCENT.FULL,
+    },
+  });
 
 export default RegisterScreen;

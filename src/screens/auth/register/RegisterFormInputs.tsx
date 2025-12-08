@@ -1,12 +1,6 @@
 import React from 'react';
 import { StandardInput } from '../../../shared/components';
-import {
-  AUTO_CAPITALIZE,
-  AUTO_COMPLETE,
-  ICONS,
-  KEYBOARD_TYPE,
-  MESSAGES,
-} from '../../../shared/constants';
+import { AUTO_CAPITALIZE, AUTO_COMPLETE, ICONS, KEYBOARD_TYPE } from '../../../shared/constants';
 
 interface PersonalInfoInputsProps {
   name: string;
@@ -16,6 +10,7 @@ interface PersonalInfoInputsProps {
   setEmail: (v: string) => void;
   setWhatsappNumber: (v: string) => void;
   labels: { name: string; email: string; whatsapp: string };
+  t: (key: string) => string;
 }
 
 export function PersonalInfoInputs({
@@ -26,13 +21,14 @@ export function PersonalInfoInputs({
   setEmail,
   setWhatsappNumber,
   labels,
+  t,
 }: PersonalInfoInputsProps): React.JSX.Element {
   return (
     <>
       <StandardInput
         label={labels.name}
         icon={ICONS.ACCOUNT}
-        placeholder={MESSAGES.PLACEHOLDERS.FULL_NAME}
+        placeholder={t('auth.fullName')}
         value={name}
         onChangeText={setName}
         autoCapitalize={AUTO_CAPITALIZE.WORDS}
@@ -42,7 +38,7 @@ export function PersonalInfoInputs({
       <StandardInput
         label={labels.email}
         icon={ICONS.EMAIL}
-        placeholder={MESSAGES.PLACEHOLDERS.EMAIL}
+        placeholder={t('auth.enterEmail')}
         value={email}
         onChangeText={setEmail}
         keyboardType={KEYBOARD_TYPE.EMAIL}
@@ -54,7 +50,7 @@ export function PersonalInfoInputs({
       <StandardInput
         label={labels.whatsapp}
         icon={ICONS.WHATSAPP}
-        placeholder={MESSAGES.PLACEHOLDERS.WHATSAPP}
+        placeholder={t('auth.whatsappNumber')}
         value={whatsappNumber}
         onChangeText={setWhatsappNumber}
         keyboardType={KEYBOARD_TYPE.PHONE}
@@ -71,6 +67,7 @@ interface PasswordInputsProps {
   setPassword: (v: string) => void;
   setConfirmPassword: (v: string) => void;
   labels: { password: string; confirmPassword: string };
+  t: (key: string) => string;
 }
 
 export function PasswordInputs({
@@ -79,13 +76,14 @@ export function PasswordInputs({
   setPassword,
   setConfirmPassword,
   labels,
+  t,
 }: PasswordInputsProps): React.JSX.Element {
   return (
     <>
       <StandardInput
         label={labels.password}
         icon={ICONS.LOCK}
-        placeholder={MESSAGES.PLACEHOLDERS.PASSWORD}
+        placeholder={t('auth.enterPassword')}
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -96,7 +94,7 @@ export function PasswordInputs({
       <StandardInput
         label={labels.confirmPassword}
         icon={ICONS.LOCK_CHECK}
-        placeholder={MESSAGES.PLACEHOLDERS.CONFIRM_PASSWORD}
+        placeholder={t('auth.confirmPassword')}
         value={confirmPassword}
         onChangeText={setConfirmPassword}
         secureTextEntry
