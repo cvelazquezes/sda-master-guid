@@ -1,24 +1,26 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { View, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import {
+  createScreenStyles,
+  createHeaderStyles,
+  createBannerStyles,
+  createNotificationCardStyles,
+  createEmptyStyles,
+} from './notifications/styles';
 import {
   ICONS,
   NOTIFICATION_TYPE,
   TEXT_LINES,
   TOUCH_OPACITY,
-  BORDERS,
-  DIMENSIONS,
-  FLEX,
-  SHADOW_OFFSET,
   MOCK_DATA,
 } from '../../../shared/constants';
 import { MS } from '../../../shared/constants/numbers';
 import { RELATIVE_TIME } from '../../../shared/constants/timing';
 import { Text, PageHeader } from '../../components/primitives';
 import { useAuth } from '../../state/AuthContext';
-import { mobileTypography, mobileIconSizes, layoutConstants } from '../../theme';
-import { designTokens } from '../../theme/designTokens';
+import { useTheme } from '../../state/ThemeContext';
 
 type NotificationType = (typeof NOTIFICATION_TYPE)[keyof typeof NOTIFICATION_TYPE];
 
@@ -44,14 +46,17 @@ const getNotificationIcon = (
   return (icons[type] || ICONS.BELL) as keyof typeof MaterialCommunityIcons.glyphMap;
 };
 
-const getNotificationColor = (type: NotificationType): string => {
-  const colors: Record<NotificationType, string> = {
-    [NOTIFICATION_TYPE.ACTIVITY]: designTokens.colors.primary,
-    [NOTIFICATION_TYPE.FEE]: designTokens.colors.warning,
-    [NOTIFICATION_TYPE.CLUB]: designTokens.colors.info,
-    [NOTIFICATION_TYPE.SYSTEM]: designTokens.colors.textSecondary,
+const getNotificationColor = (
+  type: NotificationType,
+  colors: { primary: string; warning: string; info: string; textSecondary: string }
+): string => {
+  const colorMap: Record<NotificationType, string> = {
+    [NOTIFICATION_TYPE.ACTIVITY]: colors.primary,
+    [NOTIFICATION_TYPE.FEE]: colors.warning,
+    [NOTIFICATION_TYPE.CLUB]: colors.info,
+    [NOTIFICATION_TYPE.SYSTEM]: colors.textSecondary,
   };
-  return colors[type] || designTokens.colors.textSecondary;
+  return colorMap[type] || colors.textSecondary;
 };
 
 type TranslationFn = ReturnType<typeof useTranslation>['t'];
@@ -85,29 +90,39 @@ type NotificationCardProps = {
   notification: Notification;
   onPress: () => void;
   t: TranslationFn;
+  styles: ReturnType<typeof createNotificationCardStyles>;
+  colors: { primary: string; warning: string; info: string; textSecondary: string };
+  iconSizes: { large: number };
 };
 
-function NotificationCard({ notification, onPress, t }: NotificationCardProps): React.JSX.Element {
-  const color = getNotificationColor(notification.type);
-  const cardStyles = [styles.notificationCard, !notification.read && styles.notificationCardUnread];
+function NotificationCard({
+  notification,
+  onPress,
+  t,
+  styles,
+  colors,
+  iconSizes,
+}: NotificationCardProps): React.JSX.Element {
+  const color = getNotificationColor(notification.type, colors);
+  const cardStyles = [styles.card, !notification.read && styles.cardUnread];
   return (
     <TouchableOpacity style={cardStyles} activeOpacity={TOUCH_OPACITY.default} onPress={onPress}>
       {!notification.read && <View style={styles.unreadDot} />}
-      <View style={[styles.iconContainer, { backgroundColor: `${color}15` }]}>
+      <View style={[styles.iconContainer, { backgroundColor: `${color}20` }]}>
         <MaterialCommunityIcons
           name={getNotificationIcon(notification.type)}
-          size={mobileIconSizes.large}
+          size={iconSizes.large}
           color={color}
         />
       </View>
-      <View style={styles.notificationContent}>
-        <View style={styles.notificationHeader}>
-          <Text style={styles.notificationTitle} numberOfLines={TEXT_LINES.single}>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <Text style={styles.title} numberOfLines={TEXT_LINES.single}>
             {notification.title}
           </Text>
-          <Text style={styles.notificationTime}>{formatTimestamp(notification.timestamp, t)}</Text>
+          <Text style={styles.time}>{formatTimestamp(notification.timestamp, t)}</Text>
         </View>
-        <Text style={styles.notificationMessage} numberOfLines={TEXT_LINES.double}>
+        <Text style={styles.message} numberOfLines={TEXT_LINES.double}>
           {notification.message}
         </Text>
       </View>
@@ -192,18 +207,38 @@ function useNotifications(t: TranslationFn): UseNotificationsReturn {
 const NotificationsScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
   useAuth();
+  const { colors, spacing, radii, typography, iconSizes } = useTheme();
   const { notifications, refreshing, refresh, markAsRead, markAllAsRead, unreadCount } =
     useNotifications(t);
 
+  // Create theme-aware styles
+  const screenStyles = useMemo(() => createScreenStyles(colors), [colors]);
+  const headerStyles = useMemo(
+    () => createHeaderStyles(colors, spacing, typography),
+    [colors, spacing, typography]
+  );
+  const bannerStyles = useMemo(
+    () => createBannerStyles(colors, spacing, typography),
+    [colors, spacing, typography]
+  );
+  const notificationCardStyles = useMemo(
+    () => createNotificationCardStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+  const emptyStyles = useMemo(
+    () => createEmptyStyles(colors, spacing, typography),
+    [colors, spacing, typography]
+  );
+
   const markAllAction =
     unreadCount > 0 ? (
-      <TouchableOpacity style={styles.markAllButton} onPress={markAllAsRead}>
-        <Text style={styles.markAllText}>{t('screens.notifications.markAllAsRead')}</Text>
+      <TouchableOpacity style={headerStyles.markAllButton} onPress={markAllAsRead}>
+        <Text style={headerStyles.markAllText}>{t('screens.notifications.markAllAsRead')}</Text>
       </TouchableOpacity>
     ) : null;
 
   return (
-    <View style={styles.container}>
+    <View style={screenStyles.container}>
       <PageHeader
         title={t('screens.notifications.title')}
         subtitle={t('screens.notifications.subtitle')}
@@ -211,145 +246,47 @@ const NotificationsScreen = (): React.JSX.Element => {
         actions={markAllAction}
       />
       {unreadCount > 0 && (
-        <View style={styles.unreadBanner}>
+        <View style={bannerStyles.unreadBanner}>
           <MaterialCommunityIcons
             name={ICONS.BELL_BADGE}
-            size={mobileIconSizes.medium}
-            color={designTokens.colors.primary}
+            size={iconSizes.md}
+            color={colors.primary}
           />
-          <Text style={styles.unreadText}>
+          <Text style={bannerStyles.unreadText}>
             {t('screens.notifications.unreadCount', { count: unreadCount })}
           </Text>
         </View>
       )}
       <ScrollView
-        style={styles.content}
+        style={screenStyles.content}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
       >
         {notifications.length > 0 ? (
           notifications.map((n) => (
-            <NotificationCard key={n.id} notification={n} t={t} onPress={() => markAsRead(n.id)} />
+            <NotificationCard
+              key={n.id}
+              notification={n}
+              t={t}
+              styles={notificationCardStyles}
+              colors={colors}
+              iconSizes={iconSizes}
+              onPress={() => markAsRead(n.id)}
+            />
           ))
         ) : (
-          <View style={styles.emptyState}>
+          <View style={emptyStyles.container}>
             <MaterialCommunityIcons
               name={ICONS.BELL_OFF_OUTLINE}
-              size={mobileIconSizes.xxlarge / 2}
-              color={designTokens.colors.borderMedium}
+              size={iconSizes.xxl / 2}
+              color={colors.textSecondary}
             />
-            <Text style={styles.emptyText}>{t('screens.notifications.noNotifications')}</Text>
-            <Text style={styles.emptySubtext}>{t('screens.notifications.allCaughtUp')}</Text>
+            <Text style={emptyStyles.title}>{t('screens.notifications.noNotifications')}</Text>
+            <Text style={emptyStyles.subtitle}>{t('screens.notifications.allCaughtUp')}</Text>
           </View>
         )}
       </ScrollView>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: FLEX.ONE,
-    backgroundColor: designTokens.colors.backgroundSecondary,
-  },
-  markAllButton: {
-    paddingVertical: designTokens.spacing.sm,
-    paddingHorizontal: designTokens.spacing.md,
-  },
-  markAllText: {
-    ...mobileTypography.labelBold,
-    color: designTokens.colors.primary,
-  },
-  unreadBanner: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    backgroundColor: designTokens.colors.primaryLight,
-    paddingHorizontal: designTokens.spacing.xl,
-    paddingVertical: designTokens.spacing.md,
-    gap: designTokens.spacing.md,
-  },
-  unreadText: {
-    ...mobileTypography.bodySmall,
-    color: designTokens.colors.primary,
-    fontWeight: designTokens.fontWeight.semibold,
-  },
-  content: {
-    flex: FLEX.ONE,
-  },
-  notificationCard: {
-    flexDirection: layoutConstants.flexDirection.row,
-    backgroundColor: designTokens.colors.backgroundPrimary,
-    padding: designTokens.spacing.lg,
-    marginHorizontal: designTokens.spacing.lg,
-    marginTop: designTokens.spacing.md,
-    borderRadius: designTokens.borderRadius.lg,
-    shadowColor: designTokens.colors.textPrimary,
-    shadowOffset: SHADOW_OFFSET.MD,
-    shadowOpacity: designTokens.shadows.sm.shadowOpacity,
-    shadowRadius: designTokens.shadows.sm.shadowRadius,
-    elevation: designTokens.shadows.sm.elevation,
-    position: layoutConstants.position.relative,
-  },
-  notificationCardUnread: {
-    backgroundColor: designTokens.colors.infoLight,
-    borderLeftWidth: BORDERS.WIDTH.MEDIUM,
-    borderLeftColor: designTokens.colors.primary,
-  },
-  unreadDot: {
-    position: layoutConstants.position.absolute,
-    top: designTokens.spacing.md,
-    right: designTokens.spacing.md,
-    width: DIMENSIONS.PROGRESS_BAR.STANDARD,
-    height: DIMENSIONS.PROGRESS_BAR.STANDARD,
-    borderRadius: designTokens.borderRadius.xs,
-    backgroundColor: designTokens.colors.primary,
-  },
-  iconContainer: {
-    width: designTokens.componentSizes.iconContainer.lg,
-    height: designTokens.componentSizes.iconContainer.lg,
-    borderRadius: designTokens.borderRadius['3xl'],
-    justifyContent: layoutConstants.justifyContent.center,
-    alignItems: layoutConstants.alignItems.center,
-    marginRight: designTokens.spacing.md,
-  },
-  notificationContent: {
-    flex: FLEX.ONE,
-  },
-  notificationHeader: {
-    flexDirection: layoutConstants.flexDirection.row,
-    justifyContent: layoutConstants.justifyContent.spaceBetween,
-    alignItems: layoutConstants.alignItems.flexStart,
-    marginBottom: designTokens.spacing.sm,
-    gap: designTokens.spacing.sm,
-  },
-  notificationTitle: {
-    ...mobileTypography.bodyMediumBold,
-    flex: FLEX.ONE,
-  },
-  notificationTime: {
-    ...mobileTypography.caption,
-    color: designTokens.colors.textTertiary,
-  },
-  notificationMessage: {
-    ...mobileTypography.bodySmall,
-    color: designTokens.colors.textSecondary,
-  },
-  emptyState: {
-    alignItems: layoutConstants.alignItems.center,
-    justifyContent: layoutConstants.justifyContent.center,
-    paddingVertical: designTokens.spacing['7xl'],
-    paddingHorizontal: designTokens.spacing['4xl'],
-  },
-  emptyText: {
-    ...mobileTypography.heading3,
-    color: designTokens.colors.textSecondary,
-    marginTop: designTokens.spacing.lg,
-  },
-  emptySubtext: {
-    ...mobileTypography.bodySmall,
-    color: designTokens.colors.textTertiary,
-    textAlign: layoutConstants.textAlign.center,
-    marginTop: designTokens.spacing.sm,
-  },
-});
 
 export default NotificationsScreen;

@@ -1,302 +1,443 @@
-import { StyleSheet } from 'react-native';
-import { mobileFontSizes, designTokens, layoutConstants } from '../../../theme';
+/**
+ * My Fees Screen Styles
+ * Theme-aware style factories
+ */
+import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { ThemeContextType } from '../../../state/ThemeContext';
 import { BORDERS, DIMENSIONS, FLEX } from '../../../../shared/constants';
 
-export const styles = StyleSheet.create({
-  container: { flex: FLEX.ONE },
-  balanceCardContainer: {
-    paddingVertical: designTokens.spacing.lg,
-    paddingHorizontal: designTokens.spacing.lg,
-  },
-  balanceCard: { borderRadius: designTokens.borderRadius.xl, padding: designTokens.spacing.lg },
-  balanceMain: {
-    alignItems: layoutConstants.alignItems.center,
-    marginBottom: designTokens.spacing.lg,
-  },
-  balanceLabel: { fontSize: mobileFontSizes.sm, marginBottom: designTokens.spacing.sm },
-  balanceAmount: {
-    fontSize: designTokens.fontSize['5xl'],
-    fontWeight: designTokens.fontWeight.bold,
-    marginBottom: designTokens.spacing.md,
-  },
-  balanceTag: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    paddingHorizontal: designTokens.spacing.md,
-    paddingVertical: designTokens.spacing.xs,
-    borderRadius: designTokens.borderRadius.full,
-    gap: designTokens.spacing.xs,
-  },
-  balanceTagText: {
-    fontSize: mobileFontSizes.xs,
-    fontWeight: designTokens.fontWeight.semibold,
-  },
-  quickStats: {
-    flexDirection: layoutConstants.flexDirection.row,
-    justifyContent: layoutConstants.justifyContent.spaceAround,
-    paddingTop: designTokens.spacing.lg,
-    borderTopWidth: designTokens.borderWidth.thin,
-  },
-  quickStat: { alignItems: layoutConstants.alignItems.center },
-  quickStatValue: {
-    fontSize: mobileFontSizes.lg,
-    fontWeight: designTokens.fontWeight.bold,
-  },
-  quickStatLabel: { fontSize: mobileFontSizes.xs, marginTop: designTokens.spacing.xs },
-  quickStatDivider: { width: BORDERS.WIDTH.THIN, height: DIMENSIONS.HEIGHT.DIVIDER },
-  content: { flex: FLEX.ONE, padding: designTokens.spacing.lg },
-  card: {
-    borderRadius: designTokens.borderRadius.xl,
-    padding: designTokens.spacing.lg,
-    marginBottom: designTokens.spacing.lg,
-    ...designTokens.shadows.sm,
-  },
-  cardHeader: {
-    flexDirection: layoutConstants.flexDirection.row,
-    justifyContent: layoutConstants.justifyContent.spaceBetween,
-    alignItems: layoutConstants.alignItems.center,
-    marginBottom: designTokens.spacing.lg,
-  },
-  cardTitleRow: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    gap: designTokens.spacing.sm,
-  },
-  cardTitle: { fontSize: mobileFontSizes.lg, fontWeight: designTokens.fontWeight.bold },
-  cardSubtitle: { fontSize: mobileFontSizes.sm, marginTop: designTokens.spacing.xs },
-  seeAllLink: { fontSize: mobileFontSizes.sm, fontWeight: designTokens.fontWeight.semibold },
-  progressContainer: { marginBottom: designTokens.spacing.lg },
-  progressBar: {
-    height: DIMENSIONS.PROGRESS_BAR.STANDARD,
-    borderRadius: designTokens.borderRadius.full,
-    overflow: layoutConstants.overflow.hidden,
-    marginBottom: designTokens.spacing.sm,
-  },
-  progressFill: {
-    height: DIMENSIONS.MAX_HEIGHT_PERCENT.FULL,
-    borderRadius: designTokens.borderRadius.full,
-  },
-  progressText: { fontSize: mobileFontSizes.xs, textAlign: layoutConstants.textAlign.right },
-  summaryGrid: { flexDirection: layoutConstants.flexDirection.row, gap: designTokens.spacing.md },
-  summaryItem: {
-    flex: FLEX.ONE,
-    alignItems: layoutConstants.alignItems.center,
-    padding: designTokens.spacing.lg,
-    borderRadius: designTokens.borderRadius.lg,
-  },
-  summaryValue: {
-    fontSize: mobileFontSizes.lg,
-    fontWeight: designTokens.fontWeight.bold,
-    marginTop: designTokens.spacing.sm,
-  },
-  summaryLabel: { fontSize: mobileFontSizes.xs, marginTop: designTokens.spacing.xs },
-  infoCard: { borderWidth: designTokens.borderWidth.none },
-  infoCardContent: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    gap: designTokens.spacing.lg,
-  },
-  infoIconContainer: {
-    width: DIMENSIONS.SIZE.AVATAR_MEDIUM,
-    height: DIMENSIONS.SIZE.AVATAR_MEDIUM,
-    borderRadius: designTokens.borderRadius.lg,
-    justifyContent: layoutConstants.justifyContent.center,
-    alignItems: layoutConstants.alignItems.center,
-  },
-  infoTextContainer: { flex: FLEX.ONE },
-  infoTitle: { fontSize: mobileFontSizes.sm, marginBottom: designTokens.spacing.xs },
-  infoAmount: { fontSize: mobileFontSizes['2xl'], fontWeight: designTokens.fontWeight.bold },
-  infoSubtext: { fontSize: mobileFontSizes.xs, marginTop: designTokens.spacing.xxs },
-  emptyState: {
-    alignItems: layoutConstants.alignItems.center,
-    paddingVertical: designTokens.spacing['4xl'],
-  },
-  emptyStateTitle: {
-    fontSize: mobileFontSizes.lg,
-    fontWeight: designTokens.fontWeight.semibold,
-    marginTop: designTokens.spacing.lg,
-  },
-  emptyStateText: {
-    fontSize: mobileFontSizes.sm,
-    marginTop: designTokens.spacing.sm,
-    textAlign: layoutConstants.textAlign.center,
-  },
-  helpCard: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    padding: designTokens.spacing.lg,
-    borderRadius: designTokens.borderRadius.lg,
-    gap: designTokens.spacing.md,
-  },
-  helpContent: { flex: FLEX.ONE },
-  helpTitle: {
-    fontSize: mobileFontSizes.md,
-    fontWeight: designTokens.fontWeight.semibold,
-    marginBottom: designTokens.spacing.xs,
-  },
-  helpText: { fontSize: mobileFontSizes.xs },
-});
+// ============================================================================
+// MAIN STYLES FACTORY
+// ============================================================================
 
-export const tabStyles = StyleSheet.create({
-  tabContainer: {
-    flexDirection: layoutConstants.flexDirection.row,
-    paddingHorizontal: designTokens.spacing.lg,
-    borderBottomWidth: designTokens.borderWidth.thin,
-  },
-  tab: {
-    flex: FLEX.ONE,
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    justifyContent: layoutConstants.justifyContent.center,
-    paddingVertical: designTokens.spacing.md,
-    gap: designTokens.spacing.sm,
-    borderBottomWidth: designTokens.borderWidth.medium,
-    borderBottomColor: BORDERS.COLOR.TRANSPARENT,
-  },
-  tabActive: { borderBottomWidth: designTokens.borderWidth.medium },
-  tabText: { fontSize: mobileFontSizes.sm, fontWeight: designTokens.fontWeight.semibold },
-});
+export const createStyles = (
+  colors: ThemeContextType['colors'],
+  spacing: ThemeContextType['spacing'],
+  radii: ThemeContextType['radii'],
+  typography: ThemeContextType['typography']
+) =>
+  StyleSheet.create({
+    container: { flex: FLEX.ONE, backgroundColor: colors.background },
+    balanceCardContainer: {
+      paddingVertical: spacing.lg,
+      paddingHorizontal: spacing.lg,
+    },
+    balanceCard: { borderRadius: radii.xl, padding: spacing.lg },
+    balanceMain: {
+      alignItems: 'center',
+      marginBottom: spacing.lg,
+    },
+    balanceLabel: {
+      fontSize: typography.fontSizes.sm,
+      marginBottom: spacing.sm,
+      color: colors.textSecondary,
+    },
+    balanceAmount: {
+      fontSize: typography.fontSizes['5xl'],
+      fontWeight: typography.fontWeights.bold as TextStyle['fontWeight'],
+      marginBottom: spacing.md,
+      color: colors.textPrimary,
+    },
+    balanceTag: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.xs,
+      borderRadius: radii.full,
+      gap: spacing.xs,
+    },
+    balanceTagText: {
+      fontSize: typography.fontSizes.xs,
+      fontWeight: typography.fontWeights.semibold as TextStyle['fontWeight'],
+    },
+    quickStats: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      paddingTop: spacing.lg,
+      borderTopWidth: 1,
+      borderTopColor: colors.borderLight,
+    },
+    quickStat: { alignItems: 'center' },
+    quickStatValue: {
+      fontSize: typography.fontSizes.lg,
+      fontWeight: typography.fontWeights.bold as TextStyle['fontWeight'],
+      color: colors.textPrimary,
+    },
+    quickStatLabel: {
+      fontSize: typography.fontSizes.xs,
+      marginTop: spacing.xs,
+      color: colors.textSecondary,
+    },
+    quickStatDivider: {
+      width: BORDERS.WIDTH.THIN,
+      height: DIMENSIONS.HEIGHT.DIVIDER,
+      backgroundColor: colors.borderLight,
+    },
+    content: { flex: FLEX.ONE, padding: spacing.lg },
+    card: {
+      borderRadius: radii.xl,
+      padding: spacing.lg,
+      marginBottom: spacing.lg,
+      backgroundColor: colors.backgroundPrimary,
+      shadowColor: colors.textPrimary,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    cardHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: spacing.lg,
+    },
+    cardTitleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    cardTitle: {
+      fontSize: typography.fontSizes.lg,
+      fontWeight: typography.fontWeights.bold as TextStyle['fontWeight'],
+      color: colors.textPrimary,
+    },
+    cardSubtitle: {
+      fontSize: typography.fontSizes.sm,
+      marginTop: spacing.xs,
+      color: colors.textSecondary,
+    },
+    seeAllLink: {
+      fontSize: typography.fontSizes.sm,
+      fontWeight: typography.fontWeights.semibold as TextStyle['fontWeight'],
+      color: colors.primary,
+    },
+    progressContainer: { marginBottom: spacing.lg },
+    progressBar: {
+      height: DIMENSIONS.PROGRESS_BAR.STANDARD,
+      borderRadius: radii.full,
+      overflow: 'hidden',
+      marginBottom: spacing.sm,
+      backgroundColor: colors.backgroundSecondary,
+    },
+    progressFill: {
+      height: '100%',
+      borderRadius: radii.full,
+    },
+    progressText: {
+      fontSize: typography.fontSizes.xs,
+      textAlign: 'right',
+      color: colors.textSecondary,
+    },
+    summaryGrid: { flexDirection: 'row', gap: spacing.md },
+    summaryItem: {
+      flex: FLEX.ONE,
+      alignItems: 'center',
+      padding: spacing.lg,
+      borderRadius: radii.lg,
+      backgroundColor: colors.backgroundSecondary,
+    },
+    summaryValue: {
+      fontSize: typography.fontSizes.lg,
+      fontWeight: typography.fontWeights.bold as TextStyle['fontWeight'],
+      marginTop: spacing.sm,
+      color: colors.textPrimary,
+    },
+    summaryLabel: {
+      fontSize: typography.fontSizes.xs,
+      marginTop: spacing.xs,
+      color: colors.textSecondary,
+    },
+    infoCard: { borderWidth: 0 },
+    infoCardContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.lg,
+    },
+    infoIconContainer: {
+      width: DIMENSIONS.SIZE.AVATAR_MEDIUM,
+      height: DIMENSIONS.SIZE.AVATAR_MEDIUM,
+      borderRadius: radii.lg,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    infoTextContainer: { flex: FLEX.ONE },
+    infoTitle: {
+      fontSize: typography.fontSizes.sm,
+      marginBottom: spacing.xs,
+      color: colors.textSecondary,
+    },
+    infoAmount: {
+      fontSize: typography.fontSizes['2xl'],
+      fontWeight: typography.fontWeights.bold as TextStyle['fontWeight'],
+      color: colors.textPrimary,
+    },
+    infoSubtext: {
+      fontSize: typography.fontSizes.xs,
+      marginTop: spacing.xxs,
+      color: colors.textTertiary,
+    },
+    emptyState: {
+      alignItems: 'center',
+      paddingVertical: spacing['4xl'],
+    },
+    emptyStateTitle: {
+      fontSize: typography.fontSizes.lg,
+      fontWeight: typography.fontWeights.semibold as TextStyle['fontWeight'],
+      marginTop: spacing.lg,
+      color: colors.textPrimary,
+    },
+    emptyStateText: {
+      fontSize: typography.fontSizes.sm,
+      marginTop: spacing.sm,
+      textAlign: 'center',
+      color: colors.textSecondary,
+    },
+    helpCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: spacing.lg,
+      borderRadius: radii.lg,
+      gap: spacing.md,
+      backgroundColor: colors.infoAlpha20,
+    },
+    helpContent: { flex: FLEX.ONE },
+    helpTitle: {
+      fontSize: typography.fontSizes.md,
+      fontWeight: typography.fontWeights.semibold as TextStyle['fontWeight'],
+      marginBottom: spacing.xs,
+      color: colors.textPrimary,
+    },
+    helpText: {
+      fontSize: typography.fontSizes.xs,
+      color: colors.textPrimary,
+    },
+  });
 
-export const itemStyles = StyleSheet.create({
-  activityItem: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    paddingVertical: designTokens.spacing.md,
-    gap: designTokens.spacing.md,
-  },
-  activityIcon: {
-    width: DIMENSIONS.SIZE.TOUCH_TARGET,
-    height: DIMENSIONS.SIZE.TOUCH_TARGET,
-    borderRadius: designTokens.borderRadius.lg,
-    justifyContent: layoutConstants.justifyContent.center,
-    alignItems: layoutConstants.alignItems.center,
-  },
-  activityInfo: { flex: FLEX.ONE },
-  activityTitle: {
-    fontSize: mobileFontSizes.md,
-    fontWeight: designTokens.fontWeight.semibold,
-    marginBottom: designTokens.spacing.xs,
-  },
-  activityDate: { fontSize: mobileFontSizes.xs },
-  activityAmount: { alignItems: layoutConstants.alignItems.flexEnd },
-  activityPrice: {
-    fontSize: mobileFontSizes.md,
-    fontWeight: designTokens.fontWeight.bold,
-    marginBottom: designTokens.spacing.xs,
-  },
-  activityBadge: {
-    paddingHorizontal: designTokens.spacing.sm,
-    paddingVertical: designTokens.spacing.xs,
-    borderRadius: designTokens.borderRadius.sm,
-  },
-  activityBadgeText: {
-    fontSize: designTokens.fontSize['2xs'],
-    fontWeight: designTokens.fontWeight.semibold,
-  },
-  emptyActivity: {
-    alignItems: layoutConstants.alignItems.center,
-    paddingVertical: designTokens.spacing['3xl'],
-  },
-  emptyActivityText: { fontSize: mobileFontSizes.sm, marginTop: designTokens.spacing.md },
-  historyItem: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    paddingVertical: designTokens.spacing.lg,
-    gap: designTokens.spacing.md,
-  },
-  historyIcon: {
-    width: designTokens.componentSizes.iconContainer.lg,
-    height: designTokens.componentSizes.iconContainer.lg,
-    borderRadius: designTokens.borderRadius.lg,
-    justifyContent: layoutConstants.justifyContent.center,
-    alignItems: layoutConstants.alignItems.center,
-  },
-  historyInfo: { flex: FLEX.ONE },
-  historyTitle: {
-    fontSize: mobileFontSizes.md,
-    fontWeight: designTokens.fontWeight.semibold,
-    marginBottom: designTokens.spacing.xs,
-  },
-  historyMeta: { fontSize: mobileFontSizes.xs },
-  historyPaid: {
-    fontSize: mobileFontSizes.xs,
-    marginTop: designTokens.spacing.xs,
-    fontWeight: designTokens.fontWeight.medium,
-  },
-  historyRight: { alignItems: layoutConstants.alignItems.flexEnd },
-  historyAmount: {
-    fontSize: mobileFontSizes.lg,
-    fontWeight: designTokens.fontWeight.bold,
-    marginBottom: designTokens.spacing.sm,
-  },
-  historyBadge: {
-    paddingHorizontal: designTokens.spacing.sm,
-    paddingVertical: designTokens.spacing.xs,
-    borderRadius: designTokens.borderRadius.sm,
-  },
-  historyBadgeText: {
-    fontSize: designTokens.fontSize['2xs'],
-    fontWeight: designTokens.fontWeight.semibold,
-  },
-  chargeItem: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    paddingVertical: designTokens.spacing.lg,
-    gap: designTokens.spacing.md,
-  },
-  chargeIcon: {
-    width: designTokens.componentSizes.iconContainer.lg,
-    height: designTokens.componentSizes.iconContainer.lg,
-    borderRadius: designTokens.borderRadius.lg,
-    justifyContent: layoutConstants.justifyContent.center,
-    alignItems: layoutConstants.alignItems.center,
-  },
-  chargeInfo: { flex: FLEX.ONE },
-  chargeTitle: {
-    fontSize: mobileFontSizes.md,
-    fontWeight: designTokens.fontWeight.semibold,
-    marginBottom: designTokens.spacing.xs,
-  },
-  chargeMeta: { fontSize: mobileFontSizes.xs },
-  chargeAmount: {
-    fontSize: mobileFontSizes.xl,
-    fontWeight: designTokens.fontWeight.bold,
-  },
-});
+// ============================================================================
+// TAB STYLES FACTORY
+// ============================================================================
 
-export const loadingStyles = StyleSheet.create({
-  skeletonHeader: {
-    alignItems: layoutConstants.alignItems.center,
-    paddingVertical: designTokens.spacing['4xl'],
-  },
-  skeletonContent: { padding: designTokens.spacing.lg },
-  skeleton: { borderRadius: designTokens.borderRadius.md },
-  skeletonTitle: {
-    width: DIMENSIONS.SKELETON.TITLE_WIDTH,
-    height: DIMENSIONS.SKELETON.TITLE_HEIGHT,
-    marginBottom: designTokens.spacing.sm,
-  },
-  skeletonSubtitle: {
-    width: DIMENSIONS.SKELETON.SUBTITLE_WIDTH,
-    height: DIMENSIONS.SKELETON.SUBTITLE_HEIGHT,
-  },
-  skeletonCard: {
-    height: DIMENSIONS.SIZE.ICON_CONTAINER_LARGE,
-    marginBottom: designTokens.spacing.lg,
-    borderRadius: designTokens.borderRadius.xl,
-  },
-  emptyHeader: {
-    alignItems: layoutConstants.alignItems.center,
-    paddingVertical: designTokens.spacing['5xl'],
-  },
-  emptyHeaderTitle: {
-    fontSize: mobileFontSizes['2xl'],
-    fontWeight: designTokens.fontWeight.bold,
-    marginTop: designTokens.spacing.lg,
-  },
-  emptyHeaderSubtitle: {
-    fontSize: mobileFontSizes.md,
-    marginTop: designTokens.spacing.sm,
-    textAlign: layoutConstants.textAlign.center,
-  },
-});
+export const createTabStyles = (
+  colors: ThemeContextType['colors'],
+  spacing: ThemeContextType['spacing'],
+  typography: ThemeContextType['typography']
+) =>
+  StyleSheet.create({
+    tabContainer: {
+      flexDirection: 'row',
+      paddingHorizontal: spacing.lg,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.borderLight,
+    },
+    tab: {
+      flex: FLEX.ONE,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: spacing.md,
+      gap: spacing.sm,
+      borderBottomWidth: 2,
+      borderBottomColor: 'transparent',
+    },
+    tabActive: {
+      borderBottomWidth: 2,
+      borderBottomColor: colors.primary,
+    },
+    tabText: {
+      fontSize: typography.fontSizes.sm,
+      fontWeight: typography.fontWeights.semibold as TextStyle['fontWeight'],
+      color: colors.textSecondary,
+    },
+    tabTextActive: {
+      color: colors.textPrimary,
+    },
+  });
+
+// ============================================================================
+// ITEM STYLES FACTORY
+// ============================================================================
+
+export const createItemStyles = (
+  colors: ThemeContextType['colors'],
+  spacing: ThemeContextType['spacing'],
+  radii: ThemeContextType['radii'],
+  typography: ThemeContextType['typography']
+) =>
+  StyleSheet.create({
+    activityItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: spacing.md,
+      gap: spacing.md,
+    },
+    activityIcon: {
+      width: DIMENSIONS.SIZE.TOUCH_TARGET,
+      height: DIMENSIONS.SIZE.TOUCH_TARGET,
+      borderRadius: radii.lg,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    activityInfo: { flex: FLEX.ONE },
+    activityTitle: {
+      fontSize: typography.fontSizes.md,
+      fontWeight: typography.fontWeights.semibold as TextStyle['fontWeight'],
+      marginBottom: spacing.xs,
+      color: colors.textPrimary,
+    },
+    activityDate: {
+      fontSize: typography.fontSizes.xs,
+      color: colors.textSecondary,
+    },
+    activityAmount: { alignItems: 'flex-end' },
+    activityPrice: {
+      fontSize: typography.fontSizes.md,
+      fontWeight: typography.fontWeights.bold as TextStyle['fontWeight'],
+      marginBottom: spacing.xs,
+      color: colors.textPrimary,
+    },
+    activityBadge: {
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs,
+      borderRadius: radii.sm,
+    },
+    activityBadgeText: {
+      fontSize: typography.fontSizes['2xs'],
+      fontWeight: typography.fontWeights.semibold as TextStyle['fontWeight'],
+    },
+    emptyActivity: {
+      alignItems: 'center',
+      paddingVertical: spacing['3xl'],
+    },
+    emptyActivityText: {
+      fontSize: typography.fontSizes.sm,
+      marginTop: spacing.md,
+      color: colors.textSecondary,
+    },
+    historyItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: spacing.lg,
+      gap: spacing.md,
+    },
+    historyIcon: {
+      width: 48,
+      height: 48,
+      borderRadius: radii.lg,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    historyInfo: { flex: FLEX.ONE },
+    historyTitle: {
+      fontSize: typography.fontSizes.md,
+      fontWeight: typography.fontWeights.semibold as TextStyle['fontWeight'],
+      marginBottom: spacing.xs,
+      color: colors.textPrimary,
+    },
+    historyMeta: {
+      fontSize: typography.fontSizes.xs,
+      color: colors.textSecondary,
+    },
+    historyPaid: {
+      fontSize: typography.fontSizes.xs,
+      marginTop: spacing.xs,
+      fontWeight: typography.fontWeights.medium as TextStyle['fontWeight'],
+      color: colors.success,
+    },
+    historyRight: { alignItems: 'flex-end' },
+    historyAmount: {
+      fontSize: typography.fontSizes.lg,
+      fontWeight: typography.fontWeights.bold as TextStyle['fontWeight'],
+      marginBottom: spacing.sm,
+      color: colors.textPrimary,
+    },
+    historyBadge: {
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs,
+      borderRadius: radii.sm,
+    },
+    historyBadgeText: {
+      fontSize: typography.fontSizes['2xs'],
+      fontWeight: typography.fontWeights.semibold as TextStyle['fontWeight'],
+    },
+    chargeItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: spacing.lg,
+      gap: spacing.md,
+    },
+    chargeIcon: {
+      width: 48,
+      height: 48,
+      borderRadius: radii.lg,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    chargeInfo: { flex: FLEX.ONE },
+    chargeTitle: {
+      fontSize: typography.fontSizes.md,
+      fontWeight: typography.fontWeights.semibold as TextStyle['fontWeight'],
+      marginBottom: spacing.xs,
+      color: colors.textPrimary,
+    },
+    chargeMeta: {
+      fontSize: typography.fontSizes.xs,
+      color: colors.textSecondary,
+    },
+    chargeAmount: {
+      fontSize: typography.fontSizes.xl,
+      fontWeight: typography.fontWeights.bold as TextStyle['fontWeight'],
+      color: colors.textPrimary,
+    },
+  });
+
+// ============================================================================
+// LOADING STYLES FACTORY
+// ============================================================================
+
+export const createLoadingStyles = (
+  colors: ThemeContextType['colors'],
+  spacing: ThemeContextType['spacing'],
+  radii: ThemeContextType['radii'],
+  typography: ThemeContextType['typography']
+) =>
+  StyleSheet.create({
+    skeletonHeader: {
+      alignItems: 'center',
+      paddingVertical: spacing['4xl'],
+    },
+    skeletonContent: { padding: spacing.lg },
+    skeleton: {
+      borderRadius: radii.md,
+      backgroundColor: colors.backgroundSecondary,
+    },
+    skeletonTitle: {
+      width: DIMENSIONS.SKELETON.TITLE_WIDTH,
+      height: DIMENSIONS.SKELETON.TITLE_HEIGHT,
+      marginBottom: spacing.sm,
+    },
+    skeletonSubtitle: {
+      width: DIMENSIONS.SKELETON.SUBTITLE_WIDTH,
+      height: DIMENSIONS.SKELETON.SUBTITLE_HEIGHT,
+    },
+    skeletonCard: {
+      height: DIMENSIONS.SIZE.ICON_CONTAINER_LARGE,
+      marginBottom: spacing.lg,
+      borderRadius: radii.xl,
+    },
+    emptyHeader: {
+      alignItems: 'center',
+      paddingVertical: spacing['5xl'],
+    },
+    emptyHeaderTitle: {
+      fontSize: typography.fontSizes['2xl'],
+      fontWeight: typography.fontWeights.bold as TextStyle['fontWeight'],
+      marginTop: spacing.lg,
+      color: colors.textPrimary,
+    },
+    emptyHeaderSubtitle: {
+      fontSize: typography.fontSizes.md,
+      marginTop: spacing.sm,
+      textAlign: 'center',
+      color: colors.textSecondary,
+    },
+  });

@@ -3,19 +3,11 @@
  * ✅ COMPLIANT: Uses theme values via useTheme() hook
  */
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  RefreshControl,
-  Alert,
-  Linking,
-  TextStyle,
-  ViewStyle,
-} from 'react-native';
+import { View, ScrollView, RefreshControl, Alert, Linking, TextStyle, ViewStyle } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import i18next from 'i18next';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { createStyles, createMemberCardStyles } from './members/styles';
 import { useAuth } from '../../state/AuthContext';
 import { useTheme, ThemeContextType } from '../../state/ThemeContext';
 import { clubService } from '../../../infrastructure/repositories/clubService';
@@ -35,7 +27,6 @@ import {
   EXTERNAL_URLS,
   ICONS,
   PHONE,
-  DIMENSIONS,
   FLEX,
 } from '../../../shared/constants';
 
@@ -63,69 +54,28 @@ function MemberCard({
   typography,
   t,
 }: MemberCardProps): React.JSX.Element {
-  const memberContentStyle: ViewStyle = {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  };
-
-  const memberAvatarStyle: ViewStyle = {
-    width: DIMENSIONS.SIZE.AVATAR_MEDIUM,
-    height: DIMENSIONS.SIZE.AVATAR_MEDIUM,
-    borderRadius: radii['4xl'],
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  };
-
-  const memberAvatarTextStyle: TextStyle = {
-    fontSize: typography.fontSizes['2xl'],
-    fontWeight: typography.fontWeights.bold as TextStyle['fontWeight'],
-    color: colors.textInverse,
-  };
-
-  const memberNameStyle: TextStyle = {
-    fontSize: typography.fontSizes.lg,
-    fontWeight: typography.fontWeights.bold as TextStyle['fontWeight'],
-    color: colors.textPrimary,
-    marginBottom: spacing.xxs,
-  };
-
-  const memberEmailStyle: TextStyle = {
-    fontSize: typography.fontSizes.xs,
-    color: colors.textSecondary,
-    marginBottom: spacing.xs,
-  };
-
-  const whatsappBadgeStyle: ViewStyle = {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    marginTop: spacing.xs,
-  };
-
-  const whatsappTextStyle: TextStyle = {
-    fontSize: typography.fontSizes.xs,
-    color: colors.success,
-  };
+  const cardStyles = useMemo(
+    () => createMemberCardStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
 
   return (
     <Card variant={COMPONENT_VARIANT.elevated} style={{ marginBottom: spacing.md }}>
-      <View style={memberContentStyle}>
-        <View style={memberAvatarStyle}>
-          <Text style={memberAvatarTextStyle}>{member.name.charAt(0).toUpperCase()}</Text>
+      <View style={cardStyles.content}>
+        <View style={cardStyles.avatar}>
+          <Text style={cardStyles.avatarText}>{member.name.charAt(0).toUpperCase()}</Text>
         </View>
         <View style={{ flex: FLEX.ONE }}>
-          <Text style={memberNameStyle}>{member.name}</Text>
-          <Text style={memberEmailStyle}>{member.email}</Text>
+          <Text style={cardStyles.name}>{member.name}</Text>
+          <Text style={cardStyles.email}>{member.email}</Text>
           {member.whatsappNumber && (
-            <View style={whatsappBadgeStyle}>
+            <View style={cardStyles.whatsappBadge}>
               <MaterialCommunityIcons
                 name={ICONS.WHATSAPP}
                 size={iconSizes.xs}
                 color={colors.success}
               />
-              <Text style={whatsappTextStyle}>{t('screens.members.availableOnWhatsApp')}</Text>
+              <Text style={cardStyles.whatsappText}>{t('screens.members.availableOnWhatsApp')}</Text>
             </View>
           )}
         </View>
@@ -360,31 +310,5 @@ const MembersScreen = (): React.JSX.Element => {
     </View>
   );
 };
-
-/**
- * Styles factory - Creates styles using theme values
- * ✅ COMPLIANT: Uses theme values via useTheme() hook
- */
-const createStyles = (
-  colors: ThemeContextType['colors'],
-  spacing: ThemeContextType['spacing']
-): ReturnType<typeof StyleSheet.create> =>
-  StyleSheet.create({
-    container: {
-      flex: FLEX.ONE,
-      backgroundColor: colors.backgroundSecondary,
-    },
-    searchContainer: {
-      marginHorizontal: spacing.lg,
-      marginTop: spacing.md,
-      marginBottom: spacing.lg,
-    },
-    scrollView: {
-      flex: FLEX.ONE,
-    },
-    content: {
-      padding: spacing.lg,
-    },
-  });
 
 export default MembersScreen;

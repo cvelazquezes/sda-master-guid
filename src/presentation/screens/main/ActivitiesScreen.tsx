@@ -1,11 +1,29 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, RefreshControl, Alert, Linking } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { View, ScrollView, RefreshControl, Alert, Linking } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useAuth } from '../../state/AuthContext';
+import i18next from 'i18next';
+import { useTranslation } from 'react-i18next';
+import {
+  createScreenStyles,
+  createFilterStyles,
+  createModalStyles,
+  createStatusStyles,
+  createParticipantStyles,
+} from './activities/styles';
 import { matchService } from '../../../infrastructure/repositories/matchService';
 import { userService } from '../../../infrastructure/repositories/userService';
-import { Match, MatchStatus, User } from '../../../types';
+import {
+  ALERT_BUTTON_STYLE,
+  BUTTON_SIZE,
+  COMPONENT_VARIANT,
+  EMPTY_VALUE,
+  EXTERNAL_URLS,
+  ICONS,
+  PHONE,
+} from '../../../shared/constants';
+import { LOG_MESSAGES } from '../../../shared/constants/logMessages';
+import { logger } from '../../../shared/utils/logger';
+import { MatchStatus, type Match, type User } from '../../../types';
 import { MatchCard } from '../../components/features/MatchCard';
 import {
   Text,
@@ -14,51 +32,38 @@ import {
   PageHeader,
   EmptyState,
 } from '../../components/primitives';
-import { designTokens } from '../../theme/designTokens';
-import { mobileTypography } from '../../theme/mobileTypography';
-import { layoutConstants } from '../../theme';
-import { LOG_MESSAGES } from '../../../shared/constants/logMessages';
-import { logger } from '../../../shared/utils/logger';
-import {
-  ALERT_BUTTON_STYLE,
-  BUTTON_SIZE,
-  COMPONENT_VARIANT,
-  EMPTY_VALUE,
-  EXTERNAL_URLS,
-  ICONS,
-  MESSAGES,
-  PHONE,
-  FLEX,
-} from '../../../shared/constants';
+import { useAuth } from '../../state/AuthContext';
+import { useTheme, ThemeContextType } from '../../state/ThemeContext';
 
 type TranslationFn = ReturnType<typeof useTranslation>['t'];
 
 // Helper function: get status color
-const getStatusColor = (status: MatchStatus): string => {
+const getStatusColor = (status: MatchStatus, colors: ThemeContextType['colors']): string => {
   const colorMap: Record<MatchStatus, string> = {
-    [MatchStatus.PENDING]: designTokens.colors.warning,
-    [MatchStatus.SCHEDULED]: designTokens.colors.info,
-    [MatchStatus.COMPLETED]: designTokens.colors.success,
-    [MatchStatus.SKIPPED]: designTokens.colors.textQuaternary,
+    [MatchStatus.PENDING]: colors.warning,
+    [MatchStatus.SCHEDULED]: colors.info,
+    [MatchStatus.COMPLETED]: colors.success,
+    [MatchStatus.SKIPPED]: colors.textQuaternary,
+    [MatchStatus.CANCELLED]: colors.error,
   };
-  return colorMap[status] || designTokens.colors.textSecondary;
+  return colorMap[status] || colors.textSecondary;
 };
 
 // Helper: open WhatsApp
 const openWhatsApp = (url: string): void => {
   Linking.openURL(url).catch(() => {
-    Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.COULD_NOT_OPEN_WHATSAPP);
+    Alert.alert(i18next.t('common.error'), i18next.t('errors.couldNotOpenWhatsapp'));
   });
 };
 
 // Custom hook for activities data
-interface UseActivitiesReturn {
+type UseActivitiesReturn = {
   matches: Match[];
   loading: boolean;
   refreshing: boolean;
   loadMatches: () => Promise<void>;
   onRefresh: () => void;
-}
+};
 
 function useActivities(): UseActivitiesReturn {
   const [matches, setMatches] = useState<Match[]>([]);
@@ -70,7 +75,7 @@ function useActivities(): UseActivitiesReturn {
       const data = await matchService.getMyMatches();
       setMatches(data);
     } catch {
-      Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_LOAD_ACTIVITIES);
+      Alert.alert(i18next.t('common.error'), i18next.t('errors.failedToLoadActivities'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -78,39 +83,41 @@ function useActivities(): UseActivitiesReturn {
   }, []);
 
   useEffect(() => {
-    loadMatches();
+    void loadMatches();
   }, [loadMatches]);
 
   const onRefresh = (): void => {
     setRefreshing(true);
-    loadMatches();
+    void loadMatches();
   };
 
   return { matches, loading, refreshing, loadMatches, onRefresh };
 }
 
 // Participant row component
-interface ParticipantRowProps {
+type ParticipantRowProps = {
   participant: User;
   currentUserId?: string;
   onContact: (p: User) => void;
   t: TranslationFn;
-}
+  styles: ReturnType<typeof createParticipantStyles>;
+};
 
 function ParticipantRow({
   participant,
   currentUserId,
   onContact,
   t,
+  styles,
 }: ParticipantRowProps): React.JSX.Element {
   return (
-    <View style={styles.participantRow}>
-      <View style={styles.participantAvatar}>
-        <Text style={styles.participantAvatarText}>{participant.name.charAt(0).toUpperCase()}</Text>
+    <View style={styles.row}>
+      <View style={styles.avatar}>
+        <Text style={styles.avatarText}>{participant.name.charAt(0).toUpperCase()}</Text>
       </View>
-      <View style={styles.participantInfo}>
-        <Text style={styles.participantName}>{participant.name}</Text>
-        <Text style={styles.participantEmail}>{participant.email}</Text>
+      <View style={styles.info}>
+        <Text style={styles.name}>{participant.name}</Text>
+        <Text style={styles.email}>{participant.email}</Text>
       </View>
       {participant.id !== currentUserId && (
         <StandardButton
@@ -128,18 +135,18 @@ function ParticipantRow({
 // Activity handlers
 function createSkipHandler(loadMatches: () => Promise<void>): (matchId: string) => void {
   return (matchId: string): void => {
-    Alert.alert(MESSAGES.TITLES.SKIP_ACTIVITY, MESSAGES.WARNINGS.CONFIRM_SKIP, [
-      { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
+    Alert.alert(i18next.t('titles.skipActivity'), i18next.t('warnings.confirmSkip'), [
+      { text: i18next.t('common.cancel'), style: ALERT_BUTTON_STYLE.CANCEL },
       {
-        text: MESSAGES.BUTTONS.SKIP,
+        text: i18next.t('common.skip'),
         style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
-        onPress: async () => {
-          try {
-            await matchService.skipMatch(matchId);
-            loadMatches();
-          } catch {
-            Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_SKIP_ACTIVITY);
-          }
+        onPress: () => {
+          matchService
+            .skipMatch(matchId)
+            .then(() => loadMatches())
+            .catch(() => {
+              Alert.alert(i18next.t('common.error'), i18next.t('errors.failedToSkipActivity'));
+            });
         },
       },
     ]);
@@ -153,7 +160,7 @@ function createContactHandler(t: TranslationFn): (participant: User) => void {
     }
     const message = t('screens.activities.whatsappMessageSingle', { name: participant.name });
     const cleanNum = participant.whatsappNumber.replace(PHONE.STRIP_NON_DIGITS, EMPTY_VALUE);
-    const url = `${EXTERNAL_URLS.WHATSAPP_BASE}${cleanNum}?text=${encodeURIComponent(message)}`;
+    const url = EXTERNAL_URLS.WHATSAPP.WEB(cleanNum, message);
     openWhatsApp(url);
   };
 }
@@ -167,36 +174,48 @@ function createGroupChatHandler(
     if (participants.length === 0) {
       return;
     }
-    const phoneNumbers = participants
-      .filter((p) => p.whatsappNumber && p.id !== currentUserId)
-      .map((p) => p.whatsappNumber.replace(PHONE.STRIP_NON_DIGITS, EMPTY_VALUE))
-      .join(',');
-    if (phoneNumbers) {
+    const otherParticipants = participants.filter(
+      (p) => p.whatsappNumber && p.id !== currentUserId
+    );
+    if (otherParticipants.length > 0) {
       const message = t('screens.activities.whatsappMessageGroup');
-      const url = `${EXTERNAL_URLS.WHATSAPP_GROUP}?text=${encodeURIComponent(message)}&phone=${phoneNumbers}`;
+      // Open WhatsApp with the first participant (group chat creation requires native app)
+      const [firstParticipant] = otherParticipants;
+      const cleanNum = firstParticipant.whatsappNumber.replace(PHONE.STRIP_NON_DIGITS, EMPTY_VALUE);
+      const url = EXTERNAL_URLS.WHATSAPP.WEB(cleanNum, message);
       openWhatsApp(url);
     }
   };
 }
 
 // Filter badge props
-interface FilterBadgeProps {
+type FilterBadgeProps = {
   label: string;
   status: MatchStatus | null;
-}
+  colors: ThemeContextType['colors'];
+  iconSizes: ThemeContextType['iconSizes'];
+  styles: ReturnType<typeof createFilterStyles>;
+};
 
-function FilterBadge({ label, status }: FilterBadgeProps): React.JSX.Element {
-  const color = status ? getStatusColor(status) : designTokens.colors.textSecondary;
+function FilterBadge({ label, status, colors, iconSizes, styles }: FilterBadgeProps): React.JSX.Element {
+  const color = status ? getStatusColor(status, colors) : colors.textSecondary;
   return (
-    <View style={styles.filterBadge}>
-      <MaterialCommunityIcons name={ICONS.CIRCLE} size={designTokens.icon.sizes.xs} color={color} />
-      <Text style={styles.filterText}>{label}</Text>
+    <View style={styles.badge}>
+      <MaterialCommunityIcons name={ICONS.CIRCLE} size={iconSizes.xs} color={color} />
+      <Text style={styles.text}>{label}</Text>
     </View>
   );
 }
 
 // Filter section
-function FilterSection({ t }: { t: TranslationFn }): React.JSX.Element {
+type FilterSectionProps = {
+  t: TranslationFn;
+  colors: ThemeContextType['colors'];
+  iconSizes: ThemeContextType['iconSizes'];
+  styles: ReturnType<typeof createFilterStyles>;
+};
+
+function FilterSection({ t, colors, iconSizes, styles }: FilterSectionProps): React.JSX.Element {
   const filters = [
     { label: t('screens.activities.filterAll'), status: null },
     { label: t('screens.activities.filterPending'), status: MatchStatus.PENDING },
@@ -204,11 +223,18 @@ function FilterSection({ t }: { t: TranslationFn }): React.JSX.Element {
     { label: t('screens.activities.filterCompleted'), status: MatchStatus.COMPLETED },
   ];
   return (
-    <View style={styles.filterContainer}>
-      <Text style={styles.filterLabel}>{t('screens.activities.filterByStatus')}</Text>
+    <View style={styles.container}>
+      <Text style={styles.label}>{t('screens.activities.filterByStatus')}</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         {filters.map((f) => (
-          <FilterBadge key={f.label} label={f.label} status={f.status} />
+          <FilterBadge
+            key={f.label}
+            label={f.label}
+            status={f.status}
+            colors={colors}
+            iconSizes={iconSizes}
+            styles={styles}
+          />
         ))}
       </ScrollView>
     </View>
@@ -216,13 +242,18 @@ function FilterSection({ t }: { t: TranslationFn }): React.JSX.Element {
 }
 
 // Activity list props
-interface ActivityListProps {
+type ActivityListProps = {
   matches: Match[];
-  onView: (m: Match) => void;
+  onView: (m: Match) => void | Promise<void>;
   onSkip: (id: string) => void;
-}
+};
 
 function ActivityList({ matches, onView, onSkip }: ActivityListProps): React.JSX.Element {
+  const handleView = (match: Match): void => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    onView(match);
+  };
+
   return (
     <>
       {matches.map((match) => (
@@ -230,9 +261,9 @@ function ActivityList({ matches, onView, onSkip }: ActivityListProps): React.JSX
           key={match.id}
           match={match}
           showActions={match.status === MatchStatus.PENDING}
-          onPress={() => onView(match)}
+          onPress={() => handleView(match)}
           onSkip={() => onSkip(match.id)}
-          onSchedule={() => onView(match)}
+          onSchedule={() => handleView(match)}
         />
       ))}
     </>
@@ -240,19 +271,27 @@ function ActivityList({ matches, onView, onSkip }: ActivityListProps): React.JSX
 }
 
 // Activities content
+type ActivitiesContentProps = {
+  loading: boolean;
+  matches: Match[];
+  t: TranslationFn;
+  colors: ThemeContextType['colors'];
+  iconSizes: ThemeContextType['iconSizes'];
+  filterStyles: ReturnType<typeof createFilterStyles>;
+  onView: (m: Match) => void | Promise<void>;
+  onSkip: (id: string) => void;
+};
+
 function ActivitiesContent({
   loading,
   matches,
   t,
+  colors,
+  iconSizes,
+  filterStyles,
   onView,
   onSkip,
-}: {
-  loading: boolean;
-  matches: Match[];
-  t: TranslationFn;
-  onView: (m: Match) => void;
-  onSkip: (id: string) => void;
-}): React.JSX.Element {
+}: ActivitiesContentProps): React.JSX.Element {
   if (loading) {
     return (
       <EmptyState
@@ -273,22 +312,22 @@ function ActivitiesContent({
   }
   return (
     <>
-      <FilterSection t={t} />
+      <FilterSection t={t} colors={colors} iconSizes={iconSizes} styles={filterStyles} />
       <ActivityList matches={matches} onView={onView} onSkip={onSkip} />
     </>
   );
 }
 
-interface ActivitiesState {
+type ActivitiesState = {
   selectedMatch: Match | null;
   matchParticipants: User[];
   detailModalVisible: boolean;
-  handleSkipMatch: (matchId: string) => Promise<void>;
+  handleSkipMatch: (matchId: string) => void;
   handleContactParticipant: (p: User) => void;
   handleCreateGroupChat: () => void;
   handleViewMatchDetails: (m: Match) => Promise<void>;
   closeDetailModal: () => void;
-}
+};
 
 // Custom hook for activities screen state
 function useActivitiesState(
@@ -319,7 +358,7 @@ function useActivitiesState(
     }
   };
 
-  const closeModal = (): void => {
+  const closeDetailModal = (): void => {
     setDetailModalVisible(false);
     setSelectedMatch(null);
     setMatchParticipants([]);
@@ -333,32 +372,55 @@ function useActivitiesState(
     handleContactParticipant,
     handleCreateGroupChat,
     handleViewMatchDetails,
-    closeModal,
+    closeDetailModal,
   };
 }
 
 const ActivitiesScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { colors, spacing, radii, typography, iconSizes } = useTheme();
   const { matches, loading, refreshing, loadMatches, onRefresh } = useActivities();
   const state = useActivitiesState(loadMatches, user?.id, t);
+
+  // Create theme-aware styles
+  const screenStyles = useMemo(() => createScreenStyles(colors, spacing), [colors, spacing]);
+  const filterStyles = useMemo(
+    () => createFilterStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+  const modalStyles = useMemo(
+    () => createModalStyles(colors, spacing, typography),
+    [colors, spacing, typography]
+  );
+  const statusStyles = useMemo(
+    () => createStatusStyles(spacing, radii, typography),
+    [spacing, radii, typography]
+  );
+  const participantStyles = useMemo(
+    () => createParticipantStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
 
   return (
     <>
       <ScrollView
-        style={styles.container}
+        style={screenStyles.container}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <PageHeader
+          showActions
           title={t('screens.activities.title')}
           subtitle={t('screens.activities.socialMeetupsSubtitle')}
-          showActions
         />
-        <View style={styles.content}>
+        <View style={screenStyles.content}>
           <ActivitiesContent
             loading={loading}
             matches={matches}
             t={t}
+            colors={colors}
+            iconSizes={iconSizes}
+            filterStyles={filterStyles}
             onView={state.handleViewMatchDetails}
             onSkip={state.handleSkipMatch}
           />
@@ -370,11 +432,16 @@ const ActivitiesScreen = (): React.JSX.Element => {
           match={state.selectedMatch}
           participants={state.matchParticipants}
           currentUserId={user?.id}
-          onClose={state.closeModal}
+          t={t}
+          colors={colors}
+          iconSizes={iconSizes}
+          modalStyles={modalStyles}
+          statusStyles={statusStyles}
+          participantStyles={participantStyles}
+          onClose={state.closeDetailModal}
           onContact={state.handleContactParticipant}
           onGroupChat={state.handleCreateGroupChat}
           onSkip={state.handleSkipMatch}
-          t={t}
         />
       )}
     </>
@@ -382,7 +449,7 @@ const ActivitiesScreen = (): React.JSX.Element => {
 };
 
 // Activity detail modal component
-interface ActivityDetailModalProps {
+type ActivityDetailModalProps = {
   visible: boolean;
   match: Match;
   participants: User[];
@@ -392,7 +459,12 @@ interface ActivityDetailModalProps {
   onGroupChat: () => void;
   onSkip: (id: string) => void;
   t: TranslationFn;
-}
+  colors: ThemeContextType['colors'];
+  iconSizes: ThemeContextType['iconSizes'];
+  modalStyles: ReturnType<typeof createModalStyles>;
+  statusStyles: ReturnType<typeof createStatusStyles>;
+  participantStyles: ReturnType<typeof createParticipantStyles>;
+};
 
 function ActivityDetailModal({
   visible,
@@ -404,8 +476,13 @@ function ActivityDetailModal({
   onGroupChat,
   onSkip,
   t,
+  colors,
+  iconSizes,
+  modalStyles,
+  statusStyles,
+  participantStyles,
 }: ActivityDetailModalProps): React.JSX.Element {
-  const statusColor = getStatusColor(match.status);
+  const statusColor = getStatusColor(match.status, colors);
   const statusIcon =
     match.status === MatchStatus.COMPLETED ? ICONS.CHECK_CIRCLE : ICONS.CLOCK_OUTLINE;
   const statusLabel = match.status.charAt(0).toUpperCase() + match.status.slice(1);
@@ -413,53 +490,50 @@ function ActivityDetailModal({
   return (
     <StandardModal
       visible={visible}
-      onClose={onClose}
       title={t('screens.activities.activityDetails')}
       subtitle={t('screens.activities.socialMeetupInfo')}
       icon={ICONS.ACCOUNT_HEART}
-      iconColor={designTokens.colors.primary}
-      iconBackgroundColor={designTokens.colors.primaryLight}
+      iconColor={colors.primary}
+      iconBackgroundColor={colors.primaryLight}
+      onClose={onClose}
     >
-      <View style={styles.modalContent}>
-        <View style={styles.modalSection}>
-          <Text style={styles.modalSectionTitle}>{t('screens.activities.status')}</Text>
-          <View style={[styles.statusBadge, { backgroundColor: `${statusColor}20` }]}>
-            <MaterialCommunityIcons
-              name={statusIcon}
-              size={designTokens.icon.sizes.md}
-              color={statusColor}
-            />
-            <Text style={[styles.statusText, { color: statusColor }]}>{statusLabel}</Text>
+      <View style={modalStyles.content}>
+        <View style={modalStyles.section}>
+          <Text style={modalStyles.sectionTitle}>{t('screens.activities.status')}</Text>
+          <View style={[statusStyles.badge, { backgroundColor: `${statusColor}20` }]}>
+            <MaterialCommunityIcons name={statusIcon} size={iconSizes.md} color={statusColor} />
+            <Text style={[statusStyles.text, { color: statusColor }]}>{statusLabel}</Text>
           </View>
         </View>
 
-        <View style={styles.modalSection}>
-          <Text style={styles.modalSectionTitle}>{t('screens.activities.participants')}</Text>
+        <View style={modalStyles.section}>
+          <Text style={modalStyles.sectionTitle}>{t('screens.activities.participants')}</Text>
           {participants.map((p) => (
             <ParticipantRow
               key={p.id}
               participant={p}
               currentUserId={currentUserId}
-              onContact={onContact}
               t={t}
+              styles={participantStyles}
+              onContact={onContact}
             />
           ))}
         </View>
 
-        <View style={styles.modalSection}>
+        <View style={modalStyles.section}>
           <StandardButton
+            fullWidth
             title={t('screens.activities.createGroupChat')}
             icon={ICONS.WHATSAPP}
             variant={COMPONENT_VARIANT.primary}
-            fullWidth
             onPress={onGroupChat}
           />
           {match.status === MatchStatus.PENDING && (
             <StandardButton
+              fullWidth
               title={t('screens.activities.skipActivity')}
               icon={ICONS.CLOSE}
               variant={COMPONENT_VARIANT.danger}
-              fullWidth
               onPress={() => {
                 onClose();
                 onSkip(match.id);
@@ -471,92 +545,5 @@ function ActivityDetailModal({
     </StandardModal>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: FLEX.ONE,
-    backgroundColor: designTokens.colors.backgroundSecondary,
-  },
-  content: {
-    padding: designTokens.spacing.lg,
-  },
-  filterContainer: {
-    marginBottom: designTokens.spacing.lg,
-  },
-  filterLabel: {
-    ...mobileTypography.labelBold,
-    color: designTokens.colors.textPrimary,
-    marginBottom: designTokens.spacing.sm,
-  },
-  filterBadge: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    paddingHorizontal: designTokens.spacing.md,
-    paddingVertical: designTokens.spacing.sm,
-    backgroundColor: designTokens.colors.backgroundPrimary,
-    borderRadius: designTokens.borderRadius.full,
-    marginRight: designTokens.spacing.sm,
-    gap: designTokens.spacing.sm,
-  },
-  filterText: {
-    ...mobileTypography.labelBold,
-    color: designTokens.colors.textPrimary,
-  },
-  modalContent: {
-    padding: designTokens.spacing.lg,
-  },
-  modalSection: {
-    marginBottom: designTokens.spacing.xl,
-  },
-  modalSectionTitle: {
-    ...mobileTypography.heading4,
-    color: designTokens.colors.textPrimary,
-    marginBottom: designTokens.spacing.md,
-  },
-  statusBadge: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    paddingVertical: designTokens.spacing.md,
-    paddingHorizontal: designTokens.spacing.lg,
-    borderRadius: designTokens.borderRadius.lg,
-    gap: designTokens.spacing.sm,
-  },
-  statusText: {
-    ...mobileTypography.bodyLargeBold,
-  },
-  participantRow: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    padding: designTokens.spacing.md,
-    backgroundColor: designTokens.colors.backgroundSecondary,
-    borderRadius: designTokens.borderRadius.lg,
-    marginBottom: designTokens.spacing.sm,
-    gap: designTokens.spacing.md,
-  },
-  participantAvatar: {
-    width: designTokens.componentSizes.iconContainer.lg,
-    height: designTokens.componentSizes.iconContainer.lg,
-    borderRadius: designTokens.borderRadius['3xl'],
-    backgroundColor: designTokens.colors.primary,
-    justifyContent: layoutConstants.justifyContent.center,
-    alignItems: layoutConstants.alignItems.center,
-  },
-  participantAvatarText: {
-    ...mobileTypography.heading3,
-    color: designTokens.colors.textInverse,
-  },
-  participantInfo: {
-    flex: FLEX.ONE,
-  },
-  participantName: {
-    ...mobileTypography.bodyLargeBold,
-    color: designTokens.colors.textPrimary,
-  },
-  participantEmail: {
-    ...mobileTypography.caption,
-    color: designTokens.colors.textSecondary,
-    marginTop: designTokens.spacing.xxs,
-  },
-});
 
 export default ActivitiesScreen;
