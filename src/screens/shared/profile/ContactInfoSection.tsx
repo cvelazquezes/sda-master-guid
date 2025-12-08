@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, Card, SectionHeader } from '../../../shared/components';
 import { User } from '../../../types';
-import { designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { ICONS, COMPONENT_VARIANT, LIST_SEPARATOR } from '../../../shared/constants';
 import { contactInfoStyles as styles } from './styles';
 
@@ -28,12 +28,13 @@ function DetailRow({
   value: string;
   borderColor: string;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <View style={[styles.detailRow, { borderBottomColor: borderColor }]}>
       <View style={[styles.detailIconContainer, { backgroundColor: iconBg }]}>
         <MaterialCommunityIcons
           name={icon as typeof ICONS.EMAIL}
-          size={designTokens.iconSize.lg}
+          size={iconSizes.lg}
           color={iconColor}
         />
       </View>
@@ -50,14 +51,15 @@ export function ContactInfoSection({
   colors,
   t,
 }: ContactInfoSectionProps): React.JSX.Element | null {
+  const { colors: themeColors } = useTheme();
   const hasWhatsapp = !!user?.whatsappNumber;
   const hasClasses = user?.classes && user.classes.length > 0;
   if (!hasWhatsapp && !hasClasses) {
     return null;
   }
 
-  const whatsappBg = designTokens.colors.social.whatsapp + '20';
-  const whatsappColor = designTokens.colors.social.whatsapp;
+  const whatsappBg = themeColors.success + '20';
+  const whatsappColor = themeColors.success;
 
   return (
     <View style={styles.section}>
@@ -81,7 +83,7 @@ export function ContactInfoSection({
               iconColor={colors.primary}
               label={t('screens.profile.pathfinderClasses')}
               value={user.classes.join(LIST_SEPARATOR)}
-              borderColor={designTokens.colors.transparent}
+              borderColor="transparent"
             />
           )}
         </View>

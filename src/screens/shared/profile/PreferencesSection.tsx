@@ -4,7 +4,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, Card, SectionHeader } from '../../../shared/components';
 import { ThemeSwitcher } from '../../../components/ThemeSwitcher';
 import { LanguageSwitcher } from '../../../components/LanguageSwitcher';
-import { designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { ICONS, COMPONENT_VARIANT, TOUCH_OPACITY } from '../../../shared/constants';
 import { preferencesStyles as styles } from './styles';
 
@@ -21,17 +21,14 @@ interface PreferencesSectionProps {
 }
 
 function TimezoneRow({ timezone, colors, t }: PreferencesSectionProps): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const iconBg = { backgroundColor: colors.info + '20' };
   const value = timezone || t('screens.profile.defaultTimezone');
 
   return (
     <TouchableOpacity style={styles.menuItem} activeOpacity={TOUCH_OPACITY.default}>
       <View style={[styles.menuIconContainer, iconBg]}>
-        <MaterialCommunityIcons
-          name={ICONS.EARTH}
-          size={designTokens.iconSize.lg}
-          color={colors.info}
-        />
+        <MaterialCommunityIcons name={ICONS.EARTH} size={iconSizes.lg} color={colors.info} />
       </View>
       <View style={styles.menuContent}>
         <Text style={[styles.menuLabel, { color: colors.textSecondary }]}>
@@ -41,7 +38,7 @@ function TimezoneRow({ timezone, colors, t }: PreferencesSectionProps): React.JS
       </View>
       <MaterialCommunityIcons
         name={ICONS.CHEVRON_RIGHT}
-        size={designTokens.iconSize.lg}
+        size={iconSizes.lg}
         color={colors.textTertiary}
       />
     </TouchableOpacity>

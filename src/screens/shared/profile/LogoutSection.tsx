@@ -2,7 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../shared/components';
-import { designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { ICONS, TOUCH_OPACITY } from '../../../shared/constants';
 import { logoutStyles as styles } from './styles';
 
@@ -13,6 +13,7 @@ interface LogoutSectionProps {
 }
 
 export function LogoutSection({ onLogout, colors, labels }: LogoutSectionProps): React.JSX.Element {
+  const { iconSizes, colors: themeColors } = useTheme();
   const buttonStyle = [
     styles.logoutButton,
     { backgroundColor: colors.error + '12', borderColor: colors.error },
@@ -26,16 +27,12 @@ export function LogoutSection({ onLogout, colors, labels }: LogoutSectionProps):
           onPress={onLogout}
           activeOpacity={TOUCH_OPACITY.default}
         >
-          <MaterialCommunityIcons
-            name={ICONS.LOGOUT}
-            size={designTokens.iconSize.lg}
-            color={colors.error}
-          />
+          <MaterialCommunityIcons name={ICONS.LOGOUT} size={iconSizes.lg} color={colors.error} />
           <Text style={[styles.logoutButtonText, { color: colors.error }]}>{labels.signOut}</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.versionSection}>
-        <Text style={[styles.versionText, { color: designTokens.colors.textTertiary }]}>
+        <Text style={[styles.versionText, { color: themeColors.textTertiary }]}>
           {labels.appName} • {labels.version}
         </Text>
       </View>

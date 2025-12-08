@@ -2,7 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, SectionHeader, Card } from '../../../shared/components';
-import { designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { ICONS } from '../../../shared/constants';
 import { styles } from './styles';
 
@@ -25,6 +25,7 @@ export function ContactInfoSection({
   colors,
   t,
 }: ContactInfoSectionProps): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const emailBg = colors.primary + '20';
   const whatsappBg = colors.success + '20';
 
@@ -37,7 +38,7 @@ export function ContactInfoSection({
             <View style={[styles.detailIconContainer, { backgroundColor: emailBg }]}>
               <MaterialCommunityIcons
                 name={ICONS.EMAIL_OUTLINE}
-                size={designTokens.iconSize.md}
+                size={iconSizes.md}
                 color={colors.primary}
               />
             </View>
@@ -54,7 +55,7 @@ export function ContactInfoSection({
             <View style={[styles.detailIconContainer, { backgroundColor: whatsappBg }]}>
               <MaterialCommunityIcons
                 name={ICONS.WHATSAPP}
-                size={designTokens.iconSize.md}
+                size={iconSizes.md}
                 color={colors.success}
               />
             </View>

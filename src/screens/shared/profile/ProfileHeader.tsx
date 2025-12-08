@@ -4,7 +4,6 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, Card } from '../../../shared/components';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { User, UserRole } from '../../../types';
-import { designTokens } from '../../../shared/theme';
 import {
   ICONS,
   COMPONENT_VARIANT,
@@ -31,6 +30,7 @@ export function ProfileHeader({
   const { colors: themeColors } = useTheme();
   const roleColor = getRoleColor(user?.role, colors.primary);
   const cardStyle = [styles.profileCard, { backgroundColor: roleColor }];
+  const overlayLightStrong = 'rgba(255, 255, 255, 0.8)';
 
   return (
     <View style={styles.headerSection}>
@@ -46,7 +46,7 @@ export function ProfileHeader({
           </Text>
           <Text
             variant={TEXT_VARIANT.BODY}
-            style={{ color: designTokens.overlay.lightStrong }}
+            style={{ color: overlayLightStrong }}
             align={TEXT_ALIGN.CENTER}
           >
             {user?.email || t('screens.account.defaultEmail')}
@@ -66,13 +66,16 @@ function AvatarSection({
   roleColor: string;
   role: UserRole | undefined;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
+  const overlayLight = 'rgba(255, 255, 255, 0.2)';
+  const overlayLightStrong = 'rgba(255, 255, 255, 0.8)';
   return (
     <View style={styles.avatarWrapper}>
-      <View style={[styles.avatarOuter, { backgroundColor: designTokens.overlay.light }]}>
-        <View style={[styles.avatarInner, { backgroundColor: designTokens.overlay.lightStrong }]}>
+      <View style={[styles.avatarOuter, { backgroundColor: overlayLight }]}>
+        <View style={[styles.avatarInner, { backgroundColor: overlayLightStrong }]}>
           <MaterialCommunityIcons
             name={getRoleIcon(role)}
-            size={designTokens.iconSize['3xl']}
+            size={iconSizes['3xl']}
             color={roleColor}
           />
         </View>
@@ -88,13 +91,14 @@ function RoleBadge({
   role: UserRole | undefined;
   t: (key: string) => string;
 }): React.JSX.Element {
-  const { colors: themeColors } = useTheme();
+  const { colors: themeColors, iconSizes } = useTheme();
+  const overlayLightStrong = 'rgba(255, 255, 255, 0.8)';
   return (
     <View style={styles.roleBadge}>
       <MaterialCommunityIcons
         name={getRoleIcon(role)}
-        size={designTokens.iconSize.xs}
-        color={designTokens.overlay.lightStrong}
+        size={iconSizes.xs}
+        color={overlayLightStrong}
       />
       <Text
         variant={TEXT_VARIANT.CAPTION}
@@ -116,6 +120,8 @@ function StatsRow({
   isActive: boolean;
   t: (key: string, options?: Record<string, unknown>) => string;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
+  const overlayLightStrong = 'rgba(255, 255, 255, 0.8)';
   const statusText = isActive ? t('common.active') : t('screens.profile.inactive');
   const hasClasses = user?.classes && user.classes.length > 0;
   return (
@@ -123,8 +129,8 @@ function StatsRow({
       <View style={styles.statItem}>
         <MaterialCommunityIcons
           name={ICONS.CHECK_CIRCLE}
-          size={designTokens.iconSize.md}
-          color={designTokens.overlay.lightStrong}
+          size={iconSizes.md}
+          color={overlayLightStrong}
         />
         <Text style={styles.statText}>{statusText}</Text>
       </View>
@@ -134,8 +140,8 @@ function StatsRow({
           <View style={styles.statItem}>
             <MaterialCommunityIcons
               name={ICONS.SCHOOL}
-              size={designTokens.iconSize.md}
-              color={designTokens.overlay.lightStrong}
+              size={iconSizes.md}
+              color={overlayLightStrong}
             />
             <Text style={styles.statText}>
               {t('screens.profile.classCount', { count: user.classes.length })}

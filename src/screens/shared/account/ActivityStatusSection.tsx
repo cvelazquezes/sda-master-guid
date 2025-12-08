@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Switch } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, SectionHeader, Card } from '../../../shared/components';
-import { designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { ICONS } from '../../../shared/constants';
 import { styles, statusStyles } from './styles';
 
@@ -28,6 +28,7 @@ export function ActivityStatusSection({
   colors,
   t,
 }: ActivityStatusSectionProps): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const activeColor = isActive ? colors.success : colors.textTertiary;
   const iconBg = activeColor + '20';
   const iconName = isActive ? ICONS.ACCOUNT_CHECK : ICONS.ACCOUNT_OFF;
@@ -43,11 +44,7 @@ export function ActivityStatusSection({
         <View style={statusStyles.container}>
           <View style={statusStyles.info}>
             <View style={[statusStyles.iconContainer, { backgroundColor: iconBg }]}>
-              <MaterialCommunityIcons
-                name={iconName}
-                size={designTokens.iconSize.lg}
-                color={activeColor}
-              />
+              <MaterialCommunityIcons name={iconName} size={iconSizes.lg} color={activeColor} />
             </View>
             <View style={statusStyles.text}>
               <Text style={[statusStyles.label, { color: colors.textPrimary }]}>{label}</Text>

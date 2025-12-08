@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Switch } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, Card, SectionHeader } from '../../../shared/components';
-import { designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { ICONS, COMPONENT_VARIANT, OPACITY } from '../../../shared/constants';
 import { accountStatusStyles as styles } from './styles';
 
@@ -28,6 +28,7 @@ function StatusIcon({
   isActive: boolean;
   colors: { success: string; textTertiary: string };
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const iconBgColor = isActive
     ? `${colors.success}${OPACITY.LIGHT}`
     : `${colors.textTertiary}${OPACITY.LIGHT}`;
@@ -36,7 +37,7 @@ function StatusIcon({
 
   return (
     <View style={[styles.statusIconContainer, { backgroundColor: iconBgColor }]}>
-      <MaterialCommunityIcons name={iconName} size={designTokens.iconSize.lg} color={iconColor} />
+      <MaterialCommunityIcons name={iconName} size={iconSizes.lg} color={iconColor} />
     </View>
   );
 }

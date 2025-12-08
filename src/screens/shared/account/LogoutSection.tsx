@@ -2,7 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../shared/components';
-import { designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { ICONS, TOUCH_OPACITY } from '../../../shared/constants';
 import { styles, logoutStyles } from './styles';
 
@@ -13,6 +13,7 @@ interface LogoutSectionProps {
 }
 
 export function LogoutSection({ onLogout, colors, t }: LogoutSectionProps): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const buttonBg = colors.error + '15';
   return (
     <View style={styles.section}>
@@ -21,11 +22,7 @@ export function LogoutSection({ onLogout, colors, t }: LogoutSectionProps): Reac
         onPress={onLogout}
         activeOpacity={TOUCH_OPACITY.default}
       >
-        <MaterialCommunityIcons
-          name={ICONS.LOGOUT}
-          size={designTokens.iconSize.md}
-          color={colors.error}
-        />
+        <MaterialCommunityIcons name={ICONS.LOGOUT} size={iconSizes.md} color={colors.error} />
         <Text style={[logoutStyles.buttonText, { color: colors.error }]}>{t('auth.logout')}</Text>
       </TouchableOpacity>
     </View>

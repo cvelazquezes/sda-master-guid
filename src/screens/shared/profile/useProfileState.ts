@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../context/AuthContext';
-import { MESSAGES, ALERT_BUTTON_STYLE } from '../../../shared/constants';
+import { ALERT_BUTTON_STYLE } from '../../../shared/constants';
 
 interface UseProfileStateReturn {
   isActive: boolean;
@@ -11,6 +12,7 @@ interface UseProfileStateReturn {
 }
 
 export function useProfileState(): UseProfileStateReturn {
+  const { t } = useTranslation();
   const { user, updateUser, logout } = useAuth();
   const [isActive, setIsActive] = useState(user?.isActive !== false);
   const [loading, setLoading] = useState(false);
@@ -20,10 +22,10 @@ export function useProfileState(): UseProfileStateReturn {
     try {
       await updateUser({ isActive: value });
       setIsActive(value);
-      const msg = value ? MESSAGES.SUCCESS.ACCOUNT_ACTIVATED : MESSAGES.SUCCESS.ACCOUNT_PAUSED;
-      Alert.alert(MESSAGES.TITLES.SUCCESS, msg);
+      const msg = value ? t('success.accountActivated') : t('success.accountPaused');
+      Alert.alert(t('common.success'), msg);
     } catch {
-      Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_UPDATE_SETTINGS);
+      Alert.alert(t('common.error'), t('errors.failedToUpdateSettings'));
       setIsActive(!value);
     } finally {
       setLoading(false);
@@ -31,16 +33,16 @@ export function useProfileState(): UseProfileStateReturn {
   };
 
   const handleLogout = (): void => {
-    Alert.alert(MESSAGES.TITLES.LOGOUT, MESSAGES.WARNINGS.CONFIRM_LOGOUT, [
-      { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
+    Alert.alert(t('titles.logout'), t('warnings.confirmLogout'), [
+      { text: t('common.cancel'), style: ALERT_BUTTON_STYLE.CANCEL },
       {
-        text: MESSAGES.TITLES.LOGOUT,
+        text: t('titles.logout'),
         style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
         onPress: async () => {
           try {
             await logout();
           } catch {
-            Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_LOGOUT);
+            Alert.alert(t('common.error'), t('errors.failedToLogout'));
           }
         },
       },

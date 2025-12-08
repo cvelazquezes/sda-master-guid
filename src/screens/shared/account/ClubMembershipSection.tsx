@@ -2,7 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, SectionHeader, Card } from '../../../shared/components';
-import { designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { ICONS, DATE_LOCALE_OPTIONS } from '../../../shared/constants';
 import { ApprovalStatus, Club } from '../../../types';
 import { styles } from './styles';
@@ -80,13 +80,14 @@ interface ClubRowProps {
 }
 
 function ClubRow({ club, colors, t }: ClubRowProps): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const iconBg = colors.primary + '20';
   return (
     <View style={[styles.detailRow, { borderBottomColor: colors.border }]}>
       <View style={[styles.detailIconContainer, { backgroundColor: iconBg }]}>
         <MaterialCommunityIcons
           name={ICONS.ACCOUNT_GROUP}
-          size={designTokens.iconSize.md}
+          size={iconSizes.md}
           color={colors.primary}
         />
       </View>
@@ -109,16 +110,13 @@ interface ClassesRowProps {
 }
 
 function ClassesRow({ classes, colors, t }: ClassesRowProps): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const iconBg = colors.info + '20';
   const badgeBg = colors.primary + '15';
   return (
     <View style={[styles.detailRow, { borderBottomColor: colors.border }]}>
       <View style={[styles.detailIconContainer, { backgroundColor: iconBg }]}>
-        <MaterialCommunityIcons
-          name={ICONS.SCHOOL}
-          size={designTokens.iconSize.md}
-          color={colors.info}
-        />
+        <MaterialCommunityIcons name={ICONS.SCHOOL} size={iconSizes.md} color={colors.info} />
       </View>
       <View style={styles.detailText}>
         <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
@@ -143,13 +141,14 @@ interface MemberSinceRowProps {
 }
 
 function MemberSinceRow({ date, colors, t }: MemberSinceRowProps): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const iconBg = colors.textTertiary + '20';
   return (
     <View style={[styles.detailRow, { borderBottomColor: colors.border }]}>
       <View style={[styles.detailIconContainer, { backgroundColor: iconBg }]}>
         <MaterialCommunityIcons
           name={ICONS.CALENDAR_ACCOUNT}
-          size={designTokens.iconSize.md}
+          size={iconSizes.md}
           color={colors.textTertiary}
         />
       </View>
@@ -172,13 +171,14 @@ interface StatusRowProps {
 }
 
 function StatusRow({ icon, label, color, colors, t }: StatusRowProps): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const iconBg = color + '20';
   return (
     <View style={styles.detailRow}>
       <View style={[styles.detailIconContainer, { backgroundColor: iconBg }]}>
         <MaterialCommunityIcons
           name={icon as typeof ICONS.CHECK_CIRCLE}
-          size={designTokens.iconSize.md}
+          size={iconSizes.md}
           color={color}
         />
       </View>

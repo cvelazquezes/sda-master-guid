@@ -4,7 +4,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, SectionHeader, Card } from '../../../shared/components';
 import { ThemeSwitcher } from '../../../components/ThemeSwitcher';
 import { LanguageSwitcher } from '../../../components/LanguageSwitcher';
-import { designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { ICONS } from '../../../shared/constants';
 import { styles } from './styles';
 
@@ -19,6 +19,7 @@ export function PreferencesSection({
   colors,
   t,
 }: PreferencesSectionProps): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const iconBg = colors.info + '20';
   const displayTimezone = timezone || t('screens.profile.defaultTimezone');
 
@@ -29,11 +30,7 @@ export function PreferencesSection({
         <View style={styles.detailsContainer}>
           <View style={[styles.detailRow, { borderBottomColor: colors.border }]}>
             <View style={[styles.detailIconContainer, { backgroundColor: iconBg }]}>
-              <MaterialCommunityIcons
-                name={ICONS.EARTH}
-                size={designTokens.iconSize.md}
-                color={colors.info}
-              />
+              <MaterialCommunityIcons name={ICONS.EARTH} size={iconSizes.md} color={colors.info} />
             </View>
             <View style={styles.detailText}>
               <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, SectionHeader, Card } from '../../../shared/components';
-import { designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { ICONS, APP_VERSION, TOUCH_OPACITY } from '../../../shared/constants';
 import { styles } from './styles';
 
@@ -32,13 +32,14 @@ export function AboutSection({ colors, t }: AboutSectionProps): React.JSX.Elemen
 }
 
 function VersionRow({ colors, t }: AboutSectionProps): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const iconBg = colors.textTertiary + '20';
   return (
     <View style={[styles.detailRow, { borderBottomColor: colors.border }]}>
       <View style={[styles.detailIconContainer, { backgroundColor: iconBg }]}>
         <MaterialCommunityIcons
           name={ICONS.INFORMATION_OUTLINE}
-          size={designTokens.iconSize.md}
+          size={iconSizes.md}
           color={colors.textTertiary}
         />
       </View>
@@ -53,13 +54,14 @@ function VersionRow({ colors, t }: AboutSectionProps): React.JSX.Element {
 }
 
 function PrivacyRow({ colors, t }: AboutSectionProps): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const iconBg = colors.primary + '20';
   return (
     <TouchableOpacity style={styles.detailRow} activeOpacity={TOUCH_OPACITY.default}>
       <View style={[styles.detailIconContainer, { backgroundColor: iconBg }]}>
         <MaterialCommunityIcons
           name={ICONS.SHIELD_CHECK_OUTLINE}
-          size={designTokens.iconSize.md}
+          size={iconSizes.md}
           color={colors.primary}
         />
       </View>
@@ -73,7 +75,7 @@ function PrivacyRow({ colors, t }: AboutSectionProps): React.JSX.Element {
       </View>
       <MaterialCommunityIcons
         name={ICONS.CHEVRON_RIGHT}
-        size={designTokens.iconSize.md}
+        size={iconSizes.md}
         color={colors.textTertiary}
       />
     </TouchableOpacity>
