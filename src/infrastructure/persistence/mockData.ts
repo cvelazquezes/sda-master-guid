@@ -7,8 +7,8 @@ import {
   MatchFrequency,
   MatchStatus,
   ApprovalStatus,
-} from '../types';
-import { EMPTY_VALUE } from '../shared/constants';
+} from '../../types';
+import { EMPTY_VALUE } from '../../shared/constants';
 
 // Mock Users - One of each type
 // Note: Users get their organizational hierarchy from their club

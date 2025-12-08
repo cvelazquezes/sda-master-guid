@@ -4,8 +4,8 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { User, Club, Match, MatchRound } from '../types';
-import { logger } from '../utils/logger';
+import { User, Club, Match, MatchRound } from '../../types';
+import { logger } from '../../shared/utils/logger';
 
 // Storage keys
 const STORAGE_KEYS = {
