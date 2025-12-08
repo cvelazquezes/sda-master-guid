@@ -22,7 +22,7 @@ import { LOG_MESSAGES, API_ENDPOINTS } from '../../shared/constants';
 import { MOCK_DELAY } from '../../shared/constants/timing';
 import { MS, OPACITY_VALUE } from '../../shared/constants/numbers';
 import { ROUND_STATUS } from '../../shared/constants/ui';
-import i18n from '../../presentation/i18n';
+import i18n from '../../shared/i18n';
 
 class MatchService {
   private useMockData = environment.mock.useMockApi;

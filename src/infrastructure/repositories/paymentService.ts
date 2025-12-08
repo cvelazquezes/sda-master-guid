@@ -22,7 +22,7 @@ import { storageKeys } from '../../shared/config/storage';
 import { LOCALE, LANGUAGE, ID_PREFIX, EMPTY_VALUE } from '../../shared/constants/ui';
 import { MATH, ID_GENERATION, MS } from '../../shared/constants/numbers';
 import { NUMERIC } from '../../shared/constants/validation';
-import i18n from '../../presentation/i18n';
+import i18n from '../../shared/i18n';
 
 // Payment service constants
 const PAYMENT_DELAY_MS = MS.FIVE; // Delay for unique ID generation

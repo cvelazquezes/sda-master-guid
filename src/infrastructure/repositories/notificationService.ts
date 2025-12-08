@@ -26,7 +26,7 @@ import {
   ID_PREFIX,
   REGEX_PATTERN,
 } from '../../shared/constants/ui';
-import i18n from '../../presentation/i18n';
+import i18n from '../../shared/i18n';
 
 type NotificationChannelType = (typeof NOTIFICATION_CHANNEL)[keyof typeof NOTIFICATION_CHANNEL];
 
