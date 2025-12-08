@@ -1,9 +1,10 @@
 import React, { useMemo } from 'react';
-import { View, TouchableOpacity, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
+import { createActivitySettingsStyles, createOptionButtonStyles } from './styles';
 import { Text } from '../../../components/primitives';
 import { MatchFrequency } from '../../../../types';
 import { useTheme } from '../../../state/ThemeContext';
-import { FLEX, GRID } from '../../../../shared/constants';
+import { GRID } from '../../../../shared/constants';
 
 interface ActivitySettingsSectionProps {
   matchFrequency: MatchFrequency;
@@ -38,19 +39,7 @@ function OptionButton({
   const { spacing, radii, typography, borderWidth } = useTheme();
 
   const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        selectOption: {
-          flex: FLEX.ONE,
-          padding: spacing.md,
-          borderRadius: radii.md,
-          borderWidth: borderWidth.thin,
-          alignItems: 'center',
-        } as ViewStyle,
-        selectOptionText: {
-          fontSize: typography.fontSizes.md,
-        } as TextStyle,
-      }),
+    () => createOptionButtonStyles(spacing, radii, borderWidth, typography),
     [spacing, radii, borderWidth, typography]
   );
 
@@ -84,31 +73,7 @@ export function ActivitySettingsSection(props: ActivitySettingsSectionProps): Re
   const { spacing, radii, typography } = useTheme();
 
   const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        section: {
-          padding: spacing.lg,
-          borderRadius: radii.md,
-          marginBottom: spacing.md,
-        } as ViewStyle,
-        sectionTitle: {
-          fontSize: typography.fontSizes.lg,
-          fontWeight: typography.fontWeights.bold,
-          marginBottom: spacing.md,
-        } as TextStyle,
-        selectContainer: {
-          marginBottom: spacing.lg,
-        } as ViewStyle,
-        selectLabel: {
-          fontSize: typography.fontSizes.md,
-          fontWeight: typography.fontWeights.bold,
-          marginBottom: spacing.md,
-        } as TextStyle,
-        selectOptions: {
-          flexDirection: 'row',
-          gap: spacing.md,
-        } as ViewStyle,
-      }),
+    () => createActivitySettingsStyles(spacing, radii, typography),
     [spacing, radii, typography]
   );
 

@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { View, ScrollView, TouchableOpacity, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { View, ScrollView, TouchableOpacity } from 'react-native';
+import { createFilterSectionStyles } from './styles';
 import { Text } from '../../../components/primitives';
 import { MatchStatus } from '../../../../types';
 import { useTheme } from '../../../state/ThemeContext';
@@ -45,40 +46,7 @@ export function FilterSection({
   const filters = createFilters(labels);
 
   const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        section: {
-          padding: spacing.lg,
-          backgroundColor: colors.backgroundPrimary,
-          marginTop: spacing.sm,
-        } as ViewStyle,
-        sectionTitle: {
-          fontSize: typography.fontSizes.lg,
-          fontWeight: typography.fontWeights.bold,
-          marginBottom: spacing.lg,
-        } as TextStyle,
-        filterScroll: {
-          flexDirection: 'row',
-        } as ViewStyle,
-        filterChip: {
-          paddingHorizontal: spacing.lg,
-          paddingVertical: spacing.sm,
-          backgroundColor: colors.backgroundSecondary,
-          borderRadius: radii['2xl'],
-          marginRight: spacing.sm,
-        } as ViewStyle,
-        filterChipActive: {
-          backgroundColor: colors.primary,
-        } as ViewStyle,
-        filterChipText: {
-          fontSize: typography.fontSizes.sm,
-          fontWeight: typography.fontWeights.bold,
-          color: colors.textSecondary,
-        } as TextStyle,
-        filterChipTextActive: {
-          color: colors.textInverse,
-        } as TextStyle,
-      }),
+    () => createFilterSectionStyles(colors, spacing, radii, typography),
     [colors, spacing, radii, typography]
   );
 

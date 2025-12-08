@@ -1,33 +1,31 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  RefreshControl,
-} from 'react-native';
+import { View, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import i18next from 'i18next';
 import { useTranslation } from 'react-i18next';
+import {
+  screenStyles,
+  summaryStyles,
+  sectionStyles,
+  positionCardStyles,
+  memberCardStyles,
+  assignButtonStyles,
+  infoBannerStyles,
+  footerStyles,
+} from './directive/styles';
 import { userService } from '../../../infrastructure/repositories/userService';
 import {
   ALERT_BUTTON_STYLE,
   DIRECTIVE_POSITION_IDS,
   ICONS,
   LOG_MESSAGES,
-  MESSAGES,
-  BORDERS,
-  DIMENSIONS,
-  FLEX,
-  SHADOW_OFFSET,
   SINGLE_SPACE,
-  TYPOGRAPHY,
 } from '../../../shared/constants';
 import { logger } from '../../../shared/utils/logger';
 import { UserRole } from '../../../types';
 import { SelectionModal, Text, PageHeader } from '../../components/primitives';
 import { useAuth } from '../../state/AuthContext';
-import { mobileTypography, mobileIconSizes, layoutConstants } from '../../theme';
+import { mobileIconSizes } from '../../theme';
 import { designTokens } from '../../theme/designTokens';
 import type { User } from '../../../types';
 
@@ -117,7 +115,7 @@ function useDirectiveData(clubId?: string): UseDirectiveDataReturn {
       }
     } catch (error) {
       logger.error(LOG_MESSAGES.SCREENS.CLUB_DIRECTIVE.FAILED_TO_LOAD_DATA, error as Error);
-      Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_LOAD_DIRECTIVE);
+      Alert.alert(i18next.t('common.error'), i18next.t('errors.failedToLoadDirective'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -147,28 +145,28 @@ function SummaryBanner({
   t: TranslationFn;
 }): React.JSX.Element {
   return (
-    <View style={styles.summaryBanner}>
-      <View style={styles.summaryItem}>
+    <View style={summaryStyles.banner}>
+      <View style={summaryStyles.item}>
         <MaterialCommunityIcons
           name={ICONS.ACCOUNT_CHECK}
           size={mobileIconSizes.medium}
           color={designTokens.colors.success}
         />
-        <Text style={styles.summaryText}>
-          <Text style={styles.summaryBold}>{assignedCount}</Text>
+        <Text style={summaryStyles.text}>
+          <Text style={summaryStyles.bold}>{assignedCount}</Text>
           {SINGLE_SPACE}
           {t('screens.clubDirective.assigned')}
         </Text>
       </View>
-      <View style={styles.summarySeparator} />
-      <View style={styles.summaryItem}>
+      <View style={summaryStyles.separator} />
+      <View style={summaryStyles.item}>
         <MaterialCommunityIcons
           name={ICONS.ACCOUNT_CLOCK}
           size={mobileIconSizes.medium}
           color={designTokens.colors.warning}
         />
-        <Text style={styles.summaryText}>
-          <Text style={styles.summaryBold}>{vacantCount}</Text>
+        <Text style={summaryStyles.text}>
+          <Text style={summaryStyles.bold}>{vacantCount}</Text>
           {SINGLE_SPACE}
           {t('screens.clubDirective.vacant')}
         </Text>
@@ -188,29 +186,29 @@ function AssignedPositionCard({
   t: TranslationFn;
 }): React.JSX.Element {
   return (
-    <View style={styles.positionCard}>
-      <View style={[styles.positionIcon, { backgroundColor: `${position.color}20` }]}>
+    <View style={positionCardStyles.card}>
+      <View style={[positionCardStyles.icon, { backgroundColor: `${position.color}20` }]}>
         <MaterialCommunityIcons
           name={position.icon as typeof ICONS.CHECK}
           size={mobileIconSizes.xlarge}
           color={position.color}
         />
       </View>
-      <View style={styles.positionContent}>
-        <View style={styles.positionHeader}>
-          <Text style={styles.positionTitle}>{t(position.titleKey)}</Text>
+      <View style={positionCardStyles.content}>
+        <View style={positionCardStyles.header}>
+          <Text style={positionCardStyles.title}>{t(position.titleKey)}</Text>
         </View>
-        <View style={styles.memberCard}>
-          <View style={[styles.memberAvatar, { backgroundColor: position.color }]}>
-            <Text style={styles.memberAvatarText}>
+        <View style={memberCardStyles.card}>
+          <View style={[memberCardStyles.avatar, { backgroundColor: position.color }]}>
+            <Text style={memberCardStyles.avatarText}>
               {position.memberName?.charAt(0).toUpperCase()}
             </Text>
           </View>
-          <View style={styles.memberInfo}>
-            <Text style={styles.memberName}>{position.memberName}</Text>
-            <Text style={styles.memberEmail}>{position.memberEmail}</Text>
+          <View style={memberCardStyles.info}>
+            <Text style={memberCardStyles.name}>{position.memberName}</Text>
+            <Text style={memberCardStyles.email}>{position.memberEmail}</Text>
           </View>
-          <TouchableOpacity style={styles.removeButton} onPress={onRemove}>
+          <TouchableOpacity style={memberCardStyles.removeButton} onPress={onRemove}>
             <MaterialCommunityIcons
               name={ICONS.CLOSE_CIRCLE}
               size={mobileIconSizes.medium}
@@ -234,26 +232,26 @@ function VacantPositionCard({
   t: TranslationFn;
 }): React.JSX.Element {
   return (
-    <View style={styles.positionCard}>
-      <View style={[styles.positionIcon, { backgroundColor: `${position.color}20` }]}>
+    <View style={positionCardStyles.card}>
+      <View style={[positionCardStyles.icon, { backgroundColor: `${position.color}20` }]}>
         <MaterialCommunityIcons
           name={position.icon as typeof ICONS.CHECK}
           size={mobileIconSizes.xlarge}
           color={position.color}
         />
       </View>
-      <View style={styles.positionContent}>
-        <View style={styles.positionHeader}>
-          <Text style={styles.positionTitle}>{t(position.titleKey)}</Text>
+      <View style={positionCardStyles.content}>
+        <View style={positionCardStyles.header}>
+          <Text style={positionCardStyles.title}>{t(position.titleKey)}</Text>
         </View>
-        <Text style={styles.positionDescription}>{t(position.descriptionKey)}</Text>
-        <TouchableOpacity style={styles.assignButton} onPress={onAssign}>
+        <Text style={positionCardStyles.description}>{t(position.descriptionKey)}</Text>
+        <TouchableOpacity style={assignButtonStyles.button} onPress={onAssign}>
           <MaterialCommunityIcons
             name={ICONS.ACCOUNT_PLUS}
             size={mobileIconSizes.small}
             color={designTokens.colors.primary}
           />
-          <Text style={styles.assignButtonText}>{t('screens.clubDirective.assignMember')}</Text>
+          <Text style={assignButtonStyles.text}>{t('screens.clubDirective.assignMember')}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -318,7 +316,7 @@ function useDirectiveHandlers(
       );
       setSelectMemberModalVisible(false);
       Alert.alert(
-        MESSAGES.TITLES.MEMBER_ASSIGNED_TO_POSITION,
+        t('titles.memberAssigned'),
         t('screens.clubDirective.memberAssignedMessage', {
           memberName: member.name,
           positionTitle: t(currentPosition.titleKey),
@@ -347,14 +345,10 @@ function useDirectiveHandlers(
           clearPosition(existing.id);
           assignMemberToPosition(member);
         };
-        Alert.alert(
-          MESSAGES.TITLES.MEMBER_ALREADY_ASSIGNED,
-          MESSAGES.WARNINGS.MEMBER_ALREADY_IN_POSITION,
-          [
-            { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
-            { text: t('screens.clubDirective.reassign'), onPress: onReassign },
-          ]
-        );
+        Alert.alert(t('titles.memberAlreadyAssigned'), t('warnings.memberAlreadyInPosition'), [
+          { text: t('common.cancel'), style: ALERT_BUTTON_STYLE.CANCEL },
+          { text: t('screens.clubDirective.reassign'), onPress: onReassign },
+        ]);
         return;
       }
       assignMemberToPosition(member);
@@ -364,8 +358,8 @@ function useDirectiveHandlers(
 
   const handleRemoveMember = useCallback(
     (pos: DirectivePosition): void => {
-      Alert.alert(MESSAGES.TITLES.REMOVE_MEMBER, MESSAGES.WARNINGS.CONFIRM_REMOVE_MEMBER, [
-        { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
+      Alert.alert(t('titles.removeMember'), t('warnings.confirmRemoveMember'), [
+        { text: t('common.cancel'), style: ALERT_BUTTON_STYLE.CANCEL },
         {
           text: t('screens.clubDirective.remove'),
           style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
@@ -405,8 +399,8 @@ function PositionSection({
     return null;
   }
   return (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{t(titleKey)}</Text>
+    <View style={sectionStyles.section}>
+      <Text style={sectionStyles.title}>{t(titleKey)}</Text>
       {positions.map(renderCard)}
     </View>
   );
@@ -414,27 +408,27 @@ function PositionSection({
 
 function InfoBanner({ t }: { t: TranslationFn }): React.JSX.Element {
   return (
-    <View style={styles.infoBanner}>
+    <View style={infoBannerStyles.banner}>
       <MaterialCommunityIcons
         name={ICONS.INFORMATION}
         size={mobileIconSizes.medium}
         color={designTokens.colors.info}
       />
-      <Text style={styles.infoText}>{t('screens.clubDirective.infoText')}</Text>
+      <Text style={infoBannerStyles.text}>{t('screens.clubDirective.infoText')}</Text>
     </View>
   );
 }
 
 function SaveFooter({ onSave, t }: { onSave: () => void; t: TranslationFn }): React.JSX.Element {
   return (
-    <View style={styles.footer}>
-      <TouchableOpacity style={styles.saveButton} onPress={onSave}>
+    <View style={footerStyles.footer}>
+      <TouchableOpacity style={footerStyles.saveButton} onPress={onSave}>
         <MaterialCommunityIcons
           name={ICONS.CONTENT_SAVE}
           size={mobileIconSizes.large}
           color={designTokens.colors.textInverse}
         />
-        <Text style={styles.saveButtonText}>{t('screens.clubDirective.saveDirective')}</Text>
+        <Text style={footerStyles.saveButtonText}>{t('screens.clubDirective.saveDirective')}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -450,11 +444,11 @@ const ClubDirectiveScreen = (): React.JSX.Element => {
 
   const handleSave = (): void => {
     if (h.assignedPositions.length === 0) {
-      Alert.alert(MESSAGES.TITLES.NO_ASSIGNMENTS, t('screens.clubDirective.assignAtLeastOne'));
+      Alert.alert(t('titles.noAssignments'), t('screens.clubDirective.assignAtLeastOne'));
       return;
     }
     const msg = t('screens.clubDirective.saveSuccess', { count: h.assignedPositions.length });
-    Alert.alert(MESSAGES.TITLES.DIRECTIVE_SAVED_TITLE, msg);
+    Alert.alert(t('titles.directiveSaved'), msg);
   };
 
   const modalItems = clubMembers.map((m) => {
@@ -472,7 +466,7 @@ const ClubDirectiveScreen = (): React.JSX.Element => {
   });
 
   return (
-    <View style={styles.container}>
+    <View style={screenStyles.container}>
       <PageHeader
         showActions
         title={t('screens.clubDirective.title')}
@@ -484,7 +478,7 @@ const ClubDirectiveScreen = (): React.JSX.Element => {
         t={t}
       />
       <ScrollView
-        style={styles.content}
+        style={screenStyles.content}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <PositionSection
@@ -533,170 +527,5 @@ const ClubDirectiveScreen = (): React.JSX.Element => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: FLEX.ONE,
-    backgroundColor: designTokens.colors.backgroundSecondary,
-  },
-  summaryBanner: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    justifyContent: layoutConstants.justifyContent.spaceAround,
-    backgroundColor: designTokens.colors.backgroundPrimary,
-    paddingVertical: designTokens.spacing.lg,
-    borderBottomWidth: designTokens.borderWidth.thin,
-    borderBottomColor: designTokens.colors.borderLight,
-  },
-  summaryItem: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    gap: designTokens.spacing.sm,
-  },
-  summaryText: {
-    ...mobileTypography.bodySmall,
-    color: designTokens.colors.textSecondary,
-  },
-  summaryBold: {
-    ...mobileTypography.bodyMediumBold,
-    color: designTokens.colors.textPrimary,
-  },
-  summarySeparator: {
-    width: BORDERS.WIDTH.THIN,
-    height: DIMENSIONS.HEIGHT.DIVIDER,
-    backgroundColor: designTokens.colors.borderLight,
-  },
-  content: {
-    flex: FLEX.ONE,
-  },
-  section: {
-    padding: designTokens.spacing.xl,
-  },
-  sectionTitle: {
-    ...mobileTypography.heading3,
-    marginBottom: designTokens.spacing.lg,
-  },
-  positionCard: {
-    flexDirection: layoutConstants.flexDirection.row,
-    backgroundColor: designTokens.colors.backgroundPrimary,
-    padding: designTokens.spacing.lg,
-    marginBottom: designTokens.spacing.md,
-    borderRadius: designTokens.borderRadius.lg,
-    shadowColor: designTokens.colors.textPrimary,
-    shadowOffset: SHADOW_OFFSET.MD,
-    shadowOpacity: designTokens.shadows.sm.shadowOpacity,
-    shadowRadius: designTokens.shadows.sm.shadowRadius,
-    elevation: designTokens.shadows.sm.elevation,
-  },
-  positionIcon: {
-    width: DIMENSIONS.SIZE.AVATAR_MEDIUM,
-    height: DIMENSIONS.SIZE.AVATAR_MEDIUM,
-    borderRadius: designTokens.borderRadius['4xl'],
-    justifyContent: layoutConstants.justifyContent.center,
-    alignItems: layoutConstants.alignItems.center,
-    marginRight: designTokens.spacing.md,
-  },
-  positionContent: {
-    flex: FLEX.ONE,
-  },
-  positionHeader: {
-    marginBottom: designTokens.spacing.sm,
-  },
-  positionTitle: {
-    ...mobileTypography.bodyLargeBold,
-  },
-  positionDescription: {
-    ...mobileTypography.bodySmall,
-    color: designTokens.colors.textSecondary,
-    marginBottom: designTokens.spacing.md,
-  },
-  memberCard: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    backgroundColor: designTokens.colors.inputBackground,
-    padding: designTokens.spacing.md,
-    borderRadius: designTokens.borderRadius.xl,
-    marginTop: designTokens.spacing.sm,
-  },
-  memberAvatar: {
-    width: DIMENSIONS.SIZE.ICON_BUTTON_SMALL,
-    height: DIMENSIONS.SIZE.ICON_BUTTON_SMALL,
-    borderRadius: designTokens.borderRadius['3xl'],
-    backgroundColor: designTokens.colors.primary,
-    justifyContent: layoutConstants.justifyContent.center,
-    alignItems: layoutConstants.alignItems.center,
-    marginRight: designTokens.spacing.md,
-  },
-  memberAvatarText: {
-    ...mobileTypography.bodyMediumBold,
-    color: designTokens.colors.textInverse,
-  },
-  memberInfo: {
-    flex: FLEX.ONE,
-  },
-  memberName: {
-    ...mobileTypography.bodyMediumBold,
-  },
-  memberEmail: {
-    ...mobileTypography.caption,
-    color: designTokens.colors.textSecondary,
-    marginTop: designTokens.spacing.xxs,
-  },
-  removeButton: {
-    padding: designTokens.spacing.sm,
-  },
-  assignButton: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    justifyContent: layoutConstants.justifyContent.center,
-    paddingVertical: designTokens.spacing.md,
-    paddingHorizontal: designTokens.spacing.lg,
-    borderRadius: designTokens.borderRadius.md,
-    borderWidth: designTokens.borderWidth.thin,
-    borderColor: designTokens.colors.primary,
-    borderStyle: BORDERS.STYLE.DASHED,
-    gap: designTokens.spacing.sm,
-    marginTop: designTokens.spacing.sm,
-  },
-  assignButtonText: {
-    ...mobileTypography.labelBold,
-    color: designTokens.colors.primary,
-  },
-  infoBanner: {
-    flexDirection: layoutConstants.flexDirection.row,
-    backgroundColor: designTokens.colors.infoLight,
-    padding: designTokens.spacing.lg,
-    margin: designTokens.spacing.xl,
-    borderRadius: designTokens.borderRadius.xl,
-    gap: designTokens.spacing.md,
-    borderLeftWidth: BORDERS.WIDTH.MEDIUM,
-    borderLeftColor: designTokens.colors.info,
-  },
-  infoText: {
-    ...mobileTypography.bodySmall,
-    color: designTokens.colors.info,
-    flex: FLEX.ONE,
-    lineHeight: TYPOGRAPHY.LINE_HEIGHT.LG,
-  },
-  footer: {
-    padding: designTokens.spacing.xl,
-    backgroundColor: designTokens.colors.backgroundPrimary,
-    borderTopWidth: designTokens.borderWidth.thin,
-    borderTopColor: designTokens.colors.borderLight,
-  },
-  saveButton: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    justifyContent: layoutConstants.justifyContent.center,
-    backgroundColor: designTokens.colors.primary,
-    paddingVertical: designTokens.spacing.md,
-    borderRadius: designTokens.borderRadius.xl,
-    gap: designTokens.spacing.md,
-  },
-  saveButtonText: {
-    ...mobileTypography.button,
-    color: designTokens.colors.textInverse,
-  },
-});
 
 export default ClubDirectiveScreen;

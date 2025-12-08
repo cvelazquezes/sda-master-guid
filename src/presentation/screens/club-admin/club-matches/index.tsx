@@ -1,13 +1,13 @@
 import React, { useMemo } from 'react';
-import { View, ScrollView, RefreshControl, StyleSheet } from 'react-native';
+import { View, ScrollView, RefreshControl } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { createScreenStyles } from './styles';
 import { FilterSection } from './FilterSection';
 import { MatchDetailModal } from './MatchDetailModal';
 import { MatchesList } from './MatchesList';
 import { RoundsSection } from './RoundsSection';
 import { StatsSection } from './StatsSection';
 import { useClubMatches } from './useClubMatches';
-import { FLEX } from '../../../../shared/constants';
 import { PageHeader } from '../../../components/primitives';
 import { useAuth } from '../../../state/AuthContext';
 import { useTheme } from '../../../state/ThemeContext';
@@ -63,29 +63,17 @@ function useLabels(t: (key: string) => string): {
 const ClubMatchesScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { colors, spacing, borderWidth, typography } = useTheme();
+  const { colors, spacing } = useTheme();
   const data = useClubMatches(user?.clubId);
   const labels = useLabels(t);
 
-  const dynamicStyles = useMemo(
-    () =>
-      StyleSheet.create({
-        container: {
-          flex: FLEX.ONE,
-          backgroundColor: colors.backgroundSecondary,
-        },
-        content: {
-          padding: spacing.lg,
-        },
-      }),
-    [colors, spacing]
-  );
+  const styles = useMemo(() => createScreenStyles(colors, spacing), [colors, spacing]);
 
   const refreshControl = <RefreshControl refreshing={data.refreshing} onRefresh={data.onRefresh} />;
 
   return (
     <>
-      <ScrollView style={dynamicStyles.container} refreshControl={refreshControl}>
+      <ScrollView style={styles.container} refreshControl={refreshControl}>
         <PageHeader
           showActions
           title={t('screens.clubMatches.title')}
@@ -102,7 +90,7 @@ const ClubMatchesScreen = (): React.JSX.Element => {
           labels={labels.filter}
           onFilterChange={data.setFilterStatus}
         />
-        <View style={dynamicStyles.content}>
+        <View style={styles.content}>
           <MatchesList
             matches={data.filteredMatches}
             filterStatus={data.filterStatus}

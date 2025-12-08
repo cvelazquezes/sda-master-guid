@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { View, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { View } from 'react-native';
+import { createUserPreferencesStyles } from './styles';
 import { Text } from '../../../components/primitives';
 import { ThemeSwitcher } from '../../../components/features/ThemeSwitcher';
 import { LanguageSwitcher } from '../../../components/features/LanguageSwitcher';
@@ -17,22 +18,7 @@ export function UserPreferencesSection({
   const { spacing, radii, typography } = useTheme();
 
   const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        section: {
-          padding: spacing.lg,
-          borderRadius: radii.md,
-          marginBottom: spacing.md,
-        } as ViewStyle,
-        sectionTitle: {
-          fontSize: typography.fontSizes.lg,
-          fontWeight: typography.fontWeights.bold,
-          marginBottom: spacing.md,
-        } as TextStyle,
-        preferenceItem: {
-          marginBottom: spacing.sm,
-        } as ViewStyle,
-      }),
+    () => createUserPreferencesStyles(spacing, radii, typography),
     [spacing, radii, typography]
   );
 

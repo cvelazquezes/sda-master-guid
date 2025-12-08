@@ -1,230 +1,421 @@
-import { StyleSheet } from 'react-native';
-import { mobileTypography, designTokens, layoutConstants } from '../../../theme';
+/**
+ * Club Matches Screen Styles
+ * Theme-aware style factories
+ */
+import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import { FLEX } from '../../../../shared/constants';
+import type { ThemeContextType } from '../../../state/ThemeContext';
 
-export const statsStyles = StyleSheet.create({
-  container: {
-    padding: designTokens.spacing.lg,
-    backgroundColor: designTokens.colors.backgroundPrimary,
-    marginTop: designTokens.spacing.sm,
-  },
-  sectionTitle: {
-    ...mobileTypography.heading3,
-    marginBottom: designTokens.spacing.lg,
-  },
-  statsGrid: {
-    flexDirection: layoutConstants.flexDirection.row,
-    gap: designTokens.spacing.md,
-    marginBottom: designTokens.spacing.md,
-  },
-  statCard: {
-    flex: FLEX.ONE,
-    backgroundColor: designTokens.colors.inputBackground,
-    padding: designTokens.spacing.lg,
-    borderRadius: designTokens.borderRadius.lg,
-    alignItems: layoutConstants.alignItems.center,
-  },
-  statValue: {
-    ...mobileTypography.displaySmall,
-    color: designTokens.colors.primary,
-    marginBottom: designTokens.spacing.xs,
-  },
-  statLabel: {
-    ...mobileTypography.caption,
-    color: designTokens.colors.textSecondary,
-  },
-});
+// ============================================================================
+// SCREEN STYLES FACTORY
+// ============================================================================
 
-export const roundsStyles = StyleSheet.create({
-  section: {
-    padding: designTokens.spacing.lg,
-    backgroundColor: designTokens.colors.backgroundPrimary,
-    marginTop: designTokens.spacing.sm,
-  },
-  sectionTitle: {
-    ...mobileTypography.heading3,
-    marginBottom: designTokens.spacing.lg,
-  },
-  roundCard: {
-    backgroundColor: designTokens.colors.inputBackground,
-    padding: designTokens.spacing.lg,
-    borderRadius: designTokens.borderRadius.lg,
-    marginBottom: designTokens.spacing.md,
-  },
-  roundHeader: {
-    flexDirection: layoutConstants.flexDirection.row,
-    justifyContent: layoutConstants.justifyContent.spaceBetween,
-    alignItems: layoutConstants.alignItems.center,
-    marginBottom: designTokens.spacing.sm,
-  },
-  roundTitle: {
-    ...mobileTypography.bodyLargeBold,
-  },
-  roundDate: {
-    ...mobileTypography.caption,
-    color: designTokens.colors.textSecondary,
-    marginTop: designTokens.spacing.xxs,
-  },
-  roundStatusBadge: {
-    paddingHorizontal: designTokens.spacing.md,
-    paddingVertical: designTokens.spacing.sm,
-    borderRadius: designTokens.borderRadius.lg,
-  },
-  roundStatusText: {
-    ...mobileTypography.captionBold,
-  },
-  roundMatches: {
-    ...mobileTypography.bodySmall,
-    color: designTokens.colors.textSecondary,
-  },
-});
+type ScreenStyles = {
+  container: ViewStyle;
+  content: ViewStyle;
+};
 
-export const modalStyles = StyleSheet.create({
-  modalContent: {
-    padding: designTokens.spacing.xl,
-  },
-  modalSection: {
-    marginBottom: designTokens.spacing.xxl,
-  },
-  modalSectionTitle: {
-    ...mobileTypography.heading4,
-    marginBottom: designTokens.spacing.md,
-  },
-  statusBadge: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    paddingVertical: designTokens.spacing.md,
-    paddingHorizontal: designTokens.spacing.lg,
-    borderRadius: designTokens.borderRadius.lg,
-    gap: designTokens.spacing.sm,
-  },
-  statusText: {
-    ...mobileTypography.bodyLargeBold,
-  },
-  participantRow: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    padding: designTokens.spacing.md,
-    backgroundColor: designTokens.colors.inputBackground,
-    borderRadius: designTokens.borderRadius.lg,
-    marginBottom: designTokens.spacing.sm,
-    gap: designTokens.spacing.md,
-  },
-  participantAvatar: {
-    width: designTokens.componentSizes.iconContainer.lg,
-    height: designTokens.componentSizes.iconContainer.lg,
-    borderRadius: designTokens.borderRadius['3xl'],
-    backgroundColor: designTokens.colors.primary,
-    justifyContent: layoutConstants.justifyContent.center,
-    alignItems: layoutConstants.alignItems.center,
-  },
-  participantAvatarText: {
-    ...mobileTypography.heading3,
-    color: designTokens.colors.textInverse,
-  },
-  participantInfo: {
-    flex: FLEX.ONE,
-  },
-  participantName: {
-    ...mobileTypography.bodyLargeBold,
-  },
-  participantEmail: {
-    ...mobileTypography.caption,
-    color: designTokens.colors.textSecondary,
-    marginTop: designTokens.spacing.xxs,
-  },
-  participantPhone: {
-    ...mobileTypography.caption,
-    color: designTokens.colors.success,
-    marginTop: designTokens.spacing.xxs,
-  },
-});
+export const createScreenStyles = (
+  colors: ThemeContextType['colors'],
+  spacing: ThemeContextType['spacing']
+): ScreenStyles =>
+  StyleSheet.create({
+    container: {
+      flex: FLEX.ONE,
+      backgroundColor: colors.backgroundSecondary,
+    },
+    content: {
+      padding: spacing.lg,
+    },
+  });
 
-export const filterStyles = StyleSheet.create({
-  filterContainer: {
-    flexDirection: layoutConstants.flexDirection.row,
-    paddingHorizontal: designTokens.spacing.lg,
-    paddingVertical: designTokens.spacing.md,
-    gap: designTokens.spacing.sm,
-  },
-  filterButton: {
-    paddingHorizontal: designTokens.spacing.lg,
-    paddingVertical: designTokens.spacing.sm,
-    borderRadius: designTokens.borderRadius.full,
-    backgroundColor: designTokens.colors.backgroundSecondary,
-  },
-  filterButtonActive: {
-    backgroundColor: designTokens.colors.primary,
-  },
-  filterButtonText: {
-    ...mobileTypography.caption,
-    color: designTokens.colors.textSecondary,
-  },
-  filterButtonTextActive: {
-    color: designTokens.colors.textInverse,
-  },
-});
+// ============================================================================
+// FILTER SECTION STYLES FACTORY
+// ============================================================================
 
-export const matchListStyles = StyleSheet.create({
-  listContainer: {
-    padding: designTokens.spacing.lg,
-    paddingTop: designTokens.spacing.sm,
-  },
-  matchCard: {
-    backgroundColor: designTokens.colors.inputBackground,
-    padding: designTokens.spacing.lg,
-    borderRadius: designTokens.borderRadius.lg,
-    marginBottom: designTokens.spacing.md,
-  },
-  matchHeader: {
-    flexDirection: layoutConstants.flexDirection.row,
-    justifyContent: layoutConstants.justifyContent.spaceBetween,
-    alignItems: layoutConstants.alignItems.center,
-    marginBottom: designTokens.spacing.sm,
-  },
-  matchTitle: {
-    ...mobileTypography.bodyLargeBold,
-    flex: FLEX.ONE,
-  },
-  matchBadge: {
-    paddingHorizontal: designTokens.spacing.sm,
-    paddingVertical: designTokens.spacing.xxs,
-    borderRadius: designTokens.borderRadius.md,
-  },
-  matchBadgeText: {
-    ...mobileTypography.captionBold,
-  },
-  matchParticipants: {
-    ...mobileTypography.bodySmall,
-    color: designTokens.colors.textSecondary,
-  },
-  emptyContainer: {
-    alignItems: layoutConstants.alignItems.center,
-    padding: designTokens.spacing.xxl,
-  },
-  emptyText: {
-    ...mobileTypography.body,
-    color: designTokens.colors.textTertiary,
-  },
-});
+type FilterSectionStyles = {
+  section: ViewStyle;
+  sectionTitle: TextStyle;
+  filterScroll: ViewStyle;
+  filterChip: ViewStyle;
+  filterChipActive: ViewStyle;
+  filterChipText: TextStyle;
+  filterChipTextActive: TextStyle;
+};
 
-export const indexStyles = StyleSheet.create({
-  container: {
-    flex: FLEX.ONE,
-  },
-  scrollContent: {
-    paddingBottom: designTokens.spacing.xxl,
-  },
-  header: {
-    padding: designTokens.spacing.lg,
-    backgroundColor: designTokens.colors.backgroundPrimary,
-  },
-  headerTitle: {
-    ...mobileTypography.heading2,
-  },
-  headerSubtitle: {
-    ...mobileTypography.bodySmall,
-    color: designTokens.colors.textSecondary,
-    marginTop: designTokens.spacing.xxs,
-  },
-});
+export const createFilterSectionStyles = (
+  colors: ThemeContextType['colors'],
+  spacing: ThemeContextType['spacing'],
+  radii: ThemeContextType['radii'],
+  typography: ThemeContextType['typography']
+): FilterSectionStyles =>
+  StyleSheet.create({
+    section: {
+      padding: spacing.lg,
+      backgroundColor: colors.backgroundPrimary,
+      marginTop: spacing.sm,
+    },
+    sectionTitle: {
+      fontSize: typography.fontSizes.lg,
+      fontWeight: typography.fontWeights.bold,
+      marginBottom: spacing.lg,
+      color: colors.textPrimary,
+    },
+    filterScroll: {
+      flexDirection: 'row',
+    },
+    filterChip: {
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.sm,
+      backgroundColor: colors.backgroundSecondary,
+      borderRadius: radii['2xl'],
+      marginRight: spacing.sm,
+    },
+    filterChipActive: {
+      backgroundColor: colors.primary,
+    },
+    filterChipText: {
+      fontSize: typography.fontSizes.sm,
+      fontWeight: typography.fontWeights.bold,
+      color: colors.textSecondary,
+    },
+    filterChipTextActive: {
+      color: colors.textInverse,
+    },
+  });
+
+// ============================================================================
+// STATS STYLES FACTORY
+// ============================================================================
+
+export const createStatsStyles = (
+  colors: ThemeContextType['colors'],
+  spacing: ThemeContextType['spacing'],
+  radii: ThemeContextType['radii'],
+  typography: ThemeContextType['typography']
+) =>
+  StyleSheet.create({
+    container: {
+      padding: spacing.lg,
+      backgroundColor: colors.backgroundPrimary,
+      marginTop: spacing.sm,
+    },
+    sectionTitle: {
+      fontSize: typography.fontSizes.xl,
+      fontWeight: typography.fontWeights.bold,
+      marginBottom: spacing.lg,
+      color: colors.textPrimary,
+    },
+    statsGrid: {
+      flexDirection: 'row',
+      gap: spacing.md,
+      marginBottom: spacing.md,
+    },
+    statCard: {
+      flex: FLEX.ONE,
+      backgroundColor: colors.inputBackground,
+      padding: spacing.lg,
+      borderRadius: radii.lg,
+      alignItems: 'center',
+    },
+    statValue: {
+      fontSize: typography.fontSizes['3xl'],
+      fontWeight: typography.fontWeights.bold,
+      color: colors.primary,
+      marginBottom: spacing.xs,
+    },
+    statLabel: {
+      fontSize: typography.fontSizes.xs,
+      color: colors.textSecondary,
+    },
+  });
+
+// ============================================================================
+// ROUNDS STYLES FACTORY
+// ============================================================================
+
+export const createRoundsStyles = (
+  colors: ThemeContextType['colors'],
+  spacing: ThemeContextType['spacing'],
+  radii: ThemeContextType['radii'],
+  typography: ThemeContextType['typography']
+) =>
+  StyleSheet.create({
+    section: {
+      padding: spacing.lg,
+      backgroundColor: colors.backgroundPrimary,
+      marginTop: spacing.sm,
+    },
+    sectionTitle: {
+      fontSize: typography.fontSizes.xl,
+      fontWeight: typography.fontWeights.bold,
+      marginBottom: spacing.lg,
+      color: colors.textPrimary,
+    },
+    roundCard: {
+      backgroundColor: colors.inputBackground,
+      padding: spacing.lg,
+      borderRadius: radii.lg,
+      marginBottom: spacing.md,
+    },
+    roundHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: spacing.sm,
+    },
+    roundTitle: {
+      fontSize: typography.fontSizes.md,
+      fontWeight: typography.fontWeights.bold,
+      color: colors.textPrimary,
+    },
+    roundDate: {
+      fontSize: typography.fontSizes.xs,
+      color: colors.textSecondary,
+      marginTop: spacing.xxs,
+    },
+    roundStatusBadge: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      borderRadius: radii.lg,
+    },
+    roundStatusText: {
+      fontSize: typography.fontSizes.xs,
+      fontWeight: typography.fontWeights.bold,
+    },
+    roundMatches: {
+      fontSize: typography.fontSizes.sm,
+      color: colors.textSecondary,
+    },
+  });
+
+// ============================================================================
+// MODAL STYLES FACTORY
+// ============================================================================
+
+export const createModalStyles = (
+  colors: ThemeContextType['colors'],
+  spacing: ThemeContextType['spacing'],
+  radii: ThemeContextType['radii'],
+  typography: ThemeContextType['typography']
+) =>
+  StyleSheet.create({
+    modalContent: {
+      padding: spacing.xl,
+    },
+    modalSection: {
+      marginBottom: spacing.xxl,
+    },
+    modalSectionTitle: {
+      fontSize: typography.fontSizes.lg,
+      fontWeight: typography.fontWeights.bold,
+      marginBottom: spacing.md,
+      color: colors.textPrimary,
+    },
+    statusBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: spacing.md,
+      paddingHorizontal: spacing.lg,
+      borderRadius: radii.lg,
+      gap: spacing.sm,
+    },
+    statusText: {
+      fontSize: typography.fontSizes.md,
+      fontWeight: typography.fontWeights.bold,
+    },
+    participantRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: spacing.md,
+      backgroundColor: colors.inputBackground,
+      borderRadius: radii.lg,
+      marginBottom: spacing.sm,
+      gap: spacing.md,
+    },
+    participantAvatar: {
+      width: 48,
+      height: 48,
+      borderRadius: radii['3xl'],
+      backgroundColor: colors.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    participantAvatarText: {
+      fontSize: typography.fontSizes.xl,
+      fontWeight: typography.fontWeights.bold,
+      color: colors.textInverse,
+    },
+    participantInfo: {
+      flex: FLEX.ONE,
+    },
+    participantName: {
+      fontSize: typography.fontSizes.md,
+      fontWeight: typography.fontWeights.bold,
+      color: colors.textPrimary,
+    },
+    participantEmail: {
+      fontSize: typography.fontSizes.xs,
+      color: colors.textSecondary,
+      marginTop: spacing.xxs,
+    },
+    participantPhone: {
+      fontSize: typography.fontSizes.xs,
+      color: colors.success,
+      marginTop: spacing.xxs,
+    },
+  });
+
+// ============================================================================
+// FILTER STYLES FACTORY
+// ============================================================================
+
+export const createFilterStyles = (
+  colors: ThemeContextType['colors'],
+  spacing: ThemeContextType['spacing'],
+  radii: ThemeContextType['radii'],
+  typography: ThemeContextType['typography']
+) =>
+  StyleSheet.create({
+    filterContainer: {
+      flexDirection: 'row',
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.md,
+      gap: spacing.sm,
+    },
+    filterButton: {
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.sm,
+      borderRadius: radii.full,
+      backgroundColor: colors.backgroundSecondary,
+    },
+    filterButtonActive: {
+      backgroundColor: colors.primary,
+    },
+    filterButtonText: {
+      fontSize: typography.fontSizes.xs,
+      color: colors.textSecondary,
+    },
+    filterButtonTextActive: {
+      color: colors.textInverse,
+    },
+  });
+
+// ============================================================================
+// MATCH LIST STYLES FACTORY
+// ============================================================================
+
+export const createMatchListStyles = (
+  colors: ThemeContextType['colors'],
+  spacing: ThemeContextType['spacing'],
+  radii: ThemeContextType['radii'],
+  typography: ThemeContextType['typography']
+) =>
+  StyleSheet.create({
+    listContainer: {
+      padding: spacing.lg,
+      paddingTop: spacing.sm,
+    },
+    matchCard: {
+      backgroundColor: colors.inputBackground,
+      padding: spacing.lg,
+      borderRadius: radii.lg,
+      marginBottom: spacing.md,
+    },
+    matchHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: spacing.sm,
+    },
+    matchTitle: {
+      fontSize: typography.fontSizes.md,
+      fontWeight: typography.fontWeights.bold,
+      flex: FLEX.ONE,
+      color: colors.textPrimary,
+    },
+    matchBadge: {
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xxs,
+      borderRadius: radii.md,
+    },
+    matchBadgeText: {
+      fontSize: typography.fontSizes.xs,
+      fontWeight: typography.fontWeights.bold,
+    },
+    matchParticipants: {
+      fontSize: typography.fontSizes.sm,
+      color: colors.textSecondary,
+    },
+    emptyContainer: {
+      alignItems: 'center',
+      padding: spacing.xxl,
+    },
+    emptyText: {
+      fontSize: typography.fontSizes.md,
+      color: colors.textTertiary,
+    },
+  });
+
+// ============================================================================
+// INDEX STYLES FACTORY
+// ============================================================================
+
+export const createIndexStyles = (
+  colors: ThemeContextType['colors'],
+  spacing: ThemeContextType['spacing'],
+  typography: ThemeContextType['typography']
+) =>
+  StyleSheet.create({
+    container: {
+      flex: FLEX.ONE,
+      backgroundColor: colors.background,
+    },
+    scrollContent: {
+      paddingBottom: spacing.xxl,
+    },
+    header: {
+      padding: spacing.lg,
+      backgroundColor: colors.backgroundPrimary,
+    },
+    headerTitle: {
+      fontSize: typography.fontSizes['2xl'],
+      fontWeight: typography.fontWeights.bold,
+      color: colors.textPrimary,
+    },
+    headerSubtitle: {
+      fontSize: typography.fontSizes.sm,
+      color: colors.textSecondary,
+      marginTop: spacing.xxs,
+    },
+  });
+
+// ============================================================================
+// EMPTY STYLES FACTORY
+// ============================================================================
+
+export const createEmptyStyles = (
+  colors: ThemeContextType['colors'],
+  spacing: ThemeContextType['spacing'],
+  typography: ThemeContextType['typography']
+) =>
+  StyleSheet.create({
+    container: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: spacing['4xl'],
+      marginTop: spacing['4xl'],
+    },
+    text: {
+      fontSize: typography.fontSizes.xl,
+      fontWeight: typography.fontWeights.bold,
+      marginTop: spacing.lg,
+      color: colors.textPrimary,
+    },
+    subtext: {
+      fontSize: typography.fontSizes.sm,
+      color: colors.textSecondary,
+      marginTop: spacing.sm,
+      textAlign: 'center',
+    },
+  });

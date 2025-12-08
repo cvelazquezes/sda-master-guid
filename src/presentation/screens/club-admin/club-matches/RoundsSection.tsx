@@ -1,19 +1,27 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { format } from 'date-fns';
-import { Text } from '../../../components/primitives';
-import { MatchRound } from '../../../../types';
-import { useTheme } from '../../../state/ThemeContext';
+import { useTranslation } from 'react-i18next';
+import { createRoundsStyles } from './styles';
 import { DATE_FORMATS, ROUND_STATUS, DISPLAY_LIMITS } from '../../../../shared/constants';
-import { roundsStyles as styles } from './styles';
+import { Text } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
+import type { MatchRound } from '../../../../types';
 
-interface RoundsSectionProps {
+type RoundsSectionProps = {
   matchRounds: MatchRound[];
   title: string;
-}
+};
 
-function RoundCard({ round }: { round: MatchRound }): React.JSX.Element {
+function RoundCard({
+  round,
+  styles,
+}: {
+  round: MatchRound;
+  styles: ReturnType<typeof createRoundsStyles>;
+}): React.JSX.Element {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const isActive = round.status === ROUND_STATUS.ACTIVE;
   const badgeBg = isActive ? colors.successLight : colors.backgroundSecondary;
   const textColor = isActive ? colors.success : colors.textSecondary;
@@ -23,8 +31,10 @@ function RoundCard({ round }: { round: MatchRound }): React.JSX.Element {
     <View style={styles.roundCard}>
       <View style={styles.roundHeader}>
         <View>
-          <Text style={styles.roundTitle}>Round {round.id}</Text>
-          <Text style={styles.roundDate}>Created {formattedDate}</Text>
+          <Text style={styles.roundTitle}>{t('screens.clubMatches.round', { id: round.id })}</Text>
+          <Text style={styles.roundDate}>
+            {t('screens.clubMatches.createdOn', { date: formattedDate })}
+          </Text>
         </View>
         <View style={[styles.roundStatusBadge, { backgroundColor: badgeBg }]}>
           <Text style={[styles.roundStatusText, { color: textColor }]}>
@@ -32,7 +42,9 @@ function RoundCard({ round }: { round: MatchRound }): React.JSX.Element {
           </Text>
         </View>
       </View>
-      <Text style={styles.roundMatches}>{round.matches.length} matches generated</Text>
+      <Text style={styles.roundMatches}>
+        {t('screens.clubMatches.matchesGenerated', { count: round.matches.length })}
+      </Text>
     </View>
   );
 }
@@ -41,6 +53,12 @@ export function RoundsSection({
   matchRounds,
   title,
 }: RoundsSectionProps): React.JSX.Element | null {
+  const { colors, spacing, radii, typography } = useTheme();
+  const styles = useMemo(
+    () => createRoundsStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+
   if (matchRounds.length === 0) {
     return null;
   }
@@ -50,7 +68,7 @@ export function RoundsSection({
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{title}</Text>
       {displayedRounds.map((round) => (
-        <RoundCard key={round.id} round={round} />
+        <RoundCard key={round.id} round={round} styles={styles} />
       ))}
     </View>
   );

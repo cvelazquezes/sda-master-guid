@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
-import { View, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, ScrollView, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { createScreenStyles } from './styles';
 import { ActivitySettingsSection } from './ActivitySettingsSection';
 import { BasicInfoSection } from './BasicInfoSection';
 import { useClubSettings } from './useClubSettings';
 import { UserPreferencesSection } from './UserPreferencesSection';
-import { FLEX } from '../../../../shared/constants';
 import { MatchFrequency } from '../../../../types';
 import { OrganizationHierarchy } from '../../../components/features/OrganizationHierarchy';
 import { Text, PageHeader } from '../../../components/primitives';
@@ -23,16 +23,16 @@ function useFrequencyLabels(
 
 function LoadingView({
   colors,
+  styles,
   t,
 }: {
   colors: Record<string, string>;
+  styles: ReturnType<typeof createScreenStyles>;
   t: (k: string) => string;
 }): React.JSX.Element {
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
-        {t('screens.clubSettings.loading')}
-      </Text>
+    <View style={styles.container}>
+      <Text style={styles.loadingText}>{t('screens.clubSettings.loading')}</Text>
     </View>
   );
 }
@@ -44,36 +44,13 @@ const ClubSettingsScreen = (): React.JSX.Element => {
   const { club, formData, setFormData, handleSave } = useClubSettings(user?.clubId);
   const frequencyLabels = useFrequencyLabels(t);
 
-  const dynamicStyles = useMemo(
-    () =>
-      StyleSheet.create({
-        container: { flex: FLEX.ONE, backgroundColor: colors.background },
-        content: { padding: spacing.md },
-        hierarchySection: { marginBottom: spacing.md },
-        saveButton: {
-          padding: spacing.md,
-          borderRadius: borderRadius.md,
-          alignItems: 'center',
-          marginTop: spacing.sm,
-          backgroundColor: colors.primary,
-        },
-        saveButtonText: {
-          fontSize: typography.fontSizes.md,
-          fontWeight: typography.fontWeights.semibold,
-          color: colors.textInverse,
-        },
-        loadingText: {
-          textAlign: 'center',
-          marginTop: spacing['3xl'],
-          fontSize: typography.fontSizes.lg,
-          color: colors.textSecondary,
-        },
-      }),
+  const styles = useMemo(
+    () => createScreenStyles(colors, spacing, borderRadius, typography),
     [colors, spacing, borderRadius, typography]
   );
 
   if (!club) {
-    return <LoadingView colors={colors} t={t} />;
+    return <LoadingView colors={colors} styles={styles} t={t} />;
   }
 
   const hierarchyData = {
@@ -94,14 +71,14 @@ const ClubSettingsScreen = (): React.JSX.Element => {
   };
 
   return (
-    <ScrollView style={dynamicStyles.container}>
+    <ScrollView style={styles.container}>
       <PageHeader
         showActions
         title={t('screens.clubSettings.title')}
         subtitle={t('screens.clubSettings.subtitle')}
       />
-      <View style={dynamicStyles.content}>
-        <View style={dynamicStyles.hierarchySection}>
+      <View style={styles.content}>
+        <View style={styles.hierarchySection}>
           <OrganizationHierarchy
             initialExpanded
             data={hierarchyData}
@@ -126,8 +103,8 @@ const ClubSettingsScreen = (): React.JSX.Element => {
           onGroupSizeChange={(v): void => setFormData({ ...formData, groupSize: v })}
         />
         <UserPreferencesSection title={t('screens.clubSettings.userPreferences')} colors={colors} />
-        <TouchableOpacity style={dynamicStyles.saveButton} onPress={handleSave}>
-          <Text style={dynamicStyles.saveButtonText}>{t('screens.clubSettings.saveChanges')}</Text>
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+          <Text style={styles.saveButtonText}>{t('screens.clubSettings.saveChanges')}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

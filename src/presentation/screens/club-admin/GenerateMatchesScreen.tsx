@@ -1,9 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, Alert, RefreshControl } from 'react-native';
+import { View, ScrollView, Alert, RefreshControl } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { format } from 'date-fns';
+import i18next from 'i18next';
 import { useTranslation } from 'react-i18next';
+import {
+  screenStyles,
+  sectionStylesLocal,
+  roundCardStyles,
+  emptyStyles,
+} from './generate-matches/styles';
 import { clubService } from '../../../infrastructure/repositories/clubService';
 import { matchService } from '../../../infrastructure/repositories/matchService';
 import {
@@ -12,14 +19,12 @@ import {
   COMPONENT_VARIANT,
   DATE_FORMATS,
   ICONS,
-  MESSAGES,
   SCREENS,
-  FLEX,
 } from '../../../shared/constants';
-import { MATH, BORDER_WIDTH } from '../../../shared/constants/numbers';
+import { MATH } from '../../../shared/constants/numbers';
 import { Text, Button, PageHeader } from '../../components/primitives';
 import { useAuth } from '../../state/AuthContext';
-import { mobileTypography, mobileIconSizes, layoutConstants } from '../../theme';
+import { mobileIconSizes } from '../../theme';
 import { designTokens } from '../../theme/designTokens';
 import type { MatchRound, Club } from '../../../types';
 
@@ -39,7 +44,7 @@ type UseMatchRoundsDataReturn = {
 function useMatchRoundsData(clubId?: string): UseMatchRoundsDataReturn {
   const [club, setClub] = useState<Club | null>(null);
   const [matchRounds, setMatchRounds] = useState<MatchRound[]>([]);
-  const [, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -57,7 +62,7 @@ function useMatchRoundsData(clubId?: string): UseMatchRoundsDataReturn {
         roundsData.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       );
     } catch {
-      Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_LOAD_DATA);
+      Alert.alert(i18next.t('common.error'), i18next.t('errors.failedToLoadData'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -66,14 +71,17 @@ function useMatchRoundsData(clubId?: string): UseMatchRoundsDataReturn {
 
   useEffect(() => {
     if (clubId) {
-      loadData();
+      void loadData();
     }
   }, [clubId, loadData]);
 
   const onRefresh = (): void => {
     setRefreshing(true);
-    loadData();
+    void loadData();
   };
+
+  // Suppress unused variable warning - loading is managed internally
+  void loading;
 
   return { club, matchRounds, refreshing, generating, setGenerating, onRefresh, loadData };
 }
@@ -83,32 +91,33 @@ function RoundCard({ round }: { round: MatchRound }): React.JSX.Element {
   const { t } = useTranslation();
   const activityCount = round.matches.length;
   const activityLabel = t('common.activity', { count: activityCount });
+  const formattedDate = format(new Date(round.createdAt), DATE_FORMATS.DATE_FNS_DATETIME_SHORT);
   return (
-    <View style={styles.roundCard}>
-      <View style={styles.roundHeader}>
-        <View style={styles.roundInfo}>
+    <View style={roundCardStyles.card}>
+      <View style={roundCardStyles.header}>
+        <View style={roundCardStyles.info}>
           <MaterialCommunityIcons
             name={ICONS.CALENDAR_CLOCK}
             size={mobileIconSizes.large}
             color={designTokens.colors.primary}
           />
-          <View style={styles.roundDetails}>
-            <Text style={styles.roundDate}>
+          <View style={roundCardStyles.details}>
+            <Text style={roundCardStyles.date}>
               {format(new Date(round.scheduledDate), DATE_FORMATS.DATE_FNS_DATE_DISPLAY)}
             </Text>
-            <Text style={styles.roundStatus}>
+            <Text style={roundCardStyles.status}>
               {round.status.charAt(0).toUpperCase() + round.status.slice(1)}
             </Text>
           </View>
         </View>
-        <View style={styles.roundBadge}>
-          <Text style={styles.roundBadgeText}>
+        <View style={roundCardStyles.badge}>
+          <Text style={roundCardStyles.badgeText}>
             {activityCount} {activityLabel}
           </Text>
         </View>
       </View>
-      <Text style={styles.roundCreated}>
-        Created: {format(new Date(round.createdAt), DATE_FORMATS.DATE_FNS_DATETIME_SHORT)}
+      <Text style={roundCardStyles.created}>
+        {t('screens.generateMatches.createdOn', { date: formattedDate })}
       </Text>
     </View>
   );
@@ -125,25 +134,28 @@ function createGenerateHandler(
     if (!clubId) {
       return;
     }
-    Alert.alert(MESSAGES.TITLES.GENERATE_ACTIVITIES, MESSAGES.WARNINGS.CONFIRM_GENERATE_MATCHES, [
-      { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
+    Alert.alert(t('titles.generateActivities'), t('screens.generateMatches.confirmGenerate'), [
+      { text: t('common.cancel'), style: ALERT_BUTTON_STYLE.CANCEL },
       {
         text: t('screens.generateMatches.generateButton'),
-        onPress: async () => {
+        onPress: (): void => {
           setGenerating(true);
-          try {
-            await matchService.generateMatches(clubId);
-            Alert.alert(MESSAGES.TITLES.SUCCESS, MESSAGES.SUCCESS.ACTIVITIES_GENERATED);
-            loadData();
-          } catch (error: unknown) {
-            const msg =
-              error instanceof Error
-                ? error.message
-                : t('screens.generateMatches.failedToGenerate');
-            Alert.alert(MESSAGES.TITLES.ERROR, msg);
-          } finally {
-            setGenerating(false);
-          }
+          matchService
+            .generateMatches(clubId)
+            .then(() => {
+              Alert.alert(t('common.success'), t('screens.generateMatches.activitiesGenerated'));
+              void loadData();
+            })
+            .catch((error: unknown) => {
+              const msg =
+                error instanceof Error
+                  ? error.message
+                  : t('screens.generateMatches.failedToGenerate');
+              Alert.alert(t('common.error'), msg);
+            })
+            .finally(() => {
+              setGenerating(false);
+            });
         },
       },
     ]);
@@ -155,16 +167,18 @@ function createGenerateHandler(
 function ActionButtonsSection({
   generating,
   generateTitle,
+  viewAllTitle,
   onGenerate,
   onViewAll,
 }: {
   generating: boolean;
   generateTitle: string;
+  viewAllTitle: string;
   onGenerate: () => void;
   onViewAll: () => void;
 }): React.JSX.Element {
   return (
-    <View style={styles.actionsContainer}>
+    <View style={screenStyles.actionsContainer}>
       <Button
         fullWidth
         title={generateTitle}
@@ -176,7 +190,7 @@ function ActionButtonsSection({
       />
       <Button
         fullWidth
-        title={t('screens.generateMatches.viewAllActivities')}
+        title={viewAllTitle}
         icon={ICONS.VIEW_LIST}
         variant={COMPONENT_VARIANT.secondary}
         size={BUTTON_SIZE.large}
@@ -190,14 +204,14 @@ function ActionButtonsSection({
 function EmptyRoundsState({ t }: { t: TranslationFn }): React.JSX.Element {
   const iconSize = mobileIconSizes.xxlarge * MATH.SPACING_MULTIPLIER;
   return (
-    <View style={styles.emptyContainer}>
+    <View style={emptyStyles.container}>
       <MaterialCommunityIcons
         name={ICONS.ACCOUNT_HEART_OUTLINE}
         size={iconSize}
         color={designTokens.colors.textTertiary}
       />
-      <Text style={styles.emptyText}>{t('screens.generateMatches.noActivityRounds')}</Text>
-      <Text style={styles.emptySubtext}>{t('screens.generateMatches.getStarted')}</Text>
+      <Text style={emptyStyles.title}>{t('screens.generateMatches.noActivityRounds')}</Text>
+      <Text style={emptyStyles.subtitle}>{t('screens.generateMatches.getStarted')}</Text>
     </View>
   );
 }
@@ -214,8 +228,10 @@ function RoundsSection({ matchRounds, t, onViewHistory }: RoundsSectionProps): R
   const hasMoreRounds = matchRounds.length > MATH.FIVE;
 
   return (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{t('screens.generateMatches.activityRoundsHistory')}</Text>
+    <View style={sectionStylesLocal.section}>
+      <Text style={sectionStylesLocal.title}>
+        {t('screens.generateMatches.activityRoundsHistory')}
+      </Text>
       {matchRounds.length === 0 ? (
         <EmptyRoundsState t={t} />
       ) : (
@@ -238,9 +254,10 @@ const GenerateMatchesScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const navigation = useNavigation();
+  const clubId = user?.clubId ?? undefined;
   const { club, matchRounds, refreshing, generating, setGenerating, onRefresh, loadData } =
-    useMatchRoundsData(user?.clubId);
-  const handleGenerate = createGenerateHandler(user?.clubId, t, setGenerating, loadData);
+    useMatchRoundsData(clubId);
+  const handleGenerate = createGenerateHandler(clubId, t, setGenerating, loadData);
   const generateTitle = generating
     ? t('screens.generateMatches.generating')
     : t('screens.generateMatches.generateNewRound');
@@ -248,7 +265,7 @@ const GenerateMatchesScreen = (): React.JSX.Element => {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={screenStyles.container}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <PageHeader
@@ -263,10 +280,11 @@ const GenerateMatchesScreen = (): React.JSX.Element => {
             : undefined
         }
       />
-      <View style={styles.content}>
+      <View style={screenStyles.content}>
         <ActionButtonsSection
           generating={generating}
           generateTitle={generateTitle}
+          viewAllTitle={t('screens.generateMatches.viewAllActivities')}
           onGenerate={handleGenerate}
           onViewAll={navigateToMatches}
         />
@@ -275,87 +293,5 @@ const GenerateMatchesScreen = (): React.JSX.Element => {
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: FLEX.ONE,
-    backgroundColor: designTokens.colors.backgroundSecondary,
-  },
-  content: {
-    padding: designTokens.spacing.lg,
-  },
-  actionsContainer: {
-    marginBottom: designTokens.spacing.xxl,
-    gap: designTokens.spacing.md,
-  },
-  section: {
-    backgroundColor: designTokens.colors.backgroundPrimary,
-    padding: designTokens.spacing.lg,
-    borderRadius: designTokens.borderRadius.lg,
-  },
-  sectionTitle: {
-    ...mobileTypography.heading3,
-    marginBottom: designTokens.spacing.lg,
-  },
-  roundCard: {
-    backgroundColor: designTokens.colors.inputBackground,
-    padding: designTokens.spacing.lg,
-    borderRadius: designTokens.borderRadius.lg,
-    marginBottom: designTokens.spacing.md,
-    borderLeftWidth: BORDER_WIDTH.EXTRA_THICK,
-    borderLeftColor: designTokens.colors.primary,
-  },
-  roundHeader: {
-    flexDirection: layoutConstants.flexDirection.row,
-    justifyContent: layoutConstants.justifyContent.spaceBetween,
-    alignItems: layoutConstants.alignItems.center,
-    marginBottom: designTokens.spacing.sm,
-  },
-  roundInfo: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    flex: FLEX.ONE,
-  },
-  roundDetails: {
-    marginLeft: designTokens.spacing.md,
-  },
-  roundDate: {
-    ...mobileTypography.bodyLargeBold,
-  },
-  roundStatus: {
-    ...mobileTypography.caption,
-    color: designTokens.colors.textSecondary,
-    marginTop: designTokens.spacing.xs,
-  },
-  roundBadge: {
-    backgroundColor: designTokens.colors.infoLight,
-    paddingHorizontal: designTokens.spacing.md,
-    paddingVertical: designTokens.spacing.sm,
-    borderRadius: designTokens.borderRadius.lg,
-  },
-  roundBadgeText: {
-    ...mobileTypography.captionBold,
-    color: designTokens.colors.info,
-  },
-  roundCreated: {
-    ...mobileTypography.caption,
-    color: designTokens.colors.textTertiary,
-  },
-  emptyContainer: {
-    alignItems: layoutConstants.alignItems.center,
-    padding: designTokens.spacing['4xl'],
-  },
-  emptyText: {
-    ...mobileTypography.heading4,
-    color: designTokens.colors.textSecondary,
-    marginTop: designTokens.spacing.lg,
-  },
-  emptySubtext: {
-    ...mobileTypography.bodySmall,
-    color: designTokens.colors.textTertiary,
-    marginTop: designTokens.spacing.sm,
-    textAlign: layoutConstants.textAlign.center,
-  },
-});
 
 export default GenerateMatchesScreen;

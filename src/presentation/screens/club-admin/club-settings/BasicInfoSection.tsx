@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { View, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { View } from 'react-native';
+import { createSectionStyles } from './styles';
 import { Text, Input } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
 
@@ -20,19 +21,7 @@ export function BasicInfoSection(props: BasicInfoSectionProps): React.JSX.Elemen
   const { spacing, radii, typography } = useTheme();
 
   const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        section: {
-          padding: spacing.lg,
-          borderRadius: radii.md,
-          marginBottom: spacing.md,
-        } as ViewStyle,
-        sectionTitle: {
-          fontSize: typography.fontSizes.lg,
-          fontWeight: typography.fontWeights.bold,
-          marginBottom: spacing.md,
-        } as TextStyle,
-      }),
+    () => createSectionStyles(spacing, radii, typography),
     [spacing, radii, typography]
   );
 
