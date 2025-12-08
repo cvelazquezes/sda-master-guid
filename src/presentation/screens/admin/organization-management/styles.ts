@@ -349,7 +349,7 @@ export const createFilterStyles = (
     warningBanner: {
       flexDirection: 'row',
       alignItems: 'flex-start',
-      backgroundColor: colors.warningLight,
+      backgroundColor: colors.warningAlpha20,
       padding: spacing.md,
       borderRadius: radii.md,
       marginHorizontal: spacing.lg,
@@ -359,7 +359,7 @@ export const createFilterStyles = (
     warningText: {
       flex: FLEX.ONE,
       fontSize: typography.fontSizes.sm,
-      color: colors.warning,
+      color: colors.textPrimary,
       lineHeight: TYPOGRAPHY.LINE_HEIGHT.LG,
     },
   });

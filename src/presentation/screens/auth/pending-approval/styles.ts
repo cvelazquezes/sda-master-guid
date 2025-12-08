@@ -174,7 +174,7 @@ export const createNoteCardStyles = (
   StyleSheet.create({
     card: {
       flexDirection: 'row',
-      backgroundColor: colors.warningLight,
+      backgroundColor: colors.warningAlpha20,
       borderRadius: radii.lg,
       padding: spacing.lg,
       marginBottom: spacing.xxl,
@@ -185,7 +185,7 @@ export const createNoteCardStyles = (
     text: {
       flex: FLEX.ONE,
       fontSize: typography.fontSizes.sm,
-      color: colors.textSecondary,
+      color: colors.textPrimary,
       lineHeight: TYPOGRAPHY.LINE_HEIGHT.LG,
     },
   });

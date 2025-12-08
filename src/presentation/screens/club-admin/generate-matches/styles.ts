@@ -104,7 +104,7 @@ export const createRoundCardStyles = (
       marginTop: spacing.xs,
     },
     badge: {
-      backgroundColor: colors.infoLight,
+      backgroundColor: colors.infoAlpha20,
       paddingHorizontal: spacing.md,
       paddingVertical: spacing.sm,
       borderRadius: radii.lg,
@@ -112,7 +112,7 @@ export const createRoundCardStyles = (
     badgeText: {
       fontSize: typography.fontSizes.xs,
       fontWeight: typography.fontWeights.bold as TextStyle['fontWeight'],
-      color: colors.info,
+      color: colors.textPrimary,
     },
     created: {
       fontSize: typography.fontSizes.xs,

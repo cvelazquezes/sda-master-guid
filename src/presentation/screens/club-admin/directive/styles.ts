@@ -239,7 +239,7 @@ export const createInfoBannerStyles = (
   StyleSheet.create({
     banner: {
       flexDirection: 'row',
-      backgroundColor: colors.infoLight,
+      backgroundColor: colors.infoAlpha20,
       padding: spacing.lg,
       margin: spacing.xl,
       borderRadius: radii.xl,
@@ -249,7 +249,7 @@ export const createInfoBannerStyles = (
     },
     text: {
       fontSize: typography.fontSizes.sm,
-      color: colors.info,
+      color: colors.textPrimary,
       flex: FLEX.ONE,
       lineHeight: TYPOGRAPHY.LINE_HEIGHT.LG,
     },

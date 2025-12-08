@@ -43,7 +43,7 @@ export const createPendingStyles = (
 ) =>
   StyleSheet.create({
     card: {
-      backgroundColor: colors.warningLight,
+      backgroundColor: colors.warningAlpha20,
       borderRadius: radii.lg,
       marginBottom: spacing.md,
       shadowColor: colors.textPrimary,
@@ -62,7 +62,7 @@ export const createPendingStyles = (
       width: 48,
       height: 48,
       borderRadius: radii['3xl'],
-      backgroundColor: colors.warningLight,
+      backgroundColor: colors.warning,
       justifyContent: 'center',
       alignItems: 'center',
       marginRight: spacing.md,
@@ -72,7 +72,7 @@ export const createPendingStyles = (
     avatarText: {
       fontSize: typography.fontSizes.xl,
       fontWeight: typography.fontWeights.bold,
-      color: colors.warning,
+      color: colors.textInverse,
     },
     badge: {
       position: 'absolute',
@@ -85,7 +85,7 @@ export const createPendingStyles = (
       justifyContent: 'center',
       alignItems: 'center',
       borderWidth: 2,
-      borderColor: colors.warningLight,
+      borderColor: colors.warningAlpha20,
     },
     userInfo: {
       flex: FLEX.ONE,
@@ -108,7 +108,7 @@ export const createPendingStyles = (
       flexDirection: 'row',
       alignItems: 'center',
       gap: spacing.xxs,
-      backgroundColor: colors.warningLight,
+      backgroundColor: colors.warning,
       paddingHorizontal: spacing.sm,
       paddingVertical: spacing.xxs,
       borderRadius: radii.sm,
@@ -117,7 +117,7 @@ export const createPendingStyles = (
     statusText: {
       fontSize: typography.fontSizes.xs,
       fontWeight: typography.fontWeights.semibold,
-      color: colors.warning,
+      color: colors.textInverse,
       textTransform: TEXT_TRANSFORM.UPPERCASE,
       letterSpacing: TYPOGRAPHY.LETTER_SPACING.NORMAL,
     },

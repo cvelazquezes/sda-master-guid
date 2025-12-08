@@ -11,28 +11,28 @@ export function getStatusConfig(
     case PAYMENT_STATUS.PAID:
       return {
         color: colors.success,
-        bg: colors.successLight || `${colors.success}15`,
+        bg: colors.successAlpha20 || `${colors.success}20`,
         icon: ICONS.CHECK_CIRCLE,
         label: t('screens.myFees.statusPaid'),
       };
     case PAYMENT_STATUS.OVERDUE:
       return {
         color: colors.error,
-        bg: colors.errorLight || `${colors.error}15`,
+        bg: colors.errorAlpha20 || `${colors.error}20`,
         icon: ICONS.ALERT_CIRCLE,
         label: t('screens.myFees.statusOverdue'),
       };
     case PAYMENT_STATUS.PENDING:
       return {
         color: colors.warning,
-        bg: colors.warningLight || `${colors.warning}15`,
+        bg: colors.warningAlpha20 || `${colors.warning}20`,
         icon: ICONS.CLOCK_OUTLINE,
         label: t('screens.myFees.statusPending'),
       };
     default:
       return {
         color: colors.textSecondary,
-        bg: `${colors.textSecondary}15`,
+        bg: `${colors.textSecondary}20`,
         icon: ICONS.HELP_CIRCLE,
         label: t('screens.myFees.statusUnknown'),
       };
