@@ -2,7 +2,7 @@
  * SectionHeader Primitive Component
  *
  * Reusable section header with title and optional badge/action.
- * Uses Text primitive for proper theme integration.
+ * ✅ COMPLIANT: Uses theme values via useTheme() hook
  *
  * @example
  * <SectionHeader title={t('sections.overview')} />
@@ -10,10 +10,8 @@
  */
 
 import React, { ReactNode } from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
+import { View, ViewStyle } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
-import { designTokens } from '../theme/designTokens';
-import { layoutConstants } from '../theme';
 import { FLEX, TEXT_VARIANT, TEXT_WEIGHT } from '../constants';
 import { SPACING } from '../constants/numbers';
 import { Text } from './Text';
@@ -33,14 +31,39 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
   style,
   testID,
 }) => {
-  const { colors } = useTheme();
+  const { colors, spacing, radii } = useTheme();
+
+  const containerStyle: ViewStyle = {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.lg,
+  };
+
+  const titleContainerStyle: ViewStyle = {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    flex: FLEX.ONE,
+  };
+
+  const badgeStyle: ViewStyle = {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: radii.full,
+    minWidth: spacing.xxl,
+    height: SPACING.LG,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.primaryAlpha10,
+  };
 
   return (
-    <View style={[styles.container, style]} testID={testID}>
-      <View style={styles.titleContainer}>
+    <View style={[containerStyle, style]} testID={testID}>
+      <View style={titleContainerStyle}>
         <Text variant={TEXT_VARIANT.H2}>{title}</Text>
         {badge !== undefined && (
-          <View style={[styles.badge, { backgroundColor: colors.primaryAlpha10 }]}>
+          <View style={badgeStyle}>
             <Text
               variant={TEXT_VARIANT.CAPTION}
               weight={TEXT_WEIGHT.BOLD}
@@ -51,36 +74,9 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
           </View>
         )}
       </View>
-      {action && <View style={styles.actionContainer}>{action}</View>}
+      {action && <View style={{ marginLeft: spacing.md }}>{action}</View>}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    justifyContent: layoutConstants.justifyContent.spaceBetween,
-    marginBottom: designTokens.spacing.lg,
-  },
-  titleContainer: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    gap: designTokens.spacing.sm,
-    flex: FLEX.ONE,
-  },
-  badge: {
-    paddingHorizontal: designTokens.spacing.sm,
-    paddingVertical: designTokens.spacing.xs,
-    borderRadius: designTokens.borderRadius.full,
-    minWidth: designTokens.spacing.xxl,
-    height: SPACING.LG,
-    justifyContent: layoutConstants.justifyContent.center,
-    alignItems: layoutConstants.alignItems.center,
-  },
-  actionContainer: {
-    marginLeft: designTokens.spacing.md,
-  },
-});
 
 export default SectionHeader;

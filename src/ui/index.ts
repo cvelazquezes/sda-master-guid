@@ -156,5 +156,6 @@ export type {
 // Theme context and hooks
 // =============================================================================
 export { useTheme, ThemeProvider } from '../contexts/ThemeContext';
+export type { ThemeContextType } from '../contexts/ThemeContext';
 export { lightTheme, darkTheme, getTheme } from '../shared/theme';
 export type { Theme, ThemeMode as ThemeModeType } from '../shared/theme';

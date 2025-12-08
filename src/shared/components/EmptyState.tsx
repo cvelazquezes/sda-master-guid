@@ -2,7 +2,7 @@
  * EmptyState Primitive Component
  *
  * Reusable empty state component for lists and screens.
- * Uses Text primitive for proper theme integration.
+ * ✅ COMPLIANT: Uses theme values via useTheme() hook
  *
  * @example
  * <EmptyState
@@ -13,11 +13,9 @@
  */
 
 import React, { ReactNode } from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
+import { View, ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
-import { designTokens } from '../theme/designTokens';
-import { layoutConstants } from '../theme';
 import { StandardButton } from './StandardButton';
 import {
   A11Y_ROLE,
@@ -65,28 +63,41 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   style,
   testID,
 }) => {
-  const { colors } = useTheme();
+  const { colors, spacing, radii, iconSizes, opacity } = useTheme();
   const finalIconColor = iconColor || colors.textTertiary;
+
+  const containerStyle: ViewStyle = {
+    flex: FLEX.ONE,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing.xxl,
+    borderRadius: radii.lg,
+    backgroundColor: colors.surface,
+  };
 
   return (
     <View
-      style={[styles.container, { backgroundColor: colors.surface }, style]}
+      style={[containerStyle, style]}
       testID={testID}
       accessible
       accessibilityLabel={`${title}${description ? `. ${description}` : EMPTY_VALUE}`}
       accessibilityRole={A11Y_ROLE.TEXT}
     >
       {/* Icon */}
-      <View style={styles.iconContainer}>
+      <View style={{ marginBottom: spacing.lg, opacity: opacity.high }}>
         <MaterialCommunityIcons
           name={icon as typeof ICONS.CHECK}
-          size={designTokens.icon.sizes['4xl']}
+          size={iconSizes['4xl']}
           color={finalIconColor}
         />
       </View>
 
       {/* Title */}
-      <Text variant={TEXT_VARIANT.H3} align={TEXT_ALIGN.CENTER} style={styles.title}>
+      <Text
+        variant={TEXT_VARIANT.H3}
+        align={TEXT_ALIGN.CENTER}
+        style={{ marginBottom: spacing.sm }}
+      >
         {title}
       </Text>
 
@@ -96,7 +107,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           variant={TEXT_VARIANT.BODY_SMALL}
           color={TEXT_COLOR.SECONDARY}
           align={TEXT_ALIGN.CENTER}
-          style={styles.description}
+          style={{ maxWidth: DIMENSIONS.MAX_WIDTH.MESSAGE, marginBottom: spacing.lg }}
         >
           {description}
         </Text>
@@ -107,7 +118,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 
       {/* Action button */}
       {actionLabel && onAction && (
-        <View style={styles.actionContainer}>
+        <View style={{ marginTop: spacing.md }}>
           <StandardButton
             title={actionLabel}
             onPress={onAction}
@@ -120,29 +131,5 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: FLEX.ONE,
-    justifyContent: layoutConstants.justifyContent.center,
-    alignItems: layoutConstants.alignItems.center,
-    padding: designTokens.spacing.xxl,
-    borderRadius: designTokens.borderRadius.lg,
-  },
-  iconContainer: {
-    marginBottom: designTokens.spacing.lg,
-    opacity: designTokens.opacity.high,
-  },
-  title: {
-    marginBottom: designTokens.spacing.sm,
-  },
-  description: {
-    maxWidth: DIMENSIONS.MAX_WIDTH.MESSAGE,
-    marginBottom: designTokens.spacing.lg,
-  },
-  actionContainer: {
-    marginTop: designTokens.spacing.md,
-  },
-});
 
 export default EmptyState;
