@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, Card, SectionHeader } from '../../../components/primitives';
@@ -6,7 +6,7 @@ import { ThemeSwitcher } from '../../../components/features/ThemeSwitcher';
 import { LanguageSwitcher } from '../../../components/features/LanguageSwitcher';
 import { useTheme } from '../../../state/ThemeContext';
 import { ICONS, COMPONENT_VARIANT, TOUCH_OPACITY } from '../../../../shared/constants';
-import { preferencesStyles as styles } from './styles';
+import { createPreferencesStyles } from './styles';
 
 interface PreferencesSectionProps {
   timezone?: string;
@@ -20,7 +20,12 @@ interface PreferencesSectionProps {
   t: (key: string) => string;
 }
 
-function TimezoneRow({ timezone, colors, t }: PreferencesSectionProps): React.JSX.Element {
+function TimezoneRow({
+  timezone,
+  colors,
+  t,
+  styles,
+}: PreferencesSectionProps & { styles: ReturnType<typeof createPreferencesStyles> }): React.JSX.Element {
   const { iconSizes } = useTheme();
   const iconBg = { backgroundColor: colors.info + '20' };
   const value = timezone || t('screens.profile.defaultTimezone');
@@ -50,6 +55,12 @@ export function PreferencesSection({
   colors,
   t,
 }: PreferencesSectionProps): React.JSX.Element {
+  const { colors: themeColors, spacing, radii, typography } = useTheme();
+  const styles = useMemo(
+    () => createPreferencesStyles(themeColors, spacing, radii, typography),
+    [themeColors, spacing, radii, typography]
+  );
+
   return (
     <>
       <View style={styles.section}>
@@ -67,7 +78,7 @@ export function PreferencesSection({
       </View>
       <View style={styles.section}>
         <Card variant={COMPONENT_VARIANT.elevated}>
-          <TimezoneRow timezone={timezone} colors={colors} t={t} />
+          <TimezoneRow timezone={timezone} colors={colors} t={t} styles={styles} />
         </Card>
       </View>
     </>

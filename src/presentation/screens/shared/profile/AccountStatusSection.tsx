@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Switch } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, Card, SectionHeader } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
 import { ICONS, COMPONENT_VARIANT, OPACITY_HEX } from '../../../../shared/constants';
-import { accountStatusStyles as styles } from './styles';
+import { createAccountStatusStyles } from './styles';
 
 interface AccountStatusSectionProps {
   isActive: boolean;
@@ -24,9 +24,11 @@ interface AccountStatusSectionProps {
 function StatusIcon({
   isActive,
   colors,
+  styles,
 }: {
   isActive: boolean;
   colors: { success: string; textTertiary: string };
+  styles: ReturnType<typeof createAccountStatusStyles>;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   const iconBgColor = isActive
@@ -49,6 +51,12 @@ export function AccountStatusSection({
   colors,
   t,
 }: AccountStatusSectionProps): React.JSX.Element {
+  const { colors: themeColors, spacing, radii, typography } = useTheme();
+  const styles = useMemo(
+    () => createAccountStatusStyles(themeColors, spacing, radii, typography),
+    [themeColors, spacing, radii, typography]
+  );
+
   const statusLabel = isActive
     ? t('screens.profile.participating')
     : t('screens.profile.notParticipating');
@@ -62,7 +70,7 @@ export function AccountStatusSection({
       <Card variant={COMPONENT_VARIANT.elevated}>
         <View style={styles.statusContainer}>
           <View style={styles.statusInfo}>
-            <StatusIcon isActive={isActive} colors={colors} />
+            <StatusIcon isActive={isActive} colors={colors} styles={styles} />
             <View style={styles.statusText}>
               <Text style={[styles.statusLabel, { color: colors.textPrimary }]}>{statusLabel}</Text>
               <Text style={[styles.statusDescription, { color: colors.textSecondary }]}>

@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, SectionHeader, Card } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
 import { ICONS } from '../../../../shared/constants';
-import { styles } from './styles';
+import { createStyles } from './styles';
 
 interface ContactInfoSectionProps {
   email?: string;
@@ -25,7 +25,11 @@ export function ContactInfoSection({
   colors,
   t,
 }: ContactInfoSectionProps): React.JSX.Element {
-  const { iconSizes } = useTheme();
+  const { colors: themeColors, spacing, radii, typography, iconSizes } = useTheme();
+  const styles = useMemo(
+    () => createStyles(themeColors, spacing, radii, typography),
+    [themeColors, spacing, radii, typography]
+  );
   const emailBg = colors.primary + '20';
   const whatsappBg = colors.success + '20';
 

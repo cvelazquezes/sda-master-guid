@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, Card, SectionHeader } from '../../../components/primitives';
 import { User } from '../../../../types';
 import { useTheme } from '../../../state/ThemeContext';
 import { ICONS, COMPONENT_VARIANT, LIST_SEPARATOR } from '../../../../shared/constants';
-import { contactInfoStyles as styles } from './styles';
+import { createContactInfoStyles } from './styles';
 
 interface ContactInfoSectionProps {
   user: User | null;
@@ -20,6 +20,7 @@ function DetailRow({
   label,
   value,
   borderColor,
+  styles,
 }: {
   icon: string;
   iconBg: string;
@@ -27,6 +28,7 @@ function DetailRow({
   label: string;
   value: string;
   borderColor: string;
+  styles: ReturnType<typeof createContactInfoStyles>;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (
@@ -51,7 +53,12 @@ export function ContactInfoSection({
   colors,
   t,
 }: ContactInfoSectionProps): React.JSX.Element | null {
-  const { colors: themeColors } = useTheme();
+  const { colors: themeColors, spacing, radii, typography } = useTheme();
+  const styles = useMemo(
+    () => createContactInfoStyles(themeColors, spacing, radii, typography),
+    [themeColors, spacing, radii, typography]
+  );
+
   const hasWhatsapp = !!user?.whatsappNumber;
   const hasClasses = user?.classes && user.classes.length > 0;
   if (!hasWhatsapp && !hasClasses) {
@@ -74,6 +81,7 @@ export function ContactInfoSection({
               label={t('screens.profile.whatsApp')}
               value={user.whatsappNumber}
               borderColor={colors.border}
+              styles={styles}
             />
           )}
           {hasClasses && (
@@ -84,6 +92,7 @@ export function ContactInfoSection({
               label={t('screens.profile.pathfinderClasses')}
               value={user.classes.join(LIST_SEPARATOR)}
               borderColor="transparent"
+              styles={styles}
             />
           )}
         </View>

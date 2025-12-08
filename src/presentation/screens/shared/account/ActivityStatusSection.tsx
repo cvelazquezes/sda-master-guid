@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Switch } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, SectionHeader, Card } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
 import { ICONS } from '../../../../shared/constants';
-import { styles, statusStyles } from './styles';
+import { createStyles, createStatusStyles } from './styles';
 
 interface ActivityStatusSectionProps {
   isActive: boolean;
@@ -28,7 +28,16 @@ export function ActivityStatusSection({
   colors,
   t,
 }: ActivityStatusSectionProps): React.JSX.Element {
-  const { iconSizes } = useTheme();
+  const { colors: themeColors, spacing, radii, typography, iconSizes } = useTheme();
+  const styles = useMemo(
+    () => createStyles(themeColors, spacing, radii, typography),
+    [themeColors, spacing, radii, typography]
+  );
+  const statusStyles = useMemo(
+    () => createStatusStyles(themeColors, spacing, radii, typography),
+    [themeColors, spacing, radii, typography]
+  );
+
   const activeColor = isActive ? colors.success : colors.textTertiary;
   const iconBg = activeColor + '20';
   const iconName = isActive ? ICONS.ACCOUNT_CHECK : ICONS.ACCOUNT_OFF;

@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, SectionHeader, Card } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
 import { ICONS, DATE_LOCALE_OPTIONS } from '../../../../shared/constants';
 import { ApprovalStatus, Club } from '../../../../types';
-import { styles } from './styles';
+import { createStyles } from './styles';
 
 interface ClubMembershipSectionProps {
   club: Club | null;
@@ -35,6 +35,12 @@ export function ClubMembershipSection({
   colors,
   t,
 }: ClubMembershipSectionProps): React.JSX.Element {
+  const { colors: themeColors, spacing, radii, typography } = useTheme();
+  const styles = useMemo(
+    () => createStyles(themeColors, spacing, radii, typography),
+    [themeColors, spacing, radii, typography]
+  );
+
   const formatDate = (ds: string | undefined): string => {
     if (!ds) {
       return t('common.notAvailable');
@@ -57,15 +63,18 @@ export function ClubMembershipSection({
       <SectionHeader title={t('screens.account.clubMembership')} />
       <Card variant="elevated">
         <View style={styles.detailsContainer}>
-          <ClubRow club={club} colors={colors} t={t} />
-          {classes && classes.length > 0 && <ClassesRow classes={classes} colors={colors} t={t} />}
-          <MemberSinceRow date={formatDate(createdAt)} colors={colors} t={t} />
+          <ClubRow club={club} colors={colors} t={t} styles={styles} />
+          {classes && classes.length > 0 && (
+            <ClassesRow classes={classes} colors={colors} t={t} styles={styles} />
+          )}
+          <MemberSinceRow date={formatDate(createdAt)} colors={colors} t={t} styles={styles} />
           <StatusRow
             icon={getStatusIcon()}
             label={approvalLabel}
             color={approvalColor}
             colors={colors}
             t={t}
+            styles={styles}
           />
         </View>
       </Card>
@@ -77,9 +86,10 @@ interface ClubRowProps {
   club: Club | null;
   colors: { border: string; primary: string; textSecondary: string; textPrimary: string };
   t: (key: string) => string;
+  styles: ReturnType<typeof createStyles>;
 }
 
-function ClubRow({ club, colors, t }: ClubRowProps): React.JSX.Element {
+function ClubRow({ club, colors, t, styles }: ClubRowProps): React.JSX.Element {
   const { iconSizes } = useTheme();
   const iconBg = colors.primary + '20';
   return (
@@ -107,12 +117,13 @@ interface ClassesRowProps {
   classes: string[];
   colors: { border: string; info: string; primary: string; textSecondary: string };
   t: (key: string) => string;
+  styles: ReturnType<typeof createStyles>;
 }
 
-function ClassesRow({ classes, colors, t }: ClassesRowProps): React.JSX.Element {
+function ClassesRow({ classes, colors, t, styles }: ClassesRowProps): React.JSX.Element {
   const { iconSizes } = useTheme();
   const iconBg = colors.info + '20';
-  const badgeBg = colors.primary + '15';
+  const badgeBg = colors.primaryAlpha20;
   return (
     <View style={[styles.detailRow, { borderBottomColor: colors.border }]}>
       <View style={[styles.detailIconContainer, { backgroundColor: iconBg }]}>
@@ -125,7 +136,7 @@ function ClassesRow({ classes, colors, t }: ClassesRowProps): React.JSX.Element 
         <View style={styles.classesContainer}>
           {classes.map((cls) => (
             <View key={cls} style={[styles.classBadge, { backgroundColor: badgeBg }]}>
-              <Text style={[styles.classBadgeText, { color: colors.primary }]}>{cls}</Text>
+              <Text style={[styles.classBadgeText, { color: colors.textPrimary }]}>{cls}</Text>
             </View>
           ))}
         </View>
@@ -138,9 +149,10 @@ interface MemberSinceRowProps {
   date: string;
   colors: { border: string; textTertiary: string; textSecondary: string; textPrimary: string };
   t: (key: string) => string;
+  styles: ReturnType<typeof createStyles>;
 }
 
-function MemberSinceRow({ date, colors, t }: MemberSinceRowProps): React.JSX.Element {
+function MemberSinceRow({ date, colors, t, styles }: MemberSinceRowProps): React.JSX.Element {
   const { iconSizes } = useTheme();
   const iconBg = colors.textTertiary + '20';
   return (
@@ -168,9 +180,10 @@ interface StatusRowProps {
   color: string;
   colors: { textSecondary: string };
   t: (key: string) => string;
+  styles: ReturnType<typeof createStyles>;
 }
 
-function StatusRow({ icon, label, color, colors, t }: StatusRowProps): React.JSX.Element {
+function StatusRow({ icon, label, color, colors, t, styles }: StatusRowProps): React.JSX.Element {
   const { iconSizes } = useTheme();
   const iconBg = color + '20';
   return (

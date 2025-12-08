@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, Card } from '../../../components/primitives';
@@ -12,7 +12,7 @@ import {
   TEXT_WEIGHT,
 } from '../../../../shared/constants';
 import { getRoleIcon, getRoleLabel, getRoleColor } from './profileUtils';
-import { profileHeaderStyles as styles } from './styles';
+import { createProfileHeaderStyles } from './styles';
 
 interface ProfileHeaderProps {
   user: User | null;
@@ -27,7 +27,11 @@ export function ProfileHeader({
   colors,
   t,
 }: ProfileHeaderProps): React.JSX.Element {
-  const { colors: themeColors } = useTheme();
+  const { colors: themeColors, spacing, radii, typography } = useTheme();
+  const styles = useMemo(
+    () => createProfileHeaderStyles(themeColors, spacing, radii, typography),
+    [themeColors, spacing, radii, typography]
+  );
   const roleColor = getRoleColor(user?.role, colors.primary);
   const cardStyle = [styles.profileCard, { backgroundColor: roleColor }];
   const overlayLightStrong = 'rgba(255, 255, 255, 0.8)';
@@ -36,7 +40,7 @@ export function ProfileHeader({
     <View style={styles.headerSection}>
       <Card variant={COMPONENT_VARIANT.elevated} style={cardStyle}>
         <View style={styles.profileHeader}>
-          <AvatarSection roleColor={roleColor} role={user?.role} />
+          <AvatarSection roleColor={roleColor} role={user?.role} styles={styles} />
           <Text
             variant={TEXT_VARIANT.H2}
             style={{ color: themeColors.textOnPrimary }}
@@ -51,8 +55,8 @@ export function ProfileHeader({
           >
             {user?.email || t('screens.account.defaultEmail')}
           </Text>
-          <RoleBadge role={user?.role} t={t} />
-          {user?.role !== UserRole.ADMIN && <StatsRow user={user} isActive={isActive} t={t} />}
+          <RoleBadge role={user?.role} t={t} styles={styles} />
+          {user?.role !== UserRole.ADMIN && <StatsRow user={user} isActive={isActive} t={t} styles={styles} />}
         </View>
       </Card>
     </View>
@@ -62,9 +66,11 @@ export function ProfileHeader({
 function AvatarSection({
   roleColor,
   role,
+  styles,
 }: {
   roleColor: string;
   role: UserRole | undefined;
+  styles: ReturnType<typeof createProfileHeaderStyles>;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   const overlayLight = 'rgba(255, 255, 255, 0.2)';
@@ -87,9 +93,11 @@ function AvatarSection({
 function RoleBadge({
   role,
   t,
+  styles,
 }: {
   role: UserRole | undefined;
   t: (key: string) => string;
+  styles: ReturnType<typeof createProfileHeaderStyles>;
 }): React.JSX.Element {
   const { colors: themeColors, iconSizes } = useTheme();
   const overlayLightStrong = 'rgba(255, 255, 255, 0.8)';
@@ -115,10 +123,12 @@ function StatsRow({
   user,
   isActive,
   t,
+  styles,
 }: {
   user: User | null;
   isActive: boolean;
   t: (key: string, options?: Record<string, unknown>) => string;
+  styles: ReturnType<typeof createProfileHeaderStyles>;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   const overlayLightStrong = 'rgba(255, 255, 255, 0.8)';

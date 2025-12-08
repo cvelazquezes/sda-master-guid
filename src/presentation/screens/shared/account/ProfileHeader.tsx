@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, Card } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
-import { styles } from './styles';
+import { createStyles } from './styles';
 
 interface ProfileHeaderProps {
   name: string;
@@ -24,7 +24,12 @@ export function ProfileHeader({
   colors,
   t,
 }: ProfileHeaderProps): React.JSX.Element {
-  const { iconSizes } = useTheme();
+  const { colors: themeColors, spacing, radii, typography, iconSizes } = useTheme();
+  const styles = useMemo(
+    () => createStyles(themeColors, spacing, radii, typography),
+    [themeColors, spacing, radii, typography]
+  );
+
   return (
     <View style={styles.section}>
       <Card variant="elevated" style={styles.profileCard}>

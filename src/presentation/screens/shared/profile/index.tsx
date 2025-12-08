@@ -1,10 +1,10 @@
-import React from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import React, { useMemo } from 'react';
+import { ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { createScreenStyles } from './styles';
 import { useAuth } from '../../../state/AuthContext';
 import { useTheme } from '../../../state/ThemeContext';
 import { UserRole } from '../../../../types';
-import { FLEX } from '../../../../shared/constants';
 import { useProfileState } from './useProfileState';
 import { ProfileHeader } from './ProfileHeader';
 import { PreferencesSection } from './PreferencesSection';
@@ -16,6 +16,7 @@ const ProfileScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { colors } = useTheme();
+  const screenStyles = useMemo(() => createScreenStyles(colors), [colors]);
   const { isActive, loading, handleToggleActive, handleLogout } = useProfileState();
 
   const logoutLabels = {
@@ -24,7 +25,7 @@ const ProfileScreen = (): React.JSX.Element => {
     version: t('screens.settings.version', { version: '1.0.0' }),
   };
 
-  const containerStyle = [styles.container, { backgroundColor: colors.background }];
+  const containerStyle = [screenStyles.container, { backgroundColor: colors.background }];
 
   return (
     <ScrollView style={containerStyle} showsVerticalScrollIndicator={false}>
@@ -44,11 +45,5 @@ const ProfileScreen = (): React.JSX.Element => {
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: FLEX.ONE,
-  },
-});
 
 export default ProfileScreen;

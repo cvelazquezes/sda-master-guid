@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, SectionHeader, Card } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
 import { ICONS, APP_VERSION, TOUCH_OPACITY } from '../../../../shared/constants';
-import { styles } from './styles';
+import { createStyles } from './styles';
 
 interface AboutSectionProps {
   colors: {
@@ -18,20 +18,32 @@ interface AboutSectionProps {
 }
 
 export function AboutSection({ colors, t }: AboutSectionProps): React.JSX.Element {
+  const { colors: themeColors, spacing, radii, typography } = useTheme();
+  const styles = useMemo(
+    () => createStyles(themeColors, spacing, radii, typography),
+    [themeColors, spacing, radii, typography]
+  );
+
   return (
     <View style={styles.section}>
       <SectionHeader title={t('screens.account.about')} />
       <Card variant="elevated">
         <View style={styles.detailsContainer}>
-          <VersionRow colors={colors} t={t} />
-          <PrivacyRow colors={colors} t={t} />
+          <VersionRow colors={colors} t={t} styles={styles} />
+          <PrivacyRow colors={colors} t={t} styles={styles} />
         </View>
       </Card>
     </View>
   );
 }
 
-function VersionRow({ colors, t }: AboutSectionProps): React.JSX.Element {
+interface VersionRowProps {
+  colors: AboutSectionProps['colors'];
+  t: (key: string) => string;
+  styles: ReturnType<typeof createStyles>;
+}
+
+function VersionRow({ colors, t, styles }: VersionRowProps): React.JSX.Element {
   const { iconSizes } = useTheme();
   const iconBg = colors.textTertiary + '20';
   return (
@@ -53,7 +65,7 @@ function VersionRow({ colors, t }: AboutSectionProps): React.JSX.Element {
   );
 }
 
-function PrivacyRow({ colors, t }: AboutSectionProps): React.JSX.Element {
+function PrivacyRow({ colors, t, styles }: VersionRowProps): React.JSX.Element {
   const { iconSizes } = useTheme();
   const iconBg = colors.primary + '20';
   return (

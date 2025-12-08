@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
 import { ICONS, TOUCH_OPACITY } from '../../../../shared/constants';
-import { styles, logoutStyles } from './styles';
+import { createStyles, createLogoutStyles } from './styles';
 
 interface LogoutSectionProps {
   onLogout: () => void;
@@ -13,7 +13,16 @@ interface LogoutSectionProps {
 }
 
 export function LogoutSection({ onLogout, colors, t }: LogoutSectionProps): React.JSX.Element {
-  const { iconSizes } = useTheme();
+  const { colors: themeColors, spacing, radii, typography, iconSizes } = useTheme();
+  const styles = useMemo(
+    () => createStyles(themeColors, spacing, radii, typography),
+    [themeColors, spacing, radii, typography]
+  );
+  const logoutStyles = useMemo(
+    () => createLogoutStyles(themeColors, spacing, radii, typography),
+    [themeColors, spacing, radii, typography]
+  );
+
   const buttonBg = colors.error + '15';
   return (
     <View style={styles.section}>

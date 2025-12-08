@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../state/AuthContext';
@@ -6,7 +6,7 @@ import { useTheme } from '../../../state/ThemeContext';
 import { UserRole } from '../../../../types';
 import { PageHeader } from '../../../components/primitives';
 import { EMPTY_VALUE } from '../../../../shared/constants';
-import { styles } from './styles';
+import { createStyles } from './styles';
 import { getRoleConfig, getApprovalStatusLabel } from './roleUtils';
 import { useAccountData, handleToggleActive, handleLogout } from './useAccountData';
 import { ProfileHeader } from './ProfileHeader';
@@ -20,7 +20,11 @@ import { LogoutSection } from './LogoutSection';
 const AccountScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { user, updateUser, logout } = useAuth();
-  const { colors } = useTheme();
+  const { colors, spacing, radii, typography } = useTheme();
+  const styles = useMemo(
+    () => createStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
   const { club, isActive, setIsActive, loading, setLoading } = useAccountData(
     user?.clubId,
     user?.role,
@@ -35,7 +39,7 @@ const AccountScreen = (): React.JSX.Element => {
   const onLogout = (): void => handleLogout(logout);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={styles.container}>
       <PageHeader title={t('screens.account.title')} subtitle={t('screens.account.subtitle')} />
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <ProfileHeader
