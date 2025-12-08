@@ -60,7 +60,7 @@ export {
   OptimizedList,
   lazyScreen,
   preloadScreen,
-} from '../shared/components';
+} from '../components/primitives';
 
 // Export types
 export type {
@@ -79,7 +79,6 @@ export type {
   // Pressable types
   PressableProps,
   InteractiveBackgroundColor,
-  InteractiveBackgroundColor as PressableBackgroundColor, // Alias for backward compatibility
   PressableBorderColor,
   // Divider types
   DividerProps,
@@ -95,16 +94,13 @@ export type {
   FilterSection,
   Tab,
   OptimizedListProps,
-} from '../shared/components';
+} from '../components/primitives';
 
 // =============================================================================
 // DESIGN TOKENS
 // All visual decisions come from these tokens
 // =============================================================================
 export {
-  // V2 Token System (Recommended)
-  designTokensV2,
-
   // Token creators for theming
   createSemanticTokens,
   createComponentTokens,
@@ -118,7 +114,7 @@ export {
   // Token resolver for theme-aware values
   resolveTokens,
   getTokenValue,
-} from '../shared/theme/tokens';
+} from '../theme/tokens';
 
 export type {
   // Token types
@@ -149,13 +145,13 @@ export type {
   ShadowKey,
   Status,
   UserRole,
-} from '../shared/theme/tokens/types';
+} from '../theme/tokens/types';
 
 // =============================================================================
 // THEME
 // Theme context and hooks
 // =============================================================================
-export { useTheme, ThemeProvider } from '../contexts/ThemeContext';
-export type { ThemeContextType } from '../contexts/ThemeContext';
-export { lightTheme, darkTheme, getTheme } from '../shared/theme';
-export type { Theme, ThemeMode as ThemeModeType } from '../shared/theme';
+export { useTheme, ThemeProvider } from '../state/ThemeContext';
+export type { ThemeContextType } from '../state/ThemeContext';
+export { lightTheme, darkTheme, getTheme } from '../theme';
+export type { Theme, ThemeMode as ThemeModeType } from '../theme';

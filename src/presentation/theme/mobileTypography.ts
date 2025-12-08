@@ -211,7 +211,7 @@ export const mobileTypography = {
     color: '#f44336',
   },
 
-  // Backward compatibility aliases
+  // Additional text style aliases
   body: {
     fontSize: mobileFontSizes.md,
     fontWeight: '400' as TextStyle['fontWeight'],

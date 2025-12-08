@@ -4,7 +4,7 @@
  * One file. One export. No confusion.
  *
  * Usage:
- *   import { designTokens } from '../shared/theme';
+ *   import { designTokens } from './theme';
  *
  *   designTokens.spacing.md
  *   designTokens.iconSize.lg

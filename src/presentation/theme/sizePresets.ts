@@ -12,7 +12,7 @@
  */
 
 import { designTokens } from './designTokens';
-import { ComponentSize, SpacingKey } from '../types/theme';
+import { ComponentSize, SpacingKey } from '../../shared/types/theme';
 
 // =============================================================================
 // TYPES

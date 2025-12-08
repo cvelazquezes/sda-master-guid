@@ -16,7 +16,7 @@
  * Use the useTheme() hook from ThemeContext for all theme colors:
  *
  * ```typescript
- * import { useTheme } from '../contexts/ThemeContext';
+ * import { useTheme } from './state/ThemeContext';
  * const { colors } = useTheme();
  * ```
  */
@@ -56,8 +56,6 @@ import sdaColors, {
   sdaColorUtils,
 } from './sdaColors';
 import { designTokens } from './designTokens';
-// NEW: Design Tokens V2 - Single Source of Truth
-import { designTokensV2 } from './tokens';
 // Layout Constants - Single Source of Truth for style string values
 import { layoutConstants } from './layoutConstants';
 // Size Presets - Standardized component sizing
@@ -74,7 +72,7 @@ import {
   getIconSize,
   getFontSize,
 } from './sizePresets';
-import { THEME_MODE, COLOR_SHADE } from '../constants';
+import { THEME_MODE, COLOR_SHADE } from '../../shared/constants';
 
 /**
  * Theme modes
@@ -241,13 +239,13 @@ export function getTheme(mode: ThemeMode): Theme {
  */
 
 // Re-export useTheme from ThemeContext
-export { useTheme } from '../../contexts/ThemeContext';
+export { useTheme } from '../state/ThemeContext';
 
 /**
  * Export all theme-related utilities
  */
 export {
-  // Legacy colors and typography
+  // Core theme values
   colors,
   colorUtils,
   typography,
@@ -285,9 +283,6 @@ export {
   sdaColorUtils,
   designTokens,
 
-  // NEW: Design Tokens V2 - Single Source of Truth (RECOMMENDED)
-  designTokensV2,
-
   // Layout Constants - Style string values
   layoutConstants,
 
@@ -304,9 +299,6 @@ export {
   getIconSize,
   getFontSize,
 };
-
-// Note: For Design Tokens V2, import directly from './tokens'
-// export * from './tokens'; // Commented to avoid duplicate exports
 
 /**
  * Export types from colors module

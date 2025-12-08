@@ -6,12 +6,12 @@
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react-native';
 import { AuthProvider, useAuth } from '../AuthContext';
-import { authService } from '../../services/authService';
-import { User, UserRole, ApprovalStatus } from '../../types';
-import { AuthenticationError } from '../../shared/utils/errors';
+import { authService } from '../../../infrastructure/repositories/authService';
+import { User, UserRole, ApprovalStatus } from '../../../types';
+import { AuthenticationError } from '../../../shared/utils/errors';
 
 // Mock authService
-jest.mock('../../services/authService');
+jest.mock('../../infrastructure/repositories/authService');
 
 // Mock logger
 jest.mock('../../utils/logger', () => ({

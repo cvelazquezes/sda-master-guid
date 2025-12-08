@@ -6,7 +6,7 @@
  * NOTE: This file intentionally contains literal numbers as it DEFINES color tokens.
  */
 
-import { EMPTY_VALUE } from '../constants';
+import { EMPTY_VALUE } from '../../shared/constants';
 
 export const sdaBrandColors = {
   // Primary Brand Colors - Based on SDA Identity

@@ -1,3 +1,10 @@
+/**
+ * Auth Context
+ *
+ * Provides authentication state and operations throughout the app.
+ * Moved from src/context/ to consolidate all contexts in one folder.
+ */
+
 import {
   createContext,
   useContext,
@@ -7,10 +14,10 @@ import {
   useCallback,
   useMemo,
 } from 'react';
-import { User, AuthContextType } from '../types';
-import { authService } from '../services/authService';
-import { logger } from '../utils/logger';
-import { LOG_MESSAGES } from '../shared/constants';
+import { User, AuthContextType } from '../../types';
+import { authService } from '../../infrastructure/repositories/authService';
+import { logger } from '../../shared/utils/logger';
+import { LOG_MESSAGES } from '../../shared/constants';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -128,3 +135,4 @@ export const useAuth = (): AuthContextType => {
   }
   return context;
 };
+

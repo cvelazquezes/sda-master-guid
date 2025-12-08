@@ -20,7 +20,7 @@ import {
   borderWidthPrimitives,
   typographyPrimitives,
 } from './primitives';
-import { THEME_MODE, BORDERS } from '../../constants';
+import { THEME_MODE, BORDERS } from '../../../shared/constants';
 
 // ============================================================================
 // BUTTON TOKENS

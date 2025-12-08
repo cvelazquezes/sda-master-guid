@@ -15,7 +15,7 @@ import {
   opacityPrimitives,
   typographyPrimitives,
 } from './primitives';
-import { THEME_MODE } from '../../constants';
+import { THEME_MODE } from '../../../shared/constants';
 
 export type ThemeMode = (typeof THEME_MODE)[keyof typeof THEME_MODE];
 
@@ -24,7 +24,7 @@ export type ThemeMode = (typeof THEME_MODE)[keyof typeof THEME_MODE];
 // ============================================================================
 
 /** Semantic color token structure */
-export interface SemanticColors {
+export type SemanticColors = {
   brand: Record<string, string>;
   feedback: Record<string, string>;
   text: Record<string, string>;
@@ -36,7 +36,7 @@ export interface SemanticColors {
   role: Record<string, { primary: string; subtle: string; text: string }>;
   status: Record<string, { primary: string; subtle: string; text: string }>;
   hierarchy: Record<string, { primary: string; subtle: string }>;
-}
+};
 
 /**
  * Creates theme-aware semantic color tokens
@@ -298,25 +298,38 @@ export const semanticSpacing = {
 // SEMANTIC TYPOGRAPHY TOKENS
 // ============================================================================
 
+// Helper to calculate line height in pixels (React Native requires absolute values)
+const calcLineHeight = (fontSize: number, multiplier: number): number =>
+  Math.round(fontSize * multiplier);
+
 export const semanticTypography = {
   // Display (Large headlines)
   display: {
     large: {
       fontSize: typographyPrimitives.fontSize['7xl'],
       fontWeight: typographyPrimitives.fontWeight.bold,
-      lineHeight: typographyPrimitives.lineHeight.tight,
+      lineHeight: calcLineHeight(
+        typographyPrimitives.fontSize['7xl'],
+        typographyPrimitives.lineHeight.tight
+      ),
       letterSpacing: typographyPrimitives.letterSpacing.tight,
     },
     medium: {
       fontSize: typographyPrimitives.fontSize['5xl'],
       fontWeight: typographyPrimitives.fontWeight.bold,
-      lineHeight: typographyPrimitives.lineHeight.tight,
+      lineHeight: calcLineHeight(
+        typographyPrimitives.fontSize['5xl'],
+        typographyPrimitives.lineHeight.tight
+      ),
       letterSpacing: typographyPrimitives.letterSpacing.tight,
     },
     small: {
       fontSize: typographyPrimitives.fontSize['4xl'],
       fontWeight: typographyPrimitives.fontWeight.semibold,
-      lineHeight: typographyPrimitives.lineHeight.tight,
+      lineHeight: calcLineHeight(
+        typographyPrimitives.fontSize['4xl'],
+        typographyPrimitives.lineHeight.tight
+      ),
       letterSpacing: typographyPrimitives.letterSpacing.normal,
     },
   },
@@ -326,22 +339,34 @@ export const semanticTypography = {
     h1: {
       fontSize: typographyPrimitives.fontSize['3xl'],
       fontWeight: typographyPrimitives.fontWeight.bold,
-      lineHeight: typographyPrimitives.lineHeight.snug,
+      lineHeight: calcLineHeight(
+        typographyPrimitives.fontSize['3xl'],
+        typographyPrimitives.lineHeight.snug
+      ),
     },
     h2: {
       fontSize: typographyPrimitives.fontSize['2xl'],
       fontWeight: typographyPrimitives.fontWeight.semibold,
-      lineHeight: typographyPrimitives.lineHeight.snug,
+      lineHeight: calcLineHeight(
+        typographyPrimitives.fontSize['2xl'],
+        typographyPrimitives.lineHeight.snug
+      ),
     },
     h3: {
       fontSize: typographyPrimitives.fontSize.xl,
       fontWeight: typographyPrimitives.fontWeight.semibold,
-      lineHeight: typographyPrimitives.lineHeight.normal,
+      lineHeight: calcLineHeight(
+        typographyPrimitives.fontSize.xl,
+        typographyPrimitives.lineHeight.normal
+      ),
     },
     h4: {
       fontSize: typographyPrimitives.fontSize.lg,
       fontWeight: typographyPrimitives.fontWeight.semibold,
-      lineHeight: typographyPrimitives.lineHeight.normal,
+      lineHeight: calcLineHeight(
+        typographyPrimitives.fontSize.lg,
+        typographyPrimitives.lineHeight.normal
+      ),
     },
   },
 
@@ -350,17 +375,26 @@ export const semanticTypography = {
     large: {
       fontSize: typographyPrimitives.fontSize.lg,
       fontWeight: typographyPrimitives.fontWeight.regular,
-      lineHeight: typographyPrimitives.lineHeight.normal,
+      lineHeight: calcLineHeight(
+        typographyPrimitives.fontSize.lg,
+        typographyPrimitives.lineHeight.normal
+      ),
     },
     medium: {
       fontSize: typographyPrimitives.fontSize.md,
       fontWeight: typographyPrimitives.fontWeight.regular,
-      lineHeight: typographyPrimitives.lineHeight.normal,
+      lineHeight: calcLineHeight(
+        typographyPrimitives.fontSize.md,
+        typographyPrimitives.lineHeight.normal
+      ),
     },
     small: {
       fontSize: typographyPrimitives.fontSize.sm,
       fontWeight: typographyPrimitives.fontWeight.regular,
-      lineHeight: typographyPrimitives.lineHeight.normal,
+      lineHeight: calcLineHeight(
+        typographyPrimitives.fontSize.sm,
+        typographyPrimitives.lineHeight.normal
+      ),
     },
   },
 
@@ -369,17 +403,26 @@ export const semanticTypography = {
     large: {
       fontSize: typographyPrimitives.fontSize.md,
       fontWeight: typographyPrimitives.fontWeight.medium,
-      lineHeight: typographyPrimitives.lineHeight.normal,
+      lineHeight: calcLineHeight(
+        typographyPrimitives.fontSize.md,
+        typographyPrimitives.lineHeight.normal
+      ),
     },
     medium: {
       fontSize: typographyPrimitives.fontSize.sm,
       fontWeight: typographyPrimitives.fontWeight.medium,
-      lineHeight: typographyPrimitives.lineHeight.normal,
+      lineHeight: calcLineHeight(
+        typographyPrimitives.fontSize.sm,
+        typographyPrimitives.lineHeight.normal
+      ),
     },
     small: {
       fontSize: typographyPrimitives.fontSize.xs,
       fontWeight: typographyPrimitives.fontWeight.medium,
-      lineHeight: typographyPrimitives.lineHeight.normal,
+      lineHeight: calcLineHeight(
+        typographyPrimitives.fontSize.xs,
+        typographyPrimitives.lineHeight.normal
+      ),
     },
   },
 
@@ -388,12 +431,18 @@ export const semanticTypography = {
     regular: {
       fontSize: typographyPrimitives.fontSize.xs,
       fontWeight: typographyPrimitives.fontWeight.regular,
-      lineHeight: typographyPrimitives.lineHeight.normal,
+      lineHeight: calcLineHeight(
+        typographyPrimitives.fontSize.xs,
+        typographyPrimitives.lineHeight.normal
+      ),
     },
     bold: {
       fontSize: typographyPrimitives.fontSize.xs,
       fontWeight: typographyPrimitives.fontWeight.semibold,
-      lineHeight: typographyPrimitives.lineHeight.normal,
+      lineHeight: calcLineHeight(
+        typographyPrimitives.fontSize.xs,
+        typographyPrimitives.lineHeight.normal
+      ),
     },
   },
 
@@ -402,24 +451,36 @@ export const semanticTypography = {
     button: {
       fontSize: typographyPrimitives.fontSize.lg,
       fontWeight: typographyPrimitives.fontWeight.semibold,
-      lineHeight: typographyPrimitives.lineHeight.normal,
+      lineHeight: calcLineHeight(
+        typographyPrimitives.fontSize.lg,
+        typographyPrimitives.lineHeight.normal
+      ),
       letterSpacing: typographyPrimitives.letterSpacing.wide,
     },
     buttonSmall: {
       fontSize: typographyPrimitives.fontSize.sm,
       fontWeight: typographyPrimitives.fontWeight.semibold,
-      lineHeight: typographyPrimitives.lineHeight.normal,
+      lineHeight: calcLineHeight(
+        typographyPrimitives.fontSize.sm,
+        typographyPrimitives.lineHeight.normal
+      ),
     },
     badge: {
       fontSize: typographyPrimitives.fontSize.xs,
       fontWeight: typographyPrimitives.fontWeight.semibold,
-      lineHeight: typographyPrimitives.lineHeight.tight,
+      lineHeight: calcLineHeight(
+        typographyPrimitives.fontSize.xs,
+        typographyPrimitives.lineHeight.tight
+      ),
       letterSpacing: typographyPrimitives.letterSpacing.wide,
     },
     helper: {
       fontSize: typographyPrimitives.fontSize.xs,
       fontWeight: typographyPrimitives.fontWeight.regular,
-      lineHeight: typographyPrimitives.lineHeight.normal,
+      lineHeight: calcLineHeight(
+        typographyPrimitives.fontSize.xs,
+        typographyPrimitives.lineHeight.normal
+      ),
     },
   },
 } as const;

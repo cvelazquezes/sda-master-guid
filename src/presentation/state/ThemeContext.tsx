@@ -17,29 +17,33 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
 import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { sdaSemanticColors, statusColors, roleColors } from '../shared/theme/sdaColors';
-import { darkColors, darkStatusColors, darkRoleColors } from '../shared/theme/darkColors';
+import { sdaSemanticColors, statusColors, roleColors } from '../theme/sdaColors';
+import { darkColors, darkStatusColors, darkRoleColors } from '../theme/darkColors';
 // eslint-disable-next-line no-restricted-imports -- ThemeContext is the source of theme values, legitimate import
 import {
   spacing as spacingTokens,
   borderRadius,
+  borderWidth,
   shadows as shadowTokens,
   typographyTokens,
   iconSize,
+  avatarSize,
   componentSizes,
-} from '../shared/theme/designTokens';
-import { storageKeys } from '../shared/config/storage';
-import { THEME_MODE, ThemeModeValue } from '../shared/constants/ui';
-import { logger } from '../utils/logger';
-import { LOG_MESSAGES } from '../shared/constants/logMessages';
+  lineHeights,
+  opacity as opacityTokens,
+  breakpoints as breakpointTokens,
+  responsiveScale as responsiveScaleTokens,
+} from '../theme/designTokens';
+import { storageKeys } from '../../shared/config/storage';
+import { THEME_MODE, ThemeModeValue } from '../../shared/constants/ui';
+import { logger } from '../../shared/utils/logger';
+import { LOG_MESSAGES } from '../../shared/constants/logMessages';
 
 export type ThemeMode = ThemeModeValue;
 export type ActiveTheme = typeof THEME_MODE.LIGHT | typeof THEME_MODE.DARK;
 
-// Legacy color interface (flat structure for backward compatibility)
-interface LegacyThemeColors {
-  [key: string]: string;
-}
+// Theme colors type - matches sdaSemanticColors structure
+type ThemeColors = typeof sdaSemanticColors;
 
 // Status color structure (theme-aware)
 interface StatusColorConfig {
@@ -76,19 +80,19 @@ type RoleColors = {
   user: RoleColorConfig;
 };
 
-// Theme object structure for backward compatibility
-// with components expecting { theme: { colors, ... } }
-interface ThemeObject {
-  colors: LegacyThemeColors;
-}
-
 // Token types for complete theme access
 type SpacingTokens = typeof spacingTokens;
 type RadiusTokens = typeof borderRadius;
+type BorderWidthTokens = typeof borderWidth;
 type ShadowTokens = typeof shadowTokens;
 type TypographyTokens = typeof typographyTokens;
 type IconSizeTokens = typeof iconSize;
+type AvatarSizeTokens = typeof avatarSize;
 type ComponentSizeTokens = typeof componentSizes;
+type LineHeightTokens = typeof lineHeights;
+type OpacityTokens = typeof opacityTokens;
+type BreakpointTokens = typeof breakpointTokens;
+type ResponsiveScaleTokens = typeof responsiveScaleTokens;
 
 export interface ThemeContextType {
   /** User's theme preference (light, dark, or system) */
@@ -98,7 +102,7 @@ export interface ThemeContextType {
   activeTheme: ActiveTheme;
 
   /** Colors object for theming (theme-aware) */
-  colors: LegacyThemeColors;
+  colors: ThemeColors;
 
   /**
    * Spacing tokens - Use these instead of importing designTokens
@@ -137,10 +141,40 @@ export interface ThemeContextType {
   componentSizes: ComponentSizeTokens;
 
   /**
-   * Theme object for backward compatibility
-   * Components that do `const { theme } = useTheme()` can still access theme.colors
+   * Avatar size tokens
+   * @example const { avatarSizes } = useTheme(); style={{ width: avatarSizes.lg }}
    */
-  theme: ThemeObject;
+  avatarSizes: AvatarSizeTokens;
+
+  /**
+   * Border width tokens
+   * @example const { borderWidths } = useTheme(); style={{ borderWidth: borderWidths.thin }}
+   */
+  borderWidths: BorderWidthTokens;
+
+  /**
+   * Line height tokens (pixel values for specific use cases)
+   * @example const { lineHeights } = useTheme(); style={{ lineHeight: lineHeights.body }}
+   */
+  lineHeights: LineHeightTokens;
+
+  /**
+   * Opacity tokens
+   * @example const { opacity } = useTheme(); style={{ opacity: opacity.high }}
+   */
+  opacity: OpacityTokens;
+
+  /**
+   * Breakpoint tokens for responsive design
+   * @example const { breakpoints } = useTheme(); if (width > breakpoints.tablet) { ... }
+   */
+  breakpoints: BreakpointTokens;
+
+  /**
+   * Responsive scale tokens for modals and layouts
+   * @example const { responsiveScale } = useTheme(); width * responsiveScale.modal.desktop
+   */
+  responsiveScale: ResponsiveScaleTokens;
 
   /**
    * Theme-aware status colors (for StatusIndicator, Badge)
@@ -246,15 +280,11 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   );
 
   const isDark = activeTheme === THEME_MODE.DARK;
-  const theme: ThemeObject = useMemo(
-    () => ({ colors: colors as unknown as LegacyThemeColors }),
-    [colors]
-  );
 
   const value: ThemeContextType = {
     mode,
     activeTheme,
-    colors: colors as unknown as LegacyThemeColors,
+    colors,
     // Design tokens - exposed via context so features don't need to import designTokens directly
     spacing: spacingTokens,
     radii: borderRadius,
@@ -262,8 +292,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     typography: typographyTokens,
     iconSizes: iconSize,
     componentSizes,
-    // Legacy and theme-aware properties
-    theme,
+    avatarSizes: avatarSize,
+    borderWidths: borderWidth,
+    lineHeights,
+    opacity: opacityTokens,
+    breakpoints: breakpointTokens,
+    responsiveScale: responsiveScaleTokens,
+    // Theme-aware properties
     statusColors: themeStatusColors,
     roleColors: themeRoleColors,
     isDark,
@@ -288,30 +323,6 @@ export const useTheme = (): ThemeContextType => {
     throw new Error(LOG_MESSAGES.CONTEXTS.THEME.USE_OUTSIDE_PROVIDER);
   }
   return context;
-};
-
-/**
- * Helper hook to check if dark mode is active
- *
- * @returns True if dark mode is active
- *
- * @deprecated AVOID using this for color decisions. Use semantic colors instead.
- *
- * ❌ BAD - Do NOT use for colors:
- * const isDark = useIsDark();
- * const bgColor = isDark ? '#000' : '#FFF'; // FORBIDDEN
- *
- * ✅ GOOD - Use semantic colors:
- * const { colors } = useTheme();
- * const bgColor = colors.background; // Automatically correct for light/dark
- *
- * ✅ ACCEPTABLE - Use only for non-color decisions:
- * const isDark = useIsDark();
- * const logoSource = isDark ? darkLogoImage : lightLogoImage;
- */
-export const useIsDark = (): boolean => {
-  const { isDark } = useTheme();
-  return isDark;
 };
 
 /**

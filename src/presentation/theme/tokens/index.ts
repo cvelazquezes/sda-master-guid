@@ -29,7 +29,7 @@ import { createComponentTokens } from './components';
 import { motionTokens } from './motion';
 import { layoutTokens } from './layout';
 import { behaviorTokens } from './behavior';
-import { THEME_MODE } from '../../constants';
+import { THEME_MODE } from '../../../shared/constants';
 
 export * from './primitives';
 
@@ -55,18 +55,10 @@ export * from './types';
 export { resolveTokens, getTokenValue, type ResolvedTokens } from './resolver';
 
 /**
- * Default design tokens (light theme)
- * For theme-aware tokens, use useTheme() hook from ThemeContext or resolveTokens()
+ * Design Tokens - Single Source of Truth
  *
- * This is the SINGLE SOURCE OF TRUTH for all UI decisions.
+ * For theme-aware tokens, use useTheme() hook from ThemeContext.
+ *
+ * The primitiveTokens contain the raw values (spacing, colors, typography).
+ * Use resolveTokens() for theme-specific values.
  */
-export const designTokensV2 = {
-  primitives: primitiveTokens,
-  semantic: createSemanticTokens(THEME_MODE.LIGHT),
-  components: createComponentTokens(THEME_MODE.LIGHT),
-  motion: motionTokens,
-  layout: layoutTokens,
-  behavior: behaviorTokens,
-} as const;
-
-export default designTokensV2;
