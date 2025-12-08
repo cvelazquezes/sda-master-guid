@@ -1,146 +1,200 @@
+/**
+ * Account Screen Styles
+ * Theme-aware style factories
+ */
 import { StyleSheet } from 'react-native';
-import { mobileTypography, designTokens, layoutConstants } from '../../../theme';
 import { FLEX, BORDERS } from '../../../../shared/constants';
+import type { ThemeContextType } from '../../../state/ThemeContext';
 
-export const styles = StyleSheet.create({
-  container: {
-    flex: FLEX.ONE,
-  },
-  scrollView: {
-    flex: FLEX.ONE,
-  },
-  section: {
-    paddingHorizontal: designTokens.spacing.lg,
-    paddingTop: designTokens.spacing.sm,
-  },
-  profileCard: {
-    marginBottom: designTokens.spacing.none,
-  },
-  profileHeader: {
-    alignItems: layoutConstants.alignItems.center,
-    paddingVertical: designTokens.spacing.md,
-  },
-  avatarContainer: {
-    width: designTokens.avatarSize.xxl,
-    height: designTokens.avatarSize.xxl,
-    borderRadius: designTokens.borderRadius.full,
-    alignItems: layoutConstants.alignItems.center,
-    justifyContent: layoutConstants.justifyContent.center,
-    marginBottom: designTokens.spacing.md,
-  },
-  profileName: {
-    ...mobileTypography.heading2,
-    marginBottom: designTokens.spacing.xs,
-    textAlign: layoutConstants.textAlign.center,
-  },
-  profileEmail: {
-    ...mobileTypography.body,
-    marginBottom: designTokens.spacing.sm,
-    textAlign: layoutConstants.textAlign.center,
-  },
-  roleBadge: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    paddingVertical: designTokens.spacing.xs,
-    paddingHorizontal: designTokens.spacing.md,
-    borderRadius: designTokens.borderRadius.full,
-    gap: designTokens.spacing.xs,
-  },
-  roleText: {
-    ...mobileTypography.captionBold,
-  },
-  settingRow: {
-    borderBottomWidth: designTokens.borderWidth.thin,
-    borderBottomColor: BORDERS.COLOR.TRANSPARENT,
-  },
-  detailsContainer: {},
-  detailRow: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    paddingVertical: designTokens.spacing.md,
-    borderBottomWidth: designTokens.borderWidth.thin,
-    borderBottomColor: BORDERS.COLOR.TRANSPARENT,
-    gap: designTokens.spacing.md,
-  },
-  detailIconContainer: {
-    width: designTokens.avatarSize.md,
-    height: designTokens.avatarSize.md,
-    borderRadius: designTokens.borderRadius.full,
-    alignItems: layoutConstants.alignItems.center,
-    justifyContent: layoutConstants.justifyContent.center,
-  },
-  detailText: {
-    flex: FLEX.ONE,
-  },
-  detailLabel: {
-    ...mobileTypography.caption,
-    marginBottom: designTokens.spacing.xxs,
-  },
-  detailValue: {
-    ...mobileTypography.bodyLarge,
-  },
-  classesContainer: {
-    flexDirection: layoutConstants.flexDirection.row,
-    flexWrap: layoutConstants.flexWrap.wrap,
-    gap: designTokens.spacing.xs,
-    marginTop: designTokens.spacing.xs,
-  },
-  classBadge: {
-    paddingVertical: designTokens.spacing.xs,
-    paddingHorizontal: designTokens.spacing.sm,
-    borderRadius: designTokens.borderRadius.md,
-  },
-  classBadgeText: {
-    ...mobileTypography.caption,
-    fontWeight: designTokens.fontWeight.semibold,
-  },
-  bottomSpacer: {
-    height: designTokens.spacing['3xl'],
-  },
-});
+// ============================================================================
+// MAIN STYLES FACTORY
+// ============================================================================
 
-export const statusStyles = StyleSheet.create({
-  container: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    justifyContent: layoutConstants.justifyContent.spaceBetween,
-  },
-  info: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    flex: FLEX.ONE,
-    gap: designTokens.spacing.md,
-  },
-  iconContainer: {
-    width: designTokens.touchTarget.comfortable,
-    height: designTokens.touchTarget.comfortable,
-    borderRadius: designTokens.borderRadius.full,
-    alignItems: layoutConstants.alignItems.center,
-    justifyContent: layoutConstants.justifyContent.center,
-  },
-  text: {
-    flex: FLEX.ONE,
-  },
-  label: {
-    ...mobileTypography.bodyLargeBold,
-    marginBottom: designTokens.spacing.xxs,
-  },
-  description: {
-    ...mobileTypography.caption,
-  },
-});
+export const createStyles = (
+  colors: ThemeContextType['colors'],
+  spacing: ThemeContextType['spacing'],
+  radii: ThemeContextType['radii'],
+  typography: ThemeContextType['typography']
+) => {
+  const avatarSizeXxl = 96;
+  const avatarSizeMd = 40;
 
-export const logoutStyles = StyleSheet.create({
-  button: {
-    flexDirection: layoutConstants.flexDirection.row,
-    alignItems: layoutConstants.alignItems.center,
-    justifyContent: layoutConstants.justifyContent.center,
-    padding: designTokens.spacing.md,
-    borderRadius: designTokens.borderRadius.lg,
-    borderWidth: designTokens.borderWidth.medium,
-    gap: designTokens.spacing.sm,
-  },
-  buttonText: {
-    ...mobileTypography.bodyLargeBold,
-  },
-});
+  return StyleSheet.create({
+    container: {
+      flex: FLEX.ONE,
+      backgroundColor: colors.background,
+    },
+    scrollView: {
+      flex: FLEX.ONE,
+    },
+    section: {
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.sm,
+    },
+    profileCard: {
+      marginBottom: spacing.none,
+    },
+    profileHeader: {
+      alignItems: 'center',
+      paddingVertical: spacing.md,
+    },
+    avatarContainer: {
+      width: avatarSizeXxl,
+      height: avatarSizeXxl,
+      borderRadius: radii.full,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: spacing.md,
+    },
+    profileName: {
+      fontSize: typography.fontSizes['2xl'],
+      fontWeight: typography.fontWeights.bold,
+      marginBottom: spacing.xs,
+      textAlign: 'center',
+      color: colors.textPrimary,
+    },
+    profileEmail: {
+      fontSize: typography.fontSizes.md,
+      marginBottom: spacing.sm,
+      textAlign: 'center',
+      color: colors.textSecondary,
+    },
+    roleBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: spacing.xs,
+      paddingHorizontal: spacing.md,
+      borderRadius: radii.full,
+      gap: spacing.xs,
+    },
+    roleText: {
+      fontSize: typography.fontSizes.xs,
+      fontWeight: typography.fontWeights.bold,
+    },
+    settingRow: {
+      borderBottomWidth: 1,
+      borderBottomColor: 'transparent',
+    },
+    detailsContainer: {},
+    detailRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: spacing.md,
+      borderBottomWidth: 1,
+      borderBottomColor: 'transparent',
+      gap: spacing.md,
+    },
+    detailIconContainer: {
+      width: avatarSizeMd,
+      height: avatarSizeMd,
+      borderRadius: radii.full,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    detailText: {
+      flex: FLEX.ONE,
+    },
+    detailLabel: {
+      fontSize: typography.fontSizes.xs,
+      marginBottom: spacing.xxs,
+      color: colors.textSecondary,
+    },
+    detailValue: {
+      fontSize: typography.fontSizes.md,
+      color: colors.textPrimary,
+    },
+    classesContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.xs,
+      marginTop: spacing.xs,
+    },
+    classBadge: {
+      paddingVertical: spacing.xs,
+      paddingHorizontal: spacing.sm,
+      borderRadius: radii.md,
+    },
+    classBadgeText: {
+      fontSize: typography.fontSizes.xs,
+      fontWeight: typography.fontWeights.semibold,
+    },
+    bottomSpacer: {
+      height: spacing['3xl'],
+    },
+  });
+};
+
+// ============================================================================
+// STATUS STYLES FACTORY
+// ============================================================================
+
+export const createStatusStyles = (
+  colors: ThemeContextType['colors'],
+  spacing: ThemeContextType['spacing'],
+  radii: ThemeContextType['radii'],
+  typography: ThemeContextType['typography']
+) => {
+  const touchTargetComfortable = 48;
+
+  return StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    info: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: FLEX.ONE,
+      gap: spacing.md,
+    },
+    iconContainer: {
+      width: touchTargetComfortable,
+      height: touchTargetComfortable,
+      borderRadius: radii.full,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    text: {
+      flex: FLEX.ONE,
+    },
+    label: {
+      fontSize: typography.fontSizes.md,
+      fontWeight: typography.fontWeights.bold,
+      marginBottom: spacing.xxs,
+      color: colors.textPrimary,
+    },
+    description: {
+      fontSize: typography.fontSizes.xs,
+      color: colors.textSecondary,
+    },
+  });
+};
+
+// ============================================================================
+// LOGOUT STYLES FACTORY
+// ============================================================================
+
+export const createLogoutStyles = (
+  colors: ThemeContextType['colors'],
+  spacing: ThemeContextType['spacing'],
+  radii: ThemeContextType['radii'],
+  typography: ThemeContextType['typography']
+) =>
+  StyleSheet.create({
+    button: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: spacing.md,
+      borderRadius: radii.lg,
+      borderWidth: 2,
+      borderColor: colors.error,
+      gap: spacing.sm,
+    },
+    buttonText: {
+      fontSize: typography.fontSizes.md,
+      fontWeight: typography.fontWeights.bold,
+      color: colors.error,
+    },
+  });
