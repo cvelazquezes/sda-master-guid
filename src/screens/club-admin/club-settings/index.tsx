@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Text } from '../../../shared/components';
@@ -6,7 +6,6 @@ import { useAuth } from '../../../context/AuthContext';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { MatchFrequency } from '../../../types';
 import { OrganizationHierarchy } from '../../../components/OrganizationHierarchy';
-import { designTokens, mobileTypography, layoutConstants } from '../../../shared/theme';
 import { FLEX } from '../../../shared/constants';
 import { useClubSettings } from './useClubSettings';
 import { BasicInfoSection } from './BasicInfoSection';
@@ -41,18 +40,53 @@ function LoadingView({
 const ClubSettingsScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { colors } = useTheme();
+  const { colors, spacing, borderRadius, borderWidth, typography } = useTheme();
   const { club, formData, setFormData, handleSave } = useClubSettings(user?.clubId);
   const frequencyLabels = useFrequencyLabels(t);
+
+  const dynamicStyles = useMemo(
+    () =>
+      StyleSheet.create({
+        container: { flex: FLEX.ONE, backgroundColor: colors.background },
+        header: {
+          padding: spacing.lg,
+          borderBottomWidth: borderWidth.thin,
+          backgroundColor: colors.surface,
+          borderBottomColor: colors.border,
+        },
+        title: {
+          fontSize: typography.fontSizes['3xl'],
+          fontWeight: typography.fontWeights.bold,
+          color: colors.textPrimary,
+        },
+        content: { padding: spacing.md },
+        hierarchySection: { marginBottom: spacing.md },
+        saveButton: {
+          padding: spacing.md,
+          borderRadius: borderRadius.md,
+          alignItems: 'center',
+          marginTop: spacing.sm,
+          backgroundColor: colors.primary,
+        },
+        saveButtonText: {
+          fontSize: typography.fontSizes.md,
+          fontWeight: typography.fontWeights.semibold,
+          color: colors.textInverse,
+        },
+        loadingText: {
+          textAlign: 'center',
+          marginTop: spacing['3xl'],
+          fontSize: typography.fontSizes.lg,
+          color: colors.textSecondary,
+        },
+      }),
+    [colors, spacing, borderRadius, borderWidth, typography]
+  );
 
   if (!club) {
     return <LoadingView colors={colors} t={t} />;
   }
 
-  const headerStyle = [
-    styles.header,
-    { backgroundColor: colors.surface, borderBottomColor: colors.border },
-  ];
   const hierarchyData = {
     division: club.division,
     union: club.union,
@@ -71,14 +105,12 @@ const ClubSettingsScreen = (): React.JSX.Element => {
   };
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={headerStyle}>
-        <Text style={[styles.title, { color: colors.textPrimary }]}>
-          {t('screens.clubSettings.title')}
-        </Text>
+    <ScrollView style={dynamicStyles.container}>
+      <View style={dynamicStyles.header}>
+        <Text style={dynamicStyles.title}>{t('screens.clubSettings.title')}</Text>
       </View>
-      <View style={styles.content}>
-        <View style={styles.hierarchySection}>
+      <View style={dynamicStyles.content}>
+        <View style={dynamicStyles.hierarchySection}>
           <OrganizationHierarchy
             data={hierarchyData}
             title={t('screens.clubSettings.clubOrganization')}
@@ -103,40 +135,12 @@ const ClubSettingsScreen = (): React.JSX.Element => {
           colors={colors}
         />
         <UserPreferencesSection title={t('screens.clubSettings.userPreferences')} colors={colors} />
-        <TouchableOpacity
-          style={[styles.saveButton, { backgroundColor: colors.primary }]}
-          onPress={handleSave}
-        >
-          <Text style={[styles.saveButtonText, { color: colors.textInverse }]}>
-            {t('screens.clubSettings.saveChanges')}
-          </Text>
+        <TouchableOpacity style={dynamicStyles.saveButton} onPress={handleSave}>
+          <Text style={dynamicStyles.saveButtonText}>{t('screens.clubSettings.saveChanges')}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: FLEX.ONE },
-  header: {
-    padding: designTokens.spacing.lg,
-    borderBottomWidth: designTokens.borderWidth.thin,
-  },
-  title: { ...mobileTypography.displaySmall },
-  content: { padding: designTokens.spacing.md },
-  hierarchySection: { marginBottom: designTokens.spacing.md },
-  saveButton: {
-    padding: designTokens.spacing.md,
-    borderRadius: designTokens.borderRadius.md,
-    alignItems: layoutConstants.alignItems.center,
-    marginTop: designTokens.spacing.sm,
-  },
-  saveButtonText: { ...mobileTypography.buttonMedium },
-  loadingText: {
-    textAlign: layoutConstants.textAlign.center,
-    marginTop: designTokens.spacing['3xl'],
-    ...mobileTypography.bodyLarge,
-  },
-});
 
 export default ClubSettingsScreen;

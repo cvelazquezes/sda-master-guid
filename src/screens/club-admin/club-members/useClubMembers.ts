@@ -3,7 +3,8 @@ import { Alert } from 'react-native';
 import { clubService } from '../../../services/clubService';
 import { paymentService } from '../../../services/paymentService';
 import { User, Club, MemberBalance, ApprovalStatus } from '../../../types';
-import { MESSAGES } from '../../../shared/constants';
+
+type TranslationFn = (key: string, options?: Record<string, unknown>) => string;
 
 interface UseClubMembersReturn {
   members: User[];
@@ -13,7 +14,7 @@ interface UseClubMembersReturn {
   onRefresh: () => void;
 }
 
-export function useClubMembers(clubId?: string): UseClubMembersReturn {
+export function useClubMembers(clubId: string | undefined, t: TranslationFn): UseClubMembersReturn {
   const [members, setMembers] = useState<User[]>([]);
   const [, setClub] = useState<Club | null>(null);
   const [balances, setBalances] = useState<MemberBalance[]>([]);
@@ -40,11 +41,11 @@ export function useClubMembers(clubId?: string): UseClubMembersReturn {
         setBalances(balancesData);
       }
     } catch {
-      Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_LOAD_DATA);
+      Alert.alert(t('common.error'), t('errors.failedToLoadData'));
     } finally {
       setRefreshing(false);
     }
-  }, [clubId]);
+  }, [clubId, t]);
 
   useEffect(() => {
     if (clubId) {

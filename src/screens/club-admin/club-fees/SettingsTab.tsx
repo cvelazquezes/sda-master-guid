@@ -3,7 +3,6 @@ import { View, ScrollView, TouchableOpacity, Switch } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, Input } from '../../../shared/components';
 import { useTheme } from '../../../contexts/ThemeContext';
-import { designTokens } from '../../../shared/theme';
 import {
   ICONS,
   TOUCH_OPACITY,
@@ -13,7 +12,7 @@ import {
   TEXT_VARIANT,
   TEXT_WEIGHT,
 } from '../../../shared/constants';
-import { DISPLAY_LIMITS } from '../../../shared/constants/http';
+import { DISPLAY_LIMITS } from '../../../shared/constants/ui';
 import { styles, settingsStyles } from './styles';
 import { MONTH_KEYS } from './types';
 
@@ -91,13 +90,14 @@ export function SettingsTab({
 }
 
 function InfoCard({ t }: { t: (key: string) => string }): React.JSX.Element {
+  const { iconSizes, colors } = useTheme();
   return (
     <View style={settingsStyles.infoCard}>
       <View style={settingsStyles.infoIconContainer}>
         <MaterialCommunityIcons
           name={ICONS.INFORMATION}
-          size={designTokens.iconSize.md}
-          color={designTokens.colors.primary}
+          size={iconSizes.md}
+          color={colors.primary}
         />
       </View>
       <View style={settingsStyles.infoTextContainer}>
@@ -122,10 +122,10 @@ function ActiveToggleCard({
   t,
 }: ActiveToggleCardProps): React.JSX.Element {
   const trackColors = {
-    false: designTokens.colors.borderLight,
+    false: colors.borderLight,
     true: colors.primary,
   };
-  const thumbColor = active ? colors.primary : designTokens.colors.backgroundSecondary;
+  const thumbColor = active ? colors.primary : colors.backgroundSecondary;
 
   return (
     <View style={settingsStyles.settingCard}>
@@ -269,6 +269,7 @@ function ActionButtons({
   colors,
   t,
 }: ActionButtonsProps): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <View style={settingsStyles.actionButtonsContainer}>
       <TouchableOpacity
@@ -278,7 +279,7 @@ function ActionButtons({
       >
         <MaterialCommunityIcons
           name={ICONS.CONTENT_SAVE}
-          size={designTokens.iconSize.md}
+          size={iconSizes.md}
           color={colors.textOnPrimary}
         />
         <Text
@@ -300,7 +301,7 @@ function ActionButtons({
         >
           <MaterialCommunityIcons
             name={ICONS.CALENDAR_PLUS}
-            size={designTokens.iconSize.md}
+            size={iconSizes.md}
             color={colors.primary}
           />
           <Text

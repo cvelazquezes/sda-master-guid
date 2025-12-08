@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import { Text, Input } from '../../../shared/components';
-import { designTokens, mobileTypography } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 interface BasicInfoSectionProps {
   name: string;
@@ -17,6 +17,25 @@ interface BasicInfoSectionProps {
 
 export function BasicInfoSection(props: BasicInfoSectionProps): React.JSX.Element {
   const { name, description, onNameChange, onDescriptionChange, labels, colors } = props;
+  const { spacing, radii, typography } = useTheme();
+
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        section: {
+          padding: spacing.lg,
+          borderRadius: radii.md,
+          marginBottom: spacing.md,
+        } as ViewStyle,
+        sectionTitle: {
+          fontSize: typography.fontSizes.lg,
+          fontWeight: typography.fontWeights.bold,
+          marginBottom: spacing.md,
+        } as TextStyle,
+      }),
+    [spacing, radii, typography]
+  );
+
   return (
     <View style={[styles.section, { backgroundColor: colors.surface }]}>
       <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>{labels.title}</Text>
@@ -31,15 +50,3 @@ export function BasicInfoSection(props: BasicInfoSectionProps): React.JSX.Elemen
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  section: {
-    padding: designTokens.spacing.lg,
-    borderRadius: designTokens.borderRadius.md,
-    marginBottom: designTokens.spacing.md,
-  },
-  sectionTitle: {
-    ...mobileTypography.heading3,
-    marginBottom: designTokens.spacing.md,
-  },
-});

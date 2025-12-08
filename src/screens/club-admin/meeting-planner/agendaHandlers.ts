@@ -2,13 +2,14 @@ import { Alert } from 'react-native';
 import { User } from '../../../types';
 import {
   ALERT_BUTTON_STYLE,
-  MESSAGES,
   ID_PREFIX,
   MEETING_AGENDA,
   EMPTY_VALUE,
   MOVE_DIRECTION,
 } from '../../../shared/constants';
 import { AgendaItem } from './types';
+
+type TranslationFn = (key: string, options?: Record<string, unknown>) => string;
 
 interface EditModalSetters {
   setCurrentItem: (i: AgendaItem | null) => void;
@@ -78,6 +79,7 @@ interface SaveItemOptions {
   setAgendaItems: (items: AgendaItem[]) => void;
   setEditModalVisible: (v: boolean) => void;
   setCurrentItem: (i: AgendaItem | null) => void;
+  t: TranslationFn;
 }
 
 export function handleSaveItem(options: SaveItemOptions): void {
@@ -93,7 +95,7 @@ export function handleSaveItem(options: SaveItemOptions): void {
   } = options;
 
   if (!currentItem || !editedTitle.trim()) {
-    Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.PLEASE_ENTER_TITLE);
+    Alert.alert(options.t('common.error'), options.t('errors.pleaseEnterTitle'));
     return;
   }
   const minutes = parseInt(editedMinutes) || MEETING_AGENDA.DEFAULT_MINUTES;
@@ -116,15 +118,16 @@ interface DeleteItemOptions {
   itemId: string;
   agendaItems: AgendaItem[];
   setAgendaItems: (items: AgendaItem[]) => void;
+  t: TranslationFn;
 }
 
 export function handleDeleteItem(options: DeleteItemOptions): void {
-  const { itemId, agendaItems, setAgendaItems } = options;
+  const { itemId, agendaItems, setAgendaItems, t } = options;
 
-  Alert.alert(MESSAGES.TITLES.DELETE_ACTIVITY, MESSAGES.WARNINGS.CONFIRM_DELETE_ACTIVITY, [
-    { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
+  Alert.alert(t('titles.deleteActivity'), t('warnings.confirmDeleteActivity'), [
+    { text: t('common.cancel'), style: ALERT_BUTTON_STYLE.CANCEL },
     {
-      text: MESSAGES.BUTTONS.DELETE,
+      text: t('common.delete'),
       style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
       onPress: (): void => {
         setAgendaItems(agendaItems.filter((i) => i.id !== itemId));

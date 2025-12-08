@@ -2,7 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, Input } from '../../../shared/components';
-import { mobileIconSizes, designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { DATE_LOCALE_OPTIONS, ICONS, SINGLE_SPACE } from '../../../shared/constants';
 import { meetingInfoStyles } from './styles';
 import { getNextSaturday, getNextSunday } from './dateUtils';
@@ -24,6 +24,7 @@ export function MeetingInfoSection({
   totalTime,
   t,
 }: MeetingInfoSectionProps): React.JSX.Element {
+  const { iconSizes, colors } = useTheme();
   const dateStr = meetingDate.toLocaleDateString(undefined, DATE_LOCALE_OPTIONS.FULL_DATE);
 
   return (
@@ -32,8 +33,8 @@ export function MeetingInfoSection({
         <View style={meetingInfoStyles.row}>
           <MaterialCommunityIcons
             name={ICONS.CALENDAR}
-            size={mobileIconSizes.medium}
-            color={designTokens.colors.primary}
+            size={iconSizes.md}
+            color={colors.primary}
           />
           <Text style={meetingInfoStyles.label}>{t('screens.meetingPlanner.meetingDate')}</Text>
           <Text style={meetingInfoStyles.date}>{dateStr}</Text>
@@ -65,8 +66,8 @@ export function MeetingInfoSection({
       <View style={meetingInfoStyles.totalTimeBanner}>
         <MaterialCommunityIcons
           name={ICONS.CLOCK_OUTLINE}
-          size={mobileIconSizes.medium}
-          color={designTokens.colors.primary}
+          size={iconSizes.md}
+          color={colors.primary}
         />
         <Text style={meetingInfoStyles.totalTimeText}>
           Total Meeting Time:{SINGLE_SPACE}

@@ -2,7 +2,9 @@ import { Alert, Linking } from 'react-native';
 import { matchService } from '../../../services/matchService';
 import { userService } from '../../../services/userService';
 import { Match, MatchRound, MatchStatus } from '../../../types';
-import { EMPTY_VALUE, EXTERNAL_URLS, MESSAGES, PHONE } from '../../../shared/constants';
+import { EMPTY_VALUE, EXTERNAL_URLS, PHONE } from '../../../shared/constants';
+
+type TranslationFn = (key: string, options?: Record<string, unknown>) => string;
 
 interface MatchesDataResult {
   matches: Match[];
@@ -29,7 +31,11 @@ export async function loadMatchesData(clubId: string): Promise<MatchesDataResult
   };
 }
 
-export async function sendNotification(match: Match, messageText: string): Promise<void> {
+export async function sendNotification(
+  match: Match,
+  messageText: string,
+  t?: TranslationFn
+): Promise<void> {
   try {
     const participants = await Promise.all(match.participants.map((id) => userService.getUser(id)));
     const phoneNumbers = participants
@@ -43,7 +49,9 @@ export async function sendNotification(match: Match, messageText: string): Promi
       Linking.openURL(url);
     }
   } catch {
-    Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_SEND_NOTIFICATION);
+    if (t) {
+      Alert.alert(t('common.error'), t('errors.failedToSendNotification'));
+    }
   }
 }
 

@@ -4,7 +4,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Text } from '../../../shared/components';
 import { useAuth } from '../../../context/AuthContext';
-import { mobileIconSizes, designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { ICONS, MODAL_WIDTH, EMPTY_VALUE } from '../../../shared/constants';
 import { MATH } from '../../../shared/constants/numbers';
 import { styles } from './styles';
@@ -338,6 +338,7 @@ interface HeaderProps {
 }
 
 function Header({ onNew, onReset, onAdd, t }: HeaderProps): React.JSX.Element {
+  const { iconSizes, colors } = useTheme();
   return (
     <View style={styles.header}>
       <Text style={styles.headerTitle}>{t('screens.meetingPlanner.title')}</Text>
@@ -345,23 +346,19 @@ function Header({ onNew, onReset, onAdd, t }: HeaderProps): React.JSX.Element {
         <TouchableOpacity onPress={onNew} style={styles.headerButton}>
           <MaterialCommunityIcons
             name={ICONS.FILE_DOCUMENT_OUTLINE}
-            size={mobileIconSizes.large}
-            color={designTokens.colors.textSecondary}
+            size={iconSizes.lg}
+            color={colors.textSecondary}
           />
         </TouchableOpacity>
         <TouchableOpacity onPress={onReset} style={styles.headerButton}>
           <MaterialCommunityIcons
             name={ICONS.REFRESH}
-            size={mobileIconSizes.large}
-            color={designTokens.colors.textSecondary}
+            size={iconSizes.lg}
+            color={colors.textSecondary}
           />
         </TouchableOpacity>
         <TouchableOpacity onPress={onAdd} style={styles.headerButton}>
-          <MaterialCommunityIcons
-            name={ICONS.PLUS}
-            size={mobileIconSizes.large}
-            color={designTokens.colors.primary}
-          />
+          <MaterialCommunityIcons name={ICONS.PLUS} size={iconSizes.lg} color={colors.primary} />
         </TouchableOpacity>
       </View>
     </View>
@@ -369,12 +366,13 @@ function Header({ onNew, onReset, onAdd, t }: HeaderProps): React.JSX.Element {
 }
 
 function EmptyState({ t }: { t: (key: string) => string }): React.JSX.Element {
+  const { iconSizes, colors } = useTheme();
   return (
     <View style={styles.emptyState}>
       <MaterialCommunityIcons
         name={ICONS.CALENDAR_BLANK}
-        size={designTokens.iconSize['3xl']}
-        color={designTokens.colors.borderLight}
+        size={iconSizes['3xl']}
+        color={colors.borderLight}
       />
       <Text style={styles.emptyText}>{t('screens.meetingPlanner.noActivities')}</Text>
       <Text style={styles.emptySubtext}>{t('screens.meetingPlanner.tapToAdd')}</Text>
@@ -391,14 +389,15 @@ interface FooterProps {
 }
 
 function Footer({ isSaved, setIsSaved, onSave, onShare, t }: FooterProps): React.JSX.Element {
+  const { iconSizes, colors } = useTheme();
   if (!isSaved) {
     return (
       <View style={styles.footer}>
         <TouchableOpacity style={styles.saveButton} onPress={onSave}>
           <MaterialCommunityIcons
             name={ICONS.CONTENT_SAVE}
-            size={mobileIconSizes.large}
-            color={designTokens.colors.textInverse}
+            size={iconSizes.lg}
+            color={colors.textInverse}
           />
           <Text style={styles.saveButtonText}>{t('screens.meetingPlanner.saveMeetingPlan')}</Text>
         </TouchableOpacity>
@@ -409,18 +408,14 @@ function Footer({ isSaved, setIsSaved, onSave, onShare, t }: FooterProps): React
     <View style={styles.footer}>
       <View style={styles.footerButtons}>
         <TouchableOpacity style={styles.editButton} onPress={(): void => setIsSaved(false)}>
-          <MaterialCommunityIcons
-            name={ICONS.PENCIL}
-            size={mobileIconSizes.medium}
-            color={designTokens.colors.primary}
-          />
+          <MaterialCommunityIcons name={ICONS.PENCIL} size={iconSizes.md} color={colors.primary} />
           <Text style={styles.editButtonText}>{t('screens.meetingPlanner.edit')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.shareButton} onPress={onShare}>
           <MaterialCommunityIcons
             name={ICONS.SHARE_VARIANT}
-            size={mobileIconSizes.large}
-            color={designTokens.colors.textInverse}
+            size={iconSizes.lg}
+            color={colors.textInverse}
           />
           <Text style={styles.shareButtonText}>{t('screens.meetingPlanner.shareWithMembers')}</Text>
         </TouchableOpacity>

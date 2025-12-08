@@ -2,9 +2,9 @@ import React from 'react';
 import { View, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, Input } from '../../../shared/components';
-import { mobileIconSizes, designTokens, layoutConstants } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { ANIMATION, ICONS, KEYBOARD_TYPE, TEXT_INPUT } from '../../../shared/constants';
-import { MODAL_OPACITY } from '../../../shared/constants/http';
+import { MODAL_HEIGHT_RATIO } from '../../../shared/constants/components';
 import { modalStyles } from './styles';
 import { AgendaItem } from './types';
 
@@ -24,8 +24,6 @@ interface EditItemModalProps {
   onSave: () => void;
   t: (key: string) => string;
 }
-
-const MODAL_HEIGHT_MULTIPLIER = MODAL_OPACITY.BACKDROP;
 
 export function EditItemModal({
   visible,
@@ -51,8 +49,8 @@ export function EditItemModal({
     modalStyles.content,
     {
       width: modalWidth,
-      maxHeight: windowHeight * MODAL_HEIGHT_MULTIPLIER,
-      alignSelf: layoutConstants.alignSelf.center,
+      maxHeight: windowHeight * MODAL_HEIGHT_RATIO,
+      alignSelf: 'center' as const,
     },
   ];
 
@@ -98,14 +96,15 @@ function ModalHeader({
   title: string;
   onClose: () => void;
 }): React.JSX.Element {
+  const { iconSizes, colors } = useTheme();
   return (
     <View style={modalStyles.header}>
       <Text style={modalStyles.title}>{title}</Text>
       <TouchableOpacity onPress={onClose}>
         <MaterialCommunityIcons
           name={ICONS.CLOSE}
-          size={mobileIconSizes.large}
-          color={designTokens.colors.textSecondary}
+          size={iconSizes.lg}
+          color={colors.textSecondary}
         />
       </TouchableOpacity>
     </View>

@@ -3,7 +3,7 @@ import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, IconButton } from '../../../shared/components';
 import { User, UserRole, MemberBalance } from '../../../types';
-import { designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import {
   ICONS,
   TEXT_LINES,
@@ -14,7 +14,7 @@ import {
   ELLIPSIS,
   EMPTY_VALUE,
 } from '../../../shared/constants';
-import { NUMERIC } from '../../../shared/constants/http';
+import { NUMERIC } from '../../../shared/constants/validation';
 import { memberCardStyles as styles } from './styles';
 
 interface ApprovedMemberCardProps {
@@ -39,17 +39,28 @@ interface ApprovedMemberCardProps {
   };
 }
 
-function getBalanceColor(balance?: MemberBalance): string {
+interface ThemeColors {
+  textSecondary: string;
+  success: string;
+  error: string;
+  warning: string;
+  backgroundTertiary: string;
+  primary: string;
+  textQuaternary: string;
+  textInverse: string;
+}
+
+function getBalanceColor(balance: MemberBalance | undefined, colors: ThemeColors): string {
   if (!balance) {
-    return designTokens.colors.textSecondary;
+    return colors.textSecondary;
   }
   if (balance.balance >= 0) {
-    return designTokens.colors.success;
+    return colors.success;
   }
   if (balance.overdueCharges > 0) {
-    return designTokens.colors.error;
+    return colors.error;
   }
-  return designTokens.colors.warning;
+  return colors.warning;
 }
 
 export function ApprovedMemberCard({
@@ -61,10 +72,21 @@ export function ApprovedMemberCard({
   onDelete,
   labels,
 }: ApprovedMemberCardProps): React.JSX.Element {
-  const balanceColor = getBalanceColor(balance);
+  const { colors, iconSizes } = useTheme();
+  const themeColors: ThemeColors = {
+    textSecondary: colors.textSecondary,
+    success: colors.success,
+    error: colors.error,
+    warning: colors.warning,
+    backgroundTertiary: colors.backgroundTertiary,
+    primary: colors.primary,
+    textQuaternary: colors.textQuaternary,
+    textInverse: colors.textInverse,
+  };
+  const balanceColor = getBalanceColor(balance, themeColors);
   const isActive = member.isActive;
   const cardStyle = [styles.card, !isActive && styles.cardInactive];
-  const avatarBg = isActive ? balanceColor : designTokens.colors.backgroundTertiary;
+  const avatarBg = isActive ? balanceColor : colors.backgroundTertiary;
   const roleLabel = member.role === UserRole.CLUB_ADMIN ? labels.clubAdmin : labels.user;
 
   return (
@@ -78,8 +100,22 @@ export function ApprovedMemberCard({
         >
           {member.email}
         </Text>
-        <MemberDetails member={member} isActive={isActive} labels={labels} />
-        {balance && <BalanceRow balance={balance} color={balanceColor} labels={labels} />}
+        <MemberDetails
+          member={member}
+          isActive={isActive}
+          labels={labels}
+          colors={themeColors}
+          iconSizes={iconSizes}
+        />
+        {balance && (
+          <BalanceRow
+            balance={balance}
+            color={balanceColor}
+            labels={labels}
+            colors={themeColors}
+            iconSizes={iconSizes}
+          />
+        )}
       </View>
       <MemberActions
         isActive={isActive}
@@ -87,6 +123,7 @@ export function ApprovedMemberCard({
         onToggleStatus={onToggleStatus}
         onDelete={onDelete}
         labels={labels}
+        colors={themeColors}
       />
     </TouchableOpacity>
   );
@@ -138,18 +175,25 @@ interface MemberDetailsProps {
   member: User;
   isActive: boolean;
   labels: ApprovedMemberCardProps['labels'];
+  colors: ThemeColors;
+  iconSizes: Record<string, number>;
 }
 
-function MemberDetails({ member, isActive, labels }: MemberDetailsProps): React.JSX.Element {
+function MemberDetails({
+  member,
+  isActive,
+  labels,
+  colors,
+  iconSizes,
+}: MemberDetailsProps): React.JSX.Element {
   const hasClasses = member.classes && member.classes.length > 0;
   const classesText = hasClasses
     ? member.classes.slice(0, MATH.HALF).join(LIST_SEPARATOR) +
       (member.classes.length > MATH.HALF ? ELLIPSIS : EMPTY_VALUE)
     : null;
-  const getIconColor = (active: string): string =>
-    isActive ? active : designTokens.colors.textQuaternary;
+  const getIconColor = (active: string): string => (isActive ? active : colors.textQuaternary);
   const statusIcon = isActive ? ICONS.CHECK_CIRCLE : ICONS.CANCEL;
-  const statusColor = isActive ? designTokens.colors.success : designTokens.colors.error;
+  const statusColor = isActive ? colors.success : colors.error;
 
   return (
     <View style={styles.detailsRow}>
@@ -157,8 +201,8 @@ function MemberDetails({ member, isActive, labels }: MemberDetailsProps): React.
         <View style={styles.metaItem}>
           <MaterialCommunityIcons
             name={ICONS.SCHOOL}
-            size={designTokens.iconSize.xs}
-            color={getIconColor(designTokens.colors.primary)}
+            size={iconSizes.xs}
+            color={getIconColor(colors.primary)}
           />
           <Text
             style={[styles.metaText, !isActive && styles.textInactive]}
@@ -172,8 +216,8 @@ function MemberDetails({ member, isActive, labels }: MemberDetailsProps): React.
         <View style={styles.metaItem}>
           <MaterialCommunityIcons
             name={ICONS.WHATSAPP}
-            size={designTokens.iconSize.xs}
-            color={getIconColor(designTokens.colors.success)}
+            size={iconSizes.xs}
+            color={getIconColor(colors.success)}
           />
           <Text
             style={[styles.metaText, !isActive && styles.textInactive]}
@@ -184,11 +228,7 @@ function MemberDetails({ member, isActive, labels }: MemberDetailsProps): React.
         </View>
       )}
       <View style={styles.statusBadge}>
-        <MaterialCommunityIcons
-          name={statusIcon}
-          size={designTokens.iconSize.xs}
-          color={statusColor}
-        />
+        <MaterialCommunityIcons name={statusIcon} size={iconSizes.xs} color={statusColor} />
         <Text style={styles.statusText}>{isActive ? labels.active : labels.inactive}</Text>
       </View>
     </View>
@@ -199,10 +239,14 @@ function BalanceRow({
   balance,
   color,
   labels,
+  colors,
+  iconSizes,
 }: {
   balance: MemberBalance;
   color: string;
   labels: ApprovedMemberCardProps['labels'];
+  colors: ThemeColors;
+  iconSizes: Record<string, number>;
 }): React.JSX.Element {
   const isNegative = balance.balance < 0;
   const statusLabel = isNegative
@@ -213,11 +257,7 @@ function BalanceRow({
   return (
     <View style={styles.balanceRow}>
       <View style={[styles.balanceIndicator, { backgroundColor: color }]}>
-        <MaterialCommunityIcons
-          name={ICONS.CASH}
-          size={designTokens.iconSize.xs}
-          color={designTokens.colors.textInverse}
-        />
+        <MaterialCommunityIcons name={ICONS.CASH} size={iconSizes.xs} color={colors.textInverse} />
         <Text style={styles.balanceText}>
           ${Math.abs(balance.balance).toFixed(NUMERIC.DECIMAL_PLACES)}
         </Text>
@@ -233,6 +273,7 @@ interface MemberActionsProps {
   onToggleStatus: () => void;
   onDelete: () => void;
   labels: ApprovedMemberCardProps['labels'];
+  colors: ThemeColors;
 }
 
 function MemberActions({
@@ -241,9 +282,10 @@ function MemberActions({
   onToggleStatus,
   onDelete,
   labels,
+  colors,
 }: MemberActionsProps): React.JSX.Element {
   const toggleIcon = isActive ? ICONS.CANCEL : ICONS.CHECK_CIRCLE;
-  const toggleColor = isActive ? designTokens.colors.error : designTokens.colors.success;
+  const toggleColor = isActive ? colors.error : colors.success;
   const toggleLabel = isActive ? labels.deactivate : labels.activate;
 
   return (
@@ -252,7 +294,7 @@ function MemberActions({
         icon={ICONS.SCHOOL_OUTLINE}
         onPress={onEditClasses}
         size={COMPONENT_SIZE.md}
-        color={designTokens.colors.primary}
+        color={colors.primary}
         accessibilityLabel={labels.editClasses}
       />
       <IconButton
@@ -266,7 +308,7 @@ function MemberActions({
         icon={ICONS.DELETE_OUTLINE}
         onPress={onDelete}
         size={COMPONENT_SIZE.md}
-        color={designTokens.colors.error}
+        color={colors.error}
         accessibilityLabel={labels.delete}
       />
     </View>

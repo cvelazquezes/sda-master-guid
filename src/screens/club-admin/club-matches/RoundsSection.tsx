@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { format } from 'date-fns';
 import { Text } from '../../../shared/components';
 import { MatchRound } from '../../../types';
-import { designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { DATE_FORMATS, ROUND_STATUS, DISPLAY_LIMITS } from '../../../shared/constants';
 import { roundsStyles as styles } from './styles';
 
@@ -13,11 +13,10 @@ interface RoundsSectionProps {
 }
 
 function RoundCard({ round }: { round: MatchRound }): React.JSX.Element {
+  const { colors } = useTheme();
   const isActive = round.status === ROUND_STATUS.ACTIVE;
-  const badgeBg = isActive
-    ? designTokens.colors.successLight
-    : designTokens.colors.backgroundSecondary;
-  const textColor = isActive ? designTokens.colors.success : designTokens.colors.textSecondary;
+  const badgeBg = isActive ? colors.successLight : colors.backgroundSecondary;
+  const textColor = isActive ? colors.success : colors.textSecondary;
   const formattedDate = format(new Date(round.createdAt), DATE_FORMATS.DATE_FNS_DATE_DISPLAY);
 
   return (

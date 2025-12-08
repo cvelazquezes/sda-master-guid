@@ -5,7 +5,7 @@ import { Text } from '../../../shared/components';
 import { Match, MatchStatus, User } from '../../../types';
 import { StandardModal } from '../../../shared/components/StandardModal';
 import { StandardButton } from '../../../shared/components/StandardButton';
-import { mobileIconSizes, designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { COMPONENT_VARIANT, ICONS } from '../../../shared/constants';
 import { modalStyles as styles } from './styles';
 
@@ -49,13 +49,14 @@ function ParticipantRow({ participant }: { participant: User }): React.JSX.Eleme
 }
 
 function StatusBadge({ status }: { status: MatchStatus }): React.JSX.Element {
-  const config = designTokens.status[status] || designTokens.status.pending;
+  const { colors, iconSizes } = useTheme();
+  const config = colors.status[status] || colors.status.pending;
   const displayText = status.charAt(0).toUpperCase() + status.slice(1);
   return (
     <View style={[styles.statusBadge, { backgroundColor: config.light }]}>
       <MaterialCommunityIcons
-        name={config.icon as typeof ICONS.CHECK}
-        size={mobileIconSizes.medium}
+        name={(config.icon || ICONS.CLOCK_OUTLINE) as typeof ICONS.CHECK}
+        size={iconSizes.md}
         color={config.text}
       />
       <Text style={[styles.statusText, { color: config.text }]}>{displayText}</Text>
@@ -131,6 +132,7 @@ export function MatchDetailModal({
   onUpdateStatus,
   labels,
 }: MatchDetailModalProps): React.JSX.Element | null {
+  const { colors } = useTheme();
   if (!match) {
     return null;
   }
@@ -141,8 +143,8 @@ export function MatchDetailModal({
       title={labels.title}
       subtitle={labels.subtitle}
       icon={ICONS.ACCOUNT_HEART}
-      iconColor={designTokens.colors.primary}
-      iconBackgroundColor={designTokens.colors.primaryLight}
+      iconColor={colors.primary}
+      iconBackgroundColor={colors.primaryLight}
     >
       <View style={styles.modalContent}>
         <View style={styles.modalSection}>

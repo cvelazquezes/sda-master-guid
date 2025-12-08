@@ -4,7 +4,6 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, Input } from '../../../shared/components';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { User } from '../../../types';
-import { designTokens } from '../../../shared/theme';
 import {
   ANIMATION,
   ICONS,
@@ -95,13 +94,14 @@ interface ModalHeaderProps {
 }
 
 function ModalHeader({ onClose, colors, t }: ModalHeaderProps): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <View style={modalStyles.header}>
       <Text style={modalStyles.title}>{t('screens.clubFees.createCustomCharge')}</Text>
       <TouchableOpacity onPress={onClose} style={modalStyles.closeButton}>
         <MaterialCommunityIcons
           name={ICONS.CLOSE}
-          size={designTokens.iconSize.lg}
+          size={iconSizes.lg}
           color={colors.textSecondary}
         />
       </TouchableOpacity>
@@ -224,6 +224,7 @@ function ApplyToOption({
   onPress,
   colors,
 }: ApplyToOptionProps): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const optionStyle = [modalStyles.applyToOption, active && modalStyles.applyToOptionActive];
   const textStyle = [modalStyles.applyToText, active && modalStyles.applyToTextActive];
   const iconColor = active ? colors.primary : colors.textSecondary;
@@ -231,7 +232,7 @@ function ApplyToOption({
     <TouchableOpacity style={optionStyle} onPress={onPress} activeOpacity={TOUCH_OPACITY.default}>
       <MaterialCommunityIcons
         name={icon as typeof ICONS.ACCOUNT_GROUP}
-        size={designTokens.iconSize.md}
+        size={iconSizes.md}
         color={iconColor}
       />
       <Text style={textStyle}>{label}</Text>
@@ -248,7 +249,7 @@ function MemberItem({
   isSelected: boolean;
   onToggle: () => void;
 }): React.JSX.Element {
-  const { colors } = useTheme();
+  const { colors, iconSizes } = useTheme();
   const itemStyle = [modalStyles.memberItem, isSelected && modalStyles.memberItemSelected];
   const checkboxStyle = [
     modalStyles.checkbox,
@@ -266,7 +267,7 @@ function MemberItem({
           {isSelected && (
             <MaterialCommunityIcons
               name={ICONS.CHECK}
-              size={designTokens.iconSize.sm}
+              size={iconSizes.sm}
               color={colors.textOnPrimary}
             />
           )}
@@ -348,7 +349,7 @@ interface ModalFooterProps {
 }
 
 function ModalFooter({ onClose, onCreate, t }: ModalFooterProps): React.JSX.Element {
-  const { colors } = useTheme();
+  const { colors, iconSizes } = useTheme();
   return (
     <View style={modalStyles.footer}>
       <TouchableOpacity
@@ -371,7 +372,7 @@ function ModalFooter({ onClose, onCreate, t }: ModalFooterProps): React.JSX.Elem
       >
         <MaterialCommunityIcons
           name={ICONS.PLUS_CIRCLE}
-          size={designTokens.iconSize.md}
+          size={iconSizes.md}
           color={colors.textOnPrimary}
         />
         <Text

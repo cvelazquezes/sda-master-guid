@@ -1,10 +1,13 @@
+/**
+ * MoreScreen
+ * ✅ COMPLIANT: Uses theme values via useTheme() hook
+ */
 import React from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { ScreenHeader, MenuCard, SectionHeader } from '../../shared/components';
-import { designTokens } from '../../shared/theme/designTokens';
 import { ICONS, SCREENS, MENU_ITEM_IDS, FLEX } from '../../shared/constants';
 
 interface MenuItem {
@@ -70,7 +73,7 @@ function DisabledMenuSection({
 
 const MoreScreen = (): React.JSX.Element => {
   const navigation = useNavigation();
-  const { colors } = useTheme();
+  const { colors, spacing } = useTheme();
   const { t } = useTranslation();
 
   const activityItems: MenuItem[] = [
@@ -123,19 +126,22 @@ const MoreScreen = (): React.JSX.Element => {
     },
   ];
 
+  const containerStyle = { flex: FLEX.ONE, backgroundColor: colors.background };
+  const contentStyle = { padding: spacing.lg, paddingTop: spacing.sm };
+
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={containerStyle}>
       <ScreenHeader title={t('screens.clubMore.title')} subtitle={t('screens.clubMore.subtitle')} />
-      <ScrollView style={styles.scrollView}>
-        <View style={styles.content}>
+      <ScrollView style={{ flex: FLEX.ONE }}>
+        <View style={contentStyle}>
           <SectionHeader title={t('screens.clubMore.activitiesSection')} />
           <NavMenuSection items={activityItems} navigation={navigation} />
         </View>
-        <View style={styles.content}>
+        <View style={contentStyle}>
           <SectionHeader title={t('screens.clubMore.clubManagementSection')} />
           <NavMenuSection items={managementItems} navigation={navigation} />
         </View>
-        <View style={styles.content}>
+        <View style={contentStyle}>
           <SectionHeader title={t('screens.clubMore.helpSection')} />
           <DisabledMenuSection items={helpItems} colors={colors} t={t} />
         </View>
@@ -143,18 +149,5 @@ const MoreScreen = (): React.JSX.Element => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: FLEX.ONE,
-  },
-  scrollView: {
-    flex: FLEX.ONE,
-  },
-  content: {
-    padding: designTokens.spacing.lg,
-    paddingTop: designTokens.spacing.sm,
-  },
-});
 
 export default MoreScreen;

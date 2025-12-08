@@ -3,7 +3,6 @@ import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../shared/components';
 import { useTheme } from '../../../contexts/ThemeContext';
-import { designTokens } from '../../../shared/theme';
 import { ICONS, TOUCH_OPACITY, FEE_TABS } from '../../../shared/constants';
 import { tabStyles } from './styles';
 import { FeeTabValue } from './types';
@@ -53,6 +52,7 @@ interface TabButtonProps {
 }
 
 function TabButton({ icon, label, active, onPress, colors }: TabButtonProps): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const tabStyle = [tabStyles.tab, active && tabStyles.tabActive];
   const textStyle = [tabStyles.tabText, active && tabStyles.tabTextActive];
   const iconColor = active ? colors.primary : colors.textSecondary;
@@ -61,7 +61,7 @@ function TabButton({ icon, label, active, onPress, colors }: TabButtonProps): Re
     <TouchableOpacity style={tabStyle} onPress={onPress} activeOpacity={TOUCH_OPACITY.default}>
       <MaterialCommunityIcons
         name={icon as typeof ICONS.COG_OUTLINE}
-        size={designTokens.iconSize.md}
+        size={iconSizes.md}
         color={iconColor}
       />
       <Text style={textStyle}>{label}</Text>

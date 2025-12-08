@@ -2,7 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity, Modal } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../shared/components';
-import { mobileIconSizes, designTokens, layoutConstants } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { ANIMATION, DATE_LOCALE_OPTIONS, ICONS } from '../../../shared/constants';
 import { modalStyles, shareModalStyles } from './styles';
 import { AgendaItem } from './types';
@@ -30,10 +30,7 @@ export function ShareModal({
   onConfirmShare,
   t,
 }: ShareModalProps): React.JSX.Element {
-  const overlayStyle = [
-    modalStyles.overlay,
-    { justifyContent: layoutConstants.justifyContent.center },
-  ];
+  const overlayStyle = [modalStyles.overlay, { justifyContent: 'center' as const }];
   const contentStyle = [shareModalStyles.content, { width: shareModalWidth }];
 
   return (
@@ -60,13 +57,14 @@ interface ShareHeaderProps {
 }
 
 function ShareHeader({ membersCount, t }: ShareHeaderProps): React.JSX.Element {
+  const { iconSizes, colors } = useTheme();
   return (
     <View style={shareModalStyles.header}>
       <View style={shareModalStyles.iconContainer}>
         <MaterialCommunityIcons
           name={ICONS.SHARE_VARIANT}
-          size={designTokens.iconSize.xxl}
-          color={designTokens.colors.primary}
+          size={iconSizes.xxl}
+          color={colors.primary}
         />
       </View>
       <Text style={shareModalStyles.title}>{t('screens.meetingPlanner.shareMeetingPlan')}</Text>
@@ -114,12 +112,13 @@ interface InfoRowProps {
 }
 
 function InfoRow({ icon, label, value }: InfoRowProps): React.JSX.Element {
+  const { iconSizes, colors } = useTheme();
   return (
     <View style={shareModalStyles.infoRow}>
       <MaterialCommunityIcons
         name={icon as typeof ICONS.CALENDAR}
-        size={mobileIconSizes.medium}
-        color={designTokens.colors.primary}
+        size={iconSizes.md}
+        color={colors.primary}
       />
       <View style={shareModalStyles.infoText}>
         <Text style={shareModalStyles.infoLabel}>{label}</Text>
@@ -136,6 +135,7 @@ interface ShareActionsProps {
 }
 
 function ShareActions({ onClose, onConfirmShare, t }: ShareActionsProps): React.JSX.Element {
+  const { iconSizes, colors } = useTheme();
   const confirmStyle = [
     modalStyles.button,
     modalStyles.confirmButton,
@@ -147,11 +147,7 @@ function ShareActions({ onClose, onConfirmShare, t }: ShareActionsProps): React.
         <Text style={modalStyles.cancelButtonText}>{t('common.cancel')}</Text>
       </TouchableOpacity>
       <TouchableOpacity style={confirmStyle} onPress={onConfirmShare}>
-        <MaterialCommunityIcons
-          name={ICONS.SEND}
-          size={mobileIconSizes.medium}
-          color={designTokens.colors.textInverse}
-        />
+        <MaterialCommunityIcons name={ICONS.SEND} size={iconSizes.md} color={colors.textInverse} />
         <Text style={modalStyles.confirmButtonText}>{t('screens.meetingPlanner.sendToAll')}</Text>
       </TouchableOpacity>
     </View>

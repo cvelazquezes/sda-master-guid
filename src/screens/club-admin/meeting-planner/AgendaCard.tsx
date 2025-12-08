@@ -2,7 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../shared/components';
-import { mobileIconSizes, designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { ICONS, TEXT_LINES, MOVE_DIRECTION } from '../../../shared/constants';
 import { agendaCardStyles, assignButtonStyles } from './styles';
 import { AgendaItem } from './types';
@@ -60,6 +60,7 @@ function AgendaContent({
   onRemoveMember,
   t,
 }: AgendaContentProps): React.JSX.Element {
+  const { iconSizes, colors } = useTheme();
   return (
     <View style={agendaCardStyles.content}>
       <View style={agendaCardStyles.header}>
@@ -69,8 +70,8 @@ function AgendaContent({
         <View style={agendaCardStyles.timeChip}>
           <MaterialCommunityIcons
             name={ICONS.CLOCK_OUTLINE}
-            size={mobileIconSizes.tiny}
-            color={designTokens.colors.textSecondary}
+            size={iconSizes.xxs}
+            color={colors.textSecondary}
           />
           <Text style={agendaCardStyles.timeText}>{item.estimatedMinutes}m</Text>
         </View>
@@ -98,23 +99,20 @@ function ResponsibleSection({
   onRemoveMember,
   t,
 }: ResponsibleSectionProps): React.JSX.Element {
+  const { iconSizes, colors } = useTheme();
   return (
     <View style={agendaCardStyles.responsibleSection}>
       {item.responsibleMemberId ? (
         <View style={agendaCardStyles.memberChip}>
-          <MaterialCommunityIcons
-            name={ICONS.ACCOUNT}
-            size={mobileIconSizes.small}
-            color={designTokens.colors.primary}
-          />
+          <MaterialCommunityIcons name={ICONS.ACCOUNT} size={iconSizes.sm} color={colors.primary} />
           <Text style={agendaCardStyles.memberName} numberOfLines={TEXT_LINES.single}>
             {item.responsibleMemberName}
           </Text>
           <TouchableOpacity onPress={onRemoveMember}>
             <MaterialCommunityIcons
               name={ICONS.CLOSE_CIRCLE}
-              size={mobileIconSizes.small}
-              color={designTokens.colors.textTertiary}
+              size={iconSizes.sm}
+              color={colors.textTertiary}
             />
           </TouchableOpacity>
         </View>
@@ -122,8 +120,8 @@ function ResponsibleSection({
         <TouchableOpacity style={assignButtonStyles.button} onPress={onAssign}>
           <MaterialCommunityIcons
             name={ICONS.ACCOUNT_PLUS}
-            size={mobileIconSizes.small}
-            color={designTokens.colors.primary}
+            size={iconSizes.sm}
+            color={colors.primary}
           />
           <Text style={assignButtonStyles.text}>{t('screens.meetingPlanner.assignMember')}</Text>
         </TouchableOpacity>
@@ -147,10 +145,11 @@ function AgendaActions({
   onDelete,
   onMove,
 }: AgendaActionsProps): React.JSX.Element {
+  const { iconSizes, colors } = useTheme();
   const isFirst = index === 0;
   const isLast = index === totalItems - 1;
-  const upColor = isFirst ? designTokens.colors.borderLight : designTokens.colors.textSecondary;
-  const downColor = isLast ? designTokens.colors.borderLight : designTokens.colors.textSecondary;
+  const upColor = isFirst ? colors.borderLight : colors.textSecondary;
+  const downColor = isLast ? colors.borderLight : colors.textSecondary;
 
   return (
     <View style={agendaCardStyles.actions}>
@@ -160,37 +159,21 @@ function AgendaActions({
           onPress={(): void => onMove(MOVE_DIRECTION.UP)}
           disabled={isFirst}
         >
-          <MaterialCommunityIcons
-            name={ICONS.CHEVRON_UP}
-            size={mobileIconSizes.medium}
-            color={upColor}
-          />
+          <MaterialCommunityIcons name={ICONS.CHEVRON_UP} size={iconSizes.md} color={upColor} />
         </TouchableOpacity>
         <TouchableOpacity
           style={[agendaCardStyles.moveButton, isLast && agendaCardStyles.moveButtonDisabled]}
           onPress={(): void => onMove(MOVE_DIRECTION.DOWN)}
           disabled={isLast}
         >
-          <MaterialCommunityIcons
-            name={ICONS.CHEVRON_DOWN}
-            size={mobileIconSizes.medium}
-            color={downColor}
-          />
+          <MaterialCommunityIcons name={ICONS.CHEVRON_DOWN} size={iconSizes.md} color={downColor} />
         </TouchableOpacity>
       </View>
       <TouchableOpacity style={agendaCardStyles.actionButton} onPress={onEdit}>
-        <MaterialCommunityIcons
-          name={ICONS.PENCIL}
-          size={mobileIconSizes.medium}
-          color={designTokens.colors.primary}
-        />
+        <MaterialCommunityIcons name={ICONS.PENCIL} size={iconSizes.md} color={colors.primary} />
       </TouchableOpacity>
       <TouchableOpacity style={agendaCardStyles.actionButton} onPress={onDelete}>
-        <MaterialCommunityIcons
-          name={ICONS.DELETE}
-          size={mobileIconSizes.medium}
-          color={designTokens.colors.error}
-        />
+        <MaterialCommunityIcons name={ICONS.DELETE} size={iconSizes.md} color={colors.error} />
       </TouchableOpacity>
     </View>
   );

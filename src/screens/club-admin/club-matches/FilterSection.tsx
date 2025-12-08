@@ -1,8 +1,8 @@
-import React from 'react';
-import { View, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, ScrollView, TouchableOpacity, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import { Text } from '../../../shared/components';
 import { MatchStatus } from '../../../types';
-import { mobileTypography, designTokens, layoutConstants } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { FILTER_STATUS } from '../../../shared/constants';
 
 interface FilterSectionProps {
@@ -41,7 +41,46 @@ export function FilterSection({
   title,
   labels,
 }: FilterSectionProps): React.JSX.Element {
+  const { colors, spacing, radii, typography } = useTheme();
   const filters = createFilters(labels);
+
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        section: {
+          padding: spacing.lg,
+          backgroundColor: colors.backgroundPrimary,
+          marginTop: spacing.sm,
+        } as ViewStyle,
+        sectionTitle: {
+          fontSize: typography.fontSizes.lg,
+          fontWeight: typography.fontWeights.bold,
+          marginBottom: spacing.lg,
+        } as TextStyle,
+        filterScroll: {
+          flexDirection: 'row',
+        } as ViewStyle,
+        filterChip: {
+          paddingHorizontal: spacing.lg,
+          paddingVertical: spacing.sm,
+          backgroundColor: colors.backgroundSecondary,
+          borderRadius: radii['2xl'],
+          marginRight: spacing.sm,
+        } as ViewStyle,
+        filterChipActive: {
+          backgroundColor: colors.primary,
+        } as ViewStyle,
+        filterChipText: {
+          fontSize: typography.fontSizes.sm,
+          fontWeight: typography.fontWeights.bold,
+          color: colors.textSecondary,
+        } as TextStyle,
+        filterChipTextActive: {
+          color: colors.textInverse,
+        } as TextStyle,
+      }),
+    [colors, spacing, radii, typography]
+  );
 
   return (
     <View style={styles.section}>
@@ -65,35 +104,3 @@ export function FilterSection({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  section: {
-    padding: designTokens.spacing.lg,
-    backgroundColor: designTokens.colors.backgroundPrimary,
-    marginTop: designTokens.spacing.sm,
-  },
-  sectionTitle: {
-    ...mobileTypography.heading3,
-    marginBottom: designTokens.spacing.lg,
-  },
-  filterScroll: {
-    flexDirection: layoutConstants.flexDirection.row,
-  },
-  filterChip: {
-    paddingHorizontal: designTokens.spacing.lg,
-    paddingVertical: designTokens.spacing.sm,
-    backgroundColor: designTokens.colors.backgroundSecondary,
-    borderRadius: designTokens.borderRadius['2xl'],
-    marginRight: designTokens.spacing.sm,
-  },
-  filterChipActive: {
-    backgroundColor: designTokens.colors.primary,
-  },
-  filterChipText: {
-    ...mobileTypography.labelBold,
-    color: designTokens.colors.textSecondary,
-  },
-  filterChipTextActive: {
-    color: designTokens.colors.textInverse,
-  },
-});

@@ -1,7 +1,9 @@
 import { Alert } from 'react-native';
 import { paymentService } from '../../../services/paymentService';
 import { User } from '../../../types';
-import { MESSAGES, NUMERIC, FORMAT_REGEX, EMPTY_VALUE } from '../../../shared/constants';
+import { NUMERIC, FORMAT_REGEX, EMPTY_VALUE } from '../../../shared/constants';
+
+type TranslationFn = (key: string, opts?: Record<string, unknown>) => string;
 
 interface CreateCustomChargeOptions {
   clubId: string;
@@ -15,7 +17,7 @@ interface CreateCustomChargeOptions {
   loadData: () => void;
   resetForm: () => void;
   closeModal: () => void;
-  t: (key: string, opts?: Record<string, unknown>) => string;
+  t: TranslationFn;
 }
 
 export async function createCustomCharge(options: CreateCustomChargeOptions): Promise<void> {
@@ -36,25 +38,25 @@ export async function createCustomCharge(options: CreateCustomChargeOptions): Pr
 
   const amount = parseFloat(chargeAmount);
   if (isNaN(amount) || amount <= NUMERIC.MIN_AMOUNT) {
-    Alert.alert(MESSAGES.TITLES.INVALID_AMOUNT, MESSAGES.ERRORS.INVALID_AMOUNT);
+    Alert.alert(t('titles.invalidAmount'), t('errors.invalidAmount'));
     return;
   }
   if (!chargeDescription.trim()) {
-    Alert.alert(MESSAGES.TITLES.MISSING_DESCRIPTION, MESSAGES.ERRORS.MISSING_DESCRIPTION);
+    Alert.alert(t('titles.missingDescription'), t('errors.missingDescription'));
     return;
   }
   if (!chargeDueDate) {
-    Alert.alert(MESSAGES.TITLES.MISSING_DATE, MESSAGES.ERRORS.MISSING_DATE);
+    Alert.alert(t('titles.missingDate'), t('errors.missingDate'));
     return;
   }
   if (!FORMAT_REGEX.DATE.ISO.test(chargeDueDate)) {
-    Alert.alert(MESSAGES.TITLES.INVALID_DATE, MESSAGES.ERRORS.INVALID_DATE_FORMAT);
+    Alert.alert(t('titles.invalidDate'), t('errors.invalidDateFormat'));
     return;
   }
 
   const targetUserIds = chargeApplyToAll ? members.map((m) => m.id) : selectedMemberIds;
   if (targetUserIds.length === 0) {
-    Alert.alert(MESSAGES.TITLES.NO_MEMBERS_SELECTED, MESSAGES.ERRORS.NO_MEMBERS_SELECTED);
+    Alert.alert(t('titles.noMembersSelected'), t('errors.noMembersSelected'));
     return;
   }
 
@@ -71,7 +73,7 @@ export async function createCustomCharge(options: CreateCustomChargeOptions): Pr
       ? t('screens.clubFees.allMembers')
       : t('screens.clubFees.memberCount', { count: targetUserIds.length });
     Alert.alert(
-      MESSAGES.TITLES.SUCCESS,
+      t('common.success'),
       t('screens.clubFees.chargeCreated', {
         amount: amount.toFixed(NUMERIC.DECIMAL_PLACES),
         members: memberText,
@@ -81,7 +83,7 @@ export async function createCustomCharge(options: CreateCustomChargeOptions): Pr
     resetForm();
     loadData();
   } catch {
-    Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_CREATE_CHARGE);
+    Alert.alert(t('common.error'), t('errors.failedToCreateCharge'));
   }
 }
 

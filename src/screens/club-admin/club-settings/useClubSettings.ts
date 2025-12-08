@@ -2,7 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { clubService } from '../../../services/clubService';
 import { Club, MatchFrequency } from '../../../types';
-import { CLUB, EMPTY_VALUE, MESSAGES } from '../../../shared/constants';
+import { CLUB, EMPTY_VALUE } from '../../../shared/constants';
+
+type TranslationFn = (key: string, options?: Record<string, unknown>) => string;
 
 interface FormData {
   name: string;
@@ -18,7 +20,10 @@ interface UseClubSettingsReturn {
   handleSave: () => Promise<void>;
 }
 
-export function useClubSettings(clubId?: string): UseClubSettingsReturn {
+export function useClubSettings(
+  clubId: string | undefined,
+  t: TranslationFn
+): UseClubSettingsReturn {
   const [club, setClub] = useState<Club | null>(null);
   const [formData, setFormData] = useState<FormData>({
     name: EMPTY_VALUE,
@@ -41,9 +46,9 @@ export function useClubSettings(clubId?: string): UseClubSettingsReturn {
         groupSize: clubData.groupSize,
       });
     } catch {
-      Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_LOAD_CLUB_SETTINGS);
+      Alert.alert(t('common.error'), t('errors.failedToLoadClubSettings'));
     }
-  }, [clubId]);
+  }, [clubId, t]);
 
   useEffect(() => {
     if (clubId) {
@@ -53,15 +58,15 @@ export function useClubSettings(clubId?: string): UseClubSettingsReturn {
 
   const handleSave = async (): Promise<void> => {
     if (!clubId || !formData.name || !formData.description) {
-      Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.MISSING_FIELDS);
+      Alert.alert(t('common.error'), t('errors.missingFields'));
       return;
     }
     try {
       await clubService.updateClub(clubId, formData);
       loadClub();
-      Alert.alert(MESSAGES.TITLES.SUCCESS, MESSAGES.SUCCESS.CLUB_UPDATED);
+      Alert.alert(t('common.success'), t('success.clubUpdated'));
     } catch {
-      Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_UPDATE_CLUB_SETTINGS);
+      Alert.alert(t('common.error'), t('errors.failedToUpdateClubSettings'));
     }
   };
 

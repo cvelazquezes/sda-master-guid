@@ -2,14 +2,10 @@ import { Alert } from 'react-native';
 import { clubService } from '../../../services/clubService';
 import { paymentService } from '../../../services/paymentService';
 import { User, Club, ClubFeeSettings, MemberBalance } from '../../../types';
-import {
-  MESSAGES,
-  NUMERIC,
-  LIMITS,
-  ALERT_BUTTON_STYLE,
-  LOG_MESSAGES,
-} from '../../../shared/constants';
+import { NUMERIC, LIMITS, ALERT_BUTTON_STYLE, LOG_MESSAGES } from '../../../shared/constants';
 import { logger } from '../../../shared/utils/logger';
+
+type TranslationFn = (key: string, opts?: Record<string, unknown>) => string;
 
 interface SaveFeeSettingsOptions {
   club: Club;
@@ -18,7 +14,7 @@ interface SaveFeeSettingsOptions {
   selectedMonths: number[];
   feeSettingsActive: boolean;
   setClub: (c: Club) => void;
-  t: (key: string) => string;
+  t: TranslationFn;
 }
 
 export async function saveFeeSettings(options: SaveFeeSettingsOptions): Promise<void> {
@@ -26,11 +22,11 @@ export async function saveFeeSettings(options: SaveFeeSettingsOptions): Promise<
 
   const amount = parseFloat(feeAmount);
   if (isNaN(amount) || amount < NUMERIC.MIN_AMOUNT) {
-    Alert.alert(MESSAGES.TITLES.INVALID_AMOUNT, t('screens.clubFees.invalidFeeAmount'));
+    Alert.alert(t('titles.invalidAmount'), t('screens.clubFees.invalidFeeAmount'));
     return;
   }
   if (selectedMonths.length === LIMITS.MIN_ARRAY_LENGTH && feeSettingsActive) {
-    Alert.alert(MESSAGES.TITLES.NO_MONTHS_SELECTED_TITLE, MESSAGES.ERRORS.NO_MONTHS_SELECTED);
+    Alert.alert(t('titles.noMonthsSelected'), t('errors.noMonthsSelected'));
     return;
   }
   try {
@@ -43,9 +39,9 @@ export async function saveFeeSettings(options: SaveFeeSettingsOptions): Promise<
     const updatedClub = { ...club, feeSettings };
     await clubService.updateClub(club.id, updatedClub);
     setClub(updatedClub);
-    Alert.alert(MESSAGES.TITLES.SUCCESS, t('screens.clubFees.settingsSaved'));
+    Alert.alert(t('common.success'), t('screens.clubFees.settingsSaved'));
   } catch {
-    Alert.alert(MESSAGES.TITLES.ERROR, t('screens.clubFees.failedToSave'));
+    Alert.alert(t('common.error'), t('screens.clubFees.failedToSave'));
   }
 }
 
@@ -54,7 +50,7 @@ interface GenerateFeesAlertOptions {
   members: User[];
   feeSettings: ClubFeeSettings;
   loadData: () => void;
-  t: (key: string, opts?: Record<string, unknown>) => string;
+  t: TranslationFn;
 }
 
 export function showGenerateFeesAlert(options: GenerateFeesAlertOptions): void {
@@ -71,10 +67,10 @@ export function showGenerateFeesAlert(options: GenerateFeesAlertOptions): void {
         onPress: async (): Promise<void> => {
           try {
             await paymentService.generateMonthlyFees(clubId, members, feeSettings, currentYear);
-            Alert.alert(MESSAGES.TITLES.SUCCESS, t('screens.clubFees.feesGenerated'));
+            Alert.alert(t('common.success'), t('screens.clubFees.feesGenerated'));
             loadData();
           } catch {
-            Alert.alert(MESSAGES.TITLES.ERROR, t('screens.clubFees.failedToGenerate'));
+            Alert.alert(t('common.error'), t('screens.clubFees.failedToGenerate'));
           }
         },
       },
@@ -86,7 +82,7 @@ interface NotifyAllAlertOptions {
   members: User[];
   balances: MemberBalance[];
   club: Club | null;
-  t: (key: string, opts?: Record<string, unknown>) => string;
+  t: TranslationFn;
 }
 
 export function showNotifyAllAlert(options: NotifyAllAlertOptions): void {
@@ -119,11 +115,11 @@ export function showNotifyAllAlert(options: NotifyAllAlertOptions): void {
             await clubService.updateClub(club.id, { ...club, feeSettings: updatedSettings });
           }
           Alert.alert(
-            MESSAGES.TITLES.SUCCESS,
+            t('common.success'),
             t('screens.clubFees.notificationsSent', { count: notificationCount })
           );
         } catch {
-          Alert.alert(MESSAGES.TITLES.ERROR, t('screens.clubFees.failedToSendNotifications'));
+          Alert.alert(t('common.error'), t('screens.clubFees.failedToSendNotifications'));
         }
       },
     },
@@ -133,7 +129,7 @@ export function showNotifyAllAlert(options: NotifyAllAlertOptions): void {
 interface NotifySingleMemberAlertOptions {
   member: User;
   balance: MemberBalance;
-  t: (key: string, opts?: Record<string, unknown>) => string;
+  t: TranslationFn;
 }
 
 export function showNotifySingleMemberAlert(options: NotifySingleMemberAlertOptions): void {
@@ -154,9 +150,9 @@ export function showNotifySingleMemberAlert(options: NotifySingleMemberAlertOpti
               whatsappNumber: member.whatsappNumber,
               message,
             });
-            Alert.alert(MESSAGES.TITLES.SUCCESS, t('screens.clubFees.notificationSent'));
+            Alert.alert(t('common.success'), t('screens.clubFees.notificationSent'));
           } catch {
-            Alert.alert(MESSAGES.TITLES.ERROR, t('screens.clubFees.failedToSendNotification'));
+            Alert.alert(t('common.error'), t('screens.clubFees.failedToSendNotification'));
           }
         },
       },

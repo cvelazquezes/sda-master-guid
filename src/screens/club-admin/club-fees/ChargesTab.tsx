@@ -4,7 +4,6 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../shared/components';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { CustomCharge } from '../../../types';
-import { designTokens } from '../../../shared/theme';
 import {
   ICONS,
   TEXT_ALIGN,
@@ -12,7 +11,7 @@ import {
   TEXT_VARIANT,
   TEXT_WEIGHT,
 } from '../../../shared/constants';
-import { NUMERIC } from '../../../shared/constants/http';
+import { NUMERIC } from '../../../shared/constants/validation';
 import { styles, chargeStyles, emptyStyles } from './styles';
 
 interface ChargesTabProps {
@@ -61,7 +60,7 @@ function ChargesHeader({
   onAddCharge: () => void;
   t: (key: string) => string;
 }): React.JSX.Element {
-  const { colors } = useTheme();
+  const { colors, iconSizes } = useTheme();
   return (
     <View style={[chargeStyles.header, { backgroundColor: colors.surface }]}>
       <View>
@@ -78,7 +77,7 @@ function ChargesHeader({
       >
         <MaterialCommunityIcons
           name={ICONS.PLUS}
-          size={designTokens.iconSize.md}
+          size={iconSizes.md}
           color={colors.textOnPrimary}
         />
         <Text
@@ -102,6 +101,7 @@ function ChargeCard({
   colors: Record<string, string>;
   t: (key: string, opts?: Record<string, unknown>) => string;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const memberCount = charge.appliedToUserIds.length;
   const memberText =
     memberCount === 0
@@ -131,7 +131,7 @@ function ChargeCard({
         <View style={chargeStyles.detailRow}>
           <MaterialCommunityIcons
             name={ICONS.CALENDAR_OUTLINE}
-            size={designTokens.iconSize.sm}
+            size={iconSizes.sm}
             color={colors.textSecondary}
           />
           <Text variant={TEXT_VARIANT.BODY_SMALL} color={TEXT_COLOR.SECONDARY}>
@@ -141,7 +141,7 @@ function ChargeCard({
         <View style={chargeStyles.detailRow}>
           <MaterialCommunityIcons
             name={ICONS.ACCOUNT_GROUP_OUTLINE}
-            size={designTokens.iconSize.sm}
+            size={iconSizes.sm}
             color={colors.textSecondary}
           />
           <Text variant={TEXT_VARIANT.BODY_SMALL} color={TEXT_COLOR.SECONDARY}>
@@ -154,12 +154,12 @@ function ChargeCard({
 }
 
 function EmptyCharges({ t }: { t: (key: string) => string }): React.JSX.Element {
-  const { colors } = useTheme();
+  const { colors, iconSizes } = useTheme();
   return (
     <View style={emptyStyles.container}>
       <MaterialCommunityIcons
         name={ICONS.FILE_DOCUMENT_OUTLINE}
-        size={designTokens.iconSize['4xl']}
+        size={iconSizes['4xl']}
         color={colors.border}
       />
       <Text

@@ -4,7 +4,6 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../shared/components';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { User, MemberBalance } from '../../../types';
-import { designTokens } from '../../../shared/theme';
 import {
   ICONS,
   EMPTY_VALUE,
@@ -13,7 +12,7 @@ import {
   TEXT_VARIANT,
   TEXT_WEIGHT,
 } from '../../../shared/constants';
-import { NUMERIC } from '../../../shared/constants/http';
+import { NUMERIC } from '../../../shared/constants/validation';
 import { styles, balanceStyles, emptyStyles } from './styles';
 
 interface BalancesTabProps {
@@ -69,7 +68,7 @@ interface BalancesHeaderProps {
 }
 
 function BalancesHeader({ count, onNotifyAll, t }: BalancesHeaderProps): React.JSX.Element {
-  const { colors } = useTheme();
+  const { colors, iconSizes } = useTheme();
   return (
     <View
       style={[
@@ -91,7 +90,7 @@ function BalancesHeader({ count, onNotifyAll, t }: BalancesHeaderProps): React.J
       >
         <MaterialCommunityIcons
           name={ICONS.BELL_RING_OUTLINE}
-          size={designTokens.iconSize.md}
+          size={iconSizes.md}
           color={colors.textOnPrimary}
         />
         <Text
@@ -132,6 +131,7 @@ function CardHeader({
   onPress: () => void;
   primaryColor: string;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <View style={balanceStyles.cardHeader}>
       <View style={balanceStyles.memberInfo}>
@@ -152,7 +152,7 @@ function CardHeader({
       <TouchableOpacity style={balanceStyles.notifyButton} onPress={onPress}>
         <MaterialCommunityIcons
           name={ICONS.BELL_OUTLINE}
-          size={designTokens.iconSize.lg}
+          size={iconSizes.lg}
           color={primaryColor}
         />
       </TouchableOpacity>
@@ -214,36 +214,41 @@ function BalanceCard({
             ${Math.abs(balance.balance).toFixed(NUMERIC.DECIMAL_PLACES)} {statusText}
           </Text>
         </View>
-        {balance.overdueCharges > 0 && (
-          <View style={[balanceStyles.overdueNotice, { backgroundColor: colors.errorLight }]}>
-            <MaterialCommunityIcons
-              name={ICONS.ALERT_CIRCLE}
-              size={designTokens.iconSize.sm}
-              color={colors.error}
-            />
-            <Text
-              variant={TEXT_VARIANT.CAPTION}
-              weight={TEXT_WEIGHT.SEMIBOLD}
-              color={TEXT_COLOR.ERROR}
-            >
-              {t('screens.clubFees.overdueAmount', {
-                amount: balance.overdueCharges.toFixed(NUMERIC.DECIMAL_PLACES),
-              })}
-            </Text>
-          </View>
-        )}
+        {balance.overdueCharges > 0 && <OverdueNotice balance={balance} colors={colors} t={t} />}
       </View>
     </View>
   );
 }
 
+function OverdueNotice({
+  balance,
+  colors,
+  t,
+}: {
+  balance: MemberBalance;
+  colors: Record<string, string>;
+  t: (key: string, opts?: Record<string, unknown>) => string;
+}): React.JSX.Element {
+  const { iconSizes } = useTheme();
+  return (
+    <View style={[balanceStyles.overdueNotice, { backgroundColor: colors.errorLight }]}>
+      <MaterialCommunityIcons name={ICONS.ALERT_CIRCLE} size={iconSizes.sm} color={colors.error} />
+      <Text variant={TEXT_VARIANT.CAPTION} weight={TEXT_WEIGHT.SEMIBOLD} color={TEXT_COLOR.ERROR}>
+        {t('screens.clubFees.overdueAmount', {
+          amount: balance.overdueCharges.toFixed(NUMERIC.DECIMAL_PLACES),
+        })}
+      </Text>
+    </View>
+  );
+}
+
 function EmptyBalances({ t }: { t: (key: string) => string }): React.JSX.Element {
-  const { colors } = useTheme();
+  const { colors, iconSizes } = useTheme();
   return (
     <View style={emptyStyles.container}>
       <MaterialCommunityIcons
         name={ICONS.WALLET_OUTLINE}
-        size={designTokens.iconSize['4xl']}
+        size={iconSizes['4xl']}
         color={colors.border}
       />
       <Text

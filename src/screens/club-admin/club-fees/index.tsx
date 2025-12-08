@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { Text } from '../../../shared/components';
 import { useAuth } from '../../../context/AuthContext';
 import { useTheme } from '../../../contexts/ThemeContext';
-import { designTokens } from '../../../shared/theme';
 import { ICONS, EMPTY_VALUE, FEE_TABS } from '../../../shared/constants';
 import { styles } from './styles';
 import { FeeTabValue, BREAKPOINTS, MODAL_WIDTH_CONFIG } from './types';
@@ -184,12 +183,14 @@ const ClubFeesScreen = (): React.JSX.Element | null => {
     }
   }, [user, members, chargeState, loadData, t]);
 
+  const { iconSizes } = useTheme();
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
         <MaterialCommunityIcons
           name={ICONS.LOADING}
-          size={designTokens.iconSize['4xl']}
+          size={iconSizes['4xl']}
           color={colors.primary}
         />
         <Text style={styles.loadingText}>{t('screens.clubFees.loading')}</Text>

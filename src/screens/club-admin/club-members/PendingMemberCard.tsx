@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, IconButton } from '../../../shared/components';
 import { User } from '../../../types';
-import { designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import {
   ICONS,
   TEXT_LINES,
@@ -29,20 +29,21 @@ interface MetaItemProps {
 }
 
 function MetaItem({ icon, color, children }: MetaItemProps): React.JSX.Element {
+  const { spacing, typography, colors, iconSizes } = useTheme();
   const containerStyle = {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
-    gap: designTokens.spacing.xxs,
+    gap: spacing.xxs,
   };
   const textStyle = {
-    fontSize: designTokens.fontSize.xs,
-    color: designTokens.colors.textSecondary,
+    fontSize: typography.fontSizes.xs,
+    color: colors.textSecondary,
   };
   return (
     <View style={containerStyle}>
       <MaterialCommunityIcons
         name={icon as typeof ICONS.WHATSAPP}
-        size={designTokens.iconSize.xs}
+        size={iconSizes.xs}
         color={color}
       />
       <Text style={textStyle}>{children}</Text>
@@ -51,15 +52,12 @@ function MetaItem({ icon, color, children }: MetaItemProps): React.JSX.Element {
 }
 
 function PendingAvatar({ initial }: { initial: string }): React.JSX.Element {
+  const { iconSizes, colors } = useTheme();
   return (
     <View style={styles.avatar}>
       <Text style={styles.avatarText}>{initial}</Text>
       <View style={styles.badge}>
-        <MaterialCommunityIcons
-          name={ICONS.CLOCK}
-          size={designTokens.iconSize.xxs}
-          color={designTokens.colors.warning}
-        />
+        <MaterialCommunityIcons name={ICONS.CLOCK} size={iconSizes.xxs} color={colors.warning} />
       </View>
     </View>
   );
@@ -72,6 +70,7 @@ interface PendingInfoProps {
 }
 
 function PendingInfo({ member, classesText, labels }: PendingInfoProps): React.JSX.Element {
+  const { iconSizes, colors } = useTheme();
   return (
     <View style={styles.info}>
       <View style={styles.header}>
@@ -81,8 +80,8 @@ function PendingInfo({ member, classesText, labels }: PendingInfoProps): React.J
         <View style={styles.statusBadge}>
           <MaterialCommunityIcons
             name={ICONS.CLOCK_ALERT_OUTLINE}
-            size={designTokens.iconSize.xs}
-            color={designTokens.colors.warning}
+            size={iconSizes.xs}
+            color={colors.warning}
           />
           <Text style={styles.statusText}>{labels.pending}</Text>
         </View>
@@ -92,12 +91,12 @@ function PendingInfo({ member, classesText, labels }: PendingInfoProps): React.J
       </Text>
       <View style={styles.detailsRow}>
         {member.whatsappNumber && (
-          <MetaItem icon={ICONS.WHATSAPP} color={designTokens.colors.success}>
+          <MetaItem icon={ICONS.WHATSAPP} color={colors.success}>
             {member.whatsappNumber}
           </MetaItem>
         )}
         {classesText && (
-          <MetaItem icon={ICONS.SCHOOL} color={designTokens.colors.primary}>
+          <MetaItem icon={ICONS.SCHOOL} color={colors.primary}>
             {classesText}
           </MetaItem>
         )}
@@ -112,6 +111,7 @@ export function PendingMemberCard({
   onReject,
   labels,
 }: PendingMemberCardProps): React.JSX.Element {
+  const { colors } = useTheme();
   const initial = member.name.charAt(0).toUpperCase();
   const hasClasses = member.classes && member.classes.length > 0;
   const classesText = hasClasses
@@ -128,7 +128,7 @@ export function PendingMemberCard({
           icon={ICONS.CLOSE_CIRCLE}
           onPress={(): void => onReject(member.id, member.name)}
           size={COMPONENT_SIZE.md}
-          color={designTokens.colors.textInverse}
+          color={colors.textInverse}
           style={styles.rejectButton}
           accessibilityLabel={labels.reject}
         />
@@ -136,7 +136,7 @@ export function PendingMemberCard({
           icon={ICONS.CHECK_CIRCLE}
           onPress={(): void => onApprove(member.id, member.name)}
           size={COMPONENT_SIZE.md}
-          color={designTokens.colors.textInverse}
+          color={colors.textInverse}
           style={styles.approveButton}
           accessibilityLabel={labels.approve}
         />

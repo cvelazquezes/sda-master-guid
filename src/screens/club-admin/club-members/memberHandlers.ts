@@ -1,37 +1,41 @@
 import { Alert } from 'react-native';
 import { userService } from '../../../services/userService';
 import { PathfinderClass } from '../../../types';
-import { MESSAGES, dynamicMessages, ALERT_BUTTON_STYLE } from '../../../shared/constants';
+import { ALERT_BUTTON_STYLE } from '../../../shared/constants';
+
+type TranslationFn = (key: string, opts?: Record<string, unknown>) => string;
 
 export async function toggleMemberStatus(
   memberId: string,
   isActive: boolean,
-  loadData: () => void
+  loadData: () => void,
+  t: TranslationFn
 ): Promise<void> {
   try {
     await userService.updateUser(memberId, { isActive: !isActive });
     loadData();
   } catch {
-    Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_UPDATE_MEMBER_STATUS);
+    Alert.alert(t('common.error'), t('errors.failedToUpdateMemberStatus'));
   }
 }
 
 export function showDeleteMemberAlert(
   memberId: string,
   memberName: string,
-  loadData: () => void
+  loadData: () => void,
+  t: TranslationFn
 ): void {
-  Alert.alert(MESSAGES.TITLES.DELETE_MEMBER, dynamicMessages.confirmDeleteMember(memberName), [
-    { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
+  Alert.alert(t('titles.deleteMember'), t('warnings.confirmDeleteMember', { name: memberName }), [
+    { text: t('common.cancel'), style: ALERT_BUTTON_STYLE.CANCEL },
     {
-      text: MESSAGES.BUTTONS.DELETE,
+      text: t('common.delete'),
       style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
       onPress: async (): Promise<void> => {
         try {
           await userService.deleteUser(memberId);
           loadData();
         } catch {
-          Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_DELETE_MEMBER);
+          Alert.alert(t('common.error'), t('errors.failedToDeleteMember'));
         }
       },
     },
@@ -41,19 +45,20 @@ export function showDeleteMemberAlert(
 export function showApproveMemberAlert(
   memberId: string,
   memberName: string,
-  loadData: () => void
+  loadData: () => void,
+  t: TranslationFn
 ): void {
-  Alert.alert(MESSAGES.TITLES.APPROVE_MEMBER, dynamicMessages.confirmApproveMember(memberName), [
-    { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
+  Alert.alert(t('titles.approveMember'), t('warnings.confirmApproveMember', { name: memberName }), [
+    { text: t('common.cancel'), style: ALERT_BUTTON_STYLE.CANCEL },
     {
-      text: MESSAGES.BUTTONS.APPROVE,
+      text: t('buttons.approve'),
       onPress: async (): Promise<void> => {
         try {
           await userService.approveUser(memberId);
-          Alert.alert(MESSAGES.TITLES.SUCCESS, dynamicMessages.memberApproved(memberName));
+          Alert.alert(t('common.success'), t('success.memberApproved', { name: memberName }));
           loadData();
         } catch {
-          Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_APPROVE_MEMBER);
+          Alert.alert(t('common.error'), t('errors.failedToApproveMember'));
         }
       },
     },
@@ -63,20 +68,21 @@ export function showApproveMemberAlert(
 export function showRejectMemberAlert(
   memberId: string,
   memberName: string,
-  loadData: () => void
+  loadData: () => void,
+  t: TranslationFn
 ): void {
-  Alert.alert(MESSAGES.TITLES.REJECT_MEMBER, dynamicMessages.confirmRejectMember(memberName), [
-    { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
+  Alert.alert(t('titles.rejectMember'), t('warnings.confirmRejectMember', { name: memberName }), [
+    { text: t('common.cancel'), style: ALERT_BUTTON_STYLE.CANCEL },
     {
-      text: MESSAGES.BUTTONS.REJECT,
+      text: t('buttons.reject'),
       style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
       onPress: async (): Promise<void> => {
         try {
           await userService.rejectUser(memberId);
-          Alert.alert(MESSAGES.TITLES.SUCCESS, dynamicMessages.memberRejected(memberName));
+          Alert.alert(t('common.success'), t('success.memberRejected', { name: memberName }));
           loadData();
         } catch {
-          Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_REJECT_MEMBER);
+          Alert.alert(t('common.error'), t('errors.failedToRejectMember'));
         }
       },
     },
@@ -86,13 +92,14 @@ export function showRejectMemberAlert(
 export async function saveClasses(
   memberId: string,
   classes: PathfinderClass[],
-  loadData: () => void
+  loadData: () => void,
+  t: TranslationFn
 ): Promise<void> {
   try {
     await userService.updateUser(memberId, { classes });
-    Alert.alert(MESSAGES.TITLES.SUCCESS, MESSAGES.SUCCESS.CLASSES_UPDATED);
+    Alert.alert(t('common.success'), t('success.classesUpdated'));
     loadData();
   } catch {
-    Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_UPDATE_CLASSES);
+    Alert.alert(t('common.error'), t('errors.failedToUpdateClasses'));
   }
 }

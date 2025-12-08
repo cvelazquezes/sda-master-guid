@@ -3,7 +3,6 @@ import { Alert } from 'react-native';
 import { clubService } from '../../../services/clubService';
 import { paymentService } from '../../../services/paymentService';
 import { User, Club, MemberBalance, CustomCharge, ApprovalStatus } from '../../../types';
-import { MESSAGES } from '../../../shared/constants';
 
 interface UseClubFeesReturn {
   club: Club | null;
@@ -49,7 +48,7 @@ export function useClubFees(
       const balancesData = await paymentService.getAllMembersBalances(clubId, approvedMemberIds);
       setBalances(balancesData);
     } catch {
-      Alert.alert(MESSAGES.TITLES.ERROR, t('screens.clubFees.failedToLoad'));
+      Alert.alert(t('common.error'), t('screens.clubFees.failedToLoad'));
     } finally {
       setLoading(false);
       setRefreshing(false);

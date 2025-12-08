@@ -1,25 +1,24 @@
 /**
  * ClubAdminDashboardScreen
  * Dashboard for club administrators
- * Supports dynamic theming (light/dark mode)
+ * ✅ COMPLIANT: Uses theme values via useTheme() hook
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, ScrollView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import i18next from 'i18next';
 import { useAuth } from '../../context/AuthContext';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme, ThemeContextType } from '../../contexts/ThemeContext';
 import { ClubDetailModal } from '../../components/ClubDetailModal';
 import { ClubCard } from '../../components/ClubCard';
 import { StatCard } from '../../components/StatCard';
 import { clubService } from '../../services/clubService';
 import { matchService } from '../../services/matchService';
 import { Club, ApprovalStatus, MatchStatus } from '../../types';
-import { designTokens } from '../../shared/theme/designTokens';
-import { layoutConstants } from '../../shared/theme';
 import { ScreenHeader, SectionHeader, MenuCard } from '../../shared/components';
-import { ICONS, MENU_ITEM_IDS, MESSAGES, SCREENS, TABS, FLEX } from '../../shared/constants';
+import { ICONS, MENU_ITEM_IDS, SCREENS, TABS, FLEX } from '../../shared/constants';
 
 interface DashboardStats {
   totalMembers: number;
@@ -63,7 +62,7 @@ function useClubDashboardData(clubId?: string): {
         upcomingMatches: upcoming.length,
       });
     } catch {
-      Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_LOAD_CLUB_INFO);
+      Alert.alert(i18next.t('common.error'), i18next.t('errors.failedToLoadClubInfo'));
     }
   }, [clubId]);
 
@@ -77,21 +76,27 @@ function useClubDashboardData(clubId?: string): {
 }
 
 // Stats section component
+interface DashboardStatsSectionProps {
+  stats: DashboardStats;
+  colors: ThemeContextType['colors'];
+  spacing: ThemeContextType['spacing'];
+  t: ReturnType<typeof useTranslation>['t'];
+  navigation: ReturnType<typeof useNavigation>;
+}
+
 function DashboardStatsSection({
   stats,
   colors,
+  spacing,
   t,
   navigation,
-}: {
-  stats: DashboardStats;
-  colors: ReturnType<typeof useTheme>['colors'];
-  t: ReturnType<typeof useTranslation>['t'];
-  navigation: ReturnType<typeof useNavigation>;
-}): React.JSX.Element {
+}: DashboardStatsSectionProps): React.JSX.Element {
+  const gridStyle = { flexDirection: 'row' as const, gap: spacing.md, marginBottom: spacing.md };
+
   return (
-    <View style={styles.statsSection}>
+    <View style={{ padding: spacing.lg, paddingBottom: spacing.none }}>
       <SectionHeader title={t('sections.clubOverview')} />
-      <View style={styles.statsGrid}>
+      <View style={gridStyle}>
         <StatCard
           icon={ICONS.ACCOUNT_GROUP}
           label={t('stats.members')}
@@ -110,7 +115,7 @@ function DashboardStatsSection({
         />
       </View>
       {stats.pendingApprovals > 0 && (
-        <View style={styles.statsRow}>
+        <View style={{ marginBottom: spacing.md }}>
           <StatCard
             icon={ICONS.CLOCK_ALERT_OUTLINE}
             label={t('stats.pendingApprovals')}
@@ -126,7 +131,8 @@ function DashboardStatsSection({
 }
 
 type TranslationFn = ReturnType<typeof useTranslation>['t'];
-type ThemeColors = ReturnType<typeof useTheme>['colors'];
+type ThemeColors = ThemeContextType['colors'];
+type ThemeSpacing = ThemeContextType['spacing'];
 type NavType = ReturnType<typeof useNavigation>;
 
 // Quick action item interface
@@ -171,17 +177,19 @@ const createQuickActions = (t: TranslationFn, colors: ThemeColors): QuickAction[
 interface QuickActionsSectionProps {
   t: TranslationFn;
   colors: ThemeColors;
+  spacing: ThemeSpacing;
   navigation: NavType;
 }
 
 function QuickActionsSection({
   t,
   colors,
+  spacing,
   navigation,
 }: QuickActionsSectionProps): React.JSX.Element {
   const quickActions = createQuickActions(t, colors);
   return (
-    <View style={styles.content}>
+    <View style={{ padding: spacing.lg }}>
       <SectionHeader title={t('sections.quickActions')} />
       {quickActions.map((item) => (
         <MenuCard
@@ -200,12 +208,12 @@ function QuickActionsSection({
 const ClubAdminDashboardScreen = (): React.JSX.Element => {
   const navigation = useNavigation();
   const { user } = useAuth();
-  const { colors } = useTheme();
+  const { colors, spacing } = useTheme();
   const { t } = useTranslation();
   const [clubDetailVisible, setClubDetailVisible] = useState(false);
   const { club, stats } = useClubDashboardData(user?.clubId);
 
-  const containerStyle = [styles.container, { backgroundColor: colors.backgroundSecondary }];
+  const containerStyle = { flex: FLEX.ONE, backgroundColor: colors.backgroundSecondary };
 
   return (
     <ScrollView style={containerStyle}>
@@ -214,13 +222,19 @@ const ClubAdminDashboardScreen = (): React.JSX.Element => {
         subtitle={t('screens.clubDashboard.subtitle')}
       >
         {club && (
-          <View style={styles.clubCardContainer}>
+          <View style={{ marginTop: spacing.lg }}>
             <ClubCard club={club} onPress={() => setClubDetailVisible(true)} />
           </View>
         )}
       </ScreenHeader>
-      <DashboardStatsSection stats={stats} colors={colors} t={t} navigation={navigation} />
-      <QuickActionsSection t={t} colors={colors} navigation={navigation} />
+      <DashboardStatsSection
+        stats={stats}
+        colors={colors}
+        spacing={spacing}
+        t={t}
+        navigation={navigation}
+      />
+      <QuickActionsSection t={t} colors={colors} spacing={spacing} navigation={navigation} />
       <ClubDetailModal
         visible={clubDetailVisible}
         club={club}
@@ -229,29 +243,5 @@ const ClubAdminDashboardScreen = (): React.JSX.Element => {
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: FLEX.ONE,
-  },
-  clubCardContainer: {
-    marginTop: designTokens.spacing.lg,
-  },
-  statsSection: {
-    padding: designTokens.spacing.lg,
-    paddingBottom: designTokens.spacing.none,
-  },
-  statsGrid: {
-    flexDirection: layoutConstants.flexDirection.row,
-    gap: designTokens.spacing.md,
-    marginBottom: designTokens.spacing.md,
-  },
-  statsRow: {
-    marginBottom: designTokens.spacing.md,
-  },
-  content: {
-    padding: designTokens.spacing.lg,
-  },
-});
 
 export default ClubAdminDashboardScreen;

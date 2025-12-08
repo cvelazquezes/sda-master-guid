@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, ScrollView, RefreshControl, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Text } from '../../../shared/components';
 import { useAuth } from '../../../context/AuthContext';
-import { mobileTypography, designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { FLEX } from '../../../shared/constants';
 import { useClubMatches } from './useClubMatches';
 import { StatsSection } from './StatsSection';
@@ -63,17 +63,47 @@ function useLabels(t: (key: string) => string): {
 const ClubMatchesScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { colors, spacing, borderWidth, typography } = useTheme();
   const data = useClubMatches(user?.clubId);
   const labels = useLabels(t);
+
+  const dynamicStyles = useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          flex: FLEX.ONE,
+          backgroundColor: colors.backgroundSecondary,
+        },
+        header: {
+          backgroundColor: colors.backgroundPrimary,
+          padding: spacing.xl,
+          borderBottomWidth: borderWidth.thin,
+          borderBottomColor: colors.borderLight,
+        },
+        title: {
+          fontSize: typography.fontSizes['4xl'],
+          fontWeight: typography.fontWeights.bold,
+        },
+        subtitle: {
+          fontSize: typography.fontSizes.sm,
+          color: colors.textSecondary,
+          marginTop: spacing.xs,
+        },
+        content: {
+          padding: spacing.lg,
+        },
+      }),
+    [colors, spacing, borderWidth, typography]
+  );
 
   const refreshControl = <RefreshControl refreshing={data.refreshing} onRefresh={data.onRefresh} />;
 
   return (
     <>
-      <ScrollView style={styles.container} refreshControl={refreshControl}>
-        <View style={styles.header}>
-          <Text style={styles.title}>{t('screens.clubMatches.title')}</Text>
-          <Text style={styles.subtitle}>{t('screens.clubMatches.subtitle')}</Text>
+      <ScrollView style={dynamicStyles.container} refreshControl={refreshControl}>
+        <View style={dynamicStyles.header}>
+          <Text style={dynamicStyles.title}>{t('screens.clubMatches.title')}</Text>
+          <Text style={dynamicStyles.subtitle}>{t('screens.clubMatches.subtitle')}</Text>
         </View>
         <StatsSection stats={data.stats} labels={labels.stats} />
         <RoundsSection
@@ -86,7 +116,7 @@ const ClubMatchesScreen = (): React.JSX.Element => {
           title={t('screens.clubMatches.matches')}
           labels={labels.filter}
         />
-        <View style={styles.content}>
+        <View style={dynamicStyles.content}>
           <MatchesList
             matches={data.filteredMatches}
             filterStatus={data.filterStatus}
@@ -107,29 +137,5 @@ const ClubMatchesScreen = (): React.JSX.Element => {
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: FLEX.ONE,
-    backgroundColor: designTokens.colors.backgroundSecondary,
-  },
-  header: {
-    backgroundColor: designTokens.colors.backgroundPrimary,
-    padding: designTokens.spacing.xl,
-    borderBottomWidth: designTokens.borderWidth.thin,
-    borderBottomColor: designTokens.colors.borderLight,
-  },
-  title: {
-    ...mobileTypography.displayMedium,
-  },
-  subtitle: {
-    ...mobileTypography.bodySmall,
-    color: designTokens.colors.textSecondary,
-    marginTop: designTokens.spacing.xs,
-  },
-  content: {
-    padding: designTokens.spacing.lg,
-  },
-});
 
 export default ClubMatchesScreen;

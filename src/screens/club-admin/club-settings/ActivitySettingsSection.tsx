@@ -1,8 +1,8 @@
-import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, TouchableOpacity, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import { Text } from '../../../shared/components';
 import { MatchFrequency } from '../../../types';
-import { designTokens, mobileTypography, layoutConstants } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { FLEX, GRID } from '../../../shared/constants';
 
 interface ActivitySettingsSectionProps {
@@ -35,6 +35,25 @@ function OptionButton({
   onPress: () => void;
   colors: ActivitySettingsSectionProps['colors'];
 }): React.JSX.Element {
+  const { spacing, radii, typography, borderWidth } = useTheme();
+
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        selectOption: {
+          flex: FLEX.ONE,
+          padding: spacing.md,
+          borderRadius: radii.md,
+          borderWidth: borderWidth.thin,
+          alignItems: 'center',
+        } as ViewStyle,
+        selectOptionText: {
+          fontSize: typography.fontSizes.md,
+        } as TextStyle,
+      }),
+    [spacing, radii, borderWidth, typography]
+  );
+
   const optionStyle = [
     styles.selectOption,
     { borderColor: colors.border, backgroundColor: colors.inputBackground },
@@ -43,7 +62,7 @@ function OptionButton({
   const textStyle = [
     styles.selectOptionText,
     { color: colors.textSecondary },
-    selected && { color: colors.textInverse, fontWeight: designTokens.fontWeight.semibold },
+    selected && { color: colors.textInverse, fontWeight: typography.fontWeights.semibold },
   ];
   return (
     <TouchableOpacity style={optionStyle} onPress={onPress}>
@@ -62,6 +81,37 @@ export function ActivitySettingsSection(props: ActivitySettingsSectionProps): Re
     frequencyLabels,
     colors,
   } = props;
+  const { spacing, radii, typography } = useTheme();
+
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        section: {
+          padding: spacing.lg,
+          borderRadius: radii.md,
+          marginBottom: spacing.md,
+        } as ViewStyle,
+        sectionTitle: {
+          fontSize: typography.fontSizes.lg,
+          fontWeight: typography.fontWeights.bold,
+          marginBottom: spacing.md,
+        } as TextStyle,
+        selectContainer: {
+          marginBottom: spacing.lg,
+        } as ViewStyle,
+        selectLabel: {
+          fontSize: typography.fontSizes.md,
+          fontWeight: typography.fontWeights.bold,
+          marginBottom: spacing.md,
+        } as TextStyle,
+        selectOptions: {
+          flexDirection: 'row',
+          gap: spacing.md,
+        } as ViewStyle,
+      }),
+    [spacing, radii, typography]
+  );
+
   return (
     <View style={[styles.section, { backgroundColor: colors.surface }]}>
       <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>{labels.title}</Text>
@@ -96,23 +146,3 @@ export function ActivitySettingsSection(props: ActivitySettingsSectionProps): Re
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  section: {
-    padding: designTokens.spacing.lg,
-    borderRadius: designTokens.borderRadius.md,
-    marginBottom: designTokens.spacing.md,
-  },
-  sectionTitle: { ...mobileTypography.heading3, marginBottom: designTokens.spacing.md },
-  selectContainer: { marginBottom: designTokens.spacing.lg },
-  selectLabel: { ...mobileTypography.bodyLargeBold, marginBottom: designTokens.spacing.md },
-  selectOptions: { flexDirection: layoutConstants.flexDirection.row, gap: designTokens.spacing.md },
-  selectOption: {
-    flex: FLEX.ONE,
-    padding: designTokens.spacing.md,
-    borderRadius: designTokens.borderRadius.md,
-    borderWidth: designTokens.borderWidth.thin,
-    alignItems: layoutConstants.alignItems.center,
-  },
-  selectOptionText: { ...mobileTypography.body },
-});

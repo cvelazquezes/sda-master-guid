@@ -2,10 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { userService } from '../../../services/userService';
 import { User } from '../../../types';
-import { ID_PREFIX, MESSAGES } from '../../../shared/constants';
+import { ID_PREFIX } from '../../../shared/constants';
 import { LOG_MESSAGES } from '../../../shared/constants/logMessages';
 import { logger } from '../../../shared/utils/logger';
 import { AgendaItem } from './types';
+
+type TranslationFn = (key: string, options?: Record<string, unknown>) => string;
 
 interface UseMeetingPlannerReturn {
   agendaItems: AgendaItem[];
@@ -22,7 +24,8 @@ interface UseMeetingPlannerReturn {
 export function useMeetingPlanner(
   clubId: string | undefined,
   getDefaultAgenda: () => Omit<AgendaItem, 'id' | 'order'>[],
-  defaultTitle: string
+  defaultTitle: string,
+  t: TranslationFn
 ): UseMeetingPlannerReturn {
   const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
   const [clubMembers, setClubMembers] = useState<User[]>([]);
@@ -45,9 +48,9 @@ export function useMeetingPlanner(
       }
     } catch (error) {
       logger.error(LOG_MESSAGES.MEETING_PLANNER.FAILED_TO_LOAD_DATA, error as Error);
-      Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_LOAD_MEETING_DATA);
+      Alert.alert(t('common.error'), t('errors.failedToLoadMeetingData'));
     }
-  }, [clubId, getDefaultAgenda]);
+  }, [clubId, getDefaultAgenda, t]);
 
   useEffect(() => {
     loadData();

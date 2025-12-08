@@ -1,19 +1,16 @@
 import { Alert } from 'react-native';
 import { User } from '../../../types';
-import {
-  ALERT_BUTTON_STYLE,
-  DATE_LOCALE_OPTIONS,
-  MESSAGES,
-  ID_PREFIX,
-} from '../../../shared/constants';
+import { ALERT_BUTTON_STYLE, DATE_LOCALE_OPTIONS, ID_PREFIX } from '../../../shared/constants';
 import { AgendaItem } from './types';
+
+type TranslationFn = (key: string, opts?: Record<string, unknown>) => string;
 
 interface SaveMeetingOptions {
   agendaItems: AgendaItem[];
   meetingDate: Date;
   setIsSaved: (v: boolean) => void;
   setShareModalVisible: (v: boolean) => void;
-  t: (key: string, opts?: Record<string, unknown>) => string;
+  t: TranslationFn;
 }
 
 export function handleSaveMeeting(options: SaveMeetingOptions): void {
@@ -21,36 +18,34 @@ export function handleSaveMeeting(options: SaveMeetingOptions): void {
 
   const unassignedItems = agendaItems.filter((item) => !item.responsibleMemberId);
   if (unassignedItems.length > 0) {
-    Alert.alert(
-      MESSAGES.TITLES.MISSING_ASSIGNMENTS,
-      MESSAGES.WARNINGS.PLEASE_ASSIGN_ALL_ACTIVITIES,
-      [{ text: MESSAGES.BUTTONS.OK }]
-    );
+    Alert.alert(t('titles.missingAssignments'), t('warnings.pleaseAssignAllActivities'), [
+      { text: t('common.ok') },
+    ]);
     return;
   }
   setIsSaved(true);
   Alert.alert(
-    MESSAGES.TITLES.MEETING_SAVED_TITLE,
+    t('titles.meetingSaved'),
     t('screens.meetingPlanner.meetingSavedSuccess', {
       date: meetingDate.toLocaleDateString(undefined, DATE_LOCALE_OPTIONS.DATE_WITHOUT_YEAR),
     }),
-    [{ text: MESSAGES.BUTTONS.OK, onPress: (): void => setShareModalVisible(true) }]
+    [{ text: t('common.ok'), onPress: (): void => setShareModalVisible(true) }]
   );
 }
 
 interface ConfirmShareOptions {
   clubMembers: User[];
   setShareModalVisible: (v: boolean) => void;
-  t: (key: string, opts?: Record<string, unknown>) => string;
+  t: TranslationFn;
 }
 
 export function confirmShareMeeting(options: ConfirmShareOptions): void {
   const { clubMembers, setShareModalVisible, t } = options;
 
   Alert.alert(
-    MESSAGES.TITLES.MEETING_SHARED_TITLE,
+    t('titles.meetingShared'),
     t('screens.meetingPlanner.meetingSharedSuccess', { count: clubMembers.length }),
-    [{ text: MESSAGES.BUTTONS.OK, onPress: (): void => setShareModalVisible(false) }]
+    [{ text: t('common.ok'), onPress: (): void => setShareModalVisible(false) }]
   );
 }
 
@@ -58,14 +53,14 @@ interface ResetToDefaultOptions {
   getDefaultAgenda: () => Omit<AgendaItem, 'id' | 'order'>[];
   setAgendaItems: (items: AgendaItem[]) => void;
   setIsSaved: (v: boolean) => void;
-  t: (key: string) => string;
+  t: TranslationFn;
 }
 
 export function handleResetToDefault(options: ResetToDefaultOptions): void {
   const { getDefaultAgenda, setAgendaItems, setIsSaved, t } = options;
 
-  Alert.alert(MESSAGES.TITLES.RESET_TO_DEFAULT_TITLE, MESSAGES.WARNINGS.CONFIRM_RESET_MEETING, [
-    { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
+  Alert.alert(t('titles.resetToDefault'), t('warnings.confirmResetMeeting'), [
+    { text: t('common.cancel'), style: ALERT_BUTTON_STYLE.CANCEL },
     {
       text: t('screens.meetingPlanner.reset'),
       style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
@@ -86,10 +81,10 @@ interface NewMeetingOptions {
   getDefaultAgenda: () => Omit<AgendaItem, 'id' | 'order'>[];
   setAgendaItems: (items: AgendaItem[]) => void;
   setMeetingDate: (d: Date) => void;
-  setMeetingTitle: (t: string) => void;
+  setMeetingTitle: (title: string) => void;
   setIsSaved: (v: boolean) => void;
   defaultTitle: string;
-  t: (key: string) => string;
+  t: TranslationFn;
 }
 
 export function handleNewMeeting(options: NewMeetingOptions): void {
@@ -103,8 +98,8 @@ export function handleNewMeeting(options: NewMeetingOptions): void {
     t,
   } = options;
 
-  Alert.alert(MESSAGES.TITLES.CREATE_NEW_MEETING, MESSAGES.WARNINGS.CONFIRM_NEW_MEETING, [
-    { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
+  Alert.alert(t('titles.createNewMeeting'), t('warnings.confirmNewMeeting'), [
+    { text: t('common.cancel'), style: ALERT_BUTTON_STYLE.CANCEL },
     {
       text: t('screens.meetingPlanner.createNew'),
       onPress: (): void => {

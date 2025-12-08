@@ -3,9 +3,9 @@ import { View, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../shared/components';
 import { User } from '../../../types';
-import { mobileIconSizes, designTokens, layoutConstants } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { ANIMATION, ICONS } from '../../../shared/constants';
-import { MODAL_OPACITY } from '../../../shared/constants/http';
+import { MODAL_HEIGHT_RATIO } from '../../../shared/constants/components';
 import { modalStyles } from './styles';
 
 interface SelectMemberModalProps {
@@ -18,8 +18,6 @@ interface SelectMemberModalProps {
   t: (key: string) => string;
 }
 
-const MODAL_HEIGHT_MULTIPLIER = MODAL_OPACITY.BACKDROP;
-
 export function SelectMemberModal({
   visible,
   onClose,
@@ -29,12 +27,13 @@ export function SelectMemberModal({
   onSelectMember,
   t,
 }: SelectMemberModalProps): React.JSX.Element {
+  const { iconSizes, colors } = useTheme();
   const contentStyle = [
     modalStyles.content,
     {
       width: modalWidth,
-      maxHeight: windowHeight * MODAL_HEIGHT_MULTIPLIER,
-      alignSelf: layoutConstants.alignSelf.center,
+      maxHeight: windowHeight * MODAL_HEIGHT_RATIO,
+      alignSelf: 'center' as const,
     },
   ];
 
@@ -47,8 +46,8 @@ export function SelectMemberModal({
             <TouchableOpacity onPress={onClose}>
               <MaterialCommunityIcons
                 name={ICONS.CLOSE}
-                size={mobileIconSizes.large}
-                color={designTokens.colors.textSecondary}
+                size={iconSizes.lg}
+                color={colors.textSecondary}
               />
             </TouchableOpacity>
           </View>
@@ -79,6 +78,7 @@ interface MemberOptionProps {
 }
 
 function MemberOption({ member, onSelect }: MemberOptionProps): React.JSX.Element {
+  const { iconSizes, colors } = useTheme();
   return (
     <TouchableOpacity style={modalStyles.memberOption} onPress={onSelect}>
       <View style={modalStyles.memberAvatar}>
@@ -90,8 +90,8 @@ function MemberOption({ member, onSelect }: MemberOptionProps): React.JSX.Elemen
       </View>
       <MaterialCommunityIcons
         name={ICONS.CHEVRON_RIGHT}
-        size={mobileIconSizes.medium}
-        color={designTokens.colors.borderLight}
+        size={iconSizes.md}
+        color={colors.borderLight}
       />
     </TouchableOpacity>
   );

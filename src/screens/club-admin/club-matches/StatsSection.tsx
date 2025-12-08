@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { Text } from '../../../shared/components';
-import { designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { statsStyles as styles } from './styles';
 
 interface StatsSectionProps {
@@ -31,28 +31,17 @@ function StatCard({ value, label, color }: StatCardProps): React.JSX.Element {
 }
 
 export function StatsSection({ stats, labels }: StatsSectionProps): React.JSX.Element {
+  const { colors } = useTheme();
   return (
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>{labels.overview}</Text>
       <View style={styles.statsGrid}>
         <StatCard value={stats.total} label={labels.total} />
-        <StatCard
-          value={stats.pending}
-          label={labels.pending}
-          color={designTokens.colors.warning}
-        />
+        <StatCard value={stats.pending} label={labels.pending} color={colors.warning} />
       </View>
       <View style={styles.statsGrid}>
-        <StatCard
-          value={stats.scheduled}
-          label={labels.scheduled}
-          color={designTokens.colors.info}
-        />
-        <StatCard
-          value={stats.completed}
-          label={labels.completed}
-          color={designTokens.colors.success}
-        />
+        <StatCard value={stats.scheduled} label={labels.scheduled} color={colors.info} />
+        <StatCard value={stats.completed} label={labels.completed} color={colors.success} />
       </View>
     </View>
   );

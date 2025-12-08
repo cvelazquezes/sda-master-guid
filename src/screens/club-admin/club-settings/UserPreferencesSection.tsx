@@ -1,9 +1,9 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import { Text } from '../../../shared/components';
 import { ThemeSwitcher } from '../../../components/ThemeSwitcher';
 import { LanguageSwitcher } from '../../../components/LanguageSwitcher';
-import { designTokens, mobileTypography } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 interface UserPreferencesSectionProps {
   title: string;
@@ -14,6 +14,28 @@ export function UserPreferencesSection({
   title,
   colors,
 }: UserPreferencesSectionProps): React.JSX.Element {
+  const { spacing, radii, typography } = useTheme();
+
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        section: {
+          padding: spacing.lg,
+          borderRadius: radii.md,
+          marginBottom: spacing.md,
+        } as ViewStyle,
+        sectionTitle: {
+          fontSize: typography.fontSizes.lg,
+          fontWeight: typography.fontWeights.bold,
+          marginBottom: spacing.md,
+        } as TextStyle,
+        preferenceItem: {
+          marginBottom: spacing.sm,
+        } as ViewStyle,
+      }),
+    [spacing, radii, typography]
+  );
+
   return (
     <View style={[styles.section, { backgroundColor: colors.surface }]}>
       <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>{title}</Text>
@@ -26,18 +48,3 @@ export function UserPreferencesSection({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  section: {
-    padding: designTokens.spacing.lg,
-    borderRadius: designTokens.borderRadius.md,
-    marginBottom: designTokens.spacing.md,
-  },
-  sectionTitle: {
-    ...mobileTypography.heading3,
-    marginBottom: designTokens.spacing.md,
-  },
-  preferenceItem: {
-    marginBottom: designTokens.spacing.sm,
-  },
-});
