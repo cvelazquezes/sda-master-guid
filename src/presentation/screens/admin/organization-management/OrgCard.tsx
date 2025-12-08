@@ -1,14 +1,14 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
 import { A11Y_ROLE, ICONS, TOUCH_OPACITY } from '../../../../shared/constants';
-import { OrganizationItem } from './types';
-import { cardStyles } from './styles';
+import { createCardStyles } from './styles';
 import { getTypeIcon, getTypeColor } from './orgUtils';
+import type { OrganizationItem } from './types';
 
-interface OrgCardProps {
+type OrgCardProps = {
   org: OrganizationItem;
   onEdit: (org: OrganizationItem) => void;
   onDelete: (org: OrganizationItem) => void;
@@ -25,7 +25,9 @@ interface OrgCardProps {
     surface: string;
   };
   t: (key: string, opts?: Record<string, unknown>) => string;
-}
+};
+
+type CardStylesType = ReturnType<typeof createCardStyles>;
 
 function CardHeader({
   org,
@@ -34,6 +36,7 @@ function CardHeader({
   deleteLabel,
   colors,
   onDelete,
+  cardStyles,
 }: {
   org: OrganizationItem;
   iconName: string;
@@ -41,6 +44,7 @@ function CardHeader({
   deleteLabel: string;
   colors: OrgCardProps['colors'];
   onDelete: () => void;
+  cardStyles: CardStylesType;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (
@@ -75,7 +79,13 @@ function CardHeader({
 }
 
 export function OrgCard({ org, onEdit, onDelete, colors, t }: OrgCardProps): React.JSX.Element {
-  const { iconSizes } = useTheme();
+  const { iconSizes, colors: themeColors, spacing, radii, typography } = useTheme();
+
+  const cardStyles = useMemo(
+    () => createCardStyles(themeColors, spacing, radii, typography),
+    [themeColors, spacing, radii, typography]
+  );
+
   const iconName = getTypeIcon(org.type);
   const iconColor = getTypeColor(org.type, colors);
   const deleteLabel = t('screens.organizationManagement.deleteItem', { name: org.name });
@@ -97,6 +107,7 @@ export function OrgCard({ org, onEdit, onDelete, colors, t }: OrgCardProps): Rea
         deleteLabel={deleteLabel}
         colors={colors}
         onDelete={(): void => onDelete(org)}
+        cardStyles={cardStyles}
       />
       <View style={[cardStyles.footer, { borderTopColor: colors.border }]}>
         <MaterialCommunityIcons

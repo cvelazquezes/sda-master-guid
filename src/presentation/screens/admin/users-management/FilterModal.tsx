@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Club, UserRole, UserStatus } from '../../../../types';
@@ -11,7 +11,7 @@ import {
   HIERARCHY_FIELDS,
   EMPTY_VALUE,
 } from '../../../../shared/constants';
-import { modalStyles, filterStyles, buttonStyles } from './styles';
+import { createModalStyles, createFilterStyles, createButtonStyles } from './styles';
 import { UserFilters } from './types';
 
 interface FilterModalProps {
@@ -45,6 +45,20 @@ export function FilterModal({
   colors,
   t,
 }: FilterModalProps): React.JSX.Element {
+  const { colors: themeColors, spacing, radii, typography } = useTheme();
+  const modalStyles = useMemo(
+    () => createModalStyles(themeColors, spacing, radii, typography),
+    [themeColors, spacing, radii, typography]
+  );
+  const filterStyles = useMemo(
+    () => createFilterStyles(themeColors, spacing, radii, typography),
+    [themeColors, spacing, radii, typography]
+  );
+  const buttonStyles = useMemo(
+    () => createButtonStyles(themeColors, spacing, radii, typography),
+    [themeColors, spacing, radii, typography]
+  );
+
   const anim = isMobile ? ANIMATION_TYPE.SLIDE : ANIMATION_TYPE.FADE;
   const overlayStyle = [
     modalStyles.overlay,
@@ -68,9 +82,9 @@ export function FilterModal({
           {isMobile && (
             <View style={[modalStyles.dragHandle, { backgroundColor: colors.borderLight }]} />
           )}
-          <ModalHeader colors={colors} t={t} onClose={onClose} />
+          <ModalHeader colors={colors} t={t} onClose={onClose} modalStyles={modalStyles} />
           <ScrollView style={modalStyles.body}>
-            <InfoBanner colors={colors} t={t} />
+            <InfoBanner colors={colors} t={t} filterStyles={filterStyles} />
             <OrgSection
               filters={filters}
               onUpdate={onUpdateFilter}
@@ -81,11 +95,31 @@ export function FilterModal({
               clubs={availableClubs}
               colors={colors}
               t={t}
+              filterStyles={filterStyles}
             />
-            <RoleSection filters={filters} onUpdate={onUpdateFilter} colors={colors} t={t} />
-            <StatusSection filters={filters} onUpdate={onUpdateFilter} colors={colors} t={t} />
+            <RoleSection
+              filters={filters}
+              onUpdate={onUpdateFilter}
+              colors={colors}
+              t={t}
+              filterStyles={filterStyles}
+            />
+            <StatusSection
+              filters={filters}
+              onUpdate={onUpdateFilter}
+              colors={colors}
+              t={t}
+              filterStyles={filterStyles}
+            />
           </ScrollView>
-          <ModalFooter colors={colors} t={t} onClear={onClear} onClose={onClose} />
+          <ModalFooter
+            colors={colors}
+            t={t}
+            onClear={onClear}
+            onClose={onClose}
+            modalStyles={modalStyles}
+            buttonStyles={buttonStyles}
+          />
         </View>
       </View>
     </Modal>
@@ -96,10 +130,12 @@ function ModalHeader({
   colors,
   t,
   onClose,
+  modalStyles,
 }: {
   colors: Record<string, string>;
   t: (key: string) => string;
   onClose: () => void;
+  modalStyles: ReturnType<typeof createModalStyles>;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (
@@ -121,15 +157,17 @@ function ModalHeader({
 function InfoBanner({
   colors,
   t,
+  filterStyles,
 }: {
   colors: Record<string, string>;
   t: (key: string) => string;
+  filterStyles: ReturnType<typeof createFilterStyles>;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (
-    <View style={[filterStyles.infoBanner, { backgroundColor: colors.primaryLight }]}>
+    <View style={filterStyles.infoBanner}>
       <MaterialCommunityIcons name={ICONS.INFORMATION} size={iconSizes.sm} color={colors.primary} />
-      <Text style={[filterStyles.infoText, { color: colors.primary }]}>
+      <Text style={filterStyles.infoText}>
         {t('screens.usersManagement.filterDescription')}
       </Text>
     </View>
@@ -141,11 +179,15 @@ function ModalFooter({
   t,
   onClear,
   onClose,
+  modalStyles,
+  buttonStyles,
 }: {
   colors: Record<string, string>;
   t: (key: string) => string;
   onClear: () => void;
   onClose: () => void;
+  modalStyles: ReturnType<typeof createModalStyles>;
+  buttonStyles: ReturnType<typeof createButtonStyles>;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (
@@ -175,6 +217,7 @@ interface OrgSectionProps {
   clubs: Club[];
   colors: Record<string, string>;
   t: (key: string, opts?: Record<string, unknown>) => string;
+  filterStyles: ReturnType<typeof createFilterStyles>;
 }
 
 function OrgSection({
@@ -187,6 +230,7 @@ function OrgSection({
   clubs,
   colors,
   t,
+  filterStyles,
 }: OrgSectionProps): React.JSX.Element {
   const base = 'components.organizationHierarchy.levels';
   const hierarchies = [
@@ -227,11 +271,19 @@ function OrgSection({
               selected={filters[field as keyof UserFilters] as string}
               onSelect={(v): void => onUpdate(field, v)}
               colors={colors}
+              filterStyles={filterStyles}
             />
           )
       )}
       {clubs.length > 0 && (
-        <ClubsSection filters={filters} onUpdate={onUpdate} clubs={clubs} colors={colors} t={t} />
+        <ClubsSection
+          filters={filters}
+          onUpdate={onUpdate}
+          clubs={clubs}
+          colors={colors}
+          t={t}
+          filterStyles={filterStyles}
+        />
       )}
     </View>
   );
@@ -243,12 +295,14 @@ function ClubsSection({
   clubs,
   colors,
   t,
+  filterStyles,
 }: {
   filters: UserFilters;
   onUpdate: (f: string, v: string) => void;
   clubs: Club[];
   colors: Record<string, string>;
   t: (key: string, opts?: Record<string, unknown>) => string;
+  filterStyles: ReturnType<typeof createFilterStyles>;
 }): React.JSX.Element {
   const allLabel = t('screens.usersManagement.allClubsIn', { church: filters.church });
   const allActive = !filters.clubId;
@@ -263,6 +317,7 @@ function ClubsSection({
         isActive={allActive}
         onPress={(): void => onUpdate(HIERARCHY_FIELDS.CLUB_ID, EMPTY_VALUE)}
         colors={colors}
+        filterStyles={filterStyles}
       />
       {clubs.map((club) => (
         <ClubOption
@@ -273,6 +328,7 @@ function ClubsSection({
           inactiveLabel={t('screens.usersManagement.inactive')}
           onPress={(): void => onUpdate(HIERARCHY_FIELDS.CLUB_ID, club.id)}
           colors={colors}
+          filterStyles={filterStyles}
         />
       ))}
     </View>
@@ -286,6 +342,7 @@ function ClubOption({
   inactiveLabel,
   onPress,
   colors,
+  filterStyles,
 }: {
   label: string;
   isActive: boolean;
@@ -293,6 +350,7 @@ function ClubOption({
   inactiveLabel?: string;
   onPress: () => void;
   colors: Record<string, string>;
+  filterStyles: ReturnType<typeof createFilterStyles>;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (
@@ -320,6 +378,7 @@ interface HierarchyOptionsProps {
   selected: string;
   onSelect: (v: string) => void;
   colors: Record<string, string>;
+  filterStyles: ReturnType<typeof createFilterStyles>;
 }
 
 function HierarchyOptions({
@@ -329,12 +388,21 @@ function HierarchyOptions({
   selected,
   onSelect,
   colors,
+  filterStyles,
 }: HierarchyOptionsProps): React.JSX.Element | null {
   if (items.length === 0) {
     return null;
   }
   if (items.length === 1) {
-    return <SingleHierarchyItem icon={icon} label={label} value={items[0]} colors={colors} />;
+    return (
+      <SingleHierarchyItem
+        icon={icon}
+        label={label}
+        value={items[0]}
+        colors={colors}
+        filterStyles={filterStyles}
+      />
+    );
   }
   return (
     <View>
@@ -346,6 +414,7 @@ function HierarchyOptions({
           isSelected={selected === item}
           onSelect={onSelect}
           colors={colors}
+          filterStyles={filterStyles}
         />
       ))}
     </View>
@@ -357,11 +426,13 @@ function SingleHierarchyItem({
   label,
   value,
   colors,
+  filterStyles,
 }: {
   icon: string;
   label: string;
   value: string;
   colors: Record<string, string>;
+  filterStyles: ReturnType<typeof createFilterStyles>;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (
@@ -389,11 +460,13 @@ function HierarchyOptionItem({
   isSelected,
   onSelect,
   colors,
+  filterStyles,
 }: {
   item: string;
   isSelected: boolean;
   onSelect: (v: string) => void;
   colors: Record<string, string>;
+  filterStyles: ReturnType<typeof createFilterStyles>;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   const optStyle = [
@@ -401,13 +474,13 @@ function HierarchyOptionItem({
     { backgroundColor: colors.surfaceLight },
     isSelected && [
       filterStyles.optionActive,
-      { backgroundColor: colors.primaryLight, borderColor: colors.primary },
+      { backgroundColor: colors.primaryAlpha20, borderColor: colors.primary },
     ],
   ];
   const textStyle = [
     filterStyles.optionText,
     { color: colors.textSecondary },
-    isSelected && [filterStyles.optionTextActive, { color: colors.primary }],
+    isSelected && [filterStyles.optionTextActive, { color: colors.textPrimary }],
   ];
   return (
     <TouchableOpacity style={optStyle} onPress={(): void => onSelect(item)}>
@@ -424,9 +497,16 @@ interface RoleSectionProps {
   onUpdate: (f: string, v: string) => void;
   colors: Record<string, string>;
   t: (key: string) => string;
+  filterStyles: ReturnType<typeof createFilterStyles>;
 }
 
-function RoleSection({ filters, onUpdate, colors, t }: RoleSectionProps): React.JSX.Element {
+function RoleSection({
+  filters,
+  onUpdate,
+  colors,
+  t,
+  filterStyles,
+}: RoleSectionProps): React.JSX.Element {
   const options = [
     {
       id: FILTER_STATUS.ALL,
@@ -465,6 +545,7 @@ function RoleSection({ filters, onUpdate, colors, t }: RoleSectionProps): React.
           label={opt.label}
           onPress={(): void => onUpdate(HIERARCHY_FIELDS.ROLE, opt.id)}
           colors={colors}
+          filterStyles={filterStyles}
         />
       ))}
     </View>
@@ -476,9 +557,16 @@ interface StatusSectionProps {
   onUpdate: (f: string, v: string) => void;
   colors: Record<string, string>;
   t: (key: string) => string;
+  filterStyles: ReturnType<typeof createFilterStyles>;
 }
 
-function StatusSection({ filters, onUpdate, colors, t }: StatusSectionProps): React.JSX.Element {
+function StatusSection({
+  filters,
+  onUpdate,
+  colors,
+  t,
+  filterStyles,
+}: StatusSectionProps): React.JSX.Element {
   const getStatusValue = (id: string): string => {
     if (id === UserStatus.ACTIVE) {
       return FILTER_STATUS.ACTIVE;
@@ -522,6 +610,7 @@ function StatusSection({ filters, onUpdate, colors, t }: StatusSectionProps): Re
           label={opt.label}
           onPress={(): void => onUpdate(HIERARCHY_FIELDS.STATUS, getStatusValue(opt.id))}
           colors={colors}
+          filterStyles={filterStyles}
         />
       ))}
     </View>
@@ -535,6 +624,7 @@ function FilterOption({
   label,
   onPress,
   colors,
+  filterStyles,
 }: {
   isActive: boolean;
   icon: string;
@@ -542,6 +632,7 @@ function FilterOption({
   label: string;
   onPress: () => void;
   colors: Record<string, string>;
+  filterStyles: ReturnType<typeof createFilterStyles>;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (

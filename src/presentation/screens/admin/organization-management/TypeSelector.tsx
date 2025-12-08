@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, ScrollView, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
 import { A11Y_ROLE, ORGANIZATION_TYPES, OrganizationType, ICONS } from '../../../../shared/constants';
-import { styles } from './styles';
+import { createStyles } from './styles';
 import { getTypeLabel, getTypeIcon, getTypeColor } from './orgUtils';
 
 interface TypeSelectorProps {
@@ -20,7 +20,8 @@ export function TypeSelector({
   colors,
   t,
 }: TypeSelectorProps): React.JSX.Element {
-  const { iconSizes } = useTheme();
+  const { colors: themeColors, spacing, iconSizes } = useTheme();
+  const styles = useMemo(() => createStyles(themeColors, spacing), [themeColors, spacing]);
 
   const renderBtn = (type: OrganizationType): React.JSX.Element => {
     const isSelected = selectedType === type;

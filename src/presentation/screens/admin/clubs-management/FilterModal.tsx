@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
 import { ANIMATION_TYPE, ICONS, HIERARCHY_FIELDS } from '../../../../shared/constants';
-import { modalStyles, filterStyles, buttonStyles } from './styles';
+import { createModalStyles, createFilterStyles, createButtonStyles } from './styles';
 import { ClubFilters } from './types';
 import { HierarchyFilterItem } from './HierarchyFilterItem';
 import { StatusFilterSection } from './StatusFilterSection';
@@ -42,6 +42,7 @@ interface HierarchyFiltersProps {
   availableChurches: string[];
   colors: { primary: string; success: string };
   t: (key: string) => string;
+  filterStyles: ReturnType<typeof createFilterStyles>;
 }
 
 function HierarchyFilters({
@@ -53,6 +54,7 @@ function HierarchyFilters({
   availableChurches,
   colors,
   t,
+  filterStyles,
 }: HierarchyFiltersProps): React.JSX.Element {
   return (
     <View style={filterStyles.section}>
@@ -95,7 +97,7 @@ function HierarchyFilters({
   );
 }
 
-function InfoBanner({ color }: { color: string }): React.JSX.Element {
+function InfoBanner({ color, filterStyles }: { color: string; filterStyles: ReturnType<typeof createFilterStyles> }): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (
     <View style={[filterStyles.infoBanner, { backgroundColor: color + '15' }]}>
@@ -118,6 +120,20 @@ export function FilterModal({
   colors,
   t,
 }: FilterModalProps): React.JSX.Element {
+  const { colors: themeColors, spacing, radii, typography } = useTheme();
+  const modalStyles = useMemo(
+    () => createModalStyles(themeColors, spacing, radii, typography),
+    [themeColors, spacing, radii, typography]
+  );
+  const filterStyles = useMemo(
+    () => createFilterStyles(themeColors, spacing, radii, typography),
+    [themeColors, spacing, radii, typography]
+  );
+  const buttonStyles = useMemo(
+    () => createButtonStyles(themeColors, spacing, radii, typography),
+    [themeColors, spacing, radii, typography]
+  );
+
   const anim = isMobile ? ANIMATION_TYPE.SLIDE : ANIMATION_TYPE.FADE;
   const overlayStyle = [
     modalStyles.overlay,
@@ -138,6 +154,7 @@ export function FilterModal({
     availableChurches,
     colors,
     t,
+    filterStyles,
   };
 
   return (
@@ -147,9 +164,9 @@ export function FilterModal({
           {isMobile && (
             <View style={[modalStyles.dragHandle, { backgroundColor: colors.borderLight }]} />
           )}
-          <ModalHeader colors={colors} t={t} onClose={onClose} />
+          <ModalHeader colors={colors} t={t} onClose={onClose} modalStyles={modalStyles} />
           <ScrollView style={modalStyles.body}>
-            <InfoBanner color={colors.primary} />
+            <InfoBanner color={colors.primary} filterStyles={filterStyles} />
             <HierarchyFilters {...hProps} />
             <StatusFilterSection
               currentStatus={filters.status}
@@ -158,7 +175,7 @@ export function FilterModal({
               t={t}
             />
           </ScrollView>
-          <ModalFooter colors={colors} t={t} onClear={onClearFilters} onClose={onClose} />
+          <ModalFooter colors={colors} t={t} onClear={onClearFilters} onClose={onClose} modalStyles={modalStyles} buttonStyles={buttonStyles} />
         </View>
       </View>
     </Modal>
@@ -169,10 +186,12 @@ function ModalHeader({
   colors,
   t,
   onClose,
+  modalStyles,
 }: {
   colors: { borderLight: string; textPrimary: string; textSecondary: string };
   t: (key: string) => string;
   onClose: () => void;
+  modalStyles: ReturnType<typeof createModalStyles>;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (
@@ -196,11 +215,15 @@ function ModalFooter({
   t,
   onClear,
   onClose,
+  modalStyles,
+  buttonStyles,
 }: {
   colors: { textSecondary: string };
   t: (key: string) => string;
   onClear: () => void;
   onClose: () => void;
+  modalStyles: ReturnType<typeof createModalStyles>;
+  buttonStyles: ReturnType<typeof createButtonStyles>;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (

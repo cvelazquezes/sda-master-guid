@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { User, UserRole, Club } from '../../../../types';
@@ -13,7 +13,7 @@ import {
   EMPTY_VALUE,
 } from '../../../../shared/constants';
 import { MATH } from '../../../../shared/constants/numbers';
-import { pendingStyles } from './styles';
+import { createPendingStyles } from './styles';
 
 interface PendingUserCardProps {
   user: User;
@@ -49,15 +49,28 @@ export function PendingUserCard({
   colors,
   t,
 }: PendingUserCardProps): React.JSX.Element {
+  const { colors: themeColors, spacing, radii, typography } = useTheme();
+  const pendingStyles = useMemo(
+    () => createPendingStyles(themeColors, spacing, radii, typography),
+    [themeColors, spacing, radii, typography]
+  );
+
   const cardStyle = [
     pendingStyles.card,
     { backgroundColor: colors.warningAlpha10, borderColor: colors.warning },
   ];
   return (
     <View style={cardStyle}>
-      <PendingAvatar name={user.name} colors={colors} />
-      <PendingInfo user={user} clubs={clubs} colors={colors} t={t} />
-      <PendingActions user={user} onApprove={onApprove} onReject={onReject} colors={colors} t={t} />
+      <PendingAvatar name={user.name} colors={colors} pendingStyles={pendingStyles} />
+      <PendingInfo user={user} clubs={clubs} colors={colors} t={t} pendingStyles={pendingStyles} />
+      <PendingActions
+        user={user}
+        onApprove={onApprove}
+        onReject={onReject}
+        colors={colors}
+        t={t}
+        pendingStyles={pendingStyles}
+      />
     </View>
   );
 }
@@ -65,9 +78,11 @@ export function PendingUserCard({
 function PendingAvatar({
   name,
   colors,
+  pendingStyles,
 }: {
   name: string;
   colors: PendingUserCardProps['colors'];
+  pendingStyles: ReturnType<typeof createPendingStyles>;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (
@@ -91,7 +106,10 @@ function PendingInfo({
   clubs,
   colors,
   t,
-}: Omit<PendingUserCardProps, 'onApprove' | 'onReject'>): React.JSX.Element {
+  pendingStyles,
+}: Omit<PendingUserCardProps, 'onApprove' | 'onReject'> & {
+  pendingStyles: ReturnType<typeof createPendingStyles>;
+}): React.JSX.Element {
   const { iconSizes } = useTheme();
   const isClubAdmin = user.role === UserRole.CLUB_ADMIN;
   const statusIcon = isClubAdmin ? ICONS.SHIELD_ACCOUNT : ICONS.CLOCK_ALERT_OUTLINE;
@@ -119,7 +137,7 @@ function PendingInfo({
       >
         {user.email}
       </Text>
-      <MetaDetails user={user} clubs={clubs} colors={colors} t={t} />
+      <MetaDetails user={user} clubs={clubs} colors={colors} t={t} pendingStyles={pendingStyles} />
     </View>
   );
 }
@@ -129,7 +147,10 @@ function MetaDetails({
   clubs,
   colors,
   t,
-}: Omit<PendingUserCardProps, 'onApprove' | 'onReject'>): React.JSX.Element {
+  pendingStyles,
+}: Omit<PendingUserCardProps, 'onApprove' | 'onReject'> & {
+  pendingStyles: ReturnType<typeof createPendingStyles>;
+}): React.JSX.Element {
   const classesText =
     user.classes && user.classes.length > 0
       ? user.classes.slice(0, MATH.HALF).join(LIST_SEPARATOR) +
@@ -143,6 +164,7 @@ function MetaDetails({
         color={colors.primary}
         text={getClubName(user.clubId, clubs, t)}
         textColor={colors.textSecondary}
+        pendingStyles={pendingStyles}
       />
       {user.whatsappNumber && (
         <MetaItem
@@ -150,6 +172,7 @@ function MetaDetails({
           color={colors.success}
           text={user.whatsappNumber}
           textColor={colors.textSecondary}
+          pendingStyles={pendingStyles}
         />
       )}
       {classesText && (
@@ -158,6 +181,7 @@ function MetaDetails({
           color={colors.primary}
           text={classesText}
           textColor={colors.textSecondary}
+          pendingStyles={pendingStyles}
         />
       )}
     </View>
@@ -169,11 +193,13 @@ function MetaItem({
   color,
   text,
   textColor,
+  pendingStyles,
 }: {
   icon: string;
   color: string;
   text: string;
   textColor: string;
+  pendingStyles: ReturnType<typeof createPendingStyles>;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (
@@ -199,7 +225,10 @@ function PendingActions({
   onReject,
   colors,
   t,
-}: Omit<PendingUserCardProps, 'clubs'>): React.JSX.Element {
+  pendingStyles,
+}: Omit<PendingUserCardProps, 'clubs'> & {
+  pendingStyles: ReturnType<typeof createPendingStyles>;
+}): React.JSX.Element {
   return (
     <View style={pendingStyles.actionsContainer}>
       <IconButton

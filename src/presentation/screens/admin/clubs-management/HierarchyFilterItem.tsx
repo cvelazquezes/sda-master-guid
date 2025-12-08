@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
 import { ICONS } from '../../../../shared/constants';
-import { filterStyles } from './styles';
+import { createFilterStyles } from './styles';
 
 interface HierarchyFilterItemProps {
   icon: string;
@@ -20,11 +20,13 @@ function SingleValueItem({
   label,
   value,
   colors,
+  filterStyles,
 }: {
   icon: string;
   label: string;
   value: string;
   colors: { primary: string; success: string };
+  filterStyles: ReturnType<typeof createFilterStyles>;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (
@@ -52,11 +54,13 @@ function ValueOption({
   selected,
   onSelect,
   color,
+  filterStyles,
 }: {
   value: string;
   selected: boolean;
   onSelect: () => void;
   color: string;
+  filterStyles: ReturnType<typeof createFilterStyles>;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (
@@ -80,11 +84,17 @@ export function HierarchyFilterItem({
   onSelect,
   colors,
 }: HierarchyFilterItemProps): React.JSX.Element | null {
+  const { colors: themeColors, spacing, radii, typography } = useTheme();
+  const filterStyles = useMemo(
+    () => createFilterStyles(themeColors, spacing, radii, typography),
+    [themeColors, spacing, radii, typography]
+  );
+
   if (values.length === 0) {
     return null;
   }
   if (values.length === 1) {
-    return <SingleValueItem icon={icon} label={label} value={values[0]} colors={colors} />;
+    return <SingleValueItem icon={icon} label={label} value={values[0]} colors={colors} filterStyles={filterStyles} />;
   }
   return (
     <View>
@@ -96,6 +106,7 @@ export function HierarchyFilterItem({
           selected={selectedValue === v}
           onSelect={(): void => onSelect(v)}
           color={colors.primary}
+          filterStyles={filterStyles}
         />
       ))}
     </View>

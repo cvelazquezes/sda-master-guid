@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, Input } from '../../../components/primitives';
@@ -10,8 +10,8 @@ import {
   HIERARCHY_FIELDS,
   EMPTY_VALUE,
 } from '../../../../shared/constants';
-import { modalStyles, filterStyles, buttonStyles } from './styles';
-import { OrgFormData } from './types';
+import { createModalStyles, createFilterStyles, createButtonStyles } from './styles';
+import { HierarchySelector } from './HierarchySelector';
 import {
   getTypeLabel,
   getTypeIcon,
@@ -20,10 +20,10 @@ import {
   getAvailableAssociations,
   getAvailableParents,
 } from './orgUtils';
-import { HierarchySelector } from './HierarchySelector';
-import { Club } from '../../../../types';
+import type { OrgFormData } from './types';
+import type { Club } from '../../../../types';
 
-interface OrgModalProps {
+type OrgModalProps = {
   visible: boolean;
   onClose: () => void;
   isMobile: boolean;
@@ -50,11 +50,12 @@ interface OrgModalProps {
     primaryLight: string;
     success: string;
     warning: string;
+    warningLight: string;
     textInverse: string;
     info: string;
   };
   t: (key: string, opts?: Record<string, unknown>) => string;
-}
+};
 
 type HierarchyType = typeof HIERARCHY_FIELDS.DIVISION;
 
@@ -83,6 +84,21 @@ export function OrgModal({
   colors,
   t,
 }: OrgModalProps): React.JSX.Element {
+  const { spacing, radii, typography } = useTheme();
+
+  const modalStyles = useMemo(
+    () => createModalStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+  const filterStyles = useMemo(
+    () => createFilterStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+  const buttonStyles = useMemo(
+    () => createButtonStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+
   const typeLabel = getTypeLabel(selectedType as HierarchyType, t);
   const divisions = getAvailableDivisions(clubs);
   const unions = getAvailableUnions(clubs, formData.parentDivision || undefined);
@@ -119,9 +135,10 @@ export function OrgModal({
             onClose={onClose}
             colors={colors}
             t={t}
+            modalStyles={modalStyles}
           />
           <ScrollView style={modalStyles.body}>
-            <InfoBanner selectedType={selectedType} colors={colors} t={t} />
+            <InfoBanner selectedType={selectedType} colors={colors} t={t} filterStyles={filterStyles} />
             <HierarchySelectors
               selectedType={selectedType}
               formData={formData}
@@ -137,6 +154,7 @@ export function OrgModal({
               setParentAssociationSearch={setParentAssociationSearch}
               colors={colors}
               t={t}
+              filterStyles={filterStyles}
             />
             <TypeInfoSection
               typeLabel={typeLabel}
@@ -144,9 +162,10 @@ export function OrgModal({
               formData={formData}
               setFormData={setFormData}
               t={t}
+              filterStyles={filterStyles}
             />
             {noParentWarning && (
-              <NoParentWarning selectedType={selectedType} colors={colors} t={t} />
+              <NoParentWarning selectedType={selectedType} colors={colors} t={t} filterStyles={filterStyles} />
             )}
           </ScrollView>
           <ModalFooter
@@ -155,6 +174,8 @@ export function OrgModal({
             onSave={onSave}
             colors={colors}
             t={t}
+            modalStyles={modalStyles}
+            buttonStyles={buttonStyles}
           />
         </View>
       </View>
@@ -168,12 +189,14 @@ function ModalHeader({
   onClose,
   colors,
   t,
+  modalStyles,
 }: {
   editMode: boolean;
   typeLabel: string;
   onClose: () => void;
   colors: { borderLight: string; textPrimary: string; textSecondary: string };
   t: (key: string, opts?: Record<string, unknown>) => string;
+  modalStyles: ReturnType<typeof createModalStyles>;
 }): React.JSX.Element {
   const titleKey = editMode
     ? 'screens.organizationManagement.editType'
@@ -206,10 +229,12 @@ function InfoBanner({
   selectedType,
   colors,
   t,
+  filterStyles,
 }: {
   selectedType: string;
   colors: { primaryLight: string; primary: string };
   t: (key: string) => string;
+  filterStyles: ReturnType<typeof createFilterStyles>;
 }): React.JSX.Element {
   const getInfoText = (): string => {
     const base = 'screens.organizationManagement';
@@ -227,14 +252,14 @@ function InfoBanner({
 
   const { iconSizes } = useTheme();
   return (
-    <View style={[filterStyles.infoBanner, { backgroundColor: colors.primaryLight }]}>
+    <View style={filterStyles.infoBanner}>
       <MaterialCommunityIcons name={ICONS.INFORMATION} size={iconSizes.sm} color={colors.primary} />
-      <Text style={[filterStyles.infoText, { color: colors.primary }]}>{getInfoText()}</Text>
+      <Text style={filterStyles.infoText}>{getInfoText()}</Text>
     </View>
   );
 }
 
-interface HierarchySelectorsProps {
+type HierarchySelectorsProps = {
   selectedType: string;
   formData: OrgFormData;
   setFormData: React.Dispatch<React.SetStateAction<OrgFormData>>;
@@ -258,7 +283,16 @@ interface HierarchySelectorsProps {
     textTertiary: string;
   };
   t: (key: string, opts?: Record<string, unknown>) => string;
-}
+  filterStyles: ReturnType<typeof createFilterStyles>;
+};
+
+// Helper type for HierarchySelector colors
+type HierarchySelectorColors = {
+  primary: string;
+  success: string;
+  textTertiary: string;
+  textPrimary: string;
+};
 
 function HierarchySelectors(props: HierarchySelectorsProps): React.JSX.Element | null {
   const { selectedType, divisions } = props;
@@ -580,12 +614,14 @@ function TypeInfoSection({
   formData,
   setFormData,
   t,
+  filterStyles,
 }: {
   typeLabel: string;
   selectedType: string;
   formData: OrgFormData;
   setFormData: React.Dispatch<React.SetStateAction<OrgFormData>>;
   t: (key: string, opts?: Record<string, unknown>) => string;
+  filterStyles: ReturnType<typeof createFilterStyles>;
 }): React.JSX.Element {
   const base = 'screens.organizationManagement';
 
@@ -610,10 +646,12 @@ function NoParentWarning({
   selectedType,
   colors,
   t,
+  filterStyles,
 }: {
   selectedType: string;
   colors: { warning: string };
   t: (key: string, opts?: Record<string, unknown>) => string;
+  filterStyles: ReturnType<typeof createFilterStyles>;
 }): React.JSX.Element {
   const getParentType = (): string => {
     const divLevel = t('components.organizationHierarchy.levels.division').toLowerCase();
@@ -646,12 +684,16 @@ function ModalFooter({
   onSave,
   colors,
   t,
+  modalStyles,
+  buttonStyles,
 }: {
   editMode: boolean;
   onClose: () => void;
   onSave: () => void;
   colors: { textSecondary: string; textInverse: string };
   t: (key: string) => string;
+  modalStyles: ReturnType<typeof createModalStyles>;
+  buttonStyles: ReturnType<typeof createButtonStyles>;
 }): React.JSX.Element {
   const base = 'screens.organizationManagement';
   const saveIcon = editMode ? ICONS.CONTENT_SAVE : ICONS.PLUS_CIRCLE;

@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, ScrollView, TouchableOpacity, useWindowDimensions } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '../../../state/ThemeContext';
-import { PageHeader, SearchBar, EmptyState, Text } from '../../../components/primitives';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { OrgCard } from './OrgCard';
+import { handleSave, handleDelete } from './orgHandlers';
+import { OrgModal } from './OrgModal';
+import { getTypeLabel, getTypeIcon } from './orgUtils';
+import { createStyles } from './styles';
+import { TypeSelector } from './TypeSelector';
+import { useOrganizationData } from './useOrganizationData';
 import {
   SAFE_AREA_EDGES,
   A11Y_ROLE,
@@ -14,14 +19,9 @@ import {
   EMPTY_VALUE,
   FLEX,
 } from '../../../../shared/constants';
-import { styles } from './styles';
-import { OrganizationItem } from './types';
-import { useOrganizationData } from './useOrganizationData';
-import { getTypeLabel, getTypeIcon } from './orgUtils';
-import { handleSave, handleDelete } from './orgHandlers';
-import { TypeSelector } from './TypeSelector';
-import { OrgCard } from './OrgCard';
-import { OrgModal } from './OrgModal';
+import { PageHeader, SearchBar, EmptyState, Text } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
+import type { OrganizationItem } from './types';
 
 function getFormDataForEdit(org: OrganizationItem): {
   name: string;
@@ -34,18 +34,19 @@ function getFormDataForEdit(org: OrganizationItem): {
   const isChurch = org.type === HIERARCHY_FIELDS.CHURCH;
   return {
     name: org.name,
-    parentDivision: isUnion ? org.parent || EMPTY_VALUE : EMPTY_VALUE,
-    parentUnion: isAssociation ? org.parent || EMPTY_VALUE : EMPTY_VALUE,
-    parentAssociation: isChurch ? org.parent || EMPTY_VALUE : EMPTY_VALUE,
+    parentDivision: isUnion ? (org.parent ?? EMPTY_VALUE) : EMPTY_VALUE,
+    parentUnion: isAssociation ? (org.parent ?? EMPTY_VALUE) : EMPTY_VALUE,
+    parentAssociation: isChurch ? (org.parent ?? EMPTY_VALUE) : EMPTY_VALUE,
   };
 }
 
 export const OrganizationManagementScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { width: windowWidth } = useWindowDimensions();
-  const { colors } = useTheme();
+  const { colors, spacing } = useTheme();
+  const styles = useMemo(() => createStyles(colors, spacing), [colors, spacing]);
   const isMobile = windowWidth < BREAKPOINTS.MOBILE;
-  const orgData = useOrganizationData();
+  const orgData = useOrganizationData(t);
   const [modalVisible, setModalVisible] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const filteredOrgs = orgData.organizations.filter((o) =>
@@ -67,51 +68,49 @@ export const OrganizationManagementScreen = (): React.JSX.Element => {
     orgData.resetForm();
   };
   const onSave = (): void =>
-    handleSave(
-      orgData.formData,
-      orgData.selectedType,
+    handleSave({
+      formData: orgData.formData,
+      selectedType: orgData.selectedType,
       editMode,
       setModalVisible,
-      orgData.resetForm,
-      t
-    );
+      resetForm: orgData.resetForm,
+      t,
+    });
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}
-      edges={SAFE_AREA_EDGES.TOP_LEFT_RIGHT}
-    >
+    <SafeAreaView style={styles.container} edges={SAFE_AREA_EDGES.TOP_LEFT_RIGHT}>
       <PageHeader
+        showActions
         title={t('screens.organizationManagement.title')}
         subtitle={t('screens.organizationManagement.subtitle', { type: subtitleType })}
-        showActions
       />
       <TypeSelector
         selectedType={orgData.selectedType}
-        onSelectType={orgData.setSelectedType}
         colors={colors}
         t={t}
+        onSelectType={orgData.setSelectedType}
       />
       <ActionsBar
         searchQuery={orgData.searchQuery}
         setSearchQuery={orgData.setSearchQuery}
         selectedType={orgData.selectedType}
-        onCreatePress={handleCreate}
         colors={colors}
         t={t}
+        styles={styles}
+        onCreatePress={handleCreate}
       />
       <OrgList
         loading={orgData.loading}
         orgs={filteredOrgs}
         selectedType={orgData.selectedType}
         searchQuery={orgData.searchQuery}
-        onEdit={handleEdit}
         colors={colors}
         t={t}
+        styles={styles}
+        onEdit={handleEdit}
       />
       <OrgModal
         visible={modalVisible}
-        onClose={onCloseModal}
         isMobile={isMobile}
         editMode={editMode}
         selectedType={orgData.selectedType}
@@ -124,13 +123,17 @@ export const OrganizationManagementScreen = (): React.JSX.Element => {
         parentAssociationSearch={orgData.parentAssociationSearch}
         setParentAssociationSearch={orgData.setParentAssociationSearch}
         clubs={orgData.clubs}
-        onSave={onSave}
         colors={colors}
         t={t}
+        onClose={onCloseModal}
+        onSave={onSave}
       />
     </SafeAreaView>
   );
 };
+
+type ThemeColors = ReturnType<typeof useTheme>['colors'];
+type HierarchyType = typeof HIERARCHY_FIELDS.DIVISION;
 
 function ActionsBar({
   searchQuery,
@@ -139,13 +142,15 @@ function ActionsBar({
   onCreatePress,
   colors,
   t,
+  styles,
 }: {
   searchQuery: string;
   setSearchQuery: (v: string) => void;
   selectedType: string;
   onCreatePress: () => void;
-  colors: Record<string, string>;
+  colors: ThemeColors;
   t: (k: string, o?: Record<string, unknown>) => string;
+  styles: ReturnType<typeof createStyles>;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (
@@ -153,20 +158,20 @@ function ActionsBar({
       <View style={styles.searchContainer}>
         <SearchBar
           value={searchQuery}
-          onChangeText={setSearchQuery}
           placeholder={t('screens.organizationManagement.searchType', {
-            type: getTypeLabel(selectedType, t).toLowerCase(),
+            type: getTypeLabel(selectedType as HierarchyType, t).toLowerCase(),
           })}
           style={{ flex: FLEX.ONE }}
+          onChangeText={setSearchQuery}
         />
       </View>
       <TouchableOpacity
         style={styles.createButton}
-        onPress={onCreatePress}
         accessibilityRole={A11Y_ROLE.BUTTON}
         accessibilityLabel={t('screens.organizationManagement.createNewType', {
-          type: getTypeLabel(selectedType, t).toLowerCase(),
+          type: getTypeLabel(selectedType as HierarchyType, t).toLowerCase(),
         })}
+        onPress={onCreatePress}
       >
         <MaterialCommunityIcons name={ICONS.PLUS} size={iconSizes.md} color={colors.textInverse} />
         <Text style={styles.createButtonText}>{t('screens.organizationManagement.new')}</Text>
@@ -183,14 +188,16 @@ function OrgList({
   onEdit,
   colors,
   t,
+  styles,
 }: {
   loading: boolean;
   orgs: OrganizationItem[];
   selectedType: string;
   searchQuery: string;
   onEdit: (o: OrganizationItem) => void;
-  colors: Record<string, string>;
+  colors: ThemeColors;
   t: (k: string, o?: Record<string, unknown>) => string;
+  styles: ReturnType<typeof createStyles>;
 }): React.JSX.Element {
   if (loading) {
     return (
@@ -203,14 +210,14 @@ function OrgList({
     const emptyMsg = searchQuery
       ? t('screens.organizationManagement.tryAdjustingSearch')
       : t('screens.organizationManagement.addFirstType', {
-          type: getTypeLabel(selectedType, t).toLowerCase(),
+          type: getTypeLabel(selectedType as HierarchyType, t).toLowerCase(),
         });
     return (
       <ScrollView style={styles.content}>
         <EmptyState
-          icon={getTypeIcon(selectedType)}
+          icon={getTypeIcon(selectedType as HierarchyType)}
           title={t('screens.organizationManagement.noTypeFound', {
-            type: getTypeLabel(selectedType, t),
+            type: getTypeLabel(selectedType as HierarchyType, t),
           })}
           description={emptyMsg}
         />
@@ -223,10 +230,21 @@ function OrgList({
         <OrgCard
           key={org.id}
           org={org}
+          colors={{
+            primary: colors.primary,
+            info: colors.info,
+            warning: colors.warning,
+            success: colors.success,
+            textPrimary: colors.textPrimary,
+            textSecondary: colors.textSecondary,
+            textTertiary: colors.textTertiary,
+            border: colors.border,
+            error: colors.error,
+            surface: colors.surface,
+          }}
+          t={t}
           onEdit={onEdit}
           onDelete={(o): void => handleDelete(o, t)}
-          colors={colors}
-          t={t}
         />
       ))}
     </ScrollView>

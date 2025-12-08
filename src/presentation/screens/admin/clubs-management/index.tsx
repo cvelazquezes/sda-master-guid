@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, ScrollView, RefreshControl, useWindowDimensions } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../../state/ThemeContext';
@@ -7,7 +7,7 @@ import { ClubCard } from '../../../components/features/ClubCard';
 import { ClubDetailModal } from '../../../components/features/ClubDetailModal';
 import { PageHeader, SearchBar, EmptyState, Button } from '../../../components/primitives';
 import { BREAKPOINTS, HIERARCHY_FIELDS, ICONS } from '../../../../shared/constants';
-import { styles } from './styles';
+import { createStyles } from './styles';
 import { useClubsData } from './useClubsData';
 import {
   getUniqueClubValues,
@@ -60,7 +60,8 @@ function useFrequencyOptions(
 const ClubsManagementScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
-  const { colors } = useTheme();
+  const { colors, spacing } = useTheme();
+  const styles = useMemo(() => createStyles(colors, spacing), [colors, spacing]);
   const isMobile = width < BREAKPOINTS.MOBILE;
   const {
     clubs,
@@ -123,7 +124,7 @@ const ClubsManagementScreen = (): React.JSX.Element => {
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}
+      style={styles.container}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <PageHeader

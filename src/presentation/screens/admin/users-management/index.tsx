@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, ScrollView, RefreshControl, useWindowDimensions } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../../state/ThemeContext';
@@ -13,7 +13,7 @@ import {
   type Tab,
 } from '../../../components/primitives';
 import { BREAKPOINTS, ICONS, HIERARCHY_FIELDS } from '../../../../shared/constants';
-import { styles } from './styles';
+import { createStyles } from './styles';
 import { useUsersData } from './useUsersData';
 import {
   getUniqueClubValues,
@@ -96,7 +96,8 @@ function useTabs(
 const UsersManagementScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { width: windowWidth } = useWindowDimensions();
-  const { colors } = useTheme();
+  const { colors, spacing } = useTheme();
+  const styles = useMemo(() => createStyles(colors, spacing), [colors, spacing]);
   const isMobile = windowWidth < BREAKPOINTS.MOBILE;
 
   const {
@@ -157,11 +158,10 @@ const UsersManagementScreen = (): React.JSX.Element => {
 
   const filteredUsers = filterUsers(users, clubs, filters, searchQuery, activeTab);
   const tabs = useTabs(t, approvedCount, pendingCount);
-  const containerStyle = [styles.container, { backgroundColor: colors.backgroundSecondary }];
 
   return (
     <ScrollView
-      style={containerStyle}
+      style={styles.container}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <PageHeader
@@ -197,6 +197,7 @@ const UsersManagementScreen = (): React.JSX.Element => {
         setDetailVisible={setDetailVisible}
         colors={colors}
         t={t}
+        styles={styles}
       />
       <FilterModal
         visible={filterVisible}
@@ -236,6 +237,7 @@ interface UsersListProps {
   setDetailVisible: (v: boolean) => void;
   colors: Record<string, string>;
   t: (k: string) => string;
+  styles: ReturnType<typeof createStyles>;
 }
 
 function UsersList({
@@ -249,6 +251,7 @@ function UsersList({
   setDetailVisible,
   colors,
   t,
+  styles,
 }: UsersListProps): React.JSX.Element {
   if (filteredUsers.length === 0) {
     const isPending = activeTab === ApprovalStatus.PENDING;

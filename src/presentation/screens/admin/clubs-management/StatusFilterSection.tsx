@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
 import { ICONS, FILTER_STATUS, HIERARCHY_FIELDS } from '../../../../shared/constants';
-import { filterStyles } from './styles';
+import { createFilterStyles } from './styles';
 
 interface StatusFilterSectionProps {
   currentStatus: string;
@@ -19,7 +19,12 @@ export function StatusFilterSection({
   colors,
   t,
 }: StatusFilterSectionProps): React.JSX.Element {
-  const { iconSizes } = useTheme();
+  const { iconSizes, colors: themeColors, spacing, radii, typography } = useTheme();
+  const filterStyles = useMemo(
+    () => createFilterStyles(themeColors, spacing, radii, typography),
+    [themeColors, spacing, radii, typography]
+  );
+
   const statusOptions = [
     {
       id: FILTER_STATUS.ALL,

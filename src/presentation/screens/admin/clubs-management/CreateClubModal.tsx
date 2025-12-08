@@ -1,23 +1,29 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { HierarchyFilterItem } from './HierarchyFilterItem';
+import { createModalStyles, createFilterStyles, createButtonStyles } from './styles';
+import {
+  ANIMATION_TYPE,
+  ICONS,
+  HIERARCHY_FIELDS,
+  KEYBOARD_TYPE,
+  FLEX,
+} from '../../../../shared/constants';
 import { Text, Input } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
-import { ANIMATION_TYPE, ICONS, HIERARCHY_FIELDS, KEYBOARD_TYPE, FLEX } from '../../../../shared/constants';
-import { MatchFrequency } from '../../../../types';
-import { modalStyles, filterStyles, buttonStyles } from './styles';
-import { ClubFormData } from './types';
-import { HierarchyFilterItem } from './HierarchyFilterItem';
+import type { ClubFormData } from './types';
+import type { MatchFrequency } from '../../../../types';
 
-interface FrequencyOption {
+type FrequencyOption = {
   id: MatchFrequency;
   title: string;
   subtitle: string;
   icon: string;
   iconColor: string;
-}
+};
 
-interface CreateClubModalProps {
+type CreateClubModalProps = {
   visible: boolean;
   onClose: () => void;
   isMobile: boolean;
@@ -40,7 +46,7 @@ interface CreateClubModalProps {
     success: string;
   };
   t: (key: string, opts?: Record<string, unknown>) => string;
-}
+};
 
 export function CreateClubModal({
   visible,
@@ -58,6 +64,20 @@ export function CreateClubModal({
   colors,
   t,
 }: CreateClubModalProps): React.JSX.Element {
+  const { colors: themeColors, spacing, radii, typography } = useTheme();
+  const modalStyles = useMemo(
+    () => createModalStyles(themeColors, spacing, radii, typography),
+    [themeColors, spacing, radii, typography]
+  );
+  const filterStyles = useMemo(
+    () => createFilterStyles(themeColors, spacing, radii, typography),
+    [themeColors, spacing, radii, typography]
+  );
+  const buttonStyles = useMemo(
+    () => createButtonStyles(themeColors, spacing, radii, typography),
+    [themeColors, spacing, radii, typography]
+  );
+
   const anim = isMobile ? ANIMATION_TYPE.SLIDE : ANIMATION_TYPE.FADE;
   const overlayStyle = [
     modalStyles.overlay,
@@ -78,19 +98,25 @@ export function CreateClubModal({
     availableChurches,
     colors,
     t,
+    filterStyles,
   };
 
   return (
-    <Modal visible={visible} animationType={anim} transparent onRequestClose={onClose}>
+    <Modal transparent visible={visible} animationType={anim} onRequestClose={onClose}>
       <View style={overlayStyle}>
         <View style={contentStyle}>
           {isMobile && (
             <View style={[modalStyles.dragHandle, { backgroundColor: colors.borderLight }]} />
           )}
-          <ModalHeader onClose={onClose} colors={colors} t={t} />
+          <ModalHeader colors={colors} t={t} modalStyles={modalStyles} onClose={onClose} />
           <ScrollView style={modalStyles.body}>
-            <InfoBanner colors={colors} t={t} />
-            <ClubInfoSection formData={formData} setFormData={setFormData} t={t} />
+            <InfoBanner colors={colors} t={t} filterStyles={filterStyles} />
+            <ClubInfoSection
+              formData={formData}
+              setFormData={setFormData}
+              t={t}
+              filterStyles={filterStyles}
+            />
             <OrgHierarchySection {...orgProps} />
             <SettingsSection
               formData={formData}
@@ -98,29 +124,38 @@ export function CreateClubModal({
               frequencyOptions={frequencyOptions}
               colors={colors}
               t={t}
+              filterStyles={filterStyles}
             />
           </ScrollView>
-          <ModalFooter onClose={onClose} onCreateClub={onCreateClub} colors={colors} t={t} />
+          <ModalFooter
+            colors={colors}
+            t={t}
+            modalStyles={modalStyles}
+            buttonStyles={buttonStyles}
+            onClose={onClose}
+            onCreateClub={onCreateClub}
+          />
         </View>
       </View>
     </Modal>
   );
 }
 
-interface ModalHeaderProps {
+type ModalHeaderProps = {
   onClose: () => void;
   colors: { textPrimary: string; textSecondary: string; borderLight: string };
   t: (key: string) => string;
-}
+  modalStyles: ReturnType<typeof createModalStyles>;
+};
 
-function ModalHeader({ onClose, colors, t }: ModalHeaderProps): React.JSX.Element {
+function ModalHeader({ onClose, colors, t, modalStyles }: ModalHeaderProps): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (
     <View style={[modalStyles.header, { borderBottomColor: colors.borderLight }]}>
       <Text style={[modalStyles.title, { color: colors.textPrimary }]}>
         {t('screens.clubsManagement.createNewClub')}
       </Text>
-      <TouchableOpacity onPress={onClose} style={modalStyles.closeButton}>
+      <TouchableOpacity style={modalStyles.closeButton} onPress={onClose}>
         <MaterialCommunityIcons
           name={ICONS.CLOSE}
           size={iconSizes.lg}
@@ -134,56 +169,63 @@ function ModalHeader({ onClose, colors, t }: ModalHeaderProps): React.JSX.Elemen
 function InfoBanner({
   colors,
   t,
+  filterStyles,
 }: {
   colors: { primary: string };
   t: (key: string) => string;
+  filterStyles: ReturnType<typeof createFilterStyles>;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
-  const bgColor = colors.primary + '15';
   return (
-    <View style={[filterStyles.infoBanner, { backgroundColor: bgColor }]}>
+    <View style={filterStyles.infoBanner}>
       <MaterialCommunityIcons name={ICONS.INFORMATION} size={iconSizes.sm} color={colors.primary} />
-      <Text style={[filterStyles.infoText, { color: colors.primary }]}>
+      <Text style={filterStyles.infoText}>
         {t('screens.clubsManagement.filterDescription')}
       </Text>
     </View>
   );
 }
 
-interface ClubInfoSectionProps {
+type ClubInfoSectionProps = {
   formData: ClubFormData;
   setFormData: React.Dispatch<React.SetStateAction<ClubFormData>>;
   t: (key: string) => string;
-}
+  filterStyles: ReturnType<typeof createFilterStyles>;
+};
 
-function ClubInfoSection({ formData, setFormData, t }: ClubInfoSectionProps): React.JSX.Element {
+function ClubInfoSection({
+  formData,
+  setFormData,
+  t,
+  filterStyles,
+}: ClubInfoSectionProps): React.JSX.Element {
   return (
     <View style={filterStyles.section}>
       <Text style={filterStyles.sectionTitle}>
         {t('screens.clubsManagement.clubInformationSection')}
       </Text>
       <Input
+        required
         label={t('screens.clubsManagement.clubNameLabel')}
         value={formData.name}
-        onChangeText={(text): void => setFormData((p) => ({ ...p, name: text }))}
         placeholder={t('placeholders.enterClubName')}
         icon={ICONS.ACCOUNT_GROUP}
-        required
+        onChangeText={(text): void => setFormData((p) => ({ ...p, name: text }))}
       />
       <Input
-        label={t('screens.clubsManagement.descriptionLabel')}
-        value={formData.description}
-        onChangeText={(text): void => setFormData((p) => ({ ...p, description: text }))}
-        placeholder={t('placeholders.enterClubDescription')}
-        icon={ICONS.TEXT}
         multiline
         required
+        label={t('screens.clubsManagement.descriptionLabel')}
+        value={formData.description}
+        placeholder={t('placeholders.enterClubDescription')}
+        icon={ICONS.TEXT}
+        onChangeText={(text): void => setFormData((p) => ({ ...p, description: text }))}
       />
     </View>
   );
 }
 
-interface OrgHierarchySectionProps {
+type OrgHierarchySectionProps = {
   formData: ClubFormData;
   onUpdateField: (f: string, v: string) => void;
   availableDivisions: string[];
@@ -192,9 +234,10 @@ interface OrgHierarchySectionProps {
   availableChurches: string[];
   colors: { primary: string; success: string };
   t: (key: string, opts?: Record<string, unknown>) => string;
-}
+  filterStyles: ReturnType<typeof createFilterStyles>;
+};
 
-interface HierarchyRowProps {
+type HierarchyRowProps = {
   icon: string;
   label: string;
   values: string[];
@@ -204,10 +247,12 @@ interface HierarchyRowProps {
   noDataKey: string;
   colors: { primary: string; success: string };
   t: (key: string, opts?: Record<string, unknown>) => string;
-}
+  filterStyles: ReturnType<typeof createFilterStyles>;
+};
 
 function HierarchyRow(props: HierarchyRowProps): React.JSX.Element | null {
-  const { icon, label, values, selected, onSelect, parent, noDataKey, colors, t } = props;
+  const { icon, label, values, selected, onSelect, parent, noDataKey, colors, t, filterStyles } =
+    props;
   if (values.length > 0) {
     return (
       <HierarchyFilterItem
@@ -215,8 +260,8 @@ function HierarchyRow(props: HierarchyRowProps): React.JSX.Element | null {
         label={label}
         values={values}
         selectedValue={selected}
-        onSelect={onSelect}
         colors={colors}
+        onSelect={onSelect}
       />
     );
   }
@@ -242,6 +287,7 @@ function OrgHierarchySection({
   availableChurches,
   colors,
   t,
+  filterStyles,
 }: OrgHierarchySectionProps): React.JSX.Element {
   const labels = {
     division: t('components.organizationHierarchy.levels.division'),
@@ -265,10 +311,11 @@ function OrgHierarchySection({
         label={labels.division}
         values={availableDivisions}
         selected={formData.division}
-        onSelect={(v): void => onUpdateField(HIERARCHY_FIELDS.DIVISION, v)}
         noDataKey={divNoData}
         colors={colors}
         t={t}
+        filterStyles={filterStyles}
+        onSelect={(v): void => onUpdateField(HIERARCHY_FIELDS.DIVISION, v)}
       />
       <HierarchyRow
         icon={ICONS.DOMAIN}
@@ -276,10 +323,11 @@ function OrgHierarchySection({
         values={availableUnions}
         selected={formData.union}
         parent={formData.division}
-        onSelect={(v): void => onUpdateField(HIERARCHY_FIELDS.UNION, v)}
         noDataKey={unionNoData}
         colors={colors}
         t={t}
+        filterStyles={filterStyles}
+        onSelect={(v): void => onUpdateField(HIERARCHY_FIELDS.UNION, v)}
       />
       <HierarchyRow
         icon={ICONS.OFFICE_BUILDING}
@@ -287,10 +335,11 @@ function OrgHierarchySection({
         values={availableAssociations}
         selected={formData.association}
         parent={formData.union}
-        onSelect={(v): void => onUpdateField(HIERARCHY_FIELDS.ASSOCIATION, v)}
         noDataKey={assocNoData}
         colors={colors}
         t={t}
+        filterStyles={filterStyles}
+        onSelect={(v): void => onUpdateField(HIERARCHY_FIELDS.ASSOCIATION, v)}
       />
       <HierarchyRow
         icon={ICONS.CHURCH}
@@ -298,10 +347,11 @@ function OrgHierarchySection({
         values={availableChurches}
         selected={formData.church}
         parent={formData.association}
-        onSelect={(v): void => onUpdateField(HIERARCHY_FIELDS.CHURCH, v)}
         noDataKey={churchNoData}
         colors={colors}
         t={t}
+        filterStyles={filterStyles}
+        onSelect={(v): void => onUpdateField(HIERARCHY_FIELDS.CHURCH, v)}
       />
     </View>
   );
@@ -309,14 +359,21 @@ function OrgHierarchySection({
 
 const DEFAULT_GROUP_SIZE = 2;
 
-interface FreqOptionProps {
+type FreqOptionProps = {
   option: FrequencyOption;
   isActive: boolean;
   colors: { primary: string; textSecondary: string };
   onPress: () => void;
-}
+  filterStyles: ReturnType<typeof createFilterStyles>;
+};
 
-function FreqOption({ option, isActive, colors, onPress }: FreqOptionProps): React.JSX.Element {
+function FreqOption({
+  option,
+  isActive,
+  colors,
+  onPress,
+  filterStyles,
+}: FreqOptionProps): React.JSX.Element {
   const { iconSizes } = useTheme();
   const iconColor = isActive ? colors.primary : option.iconColor || colors.textSecondary;
   const optStyle = [filterStyles.option, isActive && filterStyles.optionActive];
@@ -342,13 +399,14 @@ function FreqOption({ option, isActive, colors, onPress }: FreqOptionProps): Rea
   );
 }
 
-interface SettingsSectionProps {
+type SettingsSectionProps = {
   formData: ClubFormData;
   setFormData: React.Dispatch<React.SetStateAction<ClubFormData>>;
   frequencyOptions: FrequencyOption[];
   colors: { primary: string; textSecondary: string };
   t: (key: string) => string;
-}
+  filterStyles: ReturnType<typeof createFilterStyles>;
+};
 
 function SettingsSection({
   formData,
@@ -356,6 +414,7 @@ function SettingsSection({
   frequencyOptions,
   colors,
   t,
+  filterStyles,
 }: SettingsSectionProps): React.JSX.Element {
   return (
     <View style={filterStyles.section}>
@@ -369,32 +428,42 @@ function SettingsSection({
           option={o}
           isActive={formData.matchFrequency === o.id}
           colors={colors}
+          filterStyles={filterStyles}
           onPress={(): void => setFormData((p) => ({ ...p, matchFrequency: o.id }))}
         />
       ))}
       <Input
+        required
         label={t('screens.clubsManagement.groupSizeLabel')}
         value={formData.groupSize.toString()}
-        onChangeText={(txt): void =>
-          setFormData((p) => ({ ...p, groupSize: parseInt(txt) || DEFAULT_GROUP_SIZE }))
-        }
         placeholder={t('placeholders.enterGroupSize')}
         icon={ICONS.ACCOUNT_MULTIPLE}
         keyboardType={KEYBOARD_TYPE.NUMERIC}
-        required
+        onChangeText={(txt): void =>
+          setFormData((p) => ({ ...p, groupSize: parseInt(txt) || DEFAULT_GROUP_SIZE }))
+        }
       />
     </View>
   );
 }
 
-interface ModalFooterProps {
+type ModalFooterProps = {
   onClose: () => void;
   onCreateClub: () => void;
   colors: { textSecondary: string };
   t: (key: string) => string;
-}
+  modalStyles: ReturnType<typeof createModalStyles>;
+  buttonStyles: ReturnType<typeof createButtonStyles>;
+};
 
-function ModalFooter({ onClose, onCreateClub, colors, t }: ModalFooterProps): React.JSX.Element {
+function ModalFooter({
+  onClose,
+  onCreateClub,
+  colors,
+  t,
+  modalStyles,
+  buttonStyles,
+}: ModalFooterProps): React.JSX.Element {
   const { iconSizes, colors: themeColors } = useTheme();
   return (
     <View style={modalStyles.footer}>

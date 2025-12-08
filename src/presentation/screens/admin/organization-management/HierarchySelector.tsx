@@ -1,13 +1,13 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, Input } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
 import { ICONS } from '../../../../shared/constants';
-import { filterStyles } from './styles';
+import { createFilterStyles } from './styles';
 import { filterBySearch } from './orgUtils';
 
-interface HierarchySelectorProps {
+type HierarchySelectorProps = {
   title: string;
   icon: string;
   iconColor: string;
@@ -20,9 +20,11 @@ interface HierarchySelectorProps {
   searchPlaceholder: string;
   noResultsText: string;
   levelLabel: string;
-  colors: { primary: string; success: string; textTertiary: string };
+  colors: { primary: string; success: string; textTertiary: string; textPrimary: string };
   t: (key: string) => string;
-}
+};
+
+type FilterStylesType = ReturnType<typeof createFilterStyles>;
 
 function SingleItem({
   title,
@@ -31,6 +33,7 @@ function SingleItem({
   levelLabel,
   value,
   successColor,
+  filterStyles,
 }: {
   title: string;
   icon: string;
@@ -38,6 +41,7 @@ function SingleItem({
   levelLabel: string;
   value: string;
   successColor: string;
+  filterStyles: FilterStylesType;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (
@@ -72,6 +76,8 @@ function SelectedItem({
   onClear,
   primary,
   tertiary,
+  textPrimary,
+  filterStyles,
 }: {
   title: string;
   icon: string;
@@ -79,6 +85,8 @@ function SelectedItem({
   onClear: () => void;
   primary: string;
   tertiary: string;
+  textPrimary: string;
+  filterStyles: FilterStylesType;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (
@@ -97,7 +105,7 @@ function SelectedItem({
             {selectedValue}
           </Text>
         </View>
-        <MaterialCommunityIcons name={ICONS.CLOSE_CIRCLE} size={iconSizes.md} color={tertiary} />
+        <MaterialCommunityIcons name={ICONS.CLOSE_CIRCLE} size={iconSizes.md} color={textPrimary} />
       </TouchableOpacity>
     </View>
   );
@@ -108,11 +116,13 @@ function ItemOption({
   icon,
   color,
   onSelect,
+  filterStyles,
 }: {
   item: string;
   icon: string;
   color: string;
   onSelect: () => void;
+  filterStyles: FilterStylesType;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (
@@ -143,7 +153,14 @@ export function HierarchySelector({
   noResultsText,
   levelLabel,
   colors,
-}: HierarchySelectorProps): React.JSX.Element {
+}: HierarchySelectorProps): React.JSX.Element | null {
+  const { colors: themeColors, spacing, radii, typography } = useTheme();
+
+  const filterStyles = useMemo(
+    () => createFilterStyles(themeColors, spacing, radii, typography),
+    [themeColors, spacing, radii, typography]
+  );
+
   if (items.length === 0) {
     return null;
   }
@@ -156,6 +173,7 @@ export function HierarchySelector({
         levelLabel={levelLabel}
         value={items[0]}
         successColor={colors.success}
+        filterStyles={filterStyles}
       />
     );
   }
@@ -168,6 +186,8 @@ export function HierarchySelector({
         onClear={onClear}
         primary={colors.primary}
         tertiary={colors.textTertiary}
+        textPrimary={colors.textPrimary}
+        filterStyles={filterStyles}
       />
     );
   }
@@ -199,6 +219,7 @@ export function HierarchySelector({
             icon={icon}
             color={colors.textTertiary}
             onSelect={(): void => onSelect(item)}
+            filterStyles={filterStyles}
           />
         ))
       )}
