@@ -1,69 +1,51 @@
-export enum UserRole {
-  ADMIN = 'admin',
-  CLUB_ADMIN = 'club_admin',
-  USER = 'user',
-}
+/**
+ * Types - Public API for domain types
+ *
+ * Re-exports all types from core/domain for easy access.
+ * This maintains a single import location for all domain types.
+ */
 
-export enum MatchFrequency {
-  WEEKLY = 'weekly',
-  BIWEEKLY = 'biweekly',
-  MONTHLY = 'monthly',
-}
+// Re-export enums from core/domain/value-objects
+export {
+  UserRole,
+  ApprovalStatus,
+  UserStatus,
+  MatchFrequency,
+  MatchStatus,
+  PaymentStatus,
+  ChargeType,
+  FeeStatus,
+  PaymentMethod,
+  OrganizationType,
+  PATHFINDER_CLASSES,
+} from '../core/domain/value-objects';
 
-export enum MatchStatus {
-  PENDING = 'pending',
-  SCHEDULED = 'scheduled',
-  COMPLETED = 'completed',
-  SKIPPED = 'skipped',
-  CANCELLED = 'cancelled',
-}
+export type { PathfinderClass } from '../core/domain/value-objects';
 
-export enum ApprovalStatus {
-  PENDING = 'pending',
-  APPROVED = 'approved',
-  REJECTED = 'rejected',
-}
+// ============================================================================
+// INTERFACES - Domain model interfaces
+// ============================================================================
 
-export enum UserStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-}
-
-export enum PaymentStatus {
-  PAID = 'paid',
-  PENDING = 'pending',
-  OVERDUE = 'overdue',
-  EXEMPT = 'exempt',
-}
-
-export enum ChargeType {
-  MONTHLY_FEE = 'monthly_fee',
-  CUSTOM = 'custom',
-}
-
-// Available Pathfinder classes
-export const PATHFINDER_CLASSES = [
-  'Friend',
-  'Companion',
-  'Explorer',
-  'Ranger',
-  'Voyager',
-  'Guide',
-] as const;
-
-export type PathfinderClass = (typeof PATHFINDER_CLASSES)[number];
+import {
+  UserRole,
+  ApprovalStatus,
+  MatchFrequency,
+  MatchStatus,
+  PaymentStatus,
+  ChargeType,
+  PathfinderClass,
+} from '../core/domain/value-objects';
 
 export interface User {
   id: string;
   email: string;
   name: string;
-  whatsappNumber: string; // Required for all users except admin
+  whatsappNumber: string;
   role: UserRole;
-  clubId: string | null; // Required for all users except admin (hierarchy comes from club)
-  isActive: boolean; // Activity status: true = active, false = inactive
-  // Registration/approval status for club membership (independent from activity status)
+  clubId: string | null;
+  isActive: boolean;
   approvalStatus: ApprovalStatus;
-  classes: PathfinderClass[]; // Pathfinder classes (min 1, max 3)
+  classes: PathfinderClass[];
   timezone: string;
   language: string;
   createdAt: string;
@@ -77,13 +59,11 @@ export interface Club {
   adminId: string;
   isActive: boolean;
   matchFrequency: MatchFrequency;
-  groupSize: number; // 2 or 3
-  // SDA organizational hierarchy
+  groupSize: number;
   church: string;
   association: string;
   union: string;
   division: string;
-  // Payment settings
   feeSettings?: ClubFeeSettings;
   createdAt: string;
   updatedAt: string;
@@ -92,8 +72,8 @@ export interface Club {
 
 export interface ClubFeeSettings {
   monthlyFeeAmount: number;
-  currency: string; // e.g., 'MXN', 'USD'
-  activeMonths: number[]; // Array of months (1-12) when fee applies
+  currency: string;
+  activeMonths: number[];
   isActive: boolean;
   lastNotificationDate?: string;
 }
@@ -103,7 +83,7 @@ export interface MemberPayment {
   userId: string;
   clubId: string;
   year: number;
-  month: number; // 1-12
+  month: number;
   amount: number;
   status: PaymentStatus;
   paidDate?: string;
@@ -119,11 +99,11 @@ export interface CustomCharge {
   description: string;
   amount: number;
   type: ChargeType;
-  appliedToUserIds: string[]; // Empty array means all members
+  appliedToUserIds: string[];
   createdDate: string;
   dueDate: string;
   isActive: boolean;
-  createdBy: string; // Club admin user ID
+  createdBy: string;
   createdAt: string;
 }
 
@@ -132,7 +112,7 @@ export interface MemberBalance {
   clubId: string;
   totalOwed: number;
   totalPaid: number;
-  balance: number; // negative = owes, positive = credit
+  balance: number;
   pendingCharges: number;
   overdueCharges: number;
   lastPaymentDate?: string;
@@ -141,7 +121,7 @@ export interface MemberBalance {
 export interface Match {
   id: string;
   clubId: string;
-  participants: string[]; // User IDs
+  participants: string[];
   status: MatchStatus;
   scheduledDate?: string;
   createdAt: string;
@@ -173,3 +153,4 @@ export interface AuthContextType {
   logout: () => Promise<void>;
   updateUser: (userData: Partial<User>) => Promise<void>;
 }
+

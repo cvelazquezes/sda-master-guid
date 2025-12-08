@@ -65,3 +65,6 @@ DEBUG_ANDROID.md
 *.swo
 *~
 
+
+# Lint reports
+reports/
