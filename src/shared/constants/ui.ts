@@ -28,9 +28,6 @@ export const ANIMATION_TYPE = {
   NONE: 'none',
 } as const;
 
-// Legacy alias
-export const ANIMATION = ANIMATION_TYPE;
-
 // =============================================================================
 // ACCESSIBILITY
 // =============================================================================
@@ -236,9 +233,6 @@ export const OPACITY_HEX = {
   FULL: 'FF',
 } as const;
 
-// Legacy alias
-export const OPACITY = OPACITY_HEX;
-
 // =============================================================================
 // STATUS VALUES
 // =============================================================================
@@ -251,14 +245,6 @@ export const ENTITY_STATUS = {
   INACTIVE: 'inactive',
   PENDING: 'pending',
   PAUSED: 'paused',
-} as const;
-
-// Legacy alias with camelCase keys
-export const STATUS = {
-  active: ENTITY_STATUS.ACTIVE,
-  inactive: ENTITY_STATUS.INACTIVE,
-  pending: ENTITY_STATUS.PENDING,
-  paused: ENTITY_STATUS.PAUSED,
 } as const;
 
 /**
@@ -288,9 +274,6 @@ export const ROUND_STATUS = {
   COMPLETED: 'completed',
   CANCELLED: 'cancelled',
 } as const;
-
-// Legacy alias (removed MATCH_ROUND_STATUS - use ROUND_STATUS instead)
-export const MATCH_ROUND_STATUS = ROUND_STATUS;
 
 /**
  * Filter Status - Common filter status values
@@ -627,21 +610,16 @@ export const ALL_MONTHS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
  */
 export const ORGANIZATION_TYPES = ['division', 'union', 'association', 'church'] as const;
 
-// =============================================================================
-// LEGACY EXPORTS - For backward compatibility
-// =============================================================================
-
-// Note: COMPONENT_SIZE, COMPONENT_VARIANT, etc. are exported from components.ts
-// Note: MODAL_CONFIG, MODAL_WIDTH are exported from layout.ts
-// Note: APP_VERSION is exported from app.ts
-// Note: ANIMATION_DURATION is exported from timing.ts
-// All these are re-exported via index.ts - no need to duplicate here
-
-// Legacy constant (use LIST_CONFIG from components.ts instead)
-export const LIST_THRESHOLDS = {
-  ON_END_REACHED: 0.5,
-  ITEM_VISIBLE_PERCENT: 50,
-  MINIMUM_VIEW_TIME: 300,
+/**
+ * Display Limits - For UI display constraints
+ */
+export const DISPLAY_LIMITS = {
+  /** Maximum items to show in preview/summary views */
+  MAX_PREVIEW_ITEMS: 3,
+  /** Timeout days for various operations */
+  TIMEOUT_DAYS: 30,
+  /** Percentage scale (100) */
+  PERCENTAGE_SCALE: 100,
 } as const;
 
 // =============================================================================

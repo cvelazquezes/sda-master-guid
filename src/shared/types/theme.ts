@@ -8,7 +8,7 @@
  * import { BackgroundColor, BorderColor, StatusType } from '@shared/types/theme';
  */
 
-import { designTokens } from '../theme/designTokens';
+import { designTokens } from '../../presentation/theme/designTokens';
 
 // =============================================================================
 // SPACING & SIZE TYPES (derived from designTokens)

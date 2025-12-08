@@ -27,6 +27,16 @@ export const MATH = {
   FIVE: 5,
   /** Ten */
   TEN: 10,
+  /** Fifteen */
+  FIFTEEN: 15,
+  /** Twenty-five */
+  TWENTY_FIVE: 25,
+  /** Thirty */
+  THIRTY: 30,
+  /** Thirty-six (alphanumeric base) */
+  THIRTY_SIX: 36,
+  /** Forty-five */
+  FORTY_FIVE: 45,
   /** Hundred */
   HUNDRED: 100,
   /** Thousand */
@@ -648,6 +658,20 @@ export const SHADOW_BLUR = {
 export const SHADOW_COLOR = {
   NONE: 'transparent',
   DEFAULT: '#000000',
+} as const;
+
+/**
+ * Shadow opacity values
+ */
+export const SHADOW_OPACITY = {
+  CARD: 0.1,
+  MODAL_LIGHT: 0.15,
+  MODAL_DARK: 0.3,
+  ELEVATED: 0.2,
+  /** Light theme shadow opacity */
+  LIGHT: 0.2,
+  /** Dark theme shadow opacity */
+  DARK: 0.4,
 } as const;
 
 /**

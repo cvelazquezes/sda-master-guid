@@ -2,11 +2,11 @@
  * Error Messages Constants
  *
  * Centralized error messages for consistent error handling across the application.
- * Used with custom Error classes (AuthError, AppError, etc.)
+ * Used with custom Error classes (AuthenticationError, AppError, etc.)
  *
  * ⚠️ COMPLIANCE RULE:
- * ❌ NEVER write: throw new AuthError('Invalid credentials');
- * ✅ ALWAYS use: throw new AuthError(ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS);
+ * ❌ NEVER write: throw new AuthenticationError('Invalid credentials');
+ * ✅ ALWAYS use: throw new AuthenticationError(ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS);
  *
  * @version 1.0.0
  */

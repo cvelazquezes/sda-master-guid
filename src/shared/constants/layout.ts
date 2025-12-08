@@ -35,7 +35,6 @@ export const FLEX = {
   GROW_ENABLED: 1,
 } as const;
 
-// ⚠️ Legacy alias removed - use FLEX directly
 
 // =============================================================================
 // DIMENSIONS
@@ -184,7 +183,6 @@ export const DIMENSIONS = {
   },
 } as const;
 
-// ⚠️ Legacy alias removed - use DIMENSIONS directly
 
 // =============================================================================
 // TYPOGRAPHY
@@ -208,7 +206,6 @@ export const TYPOGRAPHY = {
   },
 } as const;
 
-// ⚠️ Legacy alias removed - use TYPOGRAPHY directly
 
 // =============================================================================
 // BORDERS
@@ -235,7 +232,6 @@ export const BORDERS = {
   },
 } as const;
 
-// ⚠️ Legacy alias removed - use BORDERS directly
 
 // =============================================================================
 // TEXT TRANSFORMS
@@ -251,7 +247,6 @@ export const TEXT_TRANSFORM = {
   NONE: 'none' as const,
 } as const;
 
-// ⚠️ Legacy alias removed - use TEXT_TRANSFORM directly
 
 // =============================================================================
 // SHADOWS
@@ -269,7 +264,6 @@ export const SHADOW_OFFSET = {
   XXL: { width: 0, height: 12 },
 } as const;
 
-// ⚠️ Legacy alias removed - use SHADOW_OFFSET directly
 
 // =============================================================================
 // FONTS
@@ -283,7 +277,6 @@ export const FONT_FAMILY = {
   MONO: 'monospace',
 } as const;
 
-// ⚠️ Legacy alias removed - use FONT_FAMILY directly
 
 // =============================================================================
 // BREAKPOINTS
@@ -315,7 +308,6 @@ export const TEXT_ALIGN_VERTICAL = {
   AUTO: 'auto' as const,
 } as const;
 
-// ⚠️ Legacy alias removed - use TEXT_ALIGN_VERTICAL directly
 
 // =============================================================================
 // MODAL CONFIGURATION

@@ -312,10 +312,10 @@ function getEnvironmentConfig(): EnvironmentConfigResult {
   };
 }
 
-export const environmentConfig = getEnvironmentConfig();
+export const environment = getEnvironmentConfig();
 
-// Alias for backward compatibility - many files import { environment }
-export const environment = environmentConfig;
+// Type alias for export
+export const environmentConfig = environment;
 
 export type EnvironmentConfig = typeof environmentConfig;
 
