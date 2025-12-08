@@ -2,7 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, StandardInput } from '../../../shared/components';
-import { designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { ICONS } from '../../../shared/constants';
 import { filterStyles } from './styles';
 import { filterBySearch } from './orgUtils';
@@ -39,6 +39,7 @@ function SingleItem({
   value: string;
   successColor: string;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <View style={filterStyles.section}>
       <View style={filterStyles.sectionHeader}>
@@ -47,7 +48,7 @@ function SingleItem({
       <View style={filterStyles.hierarchyItem}>
         <MaterialCommunityIcons
           name={icon as typeof ICONS.EARTH}
-          size={designTokens.iconSize.sm}
+          size={iconSizes.sm}
           color={iconColor}
         />
         <View style={filterStyles.hierarchyInfo}>
@@ -56,7 +57,7 @@ function SingleItem({
         </View>
         <MaterialCommunityIcons
           name={ICONS.CHECK_CIRCLE}
-          size={designTokens.iconSize.sm}
+          size={iconSizes.sm}
           color={successColor}
         />
       </View>
@@ -79,6 +80,7 @@ function SelectedItem({
   primary: string;
   tertiary: string;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <View style={filterStyles.section}>
       <View style={filterStyles.sectionHeader}>
@@ -88,18 +90,14 @@ function SelectedItem({
         <View style={filterStyles.optionContent}>
           <MaterialCommunityIcons
             name={icon as typeof ICONS.EARTH}
-            size={designTokens.iconSize.md}
+            size={iconSizes.md}
             color={primary}
           />
           <Text style={[filterStyles.optionText, filterStyles.optionTextActive]}>
             {selectedValue}
           </Text>
         </View>
-        <MaterialCommunityIcons
-          name={ICONS.CLOSE_CIRCLE}
-          size={designTokens.iconSize.md}
-          color={tertiary}
-        />
+        <MaterialCommunityIcons name={ICONS.CLOSE_CIRCLE} size={iconSizes.md} color={tertiary} />
       </TouchableOpacity>
     </View>
   );
@@ -116,12 +114,13 @@ function ItemOption({
   color: string;
   onSelect: () => void;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <TouchableOpacity key={item} style={filterStyles.option} onPress={onSelect}>
       <View style={filterStyles.optionContent}>
         <MaterialCommunityIcons
           name={icon as typeof ICONS.EARTH}
-          size={designTokens.iconSize.md}
+          size={iconSizes.md}
           color={color}
         />
         <Text style={filterStyles.optionText}>{item}</Text>

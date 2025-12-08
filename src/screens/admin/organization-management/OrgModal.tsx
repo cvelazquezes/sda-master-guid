@@ -2,7 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, StandardInput } from '../../../shared/components';
-import { designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import {
   ANIMATION,
   ICONS,
@@ -180,6 +180,7 @@ function ModalHeader({
     : 'screens.organizationManagement.createType';
   const closeLabel = t('screens.organizationManagement.closeModal');
 
+  const { iconSizes } = useTheme();
   return (
     <View style={[modalStyles.header, { borderBottomColor: colors.borderLight }]}>
       <Text style={[modalStyles.title, { color: colors.textPrimary }]}>
@@ -193,7 +194,7 @@ function ModalHeader({
       >
         <MaterialCommunityIcons
           name={ICONS.CLOSE}
-          size={designTokens.iconSize.lg}
+          size={iconSizes.lg}
           color={colors.textSecondary}
         />
       </TouchableOpacity>
@@ -224,13 +225,10 @@ function InfoBanner({
     return t(`${base}.churchInfo`);
   };
 
+  const { iconSizes } = useTheme();
   return (
     <View style={[filterStyles.infoBanner, { backgroundColor: colors.primaryLight }]}>
-      <MaterialCommunityIcons
-        name={ICONS.INFORMATION}
-        size={designTokens.iconSize.sm}
-        color={colors.primary}
-      />
+      <MaterialCommunityIcons name={ICONS.INFORMATION} size={iconSizes.sm} color={colors.primary} />
       <Text style={[filterStyles.infoText, { color: colors.primary }]}>{getInfoText()}</Text>
     </View>
   );
@@ -631,13 +629,10 @@ function NoParentWarning({
     return assocLevel;
   };
 
+  const { iconSizes } = useTheme();
   return (
     <View style={filterStyles.warningBanner}>
-      <MaterialCommunityIcons
-        name={ICONS.ALERT}
-        size={designTokens.iconSize.md}
-        color={colors.warning}
-      />
+      <MaterialCommunityIcons name={ICONS.ALERT} size={iconSizes.md} color={colors.warning} />
       <Text style={filterStyles.warningText}>
         {t('screens.organizationManagement.noParentAvailable', { parentType: getParentType() })}
       </Text>
@@ -663,6 +658,7 @@ function ModalFooter({
   const saveLabel = editMode ? t(`${base}.saveChanges`) : t(`${base}.createOrganization`);
   const saveText = editMode ? t(`${base}.save`) : t(`${base}.create`);
 
+  const { iconSizes } = useTheme();
   return (
     <View style={modalStyles.footer}>
       <TouchableOpacity
@@ -673,7 +669,7 @@ function ModalFooter({
       >
         <MaterialCommunityIcons
           name={ICONS.CLOSE_CIRCLE}
-          size={designTokens.iconSize.sm}
+          size={iconSizes.sm}
           color={colors.textSecondary}
         />
         <Text style={buttonStyles.clearText}>{t('common.cancel')}</Text>
@@ -684,11 +680,7 @@ function ModalFooter({
         accessibilityRole={A11Y_ROLE.BUTTON}
         accessibilityLabel={saveLabel}
       >
-        <MaterialCommunityIcons
-          name={saveIcon}
-          size={designTokens.iconSize.sm}
-          color={colors.textInverse}
-        />
+        <MaterialCommunityIcons name={saveIcon} size={iconSizes.sm} color={colors.textInverse} />
         <Text style={buttonStyles.applyText}>{saveText}</Text>
       </TouchableOpacity>
     </View>

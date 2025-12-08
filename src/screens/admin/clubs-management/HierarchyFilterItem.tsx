@@ -2,7 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../shared/components';
-import { designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { ICONS } from '../../../shared/constants';
 import { filterStyles } from './styles';
 
@@ -26,11 +26,12 @@ function SingleValueItem({
   value: string;
   colors: { primary: string; success: string };
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <View style={filterStyles.hierarchyItem}>
       <MaterialCommunityIcons
         name={icon as typeof ICONS.EARTH}
-        size={designTokens.iconSize.sm}
+        size={iconSizes.sm}
         color={colors.primary}
       />
       <View style={filterStyles.hierarchyInfo}>
@@ -39,7 +40,7 @@ function SingleValueItem({
       </View>
       <MaterialCommunityIcons
         name={ICONS.CHECK_CIRCLE}
-        size={designTokens.iconSize.sm}
+        size={iconSizes.sm}
         color={colors.success}
       />
     </View>
@@ -57,6 +58,7 @@ function ValueOption({
   onSelect: () => void;
   color: string;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <TouchableOpacity
       style={[filterStyles.option, selected && filterStyles.optionActive]}
@@ -65,9 +67,7 @@ function ValueOption({
       <Text style={[filterStyles.optionText, selected && filterStyles.optionTextActive]}>
         {value}
       </Text>
-      {selected && (
-        <MaterialCommunityIcons name={ICONS.CHECK} size={designTokens.iconSize.md} color={color} />
-      )}
+      {selected && <MaterialCommunityIcons name={ICONS.CHECK} size={iconSizes.md} color={color} />}
     </TouchableOpacity>
   );
 }

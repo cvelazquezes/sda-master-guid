@@ -2,7 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../shared/components';
-import { mobileIconSizes, designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { A11Y_ROLE, ICONS, TOUCH_OPACITY } from '../../../shared/constants';
 import { OrganizationItem } from './types';
 import { cardStyles } from './styles';
@@ -42,12 +42,13 @@ function CardHeader({
   colors: OrgCardProps['colors'];
   onDelete: () => void;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <View style={cardStyles.header}>
       <View style={cardStyles.title}>
         <MaterialCommunityIcons
           name={iconName as typeof ICONS.CHECK}
-          size={mobileIconSizes.medium}
+          size={iconSizes.md}
           color={iconColor}
         />
         <View style={cardStyles.info}>
@@ -65,7 +66,7 @@ function CardHeader({
       >
         <MaterialCommunityIcons
           name={ICONS.DELETE_OUTLINE}
-          size={designTokens.iconSize.md}
+          size={iconSizes.md}
           color={colors.error}
         />
       </TouchableOpacity>
@@ -74,6 +75,7 @@ function CardHeader({
 }
 
 export function OrgCard({ org, onEdit, onDelete, colors, t }: OrgCardProps): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const iconName = getTypeIcon(org.type);
   const iconColor = getTypeColor(org.type, colors);
   const deleteLabel = t('screens.organizationManagement.deleteItem', { name: org.name });
@@ -99,7 +101,7 @@ export function OrgCard({ org, onEdit, onDelete, colors, t }: OrgCardProps): Rea
       <View style={[cardStyles.footer, { borderTopColor: colors.border }]}>
         <MaterialCommunityIcons
           name={ICONS.ACCOUNT_GROUP}
-          size={designTokens.iconSize.xs}
+          size={iconSizes.xs}
           color={colors.textTertiary}
         />
         <Text style={[cardStyles.clubCount, { color: colors.textSecondary }]}>

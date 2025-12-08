@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { User, UserRole, Club } from '../../../types';
 import { Text, IconButton } from '../../../shared/components';
-import { designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import {
   ICONS,
   TEXT_LINES,
@@ -12,7 +12,7 @@ import {
   ELLIPSIS,
   EMPTY_VALUE,
 } from '../../../shared/constants';
-import { MATH } from '../../../shared/constants/http';
+import { MATH } from '../../../shared/constants/numbers';
 import { pendingStyles } from './styles';
 
 interface PendingUserCardProps {
@@ -69,6 +69,7 @@ function PendingAvatar({
   name: string;
   colors: PendingUserCardProps['colors'];
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <View style={[pendingStyles.avatar, { backgroundColor: colors.warningAlpha20 }]}>
       <Text style={[pendingStyles.avatarText, { color: colors.warning }]}>
@@ -77,7 +78,7 @@ function PendingAvatar({
       <View style={[pendingStyles.badge, { backgroundColor: colors.warning }]}>
         <MaterialCommunityIcons
           name={ICONS.CLOCK}
-          size={designTokens.iconSize.xxs}
+          size={iconSizes.xxs}
           color={colors.textInverse}
         />
       </View>
@@ -91,6 +92,7 @@ function PendingInfo({
   colors,
   t,
 }: Omit<PendingUserCardProps, 'onApprove' | 'onReject'>): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const isClubAdmin = user.role === UserRole.CLUB_ADMIN;
   const statusIcon = isClubAdmin ? ICONS.SHIELD_ACCOUNT : ICONS.CLOCK_ALERT_OUTLINE;
   const statusLabel = isClubAdmin
@@ -107,11 +109,7 @@ function PendingInfo({
           {user.name}
         </Text>
         <View style={pendingStyles.statusBadge}>
-          <MaterialCommunityIcons
-            name={statusIcon}
-            size={designTokens.iconSize.xs}
-            color={colors.warning}
-          />
+          <MaterialCommunityIcons name={statusIcon} size={iconSizes.xs} color={colors.warning} />
           <Text style={pendingStyles.statusText}>{statusLabel}</Text>
         </View>
       </View>
@@ -177,11 +175,12 @@ function MetaItem({
   text: string;
   textColor: string;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <View style={pendingStyles.metaItem}>
       <MaterialCommunityIcons
         name={icon as typeof ICONS.DOMAIN}
-        size={designTokens.iconSize.xs}
+        size={iconSizes.xs}
         color={color}
       />
       <Text

@@ -2,13 +2,10 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Alert } from 'react-native';
 import { Club } from '../../../types';
 import { clubService } from '../../../services/clubService';
-import {
-  MESSAGES,
-  HIERARCHY_FIELDS,
-  OrganizationType,
-  EMPTY_VALUE,
-} from '../../../shared/constants';
+import { HIERARCHY_FIELDS, OrganizationType, EMPTY_VALUE } from '../../../shared/constants';
 import { OrganizationItem, OrgFormData, initialFormData } from './types';
+
+type TranslationFn = (key: string, options?: Record<string, unknown>) => string;
 
 interface UseOrganizationDataReturn {
   clubs: Club[];
@@ -85,7 +82,7 @@ function buildOrgMap(clubs: Club[]): Map<string, OrganizationItem> {
   return orgMap;
 }
 
-export function useOrganizationData(): UseOrganizationDataReturn {
+export function useOrganizationData(t: TranslationFn): UseOrganizationDataReturn {
   const [clubs, setClubs] = useState<Club[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(EMPTY_VALUE);
@@ -101,11 +98,11 @@ export function useOrganizationData(): UseOrganizationDataReturn {
       const clubsList = await clubService.getAllClubs();
       setClubs(clubsList);
     } catch {
-      Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FETCH_FAILED);
+      Alert.alert(t('common.error'), t('errors.fetchFailed'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     loadData();

@@ -3,7 +3,7 @@ import { View, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Club, UserRole, UserStatus } from '../../../types';
 import { Text } from '../../../shared/components';
-import { designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import {
   ANIMATION,
   ICONS,
@@ -101,6 +101,7 @@ function ModalHeader({
   t: (key: string) => string;
   onClose: () => void;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <View style={[modalStyles.header, { borderBottomColor: colors.border }]}>
       <Text style={[modalStyles.title, { color: colors.textPrimary }]}>
@@ -109,7 +110,7 @@ function ModalHeader({
       <TouchableOpacity onPress={onClose} style={modalStyles.closeButton}>
         <MaterialCommunityIcons
           name={ICONS.CLOSE}
-          size={designTokens.iconSize.lg}
+          size={iconSizes.lg}
           color={colors.textSecondary}
         />
       </TouchableOpacity>
@@ -124,13 +125,10 @@ function InfoBanner({
   colors: Record<string, string>;
   t: (key: string) => string;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <View style={[filterStyles.infoBanner, { backgroundColor: colors.primaryLight }]}>
-      <MaterialCommunityIcons
-        name={ICONS.INFORMATION}
-        size={designTokens.iconSize.sm}
-        color={colors.primary}
-      />
+      <MaterialCommunityIcons name={ICONS.INFORMATION} size={iconSizes.sm} color={colors.primary} />
       <Text style={[filterStyles.infoText, { color: colors.primary }]}>
         {t('screens.usersManagement.filterDescription')}
       </Text>
@@ -149,12 +147,13 @@ function ModalFooter({
   onClear: () => void;
   onClose: () => void;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <View style={modalStyles.footer}>
       <TouchableOpacity style={buttonStyles.clear} onPress={onClear}>
         <MaterialCommunityIcons
           name={ICONS.FILTER_OFF}
-          size={designTokens.iconSize.md}
+          size={iconSizes.md}
           color={colors.textSecondary}
         />
         <Text style={buttonStyles.clearText}>{t('screens.usersManagement.clearAll')}</Text>
@@ -295,6 +294,7 @@ function ClubOption({
   onPress: () => void;
   colors: Record<string, string>;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <TouchableOpacity
       style={[filterStyles.option, isActive && filterStyles.optionActive]}
@@ -307,11 +307,7 @@ function ClubOption({
         {isInactive && <Text style={filterStyles.clubInactiveLabel}>{inactiveLabel}</Text>}
       </View>
       {isActive && (
-        <MaterialCommunityIcons
-          name={ICONS.CHECK}
-          size={designTokens.iconSize.md}
-          color={colors.primary}
-        />
+        <MaterialCommunityIcons name={ICONS.CHECK} size={iconSizes.md} color={colors.primary} />
       )}
     </TouchableOpacity>
   );
@@ -367,11 +363,12 @@ function SingleHierarchyItem({
   value: string;
   colors: Record<string, string>;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <View style={[filterStyles.hierarchyItem, { backgroundColor: colors.surfaceLight }]}>
       <MaterialCommunityIcons
         name={icon as typeof ICONS.EARTH}
-        size={designTokens.iconSize.sm}
+        size={iconSizes.sm}
         color={colors.primary}
       />
       <View style={filterStyles.hierarchyInfo}>
@@ -380,7 +377,7 @@ function SingleHierarchyItem({
       </View>
       <MaterialCommunityIcons
         name={ICONS.CHECK_CIRCLE}
-        size={designTokens.iconSize.sm}
+        size={iconSizes.sm}
         color={colors.success}
       />
     </View>
@@ -398,6 +395,7 @@ function HierarchyOptionItem({
   onSelect: (v: string) => void;
   colors: Record<string, string>;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const optStyle = [
     filterStyles.option,
     { backgroundColor: colors.surfaceLight },
@@ -415,11 +413,7 @@ function HierarchyOptionItem({
     <TouchableOpacity style={optStyle} onPress={(): void => onSelect(item)}>
       <Text style={textStyle}>{item}</Text>
       {isSelected && (
-        <MaterialCommunityIcons
-          name={ICONS.CHECK}
-          size={designTokens.iconSize.md}
-          color={colors.primary}
-        />
+        <MaterialCommunityIcons name={ICONS.CHECK} size={iconSizes.md} color={colors.primary} />
       )}
     </TouchableOpacity>
   );
@@ -549,6 +543,7 @@ function FilterOption({
   onPress: () => void;
   colors: Record<string, string>;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <TouchableOpacity
       style={[filterStyles.option, isActive && filterStyles.optionActive]}
@@ -557,7 +552,7 @@ function FilterOption({
       <View style={filterStyles.optionContent}>
         <MaterialCommunityIcons
           name={icon as typeof ICONS.CHECK}
-          size={designTokens.iconSize.md}
+          size={iconSizes.md}
           color={iconColor}
         />
         <Text style={[filterStyles.optionText, isActive && filterStyles.optionTextActive]}>
@@ -565,11 +560,7 @@ function FilterOption({
         </Text>
       </View>
       {isActive && (
-        <MaterialCommunityIcons
-          name={ICONS.CHECK}
-          size={designTokens.iconSize.md}
-          color={colors.primary}
-        />
+        <MaterialCommunityIcons name={ICONS.CHECK} size={iconSizes.md} color={colors.primary} />
       )}
     </TouchableOpacity>
   );

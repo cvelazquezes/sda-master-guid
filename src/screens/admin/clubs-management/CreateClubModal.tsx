@@ -2,15 +2,8 @@ import React from 'react';
 import { View, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text, StandardInput } from '../../../shared/components';
-import { designTokens } from '../../../shared/theme';
-import {
-  ANIMATION,
-  ICONS,
-  HIERARCHY_FIELDS,
-  MESSAGES,
-  KEYBOARD_TYPE,
-  FLEX,
-} from '../../../shared/constants';
+import { useTheme } from '../../../contexts/ThemeContext';
+import { ANIMATION, ICONS, HIERARCHY_FIELDS, KEYBOARD_TYPE, FLEX } from '../../../shared/constants';
 import { MatchFrequency } from '../../../types';
 import { modalStyles, filterStyles, buttonStyles } from './styles';
 import { ClubFormData } from './types';
@@ -121,6 +114,7 @@ interface ModalHeaderProps {
 }
 
 function ModalHeader({ onClose, colors, t }: ModalHeaderProps): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <View style={[modalStyles.header, { borderBottomColor: colors.borderLight }]}>
       <Text style={[modalStyles.title, { color: colors.textPrimary }]}>
@@ -129,7 +123,7 @@ function ModalHeader({ onClose, colors, t }: ModalHeaderProps): React.JSX.Elemen
       <TouchableOpacity onPress={onClose} style={modalStyles.closeButton}>
         <MaterialCommunityIcons
           name={ICONS.CLOSE}
-          size={designTokens.iconSize.lg}
+          size={iconSizes.lg}
           color={colors.textSecondary}
         />
       </TouchableOpacity>
@@ -144,14 +138,11 @@ function InfoBanner({
   colors: { primary: string };
   t: (key: string) => string;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const bgColor = colors.primary + '15';
   return (
     <View style={[filterStyles.infoBanner, { backgroundColor: bgColor }]}>
-      <MaterialCommunityIcons
-        name={ICONS.INFORMATION}
-        size={designTokens.iconSize.sm}
-        color={colors.primary}
-      />
+      <MaterialCommunityIcons name={ICONS.INFORMATION} size={iconSizes.sm} color={colors.primary} />
       <Text style={[filterStyles.infoText, { color: colors.primary }]}>
         {t('screens.clubsManagement.filterDescription')}
       </Text>
@@ -175,7 +166,7 @@ function ClubInfoSection({ formData, setFormData, t }: ClubInfoSectionProps): Re
         label={t('screens.clubsManagement.clubNameLabel')}
         value={formData.name}
         onChangeText={(text): void => setFormData((p) => ({ ...p, name: text }))}
-        placeholder={MESSAGES.PLACEHOLDERS.ENTER_CLUB_NAME}
+        placeholder={t('placeholders.enterClubName')}
         icon={ICONS.ACCOUNT_GROUP}
         required
       />
@@ -183,7 +174,7 @@ function ClubInfoSection({ formData, setFormData, t }: ClubInfoSectionProps): Re
         label={t('screens.clubsManagement.descriptionLabel')}
         value={formData.description}
         onChangeText={(text): void => setFormData((p) => ({ ...p, description: text }))}
-        placeholder={MESSAGES.PLACEHOLDERS.ENTER_CLUB_DESCRIPTION}
+        placeholder={t('placeholders.enterClubDescription')}
         icon={ICONS.TEXT}
         multiline
         required
@@ -326,6 +317,7 @@ interface FreqOptionProps {
 }
 
 function FreqOption({ option, isActive, colors, onPress }: FreqOptionProps): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const iconColor = isActive ? colors.primary : option.iconColor || colors.textSecondary;
   const optStyle = [filterStyles.option, isActive && filterStyles.optionActive];
   return (
@@ -333,7 +325,7 @@ function FreqOption({ option, isActive, colors, onPress }: FreqOptionProps): Rea
       <View style={filterStyles.optionContent}>
         <MaterialCommunityIcons
           name={option.icon as typeof ICONS.CHECK}
-          size={designTokens.iconSize.md}
+          size={iconSizes.md}
           color={iconColor}
         />
         <View style={{ flex: FLEX.ONE }}>
@@ -344,11 +336,7 @@ function FreqOption({ option, isActive, colors, onPress }: FreqOptionProps): Rea
         </View>
       </View>
       {isActive && (
-        <MaterialCommunityIcons
-          name={ICONS.CHECK}
-          size={designTokens.iconSize.md}
-          color={colors.primary}
-        />
+        <MaterialCommunityIcons name={ICONS.CHECK} size={iconSizes.md} color={colors.primary} />
       )}
     </TouchableOpacity>
   );
@@ -390,7 +378,7 @@ function SettingsSection({
         onChangeText={(txt): void =>
           setFormData((p) => ({ ...p, groupSize: parseInt(txt) || DEFAULT_GROUP_SIZE }))
         }
-        placeholder={MESSAGES.PLACEHOLDERS.ENTER_GROUP_SIZE}
+        placeholder={t('placeholders.enterGroupSize')}
         icon={ICONS.ACCOUNT_MULTIPLE}
         keyboardType={KEYBOARD_TYPE.NUMERIC}
         required
@@ -407,12 +395,13 @@ interface ModalFooterProps {
 }
 
 function ModalFooter({ onClose, onCreateClub, colors, t }: ModalFooterProps): React.JSX.Element {
+  const { iconSizes, colors: themeColors } = useTheme();
   return (
     <View style={modalStyles.footer}>
       <TouchableOpacity style={buttonStyles.clear} onPress={onClose}>
         <MaterialCommunityIcons
           name={ICONS.CLOSE_CIRCLE}
-          size={designTokens.iconSize.md}
+          size={iconSizes.md}
           color={colors.textSecondary}
         />
         <Text style={buttonStyles.clearText}>{t('common.cancel')}</Text>
@@ -420,8 +409,8 @@ function ModalFooter({ onClose, onCreateClub, colors, t }: ModalFooterProps): Re
       <TouchableOpacity style={buttonStyles.apply} onPress={onCreateClub}>
         <MaterialCommunityIcons
           name={ICONS.PLUS_CIRCLE}
-          size={designTokens.iconSize.md}
-          color={designTokens.colors.textInverse}
+          size={iconSizes.md}
+          color={themeColors.textInverse}
         />
         <Text style={buttonStyles.applyText}>{t('screens.clubsManagement.createClub')}</Text>
       </TouchableOpacity>

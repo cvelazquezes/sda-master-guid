@@ -6,8 +6,7 @@ import { Club, MatchFrequency } from '../../../types';
 import { ClubCard } from '../../../components/ClubCard';
 import { ClubDetailModal } from '../../../components/ClubDetailModal';
 import { ScreenHeader, SearchBar, EmptyState, StandardButton } from '../../../shared/components';
-import { BREAKPOINTS, HIERARCHY_FIELDS, ICONS, MESSAGES } from '../../../shared/constants';
-import { designTokens } from '../../../shared/theme';
+import { BREAKPOINTS, HIERARCHY_FIELDS, ICONS } from '../../../shared/constants';
 import { styles } from './styles';
 import { useClubsData } from './useClubsData';
 import {
@@ -46,7 +45,7 @@ function useFrequencyOptions(
       title: t('components.frequencyOptions.biweekly'),
       subtitle: t('components.frequencyOptions.biweeklySubtitle'),
       icon: ICONS.CALENDAR_RANGE,
-      iconColor: designTokens.colors.info,
+      iconColor: colors.info,
     },
     {
       id: MatchFrequency.MONTHLY,
@@ -137,7 +136,7 @@ const ClubsManagementScreen = (): React.JSX.Element => {
       <SearchBar
         value={searchQuery}
         onChangeText={setSearchQuery}
-        placeholder={MESSAGES.PLACEHOLDERS.SEARCH_CLUBS}
+        placeholder={t('placeholders.searchClubs')}
         onFilterPress={(): void => setFilterVisible(true)}
         filterActive={getActiveFilterCount(filters, searchQuery) > 0}
       />

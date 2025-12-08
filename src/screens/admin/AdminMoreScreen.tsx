@@ -1,15 +1,15 @@
 /**
  * AdminMoreScreen
  * More options screen for platform administrators
+ * ✅ COMPLIANT: Uses theme values via useTheme() hook
  */
 
 import React from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { ScreenHeader, MenuCard, SectionHeader } from '../../shared/components';
-import { designTokens } from '../../shared/theme/designTokens';
 import { ICONS, MENU_ITEM_IDS, SCREENS, FLEX } from '../../shared/constants';
 
 interface MenuItem {
@@ -53,7 +53,7 @@ function MenuSection({
 
 const AdminMoreScreen = (): React.JSX.Element => {
   const navigation = useNavigation();
-  const { colors } = useTheme();
+  const { colors, spacing } = useTheme();
   const { t } = useTranslation();
 
   const managementItems: MenuItem[] = [
@@ -88,18 +88,21 @@ const AdminMoreScreen = (): React.JSX.Element => {
     },
   ];
 
+  const containerStyle = { flex: FLEX.ONE, backgroundColor: colors.background };
+  const contentStyle = { padding: spacing.lg, paddingTop: spacing.sm };
+
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={containerStyle}>
       <ScreenHeader
         title={t('screens.adminMore.title')}
         subtitle={t('screens.adminMore.subtitle')}
       />
-      <ScrollView style={styles.scrollView}>
-        <View style={styles.content}>
+      <ScrollView style={{ flex: FLEX.ONE }}>
+        <View style={contentStyle}>
           <SectionHeader title={t('screens.adminMore.managementSection')} />
           <MenuSection items={managementItems} colors={colors} navigation={navigation} t={t} />
         </View>
-        <View style={styles.content}>
+        <View style={contentStyle}>
           <SectionHeader title={t('screens.adminMore.systemSection')} />
           <MenuSection items={systemItems} colors={colors} navigation={navigation} t={t} />
         </View>
@@ -107,18 +110,5 @@ const AdminMoreScreen = (): React.JSX.Element => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: FLEX.ONE,
-  },
-  scrollView: {
-    flex: FLEX.ONE,
-  },
-  content: {
-    padding: designTokens.spacing.lg,
-    paddingTop: designTokens.spacing.sm,
-  },
-});
 
 export default AdminMoreScreen;

@@ -5,7 +5,6 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { ScreenHeader, SearchBar, EmptyState, Text } from '../../../shared/components';
-import { designTokens } from '../../../shared/theme';
 import {
   SAFE_AREA_EDGES,
   A11Y_ROLE,
@@ -147,6 +146,7 @@ function ActionsBar({
   colors: Record<string, string>;
   t: (k: string, o?: Record<string, unknown>) => string;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <View style={styles.actionsContainer}>
       <View style={styles.searchContainer}>
@@ -167,11 +167,7 @@ function ActionsBar({
           type: getTypeLabel(selectedType, t).toLowerCase(),
         })}
       >
-        <MaterialCommunityIcons
-          name={ICONS.PLUS}
-          size={designTokens.iconSize.md}
-          color={colors.textInverse}
-        />
+        <MaterialCommunityIcons name={ICONS.PLUS} size={iconSizes.md} color={colors.textInverse} />
         <Text style={styles.createButtonText}>{t('screens.organizationManagement.new')}</Text>
       </TouchableOpacity>
     </View>

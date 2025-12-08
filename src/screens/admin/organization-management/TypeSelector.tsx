@@ -2,7 +2,7 @@ import React from 'react';
 import { View, ScrollView, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../shared/components';
-import { designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { A11Y_ROLE, ORGANIZATION_TYPES, OrganizationType, ICONS } from '../../../shared/constants';
 import { styles } from './styles';
 import { getTypeLabel, getTypeIcon, getTypeColor } from './orgUtils';
@@ -20,6 +20,8 @@ export function TypeSelector({
   colors,
   t,
 }: TypeSelectorProps): React.JSX.Element {
+  const { iconSizes } = useTheme();
+
   const renderBtn = (type: OrganizationType): React.JSX.Element => {
     const isSelected = selectedType === type;
     const label = getTypeLabel(type, t);
@@ -37,7 +39,7 @@ export function TypeSelector({
       >
         <MaterialCommunityIcons
           name={getTypeIcon(type) as typeof ICONS.CHECK}
-          size={designTokens.iconSize.md}
+          size={iconSizes.md}
           color={iconColor}
         />
         <Text style={txtStyle}>{label}s</Text>

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../shared/components';
-import { designTokens } from '../../../shared/theme';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { ICONS, FILTER_STATUS, HIERARCHY_FIELDS } from '../../../shared/constants';
 import { filterStyles } from './styles';
 
@@ -19,6 +19,7 @@ export function StatusFilterSection({
   colors,
   t,
 }: StatusFilterSectionProps): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const statusOptions = [
     {
       id: FILTER_STATUS.ALL,
@@ -54,7 +55,7 @@ export function StatusFilterSection({
           <View style={filterStyles.optionContent}>
             <MaterialCommunityIcons
               name={option.icon as typeof ICONS.CHECK}
-              size={designTokens.iconSize.md}
+              size={iconSizes.md}
               color={currentStatus === option.id ? colors.primary : option.color}
             />
             <Text
@@ -67,11 +68,7 @@ export function StatusFilterSection({
             </Text>
           </View>
           {currentStatus === option.id && (
-            <MaterialCommunityIcons
-              name={ICONS.CHECK}
-              size={designTokens.iconSize.md}
-              color={colors.primary}
-            />
+            <MaterialCommunityIcons name={ICONS.CHECK} size={iconSizes.md} color={colors.primary} />
           )}
         </TouchableOpacity>
       ))}

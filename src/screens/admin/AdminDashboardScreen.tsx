@@ -1,20 +1,18 @@
 /**
  * AdminDashboardScreen
  * Dashboard for platform administrators
- * Supports dynamic theming (light/dark mode)
+ * ✅ COMPLIANT: Uses theme values via useTheme() hook
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme, ThemeContextType } from '../../contexts/ThemeContext';
 import { StatCard } from '../../components/StatCard';
 import { userService } from '../../services/userService';
 import { clubService } from '../../services/clubService';
-import { designTokens } from '../../shared/theme/designTokens';
-import { layoutConstants } from '../../shared/theme';
 import { ScreenHeader, SectionHeader, MenuCard } from '../../shared/components';
 import { logger } from '../../shared/utils/logger';
 import { ApprovalStatus } from '../../types';
@@ -50,7 +48,7 @@ const loadDashboardStats = async (): Promise<DashboardStats> => {
 const AdminDashboardScreen = (): React.JSX.Element => {
   const navigation = useNavigation();
   const { user } = useAuth();
-  const { colors } = useTheme();
+  const { colors, spacing } = useTheme();
   const { t } = useTranslation();
   const [stats, setStats] = useState<DashboardStats>(initialStats);
 
@@ -77,14 +75,16 @@ const AdminDashboardScreen = (): React.JSX.Element => {
     },
   ];
 
+  const containerStyle = { flex: FLEX.ONE, backgroundColor: colors.backgroundSecondary };
+
   return (
-    <ScrollView style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
+    <ScrollView style={containerStyle}>
       <ScreenHeader
         title={t('screens.adminDashboard.title')}
         subtitle={t('screens.adminDashboard.welcomeSubtitle', { name: user?.name })}
       />
-      <StatsSection stats={stats} colors={colors} t={t} navigation={navigation} />
-      <View style={styles.content}>
+      <StatsSection stats={stats} colors={colors} spacing={spacing} t={t} navigation={navigation} />
+      <View style={{ padding: spacing.lg }}>
         <SectionHeader title={t('sections.management')} />
         {menuItems.map((item) => (
           <MenuCard
@@ -104,16 +104,25 @@ const AdminDashboardScreen = (): React.JSX.Element => {
 // Extracted stats section component
 interface StatsSectionProps {
   stats: DashboardStats;
-  colors: ReturnType<typeof useTheme>['colors'];
+  colors: ThemeContextType['colors'];
+  spacing: ThemeContextType['spacing'];
   t: ReturnType<typeof useTranslation>['t'];
   navigation: ReturnType<typeof useNavigation>;
 }
 
-function StatsSection({ stats, colors, t, navigation }: StatsSectionProps): React.JSX.Element {
+function StatsSection({
+  stats,
+  colors,
+  spacing,
+  t,
+  navigation,
+}: StatsSectionProps): React.JSX.Element {
+  const gridStyle = { flexDirection: 'row' as const, gap: spacing.md, marginBottom: spacing.md };
+
   return (
-    <View style={styles.statsSection}>
+    <View style={{ padding: spacing.lg, paddingBottom: spacing.none }}>
       <SectionHeader title={t('sections.overview')} />
-      <View style={styles.statsGrid}>
+      <View style={gridStyle}>
         <StatCard
           icon={ICONS.ACCOUNT_GROUP}
           label={t('stats.totalUsers')}
@@ -130,7 +139,7 @@ function StatsSection({ stats, colors, t, navigation }: StatsSectionProps): Reac
         />
       </View>
       {stats.pendingApprovals > 0 && (
-        <View style={styles.statsRow}>
+        <View style={{ marginBottom: spacing.md }}>
           <StatCard
             icon={ICONS.CLOCK_ALERT_OUTLINE}
             label={t('stats.pendingApprovals')}
@@ -143,26 +152,5 @@ function StatsSection({ stats, colors, t, navigation }: StatsSectionProps): Reac
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: FLEX.ONE,
-  },
-  statsSection: {
-    padding: designTokens.spacing.lg,
-    paddingBottom: designTokens.spacing.none,
-  },
-  statsGrid: {
-    flexDirection: layoutConstants.flexDirection.row,
-    gap: designTokens.spacing.md,
-    marginBottom: designTokens.spacing.md,
-  },
-  statsRow: {
-    marginBottom: designTokens.spacing.md,
-  },
-  content: {
-    padding: designTokens.spacing.lg,
-  },
-});
 
 export default AdminDashboardScreen;

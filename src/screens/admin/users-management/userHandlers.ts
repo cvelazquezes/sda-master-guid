@@ -1,18 +1,21 @@
 import { Alert } from 'react-native';
 import { UserRole } from '../../../types';
 import { userService } from '../../../services/userService';
-import { ALERT_BUTTON_STYLE, MESSAGES, dynamicMessages } from '../../../shared/constants';
+import { ALERT_BUTTON_STYLE } from '../../../shared/constants';
+
+type TranslationFn = (key: string, opts?: Record<string, unknown>) => string;
 
 export async function handleToggleUserStatus(
   userId: string,
   isActive: boolean,
-  loadData: () => Promise<void>
+  loadData: () => Promise<void>,
+  t: TranslationFn
 ): Promise<void> {
   try {
     await userService.updateUser(userId, { isActive: !isActive });
     loadData();
   } catch {
-    Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_UPDATE_USER_STATUS);
+    Alert.alert(t('common.error'), t('errors.failedToUpdateUserStatus'));
   }
 }
 
@@ -21,7 +24,7 @@ interface HandleApproveUserOptions {
   userName: string;
   userRole: UserRole;
   loadData: () => Promise<void>;
-  t: (key: string, opts?: Record<string, unknown>) => string;
+  t: TranslationFn;
 }
 
 export function handleApproveUser(options: HandleApproveUserOptions): void {
@@ -31,19 +34,19 @@ export function handleApproveUser(options: HandleApproveUserOptions): void {
       ? t('screens.usersManagement.roleClubAdmin')
       : t('screens.usersManagement.roleUser');
   Alert.alert(
-    MESSAGES.TITLES.APPROVE_USER,
-    dynamicMessages.confirmApproveUser(userName, roleLabel),
+    t('titles.approveUser'),
+    t('warnings.confirmApproveUser', { name: userName, role: roleLabel }),
     [
-      { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
+      { text: t('common.cancel'), style: ALERT_BUTTON_STYLE.CANCEL },
       {
-        text: MESSAGES.BUTTONS.APPROVE,
+        text: t('buttons.approve'),
         onPress: async (): Promise<void> => {
           try {
             await userService.approveUser(userId);
-            Alert.alert(MESSAGES.TITLES.SUCCESS, dynamicMessages.userApproved(userName));
+            Alert.alert(t('common.success'), t('success.userApproved', { name: userName }));
             loadData();
           } catch {
-            Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_APPROVE_USER);
+            Alert.alert(t('common.error'), t('errors.failedToApproveUser'));
           }
         },
       },
@@ -54,20 +57,21 @@ export function handleApproveUser(options: HandleApproveUserOptions): void {
 export function handleRejectUser(
   userId: string,
   userName: string,
-  loadData: () => Promise<void>
+  loadData: () => Promise<void>,
+  t: TranslationFn
 ): void {
-  Alert.alert(MESSAGES.TITLES.REJECT_USER, dynamicMessages.confirmRejectUser(userName), [
-    { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
+  Alert.alert(t('titles.rejectUser'), t('warnings.confirmRejectUser', { name: userName }), [
+    { text: t('common.cancel'), style: ALERT_BUTTON_STYLE.CANCEL },
     {
-      text: MESSAGES.BUTTONS.REJECT,
+      text: t('buttons.reject'),
       style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
       onPress: async (): Promise<void> => {
         try {
           await userService.rejectUser(userId);
-          Alert.alert(MESSAGES.TITLES.SUCCESS, dynamicMessages.userRejected(userName));
+          Alert.alert(t('common.success'), t('success.userRejected', { name: userName }));
           loadData();
         } catch {
-          Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_REJECT_USER);
+          Alert.alert(t('common.error'), t('errors.failedToRejectUser'));
         }
       },
     },
@@ -77,19 +81,20 @@ export function handleRejectUser(
 export function handleDeleteUser(
   userId: string,
   userName: string,
-  loadData: () => Promise<void>
+  loadData: () => Promise<void>,
+  t: TranslationFn
 ): void {
-  Alert.alert(MESSAGES.TITLES.DELETE_USER, dynamicMessages.confirmDeleteUser(userName), [
-    { text: MESSAGES.BUTTONS.CANCEL, style: ALERT_BUTTON_STYLE.CANCEL },
+  Alert.alert(t('titles.deleteUser'), t('warnings.confirmDeleteUser', { name: userName }), [
+    { text: t('common.cancel'), style: ALERT_BUTTON_STYLE.CANCEL },
     {
-      text: MESSAGES.BUTTONS.DELETE,
+      text: t('common.delete'),
       style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
       onPress: async (): Promise<void> => {
         try {
           await userService.deleteUser(userId);
           loadData();
         } catch {
-          Alert.alert(MESSAGES.TITLES.ERROR, MESSAGES.ERRORS.FAILED_TO_DELETE_USER);
+          Alert.alert(t('common.error'), t('errors.failedToDeleteUser'));
         }
       },
     },
