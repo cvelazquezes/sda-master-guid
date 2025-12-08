@@ -20,4 +20,5 @@ export * from './config';
 // Types
 export * from './types';
 
-// Testing utilities (import from './testing' directly in test files)
+// Internationalization
+export * from './i18n';

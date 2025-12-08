@@ -117,6 +117,9 @@ export const es: TranslationKeys = {
     confirmAction: '¿Estás seguro de que deseas continuar?',
     accountInactive: 'Tu cuenta está inactiva',
     confirmSkip: '¿Saltar esta actividad? Esta acción no se puede deshacer.',
+    confirmRemoveMember: '¿Estás seguro de que deseas eliminar a este miembro de la posición?',
+    memberAlreadyInPosition:
+      'Este miembro ya está asignado a una posición. Por favor elimínalo primero antes de asignarlo a una nueva posición.',
   },
 
   // Marcadores de posición
@@ -435,6 +438,10 @@ export const es: TranslationKeys = {
       failedToGenerate: 'Error al generar actividades',
       clubActivities: '{{clubName}} • {{frequency}} actividades',
       getStarted: 'Genera tu primera ronda de actividades para comenzar',
+      createdOn: 'Creado: {{date}}',
+      confirmGenerate:
+        'Esto generará nuevos emparejamientos de actividades sociales para todos los miembros del club. ¿Continuar?',
+      activitiesGenerated: '¡Actividades sociales generadas exitosamente!',
     },
     clubMatches: {
       title: 'Gestión de Actividades',
@@ -459,6 +466,11 @@ export const es: TranslationKeys = {
       generateFromDashboard: 'Genera actividades desde el panel',
       noFilteredActivities: 'No hay actividades {{status}}',
       active: 'Activo',
+      round: 'Ronda {{id}}',
+      createdOn: 'Creado {{date}}',
+      matchesGenerated: '{{count}} emparejamiento generado',
+      matchesGenerated_plural: '{{count}} emparejamientos generados',
+      participants: 'Participantes ({{count}})',
     },
     clubDirective: {
       title: 'Directiva del Club',
@@ -917,6 +929,8 @@ export const es: TranslationKeys = {
     language: 'Idioma',
     theme: 'Tema',
     darkMode: 'Modo Oscuro',
+    darkBlueMode: 'Azul Oscuro (ASD)',
+    sdaDarkMode: 'ASD Oscuro',
     lightMode: 'Modo Claro',
     systemDefault: 'Predeterminado del Sistema',
     notifications: 'Notificaciones',
@@ -1037,6 +1051,21 @@ export const es: TranslationKeys = {
     filterOptions: 'Opciones de Filtro',
   },
 
+  // Títulos de Alertas
+  titles: {
+    error: 'Error',
+    success: 'Éxito',
+    warning: 'Advertencia',
+    confirm: 'Confirmar',
+    skipActivity: 'Saltar Actividad',
+    removeMember: 'Eliminar Miembro',
+    noAssignments: 'Sin Asignaciones',
+    directiveSaved: 'Directiva Guardada',
+    memberAssigned: 'Miembro Asignado',
+    memberAlreadyAssigned: 'Miembro Ya Asignado',
+    generateActivities: 'Generar Actividades Sociales',
+  },
+
   // Clases
   classes: {
     selectClasses: 'Seleccionar Clases',
@@ -1082,6 +1111,7 @@ export const es: TranslationKeys = {
     themeSwitcher: {
       lightSubtitle: 'Siempre usar colores claros',
       darkSubtitle: 'Siempre usar colores oscuros',
+      sdaDarkSubtitle: 'Tema oscuro con colores de marca ASD',
       systemSubtitle: 'Seguir configuración del dispositivo',
     },
     frequencyOptions: {

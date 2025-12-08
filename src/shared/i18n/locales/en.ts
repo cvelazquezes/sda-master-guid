@@ -115,6 +115,9 @@ export const en = {
     confirmAction: 'Are you sure you want to proceed?',
     accountInactive: 'Your account is inactive',
     confirmSkip: 'Skip this activity? This cannot be undone.',
+    confirmRemoveMember: 'Are you sure you want to remove this member from the position?',
+    memberAlreadyInPosition:
+      'This member is already assigned to a position. Please remove them first before assigning to a new position.',
   },
 
   // Placeholders
@@ -433,6 +436,10 @@ export const en = {
       failedToGenerate: 'Failed to generate activities',
       clubActivities: '{{clubName}} • {{frequency}} activities',
       getStarted: 'Generate your first activity round to get started',
+      createdOn: 'Created: {{date}}',
+      confirmGenerate:
+        'This will generate new social activity matches for all club members. Continue?',
+      activitiesGenerated: 'Social activities generated successfully!',
     },
     clubMatches: {
       title: 'Activity Management',
@@ -457,6 +464,11 @@ export const en = {
       generateFromDashboard: 'Generate activities from the dashboard',
       noFilteredActivities: 'No {{status}} activities',
       active: 'Active',
+      round: 'Round {{id}}',
+      createdOn: 'Created {{date}}',
+      matchesGenerated: '{{count}} match generated',
+      matchesGenerated_plural: '{{count}} matches generated',
+      participants: 'Participants ({{count}})',
     },
     clubDirective: {
       title: 'Club Directive',
@@ -913,6 +925,8 @@ export const en = {
     language: 'Language',
     theme: 'Theme',
     darkMode: 'Dark Mode',
+    darkBlueMode: 'Dark Blue (SDA)',
+    sdaDarkMode: 'SDA Dark',
     lightMode: 'Light Mode',
     systemDefault: 'System Default',
     notifications: 'Notifications',
@@ -1033,6 +1047,21 @@ export const en = {
     filterOptions: 'Filter Options',
   },
 
+  // Alert Titles
+  titles: {
+    error: 'Error',
+    success: 'Success',
+    warning: 'Warning',
+    confirm: 'Confirm',
+    skipActivity: 'Skip Activity',
+    removeMember: 'Remove Member',
+    noAssignments: 'No Assignments',
+    directiveSaved: 'Directive Saved',
+    memberAssigned: 'Member Assigned',
+    memberAlreadyAssigned: 'Member Already Assigned',
+    generateActivities: 'Generate Social Activities',
+  },
+
   // Classes
   classes: {
     selectClasses: 'Select Classes',
@@ -1078,6 +1107,7 @@ export const en = {
     themeSwitcher: {
       lightSubtitle: 'Always use light colors',
       darkSubtitle: 'Always use dark colors',
+      sdaDarkSubtitle: 'Dark theme with SDA brand colors',
       systemSubtitle: 'Follow device settings',
     },
     frequencyOptions: {
