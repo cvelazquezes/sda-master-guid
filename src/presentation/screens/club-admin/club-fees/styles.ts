@@ -405,7 +405,7 @@ export const createBalanceStyles = (
     overdueNotice: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: colors.errorLight,
+      backgroundColor: colors.errorAlpha20,
       padding: spacing.sm + spacing.xxs,
       borderRadius: radii.md,
       gap: spacing.sm,

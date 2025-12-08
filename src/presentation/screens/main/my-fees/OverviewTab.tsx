@@ -153,7 +153,7 @@ function SummaryGrid({
       <SummaryItem
         icon={ICONS.CLOCK_OUTLINE}
         color={colors.warning}
-        bgColor={colors.warningLight || `${colors.warning}15`}
+        bgColor={colors.warningAlpha20 || `${colors.warning}20`}
         value={`$${pending}`}
         label={t('screens.myFees.statusPending')}
         colors={colors}
@@ -162,7 +162,7 @@ function SummaryGrid({
       <SummaryItem
         icon={ICONS.ALERT_CIRCLE}
         color={colors.error}
-        bgColor={colors.errorLight || `${colors.error}15`}
+        bgColor={colors.errorAlpha20 || `${colors.error}20`}
         value={`$${overdue}`}
         label={t('screens.myFees.overdue')}
         colors={colors}

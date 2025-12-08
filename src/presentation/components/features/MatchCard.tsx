@@ -76,7 +76,7 @@ const MatchCardComponent: React.FC<MatchCardProps> = ({
         {/* Skip button for pending matches */}
         {showActions && match.status === MatchStatus.PENDING && onSkip && (
           <TouchableOpacity
-            style={[styles.skipButton, { backgroundColor: colors.errorLight }]}
+            style={[styles.skipButton, { backgroundColor: colors.errorAlpha20 }]}
             onPress={onSkip}
           >
             <MaterialCommunityIcons

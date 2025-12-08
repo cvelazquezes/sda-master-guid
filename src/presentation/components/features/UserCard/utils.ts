@@ -5,11 +5,11 @@ import { RoleConfig, ThemeColors } from './types';
 export const getRoleConfig = (role: UserRole, colors: ThemeColors): RoleConfig => {
   switch (role) {
     case UserRole.ADMIN:
-      return { color: colors.error, bg: colors.errorLight };
+      return { color: colors.error, bg: colors.errorAlpha20 || colors.errorLight };
     case UserRole.CLUB_ADMIN:
-      return { color: colors.warning, bg: colors.warningLight };
+      return { color: colors.warning, bg: colors.warningAlpha20 || colors.warningLight };
     default:
-      return { color: colors.info, bg: colors.infoLight };
+      return { color: colors.info, bg: colors.infoAlpha20 || colors.infoLight };
   }
 };
 
