@@ -4,15 +4,15 @@
  */
 
 import { matchService } from '../matchService';
-import { secureStorage } from '../../utils/secureStorage';
+import { secureStorage } from '../../../shared/utils/secureStorage';
 import {
   mockMatches,
   mockClubs,
   getMatchesByClub,
   getMatchesForUser,
   getUsersByClub,
-} from '../mockData';
-import { MatchStatus } from '../../types';
+} from '../../persistence/mockData';
+import { MatchStatus } from '../../../types';
 
 // Mock dependencies
 jest.mock('../../utils/secureStorage');

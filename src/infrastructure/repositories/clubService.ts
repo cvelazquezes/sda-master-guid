@@ -3,14 +3,14 @@
  * Handles club management with mock/backend toggle
  */
 
-import { apiService } from './api';
+import { apiService } from '../http/api';
 import { environment } from '../config/environment';
-import { logger } from '../utils/logger';
-import { Club, MatchFrequency, User, ApprovalStatus } from '../types';
-import { mockClubs, getUsersByClub } from './mockData';
-import { NotFoundError } from '../utils/errors';
-import { LOG_MESSAGES, API_ENDPOINTS } from '../shared/constants';
-import { MOCK_DELAY } from '../shared/constants/timing';
+import { logger } from '../../shared/utils/logger';
+import { Club, MatchFrequency, User, ApprovalStatus } from '../../types';
+import { mockClubs, getUsersByClub } from '../persistence/mockData';
+import { NotFoundError } from '../../shared/utils/errors';
+import { LOG_MESSAGES, API_ENDPOINTS } from '../../shared/constants';
+import { MOCK_DELAY } from '../../shared/constants/timing';
 
 interface CreateClubData {
   name: string;

@@ -4,9 +4,9 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { apiService } from './api';
+import { apiService } from '../http/api';
 import { environment } from '../config/environment';
-import { logger } from '../utils/logger';
+import { logger } from '../../shared/utils/logger';
 import {
   MemberPayment,
   CustomCharge,
@@ -16,13 +16,13 @@ import {
   ChargeType,
   User,
   ApprovalStatus,
-} from '../types';
-import { LOG_MESSAGES, API_ENDPOINTS } from '../shared/constants';
-import { storageKeys } from '../shared/config/storage';
-import { LOCALE, LANGUAGE, ID_PREFIX, EMPTY_VALUE } from '../shared/constants/ui';
-import { MATH, ID_GENERATION, MS } from '../shared/constants/numbers';
-import { NUMERIC } from '../shared/constants/validation';
-import i18n from '../i18n';
+} from '../../types';
+import { LOG_MESSAGES, API_ENDPOINTS } from '../../shared/constants';
+import { storageKeys } from '../../shared/config/storage';
+import { LOCALE, LANGUAGE, ID_PREFIX, EMPTY_VALUE } from '../../shared/constants/ui';
+import { MATH, ID_GENERATION, MS } from '../../shared/constants/numbers';
+import { NUMERIC } from '../../shared/constants/validation';
+import i18n from '../../presentation/i18n';
 
 // Payment service constants
 const PAYMENT_DELAY_MS = MS.FIVE; // Delay for unique ID generation

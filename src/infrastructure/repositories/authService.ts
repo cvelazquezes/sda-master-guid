@@ -4,9 +4,9 @@
  */
 
 import { Platform } from 'react-native';
-import { apiService } from './api';
-import { secureStorage } from '../utils/secureStorage';
-import { logger } from '../utils/logger';
+import { apiService } from '../http/api';
+import { secureStorage } from '../../shared/utils/secureStorage';
+import { logger } from '../../shared/utils/logger';
 import { environment } from '../config/environment';
 import {
   LoginCredentials,
@@ -16,8 +16,8 @@ import {
   LoginSchema,
   RegisterSchema,
   UpdateUserSchema,
-} from '../utils/validation';
-import { AuthenticationError, ConflictError, NotFoundError } from '../utils/errors';
+} from '../../shared/utils/validation';
+import { AuthenticationError, ConflictError, NotFoundError } from '../../shared/utils/errors';
 import {
   LOG_MESSAGES,
   ERROR_MESSAGES,
@@ -26,9 +26,9 @@ import {
   generateMockToken,
   API_ENDPOINTS,
   PLATFORM_OS,
-} from '../shared/constants';
-import { UserRole, ApprovalStatus, PathfinderClass, User, PATHFINDER_CLASSES } from '../types';
-import { mockUsers, getUserByEmail } from './mockData';
+} from '../../shared/constants';
+import { UserRole, ApprovalStatus, PathfinderClass, User, PATHFINDER_CLASSES } from '../../types';
+import { mockUsers, getUserByEmail } from '../persistence/mockData';
 
 // Constants
 const MOCK_API_DELAY_MS = 500;

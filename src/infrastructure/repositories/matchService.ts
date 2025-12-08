@@ -3,11 +3,11 @@
  * Handles match generation and management with mock/backend toggle
  */
 
-import { apiService } from './api';
+import { apiService } from '../http/api';
 import { environment } from '../config/environment';
-import { logger } from '../utils/logger';
-import { secureStorage } from '../utils/secureStorage';
-import { Match, MatchRound, MatchStatus, ApprovalStatus } from '../types';
+import { logger } from '../../shared/utils/logger';
+import { secureStorage } from '../../shared/utils/secureStorage';
+import { Match, MatchRound, MatchStatus, ApprovalStatus } from '../../types';
 import {
   mockMatches,
   mockMatchRounds,
@@ -16,13 +16,13 @@ import {
   getMatchesByClub,
   getMatchRoundsByClub,
   getUsersByClub,
-} from './mockData';
-import { NotFoundError, ValidationError } from '../utils/errors';
-import { LOG_MESSAGES, API_ENDPOINTS } from '../shared/constants';
-import { MOCK_DELAY } from '../shared/constants/timing';
-import { MS, OPACITY_VALUE } from '../shared/constants/numbers';
-import { MATCH_ROUND_STATUS } from '../shared/constants/ui';
-import i18n from '../i18n';
+} from '../persistence/mockData';
+import { NotFoundError, ValidationError } from '../../shared/utils/errors';
+import { LOG_MESSAGES, API_ENDPOINTS } from '../../shared/constants';
+import { MOCK_DELAY } from '../../shared/constants/timing';
+import { MS, OPACITY_VALUE } from '../../shared/constants/numbers';
+import { ROUND_STATUS } from '../../shared/constants/ui';
+import i18n from '../../presentation/i18n';
 
 class MatchService {
   private useMockData = environment.mock.useMockApi;
@@ -301,7 +301,7 @@ class MatchService {
       clubId,
       matches: newMatches,
       scheduledDate: new Date(Date.now() + MS.WEEK).toISOString(),
-      status: MATCH_ROUND_STATUS.ACTIVE,
+      status: ROUND_STATUS.ACTIVE,
       createdAt: new Date().toISOString(),
     };
 

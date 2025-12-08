@@ -4,20 +4,20 @@
  */
 
 import { Alert, Linking, Platform } from 'react-native';
-import { apiService } from './api';
+import { apiService } from '../http/api';
 import { environment } from '../config/environment';
-import { logger } from '../utils/logger';
-import { MemberBalance, User } from '../types';
+import { logger } from '../../shared/utils/logger';
+import { MemberBalance, User } from '../../types';
 import {
   DEBOUNCE,
   ALERT_BUTTON_STYLE,
   EMPTY_VALUE,
   API_ENDPOINTS,
   EXTERNAL_URLS,
-} from '../shared/constants';
-import { ID_GENERATION } from '../shared/constants/numbers';
-import { NUMERIC } from '../shared/constants/validation';
-import { LOG_MESSAGES } from '../shared/constants/logMessages';
+} from '../../shared/constants';
+import { ID_GENERATION } from '../../shared/constants/numbers';
+import { NUMERIC } from '../../shared/constants/validation';
+import { LOG_MESSAGES } from '../../shared/constants/logMessages';
 import {
   NOTIFICATION_CHANNEL,
   LOCALE,
@@ -25,8 +25,8 @@ import {
   PLATFORM,
   ID_PREFIX,
   REGEX_PATTERN,
-} from '../shared/constants/ui';
-import i18n from '../i18n';
+} from '../../shared/constants/ui';
+import i18n from '../../presentation/i18n';
 
 type NotificationChannelType = (typeof NOTIFICATION_CHANNEL)[keyof typeof NOTIFICATION_CHANNEL];
 

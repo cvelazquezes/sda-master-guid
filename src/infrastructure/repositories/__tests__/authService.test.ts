@@ -4,8 +4,8 @@
  */
 
 import { authService } from '../authService';
-import { secureStorage } from '../../utils/secureStorage';
-import { mockUsers, getUserByEmail } from '../mockData';
+import { secureStorage } from '../../../shared/utils/secureStorage';
+import { mockUsers, getUserByEmail } from '../../persistence/mockData';
 
 // Mock dependencies
 jest.mock('../../utils/secureStorage');

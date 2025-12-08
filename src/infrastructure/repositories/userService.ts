@@ -3,13 +3,13 @@
  * Handles user management with mock/backend toggle
  */
 
-import { apiService } from './api';
+import { apiService } from '../http/api';
 import { environment } from '../config/environment';
-import { logger } from '../utils/logger';
-import { User, UserRole, ApprovalStatus } from '../types';
-import { mockUsers } from './mockData';
-import { NotFoundError } from '../utils/errors';
-import { LOG_MESSAGES, ERROR_MESSAGES, API_ENDPOINTS } from '../shared/constants';
+import { logger } from '../../shared/utils/logger';
+import { User, UserRole, ApprovalStatus } from '../../types';
+import { mockUsers } from '../persistence/mockData';
+import { NotFoundError } from '../../shared/utils/errors';
+import { LOG_MESSAGES, ERROR_MESSAGES, API_ENDPOINTS } from '../../shared/constants';
 
 // Constants
 const MOCK_API_DELAY_MS = 300;
