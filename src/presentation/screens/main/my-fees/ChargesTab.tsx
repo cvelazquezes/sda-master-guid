@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../components/primitives';
@@ -7,7 +7,7 @@ import { useTheme } from '../../../state/ThemeContext';
 import { ICONS } from '../../../../shared/constants';
 import { NUMERIC } from '../../../../shared/constants/http';
 import { DATE_LOCALE_OPTIONS } from '../../../../shared/constants/formats';
-import { styles, itemStyles } from './styles';
+import { createStyles, createItemStyles } from './styles';
 
 interface ChargesTabProps {
   customCharges: CustomCharge[];
@@ -16,6 +16,16 @@ interface ChargesTabProps {
 }
 
 export function ChargesTab({ customCharges, colors, t }: ChargesTabProps): React.JSX.Element {
+  const { spacing, radii, typography } = useTheme();
+  const styles = useMemo(
+    () => createStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+  const itemStyles = useMemo(
+    () => createItemStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+
   return (
     <View style={[styles.card, { backgroundColor: colors.surface }]}>
       <View style={styles.cardHeader}>
@@ -31,9 +41,10 @@ export function ChargesTab({ customCharges, colors, t }: ChargesTabProps): React
           total={customCharges.length}
           colors={colors}
           t={t}
+          itemStyles={itemStyles}
         />
       ))}
-      {customCharges.length === 0 && <EmptyCharges colors={colors} t={t} />}
+      {customCharges.length === 0 && <EmptyCharges colors={colors} t={t} styles={styles} />}
     </View>
   );
 }
@@ -44,12 +55,14 @@ function ChargeItem({
   total,
   colors,
   t,
+  itemStyles,
 }: {
   charge: CustomCharge;
   index: number;
   total: number;
   colors: Record<string, string>;
   t: (key: string, opts?: Record<string, unknown>) => string;
+  itemStyles: ReturnType<typeof createItemStyles>;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   const borderStyle =
@@ -87,9 +100,11 @@ function ChargeItem({
 function EmptyCharges({
   colors,
   t,
+  styles,
 }: {
   colors: Record<string, string>;
   t: (key: string) => string;
+  styles: ReturnType<typeof createStyles>;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (

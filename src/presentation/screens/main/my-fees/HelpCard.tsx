@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
 import { ICONS } from '../../../../shared/constants';
-import { styles } from './styles';
+import { createStyles } from './styles';
 
 interface HelpCardProps {
   colors: Record<string, string>;
@@ -12,7 +12,11 @@ interface HelpCardProps {
 }
 
 export function HelpCard({ colors, t }: HelpCardProps): React.JSX.Element {
-  const { iconSizes } = useTheme();
+  const { iconSizes, spacing, radii, typography } = useTheme();
+  const styles = useMemo(
+    () => createStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
   return (
     <View style={[styles.helpCard, { backgroundColor: colors.surface }]}>
       <MaterialCommunityIcons name={ICONS.LIFEBUOY} size={iconSizes.lg} color={colors.primary} />

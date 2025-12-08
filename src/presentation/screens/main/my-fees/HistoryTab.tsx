@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../components/primitives';
@@ -7,7 +7,7 @@ import { useTheme } from '../../../state/ThemeContext';
 import { ICONS } from '../../../../shared/constants';
 import { NUMERIC } from '../../../../shared/constants/http';
 import { DATE_LOCALE_OPTIONS } from '../../../../shared/constants/formats';
-import { styles, itemStyles } from './styles';
+import { createStyles, createItemStyles } from './styles';
 import { getStatusConfig } from './statusUtils';
 
 interface HistoryTabProps {
@@ -17,6 +17,16 @@ interface HistoryTabProps {
 }
 
 export function HistoryTab({ payments, colors, t }: HistoryTabProps): React.JSX.Element {
+  const { spacing, radii, typography } = useTheme();
+  const styles = useMemo(
+    () => createStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+  const itemStyles = useMemo(
+    () => createItemStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+
   const sortedPayments = [...payments].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
@@ -36,9 +46,10 @@ export function HistoryTab({ payments, colors, t }: HistoryTabProps): React.JSX.
           total={payments.length}
           colors={colors}
           t={t}
+          itemStyles={itemStyles}
         />
       ))}
-      {payments.length === 0 && <EmptyHistory colors={colors} t={t} />}
+      {payments.length === 0 && <EmptyHistory colors={colors} t={t} styles={styles} />}
     </View>
   );
 }
@@ -49,12 +60,14 @@ function HistoryItem({
   total,
   colors,
   t,
+  itemStyles,
 }: {
   payment: MemberPayment;
   index: number;
   total: number;
   colors: Record<string, string>;
   t: (key: string, opts?: Record<string, unknown>) => string;
+  itemStyles: ReturnType<typeof createItemStyles>;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   const config = getStatusConfig(payment.status, colors, t);
@@ -103,9 +116,11 @@ function HistoryItem({
 function EmptyHistory({
   colors,
   t,
+  styles,
 }: {
   colors: Record<string, string>;
   t: (key: string) => string;
+  styles: ReturnType<typeof createStyles>;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (

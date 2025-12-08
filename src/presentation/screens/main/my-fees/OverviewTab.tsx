@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../components/primitives';
 import { Club, MemberBalance, MemberPayment } from '../../../../types';
-import { designTokens } from '../../../theme';
+import { useTheme } from '../../../state/ThemeContext';
 import {
   DEFAULT_DISPLAY,
   EMPTY_VALUE,
@@ -15,7 +15,7 @@ import {
 import { NUMERIC } from '../../../../shared/constants/http';
 import { MATH } from '../../../../shared/constants/numbers';
 import { DATE_LOCALE_OPTIONS } from '../../../../shared/constants/formats';
-import { styles, itemStyles } from './styles';
+import { createStyles, createItemStyles } from './styles';
 import { getStatusConfig } from './statusUtils';
 import { MyFeesTabValue } from './types';
 
@@ -42,6 +42,16 @@ export function OverviewTab({
   colors,
   t,
 }: OverviewTabProps): React.JSX.Element {
+  const { spacing, radii, typography } = useTheme();
+  const styles = useMemo(
+    () => createStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+  const itemStyles = useMemo(
+    () => createItemStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+
   return (
     <>
       <PaymentProgressCard
@@ -51,9 +61,10 @@ export function OverviewTab({
         paymentProgress={paymentProgress}
         colors={colors}
         t={t}
+        styles={styles}
       />
-      {club?.feeSettings?.isActive && <MonthlyFeeInfo club={club} colors={colors} t={t} />}
-      <RecentActivity payments={payments} setSelectedTab={setSelectedTab} colors={colors} t={t} />
+      {club?.feeSettings?.isActive && <MonthlyFeeInfo club={club} colors={colors} t={t} styles={styles} />}
+      <RecentActivity payments={payments} setSelectedTab={setSelectedTab} colors={colors} t={t} styles={styles} itemStyles={itemStyles} />
     </>
   );
 }
@@ -65,6 +76,7 @@ function PaymentProgressCard({
   paymentProgress,
   colors,
   t,
+  styles,
 }: {
   balance: MemberBalance | null;
   paidPayments: number;
@@ -72,14 +84,16 @@ function PaymentProgressCard({
   paymentProgress: number;
   colors: Record<string, string>;
   t: (key: string, opts?: Record<string, unknown>) => string;
+  styles: ReturnType<typeof createStyles>;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <View style={[styles.card, { backgroundColor: colors.surface }]}>
       <View style={styles.cardHeader}>
         <View style={styles.cardTitleRow}>
           <MaterialCommunityIcons
             name={ICONS.CHART_DONUT}
-            size={designTokens.iconSize.lg}
+            size={iconSizes.lg}
             color={colors.primary}
           />
           <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>
@@ -103,7 +117,7 @@ function PaymentProgressCard({
           {t('screens.myFees.percentComplete', { percent: paymentProgress.toFixed(0) })}
         </Text>
       </View>
-      <SummaryGrid balance={balance} colors={colors} t={t} />
+      <SummaryGrid balance={balance} colors={colors} t={t} styles={styles} />
     </View>
   );
 }
@@ -112,10 +126,12 @@ function SummaryGrid({
   balance,
   colors,
   t,
+  styles,
 }: {
   balance: MemberBalance | null;
   colors: Record<string, string>;
   t: (key: string) => string;
+  styles: ReturnType<typeof createStyles>;
 }): React.JSX.Element {
   const totalPaid =
     balance?.totalPaid.toFixed(NUMERIC.DECIMAL_PLACES) || t('screens.myFees.defaultAmount');
@@ -132,6 +148,7 @@ function SummaryGrid({
         value={`$${totalPaid}`}
         label={t('screens.myFees.totalPaid')}
         colors={colors}
+        styles={styles}
       />
       <SummaryItem
         icon={ICONS.CLOCK_OUTLINE}
@@ -140,6 +157,7 @@ function SummaryGrid({
         value={`$${pending}`}
         label={t('screens.myFees.statusPending')}
         colors={colors}
+        styles={styles}
       />
       <SummaryItem
         icon={ICONS.ALERT_CIRCLE}
@@ -148,6 +166,7 @@ function SummaryGrid({
         value={`$${overdue}`}
         label={t('screens.myFees.overdue')}
         colors={colors}
+        styles={styles}
       />
     </View>
   );
@@ -160,6 +179,7 @@ function SummaryItem({
   value,
   label,
   colors,
+  styles,
 }: {
   icon: string;
   color: string;
@@ -167,12 +187,14 @@ function SummaryItem({
   value: string;
   label: string;
   colors: Record<string, string>;
+  styles: ReturnType<typeof createStyles>;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <View style={[styles.summaryItem, { backgroundColor: bgColor }]}>
       <MaterialCommunityIcons
         name={icon as typeof ICONS.CHECK_CIRCLE}
-        size={designTokens.iconSize.xl}
+        size={iconSizes.xl}
         color={color}
       />
       <Text style={[styles.summaryValue, { color }]}>{value}</Text>
@@ -185,24 +207,27 @@ function MonthlyFeeInfo({
   club,
   colors,
   t,
+  styles,
 }: {
   club: Club;
   colors: Record<string, string>;
   t: (key: string, opts?: Record<string, unknown>) => string;
+  styles: ReturnType<typeof createStyles>;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <View
       style={[
         styles.card,
         styles.infoCard,
-        { backgroundColor: colors.infoLight || `${colors.info}15` },
+        { backgroundColor: colors.infoAlpha20 || `${colors.info}20` },
       ]}
     >
       <View style={styles.infoCardContent}>
         <View style={[styles.infoIconContainer, { backgroundColor: colors.info }]}>
           <MaterialCommunityIcons
             name={ICONS.CALENDAR_MONTH}
-            size={designTokens.iconSize.lg}
+            size={iconSizes.lg}
             color={colors.textInverse}
           />
         </View>
@@ -210,7 +235,7 @@ function MonthlyFeeInfo({
           <Text style={[styles.infoTitle, { color: colors.textPrimary }]}>
             {t('screens.myFees.monthlyFee')}
           </Text>
-          <Text style={[styles.infoAmount, { color: colors.info }]}>
+          <Text style={[styles.infoAmount, { color: colors.textPrimary }]}>
             $
             {club.feeSettings?.monthlyFeeAmount.toFixed(NUMERIC.DECIMAL_PLACES) ??
               DEFAULT_DISPLAY.AMOUNT_ZERO}
@@ -233,12 +258,17 @@ function RecentActivity({
   setSelectedTab,
   colors,
   t,
+  styles,
+  itemStyles,
 }: {
   payments: MemberPayment[];
   setSelectedTab: (tab: MyFeesTabValue) => void;
   colors: Record<string, string>;
   t: (key: string, opts?: Record<string, unknown>) => string;
+  styles: ReturnType<typeof createStyles>;
+  itemStyles: ReturnType<typeof createItemStyles>;
 }): React.JSX.Element {
+  const { spacing } = useTheme();
   return (
     <View style={[styles.card, { backgroundColor: colors.surface }]}>
       <View style={styles.cardHeader}>
@@ -252,9 +282,9 @@ function RecentActivity({
         </TouchableOpacity>
       </View>
       {payments.slice(0, DISPLAY_LIMITS.MAX_PREVIEW_ITEMS).map((payment, index) => (
-        <ActivityItem key={payment.id} payment={payment} index={index} colors={colors} t={t} />
+        <ActivityItem key={payment.id} payment={payment} index={index} colors={colors} t={t} itemStyles={itemStyles} spacing={spacing} />
       ))}
-      {payments.length === 0 && <EmptyActivity colors={colors} t={t} />}
+      {payments.length === 0 && <EmptyActivity colors={colors} t={t} itemStyles={itemStyles} />}
     </View>
   );
 }
@@ -264,23 +294,28 @@ function ActivityItem({
   index,
   colors,
   t,
+  itemStyles,
+  spacing,
 }: {
   payment: MemberPayment;
   index: number;
   colors: Record<string, string>;
   t: (key: string, opts?: Record<string, unknown>) => string;
+  itemStyles: ReturnType<typeof createItemStyles>;
+  spacing: { xs: number };
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   const config = getStatusConfig(payment.status, colors, t);
   const borderStyle =
     index < MATH.HALF
-      ? { borderBottomWidth: designTokens.borderWidth.thin, borderBottomColor: colors.border }
+      ? { borderBottomWidth: spacing.xs / 8, borderBottomColor: colors.border }
       : {};
   return (
     <View style={[itemStyles.activityItem, borderStyle]}>
       <View style={[itemStyles.activityIcon, { backgroundColor: config.bg }]}>
         <MaterialCommunityIcons
           name={config.icon as typeof ICONS.CHECK_CIRCLE}
-          size={designTokens.iconSize.md}
+          size={iconSizes.md}
           color={config.color}
         />
       </View>
@@ -310,15 +345,18 @@ function ActivityItem({
 function EmptyActivity({
   colors,
   t,
+  itemStyles,
 }: {
   colors: Record<string, string>;
   t: (key: string) => string;
+  itemStyles: ReturnType<typeof createItemStyles>;
 }): React.JSX.Element {
+  const { iconSizes } = useTheme();
   return (
     <View style={itemStyles.emptyActivity}>
       <MaterialCommunityIcons
         name={ICONS.INBOX_OUTLINE}
-        size={designTokens.iconSize.xxl}
+        size={iconSizes.xxl}
         color={colors.border}
       />
       <Text style={[itemStyles.emptyActivityText, { color: colors.textTertiary }]}>

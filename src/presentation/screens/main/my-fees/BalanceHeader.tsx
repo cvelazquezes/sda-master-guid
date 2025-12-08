@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../components/primitives';
@@ -6,7 +6,7 @@ import { MemberBalance } from '../../../../types';
 import { useTheme } from '../../../state/ThemeContext';
 import { BALANCE_STATUS, ICONS } from '../../../../shared/constants';
 import { NUMERIC } from '../../../../shared/constants/http';
-import { styles } from './styles';
+import { createStyles } from './styles';
 
 interface BalanceCardProps {
   balance: MemberBalance | null;
@@ -27,6 +27,11 @@ export function BalanceCard({
   colors,
   t,
 }: BalanceCardProps): React.JSX.Element {
+  const { spacing, radii, typography } = useTheme();
+  const styles = useMemo(
+    () => createStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
   const headerBgColor =
     balanceStatus.status === BALANCE_STATUS.GOOD
       ? colors.success
@@ -37,7 +42,7 @@ export function BalanceCard({
   return (
     <View style={[styles.balanceCardContainer, { backgroundColor: headerBgColor }]}>
       <View style={[styles.balanceCard, { backgroundColor: `${colors.textInverse}20` }]}>
-        <BalanceMain balance={balance} colors={colors} t={t} />
+        <BalanceMain balance={balance} colors={colors} t={t} styles={styles} />
         <QuickStats
           balance={balance}
           paidPayments={paidPayments}
@@ -45,6 +50,7 @@ export function BalanceCard({
           chargesCount={chargesCount}
           colors={colors}
           t={t}
+          styles={styles}
         />
       </View>
     </View>
@@ -55,10 +61,12 @@ function BalanceMain({
   balance,
   colors,
   t,
+  styles,
 }: {
   balance: MemberBalance | null;
   colors: Record<string, string>;
   t: (key: string) => string;
+  styles: ReturnType<typeof createStyles>;
 }): React.JSX.Element {
   const balanceVal = balance
     ? Math.abs(balance.balance).toFixed(NUMERIC.DECIMAL_PLACES)
@@ -69,7 +77,7 @@ function BalanceMain({
         {t('screens.myFees.currentBalance')}
       </Text>
       <Text style={[styles.balanceAmount, { color: colors.textInverse }]}>${balanceVal}</Text>
-      <BalanceTag balance={balance} colors={colors} t={t} />
+      <BalanceTag balance={balance} colors={colors} t={t} styles={styles} />
     </View>
   );
 }
@@ -78,10 +86,12 @@ function BalanceTag({
   balance,
   colors,
   t,
+  styles,
 }: {
   balance: MemberBalance | null;
   colors: Record<string, string>;
   t: (key: string) => string;
+  styles: ReturnType<typeof createStyles>;
 }): React.JSX.Element | null {
   const { iconSizes } = useTheme();
   if (!balance) {
@@ -113,6 +123,7 @@ function QuickStats({
   chargesCount,
   colors,
   t,
+  styles,
 }: {
   balance: MemberBalance | null;
   paidPayments: number;
@@ -120,6 +131,7 @@ function QuickStats({
   chargesCount: number;
   colors: Record<string, string>;
   t: (key: string) => string;
+  styles: ReturnType<typeof createStyles>;
 }): React.JSX.Element {
   return (
     <View style={[styles.quickStats, { borderTopColor: `${colors.textInverse}30` }]}>

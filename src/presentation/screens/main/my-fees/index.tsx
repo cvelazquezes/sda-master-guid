@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, ScrollView, RefreshControl, Animated } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { BalanceCard } from './BalanceHeader';
@@ -9,7 +9,7 @@ import { HistoryTab } from './HistoryTab';
 import { LoadingState, NotAMemberState } from './LoadingState';
 import { OverviewTab } from './OverviewTab';
 import { getBalanceStatus } from './statusUtils';
-import { styles } from './styles';
+import { createStyles } from './styles';
 import { useMyFees } from './useMyFees';
 import { MY_FEES_TAB, PAYMENT_STATUS, DISPLAY_LIMITS } from '../../../../shared/constants';
 import { SPACING } from '../../../../shared/constants/numbers';
@@ -21,7 +21,11 @@ import type { MyFeesTabValue } from './types';
 const MyFeesScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { colors } = useTheme();
+  const { colors, spacing, radii, typography } = useTheme();
+  const styles = useMemo(
+    () => createStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
   const [selectedTab, setSelectedTab] = useState<MyFeesTabValue>(MY_FEES_TAB.OVERVIEW);
   const {
     club,

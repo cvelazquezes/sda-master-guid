@@ -1,16 +1,25 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
 import { ICONS } from '../../../../shared/constants';
-import { styles, loadingStyles } from './styles';
+import { createStyles, createLoadingStyles } from './styles';
 
 interface LoadingStateProps {
   colors: Record<string, string>;
 }
 
 export function LoadingState({ colors }: LoadingStateProps): React.JSX.Element {
+  const { spacing, radii, typography } = useTheme();
+  const styles = useMemo(
+    () => createStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+  const loadingStyles = useMemo(
+    () => createLoadingStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.headerGradient, { backgroundColor: colors.primary }]}>
@@ -57,7 +66,15 @@ interface NotAMemberStateProps {
 }
 
 export function NotAMemberState({ colors, t }: NotAMemberStateProps): React.JSX.Element {
-  const { iconSizes } = useTheme();
+  const { iconSizes, spacing, radii, typography } = useTheme();
+  const styles = useMemo(
+    () => createStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+  const loadingStyles = useMemo(
+    () => createLoadingStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.headerGradient, { backgroundColor: colors.textTertiary }]}>

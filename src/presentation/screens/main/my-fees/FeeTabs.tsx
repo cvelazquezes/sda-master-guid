@@ -1,20 +1,29 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
 import { MY_FEES_TAB, ICONS } from '../../../../shared/constants';
-import { tabStyles } from './styles';
-import { MyFeesTabValue } from './types';
+import { createTabStyles } from './styles';
+import type { MyFeesTabValue } from './types';
 
-interface FeeTabsProps {
+type TabStylesType = ReturnType<typeof createTabStyles>;
+
+type FeeTabsProps = {
   selectedTab: MyFeesTabValue;
   onTabChange: (tab: MyFeesTabValue) => void;
   colors: Record<string, string>;
   t: (key: string) => string;
-}
+};
 
 export function FeeTabs({ selectedTab, onTabChange, colors, t }: FeeTabsProps): React.JSX.Element {
+  const { spacing, typography } = useTheme();
+
+  const tabStyles = useMemo(
+    () => createTabStyles(colors, spacing, typography),
+    [colors, spacing, typography]
+  );
+
   const tabs: MyFeesTabValue[] = [MY_FEES_TAB.OVERVIEW, MY_FEES_TAB.HISTORY, MY_FEES_TAB.CHARGES];
 
   return (
@@ -32,6 +41,7 @@ export function FeeTabs({ selectedTab, onTabChange, colors, t }: FeeTabsProps): 
           onPress={(): void => onTabChange(tab)}
           colors={colors}
           t={t}
+          tabStyles={tabStyles}
         />
       ))}
     </View>
@@ -44,12 +54,14 @@ function TabButton({
   onPress,
   colors,
   t,
+  tabStyles,
 }: {
   tab: MyFeesTabValue;
   isActive: boolean;
   onPress: () => void;
   colors: Record<string, string>;
   t: (key: string) => string;
+  tabStyles: TabStylesType;
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   const icon =
