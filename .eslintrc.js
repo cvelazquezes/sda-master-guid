@@ -4,12 +4,18 @@
  * This configuration enforces strict code quality standards.
  * All rules are set to 'error' to ensure code compliance.
  *
+ * @version 2.0.0 - Enterprise standards with type-checking
+ *
  * Configuration is modularized in config/lint/ directory:
- * - base.js: Core JavaScript rules
- * - typescript.js: TypeScript-specific rules
- * - react.js: React and React Hooks rules
- * - imports.js: Import organization rules
- * - overrides.js: File-specific rule overrides
+ * - base.js: Core JavaScript rules (code quality, async, security basics)
+ * - typescript.js: TypeScript-specific rules (type safety, naming, async)
+ * - react.js: React and React Native rules (hooks, performance, jsx)
+ * - imports.js: Import organization and architecture rules
+ * - strings.js: High-value string literal rules
+ * - logging.js: Logger service enforcement
+ * - security.js: Security-focused rules (injection, crypto, disclosure)
+ * - accessibility.js: React Native accessibility rules
+ * - overrides.js: File-specific rule exceptions
  */
 
 const {
@@ -19,6 +25,8 @@ const {
   importRules,
   stringsRules,
   loggingRules,
+  securityRules,
+  accessibilityRules,
   overridesConfig,
 } = require('./config/lint');
 
@@ -29,6 +37,7 @@ module.exports = {
   extends: [
     'expo',
     'plugin:@typescript-eslint/recommended',
+    'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'plugin:react/recommended',
     'plugin:react-hooks/recommended',
     'plugin:import/errors',
@@ -45,6 +54,9 @@ module.exports = {
     ecmaFeatures: {
       jsx: true,
     },
+    // Enable type-aware rules
+    project: './tsconfig.json',
+    tsconfigRootDir: __dirname,
   },
 
   // === PLUGINS ===
@@ -61,6 +73,9 @@ module.exports = {
         project: './tsconfig.json',
       },
     },
+    'import/parsers': {
+      '@typescript-eslint/parser': ['.ts', '.tsx'],
+    },
   },
 
   // === RULES ===
@@ -75,6 +90,8 @@ module.exports = {
     ...importRules.rules,
     ...stringsRules.rules,
     ...loggingRules.rules,
+    ...securityRules.rules,
+    ...accessibilityRules.rules,
   },
 
   // === OVERRIDES ===
@@ -91,5 +108,7 @@ module.exports = {
     '*.config.js',
     'babel.config.js',
     'metro.config.js',
+    '.eslintrc.js',
+    'config/lint/*.js',
   ],
 };
