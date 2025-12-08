@@ -13,12 +13,12 @@ import {
   UseInfiniteQueryOptions,
   useInfiniteQuery,
 } from '@tanstack/react-query';
-import { queryKeys, optimisticUpdates, queryClient } from '../api/queryClient';
-import { authService } from '../../features/auth/services/AuthService';
-import { matchService } from '../../services/matchService';
+import { queryKeys, optimisticUpdates, queryClient } from '../../infrastructure/http/queryClient';
+import { authService } from '../../infrastructure/repositories/authService';
+import { matchService } from '../../infrastructure/repositories/matchService';
 import { User, Match } from '../../types';
-import { CACHE } from '../constants/timing';
-import { QUERY_KEY, QUERY_SCOPE } from '../constants/errorMessages';
+import { CACHE } from '../../shared/constants/timing';
+import { QUERY_KEY, QUERY_SCOPE } from '../../shared/constants/errorMessages';
 
 // ============================================================================
 // Auth Hooks

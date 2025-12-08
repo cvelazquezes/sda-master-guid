@@ -4,7 +4,7 @@
  */
 
 import { useMemo, useCallback } from 'react';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../state/ThemeContext';
 import {
   BackgroundColor,
   InteractiveBackgroundColor,
@@ -15,7 +15,7 @@ import {
   RoleType,
   StatusColorConfig,
   RoleColorConfig,
-} from '../types/theme';
+} from '../../shared/types/theme';
 
 interface UseThemeColorReturn {
   getBackgroundColor: (key?: BackgroundColor) => string | undefined;

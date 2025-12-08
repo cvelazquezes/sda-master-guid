@@ -306,6 +306,7 @@ export const en = {
     },
     meetingPlanner: {
       title: 'Meeting Planner',
+      subtitle: 'Plan and organize your meetings',
       titlePlaceholder: 'Enter meeting title',
       notesPlaceholder: 'Add notes or instructions...',
       save: 'Save',
@@ -356,6 +357,7 @@ export const en = {
       descriptionPlaceholder: 'Description',
       clubOrganization: 'Club Organization',
       title: 'Club Settings',
+      subtitle: 'Configure your club preferences',
       loading: 'Loading...',
       basicInformation: 'Basic Information',
       activitySettings: 'Activity Settings',
@@ -547,6 +549,7 @@ export const en = {
     },
     notifications: {
       title: 'Notifications',
+      subtitle: 'Stay updated with your activities',
       markAllAsRead: 'Mark all as read',
       noNotifications: 'No notifications',
       unreadCount: 'You have {{count}} unread notification',
@@ -571,6 +574,8 @@ export const en = {
       },
     },
     myFees: {
+      title: 'My Finances',
+      subtitle: 'Track your payments and balance',
       notAClubMember: 'Not a Club Member',
       joinClubToViewFees: 'Join a club to view your fees and payments',
       myFinances: 'My Finances',
@@ -662,6 +667,7 @@ export const en = {
       createCustomCharge: 'Create Custom Charge',
       createCharge: 'Create Charge',
       title: 'Fee Management',
+      subtitle: 'Manage club fees and payments',
       loading: 'Loading...',
       configureMonthlyFees: 'Configure Monthly Fees',
       enableMonthlyFees: 'Enable Monthly Fees',

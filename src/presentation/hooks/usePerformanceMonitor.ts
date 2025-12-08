@@ -5,9 +5,9 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { InteractionManager } from 'react-native';
-import { logger } from '../utils/logger';
-import { MS, MATH, OPACITY_VALUE, LIST_LIMITS, FPS } from '../constants/numbers';
-import { LOG_MESSAGES } from '../constants';
+import { logger } from '../../shared/utils/logger';
+import { MS, MATH, OPACITY_VALUE, LIST_LIMITS, FPS } from '../../shared/constants/numbers';
+import { LOG_MESSAGES } from '../../shared/constants';
 
 // Performance thresholds
 const PERF_THRESHOLD = {

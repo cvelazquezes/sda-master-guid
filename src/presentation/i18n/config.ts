@@ -7,10 +7,10 @@ import i18next, { use, changeLanguage as i18nChangeLanguage } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { resources, Language } from './locales';
-import { storageKeys } from '../shared/config/storage';
-import { DEFAULT_LANGUAGE, I18N_CONFIG } from '../shared/constants/ui';
-import { logger } from '../utils/logger';
-import { LOG_MESSAGES } from '../shared/constants/logMessages';
+import { storageKeys } from '../../shared/config/storage';
+import { DEFAULT_LANGUAGE, I18N_CONFIG } from '../../shared/constants/ui';
+import { logger } from '../../shared/utils/logger';
+import { LOG_MESSAGES } from '../../shared/constants/logMessages';
 
 // Language detector for React Native
 const languageDetector = {

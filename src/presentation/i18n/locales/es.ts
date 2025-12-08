@@ -3,7 +3,7 @@
  * Traducciones al español para la app SDA Master Guide
  */
 
-import { TranslationKeys } from './en';
+import type { TranslationKeys } from './en';
 
 export const es: TranslationKeys = {
   // Común
@@ -308,6 +308,7 @@ export const es: TranslationKeys = {
     },
     meetingPlanner: {
       title: 'Planificador de Reuniones',
+      subtitle: 'Planifica y organiza tus reuniones',
       titlePlaceholder: 'Ingresa el título de la reunión',
       notesPlaceholder: 'Agregar notas o instrucciones...',
       save: 'Guardar',
@@ -358,6 +359,7 @@ export const es: TranslationKeys = {
       descriptionPlaceholder: 'Descripción',
       clubOrganization: 'Organización del Club',
       title: 'Configuración del Club',
+      subtitle: 'Configura las preferencias de tu club',
       loading: 'Cargando...',
       basicInformation: 'Información Básica',
       activitySettings: 'Configuración de Actividades',
@@ -551,6 +553,7 @@ export const es: TranslationKeys = {
     },
     notifications: {
       title: 'Notificaciones',
+      subtitle: 'Mantente actualizado con tus actividades',
       markAllAsRead: 'Marcar todo como leído',
       noNotifications: 'Sin notificaciones',
       unreadCount: 'Tienes {{count}} notificación sin leer',
@@ -575,6 +578,8 @@ export const es: TranslationKeys = {
       },
     },
     myFees: {
+      title: 'Mis Finanzas',
+      subtitle: 'Rastrea tus pagos y saldo',
       notAClubMember: 'No es Miembro del Club',
       joinClubToViewFees: 'Únete a un club para ver tus cuotas y pagos',
       myFinances: 'Mis Finanzas',
@@ -666,6 +671,7 @@ export const es: TranslationKeys = {
       createCustomCharge: 'Crear Cargo Personalizado',
       createCharge: 'Crear Cargo',
       title: 'Gestión de Cuotas',
+      subtitle: 'Gestiona cuotas y pagos del club',
       loading: 'Cargando...',
       configureMonthlyFees: 'Configurar Cuotas Mensuales',
       enableMonthlyFees: 'Habilitar Cuotas Mensuales',

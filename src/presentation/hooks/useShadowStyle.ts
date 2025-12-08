@@ -13,17 +13,17 @@
 
 import { useMemo, useCallback } from 'react';
 import { ViewStyle, Platform } from 'react-native';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../state/ThemeContext';
 import { designTokens } from '../theme/designTokens';
-import { ShadowPreset } from '../types/theme';
+import { ShadowPreset } from '../../shared/types/theme';
 import {
   SHADOW_HEIGHT,
   SHADOW_BLUR,
   SHADOW_OPACITY,
   MODAL_ELEVATION,
   SHADOW_COLOR,
-} from '../constants/numbers';
-import { PLATFORM_OS } from '../constants/app';
+} from '../../shared/constants/numbers';
+import { PLATFORM_OS } from '../../shared/constants/app';
 
 interface ShadowConfig {
   shadowColor: string;
