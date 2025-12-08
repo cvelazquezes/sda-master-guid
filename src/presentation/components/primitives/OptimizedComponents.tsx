@@ -173,7 +173,7 @@ export const OptimizedListItem = memo<ListItemProps>(function OptimizedListItem(
     onPress(id);
   }, [id, onPress]);
 
-  const backgroundColor = selected ? colors.primaryLight : colors.surface;
+  const backgroundColor = selected ? colors.primaryAlpha20 : colors.surface;
 
   return (
     <TouchableOpacity

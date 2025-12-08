@@ -95,7 +95,7 @@ const MatchCardComponent: React.FC<MatchCardProps> = ({
       <View style={styles.body}>
         {/* Participants */}
         <View style={styles.infoRow}>
-          <View style={[styles.iconBox, { backgroundColor: colors.primaryLight }]}>
+          <View style={[styles.iconBox, { backgroundColor: colors.primaryAlpha20 }]}>
             <MaterialCommunityIcons
               name={ICONS.ACCOUNT_GROUP}
               size={mobileIconSizes.medium}
@@ -115,7 +115,7 @@ const MatchCardComponent: React.FC<MatchCardProps> = ({
         {/* Scheduled Date */}
         {match.scheduledDate && (
           <View style={styles.infoRow}>
-            <View style={[styles.iconBox, { backgroundColor: colors.primaryLight }]}>
+            <View style={[styles.iconBox, { backgroundColor: colors.primaryAlpha20 }]}>
               <MaterialCommunityIcons
                 name={ICONS.CALENDAR}
                 size={mobileIconSizes.medium}

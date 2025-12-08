@@ -28,7 +28,7 @@ export const ClassOptionItem: React.FC<ClassOptionItemProps> = ({
   const optionStyle = [
     styles.classOption,
     { backgroundColor: colors.surfaceLight },
-    isSelected && { backgroundColor: colors.primaryLight, borderColor: colors.primary },
+    isSelected && { backgroundColor: colors.primaryAlpha20, borderColor: colors.primary },
   ];
 
   const checkboxStyle = [
@@ -53,7 +53,7 @@ export const ClassOptionItem: React.FC<ClassOptionItemProps> = ({
           style={[
             styles.classOptionText,
             { color: colors.textPrimary },
-            isSelected && { color: colors.primary },
+            isSelected && { fontWeight: '600' },
           ]}
         >
           {pathfinderClass}

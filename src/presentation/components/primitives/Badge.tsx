@@ -93,41 +93,41 @@ export const Badge: React.FC<BadgeProps> = ({
       return { bg: roleConfig.light, text: roleConfig.text, border: roleConfig.primary };
     }
 
-    // Variant-based colors from theme (using color mapping)
+    // Variant-based colors from theme (using alpha transparency for better contrast)
     const variantColorMap: Record<string, { bg: string; text: string; border: string }> = {
       [COMPONENT_VARIANT.primary]: {
-        bg: themeColors.primaryLight || themeColors.primaryAlpha10,
-        text: themeColors.primary,
+        bg: themeColors.primaryAlpha20 || themeColors.primaryAlpha10,
+        text: themeColors.textPrimary,
         border: themeColors.primary,
       },
       [COMPONENT_VARIANT.secondary]: {
-        bg: themeColors.secondaryLight || themeColors.secondaryAlpha10,
-        text: themeColors.secondary,
+        bg: themeColors.secondaryAlpha20 || themeColors.secondaryLight,
+        text: themeColors.textPrimary,
         border: themeColors.secondary,
       },
       [COMPONENT_VARIANT.accent]: {
-        bg: themeColors.accentLight || themeColors.accentAlpha10,
-        text: themeColors.accent,
+        bg: themeColors.accentAlpha20 || themeColors.accentLight,
+        text: themeColors.textPrimary,
         border: themeColors.accent,
       },
       [COMPONENT_VARIANT.success]: {
-        bg: themeColors.successLight,
-        text: themeColors.success,
+        bg: themeColors.successAlpha20 || themeColors.successLight,
+        text: themeColors.textPrimary,
         border: themeColors.success,
       },
       [COMPONENT_VARIANT.warning]: {
-        bg: themeColors.warningLight,
-        text: themeColors.warning,
+        bg: themeColors.warningAlpha20 || themeColors.warningLight,
+        text: themeColors.textPrimary,
         border: themeColors.warning,
       },
       [COMPONENT_VARIANT.error]: {
-        bg: themeColors.errorLight,
-        text: themeColors.error,
+        bg: themeColors.errorAlpha20 || themeColors.errorLight,
+        text: themeColors.textPrimary,
         border: themeColors.error,
       },
       [COMPONENT_VARIANT.info]: {
-        bg: themeColors.infoLight,
-        text: themeColors.info,
+        bg: themeColors.infoAlpha20 || themeColors.infoLight,
+        text: themeColors.textPrimary,
         border: themeColors.info,
       },
     };

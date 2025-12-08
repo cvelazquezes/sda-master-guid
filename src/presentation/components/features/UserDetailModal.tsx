@@ -152,14 +152,14 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ visible, user,
             {user.classes.map((pathfinderClass) => (
               <View
                 key={pathfinderClass}
-                style={[styles.classBadge, { backgroundColor: colors.primaryLight }]}
+                style={[styles.classBadge, { backgroundColor: colors.primaryAlpha20 }]}
               >
                 <MaterialCommunityIcons
                   name={ICONS.SCHOOL}
                   size={mobileIconSizes.small}
                   color={colors.primary}
                 />
-                <Text style={[styles.classBadgeText, { color: colors.primary }]}>
+                <Text style={[styles.classBadgeText, { color: colors.textPrimary }]}>
                   {pathfinderClass}
                 </Text>
               </View>

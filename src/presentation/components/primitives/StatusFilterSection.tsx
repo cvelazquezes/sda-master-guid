@@ -127,7 +127,7 @@ export function StatusFilterSection({
               <Text
                 variant={TEXT_VARIANT.BODY_SMALL}
                 weight={isSelected ? TEXT_WEIGHT.SEMIBOLD : TEXT_WEIGHT.NORMAL}
-                style={{ color: isSelected ? colors.primary : colors.textPrimary }}
+                style={{ color: colors.textPrimary }}
               >
                 {option.label}
               </Text>

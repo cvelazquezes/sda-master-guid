@@ -132,13 +132,13 @@ export const FilterModal: React.FC<FilterModalProps> = ({
 
                 {/* Info Banner (optional) */}
                 {section.infoBanner && (
-                  <View style={[styles.infoBanner, { backgroundColor: colors.primaryAlpha10 }]}>
+                  <View style={[styles.infoBanner, { backgroundColor: colors.primaryAlpha20 }]}>
                     <MaterialCommunityIcons
                       name={section.infoBanner.icon as typeof ICONS.CHECK}
                       size={designTokens.icon.sizes.sm}
                       color={colors.primary}
                     />
-                    <Text style={[styles.infoBannerText, { color: colors.primary }]}>
+                    <Text style={[styles.infoBannerText, { color: colors.textPrimary }]}>
                       {section.infoBanner.text}
                     </Text>
                   </View>

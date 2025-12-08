@@ -18,9 +18,9 @@ export const InfoCard: React.FC<InfoCardProps> = ({ selectedCount, colors }) => 
   const { iconSizes } = useTheme();
 
   return (
-    <View style={[styles.infoCard, { backgroundColor: colors.primaryLight }]}>
+    <View style={[styles.infoCard, { backgroundColor: colors.primaryAlpha20 }]}>
       <MaterialCommunityIcons name={ICONS.INFORMATION} size={iconSizes.md} color={colors.primary} />
-      <Text style={[styles.infoText, { color: colors.primary }]}>
+      <Text style={[styles.infoText, { color: colors.textPrimary }]}>
         {t('classes.classInfo')} {selectedCount}/{CLASS_SELECTION.MAX}
       </Text>
     </View>

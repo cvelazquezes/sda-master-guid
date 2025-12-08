@@ -9,7 +9,7 @@ import { View, TouchableOpacity, ViewStyle, TextStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Text } from '../primitives';
-import { LANGUAGES, changeLanguage, Language } from '../../i18n';
+import { LANGUAGES, changeLanguage, Language } from '../../../shared/i18n';
 import { useTheme } from '../../state/ThemeContext';
 import { SelectionModal, SelectionItem } from '../primitives/SelectionModal';
 import { A11Y_ROLE, ICONS, FLEX } from '../../../shared/constants';
