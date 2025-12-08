@@ -9,7 +9,7 @@ import { initializeSentry } from './src/infrastructure/services/sentry';
 import { featureFlagsService } from './src/infrastructure/services/featureFlags';
 import { logger } from './src/shared/utils/logger';
 import { LOG_MESSAGES, STATUS_BAR_STYLE } from './src/shared/constants';
-import './src/presentation/i18n'; // Initialize i18n
+import './src/shared/i18n'; // Initialize i18n
 
 // Initialize Sentry for error tracking and performance monitoring
 initializeSentry();

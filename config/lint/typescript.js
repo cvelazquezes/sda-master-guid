@@ -386,42 +386,25 @@ module.exports = {
     ],
 
     /**
-     * Disallow certain types
+     * Disallow wrapper object types (String, Number, Boolean, etc.)
+     * Use primitive types instead (string, number, boolean)
+     * Replaces deprecated ban-types for wrapper objects
      */
-    '@typescript-eslint/ban-types': [
-      'error',
-      {
-        types: {
-          Object: {
-            message: 'Use object or a specific type instead',
-            fixWith: 'object',
-          },
-          Function: {
-            message: 'Use a specific function type instead',
-          },
-          Boolean: {
-            message: 'Use boolean instead',
-            fixWith: 'boolean',
-          },
-          Number: {
-            message: 'Use number instead',
-            fixWith: 'number',
-          },
-          String: {
-            message: 'Use string instead',
-            fixWith: 'string',
-          },
-          Symbol: {
-            message: 'Use symbol instead',
-            fixWith: 'symbol',
-          },
-          '{}': {
-            message: 'Use object or Record<string, unknown> instead',
-          },
-        },
-        extendDefaults: false,
-      },
-    ],
+    '@typescript-eslint/no-wrapper-object-types': 'error',
+
+    /**
+     * Disallow empty object type {}
+     * Use object or Record<string, unknown> instead
+     * Replaces deprecated ban-types for {}
+     */
+    '@typescript-eslint/no-empty-object-type': 'error',
+
+    /**
+     * Disallow the Function type
+     * Use a specific function type instead
+     * Replaces deprecated ban-types for Function
+     */
+    '@typescript-eslint/no-unsafe-function-type': 'error',
 
     /**
      * Disallow void type outside of generic or return types
