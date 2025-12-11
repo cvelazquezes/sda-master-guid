@@ -2,8 +2,15 @@
  * Clubs Management Screen Styles
  * Theme-aware style factories
  */
-import { StyleSheet } from 'react-native';
-import { BORDERS, DIMENSIONS, FLEX, TEXT_TRANSFORM, TYPOGRAPHY } from '../../../../shared/constants';
+/* eslint-disable max-lines-per-function -- Style factory functions require many style definitions */
+import { StyleSheet, type ViewStyle, type TextStyle } from 'react-native';
+import {
+  BORDERS,
+  DIMENSIONS,
+  FLEX,
+  TEXT_TRANSFORM,
+  TYPOGRAPHY,
+} from '../../../../shared/constants';
 import type { ThemeContextType } from '../../../state/ThemeContext';
 
 // ============================================================================
@@ -13,7 +20,7 @@ import type { ThemeContextType } from '../../../state/ThemeContext';
 export const createStyles = (
   colors: ThemeContextType['colors'],
   spacing: ThemeContextType['spacing']
-) =>
+): { container: ViewStyle; content: ViewStyle } =>
   StyleSheet.create({
     container: { flex: FLEX.ONE, backgroundColor: colors.backgroundSecondary },
     content: { padding: spacing.lg },
@@ -28,7 +35,18 @@ export const createModalStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  overlay: ViewStyle;
+  overlayMobile: ViewStyle;
+  content: ViewStyle;
+  contentMobile: ViewStyle;
+  body: ViewStyle;
+  dragHandle: ViewStyle;
+  header: ViewStyle;
+  title: TextStyle;
+  closeButton: ViewStyle;
+  footer: ViewStyle;
+} =>
   StyleSheet.create({
     overlay: {
       flex: FLEX.ONE,
@@ -98,7 +116,23 @@ export const createFilterStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  infoBanner: ViewStyle;
+  infoText: TextStyle;
+  section: ViewStyle;
+  sectionTitle: TextStyle;
+  label: TextStyle;
+  hierarchyItem: ViewStyle;
+  hierarchyInfo: ViewStyle;
+  hierarchyValue: TextStyle;
+  option: ViewStyle;
+  optionActive: ViewStyle;
+  optionContent: ViewStyle;
+  optionText: TextStyle;
+  optionTextActive: TextStyle;
+  optionSubtitle: TextStyle;
+  noDataText: TextStyle;
+} =>
   StyleSheet.create({
     infoBanner: {
       flexDirection: 'row',
@@ -208,7 +242,7 @@ export const createButtonStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): { clear: ViewStyle; clearText: TextStyle; apply: ViewStyle; applyText: TextStyle } =>
   StyleSheet.create({
     clear: {
       flex: FLEX.ONE,

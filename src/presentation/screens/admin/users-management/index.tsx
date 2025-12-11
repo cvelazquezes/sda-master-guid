@@ -1,8 +1,25 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, ScrollView, RefreshControl, useWindowDimensions } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '../../../state/ThemeContext';
-import { User, ApprovalStatus, Club } from '../../../../types';
+import { FilterModal } from './FilterModal';
+import {
+  getUniqueClubValues,
+  getAvailableClubs,
+  getActiveFilterCount,
+  filterUsers,
+  updateFilterWithCascade,
+} from './filterUtils';
+import { PendingUserCard } from './PendingUserCard';
+import { createStyles } from './styles';
+import {
+  handleToggleUserStatus,
+  handleApproveUser,
+  handleRejectUser,
+  handleDeleteUser,
+} from './userHandlers';
+import { useUsersData } from './useUsersData';
+import { BREAKPOINTS, ICONS, HIERARCHY_FIELDS } from '../../../../shared/constants';
+import { type User, type Club, ApprovalStatus } from '../../../../types';
 import { UserCard } from '../../../components/features/UserCard';
 import { UserDetailModal } from '../../../components/features/UserDetailModal';
 import {
@@ -12,27 +29,10 @@ import {
   TabBar,
   type Tab,
 } from '../../../components/primitives';
-import { BREAKPOINTS, ICONS, HIERARCHY_FIELDS } from '../../../../shared/constants';
-import { createStyles } from './styles';
-import { useUsersData } from './useUsersData';
-import {
-  getUniqueClubValues,
-  getAvailableClubs,
-  getActiveFilterCount,
-  filterUsers,
-  updateFilterWithCascade,
-} from './filterUtils';
-import {
-  handleToggleUserStatus,
-  handleApproveUser,
-  handleRejectUser,
-  handleDeleteUser,
-} from './userHandlers';
-import { PendingUserCard } from './PendingUserCard';
-import { FilterModal } from './FilterModal';
-import { UserFilters } from './types';
+import { useTheme } from '../../../state/ThemeContext';
+import type { UserFilters } from './types';
 
-interface UseFilterAutoSelectOptions {
+type UseFilterAutoSelectOptions = {
   filterVisible: boolean;
   filters: UserFilters;
   setFilters: React.Dispatch<React.SetStateAction<UserFilters>>;
@@ -41,7 +41,7 @@ interface UseFilterAutoSelectOptions {
   associations: string[];
   churches: string[];
   clubs: Club[];
-}
+};
 
 function useFilterAutoSelect(options: UseFilterAutoSelectOptions): void {
   const { filterVisible, filters, setFilters, divisions, unions, associations, churches, clubs } =
@@ -52,17 +52,21 @@ function useFilterAutoSelect(options: UseFilterAutoSelectOptions): void {
     }
     const u: Record<string, string> = {};
     const canSelect = (arr: string[], val?: string): boolean => arr.length === 1 && !val;
+    const [firstDivision] = divisions;
+    const [firstUnion] = unions;
+    const [firstAssociation] = associations;
+    const [firstChurch] = churches;
     if (canSelect(divisions, filters.division)) {
-      u.division = divisions[0];
+      u.division = firstDivision;
     }
     if (canSelect(unions, filters.union)) {
-      u.union = unions[0];
+      u.union = firstUnion;
     }
     if (canSelect(associations, filters.association)) {
-      u.association = associations[0];
+      u.association = firstAssociation;
     }
     if (canSelect(churches, filters.church)) {
-      u.church = churches[0];
+      u.church = firstChurch;
     }
     if (clubs.length === 1 && !filters.clubId && filters.church) {
       u.clubId = clubs[0].id;
@@ -165,12 +169,12 @@ const UsersManagementScreen = (): React.JSX.Element => {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <PageHeader
+        showActions
         title={t('screens.usersManagement.title')}
         subtitle={t('screens.usersManagement.subtitle', {
           approved: approvedCount,
           pending: pendingCount,
         })}
-        showActions
       />
       <TabBar
         tabs={tabs}
@@ -179,12 +183,12 @@ const UsersManagementScreen = (): React.JSX.Element => {
       />
       <SearchBar
         value={searchQuery}
-        onChangeText={setSearchQuery}
         placeholder={t('screens.usersManagement.searchPlaceholder')}
+        filterActive={getActiveFilterCount(filters, searchQuery) > 0}
+        onChangeText={setSearchQuery}
         onFilterPress={
           activeTab === ApprovalStatus.APPROVED ? (): void => setFilterVisible(true) : undefined
         }
-        filterActive={getActiveFilterCount(filters, searchQuery) > 0}
       />
       <UsersList
         filteredUsers={filteredUsers}
@@ -201,11 +205,8 @@ const UsersManagementScreen = (): React.JSX.Element => {
       />
       <FilterModal
         visible={filterVisible}
-        onClose={(): void => setFilterVisible(false)}
         isMobile={isMobile}
         filters={filters}
-        onUpdateFilter={onUpdateFilter}
-        onClearFilters={clearFilters}
         availableDivisions={availableDivisions}
         availableUnions={availableUnions}
         availableAssociations={availableAssociations}
@@ -213,6 +214,9 @@ const UsersManagementScreen = (): React.JSX.Element => {
         availableClubs={availableClubs}
         colors={colors}
         t={t}
+        onClose={(): void => setFilterVisible(false)}
+        onUpdateFilter={onUpdateFilter}
+        onClearFilters={clearFilters}
       />
       <UserDetailModal
         visible={detailVisible}
@@ -226,7 +230,7 @@ const UsersManagementScreen = (): React.JSX.Element => {
   );
 };
 
-interface UsersListProps {
+type UsersListProps = {
   filteredUsers: User[];
   users: User[];
   clubs: Club[];
@@ -238,7 +242,7 @@ interface UsersListProps {
   colors: Record<string, string>;
   t: (k: string) => string;
   styles: ReturnType<typeof createStyles>;
-}
+};
 
 function UsersList({
   filteredUsers,
@@ -278,22 +282,22 @@ function UsersList({
               key={u.id}
               user={u}
               clubs={clubs}
-              onApprove={(id, n, r): void => handleApproveUser(id, n, r, loadData, t)}
-              onReject={(id, n): void => handleRejectUser(id, n, loadData)}
               colors={colors}
               t={t}
+              onApprove={(id, n, r): void => handleApproveUser(id, n, r, loadData, t)}
+              onReject={(id, n): void => handleRejectUser(id, n, loadData)}
             />
           ))
         : filteredUsers.map((u) => (
             <UserCard
               key={u.id}
+              showAdminActions
               user={u}
               clubName={getClubName(u.clubId)}
               onPress={(): void => {
                 setSelectedUser(u);
                 setDetailVisible(true);
               }}
-              showAdminActions
               onToggleStatus={(): void => handleToggleUserStatus(u.id, u.isActive, loadData)}
               onDelete={(): void => handleDeleteUser(u.id, u.name, loadData)}
             />

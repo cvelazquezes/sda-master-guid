@@ -1,15 +1,15 @@
 import React, { useMemo } from 'react';
 import { View, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text } from '../../../components/primitives';
-import { useTheme } from '../../../state/ThemeContext';
-import { ANIMATION_TYPE, ICONS, HIERARCHY_FIELDS } from '../../../../shared/constants';
-import { createModalStyles, createFilterStyles, createButtonStyles } from './styles';
-import { ClubFilters } from './types';
 import { HierarchyFilterItem } from './HierarchyFilterItem';
 import { StatusFilterSection } from './StatusFilterSection';
+import { createModalStyles, createFilterStyles, createButtonStyles } from './styles';
+import { ANIMATION_TYPE, ICONS, HIERARCHY_FIELDS } from '../../../../shared/constants';
+import { Text } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
+import type { ClubFilters } from './types';
 
-interface FilterModalProps {
+type FilterModalProps = {
   visible: boolean;
   onClose: () => void;
   isMobile: boolean;
@@ -31,9 +31,9 @@ interface FilterModalProps {
     error: string;
   };
   t: (key: string) => string;
-}
+};
 
-interface HierarchyFiltersProps {
+type HierarchyFiltersProps = {
   filters: ClubFilters;
   onUpdateFilter: (f: string, v: string) => void;
   availableDivisions: string[];
@@ -43,7 +43,7 @@ interface HierarchyFiltersProps {
   colors: { primary: string; success: string };
   t: (key: string) => string;
   filterStyles: ReturnType<typeof createFilterStyles>;
-}
+};
 
 function HierarchyFilters({
   filters,
@@ -66,41 +66,47 @@ function HierarchyFilters({
         label={t('components.organizationHierarchy.levels.division')}
         values={availableDivisions}
         selectedValue={filters.division}
-        onSelect={(v): void => onUpdateFilter(HIERARCHY_FIELDS.DIVISION, v)}
         colors={colors}
+        onSelect={(v): void => onUpdateFilter(HIERARCHY_FIELDS.DIVISION, v)}
       />
       <HierarchyFilterItem
         icon={ICONS.DOMAIN}
         label={t('components.organizationHierarchy.levels.union')}
         values={availableUnions}
         selectedValue={filters.union}
-        onSelect={(v): void => onUpdateFilter(HIERARCHY_FIELDS.UNION, v)}
         colors={colors}
+        onSelect={(v): void => onUpdateFilter(HIERARCHY_FIELDS.UNION, v)}
       />
       <HierarchyFilterItem
         icon={ICONS.OFFICE_BUILDING}
         label={t('components.organizationHierarchy.levels.association')}
         values={availableAssociations}
         selectedValue={filters.association}
-        onSelect={(v): void => onUpdateFilter(HIERARCHY_FIELDS.ASSOCIATION, v)}
         colors={colors}
+        onSelect={(v): void => onUpdateFilter(HIERARCHY_FIELDS.ASSOCIATION, v)}
       />
       <HierarchyFilterItem
         icon={ICONS.CHURCH}
         label={t('components.organizationHierarchy.levels.church')}
         values={availableChurches}
         selectedValue={filters.church}
-        onSelect={(v): void => onUpdateFilter(HIERARCHY_FIELDS.CHURCH, v)}
         colors={colors}
+        onSelect={(v): void => onUpdateFilter(HIERARCHY_FIELDS.CHURCH, v)}
       />
     </View>
   );
 }
 
-function InfoBanner({ color, filterStyles }: { color: string; filterStyles: ReturnType<typeof createFilterStyles> }): React.JSX.Element {
+function InfoBanner({
+  color,
+  filterStyles,
+}: {
+  color: string;
+  filterStyles: ReturnType<typeof createFilterStyles>;
+}): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (
-    <View style={[filterStyles.infoBanner, { backgroundColor: color + '15' }]}>
+    <View style={[filterStyles.infoBanner, { backgroundColor: `${color}20` }]}>
       <MaterialCommunityIcons name={ICONS.INFORMATION} size={iconSizes.sm} color={color} />
     </View>
   );
@@ -158,24 +164,37 @@ export function FilterModal({
   };
 
   return (
-    <Modal visible={visible} animationType={anim} transparent onRequestClose={onClose}>
+    <Modal
+      transparent
+      accessibilityViewIsModal
+      visible={visible}
+      animationType={anim}
+      onRequestClose={onClose}
+    >
       <View style={overlayStyle}>
         <View style={contentStyle}>
           {isMobile && (
             <View style={[modalStyles.dragHandle, { backgroundColor: colors.borderLight }]} />
           )}
-          <ModalHeader colors={colors} t={t} onClose={onClose} modalStyles={modalStyles} />
+          <ModalHeader colors={colors} t={t} modalStyles={modalStyles} onClose={onClose} />
           <ScrollView style={modalStyles.body}>
             <InfoBanner color={colors.primary} filterStyles={filterStyles} />
             <HierarchyFilters {...hProps} />
             <StatusFilterSection
               currentStatus={filters.status}
-              onSelectStatus={onUpdateFilter}
               colors={colors}
               t={t}
+              onSelectStatus={onUpdateFilter}
             />
           </ScrollView>
-          <ModalFooter colors={colors} t={t} onClear={onClearFilters} onClose={onClose} modalStyles={modalStyles} buttonStyles={buttonStyles} />
+          <ModalFooter
+            colors={colors}
+            t={t}
+            modalStyles={modalStyles}
+            buttonStyles={buttonStyles}
+            onClear={onClearFilters}
+            onClose={onClose}
+          />
         </View>
       </View>
     </Modal>
@@ -199,7 +218,12 @@ function ModalHeader({
       <Text style={[modalStyles.title, { color: colors.textPrimary }]}>
         {t('screens.clubsManagement.filterClubs')}
       </Text>
-      <TouchableOpacity onPress={onClose} style={modalStyles.closeButton}>
+      <TouchableOpacity
+        style={modalStyles.closeButton}
+        accessibilityRole="button"
+        accessibilityLabel="Close modal"
+        onPress={onClose}
+      >
         <MaterialCommunityIcons
           name={ICONS.CLOSE}
           size={iconSizes.lg}
@@ -228,7 +252,12 @@ function ModalFooter({
   const { iconSizes } = useTheme();
   return (
     <View style={modalStyles.footer}>
-      <TouchableOpacity style={buttonStyles.clear} onPress={onClear}>
+      <TouchableOpacity
+        style={buttonStyles.clear}
+        accessibilityRole="button"
+        accessibilityLabel="Clear all filters"
+        onPress={onClear}
+      >
         <MaterialCommunityIcons
           name={ICONS.FILTER_OFF}
           size={iconSizes.md}
@@ -236,7 +265,12 @@ function ModalFooter({
         />
         <Text style={buttonStyles.clearText}>{t('screens.clubsManagement.clearAll')}</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={buttonStyles.apply} onPress={onClose}>
+      <TouchableOpacity
+        style={buttonStyles.apply}
+        accessibilityRole="button"
+        accessibilityLabel="Apply filters"
+        onPress={onClose}
+      >
         <Text style={buttonStyles.applyText}>{t('screens.clubsManagement.applyFilters')}</Text>
       </TouchableOpacity>
     </View>

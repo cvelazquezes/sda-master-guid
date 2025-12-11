@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
-import { User, Club, ApprovalStatus } from '../../../../types';
-import { userService } from '../../../../infrastructure/repositories/userService';
+import { initialFilters, type UserFilters } from './types';
 import { clubService } from '../../../../infrastructure/repositories/clubService';
+import { userService } from '../../../../infrastructure/repositories/userService';
 import { MESSAGES, EMPTY_VALUE } from '../../../../shared/constants';
-import { UserFilters, initialFilters } from './types';
+import { type User, type Club, ApprovalStatus } from '../../../../types';
 
-interface UseUsersDataReturn {
+type UseUsersDataReturn = {
   users: User[];
   clubs: Club[];
   refreshing: boolean;
@@ -21,12 +21,13 @@ interface UseUsersDataReturn {
   clearFilters: () => void;
   pendingCount: number;
   approvedCount: number;
-}
+};
 
 export function useUsersData(): UseUsersDataReturn {
   const [users, setUsers] = useState<User[]>([]);
   const [clubs, setClubs] = useState<Club[]>([]);
-  const [, setLoading] = useState(true);
+  // eslint-disable-next-line react/hook-use-state, @typescript-eslint/naming-convention -- setter used for side effects only
+  const [_loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState(EMPTY_VALUE);
   const [activeTab, setActiveTab] = useState<'approved' | 'pending'>('approved');

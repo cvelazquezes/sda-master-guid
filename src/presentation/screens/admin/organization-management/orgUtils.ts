@@ -1,5 +1,5 @@
-import { Club } from '../../../../types';
-import { HIERARCHY_FIELDS, ICONS, OrganizationType } from '../../../../shared/constants';
+import { HIERARCHY_FIELDS, ICONS, type OrganizationType } from '../../../../shared/constants';
+import type { Club } from '../../../../types';
 
 export function getTypeLabel(type: OrganizationType, t: (key: string) => string): string {
   const labels: Record<OrganizationType, string> = {

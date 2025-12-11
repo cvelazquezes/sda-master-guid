@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { getTypeIcon, getTypeColor } from './orgUtils';
+import { createCardStyles } from './styles';
+import { A11Y_ROLE, ICONS, TOUCH_OPACITY } from '../../../../shared/constants';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
-import { A11Y_ROLE, ICONS, TOUCH_OPACITY } from '../../../../shared/constants';
-import { createCardStyles } from './styles';
-import { getTypeIcon, getTypeColor } from './orgUtils';
 import type { OrganizationItem } from './types';
 
 type OrgCardProps = {
@@ -64,9 +64,9 @@ function CardHeader({
       </View>
       <TouchableOpacity
         style={cardStyles.deleteButton}
-        onPress={onDelete}
         accessibilityRole={A11Y_ROLE.BUTTON}
         accessibilityLabel={deleteLabel}
+        onPress={onDelete}
       >
         <MaterialCommunityIcons
           name={ICONS.DELETE_OUTLINE}
@@ -98,6 +98,8 @@ export function OrgCard({ org, onEdit, onDelete, colors, t }: OrgCardProps): Rea
     <TouchableOpacity
       style={[cardStyles.card, { backgroundColor: colors.surface }]}
       activeOpacity={TOUCH_OPACITY.default}
+      accessibilityRole="button"
+      accessibilityLabel={`Edit ${org.name}`}
       onPress={(): void => onEdit(org)}
     >
       <CardHeader
@@ -106,8 +108,8 @@ export function OrgCard({ org, onEdit, onDelete, colors, t }: OrgCardProps): Rea
         iconColor={iconColor}
         deleteLabel={deleteLabel}
         colors={colors}
-        onDelete={(): void => onDelete(org)}
         cardStyles={cardStyles}
+        onDelete={(): void => onDelete(org)}
       />
       <View style={[cardStyles.footer, { borderTopColor: colors.border }]}>
         <MaterialCommunityIcons

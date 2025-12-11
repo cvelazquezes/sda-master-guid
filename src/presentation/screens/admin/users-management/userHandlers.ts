@@ -1,7 +1,7 @@
 import { Alert } from 'react-native';
-import { UserRole } from '../../../../types';
 import { userService } from '../../../../infrastructure/repositories/userService';
 import { ALERT_BUTTON_STYLE } from '../../../../shared/constants';
+import { UserRole } from '../../../../types';
 
 type TranslationFn = (key: string, opts?: Record<string, unknown>) => string;
 
@@ -19,13 +19,13 @@ export async function handleToggleUserStatus(
   }
 }
 
-interface HandleApproveUserOptions {
+type HandleApproveUserOptions = {
   userId: string;
   userName: string;
   userRole: UserRole;
   loadData: () => Promise<void>;
   t: TranslationFn;
-}
+};
 
 export function handleApproveUser(options: HandleApproveUserOptions): void {
   const { userId, userName, userRole, loadData, t } = options;

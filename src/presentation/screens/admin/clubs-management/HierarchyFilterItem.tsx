@@ -1,19 +1,19 @@
 import React, { useMemo } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { createFilterStyles } from './styles';
+import { ICONS } from '../../../../shared/constants';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
-import { ICONS } from '../../../../shared/constants';
-import { createFilterStyles } from './styles';
 
-interface HierarchyFilterItemProps {
+type HierarchyFilterItemProps = {
   icon: string;
   label: string;
   values: string[];
   selectedValue: string;
   onSelect: (value: string) => void;
   colors: { primary: string; success: string };
-}
+};
 
 function SingleValueItem({
   icon,
@@ -66,6 +66,9 @@ function ValueOption({
   return (
     <TouchableOpacity
       style={[filterStyles.option, selected && filterStyles.optionActive]}
+      accessibilityRole="radio"
+      accessibilityState={{ selected }}
+      accessibilityLabel={value}
       onPress={onSelect}
     >
       <Text style={[filterStyles.optionText, selected && filterStyles.optionTextActive]}>
@@ -94,7 +97,15 @@ export function HierarchyFilterItem({
     return null;
   }
   if (values.length === 1) {
-    return <SingleValueItem icon={icon} label={label} value={values[0]} colors={colors} filterStyles={filterStyles} />;
+    return (
+      <SingleValueItem
+        icon={icon}
+        label={label}
+        value={values[0]}
+        colors={colors}
+        filterStyles={filterStyles}
+      />
+    );
   }
   return (
     <View>
@@ -104,9 +115,9 @@ export function HierarchyFilterItem({
           key={v}
           value={v}
           selected={selectedValue === v}
-          onSelect={(): void => onSelect(v)}
           color={colors.primary}
           filterStyles={filterStyles}
+          onSelect={(): void => onSelect(v)}
         />
       ))}
     </View>

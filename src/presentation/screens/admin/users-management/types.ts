@@ -1,6 +1,6 @@
 import { FILTER_STATUS, EMPTY_VALUE } from '../../../../shared/constants';
 
-export interface UserFilters {
+export type UserFilters = {
   division: string;
   union: string;
   association: string;
@@ -8,7 +8,7 @@ export interface UserFilters {
   clubId: string;
   role: string;
   status: string;
-}
+};
 
 export const initialFilters: UserFilters = {
   division: EMPTY_VALUE,

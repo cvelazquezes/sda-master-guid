@@ -1,18 +1,22 @@
 import { Alert } from 'react-native';
-import { ALERT_BUTTON_STYLE, HIERARCHY_FIELDS, OrganizationType } from '../../../../shared/constants';
-import { OrganizationItem, OrgFormData } from './types';
 import { getTypeLabel } from './orgUtils';
+import {
+  ALERT_BUTTON_STYLE,
+  HIERARCHY_FIELDS,
+  type OrganizationType,
+} from '../../../../shared/constants';
+import type { OrganizationItem, OrgFormData } from './types';
 
 type TranslationFn = (key: string, opts?: Record<string, unknown>) => string;
 
-interface HandleSaveOptions {
+type HandleSaveOptions = {
   formData: OrgFormData;
   selectedType: OrganizationType;
   editMode: boolean;
   setModalVisible: (v: boolean) => void;
   resetForm: () => void;
   t: TranslationFn;
-}
+};
 
 export function handleSave(options: HandleSaveOptions): void {
   const { formData, selectedType, editMode, setModalVisible, resetForm, t } = options;

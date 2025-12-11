@@ -1,7 +1,7 @@
 import { Alert } from 'react-native';
 import { clubService } from '../../../../infrastructure/repositories/clubService';
 import { ALERT_BUTTON_STYLE, MESSAGES, dynamicMessages } from '../../../../shared/constants';
-import { ClubFormData } from './types';
+import type { ClubFormData } from './types';
 
 export async function handleCreateClub(
   formData: ClubFormData,

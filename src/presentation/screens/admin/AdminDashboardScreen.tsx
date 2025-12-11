@@ -8,23 +8,23 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../state/AuthContext';
-import { useTheme, ThemeContextType } from '../../state/ThemeContext';
-import { StatCard } from '../../components/features/StatCard';
-import { userService } from '../../../infrastructure/repositories/userService';
 import { clubService } from '../../../infrastructure/repositories/clubService';
-import { PageHeader, SectionHeader, MenuCard } from '../../components/primitives';
+import { userService } from '../../../infrastructure/repositories/userService';
+import { ICONS, LOG_MESSAGES, MENU_ITEM_IDS, SCREENS, FLEX } from '../../../shared/constants';
 import { logger } from '../../../shared/utils/logger';
 import { ApprovalStatus } from '../../../types';
-import { ICONS, LOG_MESSAGES, MENU_ITEM_IDS, SCREENS, FLEX } from '../../../shared/constants';
+import { StatCard } from '../../components/features/StatCard';
+import { PageHeader, SectionHeader, MenuCard } from '../../components/primitives';
+import { useAuth } from '../../state/AuthContext';
+import { useTheme, type ThemeContextType } from '../../state/ThemeContext';
 
-interface DashboardStats {
+type DashboardStats = {
   totalUsers: number;
   activeUsers: number;
   totalClubs: number;
   activeClubs: number;
   pendingApprovals: number;
-}
+};
 
 const initialStats: DashboardStats = {
   totalUsers: 0,
@@ -80,9 +80,9 @@ const AdminDashboardScreen = (): React.JSX.Element => {
   return (
     <ScrollView style={containerStyle}>
       <PageHeader
+        showActions
         title={t('screens.adminDashboard.title')}
         subtitle={t('screens.adminDashboard.welcomeSubtitle', { name: user?.name })}
-        showActions
       />
       <StatsSection stats={stats} colors={colors} spacing={spacing} t={t} navigation={navigation} />
       <View style={{ padding: spacing.lg }}>
@@ -103,13 +103,13 @@ const AdminDashboardScreen = (): React.JSX.Element => {
 };
 
 // Extracted stats section component
-interface StatsSectionProps {
+type StatsSectionProps = {
   stats: DashboardStats;
   colors: ThemeContextType['colors'];
   spacing: ThemeContextType['spacing'];
   t: ReturnType<typeof useTranslation>['t'];
   navigation: ReturnType<typeof useNavigation>;
-}
+};
 
 function StatsSection({
   stats,

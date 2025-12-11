@@ -102,7 +102,13 @@ export function CreateClubModal({
   };
 
   return (
-    <Modal transparent visible={visible} animationType={anim} onRequestClose={onClose}>
+    <Modal
+      transparent
+      accessibilityViewIsModal
+      visible={visible}
+      animationType={anim}
+      onRequestClose={onClose}
+    >
       <View style={overlayStyle}>
         <View style={contentStyle}>
           {isMobile && (
@@ -155,7 +161,12 @@ function ModalHeader({ onClose, colors, t, modalStyles }: ModalHeaderProps): Rea
       <Text style={[modalStyles.title, { color: colors.textPrimary }]}>
         {t('screens.clubsManagement.createNewClub')}
       </Text>
-      <TouchableOpacity style={modalStyles.closeButton} onPress={onClose}>
+      <TouchableOpacity
+        style={modalStyles.closeButton}
+        accessibilityRole="button"
+        accessibilityLabel="Close modal"
+        onPress={onClose}
+      >
         <MaterialCommunityIcons
           name={ICONS.CLOSE}
           size={iconSizes.lg}
@@ -179,9 +190,7 @@ function InfoBanner({
   return (
     <View style={filterStyles.infoBanner}>
       <MaterialCommunityIcons name={ICONS.INFORMATION} size={iconSizes.sm} color={colors.primary} />
-      <Text style={filterStyles.infoText}>
-        {t('screens.clubsManagement.filterDescription')}
-      </Text>
+      <Text style={filterStyles.infoText}>{t('screens.clubsManagement.filterDescription')}</Text>
     </View>
   );
 }
@@ -210,6 +219,7 @@ function ClubInfoSection({
         value={formData.name}
         placeholder={t('placeholders.enterClubName')}
         icon={ICONS.ACCOUNT_GROUP}
+        accessibilityHint="Required field"
         onChangeText={(text): void => setFormData((p) => ({ ...p, name: text }))}
       />
       <Input
@@ -219,6 +229,7 @@ function ClubInfoSection({
         value={formData.description}
         placeholder={t('placeholders.enterClubDescription')}
         icon={ICONS.TEXT}
+        accessibilityHint="Required field"
         onChangeText={(text): void => setFormData((p) => ({ ...p, description: text }))}
       />
     </View>
@@ -378,7 +389,14 @@ function FreqOption({
   const iconColor = isActive ? colors.primary : option.iconColor || colors.textSecondary;
   const optStyle = [filterStyles.option, isActive && filterStyles.optionActive];
   return (
-    <TouchableOpacity key={option.id} style={optStyle} onPress={onPress}>
+    <TouchableOpacity
+      key={option.id}
+      style={optStyle}
+      accessibilityRole="radio"
+      accessibilityState={{ selected: isActive }}
+      accessibilityLabel={option.title}
+      onPress={onPress}
+    >
       <View style={filterStyles.optionContent}>
         <MaterialCommunityIcons
           name={option.icon as typeof ICONS.CHECK}
@@ -439,8 +457,9 @@ function SettingsSection({
         placeholder={t('placeholders.enterGroupSize')}
         icon={ICONS.ACCOUNT_MULTIPLE}
         keyboardType={KEYBOARD_TYPE.NUMERIC}
+        accessibilityHint="Required field"
         onChangeText={(txt): void =>
-          setFormData((p) => ({ ...p, groupSize: parseInt(txt) || DEFAULT_GROUP_SIZE }))
+          setFormData((p) => ({ ...p, groupSize: parseInt(txt, 10) || DEFAULT_GROUP_SIZE }))
         }
       />
     </View>
@@ -467,7 +486,12 @@ function ModalFooter({
   const { iconSizes, colors: themeColors } = useTheme();
   return (
     <View style={modalStyles.footer}>
-      <TouchableOpacity style={buttonStyles.clear} onPress={onClose}>
+      <TouchableOpacity
+        style={buttonStyles.clear}
+        accessibilityRole="button"
+        accessibilityLabel="Cancel"
+        onPress={onClose}
+      >
         <MaterialCommunityIcons
           name={ICONS.CLOSE_CIRCLE}
           size={iconSizes.md}
@@ -475,7 +499,12 @@ function ModalFooter({
         />
         <Text style={buttonStyles.clearText}>{t('common.cancel')}</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={buttonStyles.apply} onPress={onCreateClub}>
+      <TouchableOpacity
+        style={buttonStyles.apply}
+        accessibilityRole="button"
+        accessibilityLabel="Create club"
+        onPress={onCreateClub}
+      >
         <MaterialCommunityIcons
           name={ICONS.PLUS_CIRCLE}
           size={iconSizes.md}

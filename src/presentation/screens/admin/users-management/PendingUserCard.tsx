@@ -1,9 +1,7 @@
 import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { User, UserRole, Club } from '../../../../types';
-import { Text, IconButton } from '../../../components/primitives';
-import { useTheme } from '../../../state/ThemeContext';
+import { createPendingStyles } from './styles';
 import {
   ICONS,
   TEXT_LINES,
@@ -13,9 +11,11 @@ import {
   EMPTY_VALUE,
 } from '../../../../shared/constants';
 import { MATH } from '../../../../shared/constants/numbers';
-import { createPendingStyles } from './styles';
+import { type User, type Club, UserRole } from '../../../../types';
+import { Text, IconButton } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
 
-interface PendingUserCardProps {
+type PendingUserCardProps = {
   user: User;
   clubs: Club[];
   onApprove: (userId: string, userName: string, userRole: UserRole) => void;
@@ -32,7 +32,7 @@ interface PendingUserCardProps {
     error: string;
   };
   t: (key: string) => string;
-}
+};
 
 function getClubName(clubId: string | null, clubs: Club[], t: (k: string) => string): string {
   if (!clubId) {
@@ -65,11 +65,11 @@ export function PendingUserCard({
       <PendingInfo user={user} clubs={clubs} colors={colors} t={t} pendingStyles={pendingStyles} />
       <PendingActions
         user={user}
-        onApprove={onApprove}
-        onReject={onReject}
         colors={colors}
         t={t}
         pendingStyles={pendingStyles}
+        onApprove={onApprove}
+        onReject={onReject}
       />
     </View>
   );
@@ -233,19 +233,19 @@ function PendingActions({
     <View style={pendingStyles.actionsContainer}>
       <IconButton
         icon={ICONS.CLOSE_CIRCLE}
-        onPress={(): void => onReject(user.id, user.name)}
         size={COMPONENT_SIZE.md}
         color={colors.textInverse}
         style={[pendingStyles.rejectButton, { backgroundColor: colors.error }]}
         accessibilityLabel={t('screens.usersManagement.rejectUser')}
+        onPress={(): void => onReject(user.id, user.name)}
       />
       <IconButton
         icon={ICONS.CHECK_CIRCLE}
-        onPress={(): void => onApprove(user.id, user.name, user.role)}
         size={COMPONENT_SIZE.md}
         color={colors.textInverse}
         style={pendingStyles.approveButton}
         accessibilityLabel={t('screens.usersManagement.approveUser')}
+        onPress={(): void => onApprove(user.id, user.name, user.role)}
       />
     </View>
   );

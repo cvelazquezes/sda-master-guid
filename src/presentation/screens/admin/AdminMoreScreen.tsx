@@ -8,11 +8,11 @@ import React from 'react';
 import { View, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '../../state/ThemeContext';
-import { PageHeader, MenuCard, SectionHeader } from '../../components/primitives';
 import { ICONS, MENU_ITEM_IDS, SCREENS, FLEX } from '../../../shared/constants';
+import { PageHeader, MenuCard, SectionHeader } from '../../components/primitives';
+import { useTheme } from '../../state/ThemeContext';
 
-interface MenuItem {
+type MenuItem = {
   id: string;
   title: string;
   description: string;
@@ -20,7 +20,7 @@ interface MenuItem {
   screen: string | null;
   color: string;
   disabled?: boolean;
-}
+};
 
 // Extracted menu section component to reduce main component size
 function MenuSection({
@@ -43,8 +43,8 @@ function MenuSection({
           description={item.disabled ? t('common.comingSoon') : item.description}
           icon={item.icon}
           color={item.disabled ? colors.textTertiary : item.color}
-          onPress={() => item.screen && navigation.navigate(item.screen as never)}
           disabled={item.disabled}
+          onPress={() => item.screen && navigation.navigate(item.screen as never)}
         />
       ))}
     </>
@@ -94,9 +94,9 @@ const AdminMoreScreen = (): React.JSX.Element => {
   return (
     <View style={containerStyle}>
       <PageHeader
+        showActions
         title={t('screens.adminMore.title')}
         subtitle={t('screens.adminMore.subtitle')}
-        showActions
       />
       <ScrollView style={{ flex: FLEX.ONE }}>
         <View style={contentStyle}>

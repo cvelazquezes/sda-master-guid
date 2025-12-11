@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { filterBySearch } from './orgUtils';
+import { createFilterStyles } from './styles';
+import { ICONS } from '../../../../shared/constants';
 import { Text, Input } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
-import { ICONS } from '../../../../shared/constants';
-import { createFilterStyles } from './styles';
-import { filterBySearch } from './orgUtils';
 
 type HierarchySelectorProps = {
   title: string;
@@ -75,7 +75,7 @@ function SelectedItem({
   selectedValue,
   onClear,
   primary,
-  tertiary,
+  _tertiary,
   textPrimary,
   filterStyles,
 }: {
@@ -84,7 +84,7 @@ function SelectedItem({
   selectedValue: string;
   onClear: () => void;
   primary: string;
-  tertiary: string;
+  _tertiary: string;
   textPrimary: string;
   filterStyles: FilterStylesType;
 }): React.JSX.Element {
@@ -94,7 +94,12 @@ function SelectedItem({
       <View style={filterStyles.sectionHeader}>
         <Text style={filterStyles.sectionTitle}>{title}</Text>
       </View>
-      <TouchableOpacity style={[filterStyles.option, filterStyles.optionActive]} onPress={onClear}>
+      <TouchableOpacity
+        style={[filterStyles.option, filterStyles.optionActive]}
+        accessibilityRole="button"
+        accessibilityLabel="Clear selection"
+        onPress={onClear}
+      >
         <View style={filterStyles.optionContent}>
           <MaterialCommunityIcons
             name={icon as typeof ICONS.EARTH}
@@ -126,7 +131,13 @@ function ItemOption({
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (
-    <TouchableOpacity key={item} style={filterStyles.option} onPress={onSelect}>
+    <TouchableOpacity
+      key={item}
+      style={filterStyles.option}
+      accessibilityRole="radio"
+      accessibilityLabel={item}
+      onPress={onSelect}
+    >
       <View style={filterStyles.optionContent}>
         <MaterialCommunityIcons
           name={icon as typeof ICONS.EARTH}
@@ -183,11 +194,11 @@ export function HierarchySelector({
         title={title}
         icon={icon}
         selectedValue={selectedValue}
-        onClear={onClear}
         primary={colors.primary}
         tertiary={colors.textTertiary}
         textPrimary={colors.textPrimary}
         filterStyles={filterStyles}
+        onClear={onClear}
       />
     );
   }
@@ -218,8 +229,8 @@ export function HierarchySelector({
             item={item}
             icon={icon}
             color={colors.textTertiary}
-            onSelect={(): void => onSelect(item)}
             filterStyles={filterStyles}
+            onSelect={(): void => onSelect(item)}
           />
         ))
       )}

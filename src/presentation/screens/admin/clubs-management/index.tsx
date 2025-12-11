@@ -1,14 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { View, ScrollView, RefreshControl, useWindowDimensions } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '../../../state/ThemeContext';
-import { Club, MatchFrequency } from '../../../../types';
-import { ClubCard } from '../../../components/features/ClubCard';
-import { ClubDetailModal } from '../../../components/features/ClubDetailModal';
-import { PageHeader, SearchBar, EmptyState, Button } from '../../../components/primitives';
-import { BREAKPOINTS, HIERARCHY_FIELDS, ICONS } from '../../../../shared/constants';
-import { createStyles } from './styles';
-import { useClubsData } from './useClubsData';
+import { handleCreateClub, handleToggleClubStatus, handleDeleteClub } from './clubHandlers';
+import { CreateClubModal } from './CreateClubModal';
+import { FilterModal } from './FilterModal';
 import {
   getUniqueClubValues,
   filterClubs,
@@ -16,17 +11,22 @@ import {
   updateFilterWithCascade,
 } from './filterUtils';
 import { getFormUniqueValues, updateFormFieldWithCascade } from './formUtils';
-import { handleCreateClub, handleToggleClubStatus, handleDeleteClub } from './clubHandlers';
-import { FilterModal } from './FilterModal';
-import { CreateClubModal } from './CreateClubModal';
+import { createStyles } from './styles';
+import { useClubsData } from './useClubsData';
+import { BREAKPOINTS, HIERARCHY_FIELDS, ICONS } from '../../../../shared/constants';
+import { type Club, MatchFrequency } from '../../../../types';
+import { ClubCard } from '../../../components/features/ClubCard';
+import { ClubDetailModal } from '../../../components/features/ClubDetailModal';
+import { PageHeader, SearchBar, EmptyState, Button } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
 
-interface FrequencyOption {
+type FrequencyOption = {
   id: MatchFrequency;
   title: string;
   subtitle: string;
   icon: string;
   iconColor: string;
-}
+};
 
 function useFrequencyOptions(
   t: (k: string) => string,
@@ -128,57 +128,54 @@ const ClubsManagementScreen = (): React.JSX.Element => {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <PageHeader
+        showActions
         title={t('screens.clubsManagement.title')}
         subtitle={t('screens.clubsManagement.subtitle', {
           filtered: filteredClubs.length,
           total: clubs.length,
         })}
-        showActions
       />
       <SearchBar
         value={searchQuery}
-        onChangeText={setSearchQuery}
         placeholder={t('placeholders.searchClubs')}
-        onFilterPress={(): void => setFilterVisible(true)}
         filterActive={getActiveFilterCount(filters, searchQuery) > 0}
+        onChangeText={setSearchQuery}
+        onFilterPress={(): void => setFilterVisible(true)}
       />
       <View style={styles.content}>
         <Button
           title={t('screens.clubsManagement.createNewClub')}
-          onPress={(): void => setModalVisible(true)}
           icon={ICONS.PLUS}
+          onPress={(): void => setModalVisible(true)}
         />
         <ClubsList
           loading={loading}
           clubs={filteredClubs}
           totalClubs={clubs.length}
-          onSelectClub={onSelectClub}
           loadClubs={loadClubs}
           t={t}
+          onSelectClub={onSelectClub}
         />
       </View>
       <FilterModal
         visible={filterVisible}
-        onClose={(): void => setFilterVisible(false)}
         isMobile={isMobile}
         filters={filters}
-        onUpdateFilter={onUpdateFilter}
-        onClearFilters={clearFilters}
         availableDivisions={filterVals.divisions}
         availableUnions={filterVals.unions}
         availableAssociations={filterVals.associations}
         availableChurches={filterVals.churches}
         colors={colors}
         t={t}
+        onClose={(): void => setFilterVisible(false)}
+        onUpdateFilter={onUpdateFilter}
+        onClearFilters={clearFilters}
       />
       <CreateClubModal
         visible={modalVisible}
-        onClose={onCloseCreateModal}
         isMobile={isMobile}
         formData={formData}
         setFormData={setFormData}
-        onUpdateField={onUpdateFormField}
-        onCreateClub={onCreateClub}
         availableDivisions={formVals.divisions}
         availableUnions={formVals.unions}
         availableAssociations={formVals.associations}
@@ -186,18 +183,21 @@ const ClubsManagementScreen = (): React.JSX.Element => {
         frequencyOptions={frequencyOptions}
         colors={colors}
         t={t}
+        onClose={onCloseCreateModal}
+        onUpdateField={onUpdateFormField}
+        onCreateClub={onCreateClub}
       />
       <ClubDetailModal visible={detailVisible} club={selectedClub} onClose={onCloseDetail} />
     </ScrollView>
   );
 };
 
-interface HierarchyValues {
+type HierarchyValues = {
   divisions: string[];
   unions: string[];
   associations: string[];
   churches: string[];
-}
+};
 
 function canAutoSelect(arr: string[], current: string | number | undefined): boolean {
   return arr.length === 1 && !current;
@@ -208,17 +208,21 @@ function getFilterUpdates(
   current: Record<string, string | number | undefined>
 ): Record<string, string> {
   const updates: Record<string, string> = {};
+  const [firstDivision] = vals.divisions;
+  const [firstUnion] = vals.unions;
+  const [firstAssociation] = vals.associations;
+  const [firstChurch] = vals.churches;
   if (canAutoSelect(vals.divisions, current.division)) {
-    updates.division = vals.divisions[0];
+    updates.division = firstDivision;
   }
   if (canAutoSelect(vals.unions, current.union)) {
-    updates.union = vals.unions[0];
+    updates.union = firstUnion;
   }
   if (canAutoSelect(vals.associations, current.association)) {
-    updates.association = vals.associations[0];
+    updates.association = firstAssociation;
   }
   if (canAutoSelect(vals.churches, current.church)) {
-    updates.church = vals.churches[0];
+    updates.church = firstChurch;
   }
   return updates;
 }
@@ -236,17 +240,21 @@ function getFormUpdates(
   curr: Record<string, string | number | undefined>
 ): Record<string, string> {
   const updates: Record<string, string> = {};
+  const [firstDivision] = vals.divisions;
+  const [firstUnion] = vals.unions;
+  const [firstAssociation] = vals.associations;
+  const [firstChurch] = vals.churches;
   if (canAutoSelect(vals.divisions, curr.division)) {
-    updates.division = vals.divisions[0];
+    updates.division = firstDivision;
   }
   if (canAutoSelectWithParent(vals.unions, curr.union, curr.division)) {
-    updates.union = vals.unions[0];
+    updates.union = firstUnion;
   }
   if (canAutoSelectWithParent(vals.associations, curr.association, curr.union)) {
-    updates.association = vals.associations[0];
+    updates.association = firstAssociation;
   }
   if (canAutoSelectWithParent(vals.churches, curr.church, curr.association)) {
-    updates.church = vals.churches[0];
+    updates.church = firstChurch;
   }
   return updates;
 }
@@ -268,13 +276,13 @@ function useFilterAutoSelect(
   }, [visible, vals, filters, setFilters]);
 }
 
-interface UseFormAutoSelectOptions {
+type UseFormAutoSelectOptions = {
   visible: boolean;
   count: number;
   form: Record<string, string | number>;
   setForm: React.Dispatch<React.SetStateAction<Record<string, string | number>>>;
   vals: HierarchyValues;
-}
+};
 
 function useFormAutoSelect(options: UseFormAutoSelectOptions): void {
   const { visible, count, form, setForm, vals } = options;
@@ -289,14 +297,14 @@ function useFormAutoSelect(options: UseFormAutoSelectOptions): void {
   }, [visible, count, vals, form, setForm]);
 }
 
-interface ClubsListProps {
+type ClubsListProps = {
   loading: boolean;
   clubs: Club[];
   totalClubs: number;
   onSelectClub: (club: Club) => void;
   loadClubs: () => void;
   t: (key: string) => string;
-}
+};
 
 function ClubsList({
   loading,
@@ -335,9 +343,9 @@ function ClubsList({
       {clubs.map((club) => (
         <ClubCard
           key={club.id}
+          showAdminActions
           club={club}
           onPress={(): void => onSelectClub(club)}
-          showAdminActions
           onToggleStatus={(): void => handleToggleClubStatus(club.id, club.isActive, loadClubs)}
           onDelete={(): void => handleDeleteClub(club.id, club.name, loadClubs)}
         />

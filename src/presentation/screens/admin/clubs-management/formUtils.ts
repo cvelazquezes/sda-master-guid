@@ -1,6 +1,6 @@
-import { Club } from '../../../../types';
 import { HIERARCHY_FIELDS, EMPTY_VALUE } from '../../../../shared/constants';
-import { ClubFormData, HierarchyField } from './types';
+import type { ClubFormData, HierarchyField } from './types';
+import type { Club } from '../../../../types';
 
 export function getFormUniqueValues(
   clubs: Club[],

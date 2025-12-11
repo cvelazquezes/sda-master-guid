@@ -1,18 +1,23 @@
 import React, { useMemo } from 'react';
 import { View, ScrollView, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { getTypeLabel, getTypeIcon, getTypeColor } from './orgUtils';
+import { createStyles } from './styles';
+import {
+  A11Y_ROLE,
+  ORGANIZATION_TYPES,
+  type OrganizationType,
+  type ICONS,
+} from '../../../../shared/constants';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
-import { A11Y_ROLE, ORGANIZATION_TYPES, OrganizationType, ICONS } from '../../../../shared/constants';
-import { createStyles } from './styles';
-import { getTypeLabel, getTypeIcon, getTypeColor } from './orgUtils';
 
-interface TypeSelectorProps {
+type TypeSelectorProps = {
   selectedType: OrganizationType;
   onSelectType: (type: OrganizationType) => void;
   colors: { primary: string; info: string; warning: string; success: string; textInverse: string };
   t: (key: string, opts?: Record<string, unknown>) => string;
-}
+};
 
 export function TypeSelector({
   selectedType,
@@ -33,10 +38,10 @@ export function TypeSelector({
       <TouchableOpacity
         key={type}
         style={btnStyle}
-        onPress={(): void => onSelectType(type)}
         accessibilityRole={A11Y_ROLE.BUTTON}
         accessibilityLabel={t('screens.organizationManagement.viewTypes', { type: label })}
         accessibilityState={{ selected: isSelected }}
+        onPress={(): void => onSelectType(type)}
       >
         <MaterialCommunityIcons
           name={getTypeIcon(type) as typeof ICONS.CHECK}

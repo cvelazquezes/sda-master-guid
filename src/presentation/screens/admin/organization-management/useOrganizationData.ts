@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Alert } from 'react-native';
-import { Club } from '../../../../types';
+import { initialFormData, type OrganizationItem, type OrgFormData } from './types';
 import { clubService } from '../../../../infrastructure/repositories/clubService';
-import { HIERARCHY_FIELDS, OrganizationType, EMPTY_VALUE } from '../../../../shared/constants';
-import { OrganizationItem, OrgFormData, initialFormData } from './types';
+import { HIERARCHY_FIELDS, EMPTY_VALUE, type OrganizationType } from '../../../../shared/constants';
+import type { Club } from '../../../../types';
 
 type TranslationFn = (key: string, options?: Record<string, unknown>) => string;
 
-interface UseOrganizationDataReturn {
+type UseOrganizationDataReturn = {
   clubs: Club[];
   organizations: OrganizationItem[];
   loading: boolean;
@@ -24,15 +24,15 @@ interface UseOrganizationDataReturn {
   parentAssociationSearch: string;
   setParentAssociationSearch: (s: string) => void;
   resetForm: () => void;
-}
+};
 
-interface AddOrgToMapOptions {
+type AddOrgToMapOptions = {
   map: Map<string, OrganizationItem>;
   key: string;
   name: string;
   type: OrganizationType;
   parent?: string;
-}
+};
 
 function addOrgToMap(options: AddOrgToMapOptions): void {
   const { map, key, name, type, parent } = options;

@@ -1,19 +1,19 @@
-import { OrganizationType, EMPTY_VALUE } from '../../../../shared/constants';
+import { EMPTY_VALUE, type OrganizationType } from '../../../../shared/constants';
 
-export interface OrganizationItem {
+export type OrganizationItem = {
   id: string;
   name: string;
   type: OrganizationType;
   parent?: string;
   clubCount: number;
-}
+};
 
-export interface OrgFormData {
+export type OrgFormData = {
   name: string;
   parentDivision: string;
   parentUnion: string;
   parentAssociation: string;
-}
+};
 
 export const initialFormData: OrgFormData = {
   name: EMPTY_VALUE,

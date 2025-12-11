@@ -1,6 +1,6 @@
-import { Club } from '../../../../types';
 import { FILTER_STATUS, HIERARCHY_FIELDS, EMPTY_VALUE } from '../../../../shared/constants';
-import { ClubFilters, HierarchyField } from './types';
+import type { ClubFilters, HierarchyField } from './types';
+import type { Club } from '../../../../types';
 
 export function getUniqueClubValues(
   clubs: Club[],

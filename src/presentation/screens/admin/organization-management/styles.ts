@@ -2,8 +2,15 @@
  * Organization Management Screen Styles
  * Theme-aware style factories
  */
-import { StyleSheet } from 'react-native';
-import { FLEX, DIMENSIONS, BORDERS, TEXT_TRANSFORM, TYPOGRAPHY } from '../../../../shared/constants';
+/* eslint-disable max-lines-per-function -- Style factory functions require many style definitions */
+import { StyleSheet, type ViewStyle, type TextStyle } from 'react-native';
+import {
+  FLEX,
+  DIMENSIONS,
+  BORDERS,
+  TEXT_TRANSFORM,
+  TYPOGRAPHY,
+} from '../../../../shared/constants';
 import type { ThemeContextType } from '../../../state/ThemeContext';
 
 // ============================================================================
@@ -13,7 +20,21 @@ import type { ThemeContextType } from '../../../state/ThemeContext';
 export const createStyles = (
   colors: ThemeContextType['colors'],
   spacing: ThemeContextType['spacing']
-) =>
+): {
+  container: ViewStyle;
+  typeSelectorContainer: ViewStyle;
+  typeSelector: ViewStyle;
+  typeButton: ViewStyle;
+  typeButtonActive: ViewStyle;
+  typeButtonText: TextStyle;
+  typeButtonTextActive: TextStyle;
+  actionsContainer: ViewStyle;
+  searchContainer: ViewStyle;
+  createButton: ViewStyle;
+  createButtonText: TextStyle;
+  content: ViewStyle;
+  loadingText: TextStyle;
+} =>
   StyleSheet.create({
     container: {
       flex: FLEX.ONE,
@@ -100,7 +121,17 @@ export const createCardStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  card: ViewStyle;
+  header: ViewStyle;
+  title: ViewStyle;
+  info: ViewStyle;
+  name: TextStyle;
+  parent: TextStyle;
+  deleteButton: ViewStyle;
+  footer: ViewStyle;
+  clubCount: TextStyle;
+} =>
   StyleSheet.create({
     card: {
       backgroundColor: colors.backgroundPrimary,
@@ -169,7 +200,18 @@ export const createModalStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  overlay: ViewStyle;
+  overlayMobile: ViewStyle;
+  content: ViewStyle;
+  contentMobile: ViewStyle;
+  handle: ViewStyle;
+  header: ViewStyle;
+  title: TextStyle;
+  closeButton: ViewStyle;
+  body: ViewStyle;
+  footer: ViewStyle;
+} =>
   StyleSheet.create({
     overlay: {
       flex: FLEX.ONE,
@@ -243,7 +285,26 @@ export const createFilterStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  infoBanner: ViewStyle;
+  infoText: TextStyle;
+  section: ViewStyle;
+  sectionHeader: ViewStyle;
+  sectionTitle: TextStyle;
+  resultsCount: TextStyle;
+  hierarchyItem: ViewStyle;
+  hierarchyInfo: ViewStyle;
+  hierarchyLabel: TextStyle;
+  hierarchyValue: TextStyle;
+  option: ViewStyle;
+  optionActive: ViewStyle;
+  optionContent: ViewStyle;
+  optionText: TextStyle;
+  optionTextActive: TextStyle;
+  noResultsText: TextStyle;
+  warningBanner: ViewStyle;
+  warningText: TextStyle;
+} =>
   StyleSheet.create({
     infoBanner: {
       flexDirection: 'row',
@@ -373,7 +434,7 @@ export const createButtonStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): { clear: ViewStyle; clearText: TextStyle; apply: ViewStyle; applyText: TextStyle } =>
   StyleSheet.create({
     clear: {
       flex: FLEX.ONE,

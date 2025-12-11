@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
-import { Club } from '../../../../types';
+import { initialFilters, initialFormData, type ClubFilters, type ClubFormData } from './types';
 import { clubService } from '../../../../infrastructure/repositories/clubService';
 import { EMPTY_VALUE, MESSAGES } from '../../../../shared/constants';
-import { ClubFilters, ClubFormData, initialFilters, initialFormData } from './types';
+import type { Club } from '../../../../types';
 
-interface UseClubsDataReturn {
+type UseClubsDataReturn = {
   clubs: Club[];
   loading: boolean;
   refreshing: boolean;
@@ -19,7 +19,7 @@ interface UseClubsDataReturn {
   onRefresh: () => void;
   resetForm: () => void;
   clearFilters: () => void;
-}
+};
 
 export function useClubsData(): UseClubsDataReturn {
   const [clubs, setClubs] = useState<Club[]>([]);

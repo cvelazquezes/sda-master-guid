@@ -1,16 +1,21 @@
+import {
+  FILTER_STATUS,
+  EMPTY_VALUE,
+  CLUB,
+  type HIERARCHY_FIELDS,
+} from '../../../../shared/constants';
 import { MatchFrequency } from '../../../../types';
-import { FILTER_STATUS, EMPTY_VALUE, CLUB, HIERARCHY_FIELDS } from '../../../../shared/constants';
 
-export interface ClubFilters {
+export type ClubFilters = {
   division: string;
   union: string;
   association: string;
   church: string;
   clubId: string;
   status: (typeof FILTER_STATUS)[keyof typeof FILTER_STATUS];
-}
+};
 
-export interface ClubFormData {
+export type ClubFormData = {
   name: string;
   description: string;
   matchFrequency: MatchFrequency;
@@ -19,7 +24,7 @@ export interface ClubFormData {
   association: string;
   union: string;
   division: string;
-}
+};
 
 export const initialFilters: ClubFilters = {
   division: EMPTY_VALUE,

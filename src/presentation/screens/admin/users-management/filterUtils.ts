@@ -1,6 +1,6 @@
-import { User, Club, ApprovalStatus, UserStatus } from '../../../../types';
 import { FILTER_STATUS, HIERARCHY_FIELDS, EMPTY_VALUE } from '../../../../shared/constants';
-import { UserFilters } from './types';
+import { type User, type Club, ApprovalStatus, UserStatus } from '../../../../types';
+import type { UserFilters } from './types';
 
 export function getUniqueClubValues(
   clubs: Club[],
@@ -109,7 +109,7 @@ function checkClubField(
   filterVal: string | undefined,
   field: keyof Club
 ): boolean {
-  return !filterVal || (club !== undefined && club[field] === filterVal);
+  return !filterVal || club?.[field] === filterVal;
 }
 
 function matchesUserHierarchy(user: User, clubs: Club[], f: UserFilters): boolean {
@@ -138,13 +138,13 @@ function matchesUserRoleAndStatus(user: User, filters: UserFilters, activeTab: s
   return true;
 }
 
-interface FilterUsersOptions {
+type FilterUsersOptions = {
   users: User[];
   clubs: Club[];
   filters: UserFilters;
   searchQuery: string;
   activeTab: string;
-}
+};
 
 export function filterUsers(options: FilterUsersOptions): User[] {
   const { users, clubs, filters, searchQuery, activeTab } = options;
