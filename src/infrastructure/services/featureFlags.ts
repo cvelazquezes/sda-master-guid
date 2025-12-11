@@ -5,8 +5,6 @@
 
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { logger } from '../../shared/utils/logger';
-import { environment, isDevelopment } from '../config/environment';
 import {
   LOG_MESSAGES,
   STORAGE_KEYS,
@@ -14,6 +12,10 @@ import {
   USER_GROUP,
   TYPEOF,
 } from '../../shared/constants';
+import { logger } from '../../shared/utils/logger';
+import { environment } from '../config/environment';
+
+const { isDevelopment } = environment;
 
 // Feature flag rollout percentages
 // Note: Using literal values here to avoid module initialization order issues
@@ -34,7 +36,7 @@ const ROLLOUT_PERCENTAGE = {
 
 export type FeatureFlagValue = boolean | string | number | object;
 
-export interface FeatureFlag {
+export type FeatureFlag = {
   key: string;
   value: FeatureFlagValue;
   enabled: boolean;
@@ -42,48 +44,48 @@ export interface FeatureFlag {
   userGroups?: string[];
   userIds?: string[];
   expiresAt?: number;
-}
+};
 
-export interface FeatureFlagConfig {
+export type FeatureFlagConfig = {
   flags: Record<string, FeatureFlag>;
   version: string;
   lastUpdated: number;
-}
+};
 
 // ============================================================================
 // Feature Flags Service
 // ============================================================================
 
 class FeatureFlagsService {
-  private flags = new Map<string, FeatureFlag>();
-  private readonly STORAGE_KEY = STORAGE_KEYS.FEATURE_FLAGS.DATA;
-  private userId: string | null = null;
-  private userGroups: string[] = [];
+  private _flags: Map<string, FeatureFlag> = new Map<string, FeatureFlag>();
+  private readonly _storageKey: string = STORAGE_KEYS.FEATURE_FLAGS.DATA;
+  private _userId: string | null = null;
+  private _userGroups: string[] = [];
 
   /**
    * Initializes the feature flags service
    */
   async initialize(userId?: string, userGroups?: string[]): Promise<void> {
-    this.userId = userId || null;
-    this.userGroups = userGroups || [];
+    this._userId = userId || null;
+    this._userGroups = userGroups || [];
 
     // Load flags from storage
-    await this.loadFromStorage();
+    await this._loadFromStorage();
 
     // Load default flags
-    this.loadDefaultFlags();
+    this._loadDefaultFlags();
 
     logger.info(LOG_MESSAGES.FEATURE_FLAGS.INITIALIZED, {
-      flagCount: this.flags.size,
-      userId: this.userId,
-      groups: this.userGroups.length,
+      flagCount: this._flags.size,
+      userId: this._userId,
+      groups: this._userGroups.length,
     });
   }
 
   /**
    * Loads default feature flags
    */
-  private loadDefaultFlags(): void {
+  private _loadDefaultFlags(): void {
     const defaultFlags: Record<string, FeatureFlag> = {
       // Performance features
       [FEATURE_FLAG_KEY.ENABLE_OFFLINE_MODE]: {
@@ -134,21 +136,21 @@ class FeatureFlagsService {
       // Admin features
       [FEATURE_FLAG_KEY.ENABLE_ADMIN_DEBUG_TOOLS]: {
         key: FEATURE_FLAG_KEY.ENABLE_ADMIN_DEBUG_TOOLS,
-        value: isDevelopment(),
-        enabled: isDevelopment(),
+        value: isDevelopment,
+        enabled: isDevelopment,
         userGroups: [USER_GROUP.SUPER_ADMIN],
       },
     };
 
     // Merge with existing flags (don't overwrite)
     for (const [key, flag] of Object.entries(defaultFlags)) {
-      if (!this.flags.has(key)) {
-        this.flags.set(key, flag);
+      if (!this._flags.has(key)) {
+        this._flags.set(key, flag);
       }
     }
   }
 
-  private isExpired(flag: FeatureFlag, featureKey: string): boolean {
+  private _isExpired(flag: FeatureFlag, featureKey: string): boolean {
     if (flag.expiresAt && Date.now() > flag.expiresAt) {
       logger.debug(LOG_MESSAGES.FEATURE_FLAGS.FLAG_EXPIRED(featureKey));
       return true;
@@ -156,23 +158,23 @@ class FeatureFlagsService {
     return false;
   }
 
-  private checkUserTargeting(flag: FeatureFlag): boolean | null {
-    if (flag.userIds && this.userId) {
-      return flag.userIds.includes(this.userId);
+  private _checkUserTargeting(flag: FeatureFlag): boolean | null {
+    if (flag.userIds && this._userId) {
+      return flag.userIds.includes(this._userId);
     }
     return null;
   }
 
-  private checkGroupTargeting(flag: FeatureFlag): boolean {
-    if (!flag.userGroups || this.userGroups.length === 0) {
+  private _checkGroupTargeting(flag: FeatureFlag): boolean {
+    if (!flag.userGroups || this._userGroups.length === 0) {
       return true;
     }
-    return flag.userGroups.some((group) => this.userGroups.includes(group));
+    return flag.userGroups.some((group) => this._userGroups.includes(group));
   }
 
-  private checkRollout(flag: FeatureFlag): boolean | null {
-    if (flag.rolloutPercentage !== undefined && this.userId) {
-      const userHash = this.hashUserId(this.userId);
+  private _checkRollout(flag: FeatureFlag): boolean | null {
+    if (flag.rolloutPercentage !== undefined && this._userId) {
+      const userHash = this._hashUserId(this._userId);
       return userHash % ROLLOUT_PERCENTAGE.FULL < flag.rolloutPercentage;
     }
     return null;
@@ -182,25 +184,25 @@ class FeatureFlagsService {
    * Checks if a feature is enabled for the current user
    */
   isEnabled(featureKey: string): boolean {
-    const flag = this.flags.get(featureKey);
+    const flag = this._flags.get(featureKey);
     if (!flag) {
       logger.warn(LOG_MESSAGES.FEATURE_FLAGS.FLAG_NOT_FOUND, { featureKey });
       return false;
     }
-    if (!flag.enabled || this.isExpired(flag, featureKey)) {
+    if (!flag.enabled || this._isExpired(flag, featureKey)) {
       return false;
     }
 
-    const userTarget = this.checkUserTargeting(flag);
+    const userTarget = this._checkUserTargeting(flag);
     if (userTarget !== null) {
       return userTarget;
     }
 
-    if (!this.checkGroupTargeting(flag)) {
+    if (!this._checkGroupTargeting(flag)) {
       return false;
     }
 
-    const rollout = this.checkRollout(flag);
+    const rollout = this._checkRollout(flag);
     if (rollout !== null) {
       return rollout;
     }
@@ -216,7 +218,7 @@ class FeatureFlagsService {
       return defaultValue;
     }
 
-    const flag = this.flags.get(featureKey);
+    const flag = this._flags.get(featureKey);
     if (!flag) {
       return defaultValue;
     }
@@ -228,8 +230,8 @@ class FeatureFlagsService {
    * Sets a feature flag programmatically
    */
   async setFlag(flag: FeatureFlag): Promise<void> {
-    this.flags.set(flag.key, flag);
-    await this.saveToStorage();
+    this._flags.set(flag.key, flag);
+    await this._saveToStorage();
     logger.debug(LOG_MESSAGES.FEATURE_FLAGS.FLAG_SET(flag.key), flag);
   }
 
@@ -238,9 +240,9 @@ class FeatureFlagsService {
    */
   async updateFlags(flags: FeatureFlag[]): Promise<void> {
     for (const flag of flags) {
-      this.flags.set(flag.key, flag);
+      this._flags.set(flag.key, flag);
     }
-    await this.saveToStorage();
+    await this._saveToStorage();
     logger.info(LOG_MESSAGES.FEATURE_FLAGS.FLAGS_UPDATED(flags.length));
   }
 
@@ -248,8 +250,8 @@ class FeatureFlagsService {
    * Removes a feature flag
    */
   async removeFlag(featureKey: string): Promise<void> {
-    this.flags.delete(featureKey);
-    await this.saveToStorage();
+    this._flags.delete(featureKey);
+    await this._saveToStorage();
     logger.debug(LOG_MESSAGES.FEATURE_FLAGS.FLAG_REMOVED(featureKey));
   }
 
@@ -257,22 +259,22 @@ class FeatureFlagsService {
    * Gets all feature flags
    */
   getAllFlags(): FeatureFlag[] {
-    return Array.from(this.flags.values());
+    return Array.from(this._flags.values());
   }
 
   /**
    * Gets all enabled flags for the current user
    */
   getEnabledFlags(): string[] {
-    return Array.from(this.flags.keys()).filter((key) => this.isEnabled(key));
+    return Array.from(this._flags.keys()).filter((key) => this.isEnabled(key));
   }
 
   /**
    * Updates user context
    */
   async setUserContext(userId: string, userGroups: string[] = []): Promise<void> {
-    this.userId = userId;
-    this.userGroups = userGroups;
+    this._userId = userId;
+    this._userGroups = userGroups;
     logger.debug(LOG_MESSAGES.FEATURE_FLAGS.USER_CONTEXT_UPDATED, { userId, groups: userGroups });
   }
 
@@ -280,22 +282,22 @@ class FeatureFlagsService {
    * Clears user context
    */
   clearUserContext(): void {
-    this.userId = null;
-    this.userGroups = [];
+    this._userId = null;
+    this._userGroups = [];
   }
 
   /**
    * Saves flags to persistent storage
    */
-  private async saveToStorage(): Promise<void> {
+  private async _saveToStorage(): Promise<void> {
     try {
       const config: FeatureFlagConfig = {
-        flags: Object.fromEntries(this.flags),
+        flags: Object.fromEntries(this._flags),
         version: '1.0',
         lastUpdated: Date.now(),
       };
 
-      await AsyncStorage.setItem(this.STORAGE_KEY, JSON.stringify(config));
+      await AsyncStorage.setItem(this._storageKey, JSON.stringify(config));
     } catch (error) {
       logger.error(LOG_MESSAGES.FEATURE_FLAGS.SAVE_FAILED, error as Error);
     }
@@ -304,19 +306,19 @@ class FeatureFlagsService {
   /**
    * Loads flags from persistent storage
    */
-  private async loadFromStorage(): Promise<void> {
+  private async _loadFromStorage(): Promise<void> {
     try {
-      const stored = await AsyncStorage.getItem(this.STORAGE_KEY);
+      const stored = await AsyncStorage.getItem(this._storageKey);
       if (stored) {
-        const config: FeatureFlagConfig = JSON.parse(stored);
+        const config = JSON.parse(stored) as FeatureFlagConfig;
 
         // Load flags into memory
         for (const [key, flag] of Object.entries(config.flags)) {
-          this.flags.set(key, flag);
+          this._flags.set(key, flag);
         }
 
         logger.debug(LOG_MESSAGES.FEATURE_FLAGS.LOADED, {
-          count: this.flags.size,
+          count: this._flags.size,
           version: config.version,
         });
       }
@@ -328,7 +330,7 @@ class FeatureFlagsService {
   /**
    * Hashes user ID for consistent rollout percentage
    */
-  private hashUserId(userId: string): number {
+  private _hashUserId(userId: string): number {
     let hash = 0;
     for (let i = 0; i < userId.length; i++) {
       const char = userId.charCodeAt(i);
@@ -342,8 +344,8 @@ class FeatureFlagsService {
    * Clears all flags
    */
   async clear(): Promise<void> {
-    this.flags.clear();
-    await AsyncStorage.removeItem(this.STORAGE_KEY);
+    this._flags.clear();
+    await AsyncStorage.removeItem(this._storageKey);
     logger.info(LOG_MESSAGES.FEATURE_FLAGS.CLEARED);
   }
 
@@ -357,10 +359,10 @@ class FeatureFlagsService {
     userGroups: string[];
   } {
     return {
-      totalFlags: this.flags.size,
+      totalFlags: this._flags.size,
       enabledFlags: this.getEnabledFlags().length,
-      userId: this.userId,
-      userGroups: this.userGroups,
+      userId: this._userId,
+      userGroups: this._userGroups,
     };
   }
 }
