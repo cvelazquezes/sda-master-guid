@@ -1,6 +1,6 @@
-import { User, MemberBalance } from '../../../../types';
+import type { User, MemberBalance } from '../../../../types';
 
-export interface UserCardProps {
+export type UserCardProps = {
   user: User;
   clubName?: string | null;
   balance?: MemberBalance;
@@ -8,14 +8,14 @@ export interface UserCardProps {
   showAdminActions?: boolean;
   onToggleStatus?: () => void;
   onDelete?: () => void;
-}
+};
 
-export interface RoleConfig {
+export type RoleConfig = {
   color: string;
   bg: string;
-}
+};
 
-export interface ThemeColors {
+export type ThemeColors = {
   surface: string;
   surfaceLight: string;
   primary: string;
@@ -24,10 +24,13 @@ export interface ThemeColors {
   textTertiary: string;
   error: string;
   errorLight: string;
+  errorAlpha20?: string;
   warning: string;
   warningLight: string;
+  warningAlpha20?: string;
   info: string;
   infoLight: string;
+  infoAlpha20?: string;
   success: string;
   border: string;
-}
+};

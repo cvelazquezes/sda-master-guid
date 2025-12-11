@@ -5,19 +5,24 @@
  */
 
 import React, { useState } from 'react';
-import { View, TouchableOpacity, ViewStyle, TextStyle } from 'react-native';
+import { View, TouchableOpacity, type TextStyle, type ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { Text } from '../primitives';
-import { useTheme, ThemeMode } from '../../state/ThemeContext';
-import { SelectionModal, SelectionItem } from '../primitives/SelectionModal';
 import { A11Y_ROLE, ICONS, THEME_MODE, FLEX } from '../../../shared/constants';
+import { useTheme, type ThemeMode } from '../../state/ThemeContext';
+import { Text } from '../primitives';
+import { SelectionModal, type SelectionItem } from '../primitives/SelectionModal';
 
-interface ThemeSwitcherProps {
+type ThemeSwitcherProps = {
   showLabel?: boolean;
-}
+};
 
-const THEME_OPTIONS: { mode: ThemeMode; icon: string; labelKey: string; subtitleKey: string }[] = [
+const THEME_OPTIONS: Array<{
+  mode: ThemeMode;
+  icon: string;
+  labelKey: string;
+  subtitleKey: string;
+}> = [
   {
     mode: THEME_MODE.LIGHT,
     icon: ICONS.WEATHER_SUNNY,
@@ -31,16 +36,16 @@ const THEME_OPTIONS: { mode: ThemeMode; icon: string; labelKey: string; subtitle
     subtitleKey: 'components.themeSwitcher.darkSubtitle',
   },
   {
-    mode: THEME_MODE.DARK_BLUE,
+    mode: THEME_MODE.MIDNIGHT_BLUE,
     icon: ICONS.CHURCH,
-    labelKey: 'settings.sdaDarkMode',
-    subtitleKey: 'components.themeSwitcher.sdaDarkSubtitle',
+    labelKey: 'settings.midnightBlue',
+    subtitleKey: 'components.themeSwitcher.midnightBlueSubtitle',
   },
   {
     mode: THEME_MODE.SYSTEM,
     icon: ICONS.THEME_LIGHT_DARK,
-    labelKey: 'settings.systemDefault',
-    subtitleKey: 'components.themeSwitcher.systemSubtitle',
+    labelKey: 'settings.auto',
+    subtitleKey: 'components.themeSwitcher.autoSubtitle',
   },
 ];
 
@@ -79,7 +84,7 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ showLabel = true }
     borderRadius: radii['3xl'],
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.primary + '20',
+    backgroundColor: `${colors.primary}20`,
   };
 
   const labelStyle: TextStyle = {
@@ -97,9 +102,9 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ showLabel = true }
     <View>
       <TouchableOpacity
         style={buttonStyle}
-        onPress={() => setModalVisible(true)}
         accessibilityLabel={t('accessibility.changeTheme')}
         accessibilityRole={A11Y_ROLE.BUTTON}
+        onPress={() => setModalVisible(true)}
       >
         <View style={iconContainerStyle}>
           <MaterialCommunityIcons
@@ -123,12 +128,12 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ showLabel = true }
 
       <SelectionModal
         visible={modalVisible}
-        onClose={() => setModalVisible(false)}
         title={t('settings.theme')}
         subtitle={t('modals.chooseTheme')}
         items={selectionItems}
-        onSelectItem={handleSelect}
         selectedItemId={mode}
+        onClose={() => setModalVisible(false)}
+        onSelectItem={handleSelect}
       />
     </View>
   );

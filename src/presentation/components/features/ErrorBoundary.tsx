@@ -3,13 +3,10 @@
  * Catches and handles React component errors gracefully
  */
 
-import React, { Component, ReactNode } from 'react';
+import React, { Component, type ReactNode } from 'react';
 import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { withTranslation, WithTranslation } from 'react-i18next';
-import { Text } from '../primitives';
-import { logger } from '../../../shared/utils/logger';
-import { designTokens, layoutConstants } from '../../theme';
+import { withTranslation, type WithTranslation } from 'react-i18next';
 import {
   ICONS,
   FLEX,
@@ -22,17 +19,20 @@ import {
   TEXT_WEIGHT,
   TEXT_ALIGN,
 } from '../../../shared/constants';
+import { logger } from '../../../shared/utils/logger';
+import { designTokens, layoutConstants } from '../../theme';
+import { Text } from '../primitives';
 
-interface Props extends WithTranslation {
+type Props = {
   children: ReactNode;
   fallback?: ReactNode;
-}
+} & WithTranslation;
 
-interface State {
+type State = {
   hasError: boolean;
   error: Error | null;
   errorInfo: React.ErrorInfo | null;
-}
+};
 
 class ErrorBoundaryClass extends Component<Props, State> {
   constructor(props: Props) {
@@ -66,6 +66,7 @@ class ErrorBoundaryClass extends Component<Props, State> {
     // this.sendToErrorTracking(error, errorInfo);
   }
 
+  // eslint-disable-next-line @typescript-eslint/typedef -- Arrow function has inline return type
   handleReset = (): void => {
     this.setState({
       hasError: false,
@@ -133,7 +134,12 @@ class ErrorBoundaryClass extends Component<Props, State> {
               </ScrollView>
             )}
 
-            <TouchableOpacity style={styles.button} onPress={this.handleReset}>
+            <TouchableOpacity
+              style={styles.button}
+              accessibilityRole="button"
+              accessibilityLabel="Try again"
+              onPress={this.handleReset}
+            >
               <Text
                 variant={TEXT_VARIANT.BODY_LARGE}
                 weight={TEXT_WEIGHT.SEMIBOLD}

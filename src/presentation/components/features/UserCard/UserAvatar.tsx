@@ -1,17 +1,17 @@
 import React from 'react';
 import { View } from 'react-native';
-import { Text } from '../../primitives';
-import { useTheme } from '../../../state/ThemeContext';
-import { TEXT_VARIANT } from '../../../../shared/constants';
 import { styles } from './styles';
+import { TEXT_VARIANT } from '../../../../shared/constants';
+import { useTheme } from '../../../state/ThemeContext';
+import { Text } from '../../primitives';
 
-interface UserAvatarProps {
+type UserAvatarProps = {
   name: string;
   isActive: boolean;
   backgroundColor: string;
   inactiveBackgroundColor: string;
   inactiveTextColor: string;
-}
+};
 
 export const UserAvatar: React.FC<UserAvatarProps> = ({
   name,

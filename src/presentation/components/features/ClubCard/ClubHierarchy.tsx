@@ -1,18 +1,18 @@
 import React from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text } from '../../primitives';
-import { useTheme } from '../../../state/ThemeContext';
-import { ICONS, TEXT_LINES } from '../../../../shared/constants';
 import { styles } from './styles';
+import { ICONS, TEXT_LINES } from '../../../../shared/constants';
+import { useTheme } from '../../../state/ThemeContext';
+import { Text } from '../../primitives';
 
-interface ClubHierarchyProps {
+type ClubHierarchyProps = {
   church?: string;
   association?: string;
   isActive: boolean;
   primaryColor: string;
   textColor: string;
-}
+};
 
 export const ClubHierarchy: React.FC<ClubHierarchyProps> = ({
   church,

@@ -5,18 +5,18 @@
  */
 
 import React, { useState } from 'react';
-import { View, TouchableOpacity, ViewStyle, TextStyle } from 'react-native';
+import { View, TouchableOpacity, type TextStyle, type ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { Text } from '../primitives';
-import { LANGUAGES, changeLanguage, Language } from '../../../shared/i18n';
-import { useTheme } from '../../state/ThemeContext';
-import { SelectionModal, SelectionItem } from '../primitives/SelectionModal';
 import { A11Y_ROLE, ICONS, FLEX } from '../../../shared/constants';
+import { LANGUAGES, changeLanguage, type Language } from '../../../shared/i18n';
+import { useTheme } from '../../state/ThemeContext';
+import { Text } from '../primitives';
+import { SelectionModal, type SelectionItem } from '../primitives/SelectionModal';
 
-interface LanguageSwitcherProps {
+type LanguageSwitcherProps = {
   showLabel?: boolean;
-}
+};
 
 // Flag emojis for each language
 const FLAG_AVATARS: Record<string, string> = {
@@ -58,7 +58,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ showLabel = 
     borderRadius: radii['3xl'],
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.info + '20',
+    backgroundColor: `${colors.info}20`,
   };
 
   const labelStyle: TextStyle = {
@@ -76,9 +76,9 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ showLabel = 
     <View>
       <TouchableOpacity
         style={buttonStyle}
-        onPress={() => setModalVisible(true)}
         accessibilityLabel={t('accessibility.changeLanguage')}
         accessibilityRole={A11Y_ROLE.BUTTON}
+        onPress={() => setModalVisible(true)}
       >
         <View style={iconContainerStyle}>
           <MaterialCommunityIcons name={ICONS.TRANSLATE} size={iconSizes.md} color={colors.info} />
@@ -98,12 +98,12 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ showLabel = 
 
       <SelectionModal
         visible={modalVisible}
-        onClose={() => setModalVisible(false)}
         title={t('settings.language')}
         subtitle={t('modals.chooseLanguage')}
         items={selectionItems}
-        onSelectItem={handleSelect}
         selectedItemId={i18n.language}
+        onClose={() => setModalVisible(false)}
+        onSelectItem={handleSelect}
       />
     </View>
   );

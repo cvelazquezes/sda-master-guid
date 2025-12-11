@@ -2,14 +2,14 @@ import React from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { IconButton } from '../../primitives';
-import { User } from '../../../../types';
-import { useTheme } from '../../../state/ThemeContext';
+import { styles } from './styles';
 import { COMPONENT_SIZE, ICONS } from '../../../../shared/constants';
 import { formatDeleteLabel } from '../../../../shared/utils/formatters';
-import { styles } from './styles';
+import { useTheme } from '../../../state/ThemeContext';
+import { IconButton } from '../../primitives';
+import type { User } from '../../../../types';
 
-interface UserActionsProps {
+type UserActionsProps = {
   user: User;
   showAdminActions: boolean;
   onToggleStatus?: () => void;
@@ -18,7 +18,7 @@ interface UserActionsProps {
   errorColor: string;
   successColor: string;
   textTertiaryColor: string;
-}
+};
 
 export const UserActions: React.FC<UserActionsProps> = ({
   user,
@@ -39,21 +39,21 @@ export const UserActions: React.FC<UserActionsProps> = ({
         {onToggleStatus && (
           <IconButton
             icon={user.isActive ? ICONS.CANCEL : ICONS.CHECK_CIRCLE}
-            onPress={onToggleStatus}
             size={COMPONENT_SIZE.md}
             color={user.isActive ? errorColor : successColor}
             accessibilityLabel={
               user.isActive ? t('accessibility.deactivateUser') : t('accessibility.activateUser')
             }
+            onPress={onToggleStatus}
           />
         )}
         {onDelete && (
           <IconButton
             icon={ICONS.DELETE_OUTLINE}
-            onPress={onDelete}
             size={COMPONENT_SIZE.md}
             color={errorColor}
             accessibilityLabel={formatDeleteLabel(user.name, t)}
+            onPress={onDelete}
           />
         )}
       </View>

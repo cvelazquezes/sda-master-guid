@@ -2,16 +2,16 @@ import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { Text } from '../../primitives';
-import { useTheme } from '../../../state/ThemeContext';
-import { A11Y_ROLE, ICONS } from '../../../../shared/constants';
-import { ThemeColors } from './types';
 import { styles } from './styles';
+import { A11Y_ROLE, ICONS } from '../../../../shared/constants';
+import { useTheme } from '../../../state/ThemeContext';
+import { Text } from '../../primitives';
+import type { ThemeColors } from './types';
 
-interface ModalHeaderProps {
+type ModalHeaderProps = {
   onClose: () => void;
   colors: ThemeColors;
-}
+};
 
 export const ModalHeader: React.FC<ModalHeaderProps> = ({ onClose, colors }) => {
   const { t } = useTranslation();
@@ -26,10 +26,10 @@ export const ModalHeader: React.FC<ModalHeaderProps> = ({ onClose, colors }) => 
         </Text>
       </View>
       <TouchableOpacity
-        onPress={onClose}
         style={styles.closeButton}
         accessibilityRole={A11Y_ROLE.BUTTON}
         accessibilityLabel={t('accessibility.closeModal')}
+        onPress={onClose}
       >
         <MaterialCommunityIcons
           name={ICONS.CLOSE}

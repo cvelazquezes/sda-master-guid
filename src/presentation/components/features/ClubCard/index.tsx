@@ -6,20 +6,20 @@
 
 import React, { memo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ClubActions } from './ClubActions';
+import { ClubIcon } from './ClubIcon';
+import { ClubInfo } from './ClubInfo';
+import { styles } from './styles';
+import { COMPONENT_NAMES } from '../../../../shared/constants';
+import { formatViewDetailsLabel } from '../../../../shared/utils/formatters';
 import { useTheme } from '../../../state/ThemeContext';
 import {
   EntityCard,
-  EntityCardRenderProps,
-  EntityCardActionProps,
+  type EntityCardActionProps,
+  type EntityCardRenderProps,
 } from '../../primitives/EntityCard';
-import { formatViewDetailsLabel } from '../../../../shared/utils/formatters';
-import { COMPONENT_NAMES } from '../../../../shared/constants';
-import { Club } from '../../../../types';
-import { ClubCardProps } from './types';
-import { ClubIcon } from './ClubIcon';
-import { ClubInfo } from './ClubInfo';
-import { ClubActions } from './ClubActions';
-import { styles } from './styles';
+import type { ClubCardProps } from './types';
+import type { Club } from '../../../../types';
 
 const ClubCardComponent: React.FC<ClubCardProps> = ({
   club,
@@ -65,10 +65,10 @@ const ClubCardComponent: React.FC<ClubCardProps> = ({
       <ClubActions
         club={entity}
         showAdminActions={showAdminActions}
+        colors={{ error: colors.error, success: colors.success, textTertiary: colors.textTertiary }}
         onToggleStatus={onToggleStatus}
         onDelete={onDelete}
         onPress={cardOnPress}
-        colors={{ error: colors.error, success: colors.success, textTertiary: colors.textTertiary }}
       />
     ),
     [showAdminActions, onToggleStatus, onDelete, colors]
@@ -78,7 +78,6 @@ const ClubCardComponent: React.FC<ClubCardProps> = ({
     <EntityCard
       entity={club}
       isActive={club.isActive}
-      onPress={onPress}
       renderIcon={renderIcon}
       renderInfo={renderInfo}
       renderActions={renderActions}
@@ -86,6 +85,7 @@ const ClubCardComponent: React.FC<ClubCardProps> = ({
       accessibilityHint={t('accessibility.doubleTapToOpenClubDetails')}
       style={styles.card}
       testID={`club-card-${club.id}`}
+      onPress={onPress}
     />
   );
 };

@@ -11,15 +11,14 @@ export * from './StatCard';
 export * from './MatchCard';
 
 // Modals
-export * from './ClassSelectionModal';
 export * from './ClubDetailModal';
 export * from './UserDetailModal';
 
+// Class Selection (includes ClassSelectionModal)
+export * from './classSelection';
+
 // Organizational
 export * from './OrganizationHierarchy';
-
-// Class Selection
-export * from './classSelection';
 
 // Utilities
 export * from './ErrorBoundary';
@@ -27,4 +26,3 @@ export * from './LoadingScreen';
 export * from './OptimizedImage';
 export * from './ThemeSwitcher';
 export * from './LanguageSwitcher';
-

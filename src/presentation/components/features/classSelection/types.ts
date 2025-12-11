@@ -2,9 +2,10 @@
  * Theme colors interface for component styling
  * Matches the colors returned by useTheme() hook
  */
-export interface ThemeColors {
+export type ThemeColors = {
   primary: string;
   primaryLight: string;
+  primaryAlpha20?: string;
   surface: string;
   surfaceLight: string;
   background: string;
@@ -15,7 +16,8 @@ export interface ThemeColors {
   border: string;
   info: string;
   infoLight: string;
+  infoAlpha20?: string;
   success: string;
   error: string;
-  [key: string]: string;
-}
+  [key: string]: string | undefined;
+};

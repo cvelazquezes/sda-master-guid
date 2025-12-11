@@ -1,6 +1,6 @@
-import { TFunction } from 'i18next';
-import { UserRole, MemberBalance } from '../../../../types';
-import { RoleConfig, ThemeColors } from './types';
+import { UserRole, type MemberBalance } from '../../../../types';
+import type { RoleConfig, ThemeColors } from './types';
+import type { TFunction } from 'i18next';
 
 export const getRoleConfig = (role: UserRole, colors: ThemeColors): RoleConfig => {
   switch (role) {

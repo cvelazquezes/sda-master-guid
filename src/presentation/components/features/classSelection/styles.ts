@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
-import { mobileFontSizes, designTokens, layoutConstants } from '../../../theme';
 import { FLEX } from '../../../../shared/constants';
+import { mobileFontSizes, designTokens, layoutConstants } from '../../../theme';
 
 export const styles = StyleSheet.create({
   modalOverlay: {

@@ -9,8 +9,8 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
+import { UserRole, ApprovalStatus, type User } from '../../../../types';
 import { UserCard } from '../UserCard';
-import { User, UserRole, ApprovalStatus } from '../../../../types';
 
 // Test data builders
 const createMockUser = (overrides?: Partial<User>): User => ({
@@ -157,8 +157,8 @@ describe('UserCard', () => {
 
       const { getByLabelText } = render(
         <UserCard
-          user={user}
           showAdminActions
+          user={user}
           onToggleStatus={onToggleStatus}
           onDelete={onDelete}
         />
@@ -182,7 +182,7 @@ describe('UserCard', () => {
       const onToggleStatus = jest.fn();
 
       const { getByLabelText } = render(
-        <UserCard user={user} showAdminActions onToggleStatus={onToggleStatus} />
+        <UserCard showAdminActions user={user} onToggleStatus={onToggleStatus} />
       );
 
       const pauseButton = getByLabelText('Pause user');
@@ -196,7 +196,7 @@ describe('UserCard', () => {
       const onToggleStatus = jest.fn();
 
       const { getByLabelText } = render(
-        <UserCard user={user} showAdminActions onToggleStatus={onToggleStatus} />
+        <UserCard showAdminActions user={user} onToggleStatus={onToggleStatus} />
       );
 
       expect(getByLabelText('Resume user')).toBeTruthy();
@@ -207,7 +207,7 @@ describe('UserCard', () => {
       const onDelete = jest.fn();
 
       const { getByLabelText } = render(
-        <UserCard user={user} showAdminActions onDelete={onDelete} />
+        <UserCard showAdminActions user={user} onDelete={onDelete} />
       );
 
       const deleteButton = getByLabelText(`Delete ${user.name}`);
@@ -245,8 +245,8 @@ describe('UserCard', () => {
 
       const { getByLabelText } = render(
         <UserCard
-          user={user}
           showAdminActions
+          user={user}
           onToggleStatus={onToggleStatus}
           onDelete={onDelete}
         />
@@ -301,7 +301,7 @@ describe('UserCard', () => {
     it('should handle all admin actions disabled', () => {
       const user = createMockUser();
 
-      const { queryByLabelText } = render(<UserCard user={user} showAdminActions />);
+      const { queryByLabelText } = render(<UserCard showAdminActions user={user} />);
 
       // No actions should be visible when callbacks are not provided
       expect(queryByLabelText(/Pause/)).toBeNull();

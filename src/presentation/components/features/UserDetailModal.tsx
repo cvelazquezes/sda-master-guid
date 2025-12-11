@@ -1,28 +1,23 @@
+/* eslint-disable max-lines-per-function, complexity -- Modal with multiple states and sections */
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { Text } from '../primitives';
-import { User, Club, UserRole } from '../../../types';
 import { OrganizationHierarchy } from './OrganizationHierarchy';
 import { clubService } from '../../../infrastructure/repositories/clubService';
-import { Modal } from '../primitives';
-import { useTheme } from '../../state/ThemeContext';
-import {
-  mobileTypography,
-  mobileIconSizes,
-  mobileFontSizes,
-  layoutConstants,
-} from '../../theme';
-import { designTokens } from '../../theme/designTokens';
-import { logger } from '../../../shared/utils/logger';
 import { ACTIVITY_INDICATOR_SIZE, ICONS, LOG_MESSAGES, FLEX } from '../../../shared/constants';
+import { logger } from '../../../shared/utils/logger';
+import { UserRole, type Club, type User } from '../../../types';
+import { useTheme } from '../../state/ThemeContext';
+import { mobileTypography, mobileIconSizes, mobileFontSizes, layoutConstants } from '../../theme';
+import { designTokens } from '../../theme/designTokens';
+import { Modal, Text } from '../primitives';
 
-interface UserDetailModalProps {
+type UserDetailModalProps = {
   visible: boolean;
   user: User | null;
   onClose: () => void;
-}
+};
 
 export const UserDetailModal: React.FC<UserDetailModalProps> = ({ visible, user, onClose }) => {
   const { t } = useTranslation();
@@ -68,10 +63,11 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ visible, user,
 
   return (
     <Modal
+      accessibilityViewIsModal
       visible={visible}
-      onClose={onClose}
       title={user.name}
       subtitle={t('components.userDetailModal.subtitle')}
+      onClose={onClose}
     >
       {/* Personal Information */}
       <View style={[styles.section, { borderBottomColor: colors.border }]}>
@@ -195,6 +191,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ visible, user,
             {t('components.userDetailModal.organizationAndClub')}
           </Text>
           <OrganizationHierarchy
+            initialExpanded
             data={{
               division: club.division,
               union: club.union,
@@ -203,14 +200,17 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ visible, user,
               clubName: club.name,
             }}
             title={t('components.userDetailModal.organizationalHierarchy')}
-            initialExpanded
           />
         </View>
       )}
 
       {loading && (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size={ACTIVITY_INDICATOR_SIZE.small} color={colors.primary} />
+          <ActivityIndicator
+            size={ACTIVITY_INDICATOR_SIZE.small}
+            color={colors.primary}
+            accessibilityLabel="Loading"
+          />
           <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
             {t('components.userDetailModal.loadingClubInfo')}
           </Text>

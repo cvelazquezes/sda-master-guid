@@ -5,15 +5,15 @@
  */
 
 import React from 'react';
-import { View, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
+import { View, ActivityIndicator, type TextStyle, type ViewStyle } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Text } from '../primitives';
-import { useTheme } from '../../state/ThemeContext';
 import { FLEX, ACTIVITY_INDICATOR_SIZE } from '../../../shared/constants';
+import { useTheme } from '../../state/ThemeContext';
+import { Text } from '../primitives';
 
-interface LoadingScreenProps {
+type LoadingScreenProps = {
   message?: string;
-}
+};
 
 export const LoadingScreen: React.FC<LoadingScreenProps> = ({ message }) => {
   const { t } = useTranslation();
@@ -35,7 +35,11 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ message }) => {
 
   return (
     <View style={containerStyle}>
-      <ActivityIndicator size={ACTIVITY_INDICATOR_SIZE.large} color={colors.primary} />
+      <ActivityIndicator
+        size={ACTIVITY_INDICATOR_SIZE.large}
+        color={colors.primary}
+        accessibilityLabel="Loading"
+      />
       <Text style={messageStyle}>{displayMessage}</Text>
     </View>
   );

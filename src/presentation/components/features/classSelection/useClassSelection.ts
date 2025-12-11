@@ -1,25 +1,25 @@
 import { useState, useEffect } from 'react';
 import { Alert, useWindowDimensions } from 'react-native';
-import { PathfinderClass } from '../../../../types';
-import { useTheme } from '../../../state/ThemeContext';
 import { CLASS_SELECTION } from '../../../../shared/constants';
+import { useTheme } from '../../../state/ThemeContext';
+import type { PathfinderClass } from '../../../../types';
 
 type TranslationFn = (key: string, options?: Record<string, unknown>) => string;
 
-interface UseClassSelectionProps {
+type UseClassSelectionProps = {
   visible: boolean;
   initialClasses: PathfinderClass[];
   t: TranslationFn;
-}
+};
 
-interface UseClassSelectionReturn {
+type UseClassSelectionReturn = {
   selectedClasses: PathfinderClass[];
   modalWidth: number;
   modalMaxHeight: number;
   toggleClass: (pathfinderClass: PathfinderClass) => void;
   handleSave: (onSave: (classes: PathfinderClass[]) => void, onClose: () => void) => void;
   isSelected: (pathfinderClass: PathfinderClass) => boolean;
-}
+};
 
 export const useClassSelection = ({
   visible,
@@ -39,12 +39,14 @@ export const useClassSelection = ({
   const getModalWidth = (): number => {
     if (windowWidth > breakpoints.desktop) {
       return Math.min(responsiveScale.maxWidth.modal, windowWidth * responsiveScale.modal.desktop);
-    } else if (windowWidth > breakpoints.tablet) {
+    }
+    if (windowWidth > breakpoints.tablet) {
       return Math.min(
         responsiveScale.maxWidth.modalSmall,
         windowWidth * responsiveScale.modal.tablet
       );
-    } else if (windowWidth > breakpoints.mobile) {
+    }
+    if (windowWidth > breakpoints.mobile) {
       return windowWidth * responsiveScale.modal.mobileLarge;
     }
     return windowWidth * responsiveScale.modal.mobile;

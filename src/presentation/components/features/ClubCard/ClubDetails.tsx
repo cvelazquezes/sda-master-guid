@@ -2,22 +2,22 @@ import React from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { Text } from '../../primitives';
-import { useTheme } from '../../../state/ThemeContext';
+import { styles } from './styles';
 import { ICONS } from '../../../../shared/constants';
 import {
   formatMatchFrequency,
   formatMembersCount,
   formatGroupSize,
 } from '../../../../shared/utils/formatters';
-import { styles } from './styles';
+import { useTheme } from '../../../state/ThemeContext';
+import { Text } from '../../primitives';
 
-interface ClubDetailsProps {
+type ClubDetailsProps = {
   matchFrequency: string;
   groupSize: number;
   memberCount?: number;
   textColor: string;
-}
+};
 
 export const ClubDetails: React.FC<ClubDetailsProps> = ({
   matchFrequency,

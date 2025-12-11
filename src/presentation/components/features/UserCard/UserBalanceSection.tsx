@@ -2,20 +2,20 @@ import React from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { Text } from '../../primitives';
-import { MemberBalance } from '../../../../types';
-import { useTheme } from '../../../state/ThemeContext';
+import { styles } from './styles';
 import { EMPTY_VALUE, ICONS, SINGLE_SPACE } from '../../../../shared/constants';
 import { NUMERIC } from '../../../../shared/constants/validation';
-import { styles } from './styles';
+import { useTheme } from '../../../state/ThemeContext';
+import { Text } from '../../primitives';
+import type { MemberBalance } from '../../../../types';
 
-interface UserBalanceSectionProps {
+type UserBalanceSectionProps = {
   balance: MemberBalance;
   balanceColor: string;
   borderColor: string;
   errorColor: string;
   errorLightColor: string;
-}
+};
 
 export const UserBalanceSection: React.FC<UserBalanceSectionProps> = ({
   balance,
@@ -45,7 +45,7 @@ export const UserBalanceSection: React.FC<UserBalanceSectionProps> = ({
             size={iconSizes.xs}
             color={errorColor}
           />
-          <Text style={[styles.overdueWarningText, { color: errorColor }]}>
+          <Text style={styles.overdueWarningText}>
             ${balance.overdueCharges.toFixed(NUMERIC.DECIMAL_PLACES)}
             {SINGLE_SPACE}
             {t('components.userCard.balance.overdue')}

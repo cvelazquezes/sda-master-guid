@@ -1,21 +1,21 @@
 import React from 'react';
 import { View, Modal, ScrollView } from 'react-native';
-import { PATHFINDER_CLASSES, PathfinderClass } from '../../../../types';
-import { useTheme } from '../../../state/ThemeContext';
-import { ANIMATION_TYPE } from '../../../../shared/constants';
-import { useClassSelection } from './useClassSelection';
-import { ModalHeader } from './ModalHeader';
-import { ModalFooter } from './ModalFooter';
-import { InfoCard } from './InfoCard';
 import { ClassOptionItem } from './ClassOptionItem';
+import { InfoCard } from './InfoCard';
+import { ModalFooter } from './ModalFooter';
+import { ModalHeader } from './ModalHeader';
 import { styles } from './styles';
+import { useClassSelection } from './useClassSelection';
+import { ANIMATION_TYPE } from '../../../../shared/constants';
+import { PATHFINDER_CLASSES, type PathfinderClass } from '../../../../types';
+import { useTheme } from '../../../state/ThemeContext';
 
-interface ClassSelectionModalProps {
+type ClassSelectionModalProps = {
   visible: boolean;
   initialClasses: PathfinderClass[];
   onSave: (classes: PathfinderClass[]) => void;
   onClose: () => void;
-}
+};
 
 export const ClassSelectionModal: React.FC<ClassSelectionModalProps> = ({
   visible,
@@ -28,7 +28,13 @@ export const ClassSelectionModal: React.FC<ClassSelectionModalProps> = ({
     useClassSelection({ visible, initialClasses });
 
   return (
-    <Modal visible={visible} animationType={ANIMATION_TYPE.SLIDE} transparent onRequestClose={onClose}>
+    <Modal
+      transparent
+      accessibilityViewIsModal
+      visible={visible}
+      animationType={ANIMATION_TYPE.SLIDE}
+      onRequestClose={onClose}
+    >
       <View style={styles.modalOverlay}>
         <View
           style={[
@@ -36,7 +42,7 @@ export const ClassSelectionModal: React.FC<ClassSelectionModalProps> = ({
             { width: modalWidth, maxHeight: modalMaxHeight, backgroundColor: colors.surface },
           ]}
         >
-          <ModalHeader onClose={onClose} colors={colors} />
+          <ModalHeader colors={colors} onClose={onClose} />
           <InfoCard selectedCount={selectedClasses.length} colors={colors} />
           <ScrollView style={styles.classList}>
             {PATHFINDER_CLASSES.map((pathfinderClass) => (
@@ -45,15 +51,15 @@ export const ClassSelectionModal: React.FC<ClassSelectionModalProps> = ({
                 pathfinderClass={pathfinderClass}
                 isSelected={isSelected(pathfinderClass)}
                 selectionIndex={selectedClasses.indexOf(pathfinderClass)}
-                onToggle={toggleClass}
                 colors={colors}
+                onToggle={toggleClass}
               />
             ))}
           </ScrollView>
           <ModalFooter
+            colors={colors}
             onCancel={onClose}
             onSave={() => handleSave(onSave, onClose)}
-            colors={colors}
           />
         </View>
       </View>

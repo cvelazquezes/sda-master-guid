@@ -1,14 +1,14 @@
 import React from 'react';
 import { View } from 'react-native';
-import { HierarchyData, ThemeColors } from './types';
-import { HierarchyItem } from './HierarchyItem';
 import { HIERARCHY_LEVELS } from './config';
+import { HierarchyItem } from './HierarchyItem';
 import { styles } from './styles';
+import type { HierarchyData, ThemeColors } from './types';
 
-interface ExpandedViewProps {
+type ExpandedViewProps = {
   data: HierarchyData;
   colors: ThemeColors;
-}
+};
 
 export const ExpandedView: React.FC<ExpandedViewProps> = ({ data, colors }) => {
   return (

@@ -1,20 +1,20 @@
 import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text } from '../../primitives';
-import { PathfinderClass } from '../../../../types';
-import { useTheme } from '../../../state/ThemeContext';
-import { ICONS } from '../../../../shared/constants';
-import { ThemeColors } from './types';
 import { styles } from './styles';
+import { ICONS } from '../../../../shared/constants';
+import { useTheme } from '../../../state/ThemeContext';
+import { Text } from '../../primitives';
+import type { ThemeColors } from './types';
+import type { PathfinderClass } from '../../../../types';
 
-interface ClassOptionItemProps {
+type ClassOptionItemProps = {
   pathfinderClass: PathfinderClass;
   isSelected: boolean;
   selectionIndex: number;
   onToggle: (pathfinderClass: PathfinderClass) => void;
   colors: ThemeColors;
-}
+};
 
 export const ClassOptionItem: React.FC<ClassOptionItemProps> = ({
   pathfinderClass,
@@ -38,7 +38,13 @@ export const ClassOptionItem: React.FC<ClassOptionItemProps> = ({
   ];
 
   return (
-    <TouchableOpacity style={optionStyle} onPress={() => onToggle(pathfinderClass)}>
+    <TouchableOpacity
+      style={optionStyle}
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked: isSelected }}
+      accessibilityLabel={pathfinderClass}
+      onPress={() => onToggle(pathfinderClass)}
+    >
       <View style={styles.classOptionContent}>
         <View style={checkboxStyle}>
           {isSelected && (

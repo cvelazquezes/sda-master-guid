@@ -1,12 +1,12 @@
 import React from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text, StatusIndicator } from '../../primitives';
-import { useTheme } from '../../../state/ThemeContext';
-import { ICONS, ENTITY_STATUS, TEXT_LINES } from '../../../../shared/constants';
 import { styles } from './styles';
+import { ICONS, ENTITY_STATUS, TEXT_LINES } from '../../../../shared/constants';
+import { useTheme } from '../../../state/ThemeContext';
+import { Text, StatusIndicator } from '../../primitives';
 
-interface UserMetaInfoProps {
+type UserMetaInfoProps = {
   clubName?: string | null;
   whatsappNumber?: string;
   isActive: boolean;
@@ -14,7 +14,7 @@ interface UserMetaInfoProps {
   successColor: string;
   textSecondaryColor: string;
   textTertiaryColor: string;
-}
+};
 
 export const UserMetaInfo: React.FC<UserMetaInfoProps> = ({
   clubName,
@@ -54,7 +54,7 @@ export const UserMetaInfo: React.FC<UserMetaInfoProps> = ({
           </Text>
         </View>
       )}
-      <StatusIndicator status={isActive ? ENTITY_STATUS.ACTIVE : ENTITY_STATUS.INACTIVE} showIcon />
+      <StatusIndicator showIcon status={isActive ? ENTITY_STATUS.ACTIVE : ENTITY_STATUS.INACTIVE} />
     </View>
   );
 };

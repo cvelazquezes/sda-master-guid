@@ -2,16 +2,16 @@ import React from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { Text } from '../../primitives';
-import { useTheme } from '../../../state/ThemeContext';
-import { CLASS_SELECTION, ICONS } from '../../../../shared/constants';
-import { ThemeColors } from './types';
 import { styles } from './styles';
+import { CLASS_SELECTION, ICONS } from '../../../../shared/constants';
+import { useTheme } from '../../../state/ThemeContext';
+import { Text } from '../../primitives';
+import type { ThemeColors } from './types';
 
-interface InfoCardProps {
+type InfoCardProps = {
   selectedCount: number;
   colors: ThemeColors;
-}
+};
 
 export const InfoCard: React.FC<InfoCardProps> = ({ selectedCount, colors }) => {
   const { t } = useTranslation();

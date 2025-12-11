@@ -1,5 +1,5 @@
 import { ICONS } from '../../../../shared/constants';
-import { HierarchyLevel } from './types';
+import type { HierarchyLevel } from './types';
 
 export const HIERARCHY_LEVELS: HierarchyLevel[] = [
   {
@@ -34,7 +34,8 @@ export const HIERARCHY_LEVELS: HierarchyLevel[] = [
   },
 ];
 
-export const COMPACT_DISPLAY_KEYS: (keyof import('./types').HierarchyData)[] = [
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports -- Dynamic import needed for type inference
+export const COMPACT_DISPLAY_KEYS: Array<keyof import('./types').HierarchyData> = [
   'division',
   'church',
   'clubName',

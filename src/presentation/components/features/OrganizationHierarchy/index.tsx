@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { Text } from '../../primitives';
-import { useTheme } from '../../../state/ThemeContext';
-import { ICONS, TOUCH_OPACITY } from '../../../../shared/constants';
-import { OrganizationHierarchyProps } from './types';
 import { CompactView } from './CompactView';
 import { ExpandedView } from './ExpandedView';
 import { styles } from './styles';
+import { ICONS, TOUCH_OPACITY } from '../../../../shared/constants';
+import { useTheme } from '../../../state/ThemeContext';
+import { Text } from '../../primitives';
+import type { OrganizationHierarchyProps } from './types';
 
 export const OrganizationHierarchy: React.FC<OrganizationHierarchyProps> = ({
   data,
@@ -37,8 +37,10 @@ export const OrganizationHierarchy: React.FC<OrganizationHierarchyProps> = ({
     >
       <TouchableOpacity
         style={[styles.header, { backgroundColor: colors.surfaceLight }]}
-        onPress={() => setExpanded(!expanded)}
         activeOpacity={TOUCH_OPACITY.default}
+        accessibilityRole="button"
+        accessibilityLabel={expanded ? 'Collapse hierarchy' : 'Expand hierarchy'}
+        onPress={() => setExpanded(!expanded)}
       >
         <View style={styles.headerLeft}>
           <MaterialCommunityIcons name={ICONS.SITEMAP} size={iconSizes.md} color={colors.primary} />

@@ -1,18 +1,18 @@
 import React from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text } from '../../primitives';
-import { useTheme } from '../../../state/ThemeContext';
-import { ICONS, TEXT_LINES } from '../../../../shared/constants';
-import { HierarchyData, ThemeColors } from './types';
 import { styles } from './styles';
+import { ICONS, TEXT_LINES } from '../../../../shared/constants';
+import { useTheme } from '../../../state/ThemeContext';
+import { Text } from '../../primitives';
+import type { HierarchyData, ThemeColors } from './types';
 
-interface CompactViewProps {
+type CompactViewProps = {
   data: HierarchyData;
   colors: ThemeColors;
-}
+};
 
-const COMPACT_ITEMS: { key: keyof HierarchyData; icon: string }[] = [
+const COMPACT_ITEMS: Array<{ key: keyof HierarchyData; icon: string }> = [
   { key: 'division', icon: ICONS.EARTH },
   { key: 'church', icon: ICONS.CHURCH },
   { key: 'clubName', icon: ICONS.ACCOUNT_GROUP },

@@ -1,10 +1,10 @@
 import React from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTheme } from '../../../state/ThemeContext';
-import { ICONS } from '../../../../shared/constants';
-import { ClubIconProps } from './types';
 import { styles } from './styles';
+import { ICONS } from '../../../../shared/constants';
+import { useTheme } from '../../../state/ThemeContext';
+import type { ClubIconProps } from './types';
 
 export const ClubIcon: React.FC<ClubIconProps> = ({
   isActive,

@@ -1,14 +1,13 @@
+/* eslint-disable max-lines-per-function -- Complex card component with multiple sections */
 import React, { memo, useCallback } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '../../../state/ThemeContext';
-import {
-  EntityCard,
-  EntityCardRenderProps,
-  EntityCardActionProps,
-} from '../../primitives/EntityCard';
-import { Text, Badge } from '../../primitives';
-import { formatViewDetailsLabel } from '../../../../shared/utils/formatters';
+import { styles } from './styles';
+import { UserActions } from './UserActions';
+import { UserAvatar } from './UserAvatar';
+import { UserBalanceSection } from './UserBalanceSection';
+import { UserMetaInfo } from './UserMetaInfo';
+import { getRoleConfig, getRoleLabel, getBalanceColor } from './utils';
 import {
   COMPONENT_NAMES,
   COMPONENT_SIZE,
@@ -19,14 +18,16 @@ import {
   TEXT_COLOR,
   TEST_IDS,
 } from '../../../../shared/constants';
-import { User } from '../../../../types';
-import { UserCardProps, ThemeColors as UserThemeColors } from './types';
-import { getRoleConfig, getRoleLabel, getBalanceColor } from './utils';
-import { UserAvatar } from './UserAvatar';
-import { UserMetaInfo } from './UserMetaInfo';
-import { UserBalanceSection } from './UserBalanceSection';
-import { UserActions } from './UserActions';
-import { styles } from './styles';
+import { formatViewDetailsLabel } from '../../../../shared/utils/formatters';
+import { useTheme } from '../../../state/ThemeContext';
+import { Text, Badge } from '../../primitives';
+import {
+  EntityCard,
+  type EntityCardRenderProps,
+  type EntityCardActionProps,
+} from '../../primitives/EntityCard';
+import type { ThemeColors as UserThemeColors, UserCardProps } from './types';
+import type { User } from '../../../../types';
 
 const UserCardComponent: React.FC<UserCardProps> = ({
   user,
@@ -108,7 +109,7 @@ const UserCardComponent: React.FC<UserCardProps> = ({
               balanceColor={balanceColor}
               borderColor={themeColors.border}
               errorColor={themeColors.error}
-              errorLightColor={themeColors.errorLight}
+              errorLightColor={themeColors.errorAlpha20}
             />
           )}
         </View>
@@ -123,12 +124,12 @@ const UserCardComponent: React.FC<UserCardProps> = ({
       <UserActions
         user={entity}
         showAdminActions={showAdminActions}
-        onToggleStatus={onToggleStatus}
-        onDelete={onDelete}
-        onPress={cardOnPress}
         errorColor={themeColors.error}
         successColor={themeColors.success}
         textTertiaryColor={themeColors.textTertiary}
+        onToggleStatus={onToggleStatus}
+        onDelete={onDelete}
+        onPress={cardOnPress}
       />
     ),
     [showAdminActions, onToggleStatus, onDelete, themeColors]
@@ -138,7 +139,6 @@ const UserCardComponent: React.FC<UserCardProps> = ({
     <EntityCard
       entity={user}
       isActive={user.isActive}
-      onPress={onPress}
       renderIcon={renderIcon}
       renderInfo={renderInfo}
       renderActions={renderActions}
@@ -146,6 +146,7 @@ const UserCardComponent: React.FC<UserCardProps> = ({
       accessibilityHint={t('accessibility.doubleTapToOpenUserDetails')}
       style={styles.card}
       testID={TEST_IDS.USER_CARD(user.id)}
+      onPress={onPress}
     />
   );
 };

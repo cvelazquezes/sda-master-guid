@@ -22,14 +22,14 @@ import {
   View,
   StyleSheet,
   ActivityIndicator,
-  StyleProp,
-  ImageStyle,
-  ViewStyle,
-  ImageSourcePropType,
+  type ImageSourcePropType,
+  type ImageStyle,
+  type StyleProp,
+  type ViewStyle,
 } from 'react-native';
+import { ACTIVITY_INDICATOR_SIZE, DIMENSIONS } from '../../../shared/constants';
 import { useTheme } from '../../state/ThemeContext';
 import { layoutConstants } from '../../theme';
-import { ACTIVITY_INDICATOR_SIZE, DIMENSIONS } from '../../../shared/constants';
 
 /**
  * Image loading priority
@@ -65,7 +65,7 @@ export enum CacheControl {
   RELOAD = 'reload',
 }
 
-interface OptimizedImageProps {
+type OptimizedImageProps = {
   /**
    * Image source (URL or local)
    */
@@ -130,7 +130,7 @@ interface OptimizedImageProps {
    * Accessibility label
    */
   accessibilityLabel?: string;
-}
+};
 
 // Helper functions to reduce component complexity
 function getImageSource(
@@ -207,22 +207,27 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           source={placeholderSource}
           style={[styles.placeholder, style]}
           resizeMode={resizeMode}
+          accessibilityLabel="Placeholder image"
         />
       )}
       <Image
+        accessible
         source={imageSource}
         style={[styles.image, style, { opacity: imageOpacity }]}
         blurRadius={computedBlurRadius}
         resizeMode={resizeMode}
-        onLoad={handleLoad}
-        onError={handleError}
-        accessible
         accessibilityLabel={accessibilityLabel || 'Image'}
         accessibilityRole="image"
+        onLoad={handleLoad}
+        onError={handleError}
       />
       {showLoadingIndicator && (
         <View style={[styles.loadingContainer, { backgroundColor: loadingBgColor }]}>
-          <ActivityIndicator size={ACTIVITY_INDICATOR_SIZE.small} color={colors.primary} />
+          <ActivityIndicator
+            size={ACTIVITY_INDICATOR_SIZE.small}
+            color={colors.primary}
+            accessibilityLabel="Loading image"
+          />
         </View>
       )}
     </View>
@@ -314,7 +319,7 @@ const styles = StyleSheet.create({
  * ]);
  * ```
  */
-export function preloadImages(sources: { uri: string }[]): void {
+export function preloadImages(sources: Array<{ uri: string }>): void {
   sources.forEach((source) => {
     Image.prefetch(source.uri);
   });

@@ -1,30 +1,30 @@
-import { Club } from '../../../../types';
+import type { Club } from '../../../../types';
 
-export interface ClubCardProps {
+export type ClubCardProps = {
   club: Club;
   onPress?: () => void;
   showAdminActions?: boolean;
   onToggleStatus?: () => void;
   onDelete?: () => void;
-}
+};
 
-export interface ClubIconProps {
+export type ClubIconProps = {
   isActive: boolean;
   primaryColor: string;
   inactiveColor: string;
   activeBackground: string;
   inactiveBackground: string;
-}
+};
 
-export interface ClubInfoProps {
+export type ClubInfoProps = {
   club: Club;
   textPrimaryColor: string;
   textSecondaryColor: string;
   textTertiaryColor: string;
   primaryColor: string;
-}
+};
 
-export interface ClubActionsProps {
+export type ClubActionsProps = {
   club: Club;
   showAdminActions: boolean;
   onToggleStatus?: () => void;
@@ -35,4 +35,4 @@ export interface ClubActionsProps {
     success: string;
     textTertiary: string;
   };
-}
+};

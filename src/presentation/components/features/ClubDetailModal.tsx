@@ -1,22 +1,22 @@
+/* eslint-disable max-lines-per-function -- Modal component with multiple sections */
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { Text } from '../primitives';
-import { Club } from '../../../types';
 import { OrganizationHierarchy } from './OrganizationHierarchy';
-import { Modal } from '../primitives';
+import { ICONS, FLEX } from '../../../shared/constants';
+import { formatMatchFrequency, formatMembersCount } from '../../../shared/utils/formatters';
 import { useTheme } from '../../state/ThemeContext';
 import { mobileTypography, mobileIconSizes, layoutConstants } from '../../theme';
 import { designTokens } from '../../theme/designTokens';
-import { formatMatchFrequency, formatMembersCount } from '../../../shared/utils/formatters';
-import { ICONS, FLEX } from '../../../shared/constants';
+import { Text, Modal } from '../primitives';
+import type { Club } from '../../../types';
 
-interface ClubDetailModalProps {
+type ClubDetailModalProps = {
   visible: boolean;
   club: Club | null;
   onClose: () => void;
-}
+};
 
 export const ClubDetailModal: React.FC<ClubDetailModalProps> = ({ visible, club, onClose }) => {
   const { t } = useTranslation();
@@ -28,13 +28,14 @@ export const ClubDetailModal: React.FC<ClubDetailModalProps> = ({ visible, club,
 
   return (
     <Modal
+      accessibilityViewIsModal
       visible={visible}
-      onClose={onClose}
       title={club.name}
       subtitle={t('components.clubDetail.subtitle')}
       icon={ICONS.ACCOUNT_GROUP}
       iconColor={colors.primary}
-      iconBackgroundColor={colors.primaryLight}
+      iconBackgroundColor={colors.primaryAlpha20}
+      onClose={onClose}
     >
       {/* Basic Information */}
       <View style={[styles.section, { borderBottomColor: colors.border }]}>
@@ -154,6 +155,7 @@ export const ClubDetailModal: React.FC<ClubDetailModalProps> = ({ visible, club,
           {t('components.clubDetail.organizationalHierarchy')}
         </Text>
         <OrganizationHierarchy
+          initialExpanded
           data={{
             division: club.division,
             union: club.union,
@@ -161,7 +163,6 @@ export const ClubDetailModal: React.FC<ClubDetailModalProps> = ({ visible, club,
             church: club.church,
           }}
           title={t('components.clubDetail.clubOrganization')}
-          initialExpanded
         />
       </View>
     </Modal>

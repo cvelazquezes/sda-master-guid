@@ -1,13 +1,9 @@
+/* eslint-disable max-lines-per-function, complexity -- Complex card component with multiple states */
 import React, { memo } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
-import { Text } from '../primitives';
-import { Match, MatchStatus } from '../../../types';
-import { useTheme } from '../../state/ThemeContext';
-import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../../theme';
-import { formatMembersCount } from '../../../shared/utils/formatters';
+import { useTranslation } from 'react-i18next';
 import {
   A11Y_ROLE,
   COMPONENT_NAMES,
@@ -17,14 +13,19 @@ import {
   FLEX,
   SHADOW_COLOR,
 } from '../../../shared/constants';
+import { formatMembersCount } from '../../../shared/utils/formatters';
+import { MatchStatus, type Match } from '../../../types';
+import { useTheme } from '../../state/ThemeContext';
+import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../../theme';
+import { Text } from '../primitives';
 
-interface MatchCardProps {
+type MatchCardProps = {
   match: Match;
   onPress?: () => void;
   onSkip?: () => void;
   onSchedule?: () => void;
   showActions?: boolean;
-}
+};
 
 const MatchCardComponent: React.FC<MatchCardProps> = ({
   match,
@@ -77,6 +78,8 @@ const MatchCardComponent: React.FC<MatchCardProps> = ({
         {showActions && match.status === MatchStatus.PENDING && onSkip && (
           <TouchableOpacity
             style={[styles.skipButton, { backgroundColor: colors.errorAlpha20 }]}
+            accessibilityRole="button"
+            accessibilityLabel="Skip match"
             onPress={onSkip}
           >
             <MaterialCommunityIcons
@@ -157,6 +160,8 @@ const MatchCardComponent: React.FC<MatchCardProps> = ({
       {showActions && match.status === MatchStatus.PENDING && onSchedule && (
         <TouchableOpacity
           style={[styles.scheduleButton, { backgroundColor: colors.primary }]}
+          accessibilityRole="button"
+          accessibilityLabel="Schedule match"
           onPress={onSchedule}
         >
           <MaterialCommunityIcons
@@ -175,11 +180,11 @@ const MatchCardComponent: React.FC<MatchCardProps> = ({
   if (onPress && !showActions) {
     return (
       <TouchableOpacity
-        onPress={onPress}
-        activeOpacity={TOUCH_OPACITY.default}
         accessible
+        activeOpacity={TOUCH_OPACITY.default}
         accessibilityRole={A11Y_ROLE.BUTTON}
         accessibilityLabel={t('accessibility.viewActivityDetails')}
+        onPress={onPress}
       >
         {CardContent}
       </TouchableOpacity>

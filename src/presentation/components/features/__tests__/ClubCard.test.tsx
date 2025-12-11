@@ -9,8 +9,8 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
+import { MatchFrequency, type Club } from '../../../../types';
 import { ClubCard } from '../ClubCard';
-import { Club, MatchFrequency } from '../../../../types';
 
 // Test data builders
 const createMockClub = (overrides?: Partial<Club>): Club => ({
@@ -170,8 +170,8 @@ describe('ClubCard', () => {
 
       const { getByLabelText } = render(
         <ClubCard
-          club={club}
           showAdminActions
+          club={club}
           onToggleStatus={onToggleStatus}
           onDelete={onDelete}
         />
@@ -195,7 +195,7 @@ describe('ClubCard', () => {
       const onToggleStatus = jest.fn();
 
       const { getByLabelText } = render(
-        <ClubCard club={club} showAdminActions onToggleStatus={onToggleStatus} />
+        <ClubCard showAdminActions club={club} onToggleStatus={onToggleStatus} />
       );
 
       const deactivateButton = getByLabelText('Deactivate club');
@@ -209,7 +209,7 @@ describe('ClubCard', () => {
       const onToggleStatus = jest.fn();
 
       const { getByLabelText } = render(
-        <ClubCard club={club} showAdminActions onToggleStatus={onToggleStatus} />
+        <ClubCard showAdminActions club={club} onToggleStatus={onToggleStatus} />
       );
 
       expect(getByLabelText('Activate club')).toBeTruthy();
@@ -220,7 +220,7 @@ describe('ClubCard', () => {
       const onDelete = jest.fn();
 
       const { getByLabelText } = render(
-        <ClubCard club={club} showAdminActions onDelete={onDelete} />
+        <ClubCard showAdminActions club={club} onDelete={onDelete} />
       );
 
       const deleteButton = getByLabelText(`Delete ${club.name}`);
@@ -258,8 +258,8 @@ describe('ClubCard', () => {
 
       const { getByLabelText } = render(
         <ClubCard
-          club={club}
           showAdminActions
+          club={club}
           onToggleStatus={onToggleStatus}
           onDelete={onDelete}
         />
@@ -319,7 +319,7 @@ describe('ClubCard', () => {
     it('should handle all admin actions disabled', () => {
       const club = createMockClub();
 
-      const { queryByLabelText } = render(<ClubCard club={club} showAdminActions />);
+      const { queryByLabelText } = render(<ClubCard showAdminActions club={club} />);
 
       // No actions should be visible when callbacks are not provided
       expect(queryByLabelText(/Deactivate/)).toBeNull();

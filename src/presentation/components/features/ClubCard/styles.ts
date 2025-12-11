@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
-import { mobileTypography, designTokens, layoutConstants } from '../../../theme';
 import { FLEX } from '../../../../shared/constants';
+import { mobileTypography, designTokens, layoutConstants } from '../../../theme';
 
 // Note: shadowColor should be set dynamically via useTheme() in the component
 // Use colors.shadow || '#000000' for theme-aware shadow color

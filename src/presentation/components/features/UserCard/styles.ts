@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
-import { mobileFontSizes, designTokens, layoutConstants } from '../../../theme';
 import { FLEX } from '../../../../shared/constants';
+import { mobileFontSizes, designTokens, layoutConstants } from '../../../theme';
 
 // Note: Colors should be applied dynamically via useTheme() in the component
 // This file only contains layout-related styles
