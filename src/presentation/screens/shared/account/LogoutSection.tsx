@@ -1,16 +1,16 @@
 import React, { useMemo } from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { createLogoutStyles, createStyles } from './styles';
+import { ICONS, TOUCH_OPACITY } from '../../../../shared/constants';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
-import { ICONS, TOUCH_OPACITY } from '../../../../shared/constants';
-import { createStyles, createLogoutStyles } from './styles';
 
-interface LogoutSectionProps {
+type LogoutSectionProps = {
   onLogout: () => void;
-  colors: { error: string };
+  colors: { error: string; textPrimary: string };
   t: (key: string) => string;
-}
+};
 
 export function LogoutSection({ onLogout, colors, t }: LogoutSectionProps): React.JSX.Element {
   const { colors: themeColors, spacing, radii, typography, iconSizes } = useTheme();
@@ -23,16 +23,20 @@ export function LogoutSection({ onLogout, colors, t }: LogoutSectionProps): Reac
     [themeColors, spacing, radii, typography]
   );
 
-  const buttonBg = colors.error + '15';
+  const buttonBg = (colors as Record<string, string>).errorAlpha20 ?? `${colors.error}20`;
   return (
     <View style={styles.section}>
       <TouchableOpacity
         style={[logoutStyles.button, { backgroundColor: buttonBg, borderColor: colors.error }]}
-        onPress={onLogout}
         activeOpacity={TOUCH_OPACITY.default}
+        accessibilityRole="button"
+        accessibilityLabel="Logout"
+        onPress={onLogout}
       >
         <MaterialCommunityIcons name={ICONS.LOGOUT} size={iconSizes.md} color={colors.error} />
-        <Text style={[logoutStyles.buttonText, { color: colors.error }]}>{t('auth.logout')}</Text>
+        <Text style={[logoutStyles.buttonText, { color: colors.textPrimary }]}>
+          {t('auth.logout')}
+        </Text>
       </TouchableOpacity>
     </View>
   );

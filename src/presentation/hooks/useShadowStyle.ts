@@ -12,10 +12,8 @@
  */
 
 import { useMemo, useCallback } from 'react';
-import { ViewStyle, Platform } from 'react-native';
-import { useTheme } from '../state/ThemeContext';
-import { designTokens } from '../theme/designTokens';
-import { ShadowPreset } from '../../shared/types/theme';
+import { Platform, type ViewStyle } from 'react-native';
+import { PLATFORM_OS } from '../../shared/constants/app';
 import {
   SHADOW_HEIGHT,
   SHADOW_BLUR,
@@ -23,17 +21,19 @@ import {
   MODAL_ELEVATION,
   SHADOW_COLOR,
 } from '../../shared/constants/numbers';
-import { PLATFORM_OS } from '../../shared/constants/app';
+import { useTheme } from '../state/ThemeContext';
+import { designTokens } from '../theme/designTokens';
+import type { ShadowPreset } from '../../shared/types/theme';
 
-interface ShadowConfig {
+type ShadowConfig = {
   shadowColor: string;
   shadowOffset: { width: number; height: number };
   shadowOpacity: number;
   shadowRadius: number;
   elevation: number;
-}
+};
 
-interface UseShadowStyleReturn {
+type UseShadowStyleReturn = {
   /** Get shadow style by preset name */
   getShadow: (preset: ShadowPreset) => ViewStyle;
 
@@ -42,7 +42,7 @@ interface UseShadowStyleReturn {
 
   /** Whether dark mode is active (shadows are stronger in dark mode) */
   isDark: boolean;
-}
+};
 
 // Shadow presets with light/dark variants
 const SHADOW_PRESETS: Record<ShadowPreset, { light: ShadowConfig; dark: ShadowConfig }> = {
@@ -144,10 +144,12 @@ export const useShadowStyle = (): UseShadowStyleReturn => {
       const config = isDark ? presetConfig.dark : presetConfig.light;
 
       // Use theme shadow color if available, otherwise fallback to default
+      /* eslint-disable @typescript-eslint/no-unsafe-assignment -- Theme color fallback is type-safe */
       return {
         ...config,
         shadowColor: colors.shadow || config.shadowColor,
       };
+      /* eslint-enable @typescript-eslint/no-unsafe-assignment */
     },
     [isDark, colors.shadow]
   );

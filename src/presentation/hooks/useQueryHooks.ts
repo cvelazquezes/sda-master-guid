@@ -9,16 +9,16 @@ import {
   useQuery,
   useMutation,
   useQueryClient,
-  UseQueryOptions,
-  UseInfiniteQueryOptions,
   useInfiniteQuery,
+  type UseQueryOptions,
+  type UseInfiniteQueryOptions,
 } from '@tanstack/react-query';
 import { queryKeys, optimisticUpdates, queryClient } from '../../infrastructure/http/queryClient';
 import { authService } from '../../infrastructure/repositories/authService';
 import { matchService } from '../../infrastructure/repositories/matchService';
-import { User, Match } from '../../types';
-import { CACHE } from '../../shared/constants/timing';
 import { QUERY_KEY, QUERY_SCOPE } from '../../shared/constants/errorMessages';
+import { CACHE } from '../../shared/constants/timing';
+import type { User, Match } from '../../types';
 
 // ============================================================================
 // Auth Hooks
@@ -50,12 +50,16 @@ export function useCurrentUser(
  * await updateUser.mutateAsync({ name: 'New Name' });
  * ```
  */
-export function useUpdateUser(): ReturnType<typeof useMutation<User, Error, Partial<User>>> {
+type UpdateUserContext = { previousUser: User | undefined };
+
+export function useUpdateUser(): ReturnType<
+  typeof useMutation<User, Error, Partial<User>, UpdateUserContext>
+> {
   const queryClient = useQueryClient();
 
   return useMutation((userData: Partial<User>) => authService.updateUser(userData), {
     // Optimistic update
-    onMutate: async (newData) => {
+    onMutate: async (newData): Promise<UpdateUserContext> => {
       const queryKey = queryKeys.auth.currentUser();
 
       // Cancel outgoing refetches
@@ -66,10 +70,12 @@ export function useUpdateUser(): ReturnType<typeof useMutation<User, Error, Part
 
       // Optimistically update
       if (previousUser) {
-        queryClient.setQueryData<User>(queryKey, {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Partial<User> spread is type-safe
+        const updatedUser: User = {
           ...previousUser,
           ...newData,
-        });
+        };
+        queryClient.setQueryData<User>(queryKey, updatedUser);
       }
 
       // Return context with snapshot
@@ -77,7 +83,7 @@ export function useUpdateUser(): ReturnType<typeof useMutation<User, Error, Part
     },
 
     // Rollback on error
-    onError: (_error, _variables, context) => {
+    onError: (_error: Error, _variables: Partial<User>, context: UpdateUserContext | undefined) => {
       if (context?.previousUser) {
         queryClient.setQueryData(queryKeys.auth.currentUser(), context.previousUser);
       }
@@ -164,29 +170,40 @@ export function useMatch(
  * await updateMatch.mutateAsync({ matchId: '123', status: 'completed' });
  * ```
  */
-export function useUpdateMatch(): ReturnType<typeof useMutation> {
+type UpdateMatchVariables = { matchId: string; status?: string; [key: string]: unknown };
+type UpdateMatchContext = { previousData: Match | undefined };
+
+export function useUpdateMatch(): ReturnType<
+  typeof useMutation<Match, Error, UpdateMatchVariables, UpdateMatchContext>
+> {
   return useMutation(
-    ({ matchId, ...data }: { matchId: string; status?: string; [key: string]: unknown }) =>
-      matchService.updateMatchStatus(matchId, data.status),
+    ({ matchId, ...data }: UpdateMatchVariables) =>
+      matchService.updateMatchStatus(matchId, data.status as string | undefined),
     {
       // Optimistic update
-      onMutate: async ({ matchId, ...newData }) => {
+      /* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment -- queryKey type is inferred correctly */
+      onMutate: async ({ matchId, status }): Promise<UpdateMatchContext> => {
         const queryKey = queryKeys.matches.detail(matchId);
         const context = await optimisticUpdates.update<Match>(queryKey, (old) =>
-          old ? { ...old, ...newData } : old
+          old ? { ...old, ...(status !== undefined ? { status } : {}) } : old
         );
-        return context;
+        return context as UpdateMatchContext;
       },
+      /* eslint-enable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment */
 
       // Rollback on error
-      onError: (_error, { matchId }, context) => {
+      onError: (
+        _error: Error,
+        { matchId }: UpdateMatchVariables,
+        context: UpdateMatchContext | undefined
+      ) => {
         if (context) {
           optimisticUpdates.rollback(queryKeys.matches.detail(matchId), context);
         }
       },
 
       // Invalidate related queries on success
-      onSuccess: (_data, { matchId }) => {
+      onSuccess: (_data: Match, { matchId }: UpdateMatchVariables) => {
         optimisticUpdates.invalidate([
           queryKeys.matches.detail(matchId),
           queryKeys.matches.lists(),
@@ -205,11 +222,11 @@ export function useUpdateMatch(): ReturnType<typeof useMutation> {
  * await generateMatches.mutateAsync('club-123');
  * ```
  */
-export function useGenerateMatches(): ReturnType<typeof useMutation> {
+export function useGenerateMatches(): ReturnType<typeof useMutation<Match[], Error, string>> {
   const queryClient = useQueryClient();
 
   return useMutation((clubId: string) => matchService.generateMatches(clubId), {
-    onSuccess: (_data, clubId) => {
+    onSuccess: (_data: Match[], clubId: string) => {
       // Invalidate all match queries for this club
       queryClient.invalidateQueries(queryKeys.matches.list({ clubId }));
       queryClient.invalidateQueries(queryKeys.matches.rounds(clubId));
@@ -248,7 +265,7 @@ export function useInfiniteMatches(
     },
     {
       enabled: !!clubId,
-      getNextPageParam: (_lastPage, allPages) => {
+      getNextPageParam: (_lastPage: Match[], allPages: Match[][]) => {
         // Return next page number or undefined if no more pages
         return allPages.length + 1;
       },

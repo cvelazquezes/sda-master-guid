@@ -1,12 +1,17 @@
 import React, { useState, useMemo } from 'react';
 import { View, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { AccountTypeSection } from './AccountTypeSection';
+import { ClassSelectionSection } from './ClassSelectionSection';
+import { ClubHierarchySection } from './ClubHierarchySection';
+import { LoadingState } from './LoadingState';
+import { PersonalInfoInputs, PasswordInputs } from './RegisterFormInputs';
+import { RegisterHeader } from './RegisterHeader';
 import { createScreenStyles } from './styles';
-import { ClassSelectionModal } from '../../../components/features/ClassSelectionModal';
-import { Button } from '../../../components/primitives';
-import { useTheme } from '../../../state/ThemeContext';
+import { useClubHierarchy } from './useClubHierarchy';
+import { useRegisterForm } from './useRegisterForm';
 import {
   COMPONENT_VARIANT,
   ICONS,
@@ -15,14 +20,9 @@ import {
   SAFE_AREA_EDGES,
   SCREENS,
 } from '../../../../shared/constants';
-import { useRegisterForm } from './useRegisterForm';
-import { useClubHierarchy } from './useClubHierarchy';
-import { RegisterHeader } from './RegisterHeader';
-import { AccountTypeSection } from './AccountTypeSection';
-import { ClubHierarchySection } from './ClubHierarchySection';
-import { ClassSelectionSection } from './ClassSelectionSection';
-import { LoadingState } from './LoadingState';
-import { PersonalInfoInputs, PasswordInputs } from './RegisterFormInputs';
+import { ClassSelectionModal } from '../../../components/features/ClassSelectionModal';
+import { Button } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
 
 function useRegisterLabels(t: ReturnType<typeof useTranslation>['t']): {
   personal: { name: string; email: string; whatsapp: string };
@@ -86,9 +86,9 @@ const RegisterScreen = (): React.JSX.Element => {
             passwordLabels={labels.password}
             hierarchyLabels={labels.hierarchy}
             buttonTitle={buttonTitle}
+            t={t}
             onOpenClassModal={(): void => setClassModalVisible(true)}
             onNavigateToLogin={(): void => navigation.navigate(SCREENS.LOGIN as never)}
-            t={t}
           />
         </ScrollView>
         <ClassSelectionModal
@@ -103,7 +103,7 @@ const RegisterScreen = (): React.JSX.Element => {
 };
 
 // Form content extracted to reduce main component size
-interface FormContentProps {
+type FormContentProps = {
   form: ReturnType<typeof useRegisterForm>['form'];
   formHook: ReturnType<typeof useRegisterForm>;
   clubHierarchy: ReturnType<typeof useClubHierarchy>;
@@ -120,8 +120,9 @@ interface FormContentProps {
   onOpenClassModal: () => void;
   onNavigateToLogin: () => void;
   t: ReturnType<typeof useTranslation>['t'];
-}
+};
 
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access -- Props type is correctly inferred from hook */
 function RegisterFormContent(props: FormContentProps): React.JSX.Element {
   const {
     form,
@@ -149,10 +150,10 @@ function RegisterFormContent(props: FormContentProps): React.JSX.Element {
       />
       <AccountTypeSection
         isClubAdmin={form.isClubAdmin}
-        onToggle={(): void => formHook.setIsClubAdmin(!form.isClubAdmin)}
         sectionTitle={t('screens.register.accountType')}
         checkboxLabel={t('screens.register.iAmClubAdmin')}
         infoText={t('screens.register.clubAdminApprovalNote')}
+        onToggle={(): void => formHook.setIsClubAdmin(!form.isClubAdmin)}
       />
       <ClubHierarchySection
         sectionTitle={t('screens.register.findYourClub')}
@@ -173,11 +174,11 @@ function RegisterFormContent(props: FormContentProps): React.JSX.Element {
       {!form.isClubAdmin && (
         <ClassSelectionSection
           selectedClasses={form.selectedClasses}
-          onOpenModal={onOpenClassModal}
           sectionTitle={t('screens.register.pathfinderClasses')}
           description={t('screens.register.selectClassesInstruction')}
           selectText={t('screens.register.selectClasses')}
           selectedText={t('screens.register.selectedClasses')}
+          onOpenModal={onOpenClassModal}
         />
       )}
       <PasswordInputs
@@ -189,10 +190,11 @@ function RegisterFormContent(props: FormContentProps): React.JSX.Element {
       />
       <Button
         title={buttonTitle}
-        onPress={(): void => formHook.handleRegister(clubHierarchy.hierarchy.clubId)}
         disabled={form.loading}
         loading={form.loading}
         icon={ICONS.ACCOUNT_PLUS}
+        accessibilityState={{ disabled: form.loading }}
+        onPress={(): void => formHook.handleRegister(clubHierarchy.hierarchy.clubId)}
       />
       <Button
         title={t('screens.register.alreadyHaveAccount')}
@@ -202,5 +204,6 @@ function RegisterFormContent(props: FormContentProps): React.JSX.Element {
     </View>
   );
 }
+/* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
 
 export default RegisterScreen;

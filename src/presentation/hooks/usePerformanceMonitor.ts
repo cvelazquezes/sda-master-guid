@@ -5,9 +5,9 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { InteractionManager } from 'react-native';
-import { logger } from '../../shared/utils/logger';
-import { MS, MATH, OPACITY_VALUE, LIST_LIMITS, FPS } from '../../shared/constants/numbers';
 import { LOG_MESSAGES } from '../../shared/constants';
+import { MS, MATH, OPACITY_VALUE, LIST_LIMITS, FPS } from '../../shared/constants/numbers';
+import { logger } from '../../shared/utils/logger';
 
 // Performance thresholds
 const PERF_THRESHOLD = {
@@ -24,7 +24,7 @@ const PERF_THRESHOLD = {
 /**
  * Performance metrics
  */
-export interface PerformanceMetrics {
+export type PerformanceMetrics = {
   /** Time to interactive (ms) */
   tti: number;
   /** Component mount time (ms) */
@@ -35,12 +35,12 @@ export interface PerformanceMetrics {
   lastRenderTime: number;
   /** Memory usage (bytes) */
   memoryUsage?: number;
-}
+};
 
 /**
  * Performance budget thresholds
  */
-export interface PerformanceBudget {
+export type PerformanceBudget = {
   /** Maximum time to interactive (ms) */
   maxTTI: number;
   /** Maximum mount time (ms) */
@@ -49,12 +49,12 @@ export interface PerformanceBudget {
   maxRenderTime: number;
   /** Component name for logging */
   componentName: string;
-}
+};
 
 /**
  * Performance measurement result
  */
-export interface PerformanceMeasurement {
+export type PerformanceMeasurement = {
   /** Measurement name */
   name: string;
   /** Duration in milliseconds */
@@ -67,7 +67,7 @@ export interface PerformanceMeasurement {
   exceeded: boolean;
   /** Budget threshold if applicable */
   budget?: number;
-}
+};
 
 // ============================================================================
 // Performance Monitor Hook
@@ -380,22 +380,31 @@ export function useMemoryMonitor(interval: number = 5000): {
   useEffect(() => {
     const checkMemory = (): void => {
       // @ts-expect-error - performance.memory is not standard but available in some environments
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (performance.memory) {
-        // @ts-expect-error - performance.memory is not standard
-        const { usedJSHeapSize, totalJSHeapSize, jsHeapSizeLimit } = performance.memory;
+        // @ts-expect-error - performance.memory is not standard but available in some environments
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access -- Non-standard API access
+        const memoryInfo = performance.memory as {
+          usedJSHeapSize: number;
+          totalJSHeapSize: number;
+          jsHeapSizeLimit: number;
+        };
 
         setMemory({
-          usedJSHeapSize,
-          totalJSHeapSize,
-          jsHeapSizeLimit,
+          usedJSHeapSize: memoryInfo.usedJSHeapSize,
+          totalJSHeapSize: memoryInfo.totalJSHeapSize,
+          jsHeapSizeLimit: memoryInfo.jsHeapSizeLimit,
         });
 
         // Warn if using > 90% of heap
-        if (usedJSHeapSize > jsHeapSizeLimit * PERF_THRESHOLD.MEMORY_WARNING_RATIO) {
+        if (
+          memoryInfo.usedJSHeapSize >
+          memoryInfo.jsHeapSizeLimit * PERF_THRESHOLD.MEMORY_WARNING_RATIO
+        ) {
           logger.warn(LOG_MESSAGES.PERFORMANCE.HIGH_MEMORY, {
-            used: usedJSHeapSize,
-            limit: jsHeapSizeLimit,
-            percentage: (usedJSHeapSize / jsHeapSizeLimit) * MATH.HUNDRED,
+            used: memoryInfo.usedJSHeapSize,
+            limit: memoryInfo.jsHeapSizeLimit,
+            percentage: (memoryInfo.usedJSHeapSize / memoryInfo.jsHeapSizeLimit) * MATH.HUNDRED,
           });
         }
       }
@@ -515,7 +524,7 @@ export function useNetworkMonitor(): {
     slowestDuration: 0,
   });
 
-  const durations = useRef<{ name: string; duration: number }[]>([]);
+  const durations = useRef<Array<{ name: string; duration: number }>>([]);
 
   const trackRequest = useCallback(
     async <T>(name: string, fn: () => Promise<T>, options?: { budget?: number }): Promise<T> => {

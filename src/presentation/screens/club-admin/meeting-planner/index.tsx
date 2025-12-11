@@ -219,6 +219,7 @@ const MeetingPlannerScreen = (): React.JSX.Element => {
           isSaved={isSaved}
           setIsSaved={setIsSaved}
           t={t}
+          styles={styles}
           onSave={(): void =>
             handleSaveMeeting(
               agendaItems,
@@ -229,7 +230,6 @@ const MeetingPlannerScreen = (): React.JSX.Element => {
             )
           }
           onShare={(): void => editState.setShareModalVisible(true)}
-          styles={styles}
         />
       )}
       <EditItemModal
@@ -355,28 +355,45 @@ function MeetingHeaderActions({
   onAdd,
 }: MeetingHeaderActionsProps): React.JSX.Element {
   const { iconSizes, colors, spacing } = useTheme();
+  /* eslint-disable @typescript-eslint/no-unsafe-assignment -- Theme colors are properly typed */
   const buttonStyle = {
     padding: spacing.sm,
     borderRadius: spacing.lg,
     backgroundColor: colors.surfaceElevated || colors.surface,
   };
+  /* eslint-enable @typescript-eslint/no-unsafe-assignment */
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
-      <TouchableOpacity style={buttonStyle} onPress={onNew}>
+      <TouchableOpacity
+        style={buttonStyle}
+        accessibilityRole="button"
+        accessibilityLabel="New meeting plan"
+        onPress={onNew}
+      >
         <MaterialCommunityIcons
           name={ICONS.FILE_DOCUMENT_OUTLINE}
           size={iconSizes.md}
           color={colors.textSecondary}
         />
       </TouchableOpacity>
-      <TouchableOpacity style={buttonStyle} onPress={onReset}>
+      <TouchableOpacity
+        style={buttonStyle}
+        accessibilityRole="button"
+        accessibilityLabel="Reset meeting plan"
+        onPress={onReset}
+      >
         <MaterialCommunityIcons
           name={ICONS.REFRESH}
           size={iconSizes.md}
           color={colors.textSecondary}
         />
       </TouchableOpacity>
-      <TouchableOpacity style={buttonStyle} onPress={onAdd}>
+      <TouchableOpacity
+        style={buttonStyle}
+        accessibilityRole="button"
+        accessibilityLabel="Add activity"
+        onPress={onAdd}
+      >
         <MaterialCommunityIcons name={ICONS.PLUS} size={iconSizes.md} color={colors.primary} />
       </TouchableOpacity>
     </View>
@@ -413,12 +430,24 @@ type FooterProps = {
   styles: ReturnType<typeof createStyles>;
 };
 
-function Footer({ isSaved, setIsSaved, onSave, onShare, t, styles }: FooterProps): React.JSX.Element {
+function Footer({
+  isSaved,
+  setIsSaved,
+  onSave,
+  onShare,
+  t,
+  styles,
+}: FooterProps): React.JSX.Element {
   const { iconSizes, colors } = useTheme();
   if (!isSaved) {
     return (
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.saveButton} onPress={onSave}>
+        <TouchableOpacity
+          style={styles.saveButton}
+          accessibilityRole="button"
+          accessibilityLabel="Save meeting plan"
+          onPress={onSave}
+        >
           <MaterialCommunityIcons
             name={ICONS.CONTENT_SAVE}
             size={iconSizes.lg}
@@ -432,11 +461,21 @@ function Footer({ isSaved, setIsSaved, onSave, onShare, t, styles }: FooterProps
   return (
     <View style={styles.footer}>
       <View style={styles.footerButtons}>
-        <TouchableOpacity style={styles.editButton} onPress={(): void => setIsSaved(false)}>
+        <TouchableOpacity
+          style={styles.editButton}
+          accessibilityRole="button"
+          accessibilityLabel="Edit meeting plan"
+          onPress={(): void => setIsSaved(false)}
+        >
           <MaterialCommunityIcons name={ICONS.PENCIL} size={iconSizes.md} color={colors.primary} />
           <Text style={styles.editButtonText}>{t('screens.meetingPlanner.edit')}</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.shareButton} onPress={onShare}>
+        <TouchableOpacity
+          style={styles.shareButton}
+          accessibilityRole="button"
+          accessibilityLabel="Share with members"
+          onPress={onShare}
+        >
           <MaterialCommunityIcons
             name={ICONS.SHARE_VARIANT}
             size={iconSizes.lg}

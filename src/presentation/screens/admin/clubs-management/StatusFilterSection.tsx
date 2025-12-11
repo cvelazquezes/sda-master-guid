@@ -1,17 +1,17 @@
 import React, { useMemo } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { createFilterStyles } from './styles';
+import { ICONS, FILTER_STATUS, HIERARCHY_FIELDS } from '../../../../shared/constants';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
-import { ICONS, FILTER_STATUS, HIERARCHY_FIELDS } from '../../../../shared/constants';
-import { createFilterStyles } from './styles';
 
-interface StatusFilterSectionProps {
+type StatusFilterSectionProps = {
   currentStatus: string;
   onSelectStatus: (field: string, value: string) => void;
   colors: { primary: string; success: string; error: string; textSecondary: string };
   t: (key: string) => string;
-}
+};
 
 export function StatusFilterSection({
   currentStatus,
@@ -55,6 +55,9 @@ export function StatusFilterSection({
         <TouchableOpacity
           key={option.id}
           style={[filterStyles.option, currentStatus === option.id && filterStyles.optionActive]}
+          accessibilityRole="radio"
+          accessibilityState={{ selected: currentStatus === option.id }}
+          accessibilityLabel={option.label}
           onPress={(): void => onSelectStatus(HIERARCHY_FIELDS.STATUS, option.id)}
         >
           <View style={filterStyles.optionContent}>

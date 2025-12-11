@@ -1,13 +1,13 @@
 import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text, SectionHeader, Card } from '../../../components/primitives';
-import { useTheme } from '../../../state/ThemeContext';
-import { ICONS, DATE_LOCALE_OPTIONS } from '../../../../shared/constants';
-import { ApprovalStatus, Club } from '../../../../types';
 import { createStyles } from './styles';
+import { DATE_LOCALE_OPTIONS, ICONS } from '../../../../shared/constants';
+import { ApprovalStatus, type Club } from '../../../../types';
+import { Card, SectionHeader, Text } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
 
-interface ClubMembershipSectionProps {
+type ClubMembershipSectionProps = {
   club: Club | null;
   classes?: string[];
   createdAt?: string;
@@ -23,7 +23,7 @@ interface ClubMembershipSectionProps {
     textTertiary: string;
   };
   t: (key: string) => string;
-}
+};
 
 export function ClubMembershipSection({
   club,
@@ -82,16 +82,16 @@ export function ClubMembershipSection({
   );
 }
 
-interface ClubRowProps {
+type ClubRowProps = {
   club: Club | null;
   colors: { border: string; primary: string; textSecondary: string; textPrimary: string };
   t: (key: string) => string;
   styles: ReturnType<typeof createStyles>;
-}
+};
 
 function ClubRow({ club, colors, t, styles }: ClubRowProps): React.JSX.Element {
   const { iconSizes } = useTheme();
-  const iconBg = colors.primary + '20';
+  const iconBg = `${colors.primary}20`;
   return (
     <View style={[styles.detailRow, { borderBottomColor: colors.border }]}>
       <View style={[styles.detailIconContainer, { backgroundColor: iconBg }]}>
@@ -113,17 +113,23 @@ function ClubRow({ club, colors, t, styles }: ClubRowProps): React.JSX.Element {
   );
 }
 
-interface ClassesRowProps {
+type ClassesRowProps = {
   classes: string[];
-  colors: { border: string; info: string; primary: string; textSecondary: string };
+  colors: {
+    border: string;
+    info: string;
+    primary: string;
+    textSecondary: string;
+    textPrimary: string;
+  };
   t: (key: string) => string;
   styles: ReturnType<typeof createStyles>;
-}
+};
 
 function ClassesRow({ classes, colors, t, styles }: ClassesRowProps): React.JSX.Element {
   const { iconSizes } = useTheme();
-  const iconBg = colors.info + '20';
-  const badgeBg = colors.primaryAlpha20;
+  const iconBg = `${colors.info}20`;
+  const badgeBg = (colors as Record<string, string>).primaryAlpha20 ?? `${colors.primary}20`;
   return (
     <View style={[styles.detailRow, { borderBottomColor: colors.border }]}>
       <View style={[styles.detailIconContainer, { backgroundColor: iconBg }]}>
@@ -145,16 +151,16 @@ function ClassesRow({ classes, colors, t, styles }: ClassesRowProps): React.JSX.
   );
 }
 
-interface MemberSinceRowProps {
+type MemberSinceRowProps = {
   date: string;
   colors: { border: string; textTertiary: string; textSecondary: string; textPrimary: string };
   t: (key: string) => string;
   styles: ReturnType<typeof createStyles>;
-}
+};
 
 function MemberSinceRow({ date, colors, t, styles }: MemberSinceRowProps): React.JSX.Element {
   const { iconSizes } = useTheme();
-  const iconBg = colors.textTertiary + '20';
+  const iconBg = `${colors.textTertiary}20`;
   return (
     <View style={[styles.detailRow, { borderBottomColor: colors.border }]}>
       <View style={[styles.detailIconContainer, { backgroundColor: iconBg }]}>
@@ -174,18 +180,18 @@ function MemberSinceRow({ date, colors, t, styles }: MemberSinceRowProps): React
   );
 }
 
-interface StatusRowProps {
+type StatusRowProps = {
   icon: string;
   label: string;
   color: string;
   colors: { textSecondary: string };
   t: (key: string) => string;
   styles: ReturnType<typeof createStyles>;
-}
+};
 
 function StatusRow({ icon, label, color, colors, t, styles }: StatusRowProps): React.JSX.Element {
   const { iconSizes } = useTheme();
-  const iconBg = color + '20';
+  const iconBg = `${color}20`;
   return (
     <View style={styles.detailRow}>
       <View style={[styles.detailIconContainer, { backgroundColor: iconBg }]}>
