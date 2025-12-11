@@ -3,8 +3,8 @@
  * Comprehensive tests for match management service
  */
 
-import { matchService } from '../matchService';
 import { secureStorage } from '../../../shared/utils/secureStorage';
+import { MatchStatus } from '../../../types';
 import {
   mockMatches,
   mockClubs,
@@ -12,7 +12,7 @@ import {
   getMatchesForUser,
   getUsersByClub,
 } from '../../persistence/mockData';
-import { MatchStatus } from '../../../types';
+import { matchService } from '../matchService';
 
 // Mock dependencies
 jest.mock('../../utils/secureStorage');

@@ -3,16 +3,16 @@
  * Handles club management with mock/backend toggle
  */
 
-import { apiService } from '../http/api';
-import { environment } from '../config/environment';
-import { logger } from '../../shared/utils/logger';
-import { Club, MatchFrequency, User, ApprovalStatus } from '../../types';
-import { mockClubs, getUsersByClub } from '../persistence/mockData';
-import { NotFoundError } from '../../shared/utils/errors';
 import { LOG_MESSAGES, API_ENDPOINTS } from '../../shared/constants';
 import { MOCK_DELAY } from '../../shared/constants/timing';
+import { NotFoundError } from '../../shared/utils/errors';
+import { logger } from '../../shared/utils/logger';
+import { ApprovalStatus, type Club, type MatchFrequency, type User } from '../../types';
+import { environment } from '../config/environment';
+import { apiService } from '../http/api';
+import { mockClubs, getUsersByClub } from '../persistence/mockData';
 
-interface CreateClubData {
+type CreateClubData = {
   name: string;
   description: string;
   matchFrequency: MatchFrequency;
@@ -21,10 +21,10 @@ interface CreateClubData {
   association: string;
   union: string;
   division: string;
-}
+};
 
 class ClubService {
-  private useMockData = environment.mock.useMockApi;
+  private _useMockData: boolean = environment.mock.useMockApi;
 
   /**
    * Get all clubs
@@ -32,8 +32,8 @@ class ClubService {
   async getAllClubs(): Promise<Club[]> {
     logger.debug(LOG_MESSAGES.CLUB.FETCHING_ALL);
 
-    if (this.useMockData) {
-      return this.mockGetAllClubs();
+    if (this._useMockData) {
+      return this._mockGetAllClubs();
     }
 
     try {
@@ -49,7 +49,7 @@ class ClubService {
   /**
    * Mock get all clubs implementation
    */
-  private async mockGetAllClubs(): Promise<Club[]> {
+  private async _mockGetAllClubs(): Promise<Club[]> {
     logger.debug(LOG_MESSAGES.CLUB.MOCK_GETTING_ALL, { count: mockClubs.length });
     return [...mockClubs];
   }
@@ -60,8 +60,8 @@ class ClubService {
   async getClub(clubId: string): Promise<Club> {
     logger.debug(LOG_MESSAGES.CLUB.FETCHING_ONE, { clubId });
 
-    if (this.useMockData) {
-      return this.mockGetClub(clubId);
+    if (this._useMockData) {
+      return this._mockGetClub(clubId);
     }
 
     try {
@@ -84,7 +84,7 @@ class ClubService {
   /**
    * Mock get club implementation
    */
-  private async mockGetClub(clubId: string): Promise<Club> {
+  private async _mockGetClub(clubId: string): Promise<Club> {
     const club = mockClubs.find((c) => c.id === clubId);
     if (!club) {
       logger.warn(LOG_MESSAGES.CLUB.MOCK_NOT_FOUND, { clubId });
@@ -103,6 +103,7 @@ class ClubService {
   /**
    * Create new club
    */
+  // eslint-disable-next-line max-params -- Club creation requires all parameters
   async createClub(
     name: string,
     description: string,
@@ -126,8 +127,8 @@ class ClubService {
 
     logger.info(LOG_MESSAGES.CLUB.CREATING, { name, church });
 
-    if (this.useMockData) {
-      return this.mockCreateClub(clubData);
+    if (this._useMockData) {
+      return this._mockCreateClub(clubData);
     }
 
     try {
@@ -143,8 +144,8 @@ class ClubService {
   /**
    * Mock create club implementation
    */
-  private async mockCreateClub(data: CreateClubData): Promise<Club> {
-    await this.sleep(MOCK_DELAY.NORMAL); // Longer delay for create operations
+  private async _mockCreateClub(data: CreateClubData): Promise<Club> {
+    await this._sleep(MOCK_DELAY.NORMAL); // Longer delay for create operations
 
     const newClub: Club = {
       id: String(mockClubs.length + 1),
@@ -167,8 +168,8 @@ class ClubService {
   async updateClub(clubId: string, data: Partial<Club>): Promise<Club> {
     logger.info(LOG_MESSAGES.CLUB.UPDATING, { clubId, fields: Object.keys(data) });
 
-    if (this.useMockData) {
-      return this.mockUpdateClub(clubId, data);
+    if (this._useMockData) {
+      return this._mockUpdateClub(clubId, data);
     }
 
     try {
@@ -184,8 +185,8 @@ class ClubService {
   /**
    * Mock update club implementation
    */
-  private async mockUpdateClub(clubId: string, data: Partial<Club>): Promise<Club> {
-    await this.sleep(MOCK_DELAY.FAST);
+  private async _mockUpdateClub(clubId: string, data: Partial<Club>): Promise<Club> {
+    await this._sleep(MOCK_DELAY.FAST);
 
     const clubIndex = mockClubs.findIndex((c) => c.id === clubId);
     if (clubIndex === -1) {
@@ -209,12 +210,12 @@ class ClubService {
   async deleteClub(clubId: string): Promise<void> {
     logger.info(LOG_MESSAGES.CLUB.DELETING, { clubId });
 
-    if (this.useMockData) {
-      return this.mockDeleteClub(clubId);
+    if (this._useMockData) {
+      return this._mockDeleteClub(clubId);
     }
 
     try {
-      await apiService.delete<void>(API_ENDPOINTS.CLUBS.BY_ID(clubId));
+      await apiService.delete<undefined>(API_ENDPOINTS.CLUBS.BY_ID(clubId));
       logger.info(LOG_MESSAGES.CLUB.DELETED, { clubId });
     } catch (error) {
       logger.error(LOG_MESSAGES.CLUB.DELETE_FAILED, error as Error, { clubId });
@@ -225,8 +226,8 @@ class ClubService {
   /**
    * Mock delete club implementation
    */
-  private async mockDeleteClub(clubId: string): Promise<void> {
-    await this.sleep(MOCK_DELAY.FAST);
+  private async _mockDeleteClub(clubId: string): Promise<void> {
+    await this._sleep(MOCK_DELAY.FAST);
 
     const clubIndex = mockClubs.findIndex((c) => c.id === clubId);
     if (clubIndex !== -1) {
@@ -243,12 +244,12 @@ class ClubService {
   async joinClub(clubId: string): Promise<void> {
     logger.info(LOG_MESSAGES.CLUB.JOINING, { clubId });
 
-    if (this.useMockData) {
-      return this.mockJoinClub(clubId);
+    if (this._useMockData) {
+      return this._mockJoinClub(clubId);
     }
 
     try {
-      await apiService.post<void>(API_ENDPOINTS.CLUBS.JOIN(clubId), {});
+      await apiService.post<undefined>(API_ENDPOINTS.CLUBS.JOIN(clubId), {});
       logger.info(LOG_MESSAGES.CLUB.JOINED, { clubId });
     } catch (error) {
       logger.error(LOG_MESSAGES.CLUB.JOIN_FAILED, error as Error, { clubId });
@@ -259,8 +260,8 @@ class ClubService {
   /**
    * Mock join club implementation
    */
-  private async mockJoinClub(clubId: string): Promise<void> {
-    await this.sleep(MOCK_DELAY.FAST);
+  private async _mockJoinClub(clubId: string): Promise<void> {
+    await this._sleep(MOCK_DELAY.FAST);
     // This would update the user's clubId in a real scenario
     logger.info(LOG_MESSAGES.CLUB.MOCK_JOINED, { clubId });
   }
@@ -271,12 +272,12 @@ class ClubService {
   async leaveClub(clubId: string): Promise<void> {
     logger.info(LOG_MESSAGES.CLUB.LEAVING, { clubId });
 
-    if (this.useMockData) {
-      return this.mockLeaveClub(clubId);
+    if (this._useMockData) {
+      return this._mockLeaveClub(clubId);
     }
 
     try {
-      await apiService.post<void>(API_ENDPOINTS.CLUBS.LEAVE(clubId), {});
+      await apiService.post<undefined>(API_ENDPOINTS.CLUBS.LEAVE(clubId), {});
       logger.info(LOG_MESSAGES.CLUB.LEFT, { clubId });
     } catch (error) {
       logger.error(LOG_MESSAGES.CLUB.LEAVE_FAILED, error as Error, { clubId });
@@ -287,8 +288,8 @@ class ClubService {
   /**
    * Mock leave club implementation
    */
-  private async mockLeaveClub(clubId: string): Promise<void> {
-    await this.sleep(MOCK_DELAY.FAST);
+  private async _mockLeaveClub(clubId: string): Promise<void> {
+    await this._sleep(MOCK_DELAY.FAST);
     logger.info(LOG_MESSAGES.CLUB.MOCK_LEFT, { clubId });
   }
 
@@ -298,8 +299,8 @@ class ClubService {
   async getClubMembers(clubId: string): Promise<User[]> {
     logger.debug(LOG_MESSAGES.CLUB.FETCHING_MEMBERS, { clubId });
 
-    if (this.useMockData) {
-      return this.mockGetClubMembers(clubId);
+    if (this._useMockData) {
+      return this._mockGetClubMembers(clubId);
     }
 
     try {
@@ -315,7 +316,7 @@ class ClubService {
   /**
    * Mock get club members implementation
    */
-  private async mockGetClubMembers(clubId: string): Promise<User[]> {
+  private async _mockGetClubMembers(clubId: string): Promise<User[]> {
     const members = getUsersByClub(clubId);
     logger.debug(LOG_MESSAGES.CLUB.MOCK_FETCHED_MEMBERS, { clubId, count: members.length });
     return members;
@@ -324,8 +325,10 @@ class ClubService {
   /**
    * Sleep helper for mock delays
    */
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+  private _sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
   }
 }
 

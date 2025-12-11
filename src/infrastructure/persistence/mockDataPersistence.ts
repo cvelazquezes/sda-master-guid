@@ -4,8 +4,8 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { User, Club, Match, MatchRound } from '../../types';
 import { logger } from '../../shared/utils/logger';
+import type { User, Club, Match, MatchRound } from '../../types';
 
 // Storage keys
 const STORAGE_KEYS = {
@@ -16,12 +16,12 @@ const STORAGE_KEYS = {
   INITIALIZED: '@mock_data_initialized',
 };
 
-export interface MockDataStore {
+export type MockDataStore = {
   users: User[];
   clubs: Club[];
   matches: Match[];
   matchRounds: MatchRound[];
-}
+};
 
 /**
  * Load mock data from storage

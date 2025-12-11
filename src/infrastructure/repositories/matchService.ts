@@ -3,11 +3,17 @@
  * Handles match generation and management with mock/backend toggle
  */
 
-import { apiService } from '../http/api';
-import { environment } from '../config/environment';
+import { LOG_MESSAGES, API_ENDPOINTS } from '../../shared/constants';
+import { MS, OPACITY_VALUE } from '../../shared/constants/numbers';
+import { MOCK_DELAY } from '../../shared/constants/timing';
+import { ROUND_STATUS } from '../../shared/constants/ui';
+import { t } from '../../shared/i18n';
+import { NotFoundError, ValidationError } from '../../shared/utils/errors';
 import { logger } from '../../shared/utils/logger';
 import { secureStorage } from '../../shared/utils/secureStorage';
-import { Match, MatchRound, MatchStatus, ApprovalStatus } from '../../types';
+import { MatchStatus, ApprovalStatus, type Match, type MatchRound } from '../../types';
+import { environment } from '../config/environment';
+import { apiService } from '../http/api';
 import {
   mockMatches,
   mockMatchRounds,
@@ -17,15 +23,9 @@ import {
   getMatchRoundsByClub,
   getUsersByClub,
 } from '../persistence/mockData';
-import { NotFoundError, ValidationError } from '../../shared/utils/errors';
-import { LOG_MESSAGES, API_ENDPOINTS } from '../../shared/constants';
-import { MOCK_DELAY } from '../../shared/constants/timing';
-import { MS, OPACITY_VALUE } from '../../shared/constants/numbers';
-import { ROUND_STATUS } from '../../shared/constants/ui';
-import i18n from '../../shared/i18n';
 
 class MatchService {
-  private useMockData = environment.mock.useMockApi;
+  private _useMockData: boolean = environment.mock.useMockApi;
 
   /**
    * Get matches for a club
@@ -33,8 +33,8 @@ class MatchService {
   async getMatches(clubId: string): Promise<Match[]> {
     logger.debug(LOG_MESSAGES.MATCH.FETCHING, { clubId });
 
-    if (this.useMockData) {
-      return this.mockGetMatches(clubId);
+    if (this._useMockData) {
+      return this._mockGetMatches(clubId);
     }
 
     try {
@@ -50,7 +50,7 @@ class MatchService {
   /**
    * Mock get matches implementation
    */
-  private async mockGetMatches(clubId: string): Promise<Match[]> {
+  private async _mockGetMatches(clubId: string): Promise<Match[]> {
     const matches = getMatchesByClub(clubId);
     logger.debug(LOG_MESSAGES.MATCH.MOCK_FETCHED, { clubId, count: matches.length });
     return matches;
@@ -62,8 +62,8 @@ class MatchService {
   async getMyMatches(): Promise<Match[]> {
     logger.debug(LOG_MESSAGES.MATCH.FETCHING_MY);
 
-    if (this.useMockData) {
-      return this.mockGetMyMatches();
+    if (this._useMockData) {
+      return this._mockGetMyMatches();
     }
 
     try {
@@ -79,7 +79,7 @@ class MatchService {
   /**
    * Mock get my matches implementation
    */
-  private async mockGetMyMatches(): Promise<Match[]> {
+  private async _mockGetMyMatches(): Promise<Match[]> {
     const userId = await secureStorage.getUserId();
     if (!userId) {
       logger.warn(LOG_MESSAGES.MATCH.MOCK_NO_USER);
@@ -97,8 +97,8 @@ class MatchService {
   async getMatch(matchId: string): Promise<Match> {
     logger.debug(LOG_MESSAGES.MATCH.FETCHING_ONE, { matchId });
 
-    if (this.useMockData) {
-      return this.mockGetMatch(matchId);
+    if (this._useMockData) {
+      return this._mockGetMatch(matchId);
     }
 
     try {
@@ -114,8 +114,8 @@ class MatchService {
   /**
    * Mock get match implementation
    */
-  private async mockGetMatch(matchId: string): Promise<Match> {
-    await this.sleep(MOCK_DELAY.FAST);
+  private async _mockGetMatch(matchId: string): Promise<Match> {
+    await this._sleep(MOCK_DELAY.FAST);
 
     const match = mockMatches.find((m) => m.id === matchId);
     if (!match) {
@@ -133,8 +133,8 @@ class MatchService {
   async updateMatchStatus(matchId: string, status: MatchStatus): Promise<Match> {
     logger.info(LOG_MESSAGES.MATCH.UPDATING_STATUS, { matchId, status });
 
-    if (this.useMockData) {
-      return this.mockUpdateMatchStatus(matchId, status);
+    if (this._useMockData) {
+      return this._mockUpdateMatchStatus(matchId, status);
     }
 
     try {
@@ -152,8 +152,8 @@ class MatchService {
   /**
    * Mock update match status implementation
    */
-  private async mockUpdateMatchStatus(matchId: string, status: MatchStatus): Promise<Match> {
-    await this.sleep(MOCK_DELAY.FAST);
+  private async _mockUpdateMatchStatus(matchId: string, status: MatchStatus): Promise<Match> {
+    await this._sleep(MOCK_DELAY.FAST);
 
     const matchIndex = mockMatches.findIndex((m) => m.id === matchId);
     if (matchIndex === -1) {
@@ -177,8 +177,8 @@ class MatchService {
   async scheduleMatch(matchId: string, scheduledDate: string): Promise<Match> {
     logger.info(LOG_MESSAGES.MATCH.SCHEDULING, { matchId, scheduledDate });
 
-    if (this.useMockData) {
-      return this.mockScheduleMatch(matchId, scheduledDate);
+    if (this._useMockData) {
+      return this._mockScheduleMatch(matchId, scheduledDate);
     }
 
     try {
@@ -196,8 +196,8 @@ class MatchService {
   /**
    * Mock schedule match implementation
    */
-  private async mockScheduleMatch(matchId: string, scheduledDate: string): Promise<Match> {
-    await this.sleep(MOCK_DELAY.FAST);
+  private async _mockScheduleMatch(matchId: string, scheduledDate: string): Promise<Match> {
+    await this._sleep(MOCK_DELAY.FAST);
 
     const matchIndex = mockMatches.findIndex((m) => m.id === matchId);
     if (matchIndex === -1) {
@@ -230,8 +230,8 @@ class MatchService {
   async generateMatches(clubId: string): Promise<MatchRound> {
     logger.info(LOG_MESSAGES.MATCH.GENERATING, { clubId });
 
-    if (this.useMockData) {
-      return this.mockGenerateMatches(clubId);
+    if (this._useMockData) {
+      return this._mockGenerateMatches(clubId);
     }
 
     try {
@@ -249,8 +249,8 @@ class MatchService {
   /**
    * Mock generate matches implementation
    */
-  private async mockGenerateMatches(clubId: string): Promise<MatchRound> {
-    await this.sleep(MOCK_DELAY.SLOW);
+  private async _mockGenerateMatches(clubId: string): Promise<MatchRound> {
+    await this._sleep(MOCK_DELAY.SLOW);
 
     const club = mockClubs.find((c) => c.id === clubId);
     if (!club) {
@@ -269,7 +269,7 @@ class MatchService {
         required: club.groupSize,
       });
       throw new ValidationError(
-        i18n.t('services.validation.notEnoughMembers', {
+        t('services.validation.notEnoughMembers', {
           required: club.groupSize,
           count: members.length,
         })
@@ -316,8 +316,8 @@ class MatchService {
   async getMatchRounds(clubId: string): Promise<MatchRound[]> {
     logger.debug(LOG_MESSAGES.MATCH.FETCHING_ROUNDS, { clubId });
 
-    if (this.useMockData) {
-      return this.mockGetMatchRounds(clubId);
+    if (this._useMockData) {
+      return this._mockGetMatchRounds(clubId);
     }
 
     try {
@@ -333,7 +333,7 @@ class MatchService {
   /**
    * Mock get match rounds implementation
    */
-  private async mockGetMatchRounds(clubId: string): Promise<MatchRound[]> {
+  private async _mockGetMatchRounds(clubId: string): Promise<MatchRound[]> {
     const rounds = getMatchRoundsByClub(clubId);
     logger.debug(LOG_MESSAGES.MATCH.MOCK_FETCHED_ROUNDS, { clubId, count: rounds.length });
     return rounds;
@@ -345,8 +345,8 @@ class MatchService {
   async getClubMatches(clubId: string): Promise<Match[]> {
     logger.debug(LOG_MESSAGES.MATCH.FETCHING_CLUB_MATCHES, { clubId });
 
-    if (this.useMockData) {
-      return this.mockGetClubMatches(clubId);
+    if (this._useMockData) {
+      return this._mockGetClubMatches(clubId);
     }
 
     try {
@@ -362,7 +362,7 @@ class MatchService {
   /**
    * Mock get club matches implementation
    */
-  private async mockGetClubMatches(clubId: string): Promise<Match[]> {
+  private async _mockGetClubMatches(clubId: string): Promise<Match[]> {
     const matches = getMatchesByClub(clubId);
     logger.debug(LOG_MESSAGES.MATCH.MOCK_FETCHED_CLUB, { clubId, count: matches.length });
     return matches;
@@ -371,8 +371,10 @@ class MatchService {
   /**
    * Sleep helper for mock delays
    */
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+  private _sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
   }
 }
 

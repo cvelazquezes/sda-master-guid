@@ -3,9 +3,9 @@
  * Comprehensive tests for authentication service
  */
 
-import { authService } from '../authService';
 import { secureStorage } from '../../../shared/utils/secureStorage';
 import { mockUsers, getUserByEmail } from '../../persistence/mockData';
+import { authService } from '../authService';
 
 // Mock dependencies
 jest.mock('../../utils/secureStorage');

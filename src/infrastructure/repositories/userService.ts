@@ -3,19 +3,19 @@
  * Handles user management with mock/backend toggle
  */
 
-import { apiService } from '../http/api';
-import { environment } from '../config/environment';
-import { logger } from '../../shared/utils/logger';
-import { User, UserRole, ApprovalStatus } from '../../types';
-import { mockUsers } from '../persistence/mockData';
-import { NotFoundError } from '../../shared/utils/errors';
 import { LOG_MESSAGES, ERROR_MESSAGES, API_ENDPOINTS } from '../../shared/constants';
+import { NotFoundError } from '../../shared/utils/errors';
+import { logger } from '../../shared/utils/logger';
+import { ApprovalStatus, type User, type UserRole } from '../../types';
+import { environment } from '../config/environment';
+import { apiService } from '../http/api';
+import { mockUsers } from '../persistence/mockData';
 
 // Constants
 const MOCK_API_DELAY_MS = 300;
 
 class UserService {
-  private useMockData = environment.mock.useMockApi;
+  private _useMockData: boolean = environment.mock.useMockApi;
 
   /**
    * Get all users
@@ -23,8 +23,8 @@ class UserService {
   async getAllUsers(): Promise<User[]> {
     logger.debug(LOG_MESSAGES.USER.FETCHING_ALL);
 
-    if (this.useMockData) {
-      return this.mockGetAllUsers();
+    if (this._useMockData) {
+      return this._mockGetAllUsers();
     }
 
     try {
@@ -40,7 +40,7 @@ class UserService {
   /**
    * Mock get all users implementation
    */
-  private async mockGetAllUsers(): Promise<User[]> {
+  private async _mockGetAllUsers(): Promise<User[]> {
     // Return immediately without delay for better UX
     logger.debug(LOG_MESSAGES.USER.MOCK_GETTING_ALL, { count: mockUsers.length });
     return [...mockUsers];
@@ -52,8 +52,8 @@ class UserService {
   async getUser(userId: string): Promise<User> {
     logger.debug(LOG_MESSAGES.USER.FETCHING_ONE, { userId });
 
-    if (this.useMockData) {
-      return this.mockGetUser(userId);
+    if (this._useMockData) {
+      return this._mockGetUser(userId);
     }
 
     try {
@@ -69,8 +69,8 @@ class UserService {
   /**
    * Mock get user implementation
    */
-  private async mockGetUser(userId: string): Promise<User> {
-    await this.sleep(MOCK_API_DELAY_MS);
+  private async _mockGetUser(userId: string): Promise<User> {
+    await this._sleep(MOCK_API_DELAY_MS);
 
     const user = mockUsers.find((u) => u.id === userId);
     if (!user) {
@@ -88,8 +88,8 @@ class UserService {
   async updateUser(userId: string, data: Partial<User>): Promise<User> {
     logger.info(LOG_MESSAGES.USER.UPDATING, { userId, fields: Object.keys(data) });
 
-    if (this.useMockData) {
-      return this.mockUpdateUser(userId, data);
+    if (this._useMockData) {
+      return this._mockUpdateUser(userId, data);
     }
 
     try {
@@ -105,8 +105,8 @@ class UserService {
   /**
    * Mock update user implementation
    */
-  private async mockUpdateUser(userId: string, data: Partial<User>): Promise<User> {
-    await this.sleep(MOCK_API_DELAY_MS);
+  private async _mockUpdateUser(userId: string, data: Partial<User>): Promise<User> {
+    await this._sleep(MOCK_API_DELAY_MS);
 
     const userIndex = mockUsers.findIndex((u) => u.id === userId);
     if (userIndex === -1) {
@@ -130,12 +130,12 @@ class UserService {
   async deleteUser(userId: string): Promise<void> {
     logger.info(LOG_MESSAGES.USER.DELETING, { userId });
 
-    if (this.useMockData) {
-      return this.mockDeleteUser(userId);
+    if (this._useMockData) {
+      return this._mockDeleteUser(userId);
     }
 
     try {
-      await apiService.delete<void>(API_ENDPOINTS.USERS.BY_ID(userId));
+      await apiService.delete<undefined>(API_ENDPOINTS.USERS.BY_ID(userId));
       logger.info(LOG_MESSAGES.USER.DELETED, { userId });
     } catch (error) {
       logger.error(LOG_MESSAGES.USER.DELETE_FAILED, error as Error, { userId });
@@ -146,8 +146,8 @@ class UserService {
   /**
    * Mock delete user implementation
    */
-  private async mockDeleteUser(userId: string): Promise<void> {
-    await this.sleep(MOCK_API_DELAY_MS);
+  private async _mockDeleteUser(userId: string): Promise<void> {
+    await this._sleep(MOCK_API_DELAY_MS);
 
     const userIndex = mockUsers.findIndex((u) => u.id === userId);
     if (userIndex !== -1) {
@@ -218,8 +218,8 @@ class UserService {
   async getUsersByClub(clubId: string): Promise<User[]> {
     logger.debug(LOG_MESSAGES.USER.FETCHING_BY_CLUB, { clubId });
 
-    if (this.useMockData) {
-      return this.mockGetUsersByClub(clubId);
+    if (this._useMockData) {
+      return this._mockGetUsersByClub(clubId);
     }
 
     try {
@@ -235,8 +235,8 @@ class UserService {
   /**
    * Mock get users by club implementation
    */
-  private async mockGetUsersByClub(clubId: string): Promise<User[]> {
-    await this.sleep(MOCK_API_DELAY_MS);
+  private async _mockGetUsersByClub(clubId: string): Promise<User[]> {
+    await this._sleep(MOCK_API_DELAY_MS);
 
     const users = mockUsers.filter((u) => u.clubId === clubId);
     logger.debug(LOG_MESSAGES.USER.MOCK_FETCHED_BY_CLUB, { clubId, count: users.length });
@@ -246,8 +246,10 @@ class UserService {
   /**
    * Sleep helper for mock delays
    */
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+  private _sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
   }
 }
 
