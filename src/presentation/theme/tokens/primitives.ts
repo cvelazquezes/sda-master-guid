@@ -11,7 +11,7 @@
  * All other files should import from here rather than using magic numbers.
  */
 
-import { TextStyle } from 'react-native';
+import type { TextStyle } from 'react-native';
 
 // ============================================================================
 // COLOR PRIMITIVES

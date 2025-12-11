@@ -13,9 +13,9 @@
  * NOTE: This file intentionally contains literal numbers as it DEFINES design tokens.
  */
 
-import { TextStyle } from 'react-native';
-import { primitiveTokens } from './tokens/primitives';
 import { sdaSemanticColors, roleColors, statusColors, hierarchyColors } from './sdaColors';
+import { primitiveTokens } from './tokens/primitives';
+import type { TextStyle } from 'react-native';
 
 // =============================================================================
 // CORE SCALES

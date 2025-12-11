@@ -23,13 +23,21 @@
 
 // Primitive tokens (raw values)
 // Re-export default resolved tokens for convenience
-import { primitiveTokens } from './primitives';
-import { createSemanticTokens } from './semantic';
-import { createComponentTokens } from './components';
-import { motionTokens } from './motion';
-import { layoutTokens } from './layout';
-import { behaviorTokens } from './behavior';
-import { THEME_MODE } from '../../../shared/constants';
+// Note: These imports are intentionally kept for potential future use
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { behaviorTokens as _behaviorTokens } from './behavior';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { createComponentTokens as _createComponentTokens } from './components';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { layoutTokens as _layoutTokens } from './layout';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { motionTokens as _motionTokens } from './motion';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { primitiveTokens as _primitiveTokens } from './primitives';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { createSemanticTokens as _createSemanticTokens } from './semantic';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { THEME_MODE as _THEME_MODE } from '../../../shared/constants';
 
 export * from './primitives';
 

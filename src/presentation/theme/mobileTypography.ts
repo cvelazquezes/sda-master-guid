@@ -7,7 +7,7 @@
  * NOTE: This file intentionally contains literal numbers as it DEFINES typography tokens.
  */
 
-import { TextStyle } from 'react-native';
+import type { TextStyle } from 'react-native';
 
 /**
  * Mobile-Optimized Font Sizes

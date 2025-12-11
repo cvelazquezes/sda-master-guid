@@ -1,10 +1,10 @@
 /**
- * Dark Blue Theme Colors (SDA Brand)
+ * Midnight Blue Theme Colors (SDA Brand)
  * Dark mode color palette maintaining SDA brand identity
  * Uses SDA Blue as the primary color for a cohesive brand experience
  */
 
-export const darkBlueColors = {
+export const midnightBlueColors = {
   // Primary (SDA Blue - maintained for brand consistency in dark mode)
   primary: '#64B5F6', // Lighter SDA blue for dark backgrounds (300 shade)
   primaryLight: '#90CAF9', // Even lighter for highlights
@@ -75,7 +75,7 @@ export const darkBlueColors = {
   infoAlpha10: 'rgba(79, 195, 247, 0.10)',
   infoAlpha20: 'rgba(79, 195, 247, 0.20)',
 
-  // Semantic Colors (Dark Blue Theme)
+  // Semantic Colors (Midnight Blue Theme)
   background: '#0D1520', // Deep navy background
   backgroundPrimary: '#0D1520',
   backgroundElevated: '#1A2332', // Elevated surfaces (cards, modals)
@@ -157,10 +157,10 @@ export const darkBlueColors = {
 };
 
 // =============================================================================
-// DARK BLUE THEME STATUS COLORS
+// MIDNIGHT BLUE THEME STATUS COLORS
 // =============================================================================
 
-export const darkBlueStatusColors = {
+export const midnightBlueStatusColors = {
   active: {
     primary: '#66BB6A',
     light: 'rgba(102, 187, 106, 0.15)',
@@ -220,10 +220,10 @@ export const darkBlueStatusColors = {
 } as const;
 
 // =============================================================================
-// DARK BLUE THEME ROLE COLORS
+// MIDNIGHT BLUE THEME ROLE COLORS
 // =============================================================================
 
-export const darkBlueRoleColors = {
+export const midnightBlueRoleColors = {
   admin: {
     primary: '#EF5350',
     light: 'rgba(239, 83, 80, 0.15)',
@@ -247,5 +247,4 @@ export const darkBlueRoleColors = {
   },
 } as const;
 
-export type DarkBlueColorKey = keyof typeof darkBlueColors;
-
+export type MidnightBlueColorKey = keyof typeof midnightBlueColors;

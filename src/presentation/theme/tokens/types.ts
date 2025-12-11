@@ -5,19 +5,19 @@
  * Use these types to ensure type-safe token consumption throughout the app.
  */
 
-import { TextStyle } from 'react-native';
-import {
+import type { BehaviorTokens } from './behavior';
+import type { ComponentTokens } from './components';
+import type { LayoutTokens } from './layout';
+import type { MotionTokens } from './motion';
+import type {
   PrimitiveTokens,
   colorPrimitives,
   spacingPrimitives,
   radiusPrimitives,
   typographyPrimitives,
 } from './primitives';
-import { SemanticTokens, SemanticColors, ThemeMode } from './semantic';
-import { ComponentTokens } from './components';
-import { MotionTokens } from './motion';
-import { LayoutTokens } from './layout';
-import { BehaviorTokens } from './behavior';
+import type { SemanticTokens, SemanticColors, ThemeMode } from './semantic';
+import type { TextStyle } from 'react-native';
 
 // ============================================================================
 // THEME TYPES
@@ -27,10 +27,10 @@ import { BehaviorTokens } from './behavior';
 
 export type ActiveTheme = 'light' | 'dark';
 
-export interface ThemeConfig {
+export type ThemeConfig = {
   mode: ThemeMode;
   activeTheme: ActiveTheme;
-}
+};
 
 // ============================================================================
 // COLOR TYPES
@@ -150,13 +150,13 @@ export type LineHeightKey = keyof typeof typographyPrimitives.lineHeight;
 
 export type LetterSpacingKey = keyof typeof typographyPrimitives.letterSpacing;
 
-export interface TypographyStyle {
+export type TypographyStyle = {
   fontSize: number;
   fontWeight: TextStyle['fontWeight'];
   lineHeight?: number | TextStyle['lineHeight'];
   letterSpacing?: number;
   fontFamily?: string;
-}
+};
 
 // ============================================================================
 // BORDER TYPES
@@ -164,23 +164,23 @@ export interface TypographyStyle {
 
 export type BorderRadiusKey = keyof typeof radiusPrimitives;
 
-export interface BorderStyle {
+export type BorderStyle = {
   borderWidth: number;
   borderColor: string;
   borderRadius?: number;
-}
+};
 
 // ============================================================================
 // SHADOW TYPES
 // ============================================================================
 
-export interface ShadowStyle {
+export type ShadowStyle = {
   shadowColor: string;
   shadowOffset: { width: number; height: number };
   shadowOpacity: number;
   shadowRadius: number;
   elevation: number;
-}
+};
 
 export type ShadowKey = 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
 
@@ -251,14 +251,14 @@ export type EasingKey =
 
 export type SpringPreset = 'gentle' | 'default' | 'stiff' | 'bouncy' | 'modal' | 'press';
 
-export interface SpringConfig {
+export type SpringConfig = {
   damping: number;
   mass: number;
   stiffness: number;
   overshootClamping: boolean;
   restSpeedThreshold: number;
   restDisplacementThreshold: number;
-}
+};
 
 // ============================================================================
 // STATUS & ROLE TYPES
@@ -278,17 +278,17 @@ export type Status =
 
 export type HierarchyLevel = 'division' | 'union' | 'association' | 'church' | 'club';
 
-export interface StatusColors {
+export type StatusColors = {
   primary: string;
   subtle: string;
   text: string;
-}
+};
 
 // ============================================================================
 // RESOLVED TOKENS INTERFACE
 // ============================================================================
 
-export interface ResolvedDesignTokens {
+export type ResolvedDesignTokens = {
   // Theme info
   theme: ActiveTheme;
   isDark: boolean;
@@ -303,7 +303,7 @@ export interface ResolvedDesignTokens {
 
   // Convenience accessors
   colors: SemanticColors;
-}
+};
 
 // ============================================================================
 // TOKEN PATH TYPES (for token resolution)
@@ -317,13 +317,13 @@ export type TokenValue = string | number | Record<string, unknown>;
 // STYLE BUILDER TYPES
 // ============================================================================
 
-export interface StyleTokens {
+export type StyleTokens = {
   spacing: (key: SemanticSpacingKey) => number;
   color: (path: string) => string;
   typography: (style: keyof typeof typographyPrimitives.fontSize) => TypographyStyle;
   shadow: (key: ShadowKey) => ShadowStyle;
   radius: (key: BorderRadiusKey) => number;
-}
+};
 
 // ============================================================================
 // UTILITY TYPES

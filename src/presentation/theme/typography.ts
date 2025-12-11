@@ -7,7 +7,7 @@
  * NOTE: This file intentionally contains literal numbers as it DEFINES typography tokens.
  */
 
-import { Platform, TextStyle } from 'react-native';
+import { Platform, type TextStyle } from 'react-native';
 
 /**
  * Font families
@@ -112,7 +112,7 @@ export const typography = {
     fontWeight: fontWeights.bold,
     lineHeight: lineHeights['6xl'],
     letterSpacing: letterSpacing.tight,
-  } as TextStyle,
+  } satisfies TextStyle,
 
   displayMedium: {
     fontFamily: fontFamilies.primary,
@@ -120,7 +120,7 @@ export const typography = {
     fontWeight: fontWeights.bold,
     lineHeight: lineHeights['5xl'],
     letterSpacing: letterSpacing.tight,
-  } as TextStyle,
+  } satisfies TextStyle,
 
   displaySmall: {
     fontFamily: fontFamilies.primary,
@@ -128,7 +128,7 @@ export const typography = {
     fontWeight: fontWeights.semibold,
     lineHeight: lineHeights['4xl'],
     letterSpacing: letterSpacing.normal,
-  } as TextStyle,
+  } satisfies TextStyle,
 
   // Headline styles
   headlineLarge: {
@@ -137,7 +137,7 @@ export const typography = {
     fontWeight: fontWeights.semibold,
     lineHeight: lineHeights['3xl'],
     letterSpacing: letterSpacing.normal,
-  } as TextStyle,
+  } satisfies TextStyle,
 
   headlineMedium: {
     fontFamily: fontFamilies.primary,
@@ -145,7 +145,7 @@ export const typography = {
     fontWeight: fontWeights.semibold,
     lineHeight: lineHeights['2xl'],
     letterSpacing: letterSpacing.normal,
-  } as TextStyle,
+  } satisfies TextStyle,
 
   headlineSmall: {
     fontFamily: fontFamilies.primary,
@@ -153,7 +153,7 @@ export const typography = {
     fontWeight: fontWeights.medium,
     lineHeight: lineHeights.xl,
     letterSpacing: letterSpacing.normal,
-  } as TextStyle,
+  } satisfies TextStyle,
 
   // Title styles
   titleLarge: {
@@ -162,7 +162,7 @@ export const typography = {
     fontWeight: fontWeights.medium,
     lineHeight: lineHeights.lg,
     letterSpacing: letterSpacing.normal,
-  } as TextStyle,
+  } satisfies TextStyle,
 
   titleMedium: {
     fontFamily: fontFamilies.primary,
@@ -170,7 +170,7 @@ export const typography = {
     fontWeight: fontWeights.medium,
     lineHeight: lineHeights.md,
     letterSpacing: letterSpacing.wide,
-  } as TextStyle,
+  } satisfies TextStyle,
 
   titleSmall: {
     fontFamily: fontFamilies.primary,
@@ -178,7 +178,7 @@ export const typography = {
     fontWeight: fontWeights.medium,
     lineHeight: lineHeights.sm,
     letterSpacing: letterSpacing.wide,
-  } as TextStyle,
+  } satisfies TextStyle,
 
   // Body styles
   bodyLarge: {
@@ -187,7 +187,7 @@ export const typography = {
     fontWeight: fontWeights.regular,
     lineHeight: lineHeights.md,
     letterSpacing: letterSpacing.normal,
-  } as TextStyle,
+  } satisfies TextStyle,
 
   bodyMedium: {
     fontFamily: fontFamilies.primary,
@@ -195,7 +195,7 @@ export const typography = {
     fontWeight: fontWeights.regular,
     lineHeight: lineHeights.sm,
     letterSpacing: letterSpacing.normal,
-  } as TextStyle,
+  } satisfies TextStyle,
 
   bodySmall: {
     fontFamily: fontFamilies.primary,
@@ -203,7 +203,7 @@ export const typography = {
     fontWeight: fontWeights.regular,
     lineHeight: lineHeights.xs,
     letterSpacing: letterSpacing.wide,
-  } as TextStyle,
+  } satisfies TextStyle,
 
   // Label styles
   labelLarge: {
@@ -212,7 +212,7 @@ export const typography = {
     fontWeight: fontWeights.medium,
     lineHeight: lineHeights.sm,
     letterSpacing: letterSpacing.wide,
-  } as TextStyle,
+  } satisfies TextStyle,
 
   labelMedium: {
     fontFamily: fontFamilies.primary,
@@ -220,7 +220,7 @@ export const typography = {
     fontWeight: fontWeights.medium,
     lineHeight: lineHeights.xs,
     letterSpacing: letterSpacing.wider,
-  } as TextStyle,
+  } satisfies TextStyle,
 
   labelSmall: {
     fontFamily: fontFamilies.primary,
@@ -228,7 +228,7 @@ export const typography = {
     fontWeight: fontWeights.medium,
     lineHeight: 14,
     letterSpacing: letterSpacing.wider,
-  } as TextStyle,
+  } satisfies TextStyle,
 
   // Special styles
   button: {
@@ -238,7 +238,7 @@ export const typography = {
     lineHeight: lineHeights.sm,
     letterSpacing: letterSpacing.wide,
     textTransform: 'uppercase' as TextStyle['textTransform'],
-  } as TextStyle,
+  } satisfies TextStyle,
 
   caption: {
     fontFamily: fontFamilies.primary,
@@ -246,7 +246,7 @@ export const typography = {
     fontWeight: fontWeights.regular,
     lineHeight: lineHeights.xs,
     letterSpacing: letterSpacing.wide,
-  } as TextStyle,
+  } satisfies TextStyle,
 
   overline: {
     fontFamily: fontFamilies.primary,
@@ -255,7 +255,7 @@ export const typography = {
     lineHeight: 12,
     letterSpacing: letterSpacing.widest,
     textTransform: 'uppercase' as TextStyle['textTransform'],
-  } as TextStyle,
+  } satisfies TextStyle,
 
   code: {
     fontFamily: fontFamilies.mono,
@@ -263,7 +263,7 @@ export const typography = {
     fontWeight: fontWeights.regular,
     lineHeight: lineHeights.md,
     letterSpacing: letterSpacing.normal,
-  } as TextStyle,
+  } satisfies TextStyle,
 } as const;
 
 /**
@@ -298,9 +298,10 @@ export const typographyUtils = {
    * @returns Text style with truncation
    */
   truncate(maxLines: number = 1): TextStyle {
-    return {
+    const style: TextStyle = {
       numberOfLines: maxLines,
-    } as TextStyle; // numberOfLines is used by Text component
+    }; // numberOfLines is used by Text component
+    return style;
   },
 };
 

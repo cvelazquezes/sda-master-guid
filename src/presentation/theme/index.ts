@@ -22,20 +22,8 @@
  */
 
 import { colors, colorUtils } from './colors';
-import { typography, fontFamilies, fontWeights, fontSizes, lineHeights } from './typography';
-import {
-  spacing,
-  semanticSpacing,
-  borderRadius,
-  borderWidth,
-  shadows,
-  zIndex,
-  opacity,
-  sizes,
-  iconSizes,
-  componentSpacing,
-  containerSpacing,
-} from './spacing';
+import { designTokens } from './designTokens';
+import { layoutConstants } from './layoutConstants';
 import {
   mobileTypography,
   mobileFontSizes,
@@ -55,9 +43,7 @@ import sdaColors, {
   hierarchyColors,
   sdaColorUtils,
 } from './sdaColors';
-import { designTokens } from './designTokens';
 // Layout Constants - Single Source of Truth for style string values
-import { layoutConstants } from './layoutConstants';
 // Size Presets - Standardized component sizing
 import {
   SIZE_PRESETS,
@@ -72,12 +58,23 @@ import {
   getIconSize,
   getFontSize,
 } from './sizePresets';
+import {
+  spacing,
+  semanticSpacing,
+  borderRadius,
+  borderWidth,
+  shadows,
+  zIndex,
+  opacity,
+  sizes,
+  iconSizes,
+  componentSpacing,
+  containerSpacing,
+} from './spacing';
+import { typography, fontFamilies, fontWeights, fontSizes, lineHeights } from './typography';
 import { THEME_MODE, COLOR_SHADE } from '../../shared/constants';
-
-/**
- * Theme modes
- */
-export type ThemeMode = (typeof THEME_MODE)[keyof typeof THEME_MODE];
+// ThemeMode type is exported from state/ThemeContext - use that for the canonical type
+import type { ThemeMode } from '../state/ThemeContext';
 
 /**
  * Light theme
@@ -234,11 +231,9 @@ export function getTheme(mode: ThemeMode): Theme {
 }
 
 /**
- * Note: useTheme hook is re-exported from ThemeContext for convenience.
- * The app uses ThemeContext for theme management.
+ * Re-export useTheme from ThemeContext for convenience.
+ * This allows importing from either './state' or './theme'.
  */
-
-// Re-export useTheme from ThemeContext
 export { useTheme } from '../state/ThemeContext';
 
 /**

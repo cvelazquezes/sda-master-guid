@@ -12,13 +12,13 @@
  */
 
 import { designTokens } from './designTokens';
-import { ComponentSize, SpacingKey } from '../../shared/types/theme';
+import type { ComponentSize, SpacingKey } from '../../shared/types/theme';
 
 // =============================================================================
 // TYPES
 // =============================================================================
 
-export interface SizePreset {
+export type SizePreset = {
   /** Vertical padding key */
   paddingV: SpacingKey;
   /** Horizontal padding key */
@@ -33,9 +33,9 @@ export interface SizePreset {
   lineHeight: number;
   /** Min height for touch targets */
   minHeight: number;
-}
+};
 
-export interface BadgeSizePreset {
+export type BadgeSizePreset = {
   /** Vertical padding key */
   paddingV: SpacingKey;
   /** Horizontal padding key */
@@ -46,16 +46,16 @@ export interface BadgeSizePreset {
   iconSize: number;
   /** Line height in pixels */
   lineHeight: number;
-}
+};
 
-export interface StatusSizePreset {
+export type StatusSizePreset = {
   /** Icon size in pixels */
   iconSize: number;
   /** Font size in pixels */
   fontSize: number;
   /** Gap between icon and label */
   gap: SpacingKey;
-}
+};
 
 // =============================================================================
 // SIZE PRESETS

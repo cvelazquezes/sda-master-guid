@@ -17,7 +17,7 @@
  * @version 1.0.0
  */
 
-import { FlexStyle, TextStyle, ImageStyle } from 'react-native';
+import type { FlexStyle, TextStyle, ImageStyle } from 'react-native';
 
 /**
  * Flex Direction values

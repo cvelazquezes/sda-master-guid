@@ -10,13 +10,13 @@
  * const backgroundColor = tokens.colors.background.surface;
  */
 
-import { primitiveTokens } from './primitives';
-import { createSemanticTokens, createSemanticColors, ThemeMode } from './semantic';
-import { createComponentTokens } from './components';
-import { motionTokens } from './motion';
-import { layoutTokens } from './layout';
 import { behaviorTokens } from './behavior';
-import { ResolvedDesignTokens, TokenPath, TokenValue } from './types';
+import { createComponentTokens } from './components';
+import { layoutTokens } from './layout';
+import { motionTokens } from './motion';
+import { primitiveTokens } from './primitives';
+import { createSemanticTokens, createSemanticColors, type ThemeMode } from './semantic';
+import type { ResolvedDesignTokens, TokenPath, TokenValue } from './types';
 
 // ============================================================================
 // RESOLVE TOKENS
@@ -107,6 +107,7 @@ export function createThemedColor(theme: ThemeMode): (path: string) => string {
 
     for (const part of parts) {
       if (current === null || current === undefined) {
+        // eslint-disable-next-line no-console, no-restricted-globals
         console.warn(`Token path not found: colors.${path}`);
         return '#FF00FF'; // Magenta for debugging
       }
