@@ -7,22 +7,21 @@
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
-interface LogContext {
-  [key: string]: unknown;
-}
+type LogContext = Record<string, unknown>;
 
 /**
  * Logger class for application logging
  */
 class Logger {
-  private isDevelopment: boolean;
+  private _isDevelopment: boolean;
 
   constructor() {
-    this.isDevelopment = __DEV__;
+    this._isDevelopment = __DEV__;
   }
 
-  private log(level: LogLevel, message: string, context?: LogContext): void {
-    if (!this.isDevelopment && level === 'debug') {
+  // eslint-disable-next-line complexity -- Logging requires multiple conditionals
+  private _log(level: LogLevel, message: string, context?: LogContext): void {
+    if (!this._isDevelopment && level === 'debug') {
       return; // Skip debug logs in production
     }
 
@@ -42,28 +41,29 @@ class Logger {
       case 'error':
         console.error(logMessage, context || '');
         break;
+      default:
+        console.log(logMessage, context || '');
     }
   }
 
   debug(message: string, context?: LogContext): void {
-    this.log('debug', message, context);
+    this._log('debug', message, context);
   }
 
   info(message: string, context?: LogContext): void {
-    this.log('info', message, context);
+    this._log('info', message, context);
   }
 
   warn(message: string, context?: LogContext): void {
-    this.log('warn', message, context);
+    this._log('warn', message, context);
   }
 
   error(message: string, error?: Error, context?: LogContext): void {
     const errorContext = error
       ? { ...context, error: { message: error.message, stack: error.stack } }
       : context;
-    this.log('error', message, errorContext);
+    this._log('error', message, errorContext);
   }
 }
 
 export const logger = new Logger();
-

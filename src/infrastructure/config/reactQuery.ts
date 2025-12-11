@@ -3,9 +3,9 @@
  * Optimized caching, retry, and state management following Tanstack best practices
  */
 
-import { QueryClient, DefaultOptions, MutationCache, QueryCache } from '@tanstack/react-query';
-import { logger } from '../utils/logger';
-import { captureError } from '../../infrastructure/services/sentry';
+import { QueryClient, MutationCache, QueryCache, type DefaultOptions } from '@tanstack/react-query';
+import { logger } from '../logging/logger';
+import { captureError } from '../services/sentry';
 
 // ============================================================================
 // Configuration Constants
@@ -292,13 +292,13 @@ export async function cancelQueries(queryKey: readonly unknown[]): Promise<void>
 // Optimistic Updates Helper
 // ============================================================================
 
-interface OptimisticUpdateOptions<TData, TVariables> {
+type OptimisticUpdateOptions<TData, TVariables> = {
   queryKey: readonly unknown[];
   mutationFn: (variables: TVariables) => Promise<TData>;
   updater: (oldData: TData | undefined, variables: TVariables) => TData;
   onSuccess?: (data: TData) => void;
   onError?: (error: Error) => void;
-}
+};
 
 /**
  * Helper for optimistic updates

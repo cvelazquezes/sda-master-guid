@@ -3,14 +3,14 @@
  * Prevents cascading failures by failing fast when service is down
  */
 
-import { logger } from '../../../shared/utils/logger';
-import { CIRCUIT_BREAKER } from '../../../shared/constants/validation';
 import {
   LOG_MESSAGES,
   ERROR_MESSAGES,
   CIRCUIT_STATE,
   CIRCUIT_BREAKER_SERVICE,
 } from '../../../shared/constants';
+import { CIRCUIT_BREAKER } from '../../../shared/constants/validation';
+import { logger } from '../../../shared/utils/logger';
 
 export enum CircuitState {
   CLOSED = CIRCUIT_STATE.CLOSED, // Normal operation
@@ -18,12 +18,12 @@ export enum CircuitState {
   HALF_OPEN = CIRCUIT_STATE.HALF_OPEN, // Testing if service recovered
 }
 
-interface CircuitBreakerOptions {
+type CircuitBreakerOptions = {
   failureThreshold: number;
   successThreshold: number;
   timeout: number;
   halfOpenMaxCalls: number;
-}
+};
 
 const DEFAULT_OPTIONS: CircuitBreakerOptions = {
   failureThreshold: CIRCUIT_BREAKER.FAILURE_THRESHOLD,
@@ -33,18 +33,18 @@ const DEFAULT_OPTIONS: CircuitBreakerOptions = {
 };
 
 export class CircuitBreaker {
-  private state: CircuitState = CircuitState.CLOSED;
-  private failureCount = 0;
-  private successCount = 0;
-  private nextAttempt = Date.now();
-  private halfOpenCalls = 0;
-  private options: CircuitBreakerOptions;
+  private _state: CircuitState = CircuitState.CLOSED;
+  private _failureCount: number = 0;
+  private _successCount: number = 0;
+  private _nextAttempt: number = Date.now();
+  private _halfOpenCalls: number = 0;
+  private _options: CircuitBreakerOptions;
 
   constructor(
-    private name: string,
+    private _name: string,
     options: Partial<CircuitBreakerOptions> = {}
   ) {
-    this.options = { ...DEFAULT_OPTIONS, ...options };
+    this._options = { ...DEFAULT_OPTIONS, ...options };
   }
 
   /**
@@ -52,28 +52,28 @@ export class CircuitBreaker {
    */
   async execute<T>(fn: () => Promise<T>): Promise<T> {
     // Check if circuit is open
-    if (this.state === CircuitState.OPEN) {
-      if (Date.now() < this.nextAttempt) {
-        throw new Error(ERROR_MESSAGES.CIRCUIT_BREAKER.IS_OPEN(this.name));
+    if (this._state === CircuitState.OPEN) {
+      if (Date.now() < this._nextAttempt) {
+        throw new Error(ERROR_MESSAGES.CIRCUIT_BREAKER.IS_OPEN(this._name));
       }
       // Transition to half-open
-      this.transitionToHalfOpen();
+      this._transitionToHalfOpen();
     }
 
     // Check half-open call limit
-    if (this.state === CircuitState.HALF_OPEN) {
-      if (this.halfOpenCalls >= this.options.halfOpenMaxCalls) {
-        throw new Error(ERROR_MESSAGES.CIRCUIT_BREAKER.HALF_OPEN_LIMIT(this.name));
+    if (this._state === CircuitState.HALF_OPEN) {
+      if (this._halfOpenCalls >= this._options.halfOpenMaxCalls) {
+        throw new Error(ERROR_MESSAGES.CIRCUIT_BREAKER.HALF_OPEN_LIMIT(this._name));
       }
-      this.halfOpenCalls++;
+      this._halfOpenCalls++;
     }
 
     try {
       const result = await fn();
-      this.onSuccess();
+      this._onSuccess();
       return result;
     } catch (error) {
-      this.onFailure();
+      this._onFailure();
       throw error;
     }
   }
@@ -81,13 +81,13 @@ export class CircuitBreaker {
   /**
    * Handles successful execution
    */
-  private onSuccess(): void {
-    this.failureCount = 0;
+  private _onSuccess(): void {
+    this._failureCount = 0;
 
-    if (this.state === CircuitState.HALF_OPEN) {
-      this.successCount++;
-      if (this.successCount >= this.options.successThreshold) {
-        this.transitionToClosed();
+    if (this._state === CircuitState.HALF_OPEN) {
+      this._successCount++;
+      if (this._successCount >= this._options.successThreshold) {
+        this._transitionToClosed();
       }
     }
   }
@@ -95,53 +95,53 @@ export class CircuitBreaker {
   /**
    * Handles failed execution
    */
-  private onFailure(): void {
-    this.failureCount++;
-    this.successCount = 0;
+  private _onFailure(): void {
+    this._failureCount++;
+    this._successCount = 0;
 
-    if (this.state === CircuitState.HALF_OPEN) {
-      this.transitionToOpen();
-    } else if (this.failureCount >= this.options.failureThreshold) {
-      this.transitionToOpen();
+    if (this._state === CircuitState.HALF_OPEN) {
+      this._transitionToOpen();
+    } else if (this._failureCount >= this._options.failureThreshold) {
+      this._transitionToOpen();
     }
   }
 
   /**
    * Transitions to CLOSED state
    */
-  private transitionToClosed(): void {
-    this.state = CircuitState.CLOSED;
-    this.failureCount = 0;
-    this.successCount = 0;
-    this.halfOpenCalls = 0;
-    logger.info(LOG_MESSAGES.FORMATTED.CIRCUIT_CLOSED(this.name));
+  private _transitionToClosed(): void {
+    this._state = CircuitState.CLOSED;
+    this._failureCount = 0;
+    this._successCount = 0;
+    this._halfOpenCalls = 0;
+    logger.info(LOG_MESSAGES.FORMATTED.CIRCUIT_CLOSED(this._name));
   }
 
   /**
    * Transitions to OPEN state
    */
-  private transitionToOpen(): void {
-    this.state = CircuitState.OPEN;
-    this.nextAttempt = Date.now() + this.options.timeout;
-    this.halfOpenCalls = 0;
-    logger.warn(LOG_MESSAGES.FORMATTED.CIRCUIT_OPENED(this.name));
+  private _transitionToOpen(): void {
+    this._state = CircuitState.OPEN;
+    this._nextAttempt = Date.now() + this._options.timeout;
+    this._halfOpenCalls = 0;
+    logger.warn(LOG_MESSAGES.FORMATTED.CIRCUIT_OPENED(this._name));
   }
 
   /**
    * Transitions to HALF_OPEN state
    */
-  private transitionToHalfOpen(): void {
-    this.state = CircuitState.HALF_OPEN;
-    this.successCount = 0;
-    this.halfOpenCalls = 0;
-    logger.info(LOG_MESSAGES.FORMATTED.CIRCUIT_HALF_OPEN(this.name));
+  private _transitionToHalfOpen(): void {
+    this._state = CircuitState.HALF_OPEN;
+    this._successCount = 0;
+    this._halfOpenCalls = 0;
+    logger.info(LOG_MESSAGES.FORMATTED.CIRCUIT_HALF_OPEN(this._name));
   }
 
   /**
    * Gets current circuit state
    */
   getState(): CircuitState {
-    return this.state;
+    return this._state;
   }
 
   /**
@@ -153,9 +153,9 @@ export class CircuitBreaker {
     successCount: number;
   } {
     return {
-      state: this.state,
-      failureCount: this.failureCount,
-      successCount: this.successCount,
+      state: this._state,
+      failureCount: this._failureCount,
+      successCount: this._successCount,
     };
   }
 
@@ -163,7 +163,7 @@ export class CircuitBreaker {
    * Manually resets the circuit breaker
    */
   reset(): void {
-    this.transitionToClosed();
+    this._transitionToClosed();
   }
 }
 

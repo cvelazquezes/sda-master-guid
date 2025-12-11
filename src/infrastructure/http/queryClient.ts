@@ -13,11 +13,11 @@
  */
 
 import { QueryClient, QueryCache, MutationCache } from '@tanstack/react-query';
-import { logger } from '../../shared/utils/logger';
-import { AppError } from '../../shared/utils/errors';
-import { CACHE, RETRY } from '../../shared/constants/timing';
-import { LIST_LIMITS } from '../../shared/constants/numbers';
 import { LOG_MESSAGES, QUERY_KEY, AXIOS_ERROR_CODE } from '../../shared/constants';
+import { LIST_LIMITS } from '../../shared/constants/numbers';
+import { CACHE, RETRY } from '../../shared/constants/timing';
+import { AppError } from '../../shared/utils/errors';
+import { logger } from '../../shared/utils/logger';
 
 /**
  * Default query options
@@ -323,7 +323,7 @@ export const optimisticUpdates = {
    * ]);
    * ```
    */
-  async invalidate(queryKeys: readonly (readonly unknown[])[]) {
+  async invalidate(queryKeys: ReadonlyArray<readonly unknown[]>) {
     await Promise.all(queryKeys.map((key) => queryClient.invalidateQueries(key)));
   },
 };

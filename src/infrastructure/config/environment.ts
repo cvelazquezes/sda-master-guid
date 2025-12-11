@@ -29,11 +29,19 @@ export const environment = {
   features: {
     enableAnalytics: !__DEV__,
     enableCrashReporting: !__DEV__,
+    enableOfflineMode: true,
+    enablePerformanceMonitoring: !__DEV__,
+    enableBiometrics: true,
+    enablePushNotifications: true,
   },
+
+  /**
+   * Environment name
+   */
+  name: __DEV__ ? 'development' : 'production',
 
   /**
    * Check if running in development
    */
   isDevelopment: __DEV__,
 };
-

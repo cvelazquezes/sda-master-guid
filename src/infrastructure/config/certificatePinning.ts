@@ -5,11 +5,11 @@
  * Based on OWASP Mobile Security guidelines
  */
 
-export interface CertificatePinConfig {
+export type CertificatePinConfig = {
   hostname: string;
   includeSubdomains: boolean;
   pins: string[]; // SHA-256 hashes of certificates
-}
+};
 
 /**
  * Certificate pins for production API
@@ -69,4 +69,3 @@ export class CertificatePinningError extends Error {
     this.name = 'CertificatePinningError';
   }
 }
-

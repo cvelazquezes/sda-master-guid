@@ -3,16 +3,26 @@
  * Centralized HTTP client with retry logic, circuit breaker, and error handling
  */
 
-import axios, { AxiosInstance, AxiosError, AxiosRequestConfig } from 'axios';
-import { environment } from '../config/environment';
-import { secureStorage } from '../../shared/utils/secureStorage';
-import { logger } from '../../shared/utils/logger';
-import { retryPolicy } from './api/retryPolicy';
+import axios, { type AxiosError, type AxiosInstance, type AxiosRequestConfig } from 'axios';
 import { apiCircuitBreaker } from './api/circuitBreaker';
-import { NetworkError, TimeoutError, AuthenticationError, toAppError } from '../../shared/utils/errors';
-import { TIMEOUT } from '../../shared/constants/timing';
+import { retryPolicy } from './api/retryPolicy';
+import {
+  LOG_MESSAGES,
+  ERROR_MESSAGES,
+  APP_VERSION,
+  AXIOS_ERROR_CODE,
+} from '../../shared/constants';
 import { HTTP_STATUS, HEADER, CONTENT_TYPE, AUTH_CONSTANTS } from '../../shared/constants/http';
-import { LOG_MESSAGES, ERROR_MESSAGES, APP_VERSION, AXIOS_ERROR_CODE } from '../../shared/constants';
+import { TIMEOUT } from '../../shared/constants/timing';
+import {
+  NetworkError,
+  TimeoutError,
+  AuthenticationError,
+  toAppError,
+} from '../../shared/utils/errors';
+import { logger } from '../../shared/utils/logger';
+import { secureStorage } from '../../shared/utils/secureStorage';
+import { environment } from '../config/environment';
 
 // Constants
 const API_TIMEOUT_MS = TIMEOUT.API_DEFAULT;
@@ -22,7 +32,7 @@ const API_TIMEOUT_MS = TIMEOUT.API_DEFAULT;
  */
 const createApiClient = (): AxiosInstance => {
   const client = axios.create({
-    baseURL: environment.api.base,
+    baseURL: environment.api.baseUrl,
     timeout: API_TIMEOUT_MS,
     headers: {
       [HEADER.CONTENT_TYPE]: CONTENT_TYPE.JSON,
