@@ -17,4 +17,3 @@ export {
   type ActiveTheme,
   type ThemeContextType,
 } from './ThemeContext';
-

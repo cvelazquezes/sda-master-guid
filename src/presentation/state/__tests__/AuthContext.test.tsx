@@ -5,10 +5,10 @@
 
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react-native';
-import { AuthProvider, useAuth } from '../AuthContext';
 import { authService } from '../../../infrastructure/repositories/authService';
-import { User, UserRole, ApprovalStatus } from '../../../types';
 import { AuthenticationError } from '../../../shared/utils/errors';
+import { UserRole, ApprovalStatus, type User } from '../../../types';
+import { AuthProvider, useAuth } from '../AuthContext';
 
 // Mock authService
 jest.mock('../../infrastructure/repositories/authService');

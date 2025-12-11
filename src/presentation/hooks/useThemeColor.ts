@@ -5,7 +5,7 @@
 
 import { useMemo, useCallback } from 'react';
 import { useTheme } from '../state/ThemeContext';
-import {
+import type {
   BackgroundColor,
   InteractiveBackgroundColor,
   BorderColor,
@@ -17,7 +17,7 @@ import {
   RoleColorConfig,
 } from '../../shared/types/theme';
 
-interface UseThemeColorReturn {
+type UseThemeColorReturn = {
   getBackgroundColor: (key?: BackgroundColor) => string | undefined;
   getInteractiveBackgroundColor: (key?: InteractiveBackgroundColor) => string | undefined;
   getBorderColor: (key?: BorderColor) => string | undefined;
@@ -27,7 +27,7 @@ interface UseThemeColorReturn {
   getRoleColor: (role: RoleType) => RoleColorConfig;
   colors: Record<string, string>;
   isDark: boolean;
-}
+};
 
 type ColorsRecord = Record<string, string>;
 

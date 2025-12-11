@@ -4,11 +4,11 @@
  */
 
 import React from 'react';
-import { renderHook, act, waitFor } from '@testing-library/react-native';
 import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ThemeProvider, useTheme } from '../ThemeContext';
+import { renderHook, act, waitFor } from '@testing-library/react-native';
 import { THEME_MODE } from '../../../shared/constants/ui';
+import { ThemeProvider, useTheme } from '../ThemeContext';
 
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage', () => ({
@@ -362,5 +362,4 @@ describe('ThemeContext', () => {
       consoleSpy.mockRestore();
     });
   });
-
 });

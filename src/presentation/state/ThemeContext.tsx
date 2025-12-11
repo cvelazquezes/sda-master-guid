@@ -14,13 +14,21 @@
  * All theme values should be accessed via useTheme().
  */
 
-import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+  type ReactNode,
+} from 'react';
 import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { sdaSemanticColors, statusColors, roleColors } from '../theme/sdaColors';
+import { storageKeys } from '../../shared/config/storage';
+import { LOG_MESSAGES } from '../../shared/constants/logMessages';
+import { THEME_MODE, type ThemeModeValue } from '../../shared/constants/ui';
+import { logger } from '../../shared/utils/logger';
 import { darkColors, darkStatusColors, darkRoleColors } from '../theme/darkColors';
-import { darkBlueColors, darkBlueStatusColors, darkBlueRoleColors } from '../theme/darkBlueColors';
-// eslint-disable-next-line no-restricted-imports -- ThemeContext is the source of theme values, legitimate import
 import {
   spacing as spacingTokens,
   borderRadius,
@@ -35,25 +43,31 @@ import {
   breakpoints as breakpointTokens,
   responsiveScale as responsiveScaleTokens,
 } from '../theme/designTokens';
-import { storageKeys } from '../../shared/config/storage';
-import { THEME_MODE, ThemeModeValue } from '../../shared/constants/ui';
-import { logger } from '../../shared/utils/logger';
-import { LOG_MESSAGES } from '../../shared/constants/logMessages';
+import {
+  midnightBlueColors,
+  midnightBlueStatusColors,
+  midnightBlueRoleColors,
+} from '../theme/midnightBlueColors';
+// eslint-disable-next-line no-restricted-imports -- ThemeContext is the source of theme values, legitimate import
+import { sdaSemanticColors, statusColors, roleColors } from '../theme/sdaColors';
 
 export type ThemeMode = ThemeModeValue;
-export type ActiveTheme = typeof THEME_MODE.LIGHT | typeof THEME_MODE.DARK | typeof THEME_MODE.DARK_BLUE;
+export type ActiveTheme =
+  | typeof THEME_MODE.LIGHT
+  | typeof THEME_MODE.DARK
+  | typeof THEME_MODE.MIDNIGHT_BLUE;
 
 // Theme colors type - matches sdaSemanticColors structure
 type ThemeColors = typeof sdaSemanticColors;
 
 // Status color structure (theme-aware)
-interface StatusColorConfig {
+type StatusColorConfig = {
   primary: string;
   light: string;
   medium: string;
   text: string;
   icon: string;
-}
+};
 
 type StatusColors = {
   active: StatusColorConfig;
@@ -67,13 +81,13 @@ type StatusColors = {
 };
 
 // Role color structure (theme-aware)
-interface RoleColorConfig {
+type RoleColorConfig = {
   primary: string;
   light: string;
   medium: string;
   text: string;
   icon: string;
-}
+};
 
 type RoleColors = {
   admin: RoleColorConfig;
@@ -95,7 +109,7 @@ type OpacityTokens = typeof opacityTokens;
 type BreakpointTokens = typeof breakpointTokens;
 type ResponsiveScaleTokens = typeof responsiveScaleTokens;
 
-export interface ThemeContextType {
+export type ThemeContextType = {
   /** User's theme preference (light, dark, or system) */
   mode: ThemeMode;
 
@@ -197,13 +211,13 @@ export interface ThemeContextType {
 
   /** Toggle between light and dark mode */
   toggleTheme: () => Promise<void>;
-}
+};
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-interface ThemeProviderProps {
+type ThemeProviderProps = {
   children: ReactNode;
-}
+};
 
 // Helper to resolve active theme from mode and system preference
 const resolveActiveTheme = (
@@ -223,7 +237,12 @@ const loadThemeFromStorage = async (
 ): Promise<void> => {
   try {
     const savedTheme = await AsyncStorage.getItem(storageKeys.THEME);
-    const validThemes = [THEME_MODE.LIGHT, THEME_MODE.DARK, THEME_MODE.DARK_BLUE, THEME_MODE.SYSTEM];
+    const validThemes = [
+      THEME_MODE.LIGHT,
+      THEME_MODE.DARK,
+      THEME_MODE.MIDNIGHT_BLUE,
+      THEME_MODE.SYSTEM,
+    ];
     if (savedTheme && validThemes.includes(savedTheme as ThemeModeValue)) {
       setMode(savedTheme as ThemeMode);
     }
@@ -270,8 +289,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     switch (activeTheme) {
       case THEME_MODE.DARK:
         return darkColors;
-      case THEME_MODE.DARK_BLUE:
-        return darkBlueColors;
+      case THEME_MODE.MIDNIGHT_BLUE:
+        return midnightBlueColors;
       default:
         return sdaSemanticColors;
     }
@@ -281,8 +300,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     switch (activeTheme) {
       case THEME_MODE.DARK:
         return darkStatusColors as StatusColors;
-      case THEME_MODE.DARK_BLUE:
-        return darkBlueStatusColors as StatusColors;
+      case THEME_MODE.MIDNIGHT_BLUE:
+        return midnightBlueStatusColors as StatusColors;
       default:
         return statusColors as StatusColors;
     }
@@ -292,15 +311,16 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     switch (activeTheme) {
       case THEME_MODE.DARK:
         return darkRoleColors as RoleColors;
-      case THEME_MODE.DARK_BLUE:
-        return darkBlueRoleColors as RoleColors;
+      case THEME_MODE.MIDNIGHT_BLUE:
+        return midnightBlueRoleColors as RoleColors;
       default:
         return roleColors as RoleColors;
     }
   }, [activeTheme]);
 
-  const isDark = activeTheme === THEME_MODE.DARK || activeTheme === THEME_MODE.DARK_BLUE;
+  const isDark = activeTheme === THEME_MODE.DARK || activeTheme === THEME_MODE.MIDNIGHT_BLUE;
 
+  // eslint-disable-next-line react/jsx-no-constructed-context-values -- Value depends on many derived theme tokens
   const value: ThemeContextType = {
     mode,
     activeTheme,
@@ -326,6 +346,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     toggleTheme,
   };
 
+  // eslint-disable-next-line react/jsx-no-constructed-context-values -- Value depends on many derived theme tokens
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 };
 

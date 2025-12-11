@@ -106,7 +106,8 @@ const NotificationBell = (): React.JSX.Element => {
 };
 
 // Combined Header Right Component
-const HeaderRight = (): React.JSX.Element => {
+// eslint-disable-next-line @typescript-eslint/naming-convention -- Unused component kept for future use
+const _HeaderRight = (): React.JSX.Element => {
   return (
     <View style={headerIconStyles.headerRightContainer}>
       <ProfileIcon />

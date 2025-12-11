@@ -10,19 +10,19 @@ import {
   useContext,
   useState,
   useEffect,
-  ReactNode,
   useCallback,
   useMemo,
+  type ReactNode,
 } from 'react';
-import { User, AuthContextType } from '../../types';
 import { authService } from '../../infrastructure/repositories/authService';
-import { logger } from '../../shared/utils/logger';
 import { LOG_MESSAGES } from '../../shared/constants';
+import { logger } from '../../shared/utils/logger';
+import type { User, AuthContextType } from '../../types';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Auth operations type for the factory function
-interface AuthOperations {
+type AuthOperations = {
   login: (email: string, password: string) => Promise<void>;
   register: (
     email: string,
@@ -35,7 +35,7 @@ interface AuthOperations {
   ) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (userData: Partial<User>) => Promise<void>;
-}
+};
 
 // Extracted auth operations to reduce component complexity
 const createAuthOperations = (
@@ -51,6 +51,7 @@ const createAuthOperations = (
     }
   },
 
+  // eslint-disable-next-line max-params -- Registration requires all user data
   register: async (
     email: string,
     password: string,
@@ -124,6 +125,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const authOps = useMemo(() => createAuthOperations(setUser), []);
 
   return (
+    // eslint-disable-next-line react/jsx-no-constructed-context-values -- authOps is memoized
     <AuthContext.Provider value={{ user, isLoading, ...authOps }}>{children}</AuthContext.Provider>
   );
 };
@@ -135,4 +137,3 @@ export const useAuth = (): AuthContextType => {
   }
   return context;
 };
-
