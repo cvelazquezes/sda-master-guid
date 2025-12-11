@@ -23,4 +23,3 @@ export {
 } from './value-objects';
 
 export type { PathfinderClass } from './value-objects';
-

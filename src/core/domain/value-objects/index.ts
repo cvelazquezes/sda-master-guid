@@ -5,6 +5,8 @@
  * Value objects are compared by their attributes, not by reference.
  */
 
+/* eslint-disable max-classes-per-file -- Domain value objects are intentionally co-located */
+
 // ============================================================================
 // USER VALUE OBJECTS
 // ============================================================================
@@ -108,7 +110,8 @@ export type PathfinderClass = (typeof PATHFINDER_CLASSES)[number];
 // ============================================================================
 
 export class Email {
-  private constructor(private readonly value: string) {}
+  // eslint-disable-next-line no-useless-constructor
+  private constructor(private readonly _value: string) {}
 
   static create(email: string): Email {
     const normalized = email.toLowerCase().trim();
@@ -124,16 +127,17 @@ export class Email {
   }
 
   getValue(): string {
-    return this.value;
+    return this._value;
   }
 
   equals(other: Email): boolean {
-    return this.value === other.value;
+    return this._value === other._value;
   }
 }
 
 export class PhoneNumber {
-  private constructor(private readonly value: string) {}
+  // eslint-disable-next-line no-useless-constructor
+  private constructor(private readonly _value: string) {}
 
   static create(phone: string): PhoneNumber {
     const normalized = phone.replace(/[^+\d]/g, '');
@@ -149,11 +153,10 @@ export class PhoneNumber {
   }
 
   getValue(): string {
-    return this.value;
+    return this._value;
   }
 
   equals(other: PhoneNumber): boolean {
-    return this.value === other.value;
+    return this._value === other._value;
   }
 }
-
