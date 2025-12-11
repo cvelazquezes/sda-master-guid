@@ -4,6 +4,8 @@
  * Web platform should use httpOnly cookies managed by backend
  */
 
+/* eslint-disable max-classes-per-file -- Error class and service are co-located */
+
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { logger } from './logger';
@@ -17,22 +19,22 @@ export class SecureStorageError extends Error {
 }
 
 class SecureStorage {
-  private static readonly AUTH_TOKEN_KEY = STORAGE_KEYS.AUTH.TOKEN;
-  private static readonly REFRESH_TOKEN_KEY = STORAGE_KEYS.AUTH.REFRESH_TOKEN;
-  private static readonly USER_ID_KEY = STORAGE_KEYS.AUTH.USER_ID;
+  private static readonly _authTokenKey: string = STORAGE_KEYS.AUTH.TOKEN;
+  private static readonly _refreshTokenKey: string = STORAGE_KEYS.AUTH.REFRESH_TOKEN;
+  private static readonly _userIdKey: string = STORAGE_KEYS.AUTH.USER_ID;
 
   /**
    * Checks if secure storage is available (native platforms only)
    */
-  private isAvailable(): boolean {
+  private _isAvailable(): boolean {
     return Platform.OS !== PLATFORM_OS.WEB;
   }
 
   /**
    * Throws error if running on web platform
    */
-  private ensureNativePlatform(): void {
-    if (!this.isAvailable()) {
+  private _ensureNativePlatform(): void {
+    if (!this._isAvailable()) {
       throw new SecureStorageError(ERROR_MESSAGES.SECURE_STORAGE.NOT_AVAILABLE);
     }
   }
@@ -41,12 +43,12 @@ class SecureStorage {
    * Saves auth tokens securely
    */
   async saveTokens(accessToken: string, refreshToken: string): Promise<void> {
-    this.ensureNativePlatform();
+    this._ensureNativePlatform();
 
     try {
       await Promise.all([
-        SecureStore.setItemAsync(SecureStorage.AUTH_TOKEN_KEY, accessToken),
-        SecureStore.setItemAsync(SecureStorage.REFRESH_TOKEN_KEY, refreshToken),
+        SecureStore.setItemAsync(SecureStorage._authTokenKey, accessToken),
+        SecureStore.setItemAsync(SecureStorage._refreshTokenKey, refreshToken),
       ]);
       logger.debug(LOG_MESSAGES.SECURE_STORAGE.ITEM_STORED);
     } catch (error) {
@@ -59,10 +61,10 @@ class SecureStorage {
    * Retrieves access token
    */
   async getAccessToken(): Promise<string | null> {
-    this.ensureNativePlatform();
+    this._ensureNativePlatform();
 
     try {
-      return await SecureStore.getItemAsync(SecureStorage.AUTH_TOKEN_KEY);
+      return await SecureStore.getItemAsync(SecureStorage._authTokenKey);
     } catch (error) {
       logger.error(LOG_MESSAGES.SECURE_STORAGE.ITEM_RETRIEVE_FAILED, error as Error);
       return null;
@@ -73,10 +75,10 @@ class SecureStorage {
    * Retrieves refresh token
    */
   async getRefreshToken(): Promise<string | null> {
-    this.ensureNativePlatform();
+    this._ensureNativePlatform();
 
     try {
-      return await SecureStore.getItemAsync(SecureStorage.REFRESH_TOKEN_KEY);
+      return await SecureStore.getItemAsync(SecureStorage._refreshTokenKey);
     } catch (error) {
       logger.error(LOG_MESSAGES.SECURE_STORAGE.ITEM_RETRIEVE_FAILED, error as Error);
       return null;
@@ -87,10 +89,10 @@ class SecureStorage {
    * Saves user ID
    */
   async saveUserId(userId: string): Promise<void> {
-    this.ensureNativePlatform();
+    this._ensureNativePlatform();
 
     try {
-      await SecureStore.setItemAsync(SecureStorage.USER_ID_KEY, userId);
+      await SecureStore.setItemAsync(SecureStorage._userIdKey, userId);
     } catch (error) {
       logger.error(LOG_MESSAGES.SECURE_STORAGE.ITEM_STORE_FAILED, error as Error);
       throw new SecureStorageError(ERROR_MESSAGES.SECURE_STORAGE.SAVE_USER_ID_FAILED);
@@ -101,10 +103,10 @@ class SecureStorage {
    * Retrieves user ID
    */
   async getUserId(): Promise<string | null> {
-    this.ensureNativePlatform();
+    this._ensureNativePlatform();
 
     try {
-      return await SecureStore.getItemAsync(SecureStorage.USER_ID_KEY);
+      return await SecureStore.getItemAsync(SecureStorage._userIdKey);
     } catch (error) {
       logger.error(LOG_MESSAGES.SECURE_STORAGE.ITEM_RETRIEVE_FAILED, error as Error);
       return null;
@@ -115,13 +117,13 @@ class SecureStorage {
    * Clears all auth data
    */
   async clearAuth(): Promise<void> {
-    this.ensureNativePlatform();
+    this._ensureNativePlatform();
 
     try {
       await Promise.all([
-        SecureStore.deleteItemAsync(SecureStorage.AUTH_TOKEN_KEY),
-        SecureStore.deleteItemAsync(SecureStorage.REFRESH_TOKEN_KEY),
-        SecureStore.deleteItemAsync(SecureStorage.USER_ID_KEY),
+        SecureStore.deleteItemAsync(SecureStorage._authTokenKey),
+        SecureStore.deleteItemAsync(SecureStorage._refreshTokenKey),
+        SecureStore.deleteItemAsync(SecureStorage._userIdKey),
       ]);
       logger.debug(LOG_MESSAGES.SECURE_STORAGE.AUTH_CLEARED);
     } catch (error) {
@@ -134,7 +136,7 @@ class SecureStorage {
    * Saves any secure value
    */
   async setItem(key: string, value: string): Promise<void> {
-    this.ensureNativePlatform();
+    this._ensureNativePlatform();
 
     try {
       await SecureStore.setItemAsync(key, value);
@@ -148,7 +150,7 @@ class SecureStorage {
    * Retrieves any secure value
    */
   async getItem(key: string): Promise<string | null> {
-    this.ensureNativePlatform();
+    this._ensureNativePlatform();
 
     try {
       return await SecureStore.getItemAsync(key);
@@ -162,7 +164,7 @@ class SecureStorage {
    * Removes any secure value
    */
   async removeItem(key: string): Promise<void> {
-    this.ensureNativePlatform();
+    this._ensureNativePlatform();
 
     try {
       await SecureStore.deleteItemAsync(key);

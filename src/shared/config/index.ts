@@ -27,11 +27,11 @@
 
 // Domain/Business Rules
 // Re-export combined config for convenience
-import { domainConfig } from './domain';
 import { apiConfig } from './api';
+import { domainConfig } from './domain';
+import { environmentConfig } from './environment';
 import { featureConfig } from './features';
 import { storageConfig } from './storage';
-import { environmentConfig } from './environment';
 
 export * from './domain';
 
@@ -44,8 +44,8 @@ export * from './features';
 // Storage Configuration
 export * from './storage';
 
-// Environment Configuration
-export { environmentConfig, getEnvironment, isProduction, isDevelopment } from './environment';
+// Environment Configuration (canonical source for environment helpers)
+export * from './environment';
 
 /**
  * Complete system configuration

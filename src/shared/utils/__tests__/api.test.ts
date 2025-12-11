@@ -2,6 +2,7 @@
  * API Utilities Tests
  */
 
+import { EMPTY_VALUE } from '../../constants';
 import {
   createPaginationParams,
   createCursorPaginationParams,
@@ -15,7 +16,6 @@ import {
   createPaginatedResponse,
   createCursorPaginatedResponse,
 } from '../api';
-import { EMPTY_VALUE } from '../../constants';
 
 describe('API Utilities', () => {
   describe('createPaginationParams', () => {

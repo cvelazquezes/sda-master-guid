@@ -5,7 +5,7 @@
  * data throughout the application, with i18n support.
  */
 
-import { TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 
 /**
  * Format match frequency with i18n support

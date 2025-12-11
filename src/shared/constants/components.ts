@@ -98,6 +98,19 @@ export const COMPONENT_VARIANT = {
 } as const;
 
 // =============================================================================
+// MODAL CONFIGURATION
+// =============================================================================
+
+/**
+ * Modal Height Ratios - For calculating modal heights relative to window
+ */
+export const MODAL_HEIGHT_RATIO = {
+  DEFAULT: 0.8,
+  COMPACT: 0.6,
+  FULL: 0.95,
+} as const;
+
+// =============================================================================
 // COMPONENT BEHAVIOR
 // =============================================================================
 

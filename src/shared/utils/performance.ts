@@ -70,7 +70,7 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
     );
   }
 
-  function timerExpired(): ReturnType<T> | void {
+  function timerExpired(): ReturnType<T> | undefined {
     const time = Date.now();
     if (shouldInvoke(time)) {
       return trailingEdge(time);

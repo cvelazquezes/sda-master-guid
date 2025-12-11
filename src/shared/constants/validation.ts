@@ -181,6 +181,13 @@ export const MEETING = {
   DEFAULT_AGENDA_MINUTES: 10,
 } as const;
 
+/**
+ * Meeting Agenda Item defaults
+ */
+export const MEETING_AGENDA = {
+  DEFAULT_MINUTES: 10,
+} as const;
+
 // =============================================================================
 // DAY OF WEEK
 // =============================================================================

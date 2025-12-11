@@ -7,16 +7,16 @@ import { MS } from '../constants/numbers';
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
-interface LogEntry {
+type LogEntry = {
   timestamp: string;
   level: LogLevel;
   message: string;
   data?: unknown;
   error?: Error;
-}
+};
 
 class Logger {
-  private static SENSITIVE_FIELDS = [
+  private static _sensitiveFields: string[] = [
     'password',
     'token',
     'apiKey',
@@ -31,7 +31,7 @@ class Logger {
   /**
    * Sanitizes sensitive data from logs
    */
-  private sanitize(data: unknown): unknown {
+  private _sanitize(data: unknown): unknown {
     if (data === null || data === undefined) {
       return data;
     }
@@ -41,21 +41,21 @@ class Logger {
     }
 
     if (Array.isArray(data)) {
-      return data.map((item) => this.sanitize(item));
+      return data.map((item) => this._sanitize(item));
     }
 
     const sanitized: Record<string, unknown> = {};
 
     for (const [key, value] of Object.entries(data)) {
       const lowerKey = key.toLowerCase();
-      const isSensitive = Logger.SENSITIVE_FIELDS.some((field) =>
+      const isSensitive = Logger._sensitiveFields.some((field) =>
         lowerKey.includes(field.toLowerCase())
       );
 
       if (isSensitive) {
         sanitized[key] = '[REDACTED]';
       } else if (typeof value === 'object') {
-        sanitized[key] = this.sanitize(value);
+        sanitized[key] = this._sanitize(value);
       } else {
         sanitized[key] = value;
       }
@@ -67,7 +67,7 @@ class Logger {
   /**
    * Creates a log entry
    */
-  private createLogEntry(
+  private _createLogEntry(
     level: LogLevel,
     message: string,
     data?: unknown,
@@ -77,7 +77,7 @@ class Logger {
       timestamp: new Date().toISOString(),
       level,
       message,
-      data: data ? this.sanitize(data) : undefined,
+      data: data ? this._sanitize(data) : undefined,
       error,
     };
   }
@@ -85,12 +85,12 @@ class Logger {
   /**
    * Outputs log entry
    */
-  private output(entry: LogEntry): void {
+  private _output(entry: LogEntry): void {
     const { level, message, data, error } = entry;
 
     // In development, use console for better DX
     if (__DEV__) {
-      const style = this.getConsoleStyle(level);
+      const style = this._getConsoleStyle(level);
       console.info(`[${level.toUpperCase()}] ${message}`, style);
       if (data) {
         console.info('Data:', data);
@@ -102,13 +102,13 @@ class Logger {
     }
 
     // In production, send to logging service
-    this.sendToLoggingService(entry);
+    this._sendToLoggingService(entry);
   }
 
   /**
    * Gets console style for level
    */
-  private getConsoleStyle(level: LogLevel): string {
+  private _getConsoleStyle(level: LogLevel): string {
     const styles: Record<LogLevel, string> = {
       debug: 'color: #888',
       info: 'color: #2196f3',
@@ -121,7 +121,7 @@ class Logger {
   /**
    * Sends log to external logging service
    */
-  private sendToLoggingService(entry: LogEntry): void {
+  private _sendToLoggingService(entry: LogEntry): void {
     // TODO: Implement Sentry, LogRocket, or similar
     // For now, just use console.error for errors
     if (entry.level === 'error') {
@@ -133,28 +133,28 @@ class Logger {
    * Debug level logging
    */
   debug(message: string, data?: unknown): void {
-    this.output(this.createLogEntry('debug', message, data));
+    this._output(this._createLogEntry('debug', message, data));
   }
 
   /**
    * Info level logging
    */
   info(message: string, data?: unknown): void {
-    this.output(this.createLogEntry('info', message, data));
+    this._output(this._createLogEntry('info', message, data));
   }
 
   /**
    * Warning level logging
    */
   warn(message: string, data?: unknown): void {
-    this.output(this.createLogEntry('warn', message, data));
+    this._output(this._createLogEntry('warn', message, data));
   }
 
   /**
    * Error level logging
    */
   error(message: string, error?: Error, data?: unknown): void {
-    this.output(this.createLogEntry('error', message, data, error));
+    this._output(this._createLogEntry('error', message, data, error));
   }
 
   /**

@@ -81,7 +81,7 @@ export function validateOrThrow<T>(schema: z.ZodSchema<T>, data: unknown): T {
     return schema.parse(data);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const firstError = error.errors[0];
+      const [firstError] = error.errors;
       throw new ValidationError(firstError.message, firstError.path.join('.'), data);
     }
     throw error;

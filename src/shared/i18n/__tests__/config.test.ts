@@ -4,7 +4,14 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import i18next from 'i18next';
+import i18next, {
+  changeLanguage as i18nChangeLanguage,
+  exists as i18nExists,
+  t as i18nT,
+} from 'i18next';
+// Import after mocks are set up
+import { changeLanguage, getCurrentLanguage } from '../config';
+import { LANGUAGES } from '../locales';
 
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage', () => ({
@@ -21,10 +28,6 @@ jest.mock('../../utils/logger', () => ({
     debug: jest.fn(),
   },
 }));
-
-// Import after mocks are set up
-import { changeLanguage, getCurrentLanguage } from '../config';
-import { LANGUAGES } from '../locales';
 
 describe('i18n Configuration', () => {
   beforeEach(() => {
@@ -92,31 +95,31 @@ describe('i18n Configuration', () => {
 
       // Restore
       if (originalLanguage) {
-        i18next.changeLanguage(originalLanguage);
+        i18nChangeLanguage(originalLanguage);
       }
     });
   });
 
   describe('Translation Keys', () => {
     it('should have common translations', () => {
-      const hasCommon = i18next.exists('common.loading');
+      const hasCommon = i18nExists('common.loading');
       expect(hasCommon).toBe(true);
     });
 
     it('should have error translations', () => {
-      const hasErrors = i18next.exists('errors.generic');
+      const hasErrors = i18nExists('errors.generic');
       expect(hasErrors).toBe(true);
     });
 
     it('should have auth screen translations', () => {
-      const hasAuth = i18next.exists('screens.login.appTitle');
+      const hasAuth = i18nExists('screens.login.appTitle');
       expect(hasAuth).toBe(true);
     });
   });
 
   describe('Interpolation', () => {
     it('should handle interpolation in translations', () => {
-      const result = i18next.t('common.welcomeBack', { name: 'John' });
+      const result = i18nT('common.welcomeBack', { name: 'John' });
       expect(result).toContain('John');
     });
   });
@@ -124,15 +127,15 @@ describe('i18n Configuration', () => {
   describe('Fallback Behavior', () => {
     it('should fallback to key when translation is missing', () => {
       const key = 'nonexistent.key';
-      const result = i18next.t(key);
+      const result = i18nT(key);
       expect(result).toBe(key);
     });
 
     it('should fallback to English for missing Spanish translations', async () => {
-      await i18next.changeLanguage('es');
+      await i18nChangeLanguage('es');
 
       // If Spanish doesn't have this key, it should fallback to English
-      const result = i18next.t('common.loading');
+      const result = i18nT('common.loading');
       expect(typeof result).toBe('string');
       expect(result.length).toBeGreaterThan(0);
     });
@@ -150,43 +153,42 @@ describe('i18n Configuration', () => {
 describe('Translation Resources', () => {
   describe('English Resources', () => {
     beforeEach(async () => {
-      await i18next.changeLanguage('en');
+      await i18nChangeLanguage('en');
     });
 
     it('should have navigation translations', () => {
-      expect(i18next.exists('navigation.home')).toBe(true);
-      expect(i18next.exists('navigation.settings')).toBe(true);
+      expect(i18nExists('navigation.home')).toBe(true);
+      expect(i18nExists('navigation.settings')).toBe(true);
     });
 
     it('should have roles translations', () => {
-      expect(i18next.exists('roles.admin')).toBe(true);
-      expect(i18next.exists('roles.user')).toBe(true);
+      expect(i18nExists('roles.admin')).toBe(true);
+      expect(i18nExists('roles.user')).toBe(true);
     });
 
     it('should have validation error translations', () => {
-      expect(i18next.exists('errors.validation')).toBe(true);
+      expect(i18nExists('errors.validation')).toBe(true);
     });
 
     it('should have settings screen translations', () => {
-      expect(i18next.exists('screens.settings.theme')).toBe(true);
-      expect(i18next.exists('screens.settings.language')).toBe(true);
+      expect(i18nExists('screens.settings.theme')).toBe(true);
+      expect(i18nExists('screens.settings.language')).toBe(true);
     });
   });
 
   describe('Spanish Resources', () => {
     beforeEach(async () => {
-      await i18next.changeLanguage('es');
+      await i18nChangeLanguage('es');
     });
 
     it('should have common translations in Spanish', () => {
-      const loading = i18next.t('common.loading');
+      const loading = i18nT('common.loading');
       expect(loading).toBeDefined();
       expect(loading.length).toBeGreaterThan(0);
     });
 
     it('should have navigation translations in Spanish', () => {
-      expect(i18next.exists('navigation.home')).toBe(true);
+      expect(i18nExists('navigation.home')).toBe(true);
     });
   });
 });
-

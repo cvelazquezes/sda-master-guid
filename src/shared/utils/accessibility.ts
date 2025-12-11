@@ -3,19 +3,19 @@
  * Provides helpers for WCAG 2.1 AA compliance following Google/Apple accessibility guidelines
  */
 
-import { AccessibilityProps, Platform, AccessibilityInfo } from 'react-native';
-import { COLOR, WCAG, TOUCH_TARGET, SPACING, MATH } from '../constants/numbers';
+import { Platform, AccessibilityInfo, type AccessibilityProps } from 'react-native';
 import { PLATFORM_OS } from '../constants/app';
+import { LOCALE, DATE_FORMAT, STRING_JOINER } from '../constants/locale';
+import { COLOR, WCAG, TOUCH_TARGET, SPACING, MATH } from '../constants/numbers';
 import {
   A11Y_ROLE,
-  A11Y_CHECKED,
   A11Y_ALERT_TYPE,
   A11Y_LABEL,
   A11Y_NUMBER_LABEL,
-  AccessibilityRoleType,
-  A11yAlertType,
+  type A11Y_CHECKED,
+  type AccessibilityRoleType,
+  type A11yAlertType,
 } from '../constants/ui';
-import { LOCALE, DATE_FORMAT, STRING_JOINER } from '../constants/locale';
 
 // ============================================================================
 // Accessibility Role Mapping (derived from A11Y_ROLE constants)
@@ -27,13 +27,13 @@ export type AccessibilityRole = AccessibilityRoleType;
 // Accessibility State
 // ============================================================================
 
-export interface AccessibilityState {
+export type AccessibilityState = {
   disabled?: boolean;
   selected?: boolean;
   checked?: boolean | typeof A11Y_CHECKED.MIXED;
   busy?: boolean;
   expanded?: boolean;
-}
+};
 
 // ============================================================================
 // Common Accessibility Props
@@ -266,7 +266,7 @@ export function createTabA11yProps(
 /**
  * Combines multiple text strings into a single accessibility label
  */
-export function combineA11yLabel(...parts: (string | undefined | null)[]): string {
+export function combineA11yLabel(...parts: Array<string | undefined | null>): string {
   return parts.filter(Boolean).join(STRING_JOINER.COMMA_SPACE);
 }
 

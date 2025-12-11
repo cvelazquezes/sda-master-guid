@@ -16,7 +16,7 @@ export const resources = {
 
 export type Language = 'en' | 'es';
 
-export const LANGUAGES: { code: Language; name: string; nativeName: string }[] = [
+export const LANGUAGES: Array<{ code: Language; name: string; nativeName: string }> = [
   { code: 'en', name: 'English', nativeName: 'English' },
   { code: 'es', name: 'Spanish', nativeName: 'Español' },
 ];

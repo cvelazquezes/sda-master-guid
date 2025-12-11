@@ -3,8 +3,10 @@
  * Provides type-safe error handling
  */
 
-import { HTTP_STATUS } from '../constants/http';
+/* eslint-disable max-classes-per-file -- Error classes are intentionally co-located */
+
 import { ERROR_MESSAGES, ERROR_CODES, ERROR_NAME, TYPEOF } from '../constants';
+import { HTTP_STATUS } from '../constants/http';
 
 /**
  * Base application error
@@ -39,7 +41,6 @@ export class AuthenticationError extends AppError {
     this.cause = cause instanceof Error ? cause : undefined;
   }
 }
-
 
 /**
  * Authorization errors

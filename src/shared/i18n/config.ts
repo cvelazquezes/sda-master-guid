@@ -3,14 +3,14 @@
  * Configures i18next for internationalization
  */
 
-import i18next, { use, changeLanguage as i18nChangeLanguage } from 'i18next';
-import { initReactI18next } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { resources, Language } from './locales';
-import { storageKeys } from '../../shared/config/storage';
-import { DEFAULT_LANGUAGE, I18N_CONFIG } from '../../shared/constants/ui';
-import { logger } from '../../shared/utils/logger';
-import { LOG_MESSAGES } from '../../shared/constants/logMessages';
+import i18next, { use as i18nUse, changeLanguage as i18nChangeLanguage } from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import { resources, type Language } from './locales';
+import { storageKeys } from '../config/storage';
+import { LOG_MESSAGES } from '../constants/logMessages';
+import { DEFAULT_LANGUAGE, I18N_CONFIG } from '../constants/ui';
+import { logger } from '../utils/logger';
 
 // Language detector for React Native
 const languageDetector = {
@@ -40,7 +40,7 @@ const languageDetector = {
   },
 };
 
-use(languageDetector)
+i18nUse(languageDetector)
   .use(initReactI18next)
   .init({
     resources,

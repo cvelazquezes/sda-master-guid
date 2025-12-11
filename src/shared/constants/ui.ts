@@ -319,7 +319,7 @@ export const PLATFORM = {
 export const THEME_MODE = {
   LIGHT: 'light',
   DARK: 'dark',
-  DARK_BLUE: 'dark_blue',
+  MIDNIGHT_BLUE: 'midnight_blue',
   SYSTEM: 'system',
 } as const;
 

@@ -269,7 +269,7 @@ export const mockConfig = {
 // COMBINED ENVIRONMENT CONFIG
 // ============================================================================
 
-interface EnvironmentConfigResult {
+type EnvironmentConfigResult = {
   name: Environment;
   isProduction: boolean;
   isDevelopment: boolean;
@@ -281,7 +281,7 @@ interface EnvironmentConfigResult {
   devTools: (typeof devToolsConfig)[Environment];
   security: (typeof securityConfig)[Environment];
   mock: (typeof mockConfig)[Environment];
-}
+};
 
 function getEnvironmentConfig(): EnvironmentConfigResult {
   const env = currentEnvironment;

@@ -199,32 +199,30 @@ export type HierarchyType = 'division' | 'union' | 'association' | 'church' | 'c
  * Status color configuration
  * Each status has multiple color variants for different contexts
  */
-export interface StatusColorConfig {
+export type StatusColorConfig = {
   primary: string;
   light: string;
   medium: string;
   text: string;
   icon: string;
-}
+};
 
 /**
  * Role color configuration
  * Each role has multiple color variants for different contexts
  */
-export interface RoleColorConfig {
+export type RoleColorConfig = {
   primary: string;
   light: string;
   medium: string;
   text: string;
   icon: string;
-}
+};
 
 /**
  * Theme colors object type (for useTheme().colors)
  */
-export interface ThemeColors {
-  [key: string]: string;
-}
+export type ThemeColors = Record<string, string>;
 
 // =============================================================================
 // COMPONENT VARIANT TYPES
@@ -280,13 +278,13 @@ export type AccessibilityRole =
 /**
  * Accessibility state for components
  */
-export interface AccessibilityState {
+export type AccessibilityState = {
   disabled?: boolean;
   selected?: boolean;
   checked?: boolean | 'mixed';
   busy?: boolean;
   expanded?: boolean;
-}
+};
 
 // =============================================================================
 // RE-EXPORTS FOR CONVENIENCE

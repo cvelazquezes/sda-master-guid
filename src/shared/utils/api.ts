@@ -10,7 +10,6 @@
  * - Stripe API
  */
 
-import { PAGE, ID_GENERATION, MATH } from '../constants/numbers';
 import {
   EMPTY_VALUE,
   TYPEOF,
@@ -19,8 +18,11 @@ import {
   ARRAY_FORMAT,
   HEADER,
   STRING_DELIMITER,
+  PAGE,
+  ID_GENERATION,
+  MATH,
+  type ArrayFormatType,
 } from '../constants';
-import type { ArrayFormatType } from '../constants';
 
 // ============================================================================
 // Types
@@ -29,20 +31,20 @@ import type { ArrayFormatType } from '../constants';
 /**
  * Pagination parameters
  */
-export interface PaginationParams {
+export type PaginationParams = {
   page?: number;
   pageSize?: number;
   limit?: number;
   offset?: number;
-}
+};
 
 /**
  * Cursor-based pagination parameters
  */
-export interface CursorPaginationParams {
+export type CursorPaginationParams = {
   cursor?: string;
   limit?: number;
-}
+};
 
 /** Derived type for sort order */
 type SortOrderType = (typeof SORT_ORDER)[keyof typeof SORT_ORDER];
@@ -50,10 +52,10 @@ type SortOrderType = (typeof SORT_ORDER)[keyof typeof SORT_ORDER];
 /**
  * Sorting parameters
  */
-export interface SortParams {
+export type SortParams = {
   sortBy?: string;
   sortOrder?: SortOrderType;
-}
+};
 
 /**
  * Filter parameters (generic)
@@ -63,7 +65,7 @@ export type FilterParams = Record<string, unknown>;
 /**
  * Paginated response structure
  */
-export interface PaginatedResponse<T> {
+export type PaginatedResponse<T> = {
   data: T[];
   pagination: {
     page: number;
@@ -73,24 +75,24 @@ export interface PaginatedResponse<T> {
     hasNext: boolean;
     hasPrev: boolean;
   };
-}
+};
 
 /**
  * Cursor paginated response structure
  */
-export interface CursorPaginatedResponse<T> {
+export type CursorPaginatedResponse<T> = {
   data: T[];
   pagination: {
     cursor: string | null;
     hasMore: boolean;
     limit: number;
   };
-}
+};
 
 /**
  * API Query parameters
  */
-export interface QueryParams extends PaginationParams, SortParams, FilterParams {}
+export type QueryParams = {} & PaginationParams & SortParams & FilterParams;
 
 // ============================================================================
 // Pagination Helpers

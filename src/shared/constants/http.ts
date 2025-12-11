@@ -230,15 +230,6 @@ export const ERROR_CODE = {
 } as const;
 
 // =============================================================================
-// RE-EXPORTS FOR BACKWARDS COMPATIBILITY
-// =============================================================================
-// TODO: REVIEW THIS
-// Re-export DISPLAY_LIMITS from ui.ts (some files import from http.ts)
-export { DISPLAY_LIMITS } from './ui';
-// Re-export NUMERIC from validation.ts (some files import from http.ts)
-export { NUMERIC } from './validation';
-
-// =============================================================================
 // TYPE EXPORTS
 // =============================================================================
 

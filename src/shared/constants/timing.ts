@@ -67,6 +67,16 @@ export const DURATION = {
   PULSE: 1500,
 } as const;
 
+/**
+ * Animation Duration - Alias for common animation durations
+ * @deprecated Use DURATION instead
+ */
+export const ANIMATION_DURATION = {
+  FAST: DURATION.FAST,
+  NORMAL: DURATION.NORMAL,
+  SLOW: DURATION.SLOW,
+} as const;
+
 // =============================================================================
 // TIMEOUTS (milliseconds)
 // =============================================================================
