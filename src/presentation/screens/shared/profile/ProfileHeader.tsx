@@ -1,25 +1,25 @@
 import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text, Card } from '../../../components/primitives';
-import { useTheme } from '../../../state/ThemeContext';
-import { User, UserRole } from '../../../../types';
+import { getRoleColor, getRoleIcon, getRoleLabel } from './profileUtils';
+import { createProfileHeaderStyles } from './styles';
 import {
-  ICONS,
   COMPONENT_VARIANT,
+  ICONS,
   TEXT_ALIGN,
   TEXT_VARIANT,
   TEXT_WEIGHT,
 } from '../../../../shared/constants';
-import { getRoleIcon, getRoleLabel, getRoleColor } from './profileUtils';
-import { createProfileHeaderStyles } from './styles';
+import { UserRole, type User } from '../../../../types';
+import { Card, Text } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
 
-interface ProfileHeaderProps {
+type ProfileHeaderProps = {
   user: User | null;
   isActive: boolean;
   colors: { primary: string };
   t: (key: string, options?: Record<string, unknown>) => string;
-}
+};
 
 export function ProfileHeader({
   user,
@@ -56,7 +56,9 @@ export function ProfileHeader({
             {user?.email || t('screens.account.defaultEmail')}
           </Text>
           <RoleBadge role={user?.role} t={t} styles={styles} />
-          {user?.role !== UserRole.ADMIN && <StatsRow user={user} isActive={isActive} t={t} styles={styles} />}
+          {user?.role !== UserRole.ADMIN && (
+            <StatsRow user={user} isActive={isActive} t={t} styles={styles} />
+          )}
         </View>
       </Card>
     </View>

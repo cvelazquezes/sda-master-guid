@@ -1,11 +1,11 @@
-import { UserRole, ApprovalStatus } from '../../../../types';
 import { ICONS } from '../../../../shared/constants';
+import { ApprovalStatus, UserRole } from '../../../../types';
 
-interface RoleConfig {
+type RoleConfig = {
   label: string;
   icon: string;
   color: string;
-}
+};
 
 export function getRoleConfig(
   role: UserRole | undefined,

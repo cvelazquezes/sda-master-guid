@@ -1,18 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
-import { Club, UserRole } from '../../../../types';
 import { clubService } from '../../../../infrastructure/repositories/clubService';
-import { logger } from '../../../../shared/utils/logger';
-import { LOG_MESSAGES } from '../../../../shared/constants/logMessages';
 import { MESSAGES } from '../../../../shared/constants';
+import { LOG_MESSAGES } from '../../../../shared/constants/logMessages';
+import { logger } from '../../../../shared/utils/logger';
+import { UserRole, type Club } from '../../../../types';
 
-interface UseAccountDataReturn {
+type UseAccountDataReturn = {
   club: Club | null;
   isActive: boolean;
   setIsActive: (v: boolean) => void;
   loading: boolean;
   setLoading: (v: boolean) => void;
-}
+};
 
 export function useAccountData(
   clubId: string | undefined,

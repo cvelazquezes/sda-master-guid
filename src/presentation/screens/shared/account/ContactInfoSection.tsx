@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text, SectionHeader, Card } from '../../../components/primitives';
-import { useTheme } from '../../../state/ThemeContext';
-import { ICONS } from '../../../../shared/constants';
 import { createStyles } from './styles';
+import { ICONS } from '../../../../shared/constants';
+import { Card, SectionHeader, Text } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
 
-interface ContactInfoSectionProps {
+type ContactInfoSectionProps = {
   email?: string;
   whatsappNumber?: string;
   colors: {
@@ -17,7 +17,7 @@ interface ContactInfoSectionProps {
     textPrimary: string;
   };
   t: (key: string) => string;
-}
+};
 
 export function ContactInfoSection({
   email,
@@ -30,8 +30,8 @@ export function ContactInfoSection({
     () => createStyles(themeColors, spacing, radii, typography),
     [themeColors, spacing, radii, typography]
   );
-  const emailBg = colors.primary + '20';
-  const whatsappBg = colors.success + '20';
+  const emailBg = `${colors.primary}20`;
+  const whatsappBg = `${colors.success}20`;
 
   return (
     <View style={styles.section}>

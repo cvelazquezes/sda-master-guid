@@ -1,21 +1,21 @@
 import React, { useMemo } from 'react';
-import { View, ScrollView } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../../state/AuthContext';
-import { useTheme } from '../../../state/ThemeContext';
+import { AboutSection } from './AboutSection';
+import { ActivityStatusSection } from './ActivityStatusSection';
+import { ClubMembershipSection } from './ClubMembershipSection';
+import { ContactInfoSection } from './ContactInfoSection';
+import { LogoutSection } from './LogoutSection';
+import { PreferencesSection } from './PreferencesSection';
+import { ProfileHeader } from './ProfileHeader';
+import { getApprovalStatusLabel, getRoleConfig } from './roleUtils';
+import { createStyles } from './styles';
+import { handleLogout, handleToggleActive, useAccountData } from './useAccountData';
+import { EMPTY_VALUE } from '../../../../shared/constants';
 import { UserRole } from '../../../../types';
 import { PageHeader } from '../../../components/primitives';
-import { EMPTY_VALUE } from '../../../../shared/constants';
-import { createStyles } from './styles';
-import { getRoleConfig, getApprovalStatusLabel } from './roleUtils';
-import { useAccountData, handleToggleActive, handleLogout } from './useAccountData';
-import { ProfileHeader } from './ProfileHeader';
-import { ContactInfoSection } from './ContactInfoSection';
-import { ClubMembershipSection } from './ClubMembershipSection';
-import { ActivityStatusSection } from './ActivityStatusSection';
-import { PreferencesSection } from './PreferencesSection';
-import { AboutSection } from './AboutSection';
-import { LogoutSection } from './LogoutSection';
+import { useAuth } from '../../../state/AuthContext';
+import { useTheme } from '../../../state/ThemeContext';
 
 const AccountScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
@@ -75,14 +75,14 @@ const AccountScreen = (): React.JSX.Element => {
           <ActivityStatusSection
             isActive={isActive}
             loading={loading}
-            onToggle={onToggleActive}
             colors={colors}
             t={t}
+            onToggle={onToggleActive}
           />
         )}
         <PreferencesSection timezone={user?.timezone} colors={colors} t={t} />
         <AboutSection colors={colors} t={t} />
-        <LogoutSection onLogout={onLogout} colors={colors} t={t} />
+        <LogoutSection colors={colors} t={t} onLogout={onLogout} />
         <View style={styles.bottomSpacer} />
       </ScrollView>
     </View>

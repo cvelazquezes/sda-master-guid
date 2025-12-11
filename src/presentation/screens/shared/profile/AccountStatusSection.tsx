@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
-import { View, Switch } from 'react-native';
+import { Switch, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text, Card, SectionHeader } from '../../../components/primitives';
-import { useTheme } from '../../../state/ThemeContext';
-import { ICONS, COMPONENT_VARIANT, OPACITY_HEX } from '../../../../shared/constants';
 import { createAccountStatusStyles } from './styles';
+import { COMPONENT_VARIANT, ICONS, OPACITY_HEX } from '../../../../shared/constants';
+import { Card, SectionHeader, Text } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
 
-interface AccountStatusSectionProps {
+type AccountStatusSectionProps = {
   isActive: boolean;
   loading: boolean;
   onToggle: (value: boolean) => void;
@@ -19,7 +19,7 @@ interface AccountStatusSectionProps {
     surface: string;
   };
   t: (key: string) => string;
-}
+};
 
 function StatusIcon({
   isActive,
@@ -80,10 +80,11 @@ export function AccountStatusSection({
           </View>
           <Switch
             value={isActive}
-            onValueChange={onToggle}
             disabled={loading}
             trackColor={{ false: colors.border, true: colors.success }}
             thumbColor={colors.surface}
+            accessibilityLabel="Account status toggle"
+            onValueChange={onToggle}
           />
         </View>
       </Card>

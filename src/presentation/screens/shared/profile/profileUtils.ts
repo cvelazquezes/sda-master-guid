@@ -1,7 +1,7 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { ICONS } from '../../../../shared/constants';
 import { UserRole } from '../../../../types';
 import { designTokens } from '../../../theme';
-import { ICONS } from '../../../../shared/constants';
+import type { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export function getRoleLabel(role: UserRole | undefined, t: (key: string) => string): string {
   switch (role) {

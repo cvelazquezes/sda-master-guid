@@ -1,17 +1,17 @@
 import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text, Card, SectionHeader } from '../../../components/primitives';
-import { User } from '../../../../types';
-import { useTheme } from '../../../state/ThemeContext';
-import { ICONS, COMPONENT_VARIANT, LIST_SEPARATOR } from '../../../../shared/constants';
 import { createContactInfoStyles } from './styles';
+import { COMPONENT_VARIANT, ICONS, LIST_SEPARATOR } from '../../../../shared/constants';
+import { Card, SectionHeader, Text } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
+import type { User } from '../../../../types';
 
-interface ContactInfoSectionProps {
+type ContactInfoSectionProps = {
   user: User | null;
   colors: { border: string; primary: string; textSecondary: string; textPrimary: string };
   t: (key: string) => string;
-}
+};
 
 function DetailRow({
   icon,
@@ -65,7 +65,7 @@ export function ContactInfoSection({
     return null;
   }
 
-  const whatsappBg = themeColors.success + '20';
+  const whatsappBg = `${themeColors.success}20`;
   const whatsappColor = themeColors.success;
 
   return (
@@ -87,7 +87,7 @@ export function ContactInfoSection({
           {hasClasses && (
             <DetailRow
               icon={ICONS.SCHOOL}
-              iconBg={colors.primary + '20'}
+              iconBg={`${colors.primary}20`}
               iconColor={colors.primary}
               label={t('screens.profile.pathfinderClasses')}
               value={user.classes.join(LIST_SEPARATOR)}

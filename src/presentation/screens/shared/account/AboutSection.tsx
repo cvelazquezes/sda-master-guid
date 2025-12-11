@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text, SectionHeader, Card } from '../../../components/primitives';
-import { useTheme } from '../../../state/ThemeContext';
-import { ICONS, APP_VERSION, TOUCH_OPACITY } from '../../../../shared/constants';
 import { createStyles } from './styles';
+import { APP_VERSION, ICONS, TOUCH_OPACITY } from '../../../../shared/constants';
+import { Card, SectionHeader, Text } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
 
-interface AboutSectionProps {
+type AboutSectionProps = {
   colors: {
     border: string;
     primary: string;
@@ -15,7 +15,7 @@ interface AboutSectionProps {
     textPrimary: string;
   };
   t: (key: string) => string;
-}
+};
 
 export function AboutSection({ colors, t }: AboutSectionProps): React.JSX.Element {
   const { colors: themeColors, spacing, radii, typography } = useTheme();
@@ -37,15 +37,15 @@ export function AboutSection({ colors, t }: AboutSectionProps): React.JSX.Elemen
   );
 }
 
-interface VersionRowProps {
+type VersionRowProps = {
   colors: AboutSectionProps['colors'];
   t: (key: string) => string;
   styles: ReturnType<typeof createStyles>;
-}
+};
 
 function VersionRow({ colors, t, styles }: VersionRowProps): React.JSX.Element {
   const { iconSizes } = useTheme();
-  const iconBg = colors.textTertiary + '20';
+  const iconBg = `${colors.textTertiary}20`;
   return (
     <View style={[styles.detailRow, { borderBottomColor: colors.border }]}>
       <View style={[styles.detailIconContainer, { backgroundColor: iconBg }]}>
@@ -67,9 +67,14 @@ function VersionRow({ colors, t, styles }: VersionRowProps): React.JSX.Element {
 
 function PrivacyRow({ colors, t, styles }: VersionRowProps): React.JSX.Element {
   const { iconSizes } = useTheme();
-  const iconBg = colors.primary + '20';
+  const iconBg = `${colors.primary}20`;
   return (
-    <TouchableOpacity style={styles.detailRow} activeOpacity={TOUCH_OPACITY.default}>
+    <TouchableOpacity
+      style={styles.detailRow}
+      activeOpacity={TOUCH_OPACITY.default}
+      accessibilityRole="button"
+      accessibilityLabel="Privacy policy"
+    >
       <View style={[styles.detailIconContainer, { backgroundColor: iconBg }]}>
         <MaterialCommunityIcons
           name={ICONS.SHIELD_CHECK_OUTLINE}

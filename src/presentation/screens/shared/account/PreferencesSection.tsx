@@ -1,18 +1,18 @@
 import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text, SectionHeader, Card } from '../../../components/primitives';
-import { ThemeSwitcher } from '../../../components/features/ThemeSwitcher';
-import { LanguageSwitcher } from '../../../components/features/LanguageSwitcher';
-import { useTheme } from '../../../state/ThemeContext';
-import { ICONS } from '../../../../shared/constants';
 import { createStyles } from './styles';
+import { ICONS } from '../../../../shared/constants';
+import { LanguageSwitcher } from '../../../components/features/LanguageSwitcher';
+import { ThemeSwitcher } from '../../../components/features/ThemeSwitcher';
+import { Card, SectionHeader, Text } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
 
-interface PreferencesSectionProps {
+type PreferencesSectionProps = {
   timezone?: string;
   colors: { border: string; info: string; textSecondary: string; textPrimary: string };
   t: (key: string) => string;
-}
+};
 
 export function PreferencesSection({
   timezone,
@@ -24,7 +24,7 @@ export function PreferencesSection({
     () => createStyles(themeColors, spacing, radii, typography),
     [themeColors, spacing, radii, typography]
   );
-  const iconBg = colors.info + '20';
+  const iconBg = `${colors.info}20`;
   const displayTimezone = timezone || t('screens.profile.defaultTimezone');
 
   return (

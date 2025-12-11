@@ -20,4 +20,3 @@ export {
   filterStyles,
   footerStyles,
 } from './common';
-

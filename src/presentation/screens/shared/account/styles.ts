@@ -2,8 +2,9 @@
  * Account Screen Styles
  * Theme-aware style factories
  */
-import { StyleSheet } from 'react-native';
-import { FLEX, BORDERS } from '../../../../shared/constants';
+/* eslint-disable max-lines-per-function -- Style factory functions require many style definitions */
+import { StyleSheet, type ViewStyle, type TextStyle } from 'react-native';
+import { FLEX } from '../../../../shared/constants';
 import type { ThemeContextType } from '../../../state/ThemeContext';
 
 // ============================================================================
@@ -15,7 +16,7 @@ export const createStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) => {
+): Record<string, ViewStyle | TextStyle> => {
   const avatarSizeXxl = 96;
   const avatarSizeMd = 40;
 
@@ -133,7 +134,14 @@ export const createStatusStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) => {
+): {
+  container: ViewStyle;
+  info: ViewStyle;
+  iconContainer: ViewStyle;
+  text: ViewStyle;
+  label: TextStyle;
+  description: TextStyle;
+} => {
   const touchTargetComfortable = 48;
 
   return StyleSheet.create({
@@ -180,7 +188,7 @@ export const createLogoutStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): { button: ViewStyle; buttonText: TextStyle } =>
   StyleSheet.create({
     button: {
       flexDirection: 'row',

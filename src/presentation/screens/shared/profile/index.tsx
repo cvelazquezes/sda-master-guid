@@ -1,16 +1,16 @@
 import React, { useMemo } from 'react';
 import { ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { createScreenStyles } from './styles';
-import { useAuth } from '../../../state/AuthContext';
-import { useTheme } from '../../../state/ThemeContext';
-import { UserRole } from '../../../../types';
-import { useProfileState } from './useProfileState';
-import { ProfileHeader } from './ProfileHeader';
-import { PreferencesSection } from './PreferencesSection';
 import { AccountStatusSection } from './AccountStatusSection';
 import { ContactInfoSection } from './ContactInfoSection';
 import { LogoutSection } from './LogoutSection';
+import { PreferencesSection } from './PreferencesSection';
+import { ProfileHeader } from './ProfileHeader';
+import { createScreenStyles } from './styles';
+import { useProfileState } from './useProfileState';
+import { UserRole } from '../../../../types';
+import { useAuth } from '../../../state/AuthContext';
+import { useTheme } from '../../../state/ThemeContext';
 
 const ProfileScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
@@ -35,13 +35,13 @@ const ProfileScreen = (): React.JSX.Element => {
         <AccountStatusSection
           isActive={isActive}
           loading={loading}
-          onToggle={handleToggleActive}
           colors={colors}
           t={t}
+          onToggle={handleToggleActive}
         />
       )}
       <ContactInfoSection user={user} colors={colors} t={t} />
-      <LogoutSection onLogout={handleLogout} colors={colors} labels={logoutLabels} />
+      <LogoutSection colors={colors} labels={logoutLabels} onLogout={handleLogout} />
     </ScrollView>
   );
 };

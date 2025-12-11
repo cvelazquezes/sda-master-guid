@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
-import { View, Switch } from 'react-native';
+import { Switch, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text, SectionHeader, Card } from '../../../components/primitives';
-import { useTheme } from '../../../state/ThemeContext';
+import { createStatusStyles, createStyles } from './styles';
 import { ICONS } from '../../../../shared/constants';
-import { createStyles, createStatusStyles } from './styles';
+import { Card, SectionHeader, Text } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
 
-interface ActivityStatusSectionProps {
+type ActivityStatusSectionProps = {
   isActive: boolean;
   loading: boolean;
   onToggle: (value: boolean) => void;
@@ -19,7 +19,7 @@ interface ActivityStatusSectionProps {
     surface: string;
   };
   t: (key: string) => string;
-}
+};
 
 export function ActivityStatusSection({
   isActive,
@@ -39,7 +39,7 @@ export function ActivityStatusSection({
   );
 
   const activeColor = isActive ? colors.success : colors.textTertiary;
-  const iconBg = activeColor + '20';
+  const iconBg = `${activeColor}20`;
   const iconName = isActive ? ICONS.ACCOUNT_CHECK : ICONS.ACCOUNT_OFF;
   const label = isActive ? t('common.active') : t('screens.profile.inactive');
   const desc = isActive
@@ -64,10 +64,11 @@ export function ActivityStatusSection({
           </View>
           <Switch
             value={isActive}
-            onValueChange={onToggle}
             disabled={loading}
             trackColor={{ false: colors.border, true: colors.success }}
             thumbColor={colors.surface}
+            accessibilityLabel="Activity status toggle"
+            onValueChange={onToggle}
           />
         </View>
       </Card>

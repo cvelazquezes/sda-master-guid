@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../../state/AuthContext';
 import { ALERT_BUTTON_STYLE } from '../../../../shared/constants';
+import { useAuth } from '../../../state/AuthContext';
 
-interface UseProfileStateReturn {
+type UseProfileStateReturn = {
   isActive: boolean;
   loading: boolean;
   handleToggleActive: (value: boolean) => Promise<void>;
   handleLogout: () => void;
-}
+};
 
 export function useProfileState(): UseProfileStateReturn {
   const { t } = useTranslation();

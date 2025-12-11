@@ -2,16 +2,16 @@
  * Profile Screen Styles
  * Theme-aware style factories
  */
-import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
-import { ThemeContextType } from '../../../state/ThemeContext';
+import { StyleSheet, type ViewStyle, type TextStyle } from 'react-native';
 import { FLEX } from '../../../../shared/constants';
 import { MATH } from '../../../../shared/constants/numbers';
+import type { ThemeContextType } from '../../../state/ThemeContext';
 
 // ============================================================================
 // SCREEN STYLES FACTORY
 // ============================================================================
 
-export const createScreenStyles = (colors: ThemeContextType['colors']) =>
+export const createScreenStyles = (colors: ThemeContextType['colors']): { container: ViewStyle } =>
   StyleSheet.create({
     container: {
       flex: FLEX.ONE,
@@ -28,7 +28,7 @@ export const createProfileHeaderStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) => {
+): Record<string, ViewStyle | TextStyle> => {
   const avatarSizeXxl = 96;
   const avatarSizeXl = 80;
 
@@ -123,7 +123,7 @@ export const createAccountStatusStyles = (
   colors: ThemeContextType['colors'],
   spacing: ThemeContextType['spacing'],
   typography: ThemeContextType['typography']
-) => {
+): Record<string, ViewStyle | TextStyle> => {
   const touchTargetComfortable = 48;
 
   return StyleSheet.create({
@@ -173,7 +173,7 @@ export const createContactInfoStyles = (
   colors: ThemeContextType['colors'],
   spacing: ThemeContextType['spacing'],
   typography: ThemeContextType['typography']
-) => {
+): Record<string, ViewStyle | TextStyle> => {
   const touchTargetMinimum = 40;
 
   return StyleSheet.create({
@@ -220,7 +220,7 @@ export const createPreferencesStyles = (
   colors: ThemeContextType['colors'],
   spacing: ThemeContextType['spacing'],
   typography: ThemeContextType['typography']
-) => {
+): Record<string, ViewStyle | TextStyle> => {
   const touchTargetMinimum = 40;
 
   return StyleSheet.create({
@@ -271,7 +271,13 @@ export const createLogoutStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  section: ViewStyle;
+  logoutButton: ViewStyle;
+  logoutButtonText: TextStyle;
+  versionSection: ViewStyle;
+  versionText: TextStyle;
+} =>
   StyleSheet.create({
     section: {
       paddingHorizontal: spacing.lg,
