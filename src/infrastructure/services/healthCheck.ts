@@ -3,13 +3,18 @@
  * Monitors application and dependency health following Kubernetes/Google SRE patterns
  */
 
+import packageJson from '../../../package.json';
+import {
+  LOG_MESSAGES,
+  HEALTH_STATUS,
+  HEALTH_CHECK_NAME,
+  API_ENDPOINTS,
+} from '../../shared/constants';
+import { HTTP_METHOD } from '../../shared/constants/http';
+import { MATH } from '../../shared/constants/numbers';
+import { RETRY, TIMEOUT } from '../../shared/constants/timing';
 import { logger } from '../../shared/utils/logger';
 import { environment } from '../config/environment';
-import { RETRY, TIMEOUT } from '../../shared/constants/timing';
-import { MATH } from '../../shared/constants/numbers';
-import { HTTP_METHOD } from '../../shared/constants/http';
-import { LOG_MESSAGES, HEALTH_STATUS, HEALTH_CHECK_NAME, API_ENDPOINTS } from '../../shared/constants';
-import packageJson from '../../../package.json';
 
 // ============================================================================
 // Types
@@ -20,41 +25,41 @@ export type HealthCheckFunction = () => Promise<boolean>;
 /** Derived type from HEALTH_STATUS constant */
 type HealthStatusValue = (typeof HEALTH_STATUS)[keyof typeof HEALTH_STATUS];
 
-export interface HealthCheckResult {
+export type HealthCheckResult = {
   name: string;
   status: HealthStatusValue;
   isHealthy: boolean;
   responseTime?: number;
   error?: string;
   lastChecked: string;
-}
+};
 
-export interface HealthStatus {
+export type HealthStatus = {
   status: HealthStatusValue;
   timestamp: string;
   checks: HealthCheckResult[];
   uptime: number;
   version: string;
-}
+};
 
 // ============================================================================
 // Health Check Service
 // ============================================================================
 
 class HealthCheckService {
-  private dependencies = new Map<string, HealthCheckFunction>();
-  private lastResults = new Map<string, HealthCheckResult>();
-  private startTime = Date.now();
+  private _dependencies: Map<string, HealthCheckFunction> = new Map<string, HealthCheckFunction>();
+  private _lastResults: Map<string, HealthCheckResult> = new Map<string, HealthCheckResult>();
+  private _startTime: number = Date.now();
 
   /**
    * Registers a dependency health check
    */
   register(name: string, check: HealthCheckFunction): void {
-    if (this.dependencies.has(name)) {
+    if (this._dependencies.has(name)) {
       logger.warn(LOG_MESSAGES.HEALTH_CHECK.ALREADY_REGISTERED(name));
     }
 
-    this.dependencies.set(name, check);
+    this._dependencies.set(name, check);
     logger.debug(LOG_MESSAGES.HEALTH_CHECK.REGISTERED(name));
   }
 
@@ -62,8 +67,8 @@ class HealthCheckService {
    * Unregisters a health check
    */
   unregister(name: string): void {
-    this.dependencies.delete(name);
-    this.lastResults.delete(name);
+    this._dependencies.delete(name);
+    this._lastResults.delete(name);
     logger.debug(LOG_MESSAGES.HEALTH_CHECK.UNREGISTERED(name));
   }
 
@@ -71,15 +76,15 @@ class HealthCheckService {
    * Performs all health checks
    */
   async checkHealth(): Promise<HealthStatus> {
-    const checks = Array.from(this.dependencies.entries());
+    const checks = Array.from(this._dependencies.entries());
 
     const results = await Promise.all(
-      checks.map(([name, check]) => this.executeCheck(name, check))
+      checks.map(([name, check]) => this._executeCheck(name, check))
     );
 
     // Store results for quick access
     results.forEach((result) => {
-      this.lastResults.set(result.name, result);
+      this._lastResults.set(result.name, result);
     });
 
     // Determine overall status
@@ -99,7 +104,7 @@ class HealthCheckService {
       status,
       timestamp: new Date().toISOString(),
       checks: results,
-      uptime: Date.now() - this.startTime,
+      uptime: Date.now() - this._startTime,
       version: packageJson.version,
     };
   }
@@ -107,13 +112,16 @@ class HealthCheckService {
   /**
    * Executes a single health check
    */
-  private async executeCheck(name: string, check: HealthCheckFunction): Promise<HealthCheckResult> {
+  private async _executeCheck(
+    name: string,
+    check: HealthCheckFunction
+  ): Promise<HealthCheckResult> {
     const startTime = Date.now();
 
     try {
       const isHealthy = await Promise.race([
         check(),
-        this.timeout(TIMEOUT.ALERT), // 5 second timeout
+        this._timeout(TIMEOUT.ALERT), // 5 second timeout
       ]);
 
       const responseTime = Date.now() - startTime;
@@ -145,14 +153,14 @@ class HealthCheckService {
    * Gets the last known health status without running checks
    */
   getLastStatus(): HealthStatus {
-    const results = Array.from(this.lastResults.values());
+    const results = Array.from(this._lastResults.values());
 
     if (results.length === 0) {
       return {
         status: HEALTH_STATUS.HEALTHY,
         timestamp: new Date().toISOString(),
         checks: [],
-        uptime: Date.now() - this.startTime,
+        uptime: Date.now() - this._startTime,
         version: packageJson.version,
       };
     }
@@ -168,7 +176,7 @@ class HealthCheckService {
           : HEALTH_STATUS.UNHEALTHY,
       timestamp: new Date().toISOString(),
       checks: results,
-      uptime: Date.now() - this.startTime,
+      uptime: Date.now() - this._startTime,
       version: packageJson.version,
     };
   }
@@ -193,19 +201,19 @@ class HealthCheckService {
    * Gets status of a specific dependency
    */
   async checkDependency(name: string): Promise<HealthCheckResult | null> {
-    const check = this.dependencies.get(name);
+    const check = this._dependencies.get(name);
 
     if (!check) {
       return null;
     }
 
-    return await this.executeCheck(name, check);
+    return await this._executeCheck(name, check);
   }
 
   /**
    * Helper to create timeout promise
    */
-  private timeout(ms: number): Promise<never> {
+  private _timeout(ms: number): Promise<never> {
     return new Promise((_, reject) => {
       setTimeout(() => reject(new Error(LOG_MESSAGES.HEALTH_CHECK.TIMEOUT)), ms);
     });
@@ -215,16 +223,16 @@ class HealthCheckService {
    * Gets uptime in milliseconds
    */
   getUptime(): number {
-    return Date.now() - this.startTime;
+    return Date.now() - this._startTime;
   }
 
   /**
    * Resets the service (for testing)
    */
   reset(): void {
-    this.dependencies.clear();
-    this.lastResults.clear();
-    this.startTime = Date.now();
+    this._dependencies.clear();
+    this._lastResults.clear();
+    this._startTime = Date.now();
   }
 }
 
@@ -322,13 +330,17 @@ export function createHealthCheckWithRetry(
   return async () => {
     for (let i = 0; i <= maxRetries; i++) {
       try {
+        // eslint-disable-next-line no-await-in-loop -- Sequential health check retries require awaiting each attempt
         const result = await check();
         if (result) {
           return true;
         }
 
         if (i < maxRetries) {
-          await new Promise((resolve) => setTimeout(resolve, RETRY.FIRST));
+          // eslint-disable-next-line no-await-in-loop -- Intentional delay between retry attempts
+          await new Promise((resolve) => {
+            setTimeout(resolve, RETRY.FIRST);
+          });
         }
       } catch {
         if (i === maxRetries) {

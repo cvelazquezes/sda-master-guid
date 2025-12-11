@@ -1,13 +1,14 @@
 import { Alert } from 'react-native';
 import { clubService } from '../../../../infrastructure/repositories/clubService';
 import { paymentService } from '../../../../infrastructure/repositories/paymentService';
-import { User, Club, ClubFeeSettings, MemberBalance } from '../../../../types';
-import { NUMERIC, LIMITS, ALERT_BUTTON_STYLE, LOG_MESSAGES } from '../../../../shared/constants';
+import { ALERT_BUTTON_STYLE, LOG_MESSAGES } from '../../../../shared/constants';
+import { ARRAY_LIMITS, NUMERIC } from '../../../../shared/constants/validation';
 import { logger } from '../../../../shared/utils/logger';
+import type { User, Club, ClubFeeSettings, MemberBalance } from '../../../../types';
 
 type TranslationFn = (key: string, opts?: Record<string, unknown>) => string;
 
-interface SaveFeeSettingsOptions {
+type SaveFeeSettingsOptions = {
   club: Club;
   feeAmount: string;
   currency: string;
@@ -15,7 +16,7 @@ interface SaveFeeSettingsOptions {
   feeSettingsActive: boolean;
   setClub: (c: Club) => void;
   t: TranslationFn;
-}
+};
 
 export async function saveFeeSettings(options: SaveFeeSettingsOptions): Promise<void> {
   const { club, feeAmount, currency, selectedMonths, feeSettingsActive, setClub, t } = options;
@@ -25,7 +26,7 @@ export async function saveFeeSettings(options: SaveFeeSettingsOptions): Promise<
     Alert.alert(t('titles.invalidAmount'), t('screens.clubFees.invalidFeeAmount'));
     return;
   }
-  if (selectedMonths.length === LIMITS.MIN_ARRAY_LENGTH && feeSettingsActive) {
+  if (selectedMonths.length === ARRAY_LIMITS.MIN_LENGTH && feeSettingsActive) {
     Alert.alert(t('titles.noMonthsSelected'), t('errors.noMonthsSelected'));
     return;
   }
@@ -45,13 +46,13 @@ export async function saveFeeSettings(options: SaveFeeSettingsOptions): Promise<
   }
 }
 
-interface GenerateFeesAlertOptions {
+type GenerateFeesAlertOptions = {
   clubId: string;
   members: User[];
   feeSettings: ClubFeeSettings;
   loadData: () => void;
   t: TranslationFn;
-}
+};
 
 export function showGenerateFeesAlert(options: GenerateFeesAlertOptions): void {
   const { clubId, members, feeSettings, loadData, t } = options;
@@ -78,12 +79,12 @@ export function showGenerateFeesAlert(options: GenerateFeesAlertOptions): void {
   );
 }
 
-interface NotifyAllAlertOptions {
+type NotifyAllAlertOptions = {
   members: User[];
   balances: MemberBalance[];
   club: Club | null;
   t: TranslationFn;
-}
+};
 
 export function showNotifyAllAlert(options: NotifyAllAlertOptions): void {
   const { members, balances, club, t } = options;
@@ -98,6 +99,7 @@ export function showNotifyAllAlert(options: NotifyAllAlertOptions): void {
           for (const member of members) {
             const balance = balances.find((b) => b.userId === member.id);
             if (balance) {
+              // eslint-disable-next-line no-await-in-loop -- Sequential notification processing for UI feedback
               const message = await paymentService.getNotificationMessage(balance, member.name);
               logger.debug(LOG_MESSAGES.SCREENS.CLUB_FEES.NOTIFICATION_TO_MEMBER, {
                 name: member.name,
@@ -126,11 +128,11 @@ export function showNotifyAllAlert(options: NotifyAllAlertOptions): void {
   ]);
 }
 
-interface NotifySingleMemberAlertOptions {
+type NotifySingleMemberAlertOptions = {
   member: User;
   balance: MemberBalance;
   t: TranslationFn;
-}
+};
 
 export function showNotifySingleMemberAlert(options: NotifySingleMemberAlertOptions): void {
   const { member, balance, t } = options;

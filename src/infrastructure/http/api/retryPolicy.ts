@@ -3,21 +3,21 @@
  * Implements resilient API call retry logic
  */
 
-import { logger } from '../../../shared/utils/logger';
-import { NetworkError, TimeoutError } from '../../../shared/utils/errors';
-import { RETRY_CONFIG } from '../../../shared/constants/validation';
+import { LOG_MESSAGES, TYPEOF, AXIOS_ERROR_CODE, OBJECT_PROPERTY } from '../../../shared/constants';
 import { RETRYABLE_STATUS_CODES } from '../../../shared/constants/http';
 import { OPACITY_VALUE } from '../../../shared/constants/numbers';
-import { LOG_MESSAGES, TYPEOF, AXIOS_ERROR_CODE, OBJECT_PROPERTY } from '../../../shared/constants';
+import { RETRY_CONFIG } from '../../../shared/constants/validation';
+import { NetworkError, TimeoutError } from '../../../shared/utils/errors';
+import { logger } from '../../../shared/utils/logger';
 
-interface RetryOptions {
+type RetryOptions = {
   maxRetries: number;
   baseDelay: number;
   maxDelay: number;
   backoffMultiplier: number;
   jitter: boolean;
   retryableStatuses: number[];
-}
+};
 
 const DEFAULT_OPTIONS: RetryOptions = {
   maxRetries: RETRY_CONFIG.MAX_ATTEMPTS,
@@ -29,10 +29,10 @@ const DEFAULT_OPTIONS: RetryOptions = {
 };
 
 export class RetryPolicy {
-  private options: RetryOptions;
+  private _options: RetryOptions;
 
   constructor(options: Partial<RetryOptions> = {}) {
-    this.options = { ...DEFAULT_OPTIONS, ...options };
+    this._options = { ...DEFAULT_OPTIONS, ...options };
   }
 
   /**
@@ -41,29 +41,31 @@ export class RetryPolicy {
   async execute<T>(fn: () => Promise<T>): Promise<T> {
     let lastError: Error;
 
-    for (let attempt = 0; attempt <= this.options.maxRetries; attempt++) {
+    for (let attempt = 0; attempt <= this._options.maxRetries; attempt++) {
       try {
+        // eslint-disable-next-line no-await-in-loop -- Sequential retry attempts require awaiting each call before deciding to retry
         return await fn();
       } catch (error) {
         lastError = error as Error;
 
         // Don't retry if it's the last attempt
-        if (attempt === this.options.maxRetries) {
+        if (attempt === this._options.maxRetries) {
           break;
         }
 
         // Check if error is retriable
-        if (!this.isRetriable(error)) {
+        if (!this._isRetriable(error)) {
           throw error;
         }
 
         // Calculate delay and wait
-        const delay = this.calculateDelay(attempt);
-        logger.warn(LOG_MESSAGES.FORMATTED.RETRY_ATTEMPT(attempt + 1, this.options.maxRetries), {
+        const delay = this._calculateDelay(attempt);
+        logger.warn(LOG_MESSAGES.FORMATTED.RETRY_ATTEMPT(attempt + 1, this._options.maxRetries), {
           error,
           delay,
         });
-        await this.sleep(delay);
+        // eslint-disable-next-line no-await-in-loop -- Intentional delay between retry attempts
+        await this._sleep(delay);
       }
     }
 
@@ -73,16 +75,16 @@ export class RetryPolicy {
   /**
    * Checks if error is retriable
    */
-  private isRetriable(error: unknown): boolean {
+  private _isRetriable(error: unknown): boolean {
     // Network errors are retriable
     if (error instanceof NetworkError || error instanceof TimeoutError) {
       return true;
     }
 
     // Check HTTP status code
-    if (this.isAxiosError(error)) {
+    if (this._isAxiosError(error)) {
       const status = error.response?.status;
-      if (status && this.options.retryableStatuses.includes(status)) {
+      if (status && this._options.retryableStatuses.includes(status)) {
         return true;
       }
     }
@@ -99,14 +101,14 @@ export class RetryPolicy {
   /**
    * Calculates delay for retry with exponential backoff
    */
-  private calculateDelay(attempt: number): number {
+  private _calculateDelay(attempt: number): number {
     const exponentialDelay = Math.min(
-      this.options.baseDelay * Math.pow(this.options.backoffMultiplier, attempt),
-      this.options.maxDelay
+      this._options.baseDelay * Math.pow(this._options.backoffMultiplier, attempt),
+      this._options.maxDelay
     );
 
     // Add jitter to prevent thundering herd
-    if (this.options.jitter) {
+    if (this._options.jitter) {
       return exponentialDelay * (OPACITY_VALUE.MEDIUM + Math.random() * OPACITY_VALUE.MEDIUM);
     }
 
@@ -116,15 +118,17 @@ export class RetryPolicy {
   /**
    * Type guard for Axios errors
    */
-  private isAxiosError(error: unknown): error is { response?: { status: number } } {
+  private _isAxiosError(error: unknown): error is { response?: { status: number } } {
     return typeof error === TYPEOF.OBJECT && error !== null && OBJECT_PROPERTY.RESPONSE in error;
   }
 
   /**
    * Sleep helper
    */
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+  private _sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
   }
 }
 

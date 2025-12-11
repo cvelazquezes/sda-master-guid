@@ -3,9 +3,16 @@
  * Implements token bucket algorithm following Stripe/AWS API Gateway patterns
  */
 
-import { logger } from '../../shared/utils/logger';
+/* eslint-disable max-classes-per-file -- Related rate limiting classes are co-located */
+
+import {
+  ERROR_MESSAGES,
+  ERROR_NAME,
+  LOG_MESSAGES,
+  RATE_LIMITER_NAME,
+} from '../../shared/constants';
 import { MS, LIST_LIMITS } from '../../shared/constants/numbers';
-import { ERROR_MESSAGES, ERROR_NAME, LOG_MESSAGES, RATE_LIMITER_NAME } from '../../shared/constants';
+import { logger } from '../../shared/utils/logger';
 
 // Rate limit configuration constants
 // Note: Using literal values to avoid module initialization order issues
@@ -21,29 +28,29 @@ const RATE_LIMIT_CONFIG = {
 // Types
 // ============================================================================
 
-export interface RateLimitOptions {
+export type RateLimitOptions = {
   tokensPerInterval: number;
   interval: number; // in milliseconds
   maxTokens?: number;
-}
+};
 
-interface RateLimitBucket {
+type RateLimitBucket = {
   tokens: number;
   lastRefill: number;
   maxTokens: number;
   refillRate: number;
-}
+};
 
 // ============================================================================
 // Rate Limiter (Token Bucket Algorithm)
 // ============================================================================
 
 export class RateLimiter {
-  private buckets = new Map<string, RateLimitBucket>();
-  private options: Required<RateLimitOptions>;
+  private _buckets: Map<string, RateLimitBucket> = new Map<string, RateLimitBucket>();
+  private _options: Required<RateLimitOptions>;
 
   constructor(options: RateLimitOptions) {
-    this.options = {
+    this._options = {
       tokensPerInterval: options.tokensPerInterval,
       interval: options.interval,
       maxTokens: options.maxTokens || options.tokensPerInterval,
@@ -55,10 +62,10 @@ export class RateLimiter {
    * Returns true if tokens are available, false if rate limited
    */
   async tryConsume(key: string, tokensNeeded: number = 1): Promise<boolean> {
-    const bucket = this.getOrCreateBucket(key);
+    const bucket = this._getOrCreateBucket(key);
 
     // Refill tokens based on time passed
-    this.refillBucket(bucket);
+    this._refillBucket(bucket);
 
     // Check if enough tokens available
     if (bucket.tokens >= tokensNeeded) {
@@ -73,34 +80,36 @@ export class RateLimiter {
    * Waits until tokens are available (blocking)
    */
   async consume(key: string, tokensNeeded: number = 1): Promise<void> {
+    // eslint-disable-next-line no-await-in-loop -- Blocking rate limiter requires sequential token consumption checks
     while (!(await this.tryConsume(key, tokensNeeded))) {
       // Calculate wait time
-      const bucket = this.buckets.get(key);
+      const bucket = this._buckets.get(key);
       if (!bucket) {
         continue;
       }
       const tokensNeededToRefill = tokensNeeded - bucket.tokens;
-      const timeToWait = (tokensNeededToRefill / this.options.refillRate) * MS.SECOND;
+      const timeToWait = (tokensNeededToRefill / this._options.refillRate) * MS.SECOND;
 
       logger.debug(LOG_MESSAGES.RATE_LIMIT.WAITING(timeToWait));
-      await this.sleep(Math.min(timeToWait, this.options.interval));
+      // eslint-disable-next-line no-await-in-loop -- Intentional blocking wait for rate limiting
+      await this._sleep(Math.min(timeToWait, this._options.interval));
     }
   }
 
   /**
    * Gets or creates a bucket for a key
    */
-  private getOrCreateBucket(key: string): RateLimitBucket {
-    let bucket = this.buckets.get(key);
+  private _getOrCreateBucket(key: string): RateLimitBucket {
+    let bucket = this._buckets.get(key);
 
     if (!bucket) {
       bucket = {
-        tokens: this.options.maxTokens,
+        tokens: this._options.maxTokens,
         lastRefill: Date.now(),
-        maxTokens: this.options.maxTokens,
-        refillRate: this.options.tokensPerInterval / this.options.interval,
+        maxTokens: this._options.maxTokens,
+        refillRate: this._options.tokensPerInterval / this._options.interval,
       };
-      this.buckets.set(key, bucket);
+      this._buckets.set(key, bucket);
     }
 
     return bucket;
@@ -109,7 +118,7 @@ export class RateLimiter {
   /**
    * Refills bucket based on time elapsed
    */
-  private refillBucket(bucket: RateLimitBucket): void {
+  private _refillBucket(bucket: RateLimitBucket): void {
     const now = Date.now();
     const timePassed = now - bucket.lastRefill;
 
@@ -124,12 +133,12 @@ export class RateLimiter {
    * Gets remaining tokens for a key
    */
   getTokens(key: string): number {
-    const bucket = this.buckets.get(key);
+    const bucket = this._buckets.get(key);
     if (!bucket) {
-      return this.options.maxTokens;
+      return this._options.maxTokens;
     }
 
-    this.refillBucket(bucket);
+    this._refillBucket(bucket);
     return Math.floor(bucket.tokens);
   }
 
@@ -137,14 +146,14 @@ export class RateLimiter {
    * Resets rate limit for a key
    */
   reset(key: string): void {
-    this.buckets.delete(key);
+    this._buckets.delete(key);
   }
 
   /**
    * Clears all rate limits
    */
   clear(): void {
-    this.buckets.clear();
+    this._buckets.clear();
   }
 
   /**
@@ -155,16 +164,18 @@ export class RateLimiter {
     options: Required<RateLimitOptions>;
   } {
     return {
-      trackedKeys: this.buckets.size,
-      options: this.options,
+      trackedKeys: this._buckets.size,
+      options: this._options,
     };
   }
 
   /**
    * Sleep utility
    */
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+  private _sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
   }
 }
 
@@ -173,20 +184,20 @@ export class RateLimiter {
 // ============================================================================
 
 class RateLimitService {
-  private limiters = new Map<string, RateLimiter>();
+  private _limiters: Map<string, RateLimiter> = new Map<string, RateLimiter>();
 
   /**
    * Creates or gets a rate limiter
    */
   getLimiter(name: string, options?: RateLimitOptions): RateLimiter {
-    let limiter = this.limiters.get(name);
+    let limiter = this._limiters.get(name);
 
     if (!limiter) {
       if (!options) {
         throw new Error(LOG_MESSAGES.RATE_LIMIT.NOT_FOUND_ERROR(name));
       }
       limiter = new RateLimiter(options);
-      this.limiters.set(name, limiter);
+      this._limiters.set(name, limiter);
     }
 
     return limiter;
@@ -196,7 +207,7 @@ class RateLimitService {
    * Tries to consume from a named limiter
    */
   async tryConsume(limiterName: string, key: string, tokensNeeded: number = 1): Promise<boolean> {
-    const limiter = this.limiters.get(limiterName);
+    const limiter = this._limiters.get(limiterName);
     if (!limiter) {
       logger.warn(LOG_MESSAGES.RATE_LIMIT.NOT_FOUND(limiterName));
       return true; // Allow if limiter not configured
@@ -209,14 +220,14 @@ class RateLimitService {
    * Removes a rate limiter
    */
   removeLimiter(name: string): void {
-    this.limiters.delete(name);
+    this._limiters.delete(name);
   }
 
   /**
    * Clears all rate limiters
    */
   clear(): void {
-    this.limiters.clear();
+    this._limiters.clear();
   }
 }
 
@@ -266,6 +277,7 @@ export function rateLimit(
   keyExtractor: (...args: unknown[]) => string = () => RATE_LIMITER_NAME.DEFAULT
 ) {
   return function (target: object, propertyKey: string, descriptor: PropertyDescriptor) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- PropertyDescriptor.value is typed as any
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: unknown[]) {
@@ -276,6 +288,7 @@ export function rateLimit(
         throw new RateLimitError(LOG_MESSAGES.RATE_LIMIT.EXCEEDED(propertyKey));
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access -- Decorator pattern requires dynamic method invocation
       return await originalMethod.apply(this, args);
     };
 

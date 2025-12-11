@@ -4,12 +4,9 @@
  */
 
 import { useState, useEffect } from 'react';
-import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { logger } from '../../shared/utils/logger';
+import NetInfo, { type NetInfoState } from '@react-native-community/netinfo';
 import { addBreadcrumb } from './sentry';
-import { POLLING } from '../../shared/constants/timing';
-import { LIST_LIMITS, ID_GENERATION } from '../../shared/constants/numbers';
 import {
   LOG_MESSAGES,
   STORAGE_KEYS,
@@ -19,8 +16,12 @@ import {
   HEADER,
   BREADCRUMB_CATEGORY,
   BREADCRUMB_LEVEL,
+  type NetworkStatusType,
+  type HttpMethodType,
 } from '../../shared/constants';
-import type { NetworkStatusType, HttpMethodType } from '../../shared/constants';
+import { LIST_LIMITS, ID_GENERATION } from '../../shared/constants/numbers';
+import { POLLING } from '../../shared/constants/timing';
+import { logger } from '../../shared/utils/logger';
 
 // ============================================================================
 // React Hooks
@@ -30,7 +31,7 @@ import type { NetworkStatusType, HttpMethodType } from '../../shared/constants';
 // Types
 // ============================================================================
 
-export interface QueuedRequest {
+export type QueuedRequest = {
   id: string;
   url: string;
   method: HttpMethodType;
@@ -39,60 +40,63 @@ export interface QueuedRequest {
   timestamp: number;
   retryCount: number;
   maxRetries: number;
-}
+};
 
 export type NetworkStatus = NetworkStatusType;
 
-export interface OfflineQueueStats {
+export type OfflineQueueStats = {
   totalQueued: number;
   pendingSync: number;
   lastSyncAttempt: number | null;
   isOnline: boolean;
-}
+};
 
 // ============================================================================
 // Offline Queue Service
 // ============================================================================
 
 class OfflineService {
-  private queue: QueuedRequest[] = [];
-  private readonly STORAGE_KEY = STORAGE_KEYS.OFFLINE.QUEUE;
-  private readonly MAX_QUEUE_SIZE = LIST_LIMITS.MAX_QUEUE;
-  private isOnline = true;
-  private isSyncing = false;
-  private listeners = new Set<(status: NetworkStatus) => void>();
-  private unsubscribeNetInfo: (() => void) | null = null;
+  private _queue: QueuedRequest[] = [];
+  private readonly _storageKey: string = STORAGE_KEYS.OFFLINE.QUEUE;
+  private readonly _maxQueueSize: number = LIST_LIMITS.MAX_QUEUE;
+  private _isOnline: boolean = true;
+  private _isSyncing: boolean = false;
+  private _listeners: Set<(status: NetworkStatus) => void> = new Set<
+    (status: NetworkStatus) => void
+  >();
+  private _unsubscribeNetInfo: (() => void) | null = null;
 
   constructor() {
-    this.initialize();
+    this._initialize();
   }
 
   /**
    * Initializes the offline service
    */
-  private async initialize(): Promise<void> {
+  private async _initialize(): Promise<void> {
     // Load queue from storage
-    await this.loadQueue();
+    await this._loadQueue();
 
     // Subscribe to network state
-    this.unsubscribeNetInfo = NetInfo.addEventListener(this.handleNetworkChange);
+    this._unsubscribeNetInfo = NetInfo.addEventListener(this._handleNetworkChange);
 
     // Check initial network state
     const state = await NetInfo.fetch();
-    this.handleNetworkChange(state);
+    this._handleNetworkChange(state);
 
     logger.info(LOG_MESSAGES.OFFLINE.INITIALIZED, {
-      queueSize: this.queue.length,
-      isOnline: this.isOnline,
+      queueSize: this._queue.length,
+      isOnline: this._isOnline,
     });
   }
 
   /**
    * Handles network state changes
    */
-  private handleNetworkChange = (state: NetInfoState): void => {
-    const wasOnline = this.isOnline;
-    this.isOnline = state.isConnected ?? false;
+  // eslint-disable-next-line @typescript-eslint/typedef -- Arrow function has inline return type
+  private _handleNetworkChange = (state: NetInfoState): void => {
+    const wasOnline = this._isOnline;
+    this._isOnline = state.isConnected ?? false;
 
     const status: NetworkStatus = state.isConnected
       ? NETWORK_STATUS.ONLINE
@@ -117,10 +121,10 @@ class OfflineService {
     );
 
     // Notify listeners
-    this.notifyListeners(status);
+    this._notifyListeners(status);
 
     // Attempt sync when coming online
-    if (!wasOnline && this.isOnline && this.queue.length > 0) {
+    if (!wasOnline && this._isOnline && this._queue.length > 0) {
       logger.info(LOG_MESSAGES.OFFLINE.BACK_ONLINE);
       this.syncQueue();
     }
@@ -130,20 +134,20 @@ class OfflineService {
    * Adds a request to the offline queue
    */
   async enqueue(request: Omit<QueuedRequest, 'id' | 'timestamp' | 'retryCount'>): Promise<void> {
-    if (this.queue.length >= this.MAX_QUEUE_SIZE) {
+    if (this._queue.length >= this._maxQueueSize) {
       logger.warn(LOG_MESSAGES.OFFLINE.QUEUE_FULL);
-      this.queue.shift();
+      this._queue.shift();
     }
 
     const queuedRequest: QueuedRequest = {
       ...request,
-      id: this.generateId(),
+      id: this._generateId(),
       timestamp: Date.now(),
       retryCount: 0,
     };
 
-    this.queue.push(queuedRequest);
-    await this.saveQueue();
+    this._queue.push(queuedRequest);
+    await this._saveQueue();
 
     logger.debug(LOG_MESSAGES.OFFLINE.REQUEST_QUEUED, {
       id: queuedRequest.id,
@@ -152,7 +156,7 @@ class OfflineService {
     });
 
     // Try to sync if online
-    if (this.isOnline && !this.isSyncing) {
+    if (this._isOnline && !this._isSyncing) {
       this.syncQueue();
     }
   }
@@ -161,22 +165,23 @@ class OfflineService {
    * Syncs the offline queue
    */
   async syncQueue(): Promise<void> {
-    if (this.isSyncing || !this.isOnline || this.queue.length === 0) {
+    if (this._isSyncing || !this._isOnline || this._queue.length === 0) {
       return;
     }
 
-    this.isSyncing = true;
-    logger.info(LOG_MESSAGES.OFFLINE.SYNC_STARTED, { queueSize: this.queue.length });
+    this._isSyncing = true;
+    logger.info(LOG_MESSAGES.OFFLINE.SYNC_STARTED, { queueSize: this._queue.length });
 
-    const requestsToSync = [...this.queue];
+    const requestsToSync = [...this._queue];
     const failedRequests: QueuedRequest[] = [];
 
     for (const request of requestsToSync) {
       try {
-        await this.executeRequest(request);
+        // eslint-disable-next-line no-await-in-loop -- Sequential request processing to maintain order and handle failures individually
+        await this._executeRequest(request);
 
         // Remove from queue on success
-        this.queue = this.queue.filter((r) => r.id !== request.id);
+        this._queue = this._queue.filter((r) => r.id !== request.id);
 
         logger.debug(LOG_MESSAGES.OFFLINE.REQUEST_SYNCED, { id: request.id });
       } catch (error) {
@@ -196,12 +201,12 @@ class OfflineService {
     }
 
     // Update queue with failed requests
-    this.queue = failedRequests;
-    await this.saveQueue();
+    this._queue = failedRequests;
+    await this._saveQueue();
 
-    this.isSyncing = false;
+    this._isSyncing = false;
     logger.info(LOG_MESSAGES.OFFLINE.SYNC_COMPLETED, {
-      remaining: this.queue.length,
+      remaining: this._queue.length,
       failed: failedRequests.length,
     });
   }
@@ -209,7 +214,8 @@ class OfflineService {
   /**
    * Executes a queued request
    */
-  private async executeRequest(request: QueuedRequest): Promise<void> {
+  private async _executeRequest(request: QueuedRequest): Promise<void> {
+    /* eslint-disable @typescript-eslint/no-unsafe-assignment -- HEADER constants are properly typed strings */
     const response = await fetch(request.url, {
       method: request.method,
       headers: {
@@ -218,6 +224,7 @@ class OfflineService {
       },
       body: request.data ? JSON.stringify(request.data) : undefined,
     });
+    /* eslint-enable @typescript-eslint/no-unsafe-assignment */
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -236,26 +243,26 @@ class OfflineService {
    * Gets current network status
    */
   getNetworkStatus(): NetworkStatus {
-    return this.isOnline ? NETWORK_STATUS.ONLINE : NETWORK_STATUS.OFFLINE;
+    return this._isOnline ? NETWORK_STATUS.ONLINE : NETWORK_STATUS.OFFLINE;
   }
 
   /**
    * Subscribes to network status changes
    */
   subscribe(listener: (status: NetworkStatus) => void): () => void {
-    this.listeners.add(listener);
+    this._listeners.add(listener);
 
     // Return unsubscribe function
     return () => {
-      this.listeners.delete(listener);
+      this._listeners.delete(listener);
     };
   }
 
   /**
    * Notifies listeners of status change
    */
-  private notifyListeners(status: NetworkStatus): void {
-    this.listeners.forEach((listener) => {
+  private _notifyListeners(status: NetworkStatus): void {
+    this._listeners.forEach((listener) => {
       try {
         listener(status);
       } catch (error) {
@@ -269,11 +276,11 @@ class OfflineService {
    */
   getStats(): OfflineQueueStats {
     return {
-      totalQueued: this.queue.length,
-      pendingSync: this.queue.filter((r) => r.retryCount < r.maxRetries).length,
+      totalQueued: this._queue.length,
+      pendingSync: this._queue.filter((r) => r.retryCount < r.maxRetries).length,
       lastSyncAttempt:
-        this.queue.length > 0 ? Math.max(...this.queue.map((r) => r.timestamp)) : null,
-      isOnline: this.isOnline,
+        this._queue.length > 0 ? Math.max(...this._queue.map((r) => r.timestamp)) : null,
+      isOnline: this._isOnline,
     };
   }
 
@@ -281,17 +288,17 @@ class OfflineService {
    * Clears the offline queue
    */
   async clearQueue(): Promise<void> {
-    this.queue = [];
-    await this.saveQueue();
+    this._queue = [];
+    await this._saveQueue();
     logger.info(LOG_MESSAGES.OFFLINE.QUEUE_CLEARED);
   }
 
   /**
    * Saves queue to storage
    */
-  private async saveQueue(): Promise<void> {
+  private async _saveQueue(): Promise<void> {
     try {
-      await AsyncStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.queue));
+      await AsyncStorage.setItem(this._storageKey, JSON.stringify(this._queue));
     } catch (error) {
       logger.error(LOG_MESSAGES.OFFLINE.SAVE_FAILED, error as Error);
     }
@@ -300,23 +307,23 @@ class OfflineService {
   /**
    * Loads queue from storage
    */
-  private async loadQueue(): Promise<void> {
+  private async _loadQueue(): Promise<void> {
     try {
-      const stored = await AsyncStorage.getItem(this.STORAGE_KEY);
+      const stored = await AsyncStorage.getItem(this._storageKey);
       if (stored) {
-        this.queue = JSON.parse(stored);
-        logger.debug(LOG_MESSAGES.OFFLINE.QUEUE_LOADED, { size: this.queue.length });
+        this._queue = JSON.parse(stored) as QueuedRequest[];
+        logger.debug(LOG_MESSAGES.OFFLINE.QUEUE_LOADED, { size: this._queue.length });
       }
     } catch (error) {
       logger.error(LOG_MESSAGES.OFFLINE.LOAD_FAILED, error as Error);
-      this.queue = [];
+      this._queue = [];
     }
   }
 
   /**
    * Generates unique ID
    */
-  private generateId(): string {
+  private _generateId(): string {
     return `${Date.now()}-${Math.random().toString(ID_GENERATION.RADIX).substring(ID_GENERATION.SUBSTRING_START, ID_GENERATION.SUFFIX_LENGTH)}`;
   }
 
@@ -324,11 +331,11 @@ class OfflineService {
    * Cleanup
    */
   destroy(): void {
-    if (this.unsubscribeNetInfo) {
-      this.unsubscribeNetInfo();
-      this.unsubscribeNetInfo = null;
+    if (this._unsubscribeNetInfo) {
+      this._unsubscribeNetInfo();
+      this._unsubscribeNetInfo = null;
     }
-    this.listeners.clear();
+    this._listeners.clear();
   }
 }
 

@@ -4,35 +4,40 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { logger } from '../../shared/utils/logger';
-import { CACHE } from '../../shared/constants/timing';
-import { TIME_UNIT, OPACITY_VALUE, ID_GENERATION, LIST_LIMITS } from '../../shared/constants/numbers';
 import { LOG_MESSAGES, STORAGE_KEYS, TYPEOF } from '../../shared/constants';
+import {
+  TIME_UNIT,
+  OPACITY_VALUE,
+  ID_GENERATION,
+  LIST_LIMITS,
+} from '../../shared/constants/numbers';
+import { CACHE } from '../../shared/constants/timing';
+import { logger } from '../../shared/utils/logger';
 
 // ============================================================================
 // Types
 // ============================================================================
 
-interface IdempotencyRecord<T = unknown> {
+type IdempotencyRecord<T = unknown> = {
   key: string;
   result: T;
   timestamp: number;
   expiresAt: number;
-}
+};
 
 // ============================================================================
 // Idempotency Service
 // ============================================================================
 
 class IdempotencyService {
-  private memoryCache = new Map<string, IdempotencyRecord>();
-  private readonly STORAGE_KEY_PREFIX = STORAGE_KEYS.IDEMPOTENCY.PREFIX;
-  private readonly DEFAULT_TTL = TIME_UNIT.SECONDS_PER_HOUR; // 1 hour in seconds
-  private readonly MAX_MEMORY_CACHE_SIZE = LIST_LIMITS.MAX_CACHE;
-  private cleanupInterval: NodeJS.Timeout | null = null;
+  private _memoryCache: Map<string, IdempotencyRecord> = new Map<string, IdempotencyRecord>();
+  private readonly _storageKeyPrefix: string = STORAGE_KEYS.IDEMPOTENCY.PREFIX;
+  private readonly _defaultTtl: number = TIME_UNIT.SECONDS_PER_HOUR as number; // 1 hour in seconds
+  private readonly _maxMemoryCacheSize: number = LIST_LIMITS.MAX_CACHE;
+  private _cleanupInterval: NodeJS.Timeout | null = null;
 
   constructor() {
-    this.startCleanupInterval();
+    this._startCleanupInterval();
   }
 
   /**
@@ -44,7 +49,7 @@ class IdempotencyService {
   async execute<T>(
     idempotencyKey: string,
     operation: () => Promise<T>,
-    ttlSeconds: number = this.DEFAULT_TTL
+    ttlSeconds: number = this._defaultTtl
   ): Promise<T> {
     // Validate key
     if (!idempotencyKey || typeof idempotencyKey !== TYPEOF.STRING) {
@@ -52,7 +57,7 @@ class IdempotencyService {
     }
 
     // Check memory cache first
-    const cachedRecord = await this.get<T>(idempotencyKey);
+    const cachedRecord = await this._get<T>(idempotencyKey);
     if (cachedRecord) {
       logger.debug(LOG_MESSAGES.IDEMPOTENCY.CACHED_RESULT(idempotencyKey));
       return cachedRecord.result;
@@ -65,7 +70,7 @@ class IdempotencyService {
       const result = await operation();
 
       // Store result
-      await this.set(idempotencyKey, result, ttlSeconds);
+      await this._set(idempotencyKey, result, ttlSeconds);
 
       return result;
     } catch (error) {
@@ -77,7 +82,7 @@ class IdempotencyService {
   /**
    * Stores a result with idempotency key
    */
-  private async set<T>(key: string, result: T, ttlSeconds: number): Promise<void> {
+  private async _set<T>(key: string, result: T, ttlSeconds: number): Promise<void> {
     const now = Date.now();
     const expiresAt = now + ttlSeconds * TIME_UNIT.MS_PER_SECOND;
 
@@ -89,16 +94,16 @@ class IdempotencyService {
     };
 
     // Store in memory cache
-    this.memoryCache.set(key, record);
+    this._memoryCache.set(key, record);
 
     // Limit memory cache size
-    if (this.memoryCache.size > this.MAX_MEMORY_CACHE_SIZE) {
-      this.evictOldest();
+    if (this._memoryCache.size > this._maxMemoryCacheSize) {
+      this._evictOldest();
     }
 
     // Store in persistent storage
     try {
-      await AsyncStorage.setItem(this.getStorageKey(key), JSON.stringify(record));
+      await AsyncStorage.setItem(this._getStorageKey(key), JSON.stringify(record));
     } catch (error) {
       logger.warn(LOG_MESSAGES.IDEMPOTENCY.STORE_FAILED, error as Error);
       // Continue anyway - memory cache will work
@@ -108,34 +113,32 @@ class IdempotencyService {
   /**
    * Retrieves a cached result
    */
-  private async get<T>(key: string): Promise<IdempotencyRecord<T> | null> {
+  private async _get<T>(key: string): Promise<IdempotencyRecord<T> | null> {
     const now = Date.now();
 
     // Check memory cache first
-    const memoryRecord = this.memoryCache.get(key);
+    const memoryRecord = this._memoryCache.get(key);
     if (memoryRecord) {
       if (memoryRecord.expiresAt > now) {
         return memoryRecord as IdempotencyRecord<T>;
-      } else {
-        // Expired - remove it
-        this.memoryCache.delete(key);
       }
+      // Expired - remove it
+      this._memoryCache.delete(key);
     }
 
     // Check persistent storage
     try {
-      const stored = await AsyncStorage.getItem(this.getStorageKey(key));
+      const stored = await AsyncStorage.getItem(this._getStorageKey(key));
       if (stored) {
         const record = JSON.parse(stored) as IdempotencyRecord<T>;
 
         if (record.expiresAt > now) {
           // Still valid - add to memory cache
-          this.memoryCache.set(key, record);
+          this._memoryCache.set(key, record);
           return record;
-        } else {
-          // Expired - remove it
-          await AsyncStorage.removeItem(this.getStorageKey(key));
         }
+        // Expired - remove it
+        await AsyncStorage.removeItem(this._getStorageKey(key));
       }
     } catch (error) {
       logger.warn(LOG_MESSAGES.IDEMPOTENCY.RETRIEVE_FAILED, error as Error);
@@ -148,7 +151,7 @@ class IdempotencyService {
    * Checks if a key exists (without returning the result)
    */
   async has(key: string): Promise<boolean> {
-    const record = await this.get(key);
+    const record = await this._get(key);
     return record !== null;
   }
 
@@ -156,10 +159,10 @@ class IdempotencyService {
    * Invalidates an idempotency key
    */
   async invalidate(key: string): Promise<void> {
-    this.memoryCache.delete(key);
+    this._memoryCache.delete(key);
 
     try {
-      await AsyncStorage.removeItem(this.getStorageKey(key));
+      await AsyncStorage.removeItem(this._getStorageKey(key));
     } catch (error) {
       logger.warn(LOG_MESSAGES.IDEMPOTENCY.REMOVE_FAILED, error as Error);
     }
@@ -169,11 +172,11 @@ class IdempotencyService {
    * Clears all idempotency records
    */
   async clear(): Promise<void> {
-    this.memoryCache.clear();
+    this._memoryCache.clear();
 
     try {
       const keys = await AsyncStorage.getAllKeys();
-      const idempotencyKeys = keys.filter((k) => k.startsWith(this.STORAGE_KEY_PREFIX));
+      const idempotencyKeys = keys.filter((k) => k.startsWith(this._storageKeyPrefix));
       await AsyncStorage.multiRemove(idempotencyKeys);
     } catch (error) {
       logger.warn(LOG_MESSAGES.IDEMPOTENCY.CLEAR_FAILED, error as Error);
@@ -183,16 +186,16 @@ class IdempotencyService {
   /**
    * Evicts oldest entries from memory cache
    */
-  private evictOldest(): void {
-    const entries = Array.from(this.memoryCache.entries());
+  private _evictOldest(): void {
+    const entries = Array.from(this._memoryCache.entries());
 
     // Sort by timestamp (oldest first)
     entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
 
     // Remove oldest 10%
-    const toRemove = Math.floor(this.MAX_MEMORY_CACHE_SIZE * OPACITY_VALUE.SUBTLE);
+    const toRemove = Math.floor(this._maxMemoryCacheSize * OPACITY_VALUE.SUBTLE);
     for (let i = 0; i < toRemove; i++) {
-      this.memoryCache.delete(entries[i][0]);
+      this._memoryCache.delete(entries[i][0]);
     }
 
     logger.debug(LOG_MESSAGES.IDEMPOTENCY.EVICTED(toRemove));
@@ -201,24 +204,24 @@ class IdempotencyService {
   /**
    * Cleanup expired entries periodically
    */
-  private startCleanupInterval(): void {
+  private _startCleanupInterval(): void {
     // Run cleanup every 5 minutes
-    this.cleanupInterval = setInterval(() => {
-      this.cleanup();
+    this._cleanupInterval = setInterval(() => {
+      this._cleanup();
     }, CACHE.MEDIUM);
   }
 
   /**
    * Removes expired entries
    */
-  private async cleanup(): Promise<void> {
+  private async _cleanup(): Promise<void> {
     const now = Date.now();
     let removedCount = 0;
 
     // Clean memory cache
-    for (const [key, record] of this.memoryCache.entries()) {
+    for (const [key, record] of this._memoryCache.entries()) {
       if (record.expiresAt <= now) {
-        this.memoryCache.delete(key);
+        this._memoryCache.delete(key);
         removedCount++;
       }
     }
@@ -226,14 +229,13 @@ class IdempotencyService {
     // Clean persistent storage
     try {
       const keys = await AsyncStorage.getAllKeys();
-      const idempotencyKeys = keys.filter((k) => k.startsWith(this.STORAGE_KEY_PREFIX));
+      const idempotencyKeys = keys.filter((k) => k.startsWith(this._storageKeyPrefix));
 
-      for (const storageKey of idempotencyKeys) {
-        const removed = await this.cleanExpiredStorageKey(storageKey, now);
-        if (removed) {
-          removedCount++;
-        }
-      }
+      // Using Promise.all for parallel cleanup instead of sequential processing
+      const results = await Promise.all(
+        idempotencyKeys.map((storageKey) => this._cleanExpiredStorageKey(storageKey, now))
+      );
+      removedCount += results.filter(Boolean).length;
     } catch (error) {
       logger.warn(LOG_MESSAGES.IDEMPOTENCY.CLEANUP_FAILED, error as Error);
     }
@@ -246,7 +248,7 @@ class IdempotencyService {
   /**
    * Cleans an expired storage key if applicable
    */
-  private async cleanExpiredStorageKey(storageKey: string, now: number): Promise<boolean> {
+  private async _cleanExpiredStorageKey(storageKey: string, now: number): Promise<boolean> {
     try {
       const stored = await AsyncStorage.getItem(storageKey);
       if (!stored) {
@@ -269,8 +271,8 @@ class IdempotencyService {
   /**
    * Gets storage key for AsyncStorage
    */
-  private getStorageKey(key: string): string {
-    return `${this.STORAGE_KEY_PREFIX}${key}`;
+  private _getStorageKey(key: string): string {
+    return `${this._storageKeyPrefix}${key}`;
   }
 
   /**
@@ -281,8 +283,8 @@ class IdempotencyService {
     maxMemoryCacheSize: number;
   } {
     return {
-      memoryCacheSize: this.memoryCache.size,
-      maxMemoryCacheSize: this.MAX_MEMORY_CACHE_SIZE,
+      memoryCacheSize: this._memoryCache.size,
+      maxMemoryCacheSize: this._maxMemoryCacheSize,
     };
   }
 
@@ -290,9 +292,9 @@ class IdempotencyService {
    * Stops the cleanup interval
    */
   destroy(): void {
-    if (this.cleanupInterval) {
-      clearInterval(this.cleanupInterval);
-      this.cleanupInterval = null;
+    if (this._cleanupInterval) {
+      clearInterval(this._cleanupInterval);
+      this._cleanupInterval = null;
     }
   }
 }
