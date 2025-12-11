@@ -1,62 +1,66 @@
+/* eslint-disable max-lines -- Payment service requires comprehensive fee management logic */
 /**
  * Payment Service
  * Handles payment and fee management with mock/backend toggle
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { apiService } from '../http/api';
-import { environment } from '../config/environment';
+import { storageKeys } from '../../shared/config/storage';
+import { LOG_MESSAGES, API_ENDPOINTS } from '../../shared/constants';
+import { LANGUAGE } from '../../shared/constants/app';
+import { LOCALE } from '../../shared/constants/locale';
+import { MATH, ID_GENERATION, MS } from '../../shared/constants/numbers';
+import { ID_PREFIX, EMPTY_VALUE } from '../../shared/constants/ui';
+import { NUMERIC } from '../../shared/constants/validation';
+import i18n, { t } from '../../shared/i18n';
 import { logger } from '../../shared/utils/logger';
 import {
-  MemberPayment,
-  CustomCharge,
-  MemberBalance,
-  ClubFeeSettings,
   PaymentStatus,
   ChargeType,
-  User,
   ApprovalStatus,
+  type ClubFeeSettings,
+  type CustomCharge,
+  type MemberBalance,
+  type MemberPayment,
+  type User,
 } from '../../types';
-import { LOG_MESSAGES, API_ENDPOINTS } from '../../shared/constants';
-import { storageKeys } from '../../shared/config/storage';
-import { LOCALE, LANGUAGE, ID_PREFIX, EMPTY_VALUE } from '../../shared/constants/ui';
-import { MATH, ID_GENERATION, MS } from '../../shared/constants/numbers';
-import { NUMERIC } from '../../shared/constants/validation';
-import i18n from '../../shared/i18n';
+import { environment } from '../config/environment';
+import { apiService } from '../http/api';
 
 // Payment service constants
-const PAYMENT_DELAY_MS = MS.FIVE; // Delay for unique ID generation
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- MS constant is properly typed as number
+const PAYMENT_DELAY_MS: number = MS.FIVE; // Delay for unique ID generation
 
-interface GenerateFeesRequest {
+type GenerateFeesRequest = {
   clubId: string;
   year: number;
-}
+};
 
-interface CreateCustomChargeRequest {
+type CreateCustomChargeRequest = {
   clubId: string;
   description: string;
   amount: number;
   dueDate: string;
   appliedToUserIds: string[];
-}
+};
 
 class PaymentService {
-  private useMockData = environment.mock.useMockApi;
+  private _useMockData: boolean = environment.mock.useMockApi;
   // ============================================
   // Storage Management
   // ============================================
 
-  private async getPayments(): Promise<MemberPayment[]> {
+  private async _getPayments(): Promise<MemberPayment[]> {
     try {
       const data = await AsyncStorage.getItem(storageKeys.PAYMENTS);
-      return data ? JSON.parse(data) : [];
+      return data ? (JSON.parse(data) as MemberPayment[]) : [];
     } catch (error) {
       logger.error(LOG_MESSAGES.PAYMENT.ERROR_LOADING_PAYMENTS, error as Error);
       return [];
     }
   }
 
-  private async savePayments(payments: MemberPayment[]): Promise<void> {
+  private async _savePayments(payments: MemberPayment[]): Promise<void> {
     try {
       await AsyncStorage.setItem(storageKeys.PAYMENTS, JSON.stringify(payments));
     } catch (error) {
@@ -65,17 +69,17 @@ class PaymentService {
     }
   }
 
-  private async getCustomCharges(): Promise<CustomCharge[]> {
+  private async _getCustomCharges(): Promise<CustomCharge[]> {
     try {
       const data = await AsyncStorage.getItem(storageKeys.CUSTOM_CHARGES);
-      return data ? JSON.parse(data) : [];
+      return data ? (JSON.parse(data) as CustomCharge[]) : [];
     } catch (error) {
       logger.error(LOG_MESSAGES.PAYMENT.ERROR_LOADING_CHARGES, error as Error);
       return [];
     }
   }
 
-  private async saveCustomCharges(charges: CustomCharge[]): Promise<void> {
+  private async _saveCustomCharges(charges: CustomCharge[]): Promise<void> {
     try {
       await AsyncStorage.setItem(storageKeys.CUSTOM_CHARGES, JSON.stringify(charges));
     } catch (error) {
@@ -100,13 +104,13 @@ class PaymentService {
       memberCount: members.length,
     });
 
-    if (this.useMockData) {
-      return this.mockGenerateMonthlyFees(clubId, members, feeSettings, year);
+    if (this._useMockData) {
+      return this._mockGenerateMonthlyFees(clubId, members, feeSettings, year);
     }
 
     try {
       const request: GenerateFeesRequest = { clubId, year };
-      await apiService.post<void>(API_ENDPOINTS.PAYMENTS.GENERATE, request);
+      await apiService.post<undefined>(API_ENDPOINTS.PAYMENTS.GENERATE, request);
       logger.info(LOG_MESSAGES.PAYMENT.FEES_GENERATED, { clubId, year });
     } catch (error) {
       logger.error(LOG_MESSAGES.PAYMENT.GENERATE_FEES_FAILED, error as Error, { clubId, year });
@@ -117,13 +121,13 @@ class PaymentService {
   /**
    * Mock generate monthly fees implementation
    */
-  private async mockGenerateMonthlyFees(
+  private async _mockGenerateMonthlyFees(
     clubId: string,
     members: User[],
     feeSettings: ClubFeeSettings,
     year: number
   ): Promise<void> {
-    const payments = await this.getPayments();
+    const payments = await this._getPayments();
     const now = new Date().toISOString();
 
     // Filter only approved and active members
@@ -168,7 +172,7 @@ class PaymentService {
       }
     }
 
-    await this.savePayments(payments);
+    await this._savePayments(payments);
     logger.info(LOG_MESSAGES.PAYMENT.MOCK_FEES_GENERATED, {
       clubId,
       year,
@@ -179,8 +183,8 @@ class PaymentService {
   async getClubPayments(clubId: string, year?: number): Promise<MemberPayment[]> {
     logger.debug(LOG_MESSAGES.PAYMENT.FETCHING_CLUB_PAYMENTS, { clubId, year });
 
-    if (this.useMockData) {
-      return this.mockGetClubPayments(clubId, year);
+    if (this._useMockData) {
+      return this._mockGetClubPayments(clubId, year);
     }
 
     try {
@@ -205,8 +209,8 @@ class PaymentService {
   /**
    * Mock get club payments implementation
    */
-  private async mockGetClubPayments(clubId: string, year?: number): Promise<MemberPayment[]> {
-    const payments = await this.getPayments();
+  private async _mockGetClubPayments(clubId: string, year?: number): Promise<MemberPayment[]> {
+    const payments = await this._getPayments();
     const filtered = payments.filter((p) => {
       if (p.clubId !== clubId) {
         return false;
@@ -228,8 +232,8 @@ class PaymentService {
   async getMemberPayments(userId: string, clubId: string): Promise<MemberPayment[]> {
     logger.debug(LOG_MESSAGES.PAYMENT.FETCHING_MEMBER_PAYMENTS, { userId, clubId });
 
-    if (this.useMockData) {
-      return this.mockGetMemberPayments(userId, clubId);
+    if (this._useMockData) {
+      return this._mockGetMemberPayments(userId, clubId);
     }
 
     try {
@@ -254,8 +258,8 @@ class PaymentService {
   /**
    * Mock get member payments implementation
    */
-  private async mockGetMemberPayments(userId: string, clubId: string): Promise<MemberPayment[]> {
-    const payments = await this.getPayments();
+  private async _mockGetMemberPayments(userId: string, clubId: string): Promise<MemberPayment[]> {
+    const payments = await this._getPayments();
     const filtered = payments.filter((p) => p.userId === userId && p.clubId === clubId);
 
     logger.debug(LOG_MESSAGES.PAYMENT.MOCK_MEMBER_PAYMENTS_FETCHED, {
@@ -274,12 +278,12 @@ class PaymentService {
   ): Promise<void> {
     logger.info(LOG_MESSAGES.PAYMENT.UPDATING_STATUS, { paymentId, status });
 
-    if (this.useMockData) {
-      return this.mockUpdatePaymentStatus(paymentId, status, paidDate, notes);
+    if (this._useMockData) {
+      return this._mockUpdatePaymentStatus(paymentId, status, paidDate, notes);
     }
 
     try {
-      await apiService.patch<void>(API_ENDPOINTS.PAYMENTS.BY_ID(paymentId), {
+      await apiService.patch<undefined>(API_ENDPOINTS.PAYMENTS.BY_ID(paymentId), {
         status,
         paidDate,
         notes,
@@ -297,13 +301,13 @@ class PaymentService {
   /**
    * Mock update payment status implementation
    */
-  private async mockUpdatePaymentStatus(
+  private async _mockUpdatePaymentStatus(
     paymentId: string,
     status: PaymentStatus,
     paidDate?: string,
     notes?: string
   ): Promise<void> {
-    const payments = await this.getPayments();
+    const payments = await this._getPayments();
     const payment = payments.find((p) => p.id === paymentId);
 
     if (payment) {
@@ -316,7 +320,7 @@ class PaymentService {
         payment.notes = notes;
       }
 
-      await this.savePayments(payments);
+      await this._savePayments(payments);
       logger.info(LOG_MESSAGES.PAYMENT.MOCK_STATUS_UPDATED, { paymentId, status });
     } else {
       logger.warn(LOG_MESSAGES.PAYMENT.MOCK_PAYMENT_NOT_FOUND, { paymentId });
@@ -342,8 +346,8 @@ class PaymentService {
       userCount: appliedToUserIds.length,
     });
 
-    if (this.useMockData) {
-      return this.mockCreateCustomCharge(
+    if (this._useMockData) {
+      return this._mockCreateCustomCharge(
         clubId,
         description,
         amount,
@@ -376,7 +380,7 @@ class PaymentService {
   /**
    * Mock create custom charge implementation
    */
-  private async mockCreateCustomCharge(
+  private async _mockCreateCustomCharge(
     clubId: string,
     description: string,
     amount: number,
@@ -384,7 +388,7 @@ class PaymentService {
     appliedToUserIds: string[],
     createdBy: string
   ): Promise<CustomCharge> {
-    const charges = await this.getCustomCharges();
+    const charges = await this._getCustomCharges();
     const now = new Date().toISOString();
 
     const newCharge: CustomCharge = {
@@ -402,10 +406,10 @@ class PaymentService {
     };
 
     charges.push(newCharge);
-    await this.saveCustomCharges(charges);
+    await this._saveCustomCharges(charges);
 
     // Create payment records for this charge
-    await this.applyCustomChargeToMembers(newCharge, appliedToUserIds);
+    await this._applyCustomChargeToMembers(newCharge, appliedToUserIds);
 
     logger.info(LOG_MESSAGES.PAYMENT.MOCK_CUSTOM_CHARGE_CREATED, {
       chargeId: newCharge.id,
@@ -414,15 +418,20 @@ class PaymentService {
     return newCharge;
   }
 
-  private async applyCustomChargeToMembers(charge: CustomCharge, userIds: string[]): Promise<void> {
-    const payments = await this.getPayments();
+  private async _applyCustomChargeToMembers(
+    charge: CustomCharge,
+    userIds: string[]
+  ): Promise<void> {
+    const payments = await this._getPayments();
     const now = new Date().toISOString();
     const dueDate = new Date(charge.dueDate);
 
     // Create payment record for each selected user
     for (const userId of userIds) {
       const newPayment: MemberPayment = {
-        id: `${ID_PREFIX.PAYMENT}_${charge.id}_${userId}_${Date.now()}_${Math.random().toString(MATH.THIRTY_SIX).substr(MATH.HALF, ID_GENERATION.RANDOM_SUFFIX_LENGTH)}`,
+        id: `${ID_PREFIX.PAYMENT}_${charge.id}_${userId}_${Date.now()}_${Math.random()
+          .toString(MATH.THIRTY_SIX as number)
+          .substr(MATH.HALF as number, ID_GENERATION.RANDOM_SUFFIX_LENGTH as number)}`,
         userId,
         clubId: charge.clubId,
         year: dueDate.getFullYear(),
@@ -438,17 +447,20 @@ class PaymentService {
       payments.push(newPayment);
 
       // Small delay to ensure unique IDs
-      await new Promise((resolve) => setTimeout(resolve, PAYMENT_DELAY_MS));
+      // eslint-disable-next-line no-await-in-loop -- Intentional delay to ensure unique timestamp-based IDs
+      await new Promise((resolve) => {
+        setTimeout(resolve, PAYMENT_DELAY_MS);
+      });
     }
 
-    await this.savePayments(payments);
+    await this._savePayments(payments);
   }
 
   async getClubCustomCharges(clubId: string): Promise<CustomCharge[]> {
     logger.debug(LOG_MESSAGES.PAYMENT.FETCHING_CUSTOM_CHARGES, { clubId });
 
-    if (this.useMockData) {
-      return this.mockGetClubCustomCharges(clubId);
+    if (this._useMockData) {
+      return this._mockGetClubCustomCharges(clubId);
     }
 
     try {
@@ -464,8 +476,8 @@ class PaymentService {
   /**
    * Mock get club custom charges implementation
    */
-  private async mockGetClubCustomCharges(clubId: string): Promise<CustomCharge[]> {
-    const charges = await this.getCustomCharges();
+  private async _mockGetClubCustomCharges(clubId: string): Promise<CustomCharge[]> {
+    const charges = await this._getCustomCharges();
     const filtered = charges.filter((c) => c.clubId === clubId && c.isActive);
 
     logger.debug(LOG_MESSAGES.PAYMENT.MOCK_CUSTOM_CHARGES_FETCHED, {
@@ -478,12 +490,12 @@ class PaymentService {
   async deleteCustomCharge(chargeId: string): Promise<void> {
     logger.info(LOG_MESSAGES.PAYMENT.DELETING_CUSTOM_CHARGE, { chargeId });
 
-    if (this.useMockData) {
-      return this.mockDeleteCustomCharge(chargeId);
+    if (this._useMockData) {
+      return this._mockDeleteCustomCharge(chargeId);
     }
 
     try {
-      await apiService.delete<void>(API_ENDPOINTS.CHARGES.BY_ID(chargeId));
+      await apiService.delete<undefined>(API_ENDPOINTS.CHARGES.BY_ID(chargeId));
       logger.info(LOG_MESSAGES.PAYMENT.CUSTOM_CHARGE_DELETED, { chargeId });
     } catch (error) {
       logger.error(LOG_MESSAGES.PAYMENT.DELETE_CUSTOM_CHARGE_FAILED, error as Error, { chargeId });
@@ -494,13 +506,13 @@ class PaymentService {
   /**
    * Mock delete custom charge implementation
    */
-  private async mockDeleteCustomCharge(chargeId: string): Promise<void> {
-    const charges = await this.getCustomCharges();
+  private async _mockDeleteCustomCharge(chargeId: string): Promise<void> {
+    const charges = await this._getCustomCharges();
     const index = charges.findIndex((c) => c.id === chargeId);
 
     if (index !== -1) {
       charges[index].isActive = false;
-      await this.saveCustomCharges(charges);
+      await this._saveCustomCharges(charges);
       logger.info(LOG_MESSAGES.PAYMENT.MOCK_CUSTOM_CHARGE_DELETED, { chargeId });
     } else {
       logger.warn(LOG_MESSAGES.PAYMENT.MOCK_CUSTOM_CHARGE_NOT_FOUND, { chargeId });
@@ -514,8 +526,8 @@ class PaymentService {
   async getMemberBalance(userId: string, clubId: string): Promise<MemberBalance> {
     logger.debug(LOG_MESSAGES.PAYMENT.FETCHING_BALANCE, { userId, clubId });
 
-    if (this.useMockData) {
-      return this.mockGetMemberBalance(userId, clubId);
+    if (this._useMockData) {
+      return this._mockGetMemberBalance(userId, clubId);
     }
 
     try {
@@ -537,7 +549,7 @@ class PaymentService {
   /**
    * Mock get member balance implementation
    */
-  private async mockGetMemberBalance(userId: string, clubId: string): Promise<MemberBalance> {
+  private async _mockGetMemberBalance(userId: string, clubId: string): Promise<MemberBalance> {
     const payments = await this.getMemberPayments(userId, clubId);
     const now = new Date();
 
@@ -587,13 +599,10 @@ class PaymentService {
   }
 
   async getAllMembersBalances(clubId: string, memberIds: string[]): Promise<MemberBalance[]> {
-    const balances: MemberBalance[] = [];
-
-    for (const memberId of memberIds) {
-      const balance = await this.getMemberBalance(memberId, clubId);
-      balances.push(balance);
-    }
-
+    // Use Promise.all for parallel execution instead of sequential
+    const balances = await Promise.all(
+      memberIds.map((memberId) => this.getMemberBalance(memberId, clubId))
+    );
     return balances;
   }
 
@@ -602,7 +611,7 @@ class PaymentService {
   // ============================================
 
   async updateOverduePayments(): Promise<void> {
-    const payments = await this.getPayments();
+    const payments = await this._getPayments();
     const now = new Date();
     let updated = false;
 
@@ -618,7 +627,7 @@ class PaymentService {
     }
 
     if (updated) {
-      await this.savePayments(payments);
+      await this._savePayments(payments);
     }
   }
 
@@ -627,8 +636,8 @@ class PaymentService {
   // ============================================
 
   async getNotificationMessage(balance: MemberBalance, userName: string): Promise<string> {
-    const t = i18n.t.bind(i18n);
-    const locale = i18n.language === LANGUAGE.SPANISH ? LOCALE.SPANISH_MX : LOCALE.ENGLISH_US;
+    // Using imported t function
+    const locale = i18n.language === LANGUAGE.ES ? LOCALE.ES_ES : LOCALE.EN_US;
     const messages: string[] = [];
 
     messages.push(t('services.notification.paymentReminder.greetingSimple', { userName }));

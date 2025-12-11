@@ -3,12 +3,12 @@
  * Following OWASP CSRF Prevention Cheat Sheet
  */
 
+/* eslint-disable max-classes-per-file -- Related CSRF classes are co-located */
+
 import crypto from 'crypto';
 import { useState, useEffect, useCallback } from 'react';
-import { secureStorage } from './secureStorage';
 import { logger } from './logger';
-import { CACHE } from '../constants/timing';
-import { MATH, CRYPTO } from '../constants/numbers';
+import { secureStorage } from './secureStorage';
 import {
   LOG_MESSAGES,
   STORAGE_KEYS,
@@ -17,6 +17,8 @@ import {
   STATE_CHANGING_METHODS_UPPER,
   HEADER,
 } from '../constants';
+import { MATH, CRYPTO } from '../constants/numbers';
+import { CACHE } from '../constants/timing';
 
 // ============================================================================
 // React Hook for CSRF Token
@@ -29,12 +31,12 @@ import {
 /**
  * CSRF token configuration
  */
-interface CSRFConfig {
+type CSRFConfig = {
   /** Token expiration time in milliseconds */
   expirationTime: number;
   /** Token refresh threshold in milliseconds */
   refreshThreshold: number;
-}
+};
 
 // ============================================================================
 // CSRF Token Service
@@ -45,13 +47,15 @@ interface CSRFConfig {
  * Manages CSRF tokens for state-changing operations
  */
 export class CSRFTokenService {
-  private static readonly TOKEN_KEY = STORAGE_KEYS.CSRF.TOKEN;
-  private static readonly TOKEN_TIMESTAMP_KEY = STORAGE_KEYS.CSRF.TOKEN_TIMESTAMP;
+  private static readonly _tokenKey: string = STORAGE_KEYS.CSRF.TOKEN;
+  private static readonly _tokenTimestampKey: string = STORAGE_KEYS.CSRF.TOKEN_TIMESTAMP;
 
-  private static readonly config: CSRFConfig = {
+  /* eslint-disable @typescript-eslint/no-unsafe-assignment -- CACHE constants are properly typed numbers */
+  private static readonly _config: CSRFConfig = {
     expirationTime: CACHE.VERY_LONG, // 1 hour
     refreshThreshold: CACHE.MEDIUM, // 5 minutes
   };
+  /* eslint-enable @typescript-eslint/no-unsafe-assignment */
 
   /**
    * Generates a new CSRF token
@@ -69,8 +73,8 @@ export class CSRFTokenService {
     try {
       const timestamp = Date.now();
       await Promise.all([
-        secureStorage.setItem(this.TOKEN_KEY, token),
-        secureStorage.setItem(this.TOKEN_TIMESTAMP_KEY, timestamp.toString()),
+        secureStorage.setItem(this._tokenKey, token),
+        secureStorage.setItem(this._tokenTimestampKey, timestamp.toString()),
       ]);
       logger.debug(LOG_MESSAGES.SECURITY.CSRF.TOKEN_STORED);
     } catch (error) {
@@ -84,8 +88,8 @@ export class CSRFTokenService {
    */
   static async getToken(): Promise<string | null> {
     try {
-      const token = await secureStorage.getItem(this.TOKEN_KEY);
-      const timestampStr = await secureStorage.getItem(this.TOKEN_TIMESTAMP_KEY);
+      const token = await secureStorage.getItem(this._tokenKey);
+      const timestampStr = await secureStorage.getItem(this._tokenTimestampKey);
 
       if (!token || !timestampStr) {
         return null;
@@ -95,7 +99,7 @@ export class CSRFTokenService {
       const now = Date.now();
 
       // Check if token is expired
-      if (now - timestamp > this.config.expirationTime) {
+      if (now - timestamp > this._config.expirationTime) {
         logger.debug(LOG_MESSAGES.SECURITY.CSRF.TOKEN_EXPIRED);
         await this.clearToken();
         return null;
@@ -119,12 +123,12 @@ export class CSRFTokenService {
       await this.storeToken(token);
     } else {
       // Check if token should be refreshed
-      const timestampStr = await secureStorage.getItem(this.TOKEN_TIMESTAMP_KEY);
+      const timestampStr = await secureStorage.getItem(this._tokenTimestampKey);
       if (timestampStr) {
         const timestamp = parseInt(timestampStr, MATH.DECIMAL_BASE);
         const age = Date.now() - timestamp;
 
-        if (age > this.config.expirationTime - this.config.refreshThreshold) {
+        if (age > this._config.expirationTime - this._config.refreshThreshold) {
           logger.debug(LOG_MESSAGES.SECURITY.CSRF.TOKEN_REFRESHING);
           token = this.generateToken();
           await this.storeToken(token);
@@ -147,7 +151,7 @@ export class CSRFTokenService {
     }
 
     // Use timing-safe comparison to prevent timing attacks
-    return this.timingSafeEqual(token, storedToken);
+    return this._timingSafeEqual(token, storedToken);
   }
 
   /**
@@ -156,8 +160,8 @@ export class CSRFTokenService {
   static async clearToken(): Promise<void> {
     try {
       await Promise.all([
-        secureStorage.removeItem(this.TOKEN_KEY),
-        secureStorage.removeItem(this.TOKEN_TIMESTAMP_KEY),
+        secureStorage.removeItem(this._tokenKey),
+        secureStorage.removeItem(this._tokenTimestampKey),
       ]);
       logger.debug(LOG_MESSAGES.SECURITY.CSRF.TOKEN_CLEARED);
     } catch (error) {
@@ -168,7 +172,7 @@ export class CSRFTokenService {
   /**
    * Timing-safe string comparison to prevent timing attacks
    */
-  private static timingSafeEqual(a: string, b: string): boolean {
+  private static _timingSafeEqual(a: string, b: string): boolean {
     if (a.length !== b.length) {
       return false;
     }
@@ -247,7 +251,7 @@ export function useCSRFToken(): {
  * - Backend validates both match
  */
 export class DoubleSubmitCookieService {
-  private static readonly COOKIE_NAME = CSRF_COOKIE_NAME;
+  private static readonly _cookieName: string = CSRF_COOKIE_NAME;
 
   /**
    * Sets CSRF token in cookie

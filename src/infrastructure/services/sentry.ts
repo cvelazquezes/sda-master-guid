@@ -4,9 +4,6 @@
  */
 
 import * as Sentry from '@sentry/react-native';
-import { environment, isDevelopment, isProduction } from '../config/environment';
-import { logger } from '../../shared/utils/logger';
-import { MS, OPACITY_VALUE } from '../../shared/constants/numbers';
 import packageJson from '../../../package.json';
 import {
   LOG_MESSAGES,
@@ -20,6 +17,12 @@ import {
   SENTRY_DIST,
   SENTRY_RELEASE_PREFIX,
 } from '../../shared/constants';
+import { MS, OPACITY_VALUE } from '../../shared/constants/numbers';
+import { logger } from '../../shared/utils/logger';
+import { environment } from '../config/environment';
+
+const { isDevelopment } = environment;
+const isProduction = !environment.isDevelopment;
 
 // Sentry configuration constants
 const SENTRY_CONFIG = {
@@ -31,6 +34,7 @@ const SENTRY_CONFIG = {
 // Sentry Initialization
 // ============================================================================
 
+// eslint-disable-next-line import/no-mutable-exports -- Initialization state needs to be mutable
 let isInitialized = false;
 
 /**
@@ -38,7 +42,9 @@ let isInitialized = false;
  */
 export function initializeSentry(): void {
   // Check if Sentry config exists in environment
-  const sentryConfig = (environment as Record<string, unknown>).sentry as { enabled?: boolean; dsn?: string } | undefined;
+  const sentryConfig = (environment as Record<string, unknown>).sentry as
+    | { enabled?: boolean; dsn?: string }
+    | undefined;
   if (!sentryConfig?.enabled || !sentryConfig?.dsn) {
     logger.info(LOG_MESSAGES.SENTRY.DISABLED);
     return;
@@ -55,7 +61,7 @@ export function initializeSentry(): void {
       environment: environment.name,
 
       // Performance Monitoring
-      tracesSampleRate: isProduction() ? SENTRY_CONFIG.PRODUCTION_SAMPLE_RATE : OPACITY_VALUE.FULL,
+      tracesSampleRate: isProduction ? SENTRY_CONFIG.PRODUCTION_SAMPLE_RATE : OPACITY_VALUE.FULL,
       enableTracing: true,
 
       // Release tracking
@@ -115,7 +121,7 @@ export function initializeSentry(): void {
       ],
 
       // Debug mode in development
-      debug: isDevelopment(),
+      debug: isDevelopment,
 
       // Attach stack traces
       attachStacktrace: true,
@@ -376,11 +382,11 @@ export function trackSecurityEvent(
   }
 
   // Log locally
-  logger.log(SENTRY_CATEGORY.SECURITY, event, metadata);
+  logger.info(`${SENTRY_CATEGORY.SECURITY}: ${event}`, metadata);
 }
 
 // ============================================================================
 // Exports
 // ============================================================================
 
-export { Sentry, isInitialized as isSentryInitialized, initializeSentry };
+export { Sentry, isInitialized as isSentryInitialized };

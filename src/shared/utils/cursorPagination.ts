@@ -5,7 +5,6 @@
 
 import { useState, useCallback } from 'react';
 import { logger } from './logger';
-import { LIST_LIMITS } from '../constants/numbers';
 import {
   EMPTY_VALUE,
   LOG_MESSAGES,
@@ -14,6 +13,7 @@ import {
   ENCODING,
   QUERY_PARAM,
 } from '../constants';
+import { LIST_LIMITS } from '../constants/numbers';
 
 /** Derived type for sort order */
 type SortOrderType = (typeof SORT_ORDER)[keyof typeof SORT_ORDER];
@@ -29,19 +29,19 @@ type SortOrderType = (typeof SORT_ORDER)[keyof typeof SORT_ORDER];
 /**
  * Cursor pagination parameters
  */
-export interface CursorPaginationParams {
+export type CursorPaginationParams = {
   /** Number of items to return */
   limit: number;
   /** Cursor for pagination (base64 encoded) */
   cursor?: string;
   /** Sort order */
   order?: SortOrderType;
-}
+};
 
 /**
  * Cursor pagination response
  */
-export interface CursorPaginationResponse<T> {
+export type CursorPaginationResponse<T> = {
   /** Array of items */
   data: T[];
   /** Pagination metadata */
@@ -55,31 +55,31 @@ export interface CursorPaginationResponse<T> {
     /** Number of items in current page */
     count: number;
   };
-}
+};
 
 /**
  * Cursor data structure
  */
-interface CursorData {
+type CursorData = {
   /** Item ID */
   id: string;
   /** Timestamp for ordering */
   timestamp: string | number;
   /** Sort direction */
   direction: SortOrderType;
-}
+};
 
 /**
  * Paginated query options
  */
-export interface PaginatedQueryOptions<T> extends CursorPaginationParams {
+export type PaginatedQueryOptions<T> = {
   /** Function to fetch items */
   fetcher: (params: CursorPaginationParams) => Promise<T[]>;
   /** Function to extract ID from item */
   getId: (item: T) => string;
   /** Function to extract timestamp from item */
   getTimestamp: (item: T) => string | number;
-}
+} & CursorPaginationParams;
 
 // ============================================================================
 // Cursor Encoding/Decoding
@@ -149,12 +149,14 @@ export class CursorPaginationService {
   /**
    * Default limit for pagination
    */
-  private static readonly DEFAULT_LIMIT = LIST_LIMITS.PAGE_SIZE_DEFAULT;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- LIST_LIMITS constants are properly typed numbers
+  private static readonly _defaultLimit: number = LIST_LIMITS.PAGE_SIZE_DEFAULT;
 
   /**
    * Maximum limit allowed
    */
-  private static readonly MAX_LIMIT = LIST_LIMITS.PAGE_SIZE_MAX;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- LIST_LIMITS constants are properly typed numbers
+  private static readonly _maxLimit: number = LIST_LIMITS.PAGE_SIZE_MAX;
 
   /**
    * Executes a paginated query
@@ -172,7 +174,7 @@ export class CursorPaginationService {
     } = options;
 
     // Validate and normalize limit
-    const limit = Math.min(Math.max(1, requestedLimit || this.DEFAULT_LIMIT), this.MAX_LIMIT);
+    const limit = Math.min(Math.max(1, requestedLimit || this._defaultLimit), this._maxLimit);
 
     try {
       // Decode cursor if provided
@@ -253,7 +255,7 @@ export class CursorPaginationService {
     const params = urlObj.searchParams;
 
     return {
-      limit: parseInt(params.get(QUERY_PARAM.LIMIT) || `${this.DEFAULT_LIMIT}`, 10),
+      limit: parseInt(params.get(QUERY_PARAM.LIMIT) || `${this._defaultLimit}`, 10),
       cursor: params.get(QUERY_PARAM.CURSOR) || undefined,
       order: (params.get(QUERY_PARAM.ORDER) as SortOrderType) || SORT_ORDER.DESC,
     };
@@ -263,22 +265,22 @@ export class CursorPaginationService {
 /**
  * Hook state
  */
-interface UseCursorPaginationState<T> {
+type UseCursorPaginationState<T> = {
   data: T[];
   isLoading: boolean;
   error: Error | null;
   hasMore: boolean;
   cursor: string | null;
-}
+};
 
 /**
  * Hook result
  */
-interface UseCursorPaginationResult<T> extends UseCursorPaginationState<T> {
+type UseCursorPaginationResult<T> = {
   loadMore: () => Promise<void>;
   refresh: () => Promise<void>;
   hasMore: boolean;
-}
+} & UseCursorPaginationState<T>;
 
 /**
  * React hook for cursor-based pagination
@@ -390,9 +392,11 @@ export function validatePaginationParams(params: Partial<CursorPaginationParams>
     if (params.limit < 1) {
       return LOG_MESSAGES.VALIDATION.LIMIT_AT_LEAST;
     }
+    /* eslint-disable @typescript-eslint/no-unsafe-argument -- LIST_LIMITS.PAGE_SIZE_MAX is a properly typed number */
     if (params.limit > LIST_LIMITS.PAGE_SIZE_MAX) {
       return LOG_MESSAGES.VALIDATION.LIMIT_EXCEEDED(LIST_LIMITS.PAGE_SIZE_MAX);
     }
+    /* eslint-enable @typescript-eslint/no-unsafe-argument */
   }
 
   if (params.cursor !== undefined && params.cursor !== EMPTY_VALUE) {

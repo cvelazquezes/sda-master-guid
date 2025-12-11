@@ -4,20 +4,6 @@
  */
 
 import { Platform } from 'react-native';
-import { apiService } from '../http/api';
-import { secureStorage } from '../../shared/utils/secureStorage';
-import { logger } from '../../shared/utils/logger';
-import { environment } from '../config/environment';
-import {
-  LoginCredentials,
-  RegisterData,
-  UpdateUserData,
-  validateOrThrow,
-  LoginSchema,
-  RegisterSchema,
-  UpdateUserSchema,
-} from '../../shared/utils/validation';
-import { AuthenticationError, ConflictError, NotFoundError } from '../../shared/utils/errors';
 import {
   LOG_MESSAGES,
   ERROR_MESSAGES,
@@ -27,19 +13,39 @@ import {
   API_ENDPOINTS,
   PLATFORM_OS,
 } from '../../shared/constants';
-import { UserRole, ApprovalStatus, PathfinderClass, User, PATHFINDER_CLASSES } from '../../types';
+import { AuthenticationError, ConflictError, NotFoundError } from '../../shared/utils/errors';
+import { logger } from '../../shared/utils/logger';
+import { secureStorage } from '../../shared/utils/secureStorage';
+import {
+  validateOrThrow,
+  LoginSchema,
+  RegisterSchema,
+  UpdateUserSchema,
+  type LoginCredentials,
+  type RegisterData,
+  type UpdateUserData,
+} from '../../shared/utils/validation';
+import {
+  UserRole,
+  ApprovalStatus,
+  PATHFINDER_CLASSES,
+  type PathfinderClass,
+  type User,
+} from '../../types';
+import { environment } from '../config/environment';
+import { apiService } from '../http/api';
 import { mockUsers, getUserByEmail } from '../persistence/mockData';
 
 // Constants
 const MOCK_API_DELAY_MS = 500;
 
-interface AuthResponse {
+type AuthResponse = {
   user: User;
   token: string;
-}
+};
 
 class AuthService {
-  private useMockData = environment.mock.useMockApi;
+  private _useMockData: boolean = environment.mock.useMockApi;
 
   /**
    * Authenticates user with credentials
@@ -53,13 +59,13 @@ class AuthService {
 
     logger.info(LOG_MESSAGES.AUTH.LOGIN_ATTEMPT, { email: credentials.email });
 
-    if (this.useMockData) {
-      return await this.mockLogin(credentials);
+    if (this._useMockData) {
+      return await this._mockLogin(credentials);
     }
 
     try {
       const response = await apiService.post<AuthResponse>(API_ENDPOINTS.AUTH.LOGIN, credentials);
-      await this.saveAuthData(response);
+      await this._saveAuthData(response);
       logger.info(LOG_MESSAGES.AUTH.LOGIN_SUCCESS, { userId: response.user.id });
       return response;
     } catch (error) {
@@ -71,8 +77,8 @@ class AuthService {
   /**
    * Mock login implementation
    */
-  private async mockLogin(credentials: LoginCredentials): Promise<AuthResponse> {
-    await this.sleep(MOCK_API_DELAY_MS);
+  private async _mockLogin(credentials: LoginCredentials): Promise<AuthResponse> {
+    await this._sleep(MOCK_API_DELAY_MS);
 
     const user = getUserByEmail(credentials.email);
     if (!user) {
@@ -83,7 +89,7 @@ class AuthService {
     // In production, this would verify password hash
     const token = generateMockToken(user.id);
 
-    await this.saveAuthData({ user, token });
+    await this._saveAuthData({ user, token });
 
     logger.info(LOG_MESSAGES.AUTH.MOCK_LOGIN_SUCCESS, { userId: user.id });
     return { user, token };
@@ -92,6 +98,7 @@ class AuthService {
   /**
    * Registers new user
    */
+  // eslint-disable-next-line max-params -- Registration requires all parameters
   async register(
     email: string,
     password: string,
@@ -112,8 +119,8 @@ class AuthService {
 
     logger.info(LOG_MESSAGES.AUTH.REGISTRATION_ATTEMPT, { email: data.email, isClubAdmin });
 
-    if (this.useMockData) {
-      return await this.mockRegister(data, classes, isClubAdmin);
+    if (this._useMockData) {
+      return await this._mockRegister(data, classes, isClubAdmin);
     }
 
     try {
@@ -121,7 +128,7 @@ class AuthService {
         ...data,
         isClubAdmin,
       });
-      await this.saveAuthData(response);
+      await this._saveAuthData(response);
       logger.info(LOG_MESSAGES.AUTH.REGISTRATION_SUCCESS, { userId: response.user.id });
       return response;
     } catch (error) {
@@ -133,12 +140,12 @@ class AuthService {
   /**
    * Mock registration implementation
    */
-  private async mockRegister(
+  private async _mockRegister(
     data: RegisterData,
     classes?: string[],
     isClubAdmin?: boolean
   ): Promise<AuthResponse> {
-    await this.sleep(MOCK_API_DELAY_MS);
+    await this._sleep(MOCK_API_DELAY_MS);
 
     // Check if user already exists
     if (getUserByEmail(data.email)) {
@@ -149,12 +156,13 @@ class AuthService {
     const role = isClubAdmin ? UserRole.CLUB_ADMIN : UserRole.USER;
 
     // Create new user with pending approval status
+    /* eslint-disable @typescript-eslint/no-unsafe-assignment -- RegisterData type is validated */
     const newUser: User = {
       id: String(mockUsers.length + 1),
       email: data.email,
       name: data.name,
       whatsappNumber: data.whatsappNumber,
-      role: role,
+      role,
       clubId: data.clubId, // User gets hierarchy from their club
       isActive: false, // Inactive until approved
       // Pending approval (admin for club_admin, club admin for regular users)
@@ -165,11 +173,12 @@ class AuthService {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
+    /* eslint-enable @typescript-eslint/no-unsafe-assignment */
 
     mockUsers.push(newUser);
 
     const token = generateMockToken(newUser.id);
-    await this.saveAuthData({ user: newUser, token });
+    await this._saveAuthData({ user: newUser, token });
 
     logger.info(LOG_MESSAGES.AUTH.MOCK_REGISTRATION_SUCCESS, { userId: newUser.id, role });
     return { user: newUser, token };
@@ -199,8 +208,8 @@ class AuthService {
    * Gets current authenticated user
    */
   async getCurrentUser(): Promise<User | null> {
-    if (this.useMockData) {
-      return await this.mockGetCurrentUser();
+    if (this._useMockData) {
+      return await this._mockGetCurrentUser();
     }
 
     try {
@@ -222,7 +231,7 @@ class AuthService {
   /**
    * Mock get current user implementation
    */
-  private async mockGetCurrentUser(): Promise<User | null> {
+  private async _mockGetCurrentUser(): Promise<User | null> {
     try {
       const userId = await secureStorage.getUserId();
       const token = await secureStorage.getAccessToken();
@@ -254,8 +263,8 @@ class AuthService {
     // Validate input
     const validatedData: UpdateUserData = validateOrThrow(UpdateUserSchema, userData);
 
-    if (this.useMockData) {
-      return await this.mockUpdateUser(validatedData);
+    if (this._useMockData) {
+      return await this._mockUpdateUser(validatedData);
     }
 
     try {
@@ -271,7 +280,7 @@ class AuthService {
   /**
    * Mock update user implementation
    */
-  private async mockUpdateUser(userData: Partial<User>): Promise<User> {
+  private async _mockUpdateUser(userData: Partial<User>): Promise<User> {
     const userId = await secureStorage.getUserId();
     if (!userId) {
       throw new NotFoundError(ERROR_MESSAGES.NOT_FOUND.USER);
@@ -295,7 +304,7 @@ class AuthService {
   /**
    * Saves auth data to secure storage
    */
-  private async saveAuthData(authResponse: AuthResponse): Promise<void> {
+  private async _saveAuthData(authResponse: AuthResponse): Promise<void> {
     try {
       // Check platform before saving
       if (Platform.OS === PLATFORM_OS.WEB) {
@@ -319,8 +328,10 @@ class AuthService {
   /**
    * Sleep helper for mock delays
    */
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+  private _sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
   }
 }
 

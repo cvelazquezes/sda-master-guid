@@ -3,9 +3,11 @@
  * Optimizes API calls by batching and deduplicating requests following DataLoader patterns
  */
 
-import { logger } from '../../shared/utils/logger';
-import { BATCH } from '../../shared/constants/numbers';
+/* eslint-disable max-classes-per-file -- Batcher and Deduplicator are co-located */
+
 import { LOG_MESSAGES, ERROR_MESSAGES, DEDUP_KEY_PREFIX } from '../../shared/constants';
+import { BATCH } from '../../shared/constants/numbers';
+import { logger } from '../../shared/utils/logger';
 
 // ============================================================================
 // Types
@@ -13,33 +15,33 @@ import { LOG_MESSAGES, ERROR_MESSAGES, DEDUP_KEY_PREFIX } from '../../shared/con
 
 type BatchFunction<K, V> = (keys: readonly K[]) => Promise<V[]>;
 
-interface BatchConfig {
+type BatchConfig = {
   maxBatchSize?: number;
   batchWindowMs?: number;
-}
+};
 
-interface PendingRequest<V> {
+type PendingRequest<V> = {
   resolve: (value: V) => void;
   reject: (error: Error) => void;
-}
+};
 
 // ============================================================================
 // Request Batcher (DataLoader Pattern)
 // ============================================================================
 
 export class RequestBatcher<K = string, V = unknown> {
-  private queue: K[] = [];
-  private pending = new Map<K, PendingRequest<V>[]>();
-  private batchTimeout: NodeJS.Timeout | null = null;
+  private _queue: K[] = [];
+  private _pending: Map<K, Array<PendingRequest<V>>> = new Map<K, Array<PendingRequest<V>>>();
+  private _batchTimeout: NodeJS.Timeout | null = null;
 
-  private readonly maxBatchSize: number;
-  private readonly batchWindowMs: number;
-  private readonly batchFn: BatchFunction<K, V>;
+  private readonly _maxBatchSize: number;
+  private readonly _batchWindowMs: number;
+  private readonly _batchFn: BatchFunction<K, V>;
 
   constructor(batchFn: BatchFunction<K, V>, config: BatchConfig = {}) {
-    this.batchFn = batchFn;
-    this.maxBatchSize = config.maxBatchSize || BATCH.DEFAULT_SIZE;
-    this.batchWindowMs = config.batchWindowMs || BATCH.WINDOW_MS;
+    this._batchFn = batchFn;
+    this._maxBatchSize = config.maxBatchSize || BATCH.DEFAULT_SIZE;
+    this._batchWindowMs = config.batchWindowMs || BATCH.WINDOW_MS;
   }
 
   /**
@@ -47,7 +49,7 @@ export class RequestBatcher<K = string, V = unknown> {
    */
   async load(key: K): Promise<V> {
     // Check if already pending
-    const existing = this.pending.get(key);
+    const existing = this._pending.get(key);
 
     if (existing) {
       // Request already in flight, piggyback on it
@@ -58,17 +60,17 @@ export class RequestBatcher<K = string, V = unknown> {
 
     // Add to queue
     return new Promise<V>((resolve, reject) => {
-      this.queue.push(key);
-      this.pending.set(key, [{ resolve, reject }]);
+      this._queue.push(key);
+      this._pending.set(key, [{ resolve, reject }]);
 
       // Schedule batch if not already scheduled
-      if (!this.batchTimeout) {
-        this.scheduleBatch();
+      if (!this._batchTimeout) {
+        this._scheduleBatch();
       }
 
       // Execute immediately if batch is full
-      if (this.queue.length >= this.maxBatchSize) {
-        this.executeBatch();
+      if (this._queue.length >= this._maxBatchSize) {
+        this._executeBatch();
       }
     });
   }
@@ -83,45 +85,46 @@ export class RequestBatcher<K = string, V = unknown> {
   /**
    * Schedules a batch execution
    */
-  private scheduleBatch(): void {
-    this.batchTimeout = setTimeout(() => {
-      this.executeBatch();
-    }, this.batchWindowMs);
+  private _scheduleBatch(): void {
+    this._batchTimeout = setTimeout(() => {
+      this._executeBatch();
+    }, this._batchWindowMs);
   }
 
   /**
    * Executes the current batch
    */
-  private async executeBatch(): Promise<void> {
+  private async _executeBatch(): Promise<void> {
     // Clear timeout
-    if (this.batchTimeout) {
-      clearTimeout(this.batchTimeout);
-      this.batchTimeout = null;
+    if (this._batchTimeout) {
+      clearTimeout(this._batchTimeout);
+      this._batchTimeout = null;
     }
 
     // Nothing to do
-    if (this.queue.length === 0) {
+    if (this._queue.length === 0) {
       return;
     }
 
     // Get current batch
-    const batchKeys = this.queue.splice(0, this.maxBatchSize);
-    const batchPending = new Map<K, PendingRequest<V>[]>();
+    const batchKeys = this._queue.splice(0, this._maxBatchSize);
+    const batchPending = new Map<K, Array<PendingRequest<V>>>();
 
     // Collect pending requests
     for (const key of batchKeys) {
-      const requests = this.pending.get(key);
+      const requests = this._pending.get(key);
       if (requests) {
         batchPending.set(key, requests);
-        this.pending.delete(key);
+        this._pending.delete(key);
       }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument -- LOG_MESSAGES function is properly typed
     logger.debug(LOG_MESSAGES.REQUEST_BATCHER.EXECUTING_BATCH(batchKeys.length));
 
     try {
       // Execute batch function
-      const results = await this.batchFn(batchKeys);
+      const results = await this._batchFn(batchKeys);
 
       // Validate results
       if (results.length !== batchKeys.length) {
@@ -148,8 +151,8 @@ export class RequestBatcher<K = string, V = unknown> {
     }
 
     // Schedule next batch if queue not empty
-    if (this.queue.length > 0 && !this.batchTimeout) {
-      this.scheduleBatch();
+    if (this._queue.length > 0 && !this._batchTimeout) {
+      this._scheduleBatch();
     }
   }
 
@@ -157,21 +160,21 @@ export class RequestBatcher<K = string, V = unknown> {
    * Clears all pending requests
    */
   clear(): void {
-    if (this.batchTimeout) {
-      clearTimeout(this.batchTimeout);
-      this.batchTimeout = null;
+    if (this._batchTimeout) {
+      clearTimeout(this._batchTimeout);
+      this._batchTimeout = null;
     }
 
-    this.queue = [];
+    this._queue = [];
 
     // Reject all pending
-    this.pending.forEach((requests) => {
+    this._pending.forEach((requests) => {
       requests.forEach((req) =>
         req.reject(new Error(ERROR_MESSAGES.REQUEST_BATCHER.BATCH_CLEARED))
       );
     });
 
-    this.pending.clear();
+    this._pending.clear();
   }
 
   /**
@@ -182,8 +185,8 @@ export class RequestBatcher<K = string, V = unknown> {
     pendingKeys: number;
   } {
     return {
-      queueSize: this.queue.length,
-      pendingKeys: this.pending.size,
+      queueSize: this._queue.length,
+      pendingKeys: this._pending.size,
     };
   }
 }
@@ -193,7 +196,7 @@ export class RequestBatcher<K = string, V = unknown> {
 // ============================================================================
 
 export class RequestDeduplicator<T = unknown> {
-  private inFlight = new Map<string, Promise<T>>();
+  private _inFlight: Map<string, Promise<T>> = new Map<string, Promise<T>>();
 
   /**
    * Deduplicates requests with the same key
@@ -201,9 +204,10 @@ export class RequestDeduplicator<T = unknown> {
    */
   async dedupe(key: string, requestFn: () => Promise<T>): Promise<T> {
     // Check if request already in flight
-    const existing = this.inFlight.get(key);
+    const existing = this._inFlight.get(key);
 
     if (existing) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument -- LOG_MESSAGES function is properly typed
       logger.debug(LOG_MESSAGES.REQUEST_BATCHER.REQUEST_DEDUPLICATED(key));
       return existing;
     }
@@ -211,10 +215,10 @@ export class RequestDeduplicator<T = unknown> {
     // Execute new request
     const promise = requestFn().finally(() => {
       // Remove from in-flight once completed
-      this.inFlight.delete(key);
+      this._inFlight.delete(key);
     });
 
-    this.inFlight.set(key, promise);
+    this._inFlight.set(key, promise);
     return promise;
   }
 
@@ -222,21 +226,21 @@ export class RequestDeduplicator<T = unknown> {
    * Checks if a request is in flight
    */
   isInFlight(key: string): boolean {
-    return this.inFlight.has(key);
+    return this._inFlight.has(key);
   }
 
   /**
    * Clears a specific request
    */
   clear(key: string): void {
-    this.inFlight.delete(key);
+    this._inFlight.delete(key);
   }
 
   /**
    * Clears all requests
    */
   clearAll(): void {
-    this.inFlight.clear();
+    this._inFlight.clear();
   }
 
   /**
@@ -246,7 +250,7 @@ export class RequestDeduplicator<T = unknown> {
     inFlightCount: number;
   } {
     return {
-      inFlightCount: this.inFlight.size,
+      inFlightCount: this._inFlight.size,
     };
   }
 }
@@ -313,7 +317,7 @@ export function createUserBatchLoader<T extends { id: string }>(
 
       // Ensure order matches input
       const userMap = new Map(users.map((u) => [u.id, u]));
-      return ids.map((id) => userMap.get(id)).filter((u): u is User => u !== undefined);
+      return ids.map((id) => userMap.get(id)).filter((u): u is T => u !== undefined);
     },
     {
       maxBatchSize: BATCH.USER_BATCH_SIZE,
