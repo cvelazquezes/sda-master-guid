@@ -6,6 +6,20 @@
  */
 
 // Re-export enums from core/domain/value-objects
+// ============================================================================
+// INTERFACES - Domain model interfaces
+// ============================================================================
+
+import type {
+  UserRole,
+  ApprovalStatus,
+  MatchFrequency,
+  MatchStatus,
+  PaymentStatus,
+  ChargeType,
+  PathfinderClass,
+} from '../core/domain/value-objects';
+
 export {
   UserRole,
   ApprovalStatus,
@@ -22,21 +36,7 @@ export {
 
 export type { PathfinderClass } from '../core/domain/value-objects';
 
-// ============================================================================
-// INTERFACES - Domain model interfaces
-// ============================================================================
-
-import {
-  UserRole,
-  ApprovalStatus,
-  MatchFrequency,
-  MatchStatus,
-  PaymentStatus,
-  ChargeType,
-  PathfinderClass,
-} from '../core/domain/value-objects';
-
-export interface User {
+export type User = {
   id: string;
   email: string;
   name: string;
@@ -50,9 +50,9 @@ export interface User {
   language: string;
   createdAt: string;
   updatedAt: string;
-}
+};
 
-export interface Club {
+export type Club = {
   id: string;
   name: string;
   description: string;
@@ -68,17 +68,17 @@ export interface Club {
   createdAt: string;
   updatedAt: string;
   memberCount?: number;
-}
+};
 
-export interface ClubFeeSettings {
+export type ClubFeeSettings = {
   monthlyFeeAmount: number;
   currency: string;
   activeMonths: number[];
   isActive: boolean;
   lastNotificationDate?: string;
-}
+};
 
-export interface MemberPayment {
+export type MemberPayment = {
   id: string;
   userId: string;
   clubId: string;
@@ -91,9 +91,9 @@ export interface MemberPayment {
   notes?: string;
   createdAt: string;
   updatedAt: string;
-}
+};
 
-export interface CustomCharge {
+export type CustomCharge = {
   id: string;
   clubId: string;
   description: string;
@@ -105,9 +105,9 @@ export interface CustomCharge {
   isActive: boolean;
   createdBy: string;
   createdAt: string;
-}
+};
 
-export interface MemberBalance {
+export type MemberBalance = {
   userId: string;
   clubId: string;
   totalOwed: number;
@@ -116,9 +116,9 @@ export interface MemberBalance {
   pendingCharges: number;
   overdueCharges: number;
   lastPaymentDate?: string;
-}
+};
 
-export interface Match {
+export type Match = {
   id: string;
   clubId: string;
   participants: string[];
@@ -126,18 +126,18 @@ export interface Match {
   scheduledDate?: string;
   createdAt: string;
   updatedAt: string;
-}
+};
 
-export interface MatchRound {
+export type MatchRound = {
   id: string;
   clubId: string;
   matches: Match[];
   scheduledDate: string;
   status: 'pending' | 'active' | 'completed';
   createdAt: string;
-}
+};
 
-export interface AuthContextType {
+export type AuthContextType = {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
@@ -152,5 +152,4 @@ export interface AuthContextType {
   ) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (userData: Partial<User>) => Promise<void>;
-}
-
+};
