@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Log messages require comprehensive message definitions */
 /**
  * Log Messages Constants
  *

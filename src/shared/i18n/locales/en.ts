@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Translation files require comprehensive locale strings */
 /**
  * English Translations
  * Base language for the SDA Master Guide app
@@ -924,11 +925,10 @@ export const en = {
     title: 'Settings',
     language: 'Language',
     theme: 'Theme',
-    darkMode: 'Dark Mode',
-    darkBlueMode: 'Dark Blue (SDA)',
-    sdaDarkMode: 'SDA Dark',
-    lightMode: 'Light Mode',
-    systemDefault: 'System Default',
+    lightMode: 'Light',
+    darkMode: 'Dark',
+    midnightBlue: 'Midnight Blue',
+    auto: 'Auto',
     notifications: 'Notifications',
     privacy: 'Privacy',
     about: 'About',
@@ -1105,10 +1105,10 @@ export const en = {
       },
     },
     themeSwitcher: {
-      lightSubtitle: 'Always use light colors',
-      darkSubtitle: 'Always use dark colors',
-      sdaDarkSubtitle: 'Dark theme with SDA brand colors',
-      systemSubtitle: 'Follow device settings',
+      lightSubtitle: 'Bright, clean appearance',
+      darkSubtitle: 'Easy on the eyes in low light',
+      midnightBlueSubtitle: 'Navy tones with SDA branding',
+      autoSubtitle: 'Matches your device theme',
     },
     frequencyOptions: {
       weekly: 'Weekly',

@@ -1,8 +1,10 @@
+/* eslint-disable max-lines -- Style definitions require comprehensive styling */
 /**
  * Meeting Planner Screen Styles
  * Theme-aware style factories
  */
-import { StyleSheet } from 'react-native';
+/* eslint-disable max-lines-per-function, @typescript-eslint/explicit-function-return-type -- Style factory functions */
+import { StyleSheet, type ViewStyle, type TextStyle } from 'react-native';
 import { FLEX, SHADOW_OFFSET, DIMENSIONS, TEXT_ALIGN_VERTICAL } from '../../../../shared/constants';
 import type { ThemeContextType } from '../../../state/ThemeContext';
 
@@ -15,7 +17,21 @@ export const createStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  container: ViewStyle;
+  content: ViewStyle;
+  emptyState: ViewStyle;
+  emptyText: TextStyle;
+  emptySubtext: TextStyle;
+  footer: ViewStyle;
+  saveButton: ViewStyle;
+  saveButtonText: TextStyle;
+  footerButtons: ViewStyle;
+  editButton: ViewStyle;
+  editButtonText: TextStyle;
+  shareButton: ViewStyle;
+  shareButtonText: TextStyle;
+} =>
   StyleSheet.create({
     container: { flex: FLEX.ONE, backgroundColor: colors.backgroundSecondary },
     content: { flex: FLEX.ONE },
@@ -305,7 +321,29 @@ export const createModalStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  overlay: ViewStyle;
+  content: ViewStyle;
+  header: ViewStyle;
+  title: TextStyle;
+  body: ViewStyle;
+  inputLabel: TextStyle;
+  input: TextStyle;
+  textArea: TextStyle;
+  footer: ViewStyle;
+  button: ViewStyle;
+  cancelButton: ViewStyle;
+  cancelButtonText: TextStyle;
+  confirmButton: ViewStyle;
+  confirmButtonText: TextStyle;
+  memberOption: ViewStyle;
+  memberAvatar: ViewStyle;
+  memberAvatarText: TextStyle;
+  memberInfo: ViewStyle;
+  memberOptionName: TextStyle;
+  memberOptionEmail: TextStyle;
+  noMembersText: TextStyle;
+} =>
   StyleSheet.create({
     overlay: {
       flex: FLEX.ONE,
@@ -426,7 +464,20 @@ export const createShareModalStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  content: ViewStyle;
+  header: ViewStyle;
+  iconContainer: ViewStyle;
+  title: TextStyle;
+  subtitle: TextStyle;
+  info: ViewStyle;
+  infoRow: ViewStyle;
+  infoText: ViewStyle;
+  infoLabel: TextStyle;
+  infoValue: TextStyle;
+  actions: ViewStyle;
+  confirmButton: ViewStyle;
+} =>
   StyleSheet.create({
     content: {
       backgroundColor: colors.backgroundPrimary,

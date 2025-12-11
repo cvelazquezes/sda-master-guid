@@ -1,9 +1,8 @@
+/* eslint-disable max-lines -- Complex filter modal with multiple filter sections */
 import React, { useMemo } from 'react';
 import { View, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Club, UserRole, UserStatus } from '../../../../types';
-import { Text } from '../../../components/primitives';
-import { useTheme } from '../../../state/ThemeContext';
+import { createModalStyles, createFilterStyles, createButtonStyles } from './styles';
 import {
   ANIMATION_TYPE,
   ICONS,
@@ -11,10 +10,12 @@ import {
   HIERARCHY_FIELDS,
   EMPTY_VALUE,
 } from '../../../../shared/constants';
-import { createModalStyles, createFilterStyles, createButtonStyles } from './styles';
-import { UserFilters } from './types';
+import { type Club, UserRole, UserStatus } from '../../../../types';
+import { Text } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
+import type { UserFilters } from './types';
 
-interface FilterModalProps {
+type FilterModalProps = {
   visible: boolean;
   onClose: () => void;
   isMobile: boolean;
@@ -28,7 +29,7 @@ interface FilterModalProps {
   availableClubs: Club[];
   colors: Record<string, string>;
   t: (key: string, opts?: Record<string, unknown>) => string;
-}
+};
 
 export function FilterModal({
   visible,
@@ -76,18 +77,23 @@ export function FilterModal({
   };
 
   return (
-    <Modal visible={visible} animationType={anim} transparent onRequestClose={onClose}>
+    <Modal
+      transparent
+      accessibilityViewIsModal
+      visible={visible}
+      animationType={anim}
+      onRequestClose={onClose}
+    >
       <View style={overlayStyle}>
         <View style={contentStyle}>
           {isMobile && (
             <View style={[modalStyles.dragHandle, { backgroundColor: colors.borderLight }]} />
           )}
-          <ModalHeader colors={colors} t={t} onClose={onClose} modalStyles={modalStyles} />
+          <ModalHeader colors={colors} t={t} modalStyles={modalStyles} onClose={onClose} />
           <ScrollView style={modalStyles.body}>
             <InfoBanner colors={colors} t={t} filterStyles={filterStyles} />
             <OrgSection
               filters={filters}
-              onUpdate={onUpdateFilter}
               divisions={availableDivisions}
               unions={availableUnions}
               associations={availableAssociations}
@@ -96,29 +102,30 @@ export function FilterModal({
               colors={colors}
               t={t}
               filterStyles={filterStyles}
+              onUpdate={onUpdateFilter}
             />
             <RoleSection
               filters={filters}
-              onUpdate={onUpdateFilter}
               colors={colors}
               t={t}
               filterStyles={filterStyles}
+              onUpdate={onUpdateFilter}
             />
             <StatusSection
               filters={filters}
-              onUpdate={onUpdateFilter}
               colors={colors}
               t={t}
               filterStyles={filterStyles}
+              onUpdate={onUpdateFilter}
             />
           </ScrollView>
           <ModalFooter
             colors={colors}
             t={t}
-            onClear={onClear}
-            onClose={onClose}
             modalStyles={modalStyles}
             buttonStyles={buttonStyles}
+            onClear={onClear}
+            onClose={onClose}
           />
         </View>
       </View>
@@ -143,7 +150,12 @@ function ModalHeader({
       <Text style={[modalStyles.title, { color: colors.textPrimary }]}>
         {t('screens.usersManagement.filterUsers')}
       </Text>
-      <TouchableOpacity onPress={onClose} style={modalStyles.closeButton}>
+      <TouchableOpacity
+        style={modalStyles.closeButton}
+        accessibilityRole="button"
+        accessibilityLabel="Close modal"
+        onPress={onClose}
+      >
         <MaterialCommunityIcons
           name={ICONS.CLOSE}
           size={iconSizes.lg}
@@ -167,9 +179,7 @@ function InfoBanner({
   return (
     <View style={filterStyles.infoBanner}>
       <MaterialCommunityIcons name={ICONS.INFORMATION} size={iconSizes.sm} color={colors.primary} />
-      <Text style={filterStyles.infoText}>
-        {t('screens.usersManagement.filterDescription')}
-      </Text>
+      <Text style={filterStyles.infoText}>{t('screens.usersManagement.filterDescription')}</Text>
     </View>
   );
 }
@@ -192,7 +202,12 @@ function ModalFooter({
   const { iconSizes } = useTheme();
   return (
     <View style={modalStyles.footer}>
-      <TouchableOpacity style={buttonStyles.clear} onPress={onClear}>
+      <TouchableOpacity
+        style={buttonStyles.clear}
+        accessibilityRole="button"
+        accessibilityLabel="Clear all filters"
+        onPress={onClear}
+      >
         <MaterialCommunityIcons
           name={ICONS.FILTER_OFF}
           size={iconSizes.md}
@@ -200,14 +215,19 @@ function ModalFooter({
         />
         <Text style={buttonStyles.clearText}>{t('screens.usersManagement.clearAll')}</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={buttonStyles.apply} onPress={onClose}>
+      <TouchableOpacity
+        style={buttonStyles.apply}
+        accessibilityRole="button"
+        accessibilityLabel="Apply filters"
+        onPress={onClose}
+      >
         <Text style={buttonStyles.applyText}>{t('screens.usersManagement.applyFilters')}</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
-interface OrgSectionProps {
+type OrgSectionProps = {
   filters: UserFilters;
   onUpdate: (f: string, v: string) => void;
   divisions: string[];
@@ -218,7 +238,7 @@ interface OrgSectionProps {
   colors: Record<string, string>;
   t: (key: string, opts?: Record<string, unknown>) => string;
   filterStyles: ReturnType<typeof createFilterStyles>;
-}
+};
 
 function OrgSection({
   filters,
@@ -269,20 +289,20 @@ function OrgSection({
               icon={icon}
               items={items}
               selected={filters[field as keyof UserFilters] as string}
-              onSelect={(v): void => onUpdate(field, v)}
               colors={colors}
               filterStyles={filterStyles}
+              onSelect={(v): void => onUpdate(field, v)}
             />
           )
       )}
       {clubs.length > 0 && (
         <ClubsSection
           filters={filters}
-          onUpdate={onUpdate}
           clubs={clubs}
           colors={colors}
           t={t}
           filterStyles={filterStyles}
+          onUpdate={onUpdate}
         />
       )}
     </View>
@@ -315,9 +335,9 @@ function ClubsSection({
       <ClubOption
         label={allLabel}
         isActive={allActive}
-        onPress={(): void => onUpdate(HIERARCHY_FIELDS.CLUB_ID, EMPTY_VALUE)}
         colors={colors}
         filterStyles={filterStyles}
+        onPress={(): void => onUpdate(HIERARCHY_FIELDS.CLUB_ID, EMPTY_VALUE)}
       />
       {clubs.map((club) => (
         <ClubOption
@@ -326,9 +346,9 @@ function ClubsSection({
           isActive={filters.clubId === club.id}
           isInactive={!club.isActive}
           inactiveLabel={t('screens.usersManagement.inactive')}
-          onPress={(): void => onUpdate(HIERARCHY_FIELDS.CLUB_ID, club.id)}
           colors={colors}
           filterStyles={filterStyles}
+          onPress={(): void => onUpdate(HIERARCHY_FIELDS.CLUB_ID, club.id)}
         />
       ))}
     </View>
@@ -356,6 +376,9 @@ function ClubOption({
   return (
     <TouchableOpacity
       style={[filterStyles.option, isActive && filterStyles.optionActive]}
+      accessibilityRole="radio"
+      accessibilityState={{ selected: isActive }}
+      accessibilityLabel={label}
       onPress={onPress}
     >
       <View style={filterStyles.optionContent}>
@@ -371,7 +394,7 @@ function ClubOption({
   );
 }
 
-interface HierarchyOptionsProps {
+type HierarchyOptionsProps = {
   label: string;
   icon: string;
   items: string[];
@@ -379,7 +402,7 @@ interface HierarchyOptionsProps {
   onSelect: (v: string) => void;
   colors: Record<string, string>;
   filterStyles: ReturnType<typeof createFilterStyles>;
-}
+};
 
 function HierarchyOptions({
   label,
@@ -412,9 +435,9 @@ function HierarchyOptions({
           key={item}
           item={item}
           isSelected={selected === item}
-          onSelect={onSelect}
           colors={colors}
           filterStyles={filterStyles}
+          onSelect={onSelect}
         />
       ))}
     </View>
@@ -483,7 +506,13 @@ function HierarchyOptionItem({
     isSelected && [filterStyles.optionTextActive, { color: colors.textPrimary }],
   ];
   return (
-    <TouchableOpacity style={optStyle} onPress={(): void => onSelect(item)}>
+    <TouchableOpacity
+      style={optStyle}
+      accessibilityRole="radio"
+      accessibilityState={{ selected: isSelected }}
+      accessibilityLabel={item}
+      onPress={(): void => onSelect(item)}
+    >
       <Text style={textStyle}>{item}</Text>
       {isSelected && (
         <MaterialCommunityIcons name={ICONS.CHECK} size={iconSizes.md} color={colors.primary} />
@@ -492,13 +521,13 @@ function HierarchyOptionItem({
   );
 }
 
-interface RoleSectionProps {
+type RoleSectionProps = {
   filters: UserFilters;
   onUpdate: (f: string, v: string) => void;
   colors: Record<string, string>;
   t: (key: string) => string;
   filterStyles: ReturnType<typeof createFilterStyles>;
-}
+};
 
 function RoleSection({
   filters,
@@ -543,22 +572,22 @@ function RoleSection({
           icon={opt.icon}
           iconColor={filters.role === opt.id ? colors.primary : opt.color}
           label={opt.label}
-          onPress={(): void => onUpdate(HIERARCHY_FIELDS.ROLE, opt.id)}
           colors={colors}
           filterStyles={filterStyles}
+          onPress={(): void => onUpdate(HIERARCHY_FIELDS.ROLE, opt.id)}
         />
       ))}
     </View>
   );
 }
 
-interface StatusSectionProps {
+type StatusSectionProps = {
   filters: UserFilters;
   onUpdate: (f: string, v: string) => void;
   colors: Record<string, string>;
   t: (key: string) => string;
   filterStyles: ReturnType<typeof createFilterStyles>;
-}
+};
 
 function StatusSection({
   filters,
@@ -608,9 +637,9 @@ function StatusSection({
           icon={opt.icon}
           iconColor={filters.status === opt.id ? colors.primary : opt.color}
           label={opt.label}
-          onPress={(): void => onUpdate(HIERARCHY_FIELDS.STATUS, getStatusValue(opt.id))}
           colors={colors}
           filterStyles={filterStyles}
+          onPress={(): void => onUpdate(HIERARCHY_FIELDS.STATUS, getStatusValue(opt.id))}
         />
       ))}
     </View>
@@ -638,6 +667,9 @@ function FilterOption({
   return (
     <TouchableOpacity
       style={[filterStyles.option, isActive && filterStyles.optionActive]}
+      accessibilityRole="radio"
+      accessibilityState={{ selected: isActive }}
+      accessibilityLabel={label}
       onPress={onPress}
     >
       <View style={filterStyles.optionContent}>

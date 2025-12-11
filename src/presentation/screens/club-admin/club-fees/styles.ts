@@ -1,8 +1,10 @@
+/* eslint-disable max-lines -- Style definitions require comprehensive styling */
 /**
  * Club Fees Screen Styles
  * Theme-aware style factories
  */
-import { StyleSheet } from 'react-native';
+/* eslint-disable max-lines-per-function -- Style factory functions require many style definitions */
+import { StyleSheet, type ViewStyle, type TextStyle } from 'react-native';
 import { FLEX, SHADOW_OFFSET } from '../../../../shared/constants';
 import { MATH } from '../../../../shared/constants/numbers';
 import type { ThemeContextType } from '../../../state/ThemeContext';
@@ -15,7 +17,13 @@ export const createStyles = (
   colors: ThemeContextType['colors'],
   spacing: ThemeContextType['spacing'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  container: ViewStyle;
+  loadingContainer: ViewStyle;
+  loadingText: TextStyle;
+  tabContent: ViewStyle;
+  section: ViewStyle;
+} =>
   StyleSheet.create({
     container: { flex: FLEX.ONE, backgroundColor: colors.backgroundSecondary },
     loadingContainer: {
@@ -41,7 +49,13 @@ export const createTabStyles = (
   colors: ThemeContextType['colors'],
   spacing: ThemeContextType['spacing'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  tabs: ViewStyle;
+  tab: ViewStyle;
+  tabActive: ViewStyle;
+  tabText: TextStyle;
+  tabTextActive: TextStyle;
+} =>
   StyleSheet.create({
     tabs: {
       flexDirection: 'row',
@@ -85,7 +99,43 @@ export const createSettingsStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  infoCard: ViewStyle;
+  infoIconContainer: ViewStyle;
+  infoTextContainer: ViewStyle;
+  infoTitle: TextStyle;
+  infoText: TextStyle;
+  settingCard: ViewStyle;
+  settingRow: ViewStyle;
+  settingLabelContainer: ViewStyle;
+  settingLabel: TextStyle;
+  settingSubtext: TextStyle;
+  inputCard: ViewStyle;
+  inputLabel: TextStyle;
+  inputSubtext: TextStyle;
+  amountRow: ViewStyle;
+  amountInputWrapper: ViewStyle;
+  currencyInputWrapper: ViewStyle;
+  amountInputContainer: ViewStyle;
+  currencySymbol: TextStyle;
+  amountInput: TextStyle;
+  currencyInputContainer: ViewStyle;
+  currencyInput: TextStyle;
+  monthHeaderRow: ViewStyle;
+  monthActions: ViewStyle;
+  monthActionBtn: ViewStyle;
+  monthActionText: TextStyle;
+  monthGrid: ViewStyle;
+  monthChip: ViewStyle;
+  monthChipSelected: ViewStyle;
+  monthChipText: TextStyle;
+  monthChipTextSelected: TextStyle;
+  actionButtonsContainer: ViewStyle;
+  primaryButton: ViewStyle;
+  primaryButtonText: TextStyle;
+  secondaryButton: ViewStyle;
+  secondaryButtonText: TextStyle;
+} =>
   StyleSheet.create({
     infoCard: {
       flexDirection: 'row',
@@ -291,7 +341,32 @@ export const createBalanceStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) => {
+): {
+  header: ViewStyle;
+  title: TextStyle;
+  subtitle: TextStyle;
+  notifyAllButton: ViewStyle;
+  notifyAllButtonText: TextStyle;
+  listContainer: ViewStyle;
+  card: ViewStyle;
+  cardHeader: ViewStyle;
+  memberInfo: ViewStyle;
+  avatar: ViewStyle;
+  avatarText: TextStyle;
+  memberTextInfo: ViewStyle;
+  name: TextStyle;
+  email: TextStyle;
+  notifyButton: ViewStyle;
+  details: ViewStyle;
+  row: ViewStyle;
+  label: TextStyle;
+  value: TextStyle;
+  totalRow: ViewStyle;
+  totalLabel: TextStyle;
+  totalValue: TextStyle;
+  overdueNotice: ViewStyle;
+  overdueText: TextStyle;
+} => {
   const touchTargetMinimum = 40;
 
   return StyleSheet.create({
@@ -430,7 +505,20 @@ export const createChargeStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  header: ViewStyle;
+  title: TextStyle;
+  subtitle: TextStyle;
+  addButton: ViewStyle;
+  addButtonText: TextStyle;
+  card: ViewStyle;
+  cardHeader: ViewStyle;
+  description: TextStyle;
+  amount: TextStyle;
+  details: ViewStyle;
+  detailRow: ViewStyle;
+  detailText: TextStyle;
+} =>
   StyleSheet.create({
     header: {
       flexDirection: 'row',
@@ -518,7 +606,7 @@ export const createEmptyStyles = (
   colors: ThemeContextType['colors'],
   spacing: ThemeContextType['spacing'],
   typography: ThemeContextType['typography']
-) =>
+): { container: ViewStyle; text: TextStyle; subtext: TextStyle } =>
   StyleSheet.create({
     container: {
       flex: FLEX.ONE,

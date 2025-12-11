@@ -1,16 +1,7 @@
+/* eslint-disable max-lines -- Complex organization modal with multiple form sections */
 import React, { useMemo } from 'react';
 import { View, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text, Input } from '../../../components/primitives';
-import { useTheme } from '../../../state/ThemeContext';
-import {
-  ANIMATION_TYPE,
-  ICONS,
-  A11Y_ROLE,
-  HIERARCHY_FIELDS,
-  EMPTY_VALUE,
-} from '../../../../shared/constants';
-import { createModalStyles, createFilterStyles, createButtonStyles } from './styles';
 import { HierarchySelector } from './HierarchySelector';
 import {
   getTypeLabel,
@@ -20,6 +11,16 @@ import {
   getAvailableAssociations,
   getAvailableParents,
 } from './orgUtils';
+import { createModalStyles, createFilterStyles, createButtonStyles } from './styles';
+import {
+  ANIMATION_TYPE,
+  ICONS,
+  A11Y_ROLE,
+  HIERARCHY_FIELDS,
+  EMPTY_VALUE,
+} from '../../../../shared/constants';
+import { Text, Input } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
 import type { OrgFormData } from './types';
 import type { Club } from '../../../../types';
 
@@ -123,7 +124,13 @@ export function OrgModal({
   const noParentWarning = isNonDivisionType && parents.length === 0;
 
   return (
-    <Modal visible={visible} animationType={anim} transparent onRequestClose={onClose}>
+    <Modal
+      transparent
+      accessibilityViewIsModal
+      visible={visible}
+      animationType={anim}
+      onRequestClose={onClose}
+    >
       <View style={overlayStyle}>
         <View style={contentStyle}>
           {isMobile && (
@@ -132,13 +139,18 @@ export function OrgModal({
           <ModalHeader
             editMode={editMode}
             typeLabel={typeLabel}
-            onClose={onClose}
             colors={colors}
             t={t}
             modalStyles={modalStyles}
+            onClose={onClose}
           />
           <ScrollView style={modalStyles.body}>
-            <InfoBanner selectedType={selectedType} colors={colors} t={t} filterStyles={filterStyles} />
+            <InfoBanner
+              selectedType={selectedType}
+              colors={colors}
+              t={t}
+              filterStyles={filterStyles}
+            />
             <HierarchySelectors
               selectedType={selectedType}
               formData={formData}
@@ -165,17 +177,22 @@ export function OrgModal({
               filterStyles={filterStyles}
             />
             {noParentWarning && (
-              <NoParentWarning selectedType={selectedType} colors={colors} t={t} filterStyles={filterStyles} />
+              <NoParentWarning
+                selectedType={selectedType}
+                colors={colors}
+                t={t}
+                filterStyles={filterStyles}
+              />
             )}
           </ScrollView>
           <ModalFooter
             editMode={editMode}
-            onClose={onClose}
-            onSave={onSave}
             colors={colors}
             t={t}
             modalStyles={modalStyles}
             buttonStyles={buttonStyles}
+            onClose={onClose}
+            onSave={onSave}
           />
         </View>
       </View>
@@ -210,10 +227,10 @@ function ModalHeader({
         {t(titleKey, { type: typeLabel })}
       </Text>
       <TouchableOpacity
-        onPress={onClose}
         style={modalStyles.closeButton}
         accessibilityRole={A11Y_ROLE.BUTTON}
         accessibilityLabel={closeLabel}
+        onPress={onClose}
       >
         <MaterialCommunityIcons
           name={ICONS.CLOSE}
@@ -287,7 +304,8 @@ type HierarchySelectorsProps = {
 };
 
 // Helper type for HierarchySelector colors
-type HierarchySelectorColors = {
+// eslint-disable-next-line @typescript-eslint/naming-convention -- Unused type kept for reference
+type _HierarchySelectorColors = {
   primary: string;
   success: string;
   textTertiary: string;
@@ -329,14 +347,14 @@ function UnionHierarchy({
       items={divisions}
       selectedValue={formData.parentDivision}
       searchValue={parentDivisionSearch}
-      onSearch={setParentDivisionSearch}
-      onSelect={(v): void => setFormData((p) => ({ ...p, parentDivision: v }))}
-      onClear={(): void => setFormData((p) => ({ ...p, parentDivision: EMPTY_VALUE }))}
       searchPlaceholder={t(`${base}.searchDivisions`)}
       noResultsText={t(`${base}.noDivisionsMatching`, { query: parentDivisionSearch })}
       levelLabel={divLabel}
       colors={colors}
       t={t}
+      onSearch={setParentDivisionSearch}
+      onSelect={(v): void => setFormData((p) => ({ ...p, parentDivision: v }))}
+      onClear={(): void => setFormData((p) => ({ ...p, parentDivision: EMPTY_VALUE }))}
     />
   );
 }
@@ -366,6 +384,11 @@ function AssociationHierarchy({
         items={divisions}
         selectedValue={formData.parentDivision}
         searchValue={parentDivisionSearch}
+        searchPlaceholder={t(`${base}.searchDivisions`)}
+        noResultsText={t(`${base}.noDivisionsMatching`, { query: parentDivisionSearch })}
+        levelLabel={divLabel}
+        colors={colors}
+        t={t}
         onSearch={setParentDivisionSearch}
         onSelect={(v): void => {
           setFormData((p) => ({ ...p, parentDivision: v, parentUnion: EMPTY_VALUE }));
@@ -377,11 +400,6 @@ function AssociationHierarchy({
             parentUnion: EMPTY_VALUE,
           }));
         }}
-        searchPlaceholder={t(`${base}.searchDivisions`)}
-        noResultsText={t(`${base}.noDivisionsMatching`, { query: parentDivisionSearch })}
-        levelLabel={divLabel}
-        colors={colors}
-        t={t}
       />
       {formData.parentDivision && (
         <HierarchySelector
@@ -391,14 +409,14 @@ function AssociationHierarchy({
           items={unions}
           selectedValue={formData.parentUnion}
           searchValue={parentUnionSearch}
-          onSearch={setParentUnionSearch}
-          onSelect={(v): void => setFormData((p) => ({ ...p, parentUnion: v }))}
-          onClear={(): void => setFormData((p) => ({ ...p, parentUnion: EMPTY_VALUE }))}
           searchPlaceholder={t(`${base}.searchUnions`)}
           noResultsText={t(`${base}.noUnionsIn`, { division: formData.parentDivision })}
           levelLabel={unionLabel}
           colors={colors}
           t={t}
+          onSearch={setParentUnionSearch}
+          onSelect={(v): void => setFormData((p) => ({ ...p, parentUnion: v }))}
+          onClear={(): void => setFormData((p) => ({ ...p, parentUnion: EMPTY_VALUE }))}
         />
       )}
     </>
@@ -464,7 +482,7 @@ function ChurchHierarchy({
   );
 }
 
-interface ChurchDivProps {
+type ChurchDivProps = {
   formData: OrgFormData;
   setFormData: React.Dispatch<React.SetStateAction<OrgFormData>>;
   divisions: string[];
@@ -473,7 +491,7 @@ interface ChurchDivProps {
   colors: HierarchySelectorsProps['colors'];
   t: (key: string, opts?: Record<string, unknown>) => string;
   divLabel: string;
-}
+};
 
 function ChurchDivisionSelector({
   formData,
@@ -494,6 +512,11 @@ function ChurchDivisionSelector({
       items={divisions}
       selectedValue={formData.parentDivision}
       searchValue={parentDivisionSearch}
+      searchPlaceholder={t(`${base}.searchDivisions`)}
+      noResultsText={t(`${base}.noDivisionsMatching`, { query: parentDivisionSearch })}
+      levelLabel={divLabel}
+      colors={colors}
+      t={t}
       onSearch={setParentDivisionSearch}
       onSelect={(v): void => {
         setFormData((p) => ({
@@ -511,16 +534,11 @@ function ChurchDivisionSelector({
           parentAssociation: EMPTY_VALUE,
         }));
       }}
-      searchPlaceholder={t(`${base}.searchDivisions`)}
-      noResultsText={t(`${base}.noDivisionsMatching`, { query: parentDivisionSearch })}
-      levelLabel={divLabel}
-      colors={colors}
-      t={t}
     />
   );
 }
 
-interface ChurchUnionProps {
+type ChurchUnionProps = {
   formData: OrgFormData;
   setFormData: React.Dispatch<React.SetStateAction<OrgFormData>>;
   unions: string[];
@@ -529,7 +547,7 @@ interface ChurchUnionProps {
   colors: HierarchySelectorsProps['colors'];
   t: (key: string, opts?: Record<string, unknown>) => string;
   unionLabel: string;
-}
+};
 
 function ChurchUnionSelector({
   formData,
@@ -550,6 +568,11 @@ function ChurchUnionSelector({
       items={unions}
       selectedValue={formData.parentUnion}
       searchValue={parentUnionSearch}
+      searchPlaceholder={t(`${base}.searchUnions`)}
+      noResultsText={t(`${base}.noUnionsIn`, { division: formData.parentDivision })}
+      levelLabel={unionLabel}
+      colors={colors}
+      t={t}
       onSearch={setParentUnionSearch}
       onSelect={(v): void => {
         setFormData((p) => ({ ...p, parentUnion: v, parentAssociation: EMPTY_VALUE }));
@@ -557,16 +580,11 @@ function ChurchUnionSelector({
       onClear={(): void => {
         setFormData((p) => ({ ...p, parentUnion: EMPTY_VALUE, parentAssociation: EMPTY_VALUE }));
       }}
-      searchPlaceholder={t(`${base}.searchUnions`)}
-      noResultsText={t(`${base}.noUnionsIn`, { division: formData.parentDivision })}
-      levelLabel={unionLabel}
-      colors={colors}
-      t={t}
     />
   );
 }
 
-interface ChurchAssocProps {
+type ChurchAssocProps = {
   formData: OrgFormData;
   setFormData: React.Dispatch<React.SetStateAction<OrgFormData>>;
   associations: string[];
@@ -575,7 +593,7 @@ interface ChurchAssocProps {
   colors: HierarchySelectorsProps['colors'];
   t: (key: string, opts?: Record<string, unknown>) => string;
   assocLabel: string;
-}
+};
 
 function ChurchAssocSelector({
   formData,
@@ -596,14 +614,14 @@ function ChurchAssocSelector({
       items={associations}
       selectedValue={formData.parentAssociation}
       searchValue={parentAssociationSearch}
-      onSearch={setParentAssociationSearch}
-      onSelect={(v): void => setFormData((p) => ({ ...p, parentAssociation: v }))}
-      onClear={(): void => setFormData((p) => ({ ...p, parentAssociation: EMPTY_VALUE }))}
       searchPlaceholder={t(`${base}.searchAssociations`)}
       noResultsText={t(`${base}.noAssociationsIn`, { union: formData.parentUnion })}
       levelLabel={assocLabel}
       colors={colors}
       t={t}
+      onSearch={setParentAssociationSearch}
+      onSelect={(v): void => setFormData((p) => ({ ...p, parentAssociation: v }))}
+      onClear={(): void => setFormData((p) => ({ ...p, parentAssociation: EMPTY_VALUE }))}
     />
   );
 }
@@ -631,12 +649,13 @@ function TypeInfoSection({
         {t(`${base}.typeInformation`, { type: typeLabel })}
       </Text>
       <Input
+        required
         label={t(`${base}.typeName`, { type: typeLabel })}
         icon={getTypeIcon(selectedType as HierarchyType)}
         placeholder={t(`${base}.enterTypeName`, { type: typeLabel.toLowerCase() })}
         value={formData.name}
+        accessibilityHint="Required field"
         onChangeText={(text): void => setFormData((p) => ({ ...p, name: text }))}
-        required
       />
     </View>
   );
@@ -705,9 +724,9 @@ function ModalFooter({
     <View style={modalStyles.footer}>
       <TouchableOpacity
         style={buttonStyles.clear}
-        onPress={onClose}
         accessibilityRole={A11Y_ROLE.BUTTON}
         accessibilityLabel={t('common.cancel')}
+        onPress={onClose}
       >
         <MaterialCommunityIcons
           name={ICONS.CLOSE_CIRCLE}
@@ -718,9 +737,9 @@ function ModalFooter({
       </TouchableOpacity>
       <TouchableOpacity
         style={buttonStyles.apply}
-        onPress={onSave}
         accessibilityRole={A11Y_ROLE.BUTTON}
         accessibilityLabel={saveLabel}
+        onPress={onSave}
       >
         <MaterialCommunityIcons name={saveIcon} size={iconSizes.sm} color={colors.textInverse} />
         <Text style={buttonStyles.applyText}>{saveText}</Text>

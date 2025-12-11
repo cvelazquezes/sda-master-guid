@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Component tokens require comprehensive definitions */
 /**
  * Component Design Tokens
  *
@@ -10,8 +11,6 @@
  * NOTE: This file intentionally contains literal numbers as it DEFINES component tokens.
  */
 
-import { TextStyle } from 'react-native';
-import { createSemanticColors, semanticTypography, semanticBorder, ThemeMode } from './semantic';
 import {
   spacingPrimitives,
   shadowPrimitives,
@@ -20,7 +19,14 @@ import {
   borderWidthPrimitives,
   typographyPrimitives,
 } from './primitives';
+import {
+  createSemanticColors,
+  semanticTypography,
+  semanticBorder,
+  type ThemeMode,
+} from './semantic';
 import { THEME_MODE, BORDERS } from '../../../shared/constants';
+import type { TextStyle } from 'react-native';
 
 // ============================================================================
 // BUTTON TOKENS

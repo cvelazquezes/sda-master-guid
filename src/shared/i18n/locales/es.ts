@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Translation files require comprehensive locale strings */
 /**
  * Spanish Translations
  * Traducciones al español para la app SDA Master Guide
@@ -928,11 +929,10 @@ export const es: TranslationKeys = {
     title: 'Configuración',
     language: 'Idioma',
     theme: 'Tema',
-    darkMode: 'Modo Oscuro',
-    darkBlueMode: 'Azul Oscuro (ASD)',
-    sdaDarkMode: 'ASD Oscuro',
-    lightMode: 'Modo Claro',
-    systemDefault: 'Predeterminado del Sistema',
+    lightMode: 'Claro',
+    darkMode: 'Oscuro',
+    midnightBlue: 'Azul Medianoche',
+    auto: 'Automático',
     notifications: 'Notificaciones',
     privacy: 'Privacidad',
     about: 'Acerca de',
@@ -1109,10 +1109,10 @@ export const es: TranslationKeys = {
       },
     },
     themeSwitcher: {
-      lightSubtitle: 'Siempre usar colores claros',
-      darkSubtitle: 'Siempre usar colores oscuros',
-      sdaDarkSubtitle: 'Tema oscuro con colores de marca ASD',
-      systemSubtitle: 'Seguir configuración del dispositivo',
+      lightSubtitle: 'Apariencia brillante y limpia',
+      darkSubtitle: 'Cómodo para ambientes con poca luz',
+      midnightBlueSubtitle: 'Tonos azul marino con marca ASD',
+      autoSubtitle: 'Sigue el tema de tu dispositivo',
     },
     frequencyOptions: {
       weekly: 'Semanal',

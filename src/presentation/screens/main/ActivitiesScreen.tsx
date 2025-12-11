@@ -1,7 +1,8 @@
+/* eslint-disable max-lines -- Activities screen with comprehensive activity management */
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, ScrollView, RefreshControl, Alert, Linking } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import i18next from 'i18next';
+import { t as i18nT } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import {
   createScreenStyles,
@@ -33,7 +34,7 @@ import {
   EmptyState,
 } from '../../components/primitives';
 import { useAuth } from '../../state/AuthContext';
-import { useTheme, ThemeContextType } from '../../state/ThemeContext';
+import { useTheme, type ThemeContextType } from '../../state/ThemeContext';
 
 type TranslationFn = ReturnType<typeof useTranslation>['t'];
 
@@ -52,7 +53,7 @@ const getStatusColor = (status: MatchStatus, colors: ThemeContextType['colors'])
 // Helper: open WhatsApp
 const openWhatsApp = (url: string): void => {
   Linking.openURL(url).catch(() => {
-    Alert.alert(i18next.t('common.error'), i18next.t('errors.couldNotOpenWhatsapp'));
+    Alert.alert(i18nT('common.error'), i18nT('errors.couldNotOpenWhatsapp'));
   });
 };
 
@@ -75,7 +76,7 @@ function useActivities(): UseActivitiesReturn {
       const data = await matchService.getMyMatches();
       setMatches(data);
     } catch {
-      Alert.alert(i18next.t('common.error'), i18next.t('errors.failedToLoadActivities'));
+      Alert.alert(i18nT('common.error'), i18nT('errors.failedToLoadActivities'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -135,17 +136,17 @@ function ParticipantRow({
 // Activity handlers
 function createSkipHandler(loadMatches: () => Promise<void>): (matchId: string) => void {
   return (matchId: string): void => {
-    Alert.alert(i18next.t('titles.skipActivity'), i18next.t('warnings.confirmSkip'), [
-      { text: i18next.t('common.cancel'), style: ALERT_BUTTON_STYLE.CANCEL },
+    Alert.alert(i18nT('titles.skipActivity'), i18nT('warnings.confirmSkip'), [
+      { text: i18nT('common.cancel'), style: ALERT_BUTTON_STYLE.CANCEL },
       {
-        text: i18next.t('common.skip'),
+        text: i18nT('common.skip'),
         style: ALERT_BUTTON_STYLE.DESTRUCTIVE,
         onPress: () => {
           matchService
             .skipMatch(matchId)
             .then(() => loadMatches())
             .catch(() => {
-              Alert.alert(i18next.t('common.error'), i18next.t('errors.failedToSkipActivity'));
+              Alert.alert(i18nT('common.error'), i18nT('errors.failedToSkipActivity'));
             });
         },
       },
@@ -197,7 +198,13 @@ type FilterBadgeProps = {
   styles: ReturnType<typeof createFilterStyles>;
 };
 
-function FilterBadge({ label, status, colors, iconSizes, styles }: FilterBadgeProps): React.JSX.Element {
+function FilterBadge({
+  label,
+  status,
+  colors,
+  iconSizes,
+  styles,
+}: FilterBadgeProps): React.JSX.Element {
   const color = status ? getStatusColor(status, colors) : colors.textSecondary;
   return (
     <View style={styles.badge}>
@@ -494,7 +501,7 @@ function ActivityDetailModal({
       subtitle={t('screens.activities.socialMeetupInfo')}
       icon={ICONS.ACCOUNT_HEART}
       iconColor={colors.primary}
-      iconBackgroundColor={colors.primaryLight}
+      iconBackgroundColor={colors.primaryAlpha20}
       onClose={onClose}
     >
       <View style={modalStyles.content}>
