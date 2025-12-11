@@ -1,19 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { clubService } from '../../../../infrastructure/repositories/clubService';
-import { Club } from '../../../../types';
-import { EMPTY_VALUE } from '../../../../shared/constants';
 import * as utils from './clubHierarchyUtils';
-import { useHierarchyHandlers, HierarchyHandlers } from './hierarchyHandlers';
+import { useHierarchyHandlers, type HierarchyHandlers } from './hierarchyHandlers';
+import { clubService } from '../../../../infrastructure/repositories/clubService';
+import { EMPTY_VALUE } from '../../../../shared/constants';
+import type { Club } from '../../../../types';
 
-interface HierarchyState {
+type HierarchyState = {
   division: string;
   union: string;
   association: string;
   church: string;
   clubId: string;
-}
+};
 
 // Auto-selection hook
 function useAutoSelect(
@@ -73,7 +73,7 @@ function useAutoSelect(
   }, [clubs, h.division, h.union, h.association, h.church, h.clubId, setters]);
 }
 
-export interface UseClubHierarchyReturn extends HierarchyHandlers {
+export type UseClubHierarchyReturn = {
   clubs: Club[];
   loadingClubs: boolean;
   hierarchy: HierarchyState;
@@ -83,7 +83,7 @@ export interface UseClubHierarchyReturn extends HierarchyHandlers {
   getUniqueChurches: () => string[];
   getFilteredClubs: () => Club[];
   setClubId: (id: string) => void;
-}
+} & HierarchyHandlers;
 
 export function useClubHierarchy(): UseClubHierarchyReturn {
   const { t } = useTranslation();

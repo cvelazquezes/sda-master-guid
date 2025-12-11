@@ -2,9 +2,9 @@ import React, { useMemo } from 'react';
 import { View, TouchableOpacity, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { createHierarchyPickerStyles } from './styles';
+import { ICONS } from '../../../../shared/constants';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
-import { ICONS } from '../../../../shared/constants';
 
 type HierarchyPickerProps = {
   label: string;
@@ -41,6 +41,9 @@ export function HierarchyPicker({
                 hierarchyPickerStyles.option,
                 isSelected && hierarchyPickerStyles.optionSelected,
               ]}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: isSelected }}
+              accessibilityLabel={option}
               onPress={(): void => onSelect(option)}
             >
               <MaterialCommunityIcons name={iconName} size={iconSizes.md} color={iconColor} />

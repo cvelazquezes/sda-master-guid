@@ -2,9 +2,9 @@ import React, { useMemo } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { createSectionStyles, createClassSelectionStyles } from './styles';
+import { ICONS, LIST_SEPARATOR } from '../../../../shared/constants';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
-import { ICONS, LIST_SEPARATOR } from '../../../../shared/constants';
 import type { PathfinderClass } from '../../../../types';
 
 type ClassSelectionSectionProps = {
@@ -47,7 +47,12 @@ export function ClassSelectionSection({
         <Text style={sectionStyles.title}>{sectionTitle}</Text>
       </View>
       <Text style={sectionStyles.description}>{description}</Text>
-      <TouchableOpacity style={classSelectionStyles.button} onPress={onOpenModal}>
+      <TouchableOpacity
+        style={classSelectionStyles.button}
+        accessibilityRole="button"
+        accessibilityLabel="Select classes"
+        onPress={onOpenModal}
+      >
         <View style={classSelectionStyles.buttonContent}>
           <MaterialCommunityIcons name={ICONS.SCHOOL} size={iconSizes.md} color={colors.primary} />
           <Text style={classSelectionStyles.buttonText}>{displayText}</Text>

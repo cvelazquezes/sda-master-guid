@@ -359,6 +359,7 @@ function LoginForm(props: LoginFormProps): React.JSX.Element {
         email={email}
         disabled={loading}
         error={errors.email}
+        accessibilityLabel="Email address"
         onChange={onEmailChange}
       />
       <PasswordInput
@@ -366,6 +367,7 @@ function LoginForm(props: LoginFormProps): React.JSX.Element {
         password={password}
         disabled={loading}
         error={errors.password}
+        accessibilityLabel="Password"
         onChange={onPasswordChange}
       />
       <Button
@@ -375,6 +377,7 @@ function LoginForm(props: LoginFormProps): React.JSX.Element {
         testID={TEST_IDS.LOGIN_BUTTON}
         title={title}
         variant={COMPONENT_VARIANT.primary}
+        accessibilityState={{ disabled: loading }}
         onPress={onLogin}
       />
       <RegisterLink t={t} disabled={loading} spacing={spacing} onPress={onRegister} />

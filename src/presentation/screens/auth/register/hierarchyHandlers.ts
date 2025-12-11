@@ -3,20 +3,20 @@ import { EMPTY_VALUE } from '../../../../shared/constants';
 
 type SetState = (v: string) => void;
 
-export interface HierarchyHandlers {
+export type HierarchyHandlers = {
   handleDivisionChange: (v: string) => void;
   handleUnionChange: (v: string) => void;
   handleAssociationChange: (v: string) => void;
   handleChurchChange: (v: string) => void;
-}
+};
 
-interface HierarchySetters {
+type HierarchySetters = {
   setDivision: SetState;
   setUnion: SetState;
   setAssociation: SetState;
   setChurch: SetState;
   setClubId: SetState;
-}
+};
 
 export function useHierarchyHandlers(setters: HierarchySetters): HierarchyHandlers {
   const { setDivision, setUnion, setAssociation, setChurch, setClubId } = setters;

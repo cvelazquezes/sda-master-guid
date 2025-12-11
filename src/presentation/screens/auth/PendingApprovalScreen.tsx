@@ -1,63 +1,77 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
-  screenStyles,
-  textStyles,
-  infoCardStyles,
-  statusCardStyles,
-  noteCardStyles,
-  buttonStyles,
+  createScreenStyles,
+  createTextStyles,
+  createInfoCardStyles,
+  createStatusCardStyles,
+  createNoteCardStyles,
+  createButtonStyles,
 } from './pending-approval/styles';
+import { ICONS, LOG_MESSAGES, SAFE_AREA_EDGES } from '../../../shared/constants';
+import { logger } from '../../../shared/utils/logger';
+import { UserRole } from '../../../types';
 import { Text } from '../../components/primitives';
 import { useAuth } from '../../state/AuthContext';
-import { UserRole } from '../../../types';
-import { designTokens } from '../../theme';
-import { logger } from '../../../shared/utils/logger';
-import { ICONS, LOG_MESSAGES, SAFE_AREA_EDGES } from '../../../shared/constants';
+import { useTheme } from '../../state/ThemeContext';
+
+type StatusStepProps = {
+  number: number;
+  text: string;
+  styles: ReturnType<typeof createStatusCardStyles>;
+};
 
 // Step component for reuse
-function StatusStep({ number, text }: { number: number; text: string }): React.JSX.Element {
+function StatusStep({ number, text, styles }: StatusStepProps): React.JSX.Element {
   return (
-    <View style={statusCardStyles.step}>
-      <View style={statusCardStyles.stepNumber}>
-        <Text style={statusCardStyles.stepNumberText}>{number}</Text>
+    <View style={styles.step}>
+      <View style={styles.stepNumber}>
+        <Text style={styles.stepNumberText}>{number}</Text>
       </View>
-      <Text style={statusCardStyles.stepText}>{text}</Text>
+      <Text style={styles.stepText}>{text}</Text>
     </View>
   );
 }
 
+type InfoRowProps = {
+  icon: string;
+  text?: string;
+  styles: ReturnType<typeof createInfoCardStyles>;
+  iconSize: number;
+  iconColor: string;
+};
+
 // Info row component
-function InfoRow({ icon, text }: { icon: string; text?: string }): React.JSX.Element {
+function InfoRow({ icon, text, styles, iconSize, iconColor }: InfoRowProps): React.JSX.Element {
   return (
-    <View style={infoCardStyles.row}>
-      <MaterialCommunityIcons
-        name={icon as never}
-        size={designTokens.iconSize.md}
-        color={designTokens.colors.textSecondary}
-      />
-      <Text style={infoCardStyles.text}>{text}</Text>
+    <View style={styles.row}>
+      <MaterialCommunityIcons name={icon as never} size={iconSize} color={iconColor} />
+      <Text style={styles.text}>{text}</Text>
     </View>
   );
 }
+
+type StatusStepsContentProps = {
+  isClubAdmin: boolean;
+  t: ReturnType<typeof useTranslation>['t'];
+  styles: ReturnType<typeof createStatusCardStyles>;
+};
 
 // Status steps content
 function StatusStepsContent({
   isClubAdmin,
   t,
-}: {
-  isClubAdmin: boolean;
-  t: ReturnType<typeof useTranslation>['t'];
-}): React.JSX.Element {
+  styles,
+}: StatusStepsContentProps): React.JSX.Element {
   const prefix = isClubAdmin ? 'adminStep' : 'userStep';
   return (
     <>
-      <StatusStep number={1} text={t(`screens.pendingApproval.${prefix}1`)} />
-      <StatusStep number={2} text={t(`screens.pendingApproval.${prefix}2`)} />
-      <StatusStep number={3} text={t(`screens.pendingApproval.${prefix}3`)} />
+      <StatusStep number={1} text={t(`screens.pendingApproval.${prefix}1`)} styles={styles} />
+      <StatusStep number={2} text={t(`screens.pendingApproval.${prefix}2`)} styles={styles} />
+      <StatusStep number={3} text={t(`screens.pendingApproval.${prefix}3`)} styles={styles} />
     </>
   );
 }
@@ -65,7 +79,31 @@ function StatusStepsContent({
 const PendingApprovalScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
+  const { colors, spacing, radii, typography, iconSizes } = useTheme();
   const isClubAdmin = user?.role === UserRole.CLUB_ADMIN;
+
+  // Create styles using theme
+  const screenStyles = useMemo(() => createScreenStyles(colors, spacing), [colors, spacing]);
+  const textStyles = useMemo(
+    () => createTextStyles(colors, spacing, typography),
+    [colors, spacing, typography]
+  );
+  const infoCardStyles = useMemo(
+    () => createInfoCardStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+  const statusCardStyles = useMemo(
+    () => createStatusCardStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+  const noteCardStyles = useMemo(
+    () => createNoteCardStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+  const buttonStyles = useMemo(
+    () => createButtonStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
 
   const handleLogout = async (): Promise<void> => {
     try {
@@ -86,8 +124,8 @@ const PendingApprovalScreen = (): React.JSX.Element => {
           <View style={screenStyles.iconContainer}>
             <MaterialCommunityIcons
               name={ICONS.CLOCK_ALERT_OUTLINE}
-              size={designTokens.iconSize['4xl']}
-              color={designTokens.colors.warning}
+              size={iconSizes['4xl']}
+              color={colors.warning}
             />
           </View>
           <Text style={textStyles.title}>{t('screens.pendingApproval.title')}</Text>
@@ -95,35 +133,54 @@ const PendingApprovalScreen = (): React.JSX.Element => {
             {t('screens.pendingApproval.thankYouMessage', { name: user?.name })}
           </Text>
           <View style={infoCardStyles.card}>
-            <InfoRow icon={ICONS.EMAIL} text={user?.email} />
-            <InfoRow icon={ICONS.WHATSAPP} text={user?.whatsappNumber} />
+            <InfoRow
+              icon={ICONS.EMAIL}
+              text={user?.email}
+              styles={infoCardStyles}
+              iconSize={iconSizes.md}
+              iconColor={colors.textSecondary}
+            />
+            <InfoRow
+              icon={ICONS.WHATSAPP}
+              text={user?.whatsappNumber}
+              styles={infoCardStyles}
+              iconSize={iconSizes.md}
+              iconColor={colors.textSecondary}
+            />
           </View>
           <View style={statusCardStyles.card}>
             <View style={statusCardStyles.header}>
               <MaterialCommunityIcons
                 name={ICONS.INFORMATION}
-                size={designTokens.iconSize.lg}
-                color={designTokens.colors.primary}
+                size={iconSizes.lg}
+                color={colors.primary}
               />
-              <Text style={statusCardStyles.title}>{t('screens.pendingApproval.whatHappensNext')}</Text>
+              <Text style={statusCardStyles.title}>
+                {t('screens.pendingApproval.whatHappensNext')}
+              </Text>
             </View>
-            <StatusStepsContent isClubAdmin={isClubAdmin} t={t} />
+            <StatusStepsContent isClubAdmin={isClubAdmin} t={t} styles={statusCardStyles} />
           </View>
           <View style={noteCardStyles.card}>
             <MaterialCommunityIcons
               name={ICONS.ALERT_CIRCLE}
-              size={designTokens.iconSize.md}
-              color={designTokens.colors.warning}
+              size={iconSizes.md}
+              color={colors.warning}
             />
             <Text style={noteCardStyles.text}>
               {t('screens.pendingApproval.noteText', { admin: adminLabel })}
             </Text>
           </View>
-          <TouchableOpacity style={buttonStyles.logout} onPress={handleLogout}>
+          <TouchableOpacity
+            style={buttonStyles.logout}
+            accessibilityRole="button"
+            accessibilityLabel="Logout"
+            onPress={handleLogout}
+          >
             <MaterialCommunityIcons
               name={ICONS.LOGOUT}
-              size={designTokens.iconSize.md}
-              color={designTokens.colors.textInverse}
+              size={iconSizes.md}
+              color={colors.textInverse}
             />
             <Text style={buttonStyles.logoutText}>{t('screens.pendingApproval.logout')}</Text>
           </TouchableOpacity>

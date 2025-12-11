@@ -4,11 +4,11 @@
  */
 
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import LoginScreen from '../LoginScreen';
-import { useAuth } from '../../../state/AuthContext';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { AuthenticationError, NetworkError } from '../../../../shared/utils/errors';
+import { useAuth } from '../../../state/AuthContext';
+import LoginScreen from '../LoginScreen';
 
 // Mock navigation
 const mockNavigate = jest.fn();
@@ -179,7 +179,12 @@ describe('LoginScreen', () => {
     });
 
     it('should show loading state during login', async () => {
-      mockLogin.mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 100)));
+      mockLogin.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            setTimeout(resolve, 100);
+          })
+      );
 
       const { getByTestId, getByText } = renderWithNavigation(<LoginScreen />);
 
@@ -200,7 +205,12 @@ describe('LoginScreen', () => {
     });
 
     it('should disable inputs during login', async () => {
-      mockLogin.mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 100)));
+      mockLogin.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            setTimeout(resolve, 100);
+          })
+      );
 
       const { getByTestId } = renderWithNavigation(<LoginScreen />);
 
@@ -392,7 +402,7 @@ describe('LoginScreen', () => {
       const { getByTestId } = renderWithNavigation(<LoginScreen />);
 
       const emailInput = getByTestId('email-input');
-      const longEmail = 'a'.repeat(250) + '@example.com';
+      const longEmail = `${'a'.repeat(250)}@example.com`;
 
       fireEvent.changeText(emailInput, longEmail);
 

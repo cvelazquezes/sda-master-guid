@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { ClubPicker } from './ClubPicker';
+import { HierarchyPicker } from './HierarchyPicker';
 import { createSectionStyles } from './styles';
+import { ICONS } from '../../../../shared/constants';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
-import { HierarchyPicker } from './HierarchyPicker';
-import { ClubPicker } from './ClubPicker';
-import { ICONS } from '../../../../shared/constants';
 import type { Club } from '../../../../types';
 
 type SectionStylesType = ReturnType<typeof createSectionStyles>;

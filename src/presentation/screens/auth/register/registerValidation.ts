@@ -1,10 +1,11 @@
 import { Alert } from 'react-native';
-import { PathfinderClass } from '../../../../types';
-import { LIMITS, PHONE, PASSWORD, EMPTY_VALUE } from '../../../../shared/constants';
+import { PHONE, PASSWORD, EMPTY_VALUE } from '../../../../shared/constants';
+import { ARRAY_LIMITS } from '../../../../shared/constants/validation';
+import type { PathfinderClass } from '../../../../types';
 
 type TranslationFn = (key: string, options?: Record<string, unknown>) => string;
 
-interface FormData {
+type FormData = {
   name: string;
   email: string;
   whatsappNumber: string;
@@ -13,7 +14,7 @@ interface FormData {
   isClubAdmin: boolean;
   selectedClasses: PathfinderClass[];
   clubId: string;
-}
+};
 
 function showError(t: TranslationFn, messageKey: string): boolean {
   Alert.alert(t('common.error'), t(messageKey));
@@ -33,7 +34,7 @@ export function validateRegistration(form: FormData, t: TranslationFn): boolean 
   if (!hasRequiredFields(form)) {
     return showError(t, 'errors.missingClubSelection');
   }
-  if (!form.isClubAdmin && form.selectedClasses.length === LIMITS.MIN_ARRAY_LENGTH) {
+  if (!form.isClubAdmin && form.selectedClasses.length === ARRAY_LIMITS.MIN_LENGTH) {
     return showError(t, 'errors.missingClassSelection');
   }
   if (!isValidWhatsapp(form.whatsappNumber)) {

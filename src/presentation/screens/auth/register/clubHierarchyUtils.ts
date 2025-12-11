@@ -1,4 +1,4 @@
-import { Club } from '../../../../types';
+import type { Club } from '../../../../types';
 
 export const getUniqueDivisions = (clubs: Club[]): string[] => {
   const values = clubs.map((club) => club.division).filter(Boolean);
@@ -40,13 +40,13 @@ export const getUniqueChurches = (
   return Array.from(new Set(values)).sort();
 };
 
-interface GetFilteredClubsOptions {
+type GetFilteredClubsOptions = {
   clubs: Club[];
   division: string;
   union: string;
   association: string;
   church: string;
-}
+};
 
 export const getFilteredClubs = (options: GetFilteredClubsOptions): Club[] => {
   const { clubs, division, union, association, church } = options;

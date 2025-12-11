@@ -2,9 +2,9 @@ import React, { useMemo } from 'react';
 import { View, TouchableOpacity, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { createClubPickerStyles } from './styles';
+import { ICONS } from '../../../../shared/constants';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
-import { ICONS } from '../../../../shared/constants';
 import type { Club } from '../../../../types';
 
 type ClubPickerProps = {
@@ -42,6 +42,9 @@ export function ClubPicker({
                 clubPickerStyles.clubOption,
                 isSelected && clubPickerStyles.clubOptionSelected,
               ]}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: isSelected }}
+              accessibilityLabel={club.name}
               onPress={(): void => onSelect(club.id)}
             >
               <MaterialCommunityIcons name={iconName} size={iconSizes.md} color={iconColor} />

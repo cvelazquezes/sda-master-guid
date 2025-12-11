@@ -1,13 +1,13 @@
 import React from 'react';
-import { View, ActivityIndicator, TextStyle, ViewStyle } from 'react-native';
+import { View, ActivityIndicator, type TextStyle, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ACTIVITY_INDICATOR_SIZE, SAFE_AREA_EDGES, FLEX } from '../../../../shared/constants';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
-import { ACTIVITY_INDICATOR_SIZE, SAFE_AREA_EDGES, FLEX } from '../../../../shared/constants';
 
-interface LoadingStateProps {
+type LoadingStateProps = {
   message: string;
-}
+};
 
 export function LoadingState({ message }: LoadingStateProps): React.JSX.Element {
   const { colors, spacing, typography } = useTheme();
@@ -32,7 +32,11 @@ export function LoadingState({ message }: LoadingStateProps): React.JSX.Element 
   return (
     <SafeAreaView style={safeAreaStyle} edges={SAFE_AREA_EDGES.TOP_LEFT_RIGHT}>
       <View style={containerStyle}>
-        <ActivityIndicator size={ACTIVITY_INDICATOR_SIZE.large} color={colors.primary} />
+        <ActivityIndicator
+          size={ACTIVITY_INDICATOR_SIZE.large}
+          color={colors.primary}
+          accessibilityLabel="Loading"
+        />
         <Text style={textStyle}>{message}</Text>
       </View>
     </SafeAreaView>

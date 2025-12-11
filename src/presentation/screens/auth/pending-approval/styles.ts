@@ -2,11 +2,10 @@
  * Pending Approval Screen Styles
  * Theme-aware style factories
  */
-import { StyleSheet, ViewStyle } from 'react-native';
+import { StyleSheet, type ViewStyle, type TextStyle } from 'react-native';
 import { FLEX, SHADOW_OFFSET, TYPOGRAPHY } from '../../../../shared/constants';
 import { SPACING, BORDER_WIDTH } from '../../../../shared/constants/numbers';
 import type { ThemeContextType } from '../../../state/ThemeContext';
-import type { TextStyle } from 'react-native';
 
 // ============================================================================
 // SCREEN STYLES FACTORY
@@ -15,7 +14,7 @@ import type { TextStyle } from 'react-native';
 export const createScreenStyles = (
   colors: ThemeContextType['colors'],
   spacing: ThemeContextType['spacing']
-) =>
+): { safeArea: ViewStyle; container: ViewStyle; content: ViewStyle; iconContainer: ViewStyle } =>
   StyleSheet.create({
     safeArea: {
       flex: FLEX.ONE,
@@ -44,7 +43,7 @@ export const createTextStyles = (
   colors: ThemeContextType['colors'],
   spacing: ThemeContextType['spacing'],
   typography: ThemeContextType['typography']
-) =>
+): { title: TextStyle; message: TextStyle; userName: TextStyle } =>
   StyleSheet.create({
     title: {
       fontSize: typography.fontSizes['4xl'],
@@ -74,7 +73,7 @@ export const createInfoCardStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): { card: ViewStyle; row: ViewStyle; text: TextStyle } =>
   StyleSheet.create({
     card: {
       backgroundColor: colors.backgroundPrimary,
@@ -109,7 +108,15 @@ export const createStatusCardStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  card: ViewStyle;
+  header: ViewStyle;
+  title: TextStyle;
+  step: ViewStyle;
+  stepNumber: ViewStyle;
+  stepNumberText: TextStyle;
+  stepText: TextStyle;
+} =>
   StyleSheet.create({
     card: {
       backgroundColor: colors.backgroundPrimary,
@@ -170,7 +177,7 @@ export const createNoteCardStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): { card: ViewStyle; text: TextStyle } =>
   StyleSheet.create({
     card: {
       flexDirection: 'row',
@@ -199,7 +206,7 @@ export const createButtonStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): { logout: ViewStyle; logoutText: TextStyle } =>
   StyleSheet.create({
     logout: {
       flexDirection: 'row',

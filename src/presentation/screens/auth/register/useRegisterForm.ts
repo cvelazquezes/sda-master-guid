@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../../state/AuthContext';
-import { PathfinderClass, PATHFINDER_CLASSES } from '../../../../types';
-import { EMPTY_VALUE } from '../../../../shared/constants';
 import { validateRegistration } from './registerValidation';
+import { EMPTY_VALUE } from '../../../../shared/constants';
+import { type PathfinderClass, PATHFINDER_CLASSES } from '../../../../types';
+import { useAuth } from '../../../state/AuthContext';
 
-interface FormState {
+type FormState = {
   name: string;
   email: string;
   whatsappNumber: string;
@@ -15,9 +15,9 @@ interface FormState {
   isClubAdmin: boolean;
   selectedClasses: PathfinderClass[];
   loading: boolean;
-}
+};
 
-export interface UseRegisterFormReturn {
+export type UseRegisterFormReturn = {
   form: FormState;
   setName: (v: string) => void;
   setEmail: (v: string) => void;
@@ -27,7 +27,7 @@ export interface UseRegisterFormReturn {
   setIsClubAdmin: (v: boolean) => void;
   setSelectedClasses: (v: PathfinderClass[]) => void;
   handleRegister: (clubId: string) => Promise<void>;
-}
+};
 
 export function useRegisterForm(): UseRegisterFormReturn {
   const { t } = useTranslation();

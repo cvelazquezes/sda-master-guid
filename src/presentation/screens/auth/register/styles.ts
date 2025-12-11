@@ -2,10 +2,9 @@
  * Register Screen Styles
  * Theme-aware style factories for all register-related components
  */
-import { StyleSheet } from 'react-native';
+import { StyleSheet, type ViewStyle, type TextStyle } from 'react-native';
 import { FLEX, DIMENSIONS } from '../../../../shared/constants';
 import type { ThemeContextType } from '../../../state/ThemeContext';
-import type { ViewStyle, TextStyle } from 'react-native';
 
 // ============================================================================
 // SCREEN STYLES FACTORY
@@ -49,7 +48,7 @@ export const createSectionStyles = (
   colors: ThemeContextType['colors'],
   spacing: ThemeContextType['spacing'],
   typography: ThemeContextType['typography']
-) =>
+): { header: ViewStyle; title: TextStyle; description: TextStyle } =>
   StyleSheet.create({
     header: {
       flexDirection: 'row',
@@ -80,7 +79,12 @@ export const createAccountTypeStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  checkboxContainer: ViewStyle;
+  checkboxLabel: TextStyle;
+  infoBox: ViewStyle;
+  infoText: TextStyle;
+} =>
   StyleSheet.create({
     checkboxContainer: {
       flexDirection: 'row',
@@ -117,7 +121,14 @@ export const createHierarchyPickerStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  container: ViewStyle;
+  label: TextStyle;
+  optionsList: ViewStyle;
+  option: ViewStyle;
+  optionSelected: ViewStyle;
+  optionText: TextStyle;
+} =>
   StyleSheet.create({
     container: {
       marginBottom: spacing.md,
@@ -161,7 +172,16 @@ export const createClubPickerStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  container: ViewStyle;
+  label: TextStyle;
+  clubsList: ViewStyle;
+  clubOption: ViewStyle;
+  clubOptionSelected: ViewStyle;
+  clubInfo: ViewStyle;
+  clubName: TextStyle;
+  clubDescription: TextStyle;
+} =>
   StyleSheet.create({
     container: {
       marginBottom: spacing.md,
@@ -214,7 +234,7 @@ export const createClassSelectionStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): { button: ViewStyle; buttonContent: ViewStyle; buttonText: TextStyle } =>
   StyleSheet.create({
     button: {
       flexDirection: 'row',

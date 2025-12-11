@@ -1,14 +1,14 @@
 import React from 'react';
-import { View, TextStyle } from 'react-native';
+import { View, type TextStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { ICONS } from '../../../../shared/constants';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
-import { ICONS } from '../../../../shared/constants';
 
-interface RegisterHeaderProps {
+type RegisterHeaderProps = {
   title: string;
   subtitle: string;
-}
+};
 
 export function RegisterHeader({ title, subtitle }: RegisterHeaderProps): React.JSX.Element {
   const { colors, spacing, iconSizes, typography } = useTheme();
