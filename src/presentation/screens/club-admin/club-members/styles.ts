@@ -2,7 +2,8 @@
  * Club Members Screen Styles
  * Theme-aware style factories
  */
-import { StyleSheet } from 'react-native';
+/* eslint-disable max-lines-per-function -- Style factory functions require many style definitions */
+import { StyleSheet, type ViewStyle, type TextStyle } from 'react-native';
 import { FLEX, TEXT_TRANSFORM, TYPOGRAPHY, DIMENSIONS } from '../../../../shared/constants';
 import type { ThemeContextType } from '../../../state/ThemeContext';
 
@@ -13,7 +14,7 @@ import type { ThemeContextType } from '../../../state/ThemeContext';
 export const createStyles = (
   colors: ThemeContextType['colors'],
   spacing: ThemeContextType['spacing']
-) =>
+): { container: ViewStyle; content: ViewStyle } =>
   StyleSheet.create({
     container: {
       flex: FLEX.ONE,
@@ -33,7 +34,22 @@ export const createPendingCardStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  card: ViewStyle;
+  avatar: ViewStyle;
+  avatarText: TextStyle;
+  badge: ViewStyle;
+  info: ViewStyle;
+  header: ViewStyle;
+  name: TextStyle;
+  statusBadge: ViewStyle;
+  statusText: TextStyle;
+  email: TextStyle;
+  detailsRow: ViewStyle;
+  actionsContainer: ViewStyle;
+  rejectButton: ViewStyle;
+  approveButton: ViewStyle;
+} =>
   StyleSheet.create({
     card: {
       backgroundColor: colors.warningAlpha20,
@@ -148,7 +164,31 @@ export const createMemberCardStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  card: ViewStyle;
+  cardInactive: ViewStyle;
+  avatar: ViewStyle;
+  avatarText: TextStyle;
+  avatarTextInactive: TextStyle;
+  info: ViewStyle;
+  header: ViewStyle;
+  name: TextStyle;
+  textInactive: TextStyle;
+  roleBadge: ViewStyle;
+  roleText: TextStyle;
+  roleTextInactive: TextStyle;
+  email: TextStyle;
+  detailsRow: ViewStyle;
+  metaItem: ViewStyle;
+  metaText: TextStyle;
+  statusBadge: ViewStyle;
+  statusText: TextStyle;
+  actionsContainer: ViewStyle;
+  balanceRow: ViewStyle;
+  balanceIndicator: ViewStyle;
+  balanceText: TextStyle;
+  balanceLabel: TextStyle;
+} =>
   StyleSheet.create({
     card: {
       backgroundColor: colors.backgroundPrimary,
@@ -209,7 +249,7 @@ export const createMemberCardStyles = (
       paddingHorizontal: spacing.sm,
       paddingVertical: spacing.xxs,
       borderRadius: radii.sm,
-      backgroundColor: colors.infoLight,
+      backgroundColor: colors.infoAlpha20,
       flexShrink: FLEX.SHRINK_DISABLED,
     },
     roleText: {

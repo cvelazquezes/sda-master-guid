@@ -1,15 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { userService } from '../../../../infrastructure/repositories/userService';
-import { User } from '../../../../types';
 import { ID_PREFIX } from '../../../../shared/constants';
 import { LOG_MESSAGES } from '../../../../shared/constants/logMessages';
 import { logger } from '../../../../shared/utils/logger';
-import { AgendaItem } from './types';
+import type { AgendaItem } from './types';
+import type { User } from '../../../../types';
 
 type TranslationFn = (key: string, options?: Record<string, unknown>) => string;
 
-interface UseMeetingPlannerReturn {
+type UseMeetingPlannerReturn = {
   agendaItems: AgendaItem[];
   setAgendaItems: (items: AgendaItem[]) => void;
   clubMembers: User[];
@@ -19,11 +19,11 @@ interface UseMeetingPlannerReturn {
   setMeetingTitle: (t: string) => void;
   isSaved: boolean;
   setIsSaved: (s: boolean) => void;
-}
+};
 
 export function useMeetingPlanner(
   clubId: string | undefined,
-  getDefaultAgenda: () => Omit<AgendaItem, 'id' | 'order'>[],
+  getDefaultAgenda: () => Array<Omit<AgendaItem, 'id' | 'order'>>,
   defaultTitle: string,
   t: TranslationFn
 ): UseMeetingPlannerReturn {

@@ -1,9 +1,7 @@
 import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text, IconButton } from '../../../components/primitives';
-import { User } from '../../../../types';
-import { useTheme } from '../../../state/ThemeContext';
+import { createPendingCardStyles } from './styles';
 import {
   ICONS,
   TEXT_LINES,
@@ -13,20 +11,22 @@ import {
   ELLIPSIS,
   EMPTY_VALUE,
 } from '../../../../shared/constants';
-import { createPendingCardStyles } from './styles';
+import { Text, IconButton } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
+import type { User } from '../../../../types';
 
-interface PendingMemberCardProps {
+type PendingMemberCardProps = {
   member: User;
   onApprove: (memberId: string, memberName: string) => void;
   onReject: (memberId: string, memberName: string) => void;
   labels: { pending: string; reject: string; approve: string };
-}
+};
 
-interface MetaItemProps {
+type MetaItemProps = {
   icon: string;
   color: string;
   children: string;
-}
+};
 
 function MetaItem({ icon, color, children }: MetaItemProps): React.JSX.Element {
   const { spacing, typography, colors, iconSizes } = useTheme();
@@ -69,12 +69,12 @@ function PendingAvatar({
   );
 }
 
-interface PendingInfoProps {
+type PendingInfoProps = {
   member: User;
   classesText: string | null;
   labels: PendingMemberCardProps['labels'];
   styles: ReturnType<typeof createPendingCardStyles>;
-}
+};
 
 function PendingInfo({ member, classesText, labels, styles }: PendingInfoProps): React.JSX.Element {
   const { iconSizes, colors } = useTheme();
@@ -137,19 +137,19 @@ export function PendingMemberCard({
       <View style={styles.actionsContainer}>
         <IconButton
           icon={ICONS.CLOSE_CIRCLE}
-          onPress={(): void => onReject(member.id, member.name)}
           size={COMPONENT_SIZE.md}
           color={colors.textInverse}
           style={styles.rejectButton}
           accessibilityLabel={labels.reject}
+          onPress={(): void => onReject(member.id, member.name)}
         />
         <IconButton
           icon={ICONS.CHECK_CIRCLE}
-          onPress={(): void => onApprove(member.id, member.name)}
           size={COMPONENT_SIZE.md}
           color={colors.textInverse}
           style={styles.approveButton}
           accessibilityLabel={labels.approve}
+          onPress={(): void => onApprove(member.id, member.name)}
         />
       </View>
     </View>

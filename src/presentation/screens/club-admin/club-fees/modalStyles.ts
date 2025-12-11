@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native';
-import { mobileFontSizes, designTokens, layoutConstants } from '../../../theme';
 import { FLEX, DIMENSIONS } from '../../../../shared/constants';
 import { MATH } from '../../../../shared/constants/numbers';
+import { mobileFontSizes, designTokens, layoutConstants } from '../../../theme';
 
 export const modalStyles = StyleSheet.create({
   overlay: {
@@ -70,7 +70,7 @@ export const modalStyles = StyleSheet.create({
     borderRadius: designTokens.borderRadius.lg,
   },
   applyToOptionActive: {
-    backgroundColor: designTokens.colors.primaryLight,
+    backgroundColor: designTokens.colors.primaryAlpha20,
     borderColor: designTokens.colors.primary,
   },
   applyToText: {
@@ -78,7 +78,7 @@ export const modalStyles = StyleSheet.create({
     fontWeight: designTokens.fontWeight.semibold,
     color: designTokens.colors.textSecondary,
   },
-  applyToTextActive: { color: designTokens.colors.primary },
+  applyToTextActive: { color: designTokens.colors.textPrimary },
   memberSelectionContainer: {
     marginTop: designTokens.spacing.lg,
     backgroundColor: designTokens.colors.backgroundSecondary,
@@ -123,7 +123,7 @@ export const modalStyles = StyleSheet.create({
     borderColor: designTokens.colors.borderLight,
   },
   memberItemSelected: {
-    backgroundColor: designTokens.colors.primaryLight,
+    backgroundColor: designTokens.colors.primaryAlpha20,
     borderColor: designTokens.colors.primary,
   },
   memberItemLeft: {

@@ -15,13 +15,12 @@ import {
 import { FeeTabs } from './FeeTabs';
 import { SettingsTab } from './SettingsTab';
 import { createStyles } from './styles';
-import { BREAKPOINTS, MODAL_WIDTH_CONFIG } from './types';
+import { BREAKPOINTS, MODAL_WIDTH_CONFIG, type FeeTabValue } from './types';
 import { useClubFees } from './useClubFees';
 import { ICONS, EMPTY_VALUE, FEE_TABS } from '../../../../shared/constants';
 import { Text, PageHeader } from '../../../components/primitives';
 import { useAuth } from '../../../state/AuthContext';
 import { useTheme } from '../../../state/ThemeContext';
-import type { FeeTabValue } from './types';
 
 function useChargeState(_t: ReturnType<typeof useTranslation>['t']): {
   chargeModalVisible: boolean;

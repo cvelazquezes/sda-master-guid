@@ -1,19 +1,19 @@
 import { Alert, Linking } from 'react-native';
 import { matchService } from '../../../../infrastructure/repositories/matchService';
 import { userService } from '../../../../infrastructure/repositories/userService';
-import { Match, MatchRound, MatchStatus } from '../../../../types';
 import { EMPTY_VALUE, EXTERNAL_URLS, PHONE } from '../../../../shared/constants';
+import { type Match, type MatchRound, MatchStatus } from '../../../../types';
 
 type TranslationFn = (key: string, options?: Record<string, unknown>) => string;
 
-interface MatchesDataResult {
+type MatchesDataResult = {
   matches: Match[];
   rounds: MatchRound[];
-}
+};
 
-interface DateSortable {
+type DateSortable = {
   createdAt: string;
-}
+};
 
 function sortByDate<T extends DateSortable>(a: T, b: T): number {
   return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -59,13 +59,13 @@ export async function updateMatchStatus(matchId: string, status: MatchStatus): P
   await matchService.updateMatchStatus(matchId, status);
 }
 
-export interface MatchStats {
+export type MatchStats = {
   total: number;
   pending: number;
   scheduled: number;
   completed: number;
   skipped: number;
-}
+};
 
 export function calculateStats(matches: Match[]): MatchStats {
   return {

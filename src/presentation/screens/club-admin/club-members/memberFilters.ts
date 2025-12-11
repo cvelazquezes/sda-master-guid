@@ -1,14 +1,14 @@
-import { User, UserRole, ApprovalStatus, PathfinderClass } from '../../../../types';
 import { FILTER_STATUS, ENTITY_STATUS, MEMBER_TAB } from '../../../../shared/constants';
-import { StatusFilterValue, MemberTabValue } from './types';
+import { type User, type PathfinderClass, UserRole, ApprovalStatus } from '../../../../types';
+import type { StatusFilterValue, MemberTabValue } from './types';
 
-interface FilterParams {
+type FilterParams = {
   members: User[];
   searchQuery: string;
   statusFilter: StatusFilterValue;
   activeTab: MemberTabValue;
   classFilter: PathfinderClass[];
-}
+};
 
 function matchesApproval(member: User, activeTab: MemberTabValue): boolean {
   const isApproved = member.approvalStatus === ApprovalStatus.APPROVED;
@@ -54,7 +54,7 @@ function matchesClassFilter(member: User, classFilter: PathfinderClass[]): boole
   if (classFilter.length === 0) {
     return true;
   }
-  return member.classes && member.classes.some((c) => classFilter.includes(c));
+  return member.classes?.some((c) => classFilter.includes(c)) ?? false;
 }
 
 export function filterMembers(params: FilterParams): User[] {

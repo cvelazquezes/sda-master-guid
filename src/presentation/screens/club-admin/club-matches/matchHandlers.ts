@@ -1,14 +1,15 @@
 import { Alert } from 'react-native';
-import { userService } from '../../../../infrastructure/repositories/userService';
-import { Match, MatchStatus, User } from '../../../../types';
-import { logger } from '../../../../shared/utils/logger';
-import { ALERT_BUTTON_STYLE, LOG_MESSAGES, MESSAGES } from '../../../../shared/constants';
 import { sendNotification, updateMatchStatus, loadMatchesData } from './matchUtils';
+import { userService } from '../../../../infrastructure/repositories/userService';
+import { ALERT_BUTTON_STYLE, LOG_MESSAGES, MESSAGES } from '../../../../shared/constants';
+import { logger } from '../../../../shared/utils/logger';
+import type { Match, MatchStatus, User } from '../../../../types';
 
 export async function loadClubData(
   clubId: string,
   setMatches: (matches: Match[]) => void,
-  setMatchRounds: (rounds: import('../../../../types').MatchRound[]) => void,
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- Dynamic import needed for type inference
+  setMatchRounds: (rounds: Array<import('../../../../types').MatchRound>) => void,
   setRefreshing: (val: boolean) => void
 ): Promise<void> {
   try {

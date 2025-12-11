@@ -1,9 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, TouchableOpacity, FlatList, RefreshControl } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text } from '../../../components/primitives';
-import { useTheme } from '../../../state/ThemeContext';
-import { User, MemberBalance } from '../../../../types';
+import { createStyles, createBalanceStyles, createEmptyStyles } from './styles';
 import {
   ICONS,
   EMPTY_VALUE,
@@ -13,9 +11,11 @@ import {
   TEXT_WEIGHT,
 } from '../../../../shared/constants';
 import { NUMERIC } from '../../../../shared/constants/validation';
-import { createStyles, createBalanceStyles, createEmptyStyles } from './styles';
+import { Text } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
+import type { User, MemberBalance } from '../../../../types';
 
-interface BalancesTabProps {
+type BalancesTabProps = {
   balances: MemberBalance[];
   members: User[];
   refreshing: boolean;
@@ -23,7 +23,7 @@ interface BalancesTabProps {
   onNotifyAll: () => void;
   onNotifySingle: (member: User, balance: MemberBalance) => void;
   t: (key: string, opts?: Record<string, unknown>) => string;
-}
+};
 
 export function BalancesTab({
   balances,
@@ -54,13 +54,20 @@ export function BalancesTab({
       return null;
     }
     return (
-      <BalanceCard member={member} balance={item} onNotify={onNotifySingle} colors={colors} t={t} balanceStyles={balanceStyles} />
+      <BalanceCard
+        member={member}
+        balance={item}
+        colors={colors}
+        t={t}
+        balanceStyles={balanceStyles}
+        onNotify={onNotifySingle}
+      />
     );
   };
 
   return (
     <View style={styles.tabContent}>
-      <BalancesHeader count={balances.length} onNotifyAll={onNotifyAll} t={t} />
+      <BalancesHeader count={balances.length} t={t} onNotifyAll={onNotifyAll} />
       <FlatList
         data={balances}
         keyExtractor={(item): string => item.userId}
@@ -68,16 +75,17 @@ export function BalancesTab({
         renderItem={renderItem}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         ListEmptyComponent={<EmptyBalances t={t} emptyStyles={emptyStyles} />}
+        accessibilityRole="list"
       />
     </View>
   );
 }
 
-interface BalancesHeaderProps {
+type BalancesHeaderProps = {
   count: number;
   onNotifyAll: () => void;
   t: (key: string, opts?: Record<string, unknown>) => string;
-}
+};
 
 function BalancesHeader({ count, onNotifyAll, t }: BalancesHeaderProps): React.JSX.Element {
   const { colors, spacing, radii, typography, iconSizes } = useTheme();
@@ -102,6 +110,8 @@ function BalancesHeader({ count, onNotifyAll, t }: BalancesHeaderProps): React.J
       </View>
       <TouchableOpacity
         style={[balanceStyles.notifyAllButton, { backgroundColor: colors.primary }]}
+        accessibilityRole="button"
+        accessibilityLabel="Notify all members"
         onPress={onNotifyAll}
       >
         <MaterialCommunityIcons
@@ -121,14 +131,14 @@ function BalancesHeader({ count, onNotifyAll, t }: BalancesHeaderProps): React.J
   );
 }
 
-interface BalanceCardProps {
+type BalanceCardProps = {
   member: User;
   balance: MemberBalance;
   onNotify: (m: User, b: MemberBalance) => void;
   colors: Record<string, string>;
   t: (key: string, opts?: Record<string, unknown>) => string;
   balanceStyles: ReturnType<typeof createBalanceStyles>;
-}
+};
 
 function getBalanceStatusColor(balance: MemberBalance, colors: Record<string, string>): string {
   if (balance.balance >= 0) {
@@ -168,7 +178,12 @@ function CardHeader({
           </Text>
         </View>
       </View>
-      <TouchableOpacity style={balanceStyles.notifyButton} onPress={onPress}>
+      <TouchableOpacity
+        style={balanceStyles.notifyButton}
+        accessibilityRole="button"
+        accessibilityLabel={`Notify ${member.name}`}
+        onPress={onPress}
+      >
         <MaterialCommunityIcons
           name={ICONS.BELL_OUTLINE}
           size={iconSizes.lg}
@@ -200,9 +215,9 @@ function BalanceCard({
       <CardHeader
         member={member}
         statusColor={statusColor}
-        onPress={(): void => onNotify(member, balance)}
         primaryColor={colors.primary}
         balanceStyles={balanceStyles}
+        onPress={(): void => onNotify(member, balance)}
       />
       <View style={balanceStyles.details}>
         <View style={balanceStyles.row}>
@@ -235,7 +250,9 @@ function BalanceCard({
             ${Math.abs(balance.balance).toFixed(NUMERIC.DECIMAL_PLACES)} {statusText}
           </Text>
         </View>
-        {balance.overdueCharges > 0 && <OverdueNotice balance={balance} colors={colors} t={t} balanceStyles={balanceStyles} />}
+        {balance.overdueCharges > 0 && (
+          <OverdueNotice balance={balance} colors={colors} t={t} balanceStyles={balanceStyles} />
+        )}
       </View>
     </View>
   );
@@ -254,7 +271,7 @@ function OverdueNotice({
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (
-    <View style={[balanceStyles.overdueNotice, { backgroundColor: colors.errorLight }]}>
+    <View style={[balanceStyles.overdueNotice, { backgroundColor: colors.errorAlpha20 }]}>
       <MaterialCommunityIcons name={ICONS.ALERT_CIRCLE} size={iconSizes.sm} color={colors.error} />
       <Text variant={TEXT_VARIANT.CAPTION} weight={TEXT_WEIGHT.SEMIBOLD} color={TEXT_COLOR.ERROR}>
         {t('screens.clubFees.overdueAmount', {

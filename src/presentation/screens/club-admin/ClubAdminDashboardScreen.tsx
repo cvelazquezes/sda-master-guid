@@ -7,25 +7,25 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, ScrollView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { t as i18nT } from 'i18next';
 import { useTranslation } from 'react-i18next';
-import i18next from 'i18next';
-import { useAuth } from '../../state/AuthContext';
-import { useTheme, ThemeContextType } from '../../state/ThemeContext';
-import { ClubDetailModal } from '../../components/features/ClubDetailModal';
-import { ClubCard } from '../../components/features/ClubCard';
-import { StatCard } from '../../components/features/StatCard';
 import { clubService } from '../../../infrastructure/repositories/clubService';
 import { matchService } from '../../../infrastructure/repositories/matchService';
-import { Club, ApprovalStatus, MatchStatus } from '../../../types';
-import { PageHeader, SectionHeader, MenuCard } from '../../components/primitives';
 import { ICONS, MENU_ITEM_IDS, SCREENS, TABS, FLEX } from '../../../shared/constants';
+import { type Club, ApprovalStatus, MatchStatus } from '../../../types';
+import { ClubCard } from '../../components/features/ClubCard';
+import { ClubDetailModal } from '../../components/features/ClubDetailModal';
+import { StatCard } from '../../components/features/StatCard';
+import { PageHeader, SectionHeader, MenuCard } from '../../components/primitives';
+import { useAuth } from '../../state/AuthContext';
+import { useTheme, type ThemeContextType } from '../../state/ThemeContext';
 
-interface DashboardStats {
+type DashboardStats = {
   totalMembers: number;
   activeMembers: number;
   pendingApprovals: number;
   upcomingMatches: number;
-}
+};
 
 // Custom hook for dashboard data
 function useClubDashboardData(clubId?: string): {
@@ -62,7 +62,7 @@ function useClubDashboardData(clubId?: string): {
         upcomingMatches: upcoming.length,
       });
     } catch {
-      Alert.alert(i18next.t('common.error'), i18next.t('errors.failedToLoadClubInfo'));
+      Alert.alert(i18nT('common.error'), i18nT('errors.failedToLoadClubInfo'));
     }
   }, [clubId]);
 
@@ -76,13 +76,13 @@ function useClubDashboardData(clubId?: string): {
 }
 
 // Stats section component
-interface DashboardStatsSectionProps {
+type DashboardStatsSectionProps = {
   stats: DashboardStats;
   colors: ThemeContextType['colors'];
   spacing: ThemeContextType['spacing'];
   t: ReturnType<typeof useTranslation>['t'];
   navigation: ReturnType<typeof useNavigation>;
-}
+};
 
 function DashboardStatsSection({
   stats,
@@ -136,14 +136,14 @@ type ThemeSpacing = ThemeContextType['spacing'];
 type NavType = ReturnType<typeof useNavigation>;
 
 // Quick action item interface
-interface QuickAction {
+type QuickAction = {
   id: string;
   title: string;
   description: string;
   icon: string;
   screen: string;
   color: string;
-}
+};
 
 // Quick actions configuration
 const createQuickActions = (t: TranslationFn, colors: ThemeColors): QuickAction[] => [
@@ -174,12 +174,12 @@ const createQuickActions = (t: TranslationFn, colors: ThemeColors): QuickAction[
 ];
 
 // Quick actions section props
-interface QuickActionsSectionProps {
+type QuickActionsSectionProps = {
   t: TranslationFn;
   colors: ThemeColors;
   spacing: ThemeSpacing;
   navigation: NavType;
-}
+};
 
 function QuickActionsSection({
   t,
@@ -218,9 +218,9 @@ const ClubAdminDashboardScreen = (): React.JSX.Element => {
   return (
     <ScrollView style={containerStyle}>
       <PageHeader
+        showActions
         title={t('screens.clubDashboard.title')}
         subtitle={t('screens.clubDashboard.subtitle')}
-        showActions
       />
       {club && (
         <View style={{ marginTop: spacing.sm, paddingHorizontal: spacing.lg }}>

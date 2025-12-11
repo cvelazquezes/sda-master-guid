@@ -6,11 +6,11 @@ import React from 'react';
 import { View, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '../../state/ThemeContext';
-import { PageHeader, MenuCard, SectionHeader } from '../../components/primitives';
 import { ICONS, SCREENS, MENU_ITEM_IDS, FLEX } from '../../../shared/constants';
+import { PageHeader, MenuCard, SectionHeader } from '../../components/primitives';
+import { useTheme } from '../../state/ThemeContext';
 
-interface MenuItem {
+type MenuItem = {
   id: string;
   title: string;
   description: string;
@@ -18,7 +18,7 @@ interface MenuItem {
   screen: string | null;
   color: string;
   disabled?: boolean;
-}
+};
 
 // Extracted navigable menu section
 function NavMenuSection({
@@ -63,8 +63,8 @@ function DisabledMenuSection({
           description={item.disabled ? t('common.comingSoon') : item.description}
           icon={item.icon}
           color={item.disabled ? colors.textTertiary : item.color}
-          onPress={undefined}
           disabled={item.disabled}
+          onPress={undefined}
         />
       ))}
     </>
@@ -131,7 +131,11 @@ const MoreScreen = (): React.JSX.Element => {
 
   return (
     <View style={containerStyle}>
-      <PageHeader title={t('screens.clubMore.title')} subtitle={t('screens.clubMore.subtitle')} showActions />
+      <PageHeader
+        showActions
+        title={t('screens.clubMore.title')}
+        subtitle={t('screens.clubMore.subtitle')}
+      />
       <ScrollView style={{ flex: FLEX.ONE }}>
         <View style={contentStyle}>
           <SectionHeader title={t('screens.clubMore.activitiesSection')} />

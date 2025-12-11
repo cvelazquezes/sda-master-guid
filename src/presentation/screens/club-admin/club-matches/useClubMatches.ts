@@ -1,16 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Match, MatchStatus, User, MatchRound } from '../../../../types';
-import { FILTER_STATUS } from '../../../../shared/constants';
-import { calculateStats } from './matchUtils';
 import {
   loadClubData,
   fetchMatchParticipants,
   showNotifyAlert,
   handleStatusUpdate,
 } from './matchHandlers';
+import { calculateStats } from './matchUtils';
+import { FILTER_STATUS } from '../../../../shared/constants';
+import type { Match, MatchStatus, User, MatchRound } from '../../../../types';
 
-export interface UseClubMatchesReturn {
+export type UseClubMatchesReturn = {
   matchRounds: MatchRound[];
   filteredMatches: Match[];
   refreshing: boolean;
@@ -25,7 +25,7 @@ export interface UseClubMatchesReturn {
   handleUpdateMatchStatus: (matchId: string, status: MatchStatus) => Promise<void>;
   closeModal: () => void;
   stats: ReturnType<typeof calculateStats>;
-}
+};
 
 type FilterStatusType = MatchStatus | typeof FILTER_STATUS.ALL;
 

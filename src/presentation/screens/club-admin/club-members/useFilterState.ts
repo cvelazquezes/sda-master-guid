@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { PathfinderClass } from '../../../../types';
-import { FILTER_STATUS, EMPTY_VALUE, MEMBER_TAB } from '../../../../shared/constants';
-import { StatusFilterValue, PaymentFilterValue, MemberTabValue } from './types';
 import { handleFilterSelect } from './filterConfig';
+import { FILTER_STATUS, EMPTY_VALUE, MEMBER_TAB } from '../../../../shared/constants';
+import type { StatusFilterValue, PaymentFilterValue, MemberTabValue } from './types';
+import type { PathfinderClass } from '../../../../types';
 
-interface UseFilterStateReturn {
+type UseFilterStateReturn = {
   searchQuery: string;
   setSearchQuery: (v: string) => void;
   statusFilter: StatusFilterValue;
@@ -22,7 +22,7 @@ interface UseFilterStateReturn {
   applyFilters: () => void;
   onFilterSelect: (sectionId: string, value: string) => void;
   onTabChange: (tabId: string) => void;
-}
+};
 
 export function useFilterState(): UseFilterStateReturn {
   const [searchQuery, setSearchQuery] = useState(EMPTY_VALUE);

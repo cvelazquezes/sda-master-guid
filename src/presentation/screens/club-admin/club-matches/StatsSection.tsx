@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 import { View } from 'react-native';
+import { createStatsStyles } from './styles';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
-import { createStatsStyles } from './styles';
 
-interface StatsSectionProps {
+type StatsSectionProps = {
   stats: { total: number; pending: number; scheduled: number; completed: number };
   labels: {
     overview: string;
@@ -13,14 +13,14 @@ interface StatsSectionProps {
     scheduled: string;
     completed: string;
   };
-}
+};
 
-interface StatCardProps {
+type StatCardProps = {
   value: number;
   label: string;
   color?: string;
   styles: ReturnType<typeof createStatsStyles>;
-}
+};
 
 function StatCard({ value, label, color, styles }: StatCardProps): React.JSX.Element {
   return (
@@ -42,11 +42,26 @@ export function StatsSection({ stats, labels }: StatsSectionProps): React.JSX.El
       <Text style={styles.sectionTitle}>{labels.overview}</Text>
       <View style={styles.statsGrid}>
         <StatCard value={stats.total} label={labels.total} styles={styles} />
-        <StatCard value={stats.pending} label={labels.pending} color={colors.warning} styles={styles} />
+        <StatCard
+          value={stats.pending}
+          label={labels.pending}
+          color={colors.warning}
+          styles={styles}
+        />
       </View>
       <View style={styles.statsGrid}>
-        <StatCard value={stats.scheduled} label={labels.scheduled} color={colors.info} styles={styles} />
-        <StatCard value={stats.completed} label={labels.completed} color={colors.success} styles={styles} />
+        <StatCard
+          value={stats.scheduled}
+          label={labels.scheduled}
+          color={colors.info}
+          styles={styles}
+        />
+        <StatCard
+          value={stats.completed}
+          label={labels.completed}
+          color={colors.success}
+          styles={styles}
+        />
       </View>
     </View>
   );

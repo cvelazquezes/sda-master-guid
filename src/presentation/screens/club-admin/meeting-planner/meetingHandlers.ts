@@ -1,17 +1,17 @@
 import { Alert } from 'react-native';
-import { User } from '../../../../types';
 import { ALERT_BUTTON_STYLE, DATE_LOCALE_OPTIONS, ID_PREFIX } from '../../../../shared/constants';
-import { AgendaItem } from './types';
+import type { AgendaItem } from './types';
+import type { User } from '../../../../types';
 
 type TranslationFn = (key: string, opts?: Record<string, unknown>) => string;
 
-interface SaveMeetingOptions {
+type SaveMeetingOptions = {
   agendaItems: AgendaItem[];
   meetingDate: Date;
   setIsSaved: (v: boolean) => void;
   setShareModalVisible: (v: boolean) => void;
   t: TranslationFn;
-}
+};
 
 export function handleSaveMeeting(options: SaveMeetingOptions): void {
   const { agendaItems, meetingDate, setIsSaved, setShareModalVisible, t } = options;
@@ -33,11 +33,11 @@ export function handleSaveMeeting(options: SaveMeetingOptions): void {
   );
 }
 
-interface ConfirmShareOptions {
+type ConfirmShareOptions = {
   clubMembers: User[];
   setShareModalVisible: (v: boolean) => void;
   t: TranslationFn;
-}
+};
 
 export function confirmShareMeeting(options: ConfirmShareOptions): void {
   const { clubMembers, setShareModalVisible, t } = options;
@@ -49,12 +49,12 @@ export function confirmShareMeeting(options: ConfirmShareOptions): void {
   );
 }
 
-interface ResetToDefaultOptions {
-  getDefaultAgenda: () => Omit<AgendaItem, 'id' | 'order'>[];
+type ResetToDefaultOptions = {
+  getDefaultAgenda: () => Array<Omit<AgendaItem, 'id' | 'order'>>;
   setAgendaItems: (items: AgendaItem[]) => void;
   setIsSaved: (v: boolean) => void;
   t: TranslationFn;
-}
+};
 
 export function handleResetToDefault(options: ResetToDefaultOptions): void {
   const { getDefaultAgenda, setAgendaItems, setIsSaved, t } = options;
@@ -77,15 +77,15 @@ export function handleResetToDefault(options: ResetToDefaultOptions): void {
   ]);
 }
 
-interface NewMeetingOptions {
-  getDefaultAgenda: () => Omit<AgendaItem, 'id' | 'order'>[];
+type NewMeetingOptions = {
+  getDefaultAgenda: () => Array<Omit<AgendaItem, 'id' | 'order'>>;
   setAgendaItems: (items: AgendaItem[]) => void;
   setMeetingDate: (d: Date) => void;
   setMeetingTitle: (title: string) => void;
   setIsSaved: (v: boolean) => void;
   defaultTitle: string;
   t: TranslationFn;
-}
+};
 
 export function handleNewMeeting(options: NewMeetingOptions): void {
   const {

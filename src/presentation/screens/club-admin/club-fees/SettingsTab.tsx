@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { View, ScrollView, TouchableOpacity, Switch } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text, Input } from '../../../components/primitives';
-import { useTheme } from '../../../state/ThemeContext';
+import { createStyles, createSettingsStyles } from './styles';
+import { MONTH_KEYS } from './types';
 import {
   ICONS,
   TOUCH_OPACITY,
@@ -13,10 +13,10 @@ import {
   TEXT_WEIGHT,
 } from '../../../../shared/constants';
 import { DISPLAY_LIMITS } from '../../../../shared/constants/ui';
-import { createStyles, createSettingsStyles } from './styles';
-import { MONTH_KEYS } from './types';
+import { Text, Input } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
 
-interface SettingsTabProps {
+type SettingsTabProps = {
   feeAmount: string;
   setFeeAmount: (v: string) => void;
   currency: string;
@@ -28,7 +28,7 @@ interface SettingsTabProps {
   onSave: () => void;
   onGenerateFees: () => void;
   t: (key: string) => string;
-}
+};
 
 export function SettingsTab({
   feeAmount,
@@ -89,12 +89,12 @@ export function SettingsTab({
           settingsStyles={settingsStyles}
         />
         <ActionButtons
-          onSave={onSave}
           feeSettingsActive={feeSettingsActive}
-          onGenerateFees={onGenerateFees}
           colors={colors}
           t={t}
           settingsStyles={settingsStyles}
+          onSave={onSave}
+          onGenerateFees={onGenerateFees}
         />
       </View>
     </ScrollView>
@@ -126,13 +126,13 @@ function InfoCard({
   );
 }
 
-interface ActiveToggleCardProps {
+type ActiveToggleCardProps = {
   active: boolean;
   setActive: (v: boolean) => void;
   colors: Record<string, string>;
   t: (key: string) => string;
   settingsStyles: ReturnType<typeof createSettingsStyles>;
-}
+};
 
 function ActiveToggleCard({
   active,
@@ -158,23 +158,24 @@ function ActiveToggleCard({
         </View>
         <Switch
           value={active}
-          onValueChange={setActive}
           trackColor={trackColors}
           thumbColor={thumbColor}
+          accessibilityLabel="Enable monthly fees toggle"
+          onValueChange={setActive}
         />
       </View>
     </View>
   );
 }
 
-interface AmountInputCardProps {
+type AmountInputCardProps = {
   feeAmount: string;
   setFeeAmount: (v: string) => void;
   currency: string;
   setCurrency: (v: string) => void;
   t: (key: string) => string;
   settingsStyles: ReturnType<typeof createSettingsStyles>;
-}
+};
 
 function AmountInputCard({
   feeAmount,
@@ -193,17 +194,17 @@ function AmountInputCard({
         <View style={settingsStyles.amountInputWrapper}>
           <Input
             value={feeAmount}
-            onChangeText={setFeeAmount}
             keyboardType={KEYBOARD_TYPE.DECIMAL_PAD}
             placeholder={`$ ${t('screens.clubFees.amountPlaceholder')}`}
+            onChangeText={setFeeAmount}
           />
         </View>
         <View style={settingsStyles.currencyInputWrapper}>
           <Input
             value={currency}
-            onChangeText={setCurrency}
             placeholder={t('screens.clubFees.currencyPlaceholder')}
             maxLength={currencyMaxLength}
+            onChangeText={setCurrency}
           />
         </View>
       </View>
@@ -211,14 +212,14 @@ function AmountInputCard({
   );
 }
 
-interface MonthSelectionCardProps {
+type MonthSelectionCardProps = {
   selectedMonths: number[];
   toggleMonth: (i: number) => void;
   selectAll: () => void;
   clearAll: () => void;
   t: (key: string) => string;
   settingsStyles: ReturnType<typeof createSettingsStyles>;
-}
+};
 
 function MonthSelectionCard({
   selectedMonths,
@@ -238,10 +239,20 @@ function MonthSelectionCard({
           </Text>
         </View>
         <View style={settingsStyles.monthActions}>
-          <TouchableOpacity onPress={selectAll} style={settingsStyles.monthActionBtn}>
+          <TouchableOpacity
+            style={settingsStyles.monthActionBtn}
+            accessibilityRole="button"
+            accessibilityLabel="Select all months"
+            onPress={selectAll}
+          >
             <Text style={settingsStyles.monthActionText}>{t('screens.clubFees.all')}</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={clearAll} style={settingsStyles.monthActionBtn}>
+          <TouchableOpacity
+            style={settingsStyles.monthActionBtn}
+            accessibilityRole="button"
+            accessibilityLabel="Clear all months"
+            onPress={clearAll}
+          >
             <Text style={settingsStyles.monthActionText}>{t('screens.clubFees.none')}</Text>
           </TouchableOpacity>
         </View>
@@ -263,8 +274,11 @@ function MonthSelectionCard({
             <TouchableOpacity
               key={monthNumber}
               style={chipStyle}
-              onPress={(): void => toggleMonth(monthNumber)}
               activeOpacity={TOUCH_OPACITY.default}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: isSelected }}
+              accessibilityLabel={monthName}
+              onPress={(): void => toggleMonth(monthNumber)}
             >
               <Text style={textStyle}>
                 {monthName.substring(0, DISPLAY_LIMITS.MAX_PREVIEW_ITEMS)}
@@ -277,14 +291,14 @@ function MonthSelectionCard({
   );
 }
 
-interface ActionButtonsProps {
+type ActionButtonsProps = {
   onSave: () => void;
   feeSettingsActive: boolean;
   onGenerateFees: () => void;
   colors: Record<string, string>;
   t: (key: string) => string;
   settingsStyles: ReturnType<typeof createSettingsStyles>;
-}
+};
 
 function ActionButtons({
   onSave,
@@ -299,8 +313,10 @@ function ActionButtons({
     <View style={settingsStyles.actionButtonsContainer}>
       <TouchableOpacity
         style={[settingsStyles.primaryButton, { backgroundColor: colors.primary }]}
-        onPress={onSave}
         activeOpacity={TOUCH_OPACITY.light}
+        accessibilityRole="button"
+        accessibilityLabel="Save settings"
+        onPress={onSave}
       >
         <MaterialCommunityIcons
           name={ICONS.CONTENT_SAVE}
@@ -321,8 +337,10 @@ function ActionButtons({
             settingsStyles.secondaryButton,
             { backgroundColor: colors.surface, borderColor: colors.primary },
           ]}
-          onPress={onGenerateFees}
           activeOpacity={TOUCH_OPACITY.light}
+          accessibilityRole="button"
+          accessibilityLabel="Generate fees"
+          onPress={onGenerateFees}
         >
           <MaterialCommunityIcons
             name={ICONS.CALENDAR_PLUS}

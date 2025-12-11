@@ -1,22 +1,22 @@
-import { FEE_TABS } from '../../../../shared/constants';
 import { BREAKPOINT, OPACITY_VALUE, MODAL_SIZE } from '../../../../shared/constants/numbers';
+import type { FEE_TABS } from '../../../../shared/constants';
 
 export type FeeTabValue = (typeof FEE_TABS)[keyof typeof FEE_TABS];
 
-export interface FeeSettingsState {
+export type FeeSettingsState = {
   feeAmount: string;
   currency: string;
   selectedMonths: number[];
   feeSettingsActive: boolean;
-}
+};
 
-export interface ChargeModalState {
+export type ChargeModalState = {
   chargeDescription: string;
   chargeAmount: string;
   chargeDueDate: string;
   chargeApplyToAll: boolean;
   selectedMemberIds: string[];
-}
+};
 
 export const MONTH_KEYS = [
   'screens.clubFees.months.january',

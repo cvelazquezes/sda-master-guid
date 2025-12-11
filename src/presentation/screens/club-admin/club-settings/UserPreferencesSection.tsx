@@ -1,15 +1,15 @@
 import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { createUserPreferencesStyles } from './styles';
-import { Text } from '../../../components/primitives';
-import { ThemeSwitcher } from '../../../components/features/ThemeSwitcher';
 import { LanguageSwitcher } from '../../../components/features/LanguageSwitcher';
+import { ThemeSwitcher } from '../../../components/features/ThemeSwitcher';
+import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
 
-interface UserPreferencesSectionProps {
+type UserPreferencesSectionProps = {
   title: string;
   colors: { surface: string; textPrimary: string };
-}
+};
 
 export function UserPreferencesSection({
   title,

@@ -1,23 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { View, ScrollView, RefreshControl } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../../state/AuthContext';
-import { useTheme } from '../../../state/ThemeContext';
-import { UserDetailModal } from '../../../components/features/UserDetailModal';
-import { User, PathfinderClass } from '../../../../types';
-import { ClassSelectionModal } from '../../../components/features/ClassSelectionModal';
-import { PageHeader, SearchBar, TabBar, FilterModal } from '../../../components/primitives';
-import { MEMBER_TAB } from '../../../../shared/constants';
-import { createStyles } from './styles';
-import { useClubMembers } from './useClubMembers';
-import { useFilterState } from './useFilterState';
-import {
-  toggleMemberStatus,
-  showDeleteMemberAlert,
-  showApproveMemberAlert,
-  showRejectMemberAlert,
-  saveClasses,
-} from './memberHandlers';
 import { createTabs, createFilterSections } from './filterConfig';
 import {
   filterMembers,
@@ -25,7 +8,24 @@ import {
   countApprovedMembers,
   getAvailableClasses,
 } from './memberFilters';
+import {
+  toggleMemberStatus,
+  showDeleteMemberAlert,
+  showApproveMemberAlert,
+  showRejectMemberAlert,
+  saveClasses,
+} from './memberHandlers';
 import { MembersList } from './MembersList';
+import { createStyles } from './styles';
+import { useClubMembers } from './useClubMembers';
+import { useFilterState } from './useFilterState';
+import { MEMBER_TAB } from '../../../../shared/constants';
+import { ClassSelectionModal } from '../../../components/features/ClassSelectionModal';
+import { UserDetailModal } from '../../../components/features/UserDetailModal';
+import { PageHeader, SearchBar, TabBar, FilterModal } from '../../../components/primitives';
+import { useAuth } from '../../../state/AuthContext';
+import { useTheme } from '../../../state/ThemeContext';
+import type { User, PathfinderClass } from '../../../../types';
 
 function useLabels(t: (key: string) => string): Record<string, string> {
   return {
@@ -92,10 +92,7 @@ const ClubMembersScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { colors, spacing } = useTheme();
-  const styles = useMemo(
-    () => createStyles(colors, spacing),
-    [colors, spacing]
-  );
+  const styles = useMemo(() => createStyles(colors, spacing), [colors, spacing]);
   const { members, balances, refreshing, loadData, onRefresh } = useClubMembers(user?.clubId, t);
   const filterState = useFilterState();
   const modals = useMemberModals();
@@ -148,12 +145,12 @@ const ClubMembersScreen = (): React.JSX.Element => {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <PageHeader
+        showActions
         title={t('screens.clubMembers.title')}
         subtitle={t('screens.clubMembers.subtitle', {
           approved: approvedCount,
           pending: pendingCount,
         })}
-        showActions
       />
       <TabBar
         tabs={tabs}
@@ -162,16 +159,18 @@ const ClubMembersScreen = (): React.JSX.Element => {
       />
       <SearchBar
         value={filterState.searchQuery}
-        onChangeText={filterState.setSearchQuery}
         placeholder={t('placeholders.searchMembers')}
-        onFilterPress={showFilter}
         filterActive={filterState.hasActiveFilters}
+        onChangeText={filterState.setSearchQuery}
+        onFilterPress={showFilter}
       />
       <View style={styles.content}>
         <MembersList
           members={filteredMembers}
           balances={balances}
           activeTab={filterState.activeTab}
+          labels={labels}
+          t={t}
           onApprove={(id, name): void => showApproveMemberAlert(id, name, loadData)}
           onReject={(id, name): void => showRejectMemberAlert(id, name, loadData)}
           onPress={modals.openDetail}
@@ -180,8 +179,6 @@ const ClubMembersScreen = (): React.JSX.Element => {
             toggleMemberStatus(id, isActive, loadData);
           }}
           onDelete={(id, name): void => showDeleteMemberAlert(id, name, loadData)}
-          labels={labels}
-          t={t}
         />
       </View>
       <FilterModal

@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 import { View, TouchableOpacity, Modal } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { createModalStyles, createShareModalStyles } from './styles';
+import { ANIMATION_TYPE, DATE_LOCALE_OPTIONS, ICONS } from '../../../../shared/constants';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
-import { ANIMATION_TYPE, DATE_LOCALE_OPTIONS, ICONS } from '../../../../shared/constants';
-import { createModalStyles, createShareModalStyles } from './styles';
 import type { AgendaItem } from './types';
 
 type ShareModalProps = {
@@ -48,7 +48,13 @@ export function ShareModal({
   const contentStyle = [shareModalStyles.content, { width: shareModalWidth }];
 
   return (
-    <Modal visible={visible} animationType={ANIMATION_TYPE.FADE} transparent onRequestClose={onClose}>
+    <Modal
+      transparent
+      accessibilityViewIsModal
+      visible={visible}
+      animationType={ANIMATION_TYPE.FADE}
+      onRequestClose={onClose}
+    >
       <View style={overlayStyle}>
         <View style={contentStyle}>
           <ShareHeader membersCount={clubMembersCount} t={t} shareModalStyles={shareModalStyles} />
@@ -59,7 +65,13 @@ export function ShareModal({
             t={t}
             shareModalStyles={shareModalStyles}
           />
-          <ShareActions onClose={onClose} onConfirmShare={onConfirmShare} t={t} modalStyles={modalStyles} shareModalStyles={shareModalStyles} />
+          <ShareActions
+            t={t}
+            modalStyles={modalStyles}
+            shareModalStyles={shareModalStyles}
+            onClose={onClose}
+            onConfirmShare={onConfirmShare}
+          />
         </View>
       </View>
     </Modal>
@@ -99,7 +111,13 @@ type ShareInfoProps = {
   shareModalStyles: ShareModalStylesType;
 };
 
-function ShareInfo({ meetingDate, totalTime, itemsCount, t, shareModalStyles }: ShareInfoProps): React.JSX.Element {
+function ShareInfo({
+  meetingDate,
+  totalTime,
+  itemsCount,
+  t,
+  shareModalStyles,
+}: ShareInfoProps): React.JSX.Element {
   const dateStr = meetingDate.toLocaleDateString(undefined, DATE_LOCALE_OPTIONS.DATE_WITHOUT_YEAR);
   return (
     <View style={shareModalStyles.info}>
@@ -157,7 +175,13 @@ type ShareActionsProps = {
   shareModalStyles: ShareModalStylesType;
 };
 
-function ShareActions({ onClose, onConfirmShare, t, modalStyles, shareModalStyles }: ShareActionsProps): React.JSX.Element {
+function ShareActions({
+  onClose,
+  onConfirmShare,
+  t,
+  modalStyles,
+  shareModalStyles,
+}: ShareActionsProps): React.JSX.Element {
   const { iconSizes, colors } = useTheme();
   const confirmStyle = [
     modalStyles.button,
@@ -166,10 +190,20 @@ function ShareActions({ onClose, onConfirmShare, t, modalStyles, shareModalStyle
   ];
   return (
     <View style={shareModalStyles.actions}>
-      <TouchableOpacity style={[modalStyles.button, modalStyles.cancelButton]} onPress={onClose}>
+      <TouchableOpacity
+        style={[modalStyles.button, modalStyles.cancelButton]}
+        accessibilityRole="button"
+        accessibilityLabel="Cancel"
+        onPress={onClose}
+      >
         <Text style={modalStyles.cancelButtonText}>{t('common.cancel')}</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={confirmStyle} onPress={onConfirmShare}>
+      <TouchableOpacity
+        style={confirmStyle}
+        accessibilityRole="button"
+        accessibilityLabel="Send to all members"
+        onPress={onConfirmShare}
+      >
         <MaterialCommunityIcons name={ICONS.SEND} size={iconSizes.md} color={colors.textInverse} />
         <Text style={modalStyles.confirmButtonText}>{t('screens.meetingPlanner.sendToAll')}</Text>
       </TouchableOpacity>

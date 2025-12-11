@@ -4,11 +4,10 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { createModalStyles } from './styles';
 import { COMPONENT_VARIANT, ICONS } from '../../../../shared/constants';
-import { MatchStatus } from '../../../../types';
+import { type Match, type User, MatchStatus } from '../../../../types';
 import { Text, Modal, Button } from '../../../components/primitives';
 import { useThemeColor } from '../../../hooks/useThemeColor';
 import { useTheme } from '../../../state/ThemeContext';
-import type { Match, User } from '../../../../types';
 
 type ModalLabels = {
   title: string;
@@ -159,12 +158,13 @@ export function MatchDetailModal({
   }
   return (
     <Modal
+      accessibilityViewIsModal
       visible={visible}
       title={labels.title}
       subtitle={labels.subtitle}
       icon={ICONS.ACCOUNT_HEART}
       iconColor={colors.primary}
-      iconBackgroundColor={colors.primaryLight}
+      iconBackgroundColor={colors.primaryAlpha20}
       onClose={onClose}
     >
       <View style={styles.modalContent}>
@@ -183,9 +183,9 @@ export function MatchDetailModal({
         <ActionButtons
           match={match}
           labels={labels}
+          styles={styles}
           onNotify={onNotify}
           onUpdateStatus={onUpdateStatus}
-          styles={styles}
         />
       </View>
     </Modal>

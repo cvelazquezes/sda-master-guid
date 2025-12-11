@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { createAgendaCardStyles, createAssignButtonStyles } from './styles';
+import { ICONS, TEXT_LINES, MOVE_DIRECTION } from '../../../../shared/constants';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
-import { ICONS, TEXT_LINES, MOVE_DIRECTION } from '../../../../shared/constants';
-import { createAgendaCardStyles, createAssignButtonStyles } from './styles';
 import type { AgendaItem } from './types';
 
 type AgendaCardStylesType = ReturnType<typeof createAgendaCardStyles>;
@@ -49,14 +49,21 @@ export function AgendaCard({
       <View style={agendaCardStyles.orderBadge}>
         <Text style={agendaCardStyles.orderText}>{index + 1}</Text>
       </View>
-      <AgendaContent item={item} onAssign={onAssign} onRemoveMember={onRemoveMember} t={t} agendaCardStyles={agendaCardStyles} assignButtonStyles={assignButtonStyles} />
+      <AgendaContent
+        item={item}
+        t={t}
+        agendaCardStyles={agendaCardStyles}
+        assignButtonStyles={assignButtonStyles}
+        onAssign={onAssign}
+        onRemoveMember={onRemoveMember}
+      />
       <AgendaActions
         index={index}
         totalItems={totalItems}
+        agendaCardStyles={agendaCardStyles}
         onEdit={onEdit}
         onDelete={onDelete}
         onMove={onMove}
-        agendaCardStyles={agendaCardStyles}
       />
     </View>
   );
@@ -100,7 +107,14 @@ function AgendaContent({
           {item.description}
         </Text>
       )}
-      <ResponsibleSection item={item} onAssign={onAssign} onRemoveMember={onRemoveMember} t={t} agendaCardStyles={agendaCardStyles} assignButtonStyles={assignButtonStyles} />
+      <ResponsibleSection
+        item={item}
+        t={t}
+        agendaCardStyles={agendaCardStyles}
+        assignButtonStyles={assignButtonStyles}
+        onAssign={onAssign}
+        onRemoveMember={onRemoveMember}
+      />
     </View>
   );
 }
@@ -131,7 +145,11 @@ function ResponsibleSection({
           <Text style={agendaCardStyles.memberName} numberOfLines={TEXT_LINES.single}>
             {item.responsibleMemberName}
           </Text>
-          <TouchableOpacity onPress={onRemoveMember}>
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel="Remove assigned member"
+            onPress={onRemoveMember}
+          >
             <MaterialCommunityIcons
               name={ICONS.CLOSE_CIRCLE}
               size={iconSizes.sm}
@@ -140,7 +158,12 @@ function ResponsibleSection({
           </TouchableOpacity>
         </View>
       ) : (
-        <TouchableOpacity style={assignButtonStyles.button} onPress={onAssign}>
+        <TouchableOpacity
+          style={assignButtonStyles.button}
+          accessibilityRole="button"
+          accessibilityLabel="Assign member"
+          onPress={onAssign}
+        >
           <MaterialCommunityIcons
             name={ICONS.ACCOUNT_PLUS}
             size={iconSizes.sm}
@@ -181,23 +204,39 @@ function AgendaActions({
       <View style={agendaCardStyles.moveButtons}>
         <TouchableOpacity
           style={[agendaCardStyles.moveButton, isFirst && agendaCardStyles.moveButtonDisabled]}
-          onPress={(): void => onMove(MOVE_DIRECTION.UP)}
           disabled={isFirst}
+          accessibilityRole="button"
+          accessibilityLabel="Move up"
+          accessibilityState={{ disabled: isFirst }}
+          onPress={(): void => onMove(MOVE_DIRECTION.UP)}
         >
           <MaterialCommunityIcons name={ICONS.CHEVRON_UP} size={iconSizes.md} color={upColor} />
         </TouchableOpacity>
         <TouchableOpacity
           style={[agendaCardStyles.moveButton, isLast && agendaCardStyles.moveButtonDisabled]}
-          onPress={(): void => onMove(MOVE_DIRECTION.DOWN)}
           disabled={isLast}
+          accessibilityRole="button"
+          accessibilityLabel="Move down"
+          accessibilityState={{ disabled: isLast }}
+          onPress={(): void => onMove(MOVE_DIRECTION.DOWN)}
         >
           <MaterialCommunityIcons name={ICONS.CHEVRON_DOWN} size={iconSizes.md} color={downColor} />
         </TouchableOpacity>
       </View>
-      <TouchableOpacity style={agendaCardStyles.actionButton} onPress={onEdit}>
+      <TouchableOpacity
+        style={agendaCardStyles.actionButton}
+        accessibilityRole="button"
+        accessibilityLabel="Edit item"
+        onPress={onEdit}
+      >
         <MaterialCommunityIcons name={ICONS.PENCIL} size={iconSizes.md} color={colors.primary} />
       </TouchableOpacity>
-      <TouchableOpacity style={agendaCardStyles.actionButton} onPress={onDelete}>
+      <TouchableOpacity
+        style={agendaCardStyles.actionButton}
+        accessibilityRole="button"
+        accessibilityLabel="Delete item"
+        onPress={onDelete}
+      >
         <MaterialCommunityIcons name={ICONS.DELETE} size={iconSizes.md} color={colors.error} />
       </TouchableOpacity>
     </View>

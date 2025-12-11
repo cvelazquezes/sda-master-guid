@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
 import { View, ScrollView, RefreshControl } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { createScreenStyles } from './styles';
 import { FilterSection } from './FilterSection';
 import { MatchDetailModal } from './MatchDetailModal';
 import { MatchesList } from './MatchesList';
 import { RoundsSection } from './RoundsSection';
 import { StatsSection } from './StatsSection';
+import { createScreenStyles } from './styles';
 import { useClubMatches } from './useClubMatches';
 import { PageHeader } from '../../../components/primitives';
 import { useAuth } from '../../../state/AuthContext';

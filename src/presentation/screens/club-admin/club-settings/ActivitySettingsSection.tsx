@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { createActivitySettingsStyles, createOptionButtonStyles } from './styles';
-import { Text } from '../../../components/primitives';
-import { MatchFrequency } from '../../../../types';
-import { useTheme } from '../../../state/ThemeContext';
 import { GRID } from '../../../../shared/constants';
+import { MatchFrequency } from '../../../../types';
+import { Text } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
 
-interface ActivitySettingsSectionProps {
+type ActivitySettingsSectionProps = {
   matchFrequency: MatchFrequency;
   groupSize: number;
   onFrequencyChange: (v: MatchFrequency) => void;
@@ -22,7 +22,7 @@ interface ActivitySettingsSectionProps {
     inputBackground: string;
     primary: string;
   };
-}
+};
 
 // Option button component
 function OptionButton({
@@ -54,7 +54,13 @@ function OptionButton({
     selected && { color: colors.textInverse, fontWeight: typography.fontWeights.semibold },
   ];
   return (
-    <TouchableOpacity style={optionStyle} onPress={onPress}>
+    <TouchableOpacity
+      style={optionStyle}
+      accessibilityRole="radio"
+      accessibilityState={{ selected }}
+      accessibilityLabel={label}
+      onPress={onPress}
+    >
       <Text style={textStyle}>{label}</Text>
     </TouchableOpacity>
   );
@@ -88,8 +94,8 @@ export function ActivitySettingsSection(props: ActivitySettingsSectionProps): Re
               key={freq}
               selected={matchFrequency === freq}
               label={frequencyLabels[freq]}
-              onPress={() => onFrequencyChange(freq)}
               colors={colors}
+              onPress={() => onFrequencyChange(freq)}
             />
           ))}
         </View>
@@ -102,8 +108,8 @@ export function ActivitySettingsSection(props: ActivitySettingsSectionProps): Re
               key={size}
               selected={groupSize === size}
               label={String(size)}
-              onPress={() => onGroupSizeChange(size)}
               colors={colors}
+              onPress={() => onGroupSizeChange(size)}
             />
           ))}
         </View>

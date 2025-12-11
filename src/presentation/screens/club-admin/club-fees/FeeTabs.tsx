@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { createTabStyles } from './styles';
+import { ICONS, TOUCH_OPACITY, FEE_TABS } from '../../../../shared/constants';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
-import { ICONS, TOUCH_OPACITY, FEE_TABS } from '../../../../shared/constants';
-import { createTabStyles } from './styles';
 import type { FeeTabValue } from './types';
 
 type TabStylesType = ReturnType<typeof createTabStyles>;
@@ -29,25 +29,25 @@ export function FeeTabs({ activeTab, onTabChange, t }: FeeTabsProps): React.JSX.
         icon={ICONS.COG_OUTLINE}
         label={t('screens.clubFees.tabs.settings')}
         active={activeTab === FEE_TABS.SETTINGS}
-        onPress={(): void => onTabChange(FEE_TABS.SETTINGS)}
         colors={colors}
         tabStyles={tabStyles}
+        onPress={(): void => onTabChange(FEE_TABS.SETTINGS)}
       />
       <TabButton
         icon={ICONS.WALLET_OUTLINE}
         label={t('screens.clubFees.tabs.balances')}
         active={activeTab === FEE_TABS.BALANCES}
-        onPress={(): void => onTabChange(FEE_TABS.BALANCES)}
         colors={colors}
         tabStyles={tabStyles}
+        onPress={(): void => onTabChange(FEE_TABS.BALANCES)}
       />
       <TabButton
         icon={ICONS.FILE_DOCUMENT_OUTLINE}
         label={t('screens.clubFees.tabs.charges')}
         active={activeTab === FEE_TABS.CHARGES}
-        onPress={(): void => onTabChange(FEE_TABS.CHARGES)}
         colors={colors}
         tabStyles={tabStyles}
+        onPress={(): void => onTabChange(FEE_TABS.CHARGES)}
       />
     </View>
   );
@@ -62,14 +62,28 @@ type TabButtonProps = {
   tabStyles: TabStylesType;
 };
 
-function TabButton({ icon, label, active, onPress, colors, tabStyles }: TabButtonProps): React.JSX.Element {
+function TabButton({
+  icon,
+  label,
+  active,
+  onPress,
+  colors,
+  tabStyles,
+}: TabButtonProps): React.JSX.Element {
   const { iconSizes } = useTheme();
   const tabStyle = [tabStyles.tab, active && tabStyles.tabActive];
   const textStyle = [tabStyles.tabText, active && tabStyles.tabTextActive];
   const iconColor = active ? colors.primary : colors.textSecondary;
 
   return (
-    <TouchableOpacity style={tabStyle} onPress={onPress} activeOpacity={TOUCH_OPACITY.default}>
+    <TouchableOpacity
+      style={tabStyle}
+      activeOpacity={TOUCH_OPACITY.default}
+      accessibilityRole="tab"
+      accessibilityState={{ selected: active }}
+      accessibilityLabel={label}
+      onPress={onPress}
+    >
       <MaterialCommunityIcons
         name={icon as typeof ICONS.COG_OUTLINE}
         size={iconSizes.md}

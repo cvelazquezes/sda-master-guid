@@ -23,8 +23,8 @@ function RoundCard({
   const { colors } = useTheme();
   const { t } = useTranslation();
   const isActive = round.status === ROUND_STATUS.ACTIVE;
-  const badgeBg = isActive ? colors.successLight : colors.backgroundSecondary;
-  const textColor = isActive ? colors.success : colors.textSecondary;
+  const badgeBg = isActive ? colors.successAlpha20 : colors.backgroundSecondary;
+  const textColor = isActive ? colors.textPrimary : colors.textSecondary;
   const formattedDate = format(new Date(round.createdAt), DATE_FORMATS.DATE_FNS_DATE_DISPLAY);
 
   return (

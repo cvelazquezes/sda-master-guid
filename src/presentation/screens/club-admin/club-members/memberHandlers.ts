@@ -1,7 +1,7 @@
 import { Alert } from 'react-native';
 import { userService } from '../../../../infrastructure/repositories/userService';
-import { PathfinderClass } from '../../../../types';
 import { ALERT_BUTTON_STYLE } from '../../../../shared/constants';
+import type { PathfinderClass } from '../../../../types';
 
 type TranslationFn = (key: string, opts?: Record<string, unknown>) => string;
 

@@ -1,9 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, TouchableOpacity, FlatList, RefreshControl } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text } from '../../../components/primitives';
-import { useTheme } from '../../../state/ThemeContext';
-import { CustomCharge } from '../../../../types';
+import { createStyles, createChargeStyles, createEmptyStyles } from './styles';
 import {
   ICONS,
   TEXT_ALIGN,
@@ -12,15 +10,17 @@ import {
   TEXT_WEIGHT,
 } from '../../../../shared/constants';
 import { NUMERIC } from '../../../../shared/constants/validation';
-import { createStyles, createChargeStyles, createEmptyStyles } from './styles';
+import { Text } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
+import type { CustomCharge } from '../../../../types';
 
-interface ChargesTabProps {
+type ChargesTabProps = {
   customCharges: CustomCharge[];
   refreshing: boolean;
   onRefresh: () => void;
   onAddCharge: () => void;
   t: (key: string, opts?: Record<string, unknown>) => string;
-}
+};
 
 export function ChargesTab({
   customCharges,
@@ -45,7 +45,7 @@ export function ChargesTab({
 
   return (
     <View style={styles.tabContent}>
-      <ChargesHeader count={customCharges.length} onAddCharge={onAddCharge} t={t} />
+      <ChargesHeader count={customCharges.length} t={t} onAddCharge={onAddCharge} />
       {customCharges.length === 0 ? (
         <EmptyCharges t={t} emptyStyles={emptyStyles} />
       ) : (
@@ -57,6 +57,7 @@ export function ChargesTab({
             <ChargeCard charge={item} colors={colors} t={t} chargeStyles={chargeStyles} />
           )}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          accessibilityRole="list"
         />
       )}
     </View>
@@ -89,6 +90,8 @@ function ChargesHeader({
       </View>
       <TouchableOpacity
         style={[chargeStyles.addButton, { backgroundColor: colors.primary }]}
+        accessibilityRole="button"
+        accessibilityLabel="Add custom charge"
         onPress={onAddCharge}
       >
         <MaterialCommunityIcons

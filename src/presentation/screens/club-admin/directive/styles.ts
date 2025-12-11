@@ -2,15 +2,9 @@
  * Club Directive Screen Styles
  * Theme-aware style factories
  */
-import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
-import { ThemeContextType } from '../../../state/ThemeContext';
-import {
-  FLEX,
-  BORDERS,
-  SHADOW_OFFSET,
-  DIMENSIONS,
-  TYPOGRAPHY,
-} from '../../../../shared/constants';
+import { StyleSheet, type ViewStyle, type TextStyle } from 'react-native';
+import { FLEX, BORDERS, SHADOW_OFFSET, DIMENSIONS, TYPOGRAPHY } from '../../../../shared/constants';
+import type { ThemeContextType } from '../../../state/ThemeContext';
 
 // Re-export shared styles for convenience
 export {
@@ -23,7 +17,9 @@ export {
 // SCREEN STYLES FACTORY
 // ============================================================================
 
-export const createScreenStyles = (colors: ThemeContextType['colors']) =>
+export const createScreenStyles = (
+  colors: ThemeContextType['colors']
+): { container: ViewStyle; content: ViewStyle } =>
   StyleSheet.create({
     container: {
       flex: FLEX.ONE,
@@ -42,7 +38,7 @@ export const createSummaryStyles = (
   colors: ThemeContextType['colors'],
   spacing: ThemeContextType['spacing'],
   typography: ThemeContextType['typography']
-) =>
+): { banner: ViewStyle; item: ViewStyle; text: TextStyle; bold: TextStyle; separator: ViewStyle } =>
   StyleSheet.create({
     banner: {
       flexDirection: 'row',
@@ -82,7 +78,7 @@ export const createSectionStyles = (
   spacing: ThemeContextType['spacing'],
   typography: ThemeContextType['typography'],
   colors: ThemeContextType['colors']
-) =>
+): { section: ViewStyle; title: TextStyle } =>
   StyleSheet.create({
     section: {
       padding: spacing.xl,
@@ -104,7 +100,14 @@ export const createPositionCardStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  card: ViewStyle;
+  icon: ViewStyle;
+  content: ViewStyle;
+  header: ViewStyle;
+  title: TextStyle;
+  description: TextStyle;
+} =>
   StyleSheet.create({
     card: {
       flexDirection: 'row',
@@ -153,7 +156,15 @@ export const createMemberCardStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  card: ViewStyle;
+  avatar: ViewStyle;
+  avatarText: TextStyle;
+  info: ViewStyle;
+  name: TextStyle;
+  email: TextStyle;
+  removeButton: ViewStyle;
+} =>
   StyleSheet.create({
     card: {
       flexDirection: 'row',
@@ -204,7 +215,7 @@ export const createAssignButtonStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): { button: ViewStyle; text: TextStyle } =>
   StyleSheet.create({
     button: {
       flexDirection: 'row',
@@ -235,7 +246,7 @@ export const createInfoBannerStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): { banner: ViewStyle; text: TextStyle } =>
   StyleSheet.create({
     banner: {
       flexDirection: 'row',
@@ -264,7 +275,7 @@ export const createFooterStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): { footer: ViewStyle; saveButton: ViewStyle; saveButtonText: TextStyle } =>
   StyleSheet.create({
     footer: {
       padding: spacing.xl,

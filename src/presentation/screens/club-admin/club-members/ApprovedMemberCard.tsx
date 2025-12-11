@@ -1,9 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text, IconButton } from '../../../components/primitives';
-import { User, UserRole, MemberBalance } from '../../../../types';
-import { useTheme } from '../../../state/ThemeContext';
+import { createMemberCardStyles } from './styles';
 import {
   ICONS,
   TEXT_LINES,
@@ -15,9 +13,11 @@ import {
   EMPTY_VALUE,
 } from '../../../../shared/constants';
 import { NUMERIC } from '../../../../shared/constants/validation';
-import { createMemberCardStyles } from './styles';
+import { type User, type MemberBalance, UserRole } from '../../../../types';
+import { Text, IconButton } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
 
-interface ApprovedMemberCardProps {
+type ApprovedMemberCardProps = {
   member: User;
   balance?: MemberBalance;
   onPress: () => void;
@@ -37,9 +37,9 @@ interface ApprovedMemberCardProps {
     activate: string;
     delete: string;
   };
-}
+};
 
-interface ThemeColors {
+type ThemeColors = {
   textSecondary: string;
   success: string;
   error: string;
@@ -48,7 +48,7 @@ interface ThemeColors {
   primary: string;
   textQuaternary: string;
   textInverse: string;
-}
+};
 
 function getBalanceColor(balance: MemberBalance | undefined, colors: ThemeColors): string {
   if (!balance) {
@@ -88,14 +88,25 @@ export function ApprovedMemberCard({
     textInverse: colors.textInverse,
   };
   const balanceColor = getBalanceColor(balance, themeColors);
-  const isActive = member.isActive;
+  const { isActive } = member;
   const cardStyle = [styles.card, !isActive && styles.cardInactive];
   const avatarBg = isActive ? balanceColor : colors.backgroundTertiary;
   const roleLabel = member.role === UserRole.CLUB_ADMIN ? labels.clubAdmin : labels.user;
 
   return (
-    <TouchableOpacity style={cardStyle} onPress={onPress} activeOpacity={TOUCH_OPACITY.default}>
-      <Avatar initial={member.name.charAt(0)} color={avatarBg} isActive={isActive} styles={styles} />
+    <TouchableOpacity
+      style={cardStyle}
+      activeOpacity={TOUCH_OPACITY.default}
+      accessibilityRole="button"
+      accessibilityLabel={`View ${member.name} details`}
+      onPress={onPress}
+    >
+      <Avatar
+        initial={member.name.charAt(0)}
+        color={avatarBg}
+        isActive={isActive}
+        styles={styles}
+      />
       <View style={styles.info}>
         <MemberHeader name={member.name} role={roleLabel} isActive={isActive} styles={styles} />
         <Text
@@ -125,12 +136,12 @@ export function ApprovedMemberCard({
       </View>
       <MemberActions
         isActive={isActive}
-        onEditClasses={onEditClasses}
-        onToggleStatus={onToggleStatus}
-        onDelete={onDelete}
         labels={labels}
         colors={themeColors}
         styles={styles}
+        onEditClasses={onEditClasses}
+        onToggleStatus={onToggleStatus}
+        onDelete={onDelete}
       />
     </TouchableOpacity>
   );
@@ -182,14 +193,14 @@ function MemberHeader({
   );
 }
 
-interface MemberDetailsProps {
+type MemberDetailsProps = {
   member: User;
   isActive: boolean;
   labels: ApprovedMemberCardProps['labels'];
   colors: ThemeColors;
   iconSizes: Record<string, number>;
   styles: ReturnType<typeof createMemberCardStyles>;
-}
+};
 
 function MemberDetails({
   member,
@@ -282,7 +293,7 @@ function BalanceRow({
   );
 }
 
-interface MemberActionsProps {
+type MemberActionsProps = {
   isActive: boolean;
   onEditClasses: () => void;
   onToggleStatus: () => void;
@@ -290,7 +301,7 @@ interface MemberActionsProps {
   labels: ApprovedMemberCardProps['labels'];
   colors: ThemeColors;
   styles: ReturnType<typeof createMemberCardStyles>;
-}
+};
 
 function MemberActions({
   isActive,
@@ -309,24 +320,24 @@ function MemberActions({
     <View style={styles.actionsContainer}>
       <IconButton
         icon={ICONS.SCHOOL_OUTLINE}
-        onPress={onEditClasses}
         size={COMPONENT_SIZE.md}
         color={colors.primary}
         accessibilityLabel={labels.editClasses}
+        onPress={onEditClasses}
       />
       <IconButton
         icon={toggleIcon}
-        onPress={onToggleStatus}
         size={COMPONENT_SIZE.md}
         color={toggleColor}
         accessibilityLabel={toggleLabel}
+        onPress={onToggleStatus}
       />
       <IconButton
         icon={ICONS.DELETE_OUTLINE}
-        onPress={onDelete}
         size={COMPONENT_SIZE.md}
         color={colors.error}
         accessibilityLabel={labels.delete}
+        onPress={onDelete}
       />
     </View>
   );

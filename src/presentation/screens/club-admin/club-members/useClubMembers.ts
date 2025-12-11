@@ -2,20 +2,21 @@ import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { clubService } from '../../../../infrastructure/repositories/clubService';
 import { paymentService } from '../../../../infrastructure/repositories/paymentService';
-import { User, Club, MemberBalance, ApprovalStatus } from '../../../../types';
+import { ApprovalStatus, type User, type Club, type MemberBalance } from '../../../../types';
 
 type TranslationFn = (key: string, options?: Record<string, unknown>) => string;
 
-interface UseClubMembersReturn {
+type UseClubMembersReturn = {
   members: User[];
   balances: MemberBalance[];
   refreshing: boolean;
   loadData: () => Promise<void>;
   onRefresh: () => void;
-}
+};
 
 export function useClubMembers(clubId: string | undefined, t: TranslationFn): UseClubMembersReturn {
   const [members, setMembers] = useState<User[]>([]);
+  // eslint-disable-next-line react/hook-use-state -- setter used for side effects only
   const [, setClub] = useState<Club | null>(null);
   const [balances, setBalances] = useState<MemberBalance[]>([]);
   const [refreshing, setRefreshing] = useState(false);

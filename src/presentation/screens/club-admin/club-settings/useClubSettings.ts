@@ -1,24 +1,24 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { clubService } from '../../../../infrastructure/repositories/clubService';
-import { Club, MatchFrequency } from '../../../../types';
 import { CLUB, EMPTY_VALUE } from '../../../../shared/constants';
+import { MatchFrequency, type Club } from '../../../../types';
 
 type TranslationFn = (key: string, options?: Record<string, unknown>) => string;
 
-interface FormData {
+type FormData = {
   name: string;
   description: string;
   matchFrequency: MatchFrequency;
   groupSize: number;
-}
+};
 
-interface UseClubSettingsReturn {
+type UseClubSettingsReturn = {
   club: Club | null;
   formData: FormData;
   setFormData: (data: FormData) => void;
   handleSave: () => Promise<void>;
-}
+};
 
 export function useClubSettings(
   clubId: string | undefined,

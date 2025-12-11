@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
 import { View, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text } from '../../../components/primitives';
-import { useTheme } from '../../../state/ThemeContext';
+import { createModalStyles } from './styles';
 import { ANIMATION_TYPE, ICONS } from '../../../../shared/constants';
 import { MODAL_HEIGHT_RATIO } from '../../../../shared/constants/components';
-import { createModalStyles } from './styles';
+import { Text } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
 import type { User } from '../../../../types';
 
 type ModalStylesType = ReturnType<typeof createModalStyles>;
@@ -46,12 +46,22 @@ export function SelectMemberModal({
   ];
 
   return (
-    <Modal visible={visible} animationType={ANIMATION_TYPE.SLIDE} transparent onRequestClose={onClose}>
+    <Modal
+      transparent
+      accessibilityViewIsModal
+      visible={visible}
+      animationType={ANIMATION_TYPE.SLIDE}
+      onRequestClose={onClose}
+    >
       <View style={modalStyles.overlay}>
         <View style={contentStyle}>
           <View style={modalStyles.header}>
             <Text style={modalStyles.title}>{t('screens.meetingPlanner.assignResponsible')}</Text>
-            <TouchableOpacity onPress={onClose}>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Close modal"
+              onPress={onClose}
+            >
               <MaterialCommunityIcons
                 name={ICONS.CLOSE}
                 size={iconSizes.lg}
@@ -69,8 +79,8 @@ export function SelectMemberModal({
                 <MemberOption
                   key={member.id}
                   member={member}
-                  onSelect={(): void => onSelectMember(member)}
                   modalStyles={modalStyles}
+                  onSelect={(): void => onSelectMember(member)}
                 />
               ))
             )}
@@ -90,7 +100,12 @@ type MemberOptionProps = {
 function MemberOption({ member, onSelect, modalStyles }: MemberOptionProps): React.JSX.Element {
   const { iconSizes, colors } = useTheme();
   return (
-    <TouchableOpacity style={modalStyles.memberOption} onPress={onSelect}>
+    <TouchableOpacity
+      style={modalStyles.memberOption}
+      accessibilityRole="button"
+      accessibilityLabel={`Select ${member.name}`}
+      onPress={onSelect}
+    >
       <View style={modalStyles.memberAvatar}>
         <Text style={modalStyles.memberAvatarText}>{member.name.charAt(0).toUpperCase()}</Text>
       </View>

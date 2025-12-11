@@ -2,9 +2,15 @@ import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { clubService } from '../../../../infrastructure/repositories/clubService';
 import { paymentService } from '../../../../infrastructure/repositories/paymentService';
-import { User, Club, MemberBalance, CustomCharge, ApprovalStatus } from '../../../../types';
+import {
+  type User,
+  type Club,
+  type MemberBalance,
+  type CustomCharge,
+  ApprovalStatus,
+} from '../../../../types';
 
-interface UseClubFeesReturn {
+type UseClubFeesReturn = {
   club: Club | null;
   setClub: (c: Club | null) => void;
   members: User[];
@@ -14,7 +20,7 @@ interface UseClubFeesReturn {
   loading: boolean;
   loadData: () => Promise<void>;
   onRefresh: () => void;
-}
+};
 
 export function useClubFees(
   clubId: string | undefined,

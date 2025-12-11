@@ -2,17 +2,12 @@
  * Generate Matches Screen Styles
  * Theme-aware style factories
  */
-import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
-import { ThemeContextType } from '../../../state/ThemeContext';
+import { StyleSheet, type ViewStyle, type TextStyle } from 'react-native';
 import { FLEX, BORDER_WIDTH } from '../../../../shared/constants';
+import type { ThemeContextType } from '../../../state/ThemeContext';
 
 // Re-export shared styles for convenience
-export {
-  containerStyles,
-  sectionStyles,
-  cardStyles,
-  emptyStateStyles,
-} from '../../shared/styles';
+export { containerStyles, sectionStyles, cardStyles, emptyStateStyles } from '../../shared/styles';
 
 // ============================================================================
 // SCREEN STYLES FACTORY
@@ -21,7 +16,7 @@ export {
 export const createScreenStyles = (
   colors: ThemeContextType['colors'],
   spacing: ThemeContextType['spacing']
-) =>
+): { container: ViewStyle; content: ViewStyle; actionsContainer: ViewStyle } =>
   StyleSheet.create({
     container: {
       flex: FLEX.ONE,
@@ -45,7 +40,7 @@ export const createSectionStylesLocal = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): { section: ViewStyle; title: TextStyle } =>
   StyleSheet.create({
     section: {
       backgroundColor: colors.backgroundPrimary,
@@ -69,7 +64,17 @@ export const createRoundCardStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  card: ViewStyle;
+  header: ViewStyle;
+  info: ViewStyle;
+  details: ViewStyle;
+  date: TextStyle;
+  status: TextStyle;
+  badge: ViewStyle;
+  badgeText: TextStyle;
+  created: TextStyle;
+} =>
   StyleSheet.create({
     card: {
       backgroundColor: colors.inputBackground,
@@ -128,7 +133,7 @@ export const createEmptyStyles = (
   colors: ThemeContextType['colors'],
   spacing: ThemeContextType['spacing'],
   typography: ThemeContextType['typography']
-) =>
+): { container: ViewStyle; title: TextStyle; subtitle: TextStyle } =>
   StyleSheet.create({
     container: {
       alignItems: 'center',

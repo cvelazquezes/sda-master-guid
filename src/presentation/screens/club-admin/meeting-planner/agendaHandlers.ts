@@ -1,5 +1,4 @@
 import { Alert } from 'react-native';
-import { User } from '../../../../types';
 import {
   ALERT_BUTTON_STYLE,
   ID_PREFIX,
@@ -7,22 +6,23 @@ import {
   EMPTY_VALUE,
   MOVE_DIRECTION,
 } from '../../../../shared/constants';
-import { AgendaItem } from './types';
+import type { AgendaItem } from './types';
+import type { User } from '../../../../types';
 
 type TranslationFn = (key: string, options?: Record<string, unknown>) => string;
 
-interface EditModalSetters {
+type EditModalSetters = {
   setCurrentItem: (i: AgendaItem | null) => void;
   setEditedTitle: (t: string) => void;
   setEditedMinutes: (m: string) => void;
   setEditedDescription: (d: string) => void;
   setEditModalVisible: (v: boolean) => void;
-}
+};
 
-interface AddItemOptions extends EditModalSetters {
+type AddItemOptions = {
   agendaItems: AgendaItem[];
   t: (key: string) => string;
-}
+} & EditModalSetters;
 
 export function handleAddItem(options: AddItemOptions): void {
   const {
@@ -48,10 +48,10 @@ export function handleAddItem(options: AddItemOptions): void {
   setEditModalVisible(true);
 }
 
-interface EditItemOptions extends Omit<EditModalSetters, 'setCurrentItem'> {
+type EditItemOptions = {
   item: AgendaItem;
   setCurrentItem: (i: AgendaItem) => void;
-}
+} & Omit<EditModalSetters, 'setCurrentItem'>;
 
 export function handleEditItem(options: EditItemOptions): void {
   const {
@@ -70,7 +70,7 @@ export function handleEditItem(options: EditItemOptions): void {
   setEditModalVisible(true);
 }
 
-interface SaveItemOptions {
+type SaveItemOptions = {
   currentItem: AgendaItem | null;
   editedTitle: string;
   editedMinutes: string;
@@ -80,7 +80,7 @@ interface SaveItemOptions {
   setEditModalVisible: (v: boolean) => void;
   setCurrentItem: (i: AgendaItem | null) => void;
   t: TranslationFn;
-}
+};
 
 export function handleSaveItem(options: SaveItemOptions): void {
   const {
@@ -98,7 +98,7 @@ export function handleSaveItem(options: SaveItemOptions): void {
     Alert.alert(options.t('common.error'), options.t('errors.pleaseEnterTitle'));
     return;
   }
-  const minutes = parseInt(editedMinutes) || MEETING_AGENDA.DEFAULT_MINUTES;
+  const minutes = parseInt(editedMinutes, 10) || MEETING_AGENDA.DEFAULT_MINUTES;
   const updatedItem: AgendaItem = {
     ...currentItem,
     title: editedTitle.trim(),
@@ -114,12 +114,12 @@ export function handleSaveItem(options: SaveItemOptions): void {
   setCurrentItem(null);
 }
 
-interface DeleteItemOptions {
+type DeleteItemOptions = {
   itemId: string;
   agendaItems: AgendaItem[];
   setAgendaItems: (items: AgendaItem[]) => void;
   t: TranslationFn;
-}
+};
 
 export function handleDeleteItem(options: DeleteItemOptions): void {
   const { itemId, agendaItems, setAgendaItems, t } = options;
@@ -136,14 +136,14 @@ export function handleDeleteItem(options: DeleteItemOptions): void {
   ]);
 }
 
-interface SelectMemberOptions {
+type SelectMemberOptions = {
   member: User;
   currentItem: AgendaItem | null;
   agendaItems: AgendaItem[];
   setAgendaItems: (items: AgendaItem[]) => void;
   setSelectMemberModalVisible: (v: boolean) => void;
   setCurrentItem: (i: AgendaItem | null) => void;
-}
+};
 
 export function handleSelectMember(options: SelectMemberOptions): void {
   const {
@@ -169,11 +169,11 @@ export function handleSelectMember(options: SelectMemberOptions): void {
   setCurrentItem(null);
 }
 
-interface RemoveMemberOptions {
+type RemoveMemberOptions = {
   itemId: string;
   agendaItems: AgendaItem[];
   setAgendaItems: (items: AgendaItem[]) => void;
-}
+};
 
 export function handleRemoveMember(options: RemoveMemberOptions): void {
   const { itemId, agendaItems, setAgendaItems } = options;
@@ -187,12 +187,12 @@ export function handleRemoveMember(options: RemoveMemberOptions): void {
   );
 }
 
-interface MoveItemOptions {
+type MoveItemOptions = {
   index: number;
   direction: typeof MOVE_DIRECTION.UP | typeof MOVE_DIRECTION.DOWN;
   agendaItems: AgendaItem[];
   setAgendaItems: (items: AgendaItem[]) => void;
-}
+};
 
 export function handleMoveItem(options: MoveItemOptions): void {
   const { index, direction, agendaItems, setAgendaItems } = options;

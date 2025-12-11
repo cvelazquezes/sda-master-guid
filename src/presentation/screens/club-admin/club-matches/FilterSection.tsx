@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
 import { View, ScrollView, TouchableOpacity } from 'react-native';
 import { createFilterSectionStyles } from './styles';
-import { Text } from '../../../components/primitives';
-import { MatchStatus } from '../../../../types';
-import { useTheme } from '../../../state/ThemeContext';
 import { FILTER_STATUS } from '../../../../shared/constants';
+import { MatchStatus } from '../../../../types';
+import { Text } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
 
-interface FilterSectionProps {
+type FilterSectionProps = {
   currentFilter: MatchStatus | typeof FILTER_STATUS.ALL;
   onFilterChange: (filter: MatchStatus | typeof FILTER_STATUS.ALL) => void;
   title: string;
@@ -17,14 +17,14 @@ interface FilterSectionProps {
     completed: string;
     skipped: string;
   };
-}
+};
 
 type FilterValue = MatchStatus | typeof FILTER_STATUS.ALL;
 
-interface FilterConfig {
+type FilterConfig = {
   label: string;
   value: FilterValue;
-}
+};
 
 function createFilters(labels: FilterSectionProps['labels']): FilterConfig[] {
   return [
@@ -62,6 +62,9 @@ export function FilterSection({
             <TouchableOpacity
               key={filter.value}
               style={chipStyle}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: isActive }}
+              accessibilityLabel={filter.label}
               onPress={(): void => onFilterChange(filter.value)}
             >
               <Text style={textStyle}>{filter.label}</Text>

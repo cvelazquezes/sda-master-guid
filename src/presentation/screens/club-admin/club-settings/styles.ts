@@ -2,9 +2,9 @@
  * Club Settings Screen Styles
  * Theme-aware style factories for all club settings components
  */
-import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
-import { ThemeContextType } from '../../../state/ThemeContext';
+import { StyleSheet, type ViewStyle, type TextStyle } from 'react-native';
 import { FLEX } from '../../../../shared/constants';
+import type { ThemeContextType } from '../../../state/ThemeContext';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -183,4 +183,3 @@ export const createUserPreferencesStyles = (
       marginBottom: spacing.sm,
     },
   });
-

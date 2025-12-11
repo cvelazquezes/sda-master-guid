@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { getNextSaturday, getNextSunday } from './dateUtils';
+import { createMeetingInfoStyles } from './styles';
+import { DATE_LOCALE_OPTIONS, ICONS, SINGLE_SPACE } from '../../../../shared/constants';
 import { Text, Input } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
-import { DATE_LOCALE_OPTIONS, ICONS, SINGLE_SPACE } from '../../../../shared/constants';
-import { createMeetingInfoStyles } from './styles';
-import { getNextSaturday, getNextSunday } from './dateUtils';
 
 type MeetingInfoSectionProps = {
   meetingDate: Date;
@@ -48,6 +48,8 @@ export function MeetingInfoSection({
         <View style={meetingInfoStyles.quickDateButtons}>
           <TouchableOpacity
             style={meetingInfoStyles.quickDateButton}
+            accessibilityRole="button"
+            accessibilityLabel="Set next Saturday"
             onPress={(): void => setMeetingDate(getNextSaturday())}
           >
             <Text style={meetingInfoStyles.quickDateText}>
@@ -56,6 +58,8 @@ export function MeetingInfoSection({
           </TouchableOpacity>
           <TouchableOpacity
             style={meetingInfoStyles.quickDateButton}
+            accessibilityRole="button"
+            accessibilityLabel="Set next Sunday"
             onPress={(): void => setMeetingDate(getNextSunday())}
           >
             <Text style={meetingInfoStyles.quickDateText}>
@@ -65,8 +69,8 @@ export function MeetingInfoSection({
         </View>
         <Input
           value={meetingTitle}
-          onChangeText={setMeetingTitle}
           placeholder={t('screens.meetingPlanner.titlePlaceholder')}
+          onChangeText={setMeetingTitle}
         />
       </View>
       <View style={meetingInfoStyles.totalTimeBanner}>

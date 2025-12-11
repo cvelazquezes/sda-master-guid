@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, ScrollView, Alert, RefreshControl } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { format } from 'date-fns';
-import i18next from 'i18next';
+import { t as i18nT } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import {
-  screenStyles,
-  sectionStylesLocal,
-  roundCardStyles,
-  emptyStyles,
+  createScreenStyles,
+  createSectionStylesLocal,
+  createRoundCardStyles,
+  createEmptyStyles,
 } from './generate-matches/styles';
 import { clubService } from '../../../infrastructure/repositories/clubService';
 import { matchService } from '../../../infrastructure/repositories/matchService';
@@ -24,11 +24,45 @@ import {
 import { MATH } from '../../../shared/constants/numbers';
 import { Text, Button, PageHeader } from '../../components/primitives';
 import { useAuth } from '../../state/AuthContext';
-import { mobileIconSizes } from '../../theme';
-import { designTokens } from '../../theme/designTokens';
+import { useTheme } from '../../state/ThemeContext';
 import type { MatchRound, Club } from '../../../types';
 
 type TranslationFn = ReturnType<typeof useTranslation>['t'];
+
+// Hook to create all styles
+function useGenerateMatchesStyles(): {
+  screenStyles: ReturnType<typeof createScreenStyles>;
+  sectionStylesLocal: ReturnType<typeof createSectionStylesLocal>;
+  roundCardStyles: ReturnType<typeof createRoundCardStyles>;
+  emptyStyles: ReturnType<typeof createEmptyStyles>;
+  colors: ReturnType<typeof useTheme>['colors'];
+  iconSizes: ReturnType<typeof useTheme>['iconSizes'];
+} {
+  const { colors, spacing, radii, typography, iconSizes } = useTheme();
+
+  const screenStyles = useMemo(() => createScreenStyles(colors, spacing), [colors, spacing]);
+  const sectionStylesLocal = useMemo(
+    () => createSectionStylesLocal(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+  const roundCardStyles = useMemo(
+    () => createRoundCardStyles(colors, spacing, radii, typography),
+    [colors, spacing, radii, typography]
+  );
+  const emptyStyles = useMemo(
+    () => createEmptyStyles(colors, spacing, typography),
+    [colors, spacing, typography]
+  );
+
+  return {
+    screenStyles,
+    sectionStylesLocal,
+    roundCardStyles,
+    emptyStyles,
+    colors,
+    iconSizes,
+  };
+}
 
 // Custom hook for match rounds data
 type UseMatchRoundsDataReturn = {
@@ -62,7 +96,7 @@ function useMatchRoundsData(clubId?: string): UseMatchRoundsDataReturn {
         roundsData.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       );
     } catch {
-      Alert.alert(i18next.t('common.error'), i18next.t('errors.failedToLoadData'));
+      Alert.alert(i18nT('common.error'), i18nT('errors.failedToLoadData'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -87,36 +121,43 @@ function useMatchRoundsData(clubId?: string): UseMatchRoundsDataReturn {
 }
 
 // Round card component
-function RoundCard({ round }: { round: MatchRound }): React.JSX.Element {
+type RoundCardProps = {
+  round: MatchRound;
+  styles: ReturnType<typeof createRoundCardStyles>;
+  colors: ReturnType<typeof useTheme>['colors'];
+  iconSizes: ReturnType<typeof useTheme>['iconSizes'];
+};
+
+function RoundCard({ round, styles, colors, iconSizes }: RoundCardProps): React.JSX.Element {
   const { t } = useTranslation();
   const activityCount = round.matches.length;
   const activityLabel = t('common.activity', { count: activityCount });
   const formattedDate = format(new Date(round.createdAt), DATE_FORMATS.DATE_FNS_DATETIME_SHORT);
   return (
-    <View style={roundCardStyles.card}>
-      <View style={roundCardStyles.header}>
-        <View style={roundCardStyles.info}>
+    <View style={styles.card}>
+      <View style={styles.header}>
+        <View style={styles.info}>
           <MaterialCommunityIcons
             name={ICONS.CALENDAR_CLOCK}
-            size={mobileIconSizes.large}
-            color={designTokens.colors.primary}
+            size={iconSizes.lg}
+            color={colors.primary}
           />
-          <View style={roundCardStyles.details}>
-            <Text style={roundCardStyles.date}>
+          <View style={styles.details}>
+            <Text style={styles.date}>
               {format(new Date(round.scheduledDate), DATE_FORMATS.DATE_FNS_DATE_DISPLAY)}
             </Text>
-            <Text style={roundCardStyles.status}>
+            <Text style={styles.status}>
               {round.status.charAt(0).toUpperCase() + round.status.slice(1)}
             </Text>
           </View>
         </View>
-        <View style={roundCardStyles.badge}>
-          <Text style={roundCardStyles.badgeText}>
+        <View style={styles.badge}>
+          <Text style={styles.badgeText}>
             {activityCount} {activityLabel}
           </Text>
         </View>
       </View>
-      <Text style={roundCardStyles.created}>
+      <Text style={styles.created}>
         {t('screens.generateMatches.createdOn', { date: formattedDate })}
       </Text>
     </View>
@@ -162,23 +203,26 @@ function createGenerateHandler(
   };
 }
 
-// Header section props
 // Action buttons
+type ActionButtonsSectionProps = {
+  generating: boolean;
+  generateTitle: string;
+  viewAllTitle: string;
+  onGenerate: () => void;
+  onViewAll: () => void;
+  styles: ReturnType<typeof createScreenStyles>;
+};
+
 function ActionButtonsSection({
   generating,
   generateTitle,
   viewAllTitle,
   onGenerate,
   onViewAll,
-}: {
-  generating: boolean;
-  generateTitle: string;
-  viewAllTitle: string;
-  onGenerate: () => void;
-  onViewAll: () => void;
-}): React.JSX.Element {
+  styles,
+}: ActionButtonsSectionProps): React.JSX.Element {
   return (
-    <View style={screenStyles.actionsContainer}>
+    <View style={styles.actionsContainer}>
       <Button
         fullWidth
         title={generateTitle}
@@ -201,17 +245,30 @@ function ActionButtonsSection({
 }
 
 // Empty rounds state
-function EmptyRoundsState({ t }: { t: TranslationFn }): React.JSX.Element {
-  const iconSize = mobileIconSizes.xxlarge * MATH.SPACING_MULTIPLIER;
+type EmptyRoundsStateProps = {
+  t: TranslationFn;
+  styles: ReturnType<typeof createEmptyStyles>;
+  colors: ReturnType<typeof useTheme>['colors'];
+  iconSizes: ReturnType<typeof useTheme>['iconSizes'];
+};
+
+function EmptyRoundsState({
+  t,
+  styles,
+  colors,
+  iconSizes,
+}: EmptyRoundsStateProps): React.JSX.Element {
+  // eslint-disable-next-line no-magic-numbers -- Icon size fallback
+  const iconSize = (iconSizes.xxl ?? iconSizes['2xl'] ?? 48) * MATH.SPACING_MULTIPLIER;
   return (
-    <View style={emptyStyles.container}>
+    <View style={styles.container}>
       <MaterialCommunityIcons
         name={ICONS.ACCOUNT_HEART_OUTLINE}
         size={iconSize}
-        color={designTokens.colors.textTertiary}
+        color={colors.textTertiary}
       />
-      <Text style={emptyStyles.title}>{t('screens.generateMatches.noActivityRounds')}</Text>
-      <Text style={emptyStyles.subtitle}>{t('screens.generateMatches.getStarted')}</Text>
+      <Text style={styles.title}>{t('screens.generateMatches.noActivityRounds')}</Text>
+      <Text style={styles.subtitle}>{t('screens.generateMatches.getStarted')}</Text>
     </View>
   );
 }
@@ -221,21 +278,41 @@ type RoundsSectionProps = {
   matchRounds: MatchRound[];
   t: TranslationFn;
   onViewHistory: () => void;
+  sectionStyles: ReturnType<typeof createSectionStylesLocal>;
+  roundStyles: ReturnType<typeof createRoundCardStyles>;
+  emptyStyles: ReturnType<typeof createEmptyStyles>;
+  colors: ReturnType<typeof useTheme>['colors'];
+  iconSizes: ReturnType<typeof useTheme>['iconSizes'];
 };
 
-function RoundsSection({ matchRounds, t, onViewHistory }: RoundsSectionProps): React.JSX.Element {
+function RoundsSection({
+  matchRounds,
+  t,
+  onViewHistory,
+  sectionStyles,
+  roundStyles,
+  emptyStyles,
+  colors,
+  iconSizes,
+}: RoundsSectionProps): React.JSX.Element {
   const displayRounds = matchRounds.slice(0, MATH.FIVE);
   const hasMoreRounds = matchRounds.length > MATH.FIVE;
 
   return (
-    <View style={sectionStylesLocal.section}>
-      <Text style={sectionStylesLocal.title}>
-        {t('screens.generateMatches.activityRoundsHistory')}
-      </Text>
+    <View style={sectionStyles.section}>
+      <Text style={sectionStyles.title}>{t('screens.generateMatches.activityRoundsHistory')}</Text>
       {matchRounds.length === 0 ? (
-        <EmptyRoundsState t={t} />
+        <EmptyRoundsState t={t} styles={emptyStyles} colors={colors} iconSizes={iconSizes} />
       ) : (
-        displayRounds.map((round) => <RoundCard key={round.id} round={round} />)
+        displayRounds.map((round) => (
+          <RoundCard
+            key={round.id}
+            round={round}
+            styles={roundStyles}
+            colors={colors}
+            iconSizes={iconSizes}
+          />
+        ))
       )}
       {hasMoreRounds && (
         <Button
@@ -254,6 +331,7 @@ const GenerateMatchesScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const navigation = useNavigation();
+  const styles = useGenerateMatchesStyles();
   const clubId = user?.clubId ?? undefined;
   const { club, matchRounds, refreshing, generating, setGenerating, onRefresh, loadData } =
     useMatchRoundsData(clubId);
@@ -265,7 +343,7 @@ const GenerateMatchesScreen = (): React.JSX.Element => {
 
   return (
     <ScrollView
-      style={screenStyles.container}
+      style={styles.screenStyles.container}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <PageHeader
@@ -280,15 +358,25 @@ const GenerateMatchesScreen = (): React.JSX.Element => {
             : undefined
         }
       />
-      <View style={screenStyles.content}>
+      <View style={styles.screenStyles.content}>
         <ActionButtonsSection
           generating={generating}
           generateTitle={generateTitle}
           viewAllTitle={t('screens.generateMatches.viewAllActivities')}
+          styles={styles.screenStyles}
           onGenerate={handleGenerate}
           onViewAll={navigateToMatches}
         />
-        <RoundsSection matchRounds={matchRounds} t={t} onViewHistory={navigateToMatches} />
+        <RoundsSection
+          matchRounds={matchRounds}
+          t={t}
+          sectionStyles={styles.sectionStylesLocal}
+          roundStyles={styles.roundCardStyles}
+          emptyStyles={styles.emptyStyles}
+          colors={styles.colors}
+          iconSizes={styles.iconSizes}
+          onViewHistory={navigateToMatches}
+        />
       </View>
     </ScrollView>
   );

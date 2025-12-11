@@ -1,5 +1,3 @@
-import { PathfinderClass, PATHFINDER_CLASSES } from '../../../../types';
-import { designTokens } from '../../../theme';
 import {
   ICONS,
   FILTER_STATUS,
@@ -7,8 +5,10 @@ import {
   ENTITY_STATUS,
   FILTER_SECTION,
 } from '../../../../shared/constants';
+import { type PathfinderClass, PATHFINDER_CLASSES } from '../../../../types';
 import { type FilterSection, type Tab } from '../../../components/primitives';
-import { StatusFilterValue, PaymentFilterValue } from './types';
+import { designTokens } from '../../../theme';
+import type { StatusFilterValue, PaymentFilterValue } from './types';
 
 export function createTabs(
   approvedCount: number,
@@ -126,13 +126,13 @@ function createClassSection(
   };
 }
 
-interface CreateFilterSectionsOptions {
+type CreateFilterSectionsOptions = {
   statusFilter: StatusFilterValue;
   paymentFilter: PaymentFilterValue;
   classFilter: PathfinderClass[];
   availableClasses: PathfinderClass[];
   t: (key: string) => string;
-}
+};
 
 export function createFilterSections(options: CreateFilterSectionsOptions): FilterSection[] {
   const { statusFilter, paymentFilter, classFilter, availableClasses, t } = options;
@@ -147,14 +147,14 @@ export function createFilterSections(options: CreateFilterSectionsOptions): Filt
   return sections;
 }
 
-interface HandleFilterSelectOptions {
+type HandleFilterSelectOptions = {
   sectionId: string;
   value: string;
   classFilter: PathfinderClass[];
   setStatusFilter: (v: StatusFilterValue) => void;
   setPaymentFilter: (v: PaymentFilterValue) => void;
   setClassFilter: (v: PathfinderClass[]) => void;
-}
+};
 
 export function handleFilterSelect(options: HandleFilterSelectOptions): void {
   const { sectionId, value, classFilter, setStatusFilter, setPaymentFilter, setClassFilter } =

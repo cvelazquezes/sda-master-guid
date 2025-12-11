@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
 import { View, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text, Input } from '../../../components/primitives';
-import { useTheme } from '../../../state/ThemeContext';
+import { createModalStyles } from './styles';
 import { ANIMATION_TYPE, ICONS, KEYBOARD_TYPE, TEXT_INPUT } from '../../../../shared/constants';
 import { MODAL_HEIGHT_RATIO } from '../../../../shared/constants/components';
-import { createModalStyles } from './styles';
+import { Text, Input } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
 import type { AgendaItem } from './types';
 
 type ModalStylesType = ReturnType<typeof createModalStyles>;
@@ -64,34 +64,40 @@ export function EditItemModal({
   ];
 
   return (
-    <Modal visible={visible} animationType={ANIMATION_TYPE.SLIDE} transparent onRequestClose={onClose}>
+    <Modal
+      transparent
+      accessibilityViewIsModal
+      visible={visible}
+      animationType={ANIMATION_TYPE.SLIDE}
+      onRequestClose={onClose}
+    >
       <View style={modalStyles.overlay}>
         <View style={contentStyle}>
-          <ModalHeader title={modalTitle} onClose={onClose} modalStyles={modalStyles} />
+          <ModalHeader title={modalTitle} modalStyles={modalStyles} onClose={onClose} />
           <ScrollView style={modalStyles.body}>
             <InputField
               label={t('screens.meetingPlanner.activityTitleLabel')}
               value={editedTitle}
-              onChangeText={setEditedTitle}
               placeholder={t('screens.meetingPlanner.activityTitlePlaceholder')}
+              onChangeText={setEditedTitle}
             />
             <InputField
               label={t('screens.meetingPlanner.estimatedTime')}
               value={editedMinutes}
-              onChangeText={setEditedMinutes}
               placeholder={t('screens.meetingPlanner.minutesPlaceholder')}
               keyboardType={KEYBOARD_TYPE.NUMERIC}
+              onChangeText={setEditedMinutes}
             />
             <InputField
+              multiline
               label={t('screens.meetingPlanner.descriptionOptional')}
               value={editedDescription}
-              onChangeText={setEditedDescription}
               placeholder={t('screens.meetingPlanner.notesPlaceholder')}
-              multiline
               numberOfLines={TEXT_INPUT.NUMBER_OF_LINES.MULTI}
+              onChangeText={setEditedDescription}
             />
           </ScrollView>
-          <ModalFooter onClose={onClose} onSave={onSave} t={t} modalStyles={modalStyles} />
+          <ModalFooter t={t} modalStyles={modalStyles} onClose={onClose} onSave={onSave} />
         </View>
       </View>
     </Modal>
@@ -111,7 +117,11 @@ function ModalHeader({
   return (
     <View style={modalStyles.header}>
       <Text style={modalStyles.title}>{title}</Text>
-      <TouchableOpacity onPress={onClose}>
+      <TouchableOpacity
+        accessibilityRole="button"
+        accessibilityLabel="Close modal"
+        onPress={onClose}
+      >
         <MaterialCommunityIcons
           name={ICONS.CLOSE}
           size={iconSizes.lg}
@@ -145,11 +155,11 @@ function InputField({
     <Input
       label={label}
       value={value}
-      onChangeText={onChangeText}
       placeholder={placeholder}
       keyboardType={keyboardType as typeof KEYBOARD_TYPE.NUMERIC}
       multiline={multiline}
       numberOfLines={numberOfLines}
+      onChangeText={onChangeText}
     />
   );
 }
@@ -164,10 +174,20 @@ type ModalFooterProps = {
 function ModalFooter({ onClose, onSave, t, modalStyles }: ModalFooterProps): React.JSX.Element {
   return (
     <View style={modalStyles.footer}>
-      <TouchableOpacity style={[modalStyles.button, modalStyles.cancelButton]} onPress={onClose}>
+      <TouchableOpacity
+        style={[modalStyles.button, modalStyles.cancelButton]}
+        accessibilityRole="button"
+        accessibilityLabel="Cancel"
+        onPress={onClose}
+      >
         <Text style={modalStyles.cancelButtonText}>{t('common.cancel')}</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={[modalStyles.button, modalStyles.confirmButton]} onPress={onSave}>
+      <TouchableOpacity
+        style={[modalStyles.button, modalStyles.confirmButton]}
+        accessibilityRole="button"
+        accessibilityLabel="Save"
+        onPress={onSave}
+      >
         <Text style={modalStyles.confirmButtonText}>{t('common.save')}</Text>
       </TouchableOpacity>
     </View>

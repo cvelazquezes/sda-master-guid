@@ -1,5 +1,10 @@
-import { PathfinderClass } from '../../../../types';
-import { FILTER_STATUS, PAYMENT_STATUS, ENTITY_STATUS, MEMBER_TAB } from '../../../../shared/constants';
+import type {
+  FILTER_STATUS,
+  PAYMENT_STATUS,
+  ENTITY_STATUS,
+  MEMBER_TAB,
+} from '../../../../shared/constants';
+import type { PathfinderClass } from '../../../../types';
 
 export type StatusFilterValue =
   | typeof FILTER_STATUS.ALL
@@ -14,16 +19,16 @@ export type PaymentFilterValue =
 
 export type MemberTabValue = typeof MEMBER_TAB.APPROVED | typeof MEMBER_TAB.PENDING;
 
-export interface MembersFilterState {
+export type MembersFilterState = {
   searchQuery: string;
   statusFilter: StatusFilterValue;
   paymentFilter: PaymentFilterValue;
   classFilter: PathfinderClass[];
   activeTab: MemberTabValue;
-}
+};
 
-export interface MembersModalState {
+export type MembersModalState = {
   filterModalVisible: boolean;
   detailVisible: boolean;
   classEditModalVisible: boolean;
-}
+};

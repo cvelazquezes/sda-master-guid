@@ -2,10 +2,10 @@ import React, { useMemo } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { createEmptyStyles } from './styles';
-import { Text } from '../../../components/primitives';
-import { MatchCard } from '../../../components/features/MatchCard';
-import { useTheme } from '../../../state/ThemeContext';
 import { FILTER_STATUS, ICONS, MATH } from '../../../../shared/constants';
+import { MatchCard } from '../../../components/features/MatchCard';
+import { Text } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
 import type { Match } from '../../../../types';
 
 type EmptyStylesType = ReturnType<typeof createEmptyStyles>;
@@ -67,11 +67,15 @@ export function MatchesList({
   return (
     <>
       {matches.map((match) => (
-        <TouchableOpacity key={match.id} onPress={(): void => onViewDetails(match)}>
+        <TouchableOpacity
+          key={match.id}
+          accessibilityRole="button"
+          accessibilityLabel="View match details"
+          onPress={(): void => onViewDetails(match)}
+        >
           <MatchCard match={match} showActions={false} />
         </TouchableOpacity>
       ))}
     </>
   );
 }
-

@@ -1,9 +1,7 @@
 import React from 'react';
 import { View, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text, Input } from '../../../components/primitives';
-import { useTheme } from '../../../state/ThemeContext';
-import { User } from '../../../../types';
+import { modalStyles } from './modalStyles';
 import {
   ANIMATION_TYPE,
   ICONS,
@@ -15,9 +13,11 @@ import {
   TEXT_VARIANT,
   TEXT_WEIGHT,
 } from '../../../../shared/constants';
-import { modalStyles } from './modalStyles';
+import { Text, Input } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
+import type { User } from '../../../../types';
 
-interface ChargeModalProps {
+type ChargeModalProps = {
   visible: boolean;
   onClose: () => void;
   modalWidth: number;
@@ -35,7 +35,7 @@ interface ChargeModalProps {
   members: User[];
   onCreate: () => void;
   t: (key: string, opts?: Record<string, unknown>) => string;
-}
+};
 
 const MODAL_HEIGHT_RATIO = 0.85;
 
@@ -62,14 +62,23 @@ export function ChargeModal({
   const maxHeight = windowHeight * MODAL_HEIGHT_RATIO;
 
   return (
-    <Modal visible={visible} animationType={ANIMATION_TYPE.FADE} transparent onRequestClose={onClose}>
+    <Modal
+      transparent
+      accessibilityViewIsModal
+      visible={visible}
+      animationType={ANIMATION_TYPE.FADE}
+      onRequestClose={onClose}
+    >
       <View style={modalStyles.overlay}>
         <View style={[modalStyles.content, { width: modalWidth, maxHeight }]}>
-          <ModalHeader onClose={onClose} colors={colors} t={t} />
+          <ModalHeader colors={colors} t={t} onClose={onClose} />
           <ScrollView style={modalStyles.body} showsVerticalScrollIndicator={false}>
-            <DescriptionInput value={chargeDescription} onChange={setChargeDescription} t={t} />
-            <AmountInput value={chargeAmount} onChange={setChargeAmount} t={t} />
-            <DueDateInput value={chargeDueDate} onChange={setChargeDueDate} t={t} />
+            {/* eslint-disable-next-line no-restricted-syntax -- Input has accessibilityLabel inside */}
+            <DescriptionInput value={chargeDescription} t={t} onChange={setChargeDescription} />
+            {/* eslint-disable-next-line no-restricted-syntax -- Input has accessibilityLabel inside */}
+            <AmountInput value={chargeAmount} t={t} onChange={setChargeAmount} />
+            {/* eslint-disable-next-line no-restricted-syntax -- Input has accessibilityLabel inside */}
+            <DueDateInput value={chargeDueDate} t={t} onChange={setChargeDueDate} />
             <ApplyToSection
               chargeApplyToAll={chargeApplyToAll}
               setChargeApplyToAll={setChargeApplyToAll}
@@ -80,25 +89,30 @@ export function ChargeModal({
               t={t}
             />
           </ScrollView>
-          <ModalFooter onClose={onClose} onCreate={onCreate} t={t} />
+          <ModalFooter t={t} onClose={onClose} onCreate={onCreate} />
         </View>
       </View>
     </Modal>
   );
 }
 
-interface ModalHeaderProps {
+type ModalHeaderProps = {
   onClose: () => void;
   colors: Record<string, string>;
   t: (key: string) => string;
-}
+};
 
 function ModalHeader({ onClose, colors, t }: ModalHeaderProps): React.JSX.Element {
   const { iconSizes } = useTheme();
   return (
     <View style={modalStyles.header}>
       <Text style={modalStyles.title}>{t('screens.clubFees.createCustomCharge')}</Text>
-      <TouchableOpacity onPress={onClose} style={modalStyles.closeButton}>
+      <TouchableOpacity
+        style={modalStyles.closeButton}
+        accessibilityRole="button"
+        accessibilityLabel="Close modal"
+        onPress={onClose}
+      >
         <MaterialCommunityIcons
           name={ICONS.CLOSE}
           size={iconSizes.lg}
@@ -109,22 +123,23 @@ function ModalHeader({ onClose, colors, t }: ModalHeaderProps): React.JSX.Elemen
   );
 }
 
-interface InputProps {
+type InputProps = {
   value: string;
   onChange: (v: string) => void;
   colors: Record<string, string>;
   t: (key: string) => string;
-}
+};
 
 function DescriptionInput({ value, onChange, t }: Omit<InputProps, 'colors'>): React.JSX.Element {
   return (
     <Input
+      multiline
       label={t('screens.clubFees.description')}
       value={value}
-      onChangeText={onChange}
       placeholder={t('screens.clubFees.descriptionPlaceholder')}
-      multiline
       numberOfLines={TEXT_LINES.double}
+      accessibilityLabel="Description"
+      onChangeText={onChange}
     />
   );
 }
@@ -134,9 +149,10 @@ function AmountInput({ value, onChange, t }: Omit<InputProps, 'colors'>): React.
     <Input
       label={t('screens.clubFees.amount')}
       value={value}
-      onChangeText={onChange}
       keyboardType={KEYBOARD_TYPE.DECIMAL_PAD}
       placeholder={`$ ${t('screens.clubFees.amountPlaceholder')}`}
+      accessibilityLabel="Amount"
+      onChangeText={onChange}
     />
   );
 }
@@ -146,14 +162,15 @@ function DueDateInput({ value, onChange, t }: Omit<InputProps, 'colors'>): React
     <Input
       label={t('screens.clubFees.dueDateLabel')}
       value={value}
-      onChangeText={onChange}
       placeholder={DATE_FORMATS.ISO_DATE}
       helperText={t('screens.clubFees.dueDateFormat')}
+      accessibilityLabel="Due date"
+      onChangeText={onChange}
     />
   );
 }
 
-interface ApplyToSectionProps {
+type ApplyToSectionProps = {
   chargeApplyToAll: boolean;
   setChargeApplyToAll: (v: boolean) => void;
   selectedMemberIds: string[];
@@ -161,7 +178,7 @@ interface ApplyToSectionProps {
   members: User[];
   colors: Record<string, string>;
   t: (key: string, opts?: Record<string, unknown>) => string;
-}
+};
 
 function ApplyToSection({
   chargeApplyToAll,
@@ -186,15 +203,15 @@ function ApplyToSection({
           icon={ICONS.ACCOUNT_GROUP}
           label={t('screens.clubFees.allMembersOption')}
           active={chargeApplyToAll}
-          onPress={toggleAll}
           colors={colors}
+          onPress={toggleAll}
         />
         <ApplyToOption
           icon={ICONS.ACCOUNT_MULTIPLE_CHECK}
           label={t('screens.clubFees.selectMembersOption')}
           active={!chargeApplyToAll}
-          onPress={toggleSelect}
           colors={colors}
+          onPress={toggleSelect}
         />
       </View>
       {!chargeApplyToAll && (
@@ -209,13 +226,13 @@ function ApplyToSection({
   );
 }
 
-interface ApplyToOptionProps {
+type ApplyToOptionProps = {
   icon: string;
   label: string;
   active: boolean;
   onPress: () => void;
   colors: Record<string, string>;
-}
+};
 
 function ApplyToOption({
   icon,
@@ -229,7 +246,14 @@ function ApplyToOption({
   const textStyle = [modalStyles.applyToText, active && modalStyles.applyToTextActive];
   const iconColor = active ? colors.primary : colors.textSecondary;
   return (
-    <TouchableOpacity style={optionStyle} onPress={onPress} activeOpacity={TOUCH_OPACITY.default}>
+    <TouchableOpacity
+      style={optionStyle}
+      activeOpacity={TOUCH_OPACITY.default}
+      accessibilityRole="radio"
+      accessibilityState={{ selected: active }}
+      accessibilityLabel={label}
+      onPress={onPress}
+    >
       <MaterialCommunityIcons
         name={icon as typeof ICONS.ACCOUNT_GROUP}
         size={iconSizes.md}
@@ -259,8 +283,11 @@ function MemberItem({
     <TouchableOpacity
       key={member.id}
       style={itemStyle}
-      onPress={onToggle}
       activeOpacity={TOUCH_OPACITY.default}
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked: isSelected }}
+      accessibilityLabel={member.name}
+      onPress={onToggle}
     >
       <View style={modalStyles.memberItemLeft}>
         <View style={checkboxStyle}>
@@ -285,12 +312,12 @@ function MemberItem({
   );
 }
 
-interface MemberSelectionProps {
+type MemberSelectionProps = {
   selectedMemberIds: string[];
   setSelectedMemberIds: (v: string[]) => void;
   members: User[];
   t: (key: string, opts?: Record<string, unknown>) => string;
-}
+};
 
 function MemberSelection({
   selectedMemberIds,
@@ -324,7 +351,12 @@ function MemberSelection({
             total: members.length,
           })}
         </Text>
-        <TouchableOpacity onPress={toggleSelectAll} style={modalStyles.selectAllButton}>
+        <TouchableOpacity
+          style={modalStyles.selectAllButton}
+          accessibilityRole="button"
+          accessibilityLabel={label}
+          onPress={toggleSelectAll}
+        >
           <Text style={modalStyles.selectAllText}>{label}</Text>
         </TouchableOpacity>
       </View>
@@ -342,11 +374,11 @@ function MemberSelection({
   );
 }
 
-interface ModalFooterProps {
+type ModalFooterProps = {
   onClose: () => void;
   onCreate: () => void;
   t: (key: string) => string;
-}
+};
 
 function ModalFooter({ onClose, onCreate, t }: ModalFooterProps): React.JSX.Element {
   const { colors, iconSizes } = useTheme();
@@ -354,8 +386,10 @@ function ModalFooter({ onClose, onCreate, t }: ModalFooterProps): React.JSX.Elem
     <View style={modalStyles.footer}>
       <TouchableOpacity
         style={modalStyles.cancelButton}
-        onPress={onClose}
         activeOpacity={TOUCH_OPACITY.default}
+        accessibilityRole="button"
+        accessibilityLabel="Cancel"
+        onPress={onClose}
       >
         <Text
           variant={TEXT_VARIANT.BODY}
@@ -367,8 +401,10 @@ function ModalFooter({ onClose, onCreate, t }: ModalFooterProps): React.JSX.Elem
       </TouchableOpacity>
       <TouchableOpacity
         style={[modalStyles.createButton, { backgroundColor: colors.primary }]}
-        onPress={onCreate}
         activeOpacity={TOUCH_OPACITY.light}
+        accessibilityRole="button"
+        accessibilityLabel="Create charge"
+        onPress={onCreate}
       >
         <MaterialCommunityIcons
           name={ICONS.PLUS_CIRCLE}

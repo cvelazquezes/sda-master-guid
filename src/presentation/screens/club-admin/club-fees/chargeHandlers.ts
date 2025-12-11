@@ -1,11 +1,11 @@
 import { Alert } from 'react-native';
 import { paymentService } from '../../../../infrastructure/repositories/paymentService';
-import { User } from '../../../../types';
 import { NUMERIC, FORMAT_REGEX, EMPTY_VALUE } from '../../../../shared/constants';
+import type { User } from '../../../../types';
 
 type TranslationFn = (key: string, opts?: Record<string, unknown>) => string;
 
-interface CreateCustomChargeOptions {
+type CreateCustomChargeOptions = {
   clubId: string;
   userId: string;
   members: User[];
@@ -18,7 +18,7 @@ interface CreateCustomChargeOptions {
   resetForm: () => void;
   closeModal: () => void;
   t: TranslationFn;
-}
+};
 
 export async function createCustomCharge(options: CreateCustomChargeOptions): Promise<void> {
   const {
@@ -87,13 +87,13 @@ export async function createCustomCharge(options: CreateCustomChargeOptions): Pr
   }
 }
 
-interface ResetFormSetters {
+type ResetFormSetters = {
   setChargeDescription: (v: string) => void;
   setChargeAmount: (v: string) => void;
   setChargeDueDate: (v: string) => void;
   setChargeApplyToAll: (v: boolean) => void;
   setSelectedMemberIds: (v: string[]) => void;
-}
+};
 
 export function createResetForm(setters: ResetFormSetters): () => void {
   return (): void => {

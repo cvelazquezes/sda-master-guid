@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react';
 import { View, ScrollView, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { createScreenStyles } from './styles';
 import { ActivitySettingsSection } from './ActivitySettingsSection';
 import { BasicInfoSection } from './BasicInfoSection';
+import { createScreenStyles } from './styles';
 import { useClubSettings } from './useClubSettings';
 import { UserPreferencesSection } from './UserPreferencesSection';
 import { MatchFrequency } from '../../../../types';
@@ -15,18 +15,23 @@ import { useTheme } from '../../../state/ThemeContext';
 function useFrequencyLabels(
   t: ReturnType<typeof useTranslation>['t']
 ): Record<MatchFrequency, string> {
+  const initialValue: Record<MatchFrequency, string> = {
+    [MatchFrequency.WEEKLY]: '',
+    [MatchFrequency.BIWEEKLY]: '',
+    [MatchFrequency.MONTHLY]: '',
+  };
   return Object.values(MatchFrequency).reduce(
     (acc, freq) => ({ ...acc, [freq]: t(`club.matchFrequency.${freq}`) }),
-    {} as Record<MatchFrequency, string>
+    initialValue
   );
 }
 
 function LoadingView({
-  colors,
+  _colors,
   styles,
   t,
 }: {
-  colors: Record<string, string>;
+  _colors: Record<string, string>;
   styles: ReturnType<typeof createScreenStyles>;
   t: (k: string) => string;
 }): React.JSX.Element {
@@ -103,7 +108,12 @@ const ClubSettingsScreen = (): React.JSX.Element => {
           onGroupSizeChange={(v): void => setFormData({ ...formData, groupSize: v })}
         />
         <UserPreferencesSection title={t('screens.clubSettings.userPreferences')} colors={colors} />
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+        <TouchableOpacity
+          style={styles.saveButton}
+          accessibilityRole="button"
+          accessibilityLabel="Save changes"
+          onPress={handleSave}
+        >
           <Text style={styles.saveButtonText}>{t('screens.clubSettings.saveChanges')}</Text>
         </TouchableOpacity>
       </View>

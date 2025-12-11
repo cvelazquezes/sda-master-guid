@@ -2,7 +2,7 @@
  * Club Matches Screen Styles
  * Theme-aware style factories
  */
-import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { StyleSheet, type ViewStyle, type TextStyle } from 'react-native';
 import { FLEX } from '../../../../shared/constants';
 import type { ThemeContextType } from '../../../state/ThemeContext';
 
@@ -93,7 +93,14 @@ export const createStatsStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  container: ViewStyle;
+  sectionTitle: TextStyle;
+  statsGrid: ViewStyle;
+  statCard: ViewStyle;
+  statValue: TextStyle;
+  statLabel: TextStyle;
+} =>
   StyleSheet.create({
     container: {
       padding: spacing.lg,
@@ -139,7 +146,17 @@ export const createRoundsStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  section: ViewStyle;
+  sectionTitle: TextStyle;
+  roundCard: ViewStyle;
+  roundHeader: ViewStyle;
+  roundTitle: TextStyle;
+  roundDate: TextStyle;
+  roundStatusBadge: ViewStyle;
+  roundStatusText: TextStyle;
+  roundMatches: TextStyle;
+} =>
   StyleSheet.create({
     section: {
       padding: spacing.lg,
@@ -198,7 +215,20 @@ export const createModalStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  modalContent: ViewStyle;
+  modalSection: ViewStyle;
+  modalSectionTitle: TextStyle;
+  statusBadge: ViewStyle;
+  statusText: TextStyle;
+  participantRow: ViewStyle;
+  participantAvatar: ViewStyle;
+  participantAvatarText: TextStyle;
+  participantInfo: ViewStyle;
+  participantName: TextStyle;
+  participantEmail: TextStyle;
+  participantPhone: TextStyle;
+} =>
   StyleSheet.create({
     modalContent: {
       padding: spacing.xl,
@@ -275,7 +305,13 @@ export const createFilterStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  filterContainer: ViewStyle;
+  filterButton: ViewStyle;
+  filterButtonActive: ViewStyle;
+  filterButtonText: TextStyle;
+  filterButtonTextActive: TextStyle;
+} =>
   StyleSheet.create({
     filterContainer: {
       flexDirection: 'row',
@@ -310,7 +346,17 @@ export const createMatchListStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  listContainer: ViewStyle;
+  matchCard: ViewStyle;
+  matchHeader: ViewStyle;
+  matchTitle: TextStyle;
+  matchBadge: ViewStyle;
+  matchBadgeText: TextStyle;
+  matchParticipants: TextStyle;
+  emptyContainer: ViewStyle;
+  emptyText: TextStyle;
+} =>
   StyleSheet.create({
     listContainer: {
       padding: spacing.lg,
@@ -365,7 +411,13 @@ export const createIndexStyles = (
   colors: ThemeContextType['colors'],
   spacing: ThemeContextType['spacing'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  container: ViewStyle;
+  scrollContent: ViewStyle;
+  header: ViewStyle;
+  headerTitle: TextStyle;
+  headerSubtitle: TextStyle;
+} =>
   StyleSheet.create({
     container: {
       flex: FLEX.ONE,
@@ -398,7 +450,7 @@ export const createEmptyStyles = (
   colors: ThemeContextType['colors'],
   spacing: ThemeContextType['spacing'],
   typography: ThemeContextType['typography']
-) =>
+): { container: ViewStyle; text: TextStyle; subtext: TextStyle } =>
   StyleSheet.create({
     container: {
       alignItems: 'center',

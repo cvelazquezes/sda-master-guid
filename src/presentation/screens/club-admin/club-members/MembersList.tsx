@@ -1,12 +1,12 @@
 import React from 'react';
-import { User, MemberBalance } from '../../../../types';
-import { EmptyState } from '../../../components/primitives';
-import { ICONS, MEMBER_TAB } from '../../../../shared/constants';
-import { MemberTabValue } from './types';
-import { PendingMemberCard } from './PendingMemberCard';
 import { ApprovedMemberCard } from './ApprovedMemberCard';
+import { PendingMemberCard } from './PendingMemberCard';
+import { ICONS, MEMBER_TAB } from '../../../../shared/constants';
+import { EmptyState } from '../../../components/primitives';
+import type { MemberTabValue } from './types';
+import type { User, MemberBalance } from '../../../../types';
 
-interface MembersListProps {
+type MembersListProps = {
   members: User[];
   balances: MemberBalance[];
   activeTab: MemberTabValue;
@@ -18,7 +18,7 @@ interface MembersListProps {
   onDelete: (id: string, name: string) => void;
   labels: Record<string, string>;
   t: (key: string) => string;
-}
+};
 
 export function MembersList({
   members,
@@ -58,9 +58,9 @@ export function MembersList({
           <PendingMemberCard
             key={m.id}
             member={m}
+            labels={labels}
             onApprove={onApprove}
             onReject={onReject}
-            labels={labels}
           />
         ))}
       </>
@@ -74,11 +74,11 @@ export function MembersList({
           key={m.id}
           member={m}
           balance={balances.find((b) => b.userId === m.id)}
+          labels={labels}
           onPress={(): void => onPress(m)}
           onEditClasses={(): void => onEditClasses(m)}
           onToggleStatus={(): void => onToggleStatus(m.id, m.isActive)}
           onDelete={(): void => onDelete(m.id, m.name)}
-          labels={labels}
         />
       ))}
     </>
