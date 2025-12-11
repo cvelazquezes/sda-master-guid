@@ -5,26 +5,33 @@
  */
 
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, type ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Text } from './Text';
+import {
+  A11Y_ROLE,
+  FLEX,
+  TEXT_COLOR,
+  TEXT_VARIANT,
+  TEXT_WEIGHT,
+  type ICONS,
+} from '../../../shared/constants';
 import { useTheme } from '../../state/ThemeContext';
 import { designTokens, layoutConstants } from '../../theme';
-import { A11Y_ROLE, ICONS, FLEX, TEXT_COLOR, TEXT_VARIANT, TEXT_WEIGHT } from '../../../shared/constants';
-import { Text } from './Text';
 
-export interface Tab {
+export type Tab = {
   id: string;
   label: string;
   icon?: string;
   badge?: number;
-}
+};
 
-interface TabBarProps {
+type TabBarProps = {
   tabs: Tab[];
   activeTabId: string;
   onTabChange: (tabId: string) => void;
   style?: ViewStyle;
-}
+};
 
 export const TabBar: React.FC<TabBarProps> = ({ tabs, activeTabId, onTabChange, style }) => {
   const { colors } = useTheme();
@@ -43,12 +50,12 @@ export const TabBar: React.FC<TabBarProps> = ({ tabs, activeTabId, onTabChange, 
         return (
           <TouchableOpacity
             key={tab.id}
-            style={[styles.tab, isActive && { borderBottomColor: colors.primary }]}
-            onPress={() => onTabChange(tab.id)}
             accessible
+            style={[styles.tab, isActive && { borderBottomColor: colors.primary }]}
             accessibilityRole={A11Y_ROLE.TAB}
             accessibilityLabel={tab.label}
             accessibilityState={{ selected: isActive }}
+            onPress={() => onTabChange(tab.id)}
           >
             {tab.icon && (
               <MaterialCommunityIcons

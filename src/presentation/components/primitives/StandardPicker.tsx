@@ -4,10 +4,9 @@
  */
 
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, type ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTheme } from '../../state/ThemeContext';
-import { mobileIconSizes, designTokens, layoutConstants } from '../../theme';
+import { Text } from './Text';
 import {
   A11Y_ROLE,
   EMPTY_VALUE,
@@ -19,9 +18,10 @@ import {
   TEXT_COLOR,
 } from '../../../shared/constants';
 import { SPACING, MATH } from '../../../shared/constants/numbers';
-import { Text } from './Text';
+import { useTheme } from '../../state/ThemeContext';
+import { mobileIconSizes, designTokens, layoutConstants } from '../../theme';
 
-interface StandardPickerProps {
+type StandardPickerProps = {
   label?: string;
   value: string;
   placeholder?: string;
@@ -33,7 +33,7 @@ interface StandardPickerProps {
   containerStyle?: ViewStyle;
   /** Accessibility hint for the picker (pass translated string from screen) */
   accessibilityHint?: string;
-}
+};
 
 export const StandardPicker: React.FC<StandardPickerProps> = ({
   label,
@@ -80,13 +80,13 @@ export const StandardPicker: React.FC<StandardPickerProps> = ({
 
       {/* Picker Button */}
       <TouchableOpacity
-        style={pickerContainerStyle}
-        onPress={onPress}
-        disabled={disabled}
         accessible
+        style={pickerContainerStyle}
+        disabled={disabled}
         accessibilityRole={A11Y_ROLE.BUTTON}
         accessibilityLabel={label || displayPlaceholder}
         accessibilityHint={accessibilityHint}
+        onPress={onPress}
       >
         {/* Icon */}
         {icon && (

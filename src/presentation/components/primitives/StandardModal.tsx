@@ -18,8 +18,6 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTheme } from '../../state/ThemeContext';
-import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../../theme';
 import {
   A11Y_ROLE,
   ANIMATION_TYPE,
@@ -32,11 +30,16 @@ import {
   FLEX,
 } from '../../../shared/constants';
 import { MATH } from '../../../shared/constants/numbers';
+import { useTheme } from '../../state/ThemeContext';
+import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../../theme';
 
 // Type for animation
-type AnimationType = typeof ANIMATION_TYPE.FADE | typeof ANIMATION_TYPE.SLIDE | typeof ANIMATION_TYPE.NONE;
+type AnimationType =
+  | typeof ANIMATION_TYPE.FADE
+  | typeof ANIMATION_TYPE.SLIDE
+  | typeof ANIMATION_TYPE.NONE;
 
-interface StandardModalProps {
+type StandardModalProps = {
   visible: boolean;
   onClose: () => void;
   title: string;
@@ -54,7 +57,9 @@ interface StandardModalProps {
   headerColor?: string;
   /** Accessibility label for close button (pass translated string from screen) */
   closeButtonLabel?: string;
-}
+  /** Accessibility: indicates this is a modal view (always true internally) */
+  accessibilityViewIsModal?: boolean;
+};
 
 export const StandardModal: React.FC<StandardModalProps> = ({
   visible,
@@ -91,16 +96,16 @@ export const StandardModal: React.FC<StandardModalProps> = ({
         designTokens.responsiveScale.maxWidth.modal,
         windowWidth * designTokens.responsiveScale.modal.desktop
       );
-    } else if (windowWidth > designTokens.breakpoints.tablet) {
+    }
+    if (windowWidth > designTokens.breakpoints.tablet) {
       // Tablets and small desktop
       return Math.min(
         designTokens.responsiveScale.maxWidth.modalSmall,
         windowWidth * designTokens.responsiveScale.modal.tablet
       );
-    } else {
-      // Mobile - full width for bottom sheet
-      return windowWidth;
     }
+    // Mobile - full width for bottom sheet
+    return windowWidth;
   };
 
   // Calculate responsive max height
@@ -125,11 +130,12 @@ export const StandardModal: React.FC<StandardModalProps> = ({
 
   return (
     <Modal
+      statusBarTranslucent
+      accessibilityViewIsModal
       visible={visible}
       animationType={isMobile ? ANIMATION_TYPE.SLIDE : animationType}
       transparent={!fullScreen}
       onRequestClose={onClose}
-      statusBarTranslucent
     >
       <KeyboardAvoidingView
         style={[styles.modalOverlay, isMobile && styles.modalOverlayMobile]}
@@ -144,7 +150,6 @@ export const StandardModal: React.FC<StandardModalProps> = ({
         >
           <TouchableOpacity
             activeOpacity={1}
-            onPress={(e) => e.stopPropagation()}
             style={[
               styles.modalContent,
               {
@@ -156,6 +161,7 @@ export const StandardModal: React.FC<StandardModalProps> = ({
               isMobile ? styles.modalContentMobile : styles.modalContentDesktop,
               { width: modalWidth, maxHeight: modalMaxHeight },
             ]}
+            onPress={(e) => e.stopPropagation()}
           >
             {/* Drag Handle - Mobile Only */}
             {isMobile && <View style={[styles.dragHandle, { backgroundColor: colors.border }]} />}
@@ -181,6 +187,7 @@ export const StandardModal: React.FC<StandardModalProps> = ({
                   </View>
                 )}
                 <View style={styles.headerInfo}>
+                  {/* eslint-disable-next-line react/jsx-max-depth */}
                   <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>{title}</Text>
                   {subtitle && (
                     <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
@@ -191,11 +198,11 @@ export const StandardModal: React.FC<StandardModalProps> = ({
               </View>
               {showCloseButton && (
                 <TouchableOpacity
-                  onPress={onClose}
-                  style={styles.closeButton}
                   accessible
+                  style={styles.closeButton}
                   accessibilityRole={A11Y_ROLE.BUTTON}
                   accessibilityLabel={closeButtonLabel}
+                  onPress={onClose}
                 >
                   <MaterialCommunityIcons
                     name={ICONS.CLOSE}

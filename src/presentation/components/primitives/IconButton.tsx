@@ -5,18 +5,18 @@
  */
 
 import React from 'react';
-import { TouchableOpacity, StyleSheet, ViewStyle, StyleProp } from 'react-native';
+import { TouchableOpacity, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTheme } from '../../state/ThemeContext';
-import { designTokens, layoutConstants } from '../../theme';
 import {
   A11Y_ROLE,
   COMPONENT_SIZE,
   COMPONENT_VARIANT,
   TOUCH_OPACITY,
   DIMENSIONS,
-  ICONS,
+  type ICONS,
 } from '../../../shared/constants';
+import { useTheme } from '../../state/ThemeContext';
+import { designTokens, layoutConstants } from '../../theme';
 
 type IconButtonVariant =
   | typeof COMPONENT_VARIANT.primary
@@ -29,7 +29,7 @@ type IconButtonSize =
   | typeof COMPONENT_SIZE.md
   | typeof COMPONENT_SIZE.lg;
 
-interface IconButtonProps {
+type IconButtonProps = {
   icon: string;
   onPress: () => void;
   variant?: IconButtonVariant;
@@ -41,7 +41,7 @@ interface IconButtonProps {
   testID?: string;
   accessibilityLabel: string;
   accessibilityHint?: string;
-}
+};
 
 export const IconButton: React.FC<IconButtonProps> = ({
   icon,
@@ -116,6 +116,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
 
   return (
     <TouchableOpacity
+      accessible
       style={[
         styles.container,
         {
@@ -126,15 +127,14 @@ export const IconButton: React.FC<IconButtonProps> = ({
         disabled && styles.disabled,
         style,
       ]}
-      onPress={onPress}
       disabled={disabled}
       activeOpacity={TOUCH_OPACITY.default}
       testID={testID}
-      accessible
       accessibilityRole={A11Y_ROLE.BUTTON}
       accessibilityLabel={accessibilityLabel}
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled }}
+      onPress={onPress}
     >
       <MaterialCommunityIcons
         name={icon as typeof ICONS.CHECK}

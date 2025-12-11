@@ -9,8 +9,8 @@
 
 import React from 'react';
 import { View, Alert } from 'react-native';
-import type { Meta, StoryObj } from '@storybook/react';
 import { StandardButton as Button } from './StandardButton';
+import type { Meta, StoryObj } from '@storybook/react';
 
 const meta: Meta<typeof Button> = {
   title: 'Primitives/Button',
@@ -94,8 +94,8 @@ export const States: Story = {
   render: () => (
     <View style={{ gap: 12 }}>
       <Button title="Default" onPress={() => Alert.alert('Default')} />
-      <Button title="Loading" loading onPress={() => Alert.alert('Loading')} />
-      <Button title="Disabled" disabled onPress={() => Alert.alert('Disabled')} />
+      <Button loading title="Loading" onPress={() => Alert.alert('Loading')} />
+      <Button disabled title="Disabled" onPress={() => Alert.alert('Disabled')} />
     </View>
   ),
 };
@@ -145,14 +145,14 @@ export const FullWidth: Story = {
   render: () => (
     <View style={{ gap: 12 }}>
       <Button
-        title="Full Width Primary"
         fullWidth
+        title="Full Width Primary"
         variant="primary"
         onPress={() => Alert.alert('Full Width')}
       />
       <Button
-        title="Full Width Outline"
         fullWidth
+        title="Full Width Outline"
         variant="outline"
         onPress={() => Alert.alert('Full Width Outline')}
       />
@@ -167,16 +167,16 @@ export const FullWidth: Story = {
 export const LoginForm: Story = {
   render: () => (
     <View style={{ gap: 16 }}>
-      <Button title="Sign In" fullWidth variant="primary" onPress={() => Alert.alert('Sign In')} />
+      <Button fullWidth title="Sign In" variant="primary" onPress={() => Alert.alert('Sign In')} />
       <Button
-        title="Create Account"
         fullWidth
+        title="Create Account"
         variant="outline"
         onPress={() => Alert.alert('Create Account')}
       />
       <Button
-        title="Continue with Google"
         fullWidth
+        title="Continue with Google"
         variant="ghost"
         icon="google"
         iconPosition="left"

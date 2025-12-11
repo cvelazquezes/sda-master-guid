@@ -6,13 +6,10 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { View, StyleSheet, ViewToken } from 'react-native';
-import { FlashList, ListRenderItem } from '@shopify/flash-list';
-import { useTheme, layoutConstants } from '../../theme';
-import { designTokens } from '../../theme/designTokens';
-import { logger } from '../../../shared/utils/logger';
+import { View, StyleSheet, type ViewToken } from 'react-native';
+import { FlashList, type ListRenderItem } from '@shopify/flash-list';
+import { Text } from './Text';
 import {
-  LIST_THRESHOLDS,
   FLEX,
   TEXT_VARIANT,
   TEXT_COLOR,
@@ -20,13 +17,15 @@ import {
   LOG_MESSAGES,
 } from '../../../shared/constants';
 import { MATH } from '../../../shared/constants/numbers';
-import { Text } from './Text';
+import { logger } from '../../../shared/utils/logger';
+import { useTheme, layoutConstants } from '../../theme';
+import { designTokens } from '../../theme/designTokens';
 
 // ============================================================================
 // FlashList Wrapper with Best Practices
 // ============================================================================
 
-export interface OptimizedListProps<T> {
+export type OptimizedListProps<T> = {
   data: T[];
   renderItem: ListRenderItem<T>;
   keyExtractor: (item: T, index: number) => string;
@@ -38,7 +37,7 @@ export interface OptimizedListProps<T> {
   ListFooterComponent?: React.ComponentType<object> | React.ReactElement | null;
   refreshing?: boolean;
   onRefresh?: () => void;
-}
+};
 
 /**
  * Optimized List Component using FlashList
@@ -61,8 +60,11 @@ export function OptimizedList<T>({
   estimatedItemSize,
   onEndReached,
   onEndReachedThreshold = LIST_THRESHOLDS.ON_END_REACHED,
+  // eslint-disable-next-line @typescript-eslint/naming-convention -- React Native FlatList convention
   ListEmptyComponent,
+  // eslint-disable-next-line @typescript-eslint/naming-convention -- React Native FlatList convention
   ListHeaderComponent,
+  // eslint-disable-next-line @typescript-eslint/naming-convention -- React Native FlatList convention
   ListFooterComponent,
   refreshing,
   onRefresh,
@@ -87,26 +89,26 @@ export function OptimizedList<T>({
 
   return (
     <FlashList
-      data={data}
-      renderItem={renderItem}
-      keyExtractor={keyExtractor}
-      estimatedItemSize={estimatedItemSize}
-      // Performance optimizations
-      drawDistance={estimatedItemSize * MATH.FIVE} // Render 5 screens ahead
+      // Shorthand boolean props first
       removeClippedSubviews
-      // Pagination
-      onEndReached={onEndReached}
-      onEndReachedThreshold={onEndReachedThreshold}
-      // Viewability tracking
-      viewabilityConfig={viewabilityConfig}
-      onViewableItemsChanged={onViewableItemsChanged}
-      // Pull to refresh
       refreshing={refreshing}
-      onRefresh={onRefresh}
+      // Core props
+      data={data}
+      drawDistance={estimatedItemSize * MATH.FIVE}
+      estimatedItemSize={estimatedItemSize}
+      keyExtractor={keyExtractor}
       // Components
       ListEmptyComponent={ListEmptyComponent}
-      ListHeaderComponent={ListHeaderComponent}
       ListFooterComponent={ListFooterComponent}
+      ListHeaderComponent={ListHeaderComponent}
+      renderItem={renderItem}
+      // Viewability tracking
+      viewabilityConfig={viewabilityConfig}
+      // Callbacks last
+      onEndReached={onEndReached}
+      onEndReachedThreshold={onEndReachedThreshold}
+      onRefresh={onRefresh}
+      onViewableItemsChanged={onViewableItemsChanged}
     />
   );
 }
@@ -115,19 +117,19 @@ export function OptimizedList<T>({
 // Example: Optimized User List
 // ============================================================================
 
-interface User {
+type User = {
   id: string;
   name: string;
   email: string;
   avatar?: string;
-}
+};
 
-interface UserListItemProps {
+type UserListItemProps = {
   user: User;
   onPress: (id: string) => void;
-}
+};
 
-const UserListItem = memo<UserListItemProps>(function UserListItem({ user, onPress: _onPress }) {
+const UserListItem = memo<UserListItemProps>(({ user, onPress: _onPress }) => {
   const { theme, colors } = useTheme();
 
   return (
@@ -153,8 +155,9 @@ const UserListItem = memo<UserListItemProps>(function UserListItem({ user, onPre
     </View>
   );
 });
+UserListItem.displayName = 'UserListItem';
 
-interface OptimizedUserListProps {
+type OptimizedUserListProps = {
   users: User[];
   onUserPress: (id: string) => void;
   onLoadMore?: () => void;
@@ -162,7 +165,7 @@ interface OptimizedUserListProps {
   onRefresh?: () => void;
   /** Empty state message (pass translated string from screen) */
   emptyMessage?: string;
-}
+};
 
 /**
  * Example: Optimized User List with FlashList
@@ -178,45 +181,41 @@ interface OptimizedUserListProps {
  * />
  * ```
  */
-export const OptimizedUserList = memo<OptimizedUserListProps>(function OptimizedUserList({
-  users,
-  onUserPress,
-  onLoadMore,
-  refreshing,
-  onRefresh,
-  emptyMessage,
-}) {
-  const renderItem = useCallback<ListRenderItem<User>>(
-    ({ item }) => <UserListItem user={item} onPress={onUserPress} />,
-    [onUserPress]
-  );
+export const OptimizedUserList = memo<OptimizedUserListProps>(
+  ({ users, onUserPress, onLoadMore, refreshing, onRefresh, emptyMessage }) => {
+    const renderItem = useCallback<ListRenderItem<User>>(
+      ({ item }) => <UserListItem user={item} onPress={onUserPress} />,
+      [onUserPress]
+    );
 
-  const keyExtractor = useCallback((item: User) => item.id, []);
+    const keyExtractor = useCallback((item: User) => item.id, []);
 
-  const ListEmptyComponent = useCallback(
-    () => (
-      <View style={styles.emptyContainer}>
-        <Text variant={TEXT_VARIANT.BODY_LARGE} color={TEXT_COLOR.SECONDARY}>
-          {emptyMessage}
-        </Text>
-      </View>
-    ),
-    [emptyMessage]
-  );
+    const ListEmptyComponent = useCallback(
+      () => (
+        <View style={styles.emptyContainer}>
+          <Text variant={TEXT_VARIANT.BODY_LARGE} color={TEXT_COLOR.SECONDARY}>
+            {emptyMessage}
+          </Text>
+        </View>
+      ),
+      [emptyMessage]
+    );
 
-  return (
-    <OptimizedList
-      data={users}
-      renderItem={renderItem}
-      keyExtractor={keyExtractor}
-      estimatedItemSize={80}
-      onEndReached={onLoadMore}
-      ListEmptyComponent={ListEmptyComponent}
-      refreshing={refreshing}
-      onRefresh={onRefresh}
-    />
-  );
-});
+    return (
+      <OptimizedList
+        data={users}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+        estimatedItemSize={80}
+        ListEmptyComponent={ListEmptyComponent}
+        refreshing={refreshing}
+        onEndReached={onLoadMore}
+        onRefresh={onRefresh}
+      />
+    );
+  }
+);
+OptimizedUserList.displayName = 'OptimizedUserList';
 
 // ============================================================================
 // FlashList Best Practices

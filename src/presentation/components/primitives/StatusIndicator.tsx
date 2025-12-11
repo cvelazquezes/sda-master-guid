@@ -10,24 +10,24 @@
  */
 
 import React, { useMemo } from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
+import { View, StyleSheet, type ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTheme } from '../../state/ThemeContext';
-import { layoutConstants, getStatusSizePreset, getSpacing } from '../../theme';
+import { Text } from './Text';
 import {
   TEXT_LINES,
   COMPONENT_SIZE,
   A11Y_ROLE,
-  ICONS,
   TEXT_VARIANT,
   TEXT_WEIGHT,
+  type ICONS,
 } from '../../../shared/constants';
-import { Text } from './Text';
-import { StatusType, ComponentSize } from '../../../shared/types/theme';
+import { useTheme } from '../../state/ThemeContext';
+import { layoutConstants, getStatusSizePreset, getSpacing } from '../../theme';
+import type { ComponentSize, StatusType } from '../../../shared/types/theme';
 
 type StatusSize = typeof COMPONENT_SIZE.sm | typeof COMPONENT_SIZE.md | typeof COMPONENT_SIZE.lg;
 
-export interface StatusIndicatorProps {
+export type StatusIndicatorProps = {
   status: StatusType;
   label?: string;
   showIcon?: boolean;
@@ -37,7 +37,7 @@ export interface StatusIndicatorProps {
   testID?: string;
   /** Accessibility label (pass translated string from screen) */
   accessibilityLabel?: string;
-}
+};
 
 export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
   status,
@@ -60,9 +60,9 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
 
   return (
     <View
+      accessible
       style={[styles.container, { gap: getSpacing(sizePreset.gap) }, style]}
       testID={testID}
-      accessible
       accessibilityRole={A11Y_ROLE.TEXT}
       accessibilityLabel={accessibilityLabel || displayLabel}
     >

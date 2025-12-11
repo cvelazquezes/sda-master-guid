@@ -4,13 +4,13 @@
  * Supports dynamic theming (light/dark mode)
  */
 
-import React, { ReactNode, useMemo } from 'react';
-import { View, StyleSheet, TouchableOpacity, ViewStyle, StyleProp } from 'react-native';
+import React, { useMemo, type ReactNode } from 'react';
+import { View, StyleSheet, TouchableOpacity, type StyleProp, type ViewStyle } from 'react-native';
+import { A11Y_ROLE, TOUCH_OPACITY, COMPONENT_VARIANT } from '../../../shared/constants';
+import { useShadowStyle } from '../../hooks/useShadowStyle';
 import { useTheme } from '../../state/ThemeContext';
 import { designTokens } from '../../theme';
-import { useShadowStyle } from '../../hooks/useShadowStyle';
-import { A11Y_ROLE, TOUCH_OPACITY, COMPONENT_VARIANT } from '../../../shared/constants';
-import { ShadowPreset } from '../../../shared/types/theme';
+import type { ShadowPreset } from '../../../shared/types/theme';
 
 type CardVariant =
   | typeof COMPONENT_VARIANT.default
@@ -18,7 +18,7 @@ type CardVariant =
   | typeof COMPONENT_VARIANT.outlined
   | typeof COMPONENT_VARIANT.flat;
 
-interface CardProps {
+type CardProps = {
   children: ReactNode;
   variant?: CardVariant;
   onPress?: () => void;
@@ -28,7 +28,7 @@ interface CardProps {
   testID?: string;
   accessibilityLabel?: string;
   accessibilityHint?: string;
-}
+};
 
 export const Card: React.FC<CardProps> = ({
   children,
@@ -90,16 +90,16 @@ export const Card: React.FC<CardProps> = ({
   if (onPress) {
     return (
       <TouchableOpacity
+        accessible
         style={cardStyle}
-        onPress={onPress}
         disabled={disabled}
         activeOpacity={TOUCH_OPACITY.default}
         testID={testID}
-        accessible
         accessibilityRole={A11Y_ROLE.BUTTON}
         accessibilityLabel={accessibilityLabel}
         accessibilityHint={accessibilityHint}
         accessibilityState={{ disabled }}
+        onPress={onPress}
       >
         <View style={[styles.content, contentStyle]}>{children}</View>
       </TouchableOpacity>
@@ -107,7 +107,7 @@ export const Card: React.FC<CardProps> = ({
   }
 
   return (
-    <View style={cardStyle} testID={testID} accessible accessibilityLabel={accessibilityLabel}>
+    <View accessible style={cardStyle} testID={testID} accessibilityLabel={accessibilityLabel}>
       <View style={[styles.content, contentStyle]}>{children}</View>
     </View>
   );

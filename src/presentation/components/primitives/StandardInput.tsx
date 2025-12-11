@@ -10,12 +10,11 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
-  TextInputProps,
-  ViewStyle,
+  type TextInputProps,
+  type ViewStyle,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTheme } from '../../state/ThemeContext';
-import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../../theme';
+import { Text } from './Text';
 import {
   A11Y_ROLE,
   ICONS,
@@ -25,9 +24,10 @@ import {
   TEXT_VARIANT,
   TEXT_WEIGHT,
 } from '../../../shared/constants';
-import { Text } from './Text';
+import { useTheme } from '../../state/ThemeContext';
+import { mobileTypography, mobileIconSizes, designTokens, layoutConstants } from '../../theme';
 
-interface StandardInputProps extends TextInputProps {
+type StandardInputProps = {
   label?: string;
   icon?: string;
   error?: string;
@@ -40,7 +40,7 @@ interface StandardInputProps extends TextInputProps {
   showPasswordLabel?: string;
   /** Accessibility label for hide password button (pass translated string from screen) */
   hidePasswordLabel?: string;
-}
+} & TextInputProps;
 
 export const StandardInput: React.FC<StandardInputProps> = ({
   label,
@@ -137,6 +137,7 @@ export const StandardInput: React.FC<StandardInputProps> = ({
           style={[styles.input, { color: colors.textPrimary }, textInputProps.style]}
           secureTextEntry={secureTextEntry && !isSecureVisible}
           editable={!disabled}
+          placeholderTextColor={colors.textTertiary}
           onFocus={(e) => {
             setIsFocused(true);
             textInputProps.onFocus?.(e);
@@ -145,17 +146,16 @@ export const StandardInput: React.FC<StandardInputProps> = ({
             setIsFocused(false);
             textInputProps.onBlur?.(e);
           }}
-          placeholderTextColor={colors.textTertiary}
         />
 
         {/* Secure Entry Toggle */}
         {secureTextEntry && (
           <TouchableOpacity
-            style={styles.secureToggle}
-            onPress={() => setIsSecureVisible(!isSecureVisible)}
             accessible
+            style={styles.secureToggle}
             accessibilityRole={A11Y_ROLE.BUTTON}
             accessibilityLabel={isSecureVisible ? hidePasswordLabel : showPasswordLabel}
+            onPress={() => setIsSecureVisible(!isSecureVisible)}
           >
             <MaterialCommunityIcons
               name={isSecureVisible ? ICONS.EYE_OFF : ICONS.EYE}

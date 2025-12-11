@@ -12,14 +12,13 @@
  * />
  */
 
-import React, { ReactNode } from 'react';
-import { View, TouchableOpacity, ViewStyle } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { type ReactNode } from 'react';
+import { View, TouchableOpacity, type ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from '../../state/ThemeContext';
-import { Text } from './Text';
 import { Badge } from './Badge';
+import { Text } from './Text';
 import {
   FLEX,
   ICONS,
@@ -30,6 +29,7 @@ import {
   COMPONENT_SIZE,
 } from '../../../shared/constants';
 import { BORDER_WIDTH } from '../../../shared/constants/numbers';
+import { useTheme } from '../../state/ThemeContext';
 
 type PageHeaderProps = {
   /** Main title text */
@@ -128,8 +128,8 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       return (
         <TouchableOpacity
           style={actionButtonStyle}
-          onPress={handleBackPress}
           accessibilityLabel="Go back"
+          onPress={handleBackPress}
         >
           <MaterialCommunityIcons
             name={ICONS.ARROW_LEFT}
@@ -145,8 +145,8 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
         <View style={actionsContainerStyle}>
           <TouchableOpacity
             style={actionButtonStyle}
-            onPress={handleAccountPress}
             accessibilityLabel="My Account"
+            onPress={handleAccountPress}
           >
             <MaterialCommunityIcons
               name={ICONS.ACCOUNT_CIRCLE}
@@ -156,8 +156,8 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
           </TouchableOpacity>
           <TouchableOpacity
             style={notificationButtonStyle}
-            onPress={handleNotificationsPress}
             accessibilityLabel="Notifications"
+            onPress={handleNotificationsPress}
           >
             <MaterialCommunityIcons
               name={ICONS.BELL}
@@ -167,6 +167,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
             {notificationCount > 0 && (
               <View style={badgeContainerStyle}>
                 <Badge
+                  // eslint-disable-next-line no-magic-numbers -- UI display threshold
                   label={notificationCount > 99 ? '99+' : String(notificationCount)}
                   variant="error"
                   size={COMPONENT_SIZE.sm}
@@ -203,4 +204,3 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 };
 
 export default PageHeader;
-

@@ -11,12 +11,11 @@ import {
   StyleSheet,
   ActivityIndicator,
   View,
-  ViewStyle,
-  TextStyle,
+  type TextStyle,
+  type ViewStyle,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTheme } from '../../state/ThemeContext';
-import { designTokens, layoutConstants } from '../../theme';
+import { Text } from './Text';
 import {
   A11Y_ROLE,
   TOUCH_OPACITY,
@@ -25,12 +24,13 @@ import {
   COMPONENT_VARIANT,
   BUTTON_SIZE,
   ICON_POSITION,
-  ICONS,
   TEXT_ALIGN,
   TEXT_VARIANT,
   BORDERS,
+  type ICONS,
 } from '../../../shared/constants';
-import { Text } from './Text';
+import { useTheme } from '../../state/ThemeContext';
+import { designTokens, layoutConstants } from '../../theme';
 
 type ButtonVariant =
   | typeof COMPONENT_VARIANT.primary
@@ -42,7 +42,7 @@ type ButtonVariant =
 type ButtonSize = typeof BUTTON_SIZE.small | typeof BUTTON_SIZE.medium | typeof BUTTON_SIZE.large;
 type IconPosition = typeof ICON_POSITION.LEFT | typeof ICON_POSITION.RIGHT;
 
-interface StandardButtonProps {
+type StandardButtonProps = {
   title: string;
   onPress: () => void;
   variant?: ButtonVariant;
@@ -55,7 +55,7 @@ interface StandardButtonProps {
   testID?: string;
   accessibilityLabel?: string;
   accessibilityHint?: string;
-}
+};
 
 export const StandardButton: React.FC<StandardButtonProps> = ({
   title,
@@ -203,16 +203,16 @@ export const StandardButton: React.FC<StandardButtonProps> = ({
 
   return (
     <TouchableOpacity
+      accessible
       style={getButtonStyle()}
-      onPress={onPress}
       disabled={isDisabled}
       activeOpacity={TOUCH_OPACITY.default}
       testID={testID}
-      accessible
       accessibilityRole={A11Y_ROLE.BUTTON}
       accessibilityLabel={accessibilityLabel || title}
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled: isDisabled }}
+      onPress={onPress}
     >
       {loading ? (
         <ActivityIndicator color={getIconColor()} size={ACTIVITY_INDICATOR_SIZE.small} />

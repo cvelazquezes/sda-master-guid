@@ -6,22 +6,28 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { View, TouchableOpacity, StyleSheet, ViewProps } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, type ViewProps } from 'react-native';
+import { Text } from './Text';
+import {
+  COMPONENT_VARIANT,
+  FLEX,
+  TEXT_COLOR,
+  TEXT_VARIANT,
+  TEXT_WEIGHT,
+} from '../../../shared/constants';
 import { useTheme, layoutConstants } from '../../theme';
 import { designTokens } from '../../theme/designTokens';
-import { COMPONENT_VARIANT, FLEX, TEXT_COLOR, TEXT_VARIANT, TEXT_WEIGHT } from '../../../shared/constants';
-import { Text } from './Text';
 
 // ============================================================================
 // Basic React.memo Example
 // ============================================================================
 
-interface ButtonProps {
+type ButtonProps = {
   title: string;
   onPress: () => void;
   variant?: typeof COMPONENT_VARIANT.primary | typeof COMPONENT_VARIANT.secondary;
   disabled?: boolean;
-}
+};
 
 /**
  * Optimized Button Component
@@ -37,45 +43,43 @@ interface ButtonProps {
  * />
  * ```
  */
-export const OptimizedButton = memo<ButtonProps>(function OptimizedButton({
-  title,
-  onPress,
-  variant = COMPONENT_VARIANT.primary,
-  disabled = false,
-}) {
-  const { colors } = useTheme();
+export const OptimizedButton = memo<ButtonProps>(
+  ({ title, onPress, variant = COMPONENT_VARIANT.primary, disabled = false }) => {
+    const { colors } = useTheme();
 
-  const backgroundColor =
-    variant === COMPONENT_VARIANT.primary ? colors.primary : colors.secondary;
+    const backgroundColor =
+      variant === COMPONENT_VARIANT.primary ? colors.primary : colors.secondary;
 
-  return (
-    <TouchableOpacity
-      style={[styles.button, { backgroundColor }, disabled && styles.disabled]}
-      onPress={onPress}
-      disabled={disabled}
-    >
-      <Text
-        variant={TEXT_VARIANT.BODY_LARGE}
-        weight={TEXT_WEIGHT.SEMIBOLD}
-        color={TEXT_COLOR.ON_PRIMARY}
+    return (
+      <TouchableOpacity
+        style={[styles.button, { backgroundColor }, disabled && styles.disabled]}
+        disabled={disabled}
+        onPress={onPress}
       >
-        {title}
-      </Text>
-    </TouchableOpacity>
-  );
-});
+        <Text
+          variant={TEXT_VARIANT.BODY_LARGE}
+          weight={TEXT_WEIGHT.SEMIBOLD}
+          color={TEXT_COLOR.ON_PRIMARY}
+        >
+          {title}
+        </Text>
+      </TouchableOpacity>
+    );
+  }
+);
+OptimizedButton.displayName = 'OptimizedButton';
 
 // ============================================================================
 // React.memo with Custom Comparison
 // ============================================================================
 
-interface CardProps {
+type CardProps = {
   id: string;
   title: string;
   description: string;
   timestamp: Date;
   onPress: (id: string) => void;
-}
+};
 
 /**
  * Optimized Card Component with custom comparison
@@ -83,7 +87,7 @@ interface CardProps {
  * Only re-renders when specific props change (ignores onPress reference changes)
  */
 export const OptimizedCard = memo<CardProps>(
-  function OptimizedCard({ id, title, description, timestamp, onPress }) {
+  ({ id, title, description, timestamp, onPress }) => {
     const { colors } = useTheme();
 
     const handlePress = useCallback(() => {
@@ -127,18 +131,19 @@ export const OptimizedCard = memo<CardProps>(
     // onPress is intentionally excluded from comparison
   }
 );
+OptimizedCard.displayName = 'OptimizedCard';
 
 // ============================================================================
 // Optimized List Item
 // ============================================================================
 
-interface ListItemProps {
+type ListItemProps = {
   id: string;
   name: string;
   email: string;
   onPress: (id: string) => void;
   selected?: boolean;
-}
+};
 
 /**
  * Optimized List Item for use in FlatList
@@ -160,46 +165,47 @@ interface ListItemProps {
  * />
  * ```
  */
-export const OptimizedListItem = memo<ListItemProps>(function OptimizedListItem({
-  id,
-  name,
-  email,
-  onPress,
-  selected = false,
-}) {
-  const { theme, colors } = useTheme();
+export const OptimizedListItem = memo<ListItemProps>(
+  ({ id, name, email, onPress, selected = false }) => {
+    const { colors } = useTheme();
 
-  const handlePress = useCallback(() => {
-    onPress(id);
-  }, [id, onPress]);
+    const handlePress = useCallback(() => {
+      onPress(id);
+    }, [id, onPress]);
 
-  const backgroundColor = selected ? colors.primaryAlpha20 : colors.surface;
+    const backgroundColor = selected ? colors.primaryAlpha20 : colors.surface;
 
-  return (
-    <TouchableOpacity
-      style={[styles.listItem, { backgroundColor, borderBottomColor: colors.border }]}
-      onPress={handlePress}
-    >
-      <View style={styles.listItemContent}>
-        <Text variant={TEXT_VARIANT.BODY} weight={TEXT_WEIGHT.SEMIBOLD} style={styles.listItemName}>
-          {name}
-        </Text>
-        <Text variant={TEXT_VARIANT.BODY_SMALL} color={TEXT_COLOR.SECONDARY}>
-          {email}
-        </Text>
-      </View>
-    </TouchableOpacity>
-  );
-});
+    return (
+      <TouchableOpacity
+        style={[styles.listItem, { backgroundColor, borderBottomColor: colors.border }]}
+        onPress={handlePress}
+      >
+        <View style={styles.listItemContent}>
+          <Text
+            variant={TEXT_VARIANT.BODY}
+            weight={TEXT_WEIGHT.SEMIBOLD}
+            style={styles.listItemName}
+          >
+            {name}
+          </Text>
+          <Text variant={TEXT_VARIANT.BODY_SMALL} color={TEXT_COLOR.SECONDARY}>
+            {email}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    );
+  }
+);
+OptimizedListItem.displayName = 'OptimizedListItem';
 
 // ============================================================================
 // Optimized Container with Children
 // ============================================================================
 
-interface ContainerProps extends ViewProps {
+type ContainerProps = {
   children: React.ReactNode;
   padding?: number;
-}
+} & ViewProps;
 
 /**
  * Optimized Container Component
@@ -207,29 +213,27 @@ interface ContainerProps extends ViewProps {
  * Memoizes container to prevent re-renders when parent updates
  * but container props haven't changed.
  */
-export const OptimizedContainer = memo<ContainerProps>(function OptimizedContainer({
-  children,
-  padding = designTokens.spacing.lg,
-  style,
-  ...rest
-}) {
-  const { colors } = useTheme();
+export const OptimizedContainer = memo<ContainerProps>(
+  ({ children, padding = designTokens.spacing.lg, style, ...rest }) => {
+    const { colors } = useTheme();
 
-  return (
-    <View
-      style={[
-        {
-          backgroundColor: colors.background,
-          padding,
-        },
-        style,
-      ]}
-      {...rest}
-    >
-      {children}
-    </View>
-  );
-});
+    return (
+      <View
+        style={[
+          {
+            backgroundColor: colors.background,
+            padding,
+          },
+          style,
+        ]}
+        {...rest}
+      >
+        {children}
+      </View>
+    );
+  }
+);
+OptimizedContainer.displayName = 'OptimizedContainer';
 
 // ============================================================================
 // Performance Best Practices Guide

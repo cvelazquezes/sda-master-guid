@@ -5,10 +5,9 @@
  */
 
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, type ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTheme } from '../../state/ThemeContext';
-import { designTokens, layoutConstants } from '../../theme';
+import { Text } from './Text';
 import {
   A11Y_ROLE,
   ICONS,
@@ -19,9 +18,10 @@ import {
   TEXT_VARIANT,
   TEXT_WEIGHT,
 } from '../../../shared/constants';
-import { Text } from './Text';
+import { useTheme } from '../../state/ThemeContext';
+import { designTokens, layoutConstants } from '../../theme';
 
-interface MenuCardProps {
+type MenuCardProps = {
   title: string;
   description: string;
   icon: string;
@@ -31,7 +31,7 @@ interface MenuCardProps {
   badge?: string | number;
   style?: ViewStyle;
   testID?: string;
-}
+};
 
 export const MenuCard: React.FC<MenuCardProps> = ({
   title,
@@ -49,6 +49,7 @@ export const MenuCard: React.FC<MenuCardProps> = ({
 
   return (
     <TouchableOpacity
+      accessible
       style={[
         styles.container,
         {
@@ -63,15 +64,14 @@ export const MenuCard: React.FC<MenuCardProps> = ({
         },
         style,
       ]}
-      onPress={onPress}
       disabled={disabled}
       activeOpacity={TOUCH_OPACITY.default}
       testID={testID}
-      accessible
       accessibilityRole={A11Y_ROLE.BUTTON}
       accessibilityLabel={title}
       accessibilityHint={description}
       accessibilityState={{ disabled }}
+      onPress={onPress}
     >
       {/* Icon Container */}
       <View style={[styles.iconContainer, { backgroundColor: `${iconColor}15` }]}>

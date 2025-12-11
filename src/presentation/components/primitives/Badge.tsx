@@ -11,22 +11,22 @@
  */
 
 import React, { useMemo } from 'react';
-import { View, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { View, StyleSheet, type TextStyle, type ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { designTokens } from '../../theme/designTokens';
-import { layoutConstants, getBadgeSizePreset, getSpacing } from '../../theme';
-import { useThemeColor } from '../../hooks/useThemeColor';
+import { Text } from './Text';
 import {
   TEXT_LINES,
   COMPONENT_VARIANT,
   COMPONENT_SIZE,
   A11Y_ROLE,
-  ICONS,
   TEXT_VARIANT,
   TEXT_WEIGHT,
+  type ICONS,
 } from '../../../shared/constants';
-import { Text } from './Text';
-import { StatusType, RoleType, ComponentSize } from '../../../shared/types/theme';
+import { useThemeColor } from '../../hooks/useThemeColor';
+import { layoutConstants, getBadgeSizePreset, getSpacing } from '../../theme';
+import { designTokens } from '../../theme/designTokens';
+import type { ComponentSize, RoleType, StatusType } from '../../../shared/types/theme';
 
 type BadgeVariant =
   | typeof COMPONENT_VARIANT.primary
@@ -39,7 +39,7 @@ type BadgeVariant =
   | typeof COMPONENT_VARIANT.neutral;
 type BadgeSize = typeof COMPONENT_SIZE.sm | typeof COMPONENT_SIZE.md | typeof COMPONENT_SIZE.lg;
 
-interface BadgeProps {
+type BadgeProps = {
   // Content
   label: string;
   icon?: string;
@@ -58,7 +58,7 @@ interface BadgeProps {
   // Layout
   style?: ViewStyle;
   testID?: string;
-}
+};
 
 export const Badge: React.FC<BadgeProps> = ({
   label,
@@ -166,6 +166,7 @@ export const Badge: React.FC<BadgeProps> = ({
 
   return (
     <View
+      accessible
       style={[
         styles.container,
         containerStyle,
@@ -173,7 +174,6 @@ export const Badge: React.FC<BadgeProps> = ({
         style,
       ]}
       testID={testID}
-      accessible
       accessibilityRole={A11Y_ROLE.TEXT}
       accessibilityLabel={label}
     >
@@ -186,9 +186,9 @@ export const Badge: React.FC<BadgeProps> = ({
         />
       )}
       <Text
+        uppercase
         variant={TEXT_VARIANT.CAPTION}
         weight={TEXT_WEIGHT.BOLD}
-        uppercase
         numberOfLines={TEXT_LINES.single}
         style={textStyle}
       >

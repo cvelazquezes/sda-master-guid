@@ -9,10 +9,10 @@
 
 import React from 'react';
 import { View, Alert } from 'react-native';
-import type { Meta, StoryObj } from '@storybook/react';
 import { Card } from './Card';
-import { Text } from './Text';
 import { StandardButton as Button } from './StandardButton';
+import { Text } from './Text';
+import type { Meta, StoryObj } from '@storybook/react';
 
 const meta: Meta<typeof Card> = {
   title: 'Primitives/Card',
@@ -96,8 +96,8 @@ export const Pressable: Story = {
     <View style={{ gap: 16 }}>
       <Card
         variant="default"
-        onPress={() => Alert.alert('Card pressed!')}
         accessibilityLabel="Tap to see details"
+        onPress={() => Alert.alert('Card pressed!')}
       >
         <Text variant="h4">Pressable Card</Text>
         <Text variant="bodySmall" color="secondary">
@@ -117,7 +117,7 @@ export const Pressable: Story = {
 
 export const Disabled: Story = {
   render: () => (
-    <Card variant="default" onPress={() => Alert.alert('This should not trigger')} disabled>
+    <Card disabled variant="default" onPress={() => Alert.alert('This should not trigger')}>
       <Text variant="h4">Disabled Card</Text>
       <Text variant="bodySmall" color="secondary">
         This card cannot be pressed
@@ -215,8 +215,8 @@ export const ListItemCard: Story = {
         <Card
           key={room}
           variant="outlined"
-          onPress={() => Alert.alert(`Selected: ${room}`)}
           style={{ marginBottom: 0 }}
+          onPress={() => Alert.alert(`Selected: ${room}`)}
         >
           <View
             style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}

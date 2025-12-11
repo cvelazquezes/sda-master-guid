@@ -4,7 +4,7 @@
  * Supports dynamic theming (light/dark mode)
  */
 
-import React, { ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 import {
   View,
   Text,
@@ -15,19 +15,27 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import {
+  A11Y_ROLE,
+  ANIMATION_TYPE,
+  EMPTY_VALUE,
+  ICONS,
+  BORDERS,
+  DIMENSIONS,
+  FLEX,
+} from '../../../shared/constants';
 import { useTheme } from '../../state/ThemeContext';
 import { mobileTypography, designTokens, layoutConstants } from '../../theme';
-import { A11Y_ROLE, ANIMATION_TYPE, EMPTY_VALUE, ICONS, BORDERS, DIMENSIONS, FLEX } from '../../../shared/constants';
 
-export interface FilterOption {
+export type FilterOption = {
   id: string;
   label: string;
   value: string | number;
   icon?: string;
   color?: string;
-}
+};
 
-export interface FilterSection {
+export type FilterSection = {
   id: string;
   title: string;
   options: FilterOption[];
@@ -37,9 +45,9 @@ export interface FilterSection {
     icon: string;
     text: string;
   };
-}
+};
 
-interface FilterModalProps {
+type FilterModalProps = {
   visible: boolean;
   title?: string;
   sections: FilterSection[];
@@ -54,7 +62,7 @@ interface FilterModalProps {
   cancelLabel?: string;
   /** Label for apply/filter button (pass translated string from screen) */
   applyLabel?: string;
-}
+};
 
 export const FilterModal: React.FC<FilterModalProps> = ({
   visible,
@@ -88,9 +96,9 @@ export const FilterModal: React.FC<FilterModalProps> = ({
 
   return (
     <Modal
+      transparent
       visible={visible}
       animationType={isMobile ? ANIMATION_TYPE.SLIDE : ANIMATION_TYPE.FADE}
-      transparent
       onRequestClose={onClose}
     >
       <View style={[styles.overlay, isMobile && styles.overlayMobile]}>
@@ -108,11 +116,11 @@ export const FilterModal: React.FC<FilterModalProps> = ({
           <View style={[styles.header, { borderBottomColor: colors.border }]}>
             <Text style={[styles.title, { color: colors.textPrimary }]}>{displayTitle}</Text>
             <TouchableOpacity
-              onPress={onClose}
-              style={styles.closeButton}
               accessible
+              style={styles.closeButton}
               accessibilityRole={A11Y_ROLE.BUTTON}
               accessibilityLabel={closeLabel}
+              onPress={onClose}
             >
               <MaterialCommunityIcons
                 name={ICONS.CLOSE}
@@ -151,6 +159,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                   return (
                     <TouchableOpacity
                       key={option.id}
+                      accessible
                       style={[
                         styles.option,
                         { backgroundColor: colors.surfaceLight },
@@ -160,11 +169,10 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                           borderColor: colors.primary,
                         },
                       ]}
-                      onPress={() => onSelectOption(section.id, option.value.toString())}
-                      accessible
                       accessibilityRole={A11Y_ROLE.BUTTON}
                       accessibilityLabel={option.label}
                       accessibilityState={{ selected: isSelected }}
+                      onPress={() => onSelectOption(section.id, option.value.toString())}
                     >
                       <View style={styles.optionContent}>
                         {option.icon && (
@@ -209,11 +217,11 @@ export const FilterModal: React.FC<FilterModalProps> = ({
           {/* Footer */}
           <View style={[styles.footer, { borderTopColor: colors.border }]}>
             <TouchableOpacity
-              style={[styles.clearButton, { backgroundColor: colors.surfaceLight }]}
-              onPress={onClear}
               accessible
+              style={[styles.clearButton, { backgroundColor: colors.surfaceLight }]}
               accessibilityRole={A11Y_ROLE.BUTTON}
               accessibilityLabel={cancelLabel}
+              onPress={onClear}
             >
               <MaterialCommunityIcons
                 name={ICONS.FILTER}
@@ -225,11 +233,11 @@ export const FilterModal: React.FC<FilterModalProps> = ({
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.applyButton, { backgroundColor: colors.primary }]}
-              onPress={onApply}
               accessible
+              style={[styles.applyButton, { backgroundColor: colors.primary }]}
               accessibilityRole={A11Y_ROLE.BUTTON}
               accessibilityLabel={applyLabel}
+              onPress={onApply}
             >
               <Text style={[styles.applyButtonText, { color: colors.textOnPrimary }]}>
                 {applyLabel}

@@ -12,11 +12,11 @@
  * />
  */
 
-import React, { ReactNode } from 'react';
-import { View, ViewStyle } from 'react-native';
+import React, { type ReactNode } from 'react';
+import { View, type ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTheme } from '../../state/ThemeContext';
 import { StandardButton as Button } from './StandardButton';
+import { Text } from './Text';
 import {
   A11Y_ROLE,
   BUTTON_SIZE,
@@ -29,9 +29,9 @@ import {
   TEXT_ALIGN,
   TEXT_COLOR,
 } from '../../../shared/constants';
-import { Text } from './Text';
+import { useTheme } from '../../state/ThemeContext';
 
-export interface EmptyStateProps {
+export type EmptyStateProps = {
   // Content
   icon?: string;
   title: string;
@@ -49,7 +49,7 @@ export interface EmptyStateProps {
   iconColor?: string;
   style?: ViewStyle;
   testID?: string;
-}
+};
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
   icon = ICONS.INBOX_OUTLINE,
@@ -77,9 +77,9 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 
   return (
     <View
+      accessible
       style={[containerStyle, style]}
       testID={testID}
-      accessible
       accessibilityLabel={`${title}${description ? `. ${description}` : EMPTY_VALUE}`}
       accessibilityRole={A11Y_ROLE.TEXT}
     >
@@ -121,10 +121,10 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         <View style={{ marginTop: spacing.md }}>
           <Button
             title={actionLabel}
-            onPress={onAction}
             icon={actionIcon}
             variant={COMPONENT_VARIANT.primary}
             size={BUTTON_SIZE.medium}
+            onPress={onAction}
           />
         </View>
       )}

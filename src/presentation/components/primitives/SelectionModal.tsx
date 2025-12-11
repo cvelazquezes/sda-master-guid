@@ -7,9 +7,8 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTheme } from '../../state/ThemeContext';
 import { StandardModal as Modal } from './StandardModal';
-import { mobileIconSizes, designTokens, layoutConstants } from '../../theme';
+import { Text } from './Text';
 import {
   A11Y_ROLE,
   EMPTY_VALUE,
@@ -22,9 +21,10 @@ import {
   TEXT_WEIGHT,
   TEXT_ALIGN,
 } from '../../../shared/constants';
-import { Text } from './Text';
+import { useTheme } from '../../state/ThemeContext';
+import { mobileIconSizes, designTokens, layoutConstants } from '../../theme';
 
-export interface SelectionItem {
+export type SelectionItem = {
   id: string;
   title: string;
   subtitle?: string;
@@ -34,9 +34,9 @@ export interface SelectionItem {
   badgeColor?: string;
   disabled?: boolean;
   avatar?: string;
-}
+};
 
-interface SelectionModalProps {
+type SelectionModalProps = {
   visible: boolean;
   onClose: () => void;
   title: string;
@@ -50,7 +50,7 @@ interface SelectionModalProps {
   multiSelect?: boolean;
   /** Accessibility label for close button (pass translated string from screen) */
   closeButtonLabel?: string;
-}
+};
 
 export const SelectionModal: React.FC<SelectionModalProps> = ({
   visible,
@@ -79,18 +79,18 @@ export const SelectionModal: React.FC<SelectionModalProps> = ({
           styles.item,
           { backgroundColor: colors.surfaceLight },
           isSelected && {
-            backgroundColor: colors.successLight,
+            backgroundColor: colors.successAlpha20,
             borderWidth: designTokens.borderWidth.medium,
             borderColor: colors.success,
           },
           isDisabled && styles.itemDisabled,
         ]}
-        onPress={() => !isDisabled && onSelectItem(item)}
         disabled={isDisabled}
         activeOpacity={TOUCH_OPACITY.default}
         accessibilityRole={A11Y_ROLE.BUTTON}
         accessibilityLabel={`${item.title}${item.subtitle ? `. ${item.subtitle}` : EMPTY_VALUE}`}
         accessibilityState={{ selected: isSelected, disabled: isDisabled }}
+        onPress={() => !isDisabled && onSelectItem(item)}
       >
         {/* Icon or Avatar */}
         {item.icon && (
@@ -166,12 +166,12 @@ export const SelectionModal: React.FC<SelectionModalProps> = ({
   return (
     <Modal
       visible={visible}
-      onClose={onClose}
       title={title}
       subtitle={subtitle}
       scrollable={false}
       maxHeight={DIMENSIONS.MAX_HEIGHT_PERCENT.EIGHTY_FIVE}
       closeButtonLabel={closeButtonLabel}
+      onClose={onClose}
     >
       {items.length === 0 ? (
         <View style={styles.emptyContainer}>

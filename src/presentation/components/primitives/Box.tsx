@@ -10,19 +10,19 @@
  * </Box>
  */
 
-import React, { ReactNode, useMemo } from 'react';
-import { View, ViewStyle, StyleProp, StyleSheet } from 'react-native';
-import { designTokens } from '../../theme/designTokens';
+import React, { useMemo, type ReactNode } from 'react';
+import { View, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import { useThemeColor } from '../../hooks/useThemeColor';
-import {
+import { designTokens } from '../../theme/designTokens';
+import type {
   BackgroundColor,
   BorderColor,
-  SpacingKey,
-  RadiusKey,
   BorderWidthKey,
+  RadiusKey,
+  SpacingKey,
 } from '../../../shared/types/theme';
 
-export interface BoxProps {
+export type BoxProps = {
   children?: ReactNode;
   bg?: BackgroundColor;
   padding?: SpacingKey;
@@ -57,9 +57,9 @@ export interface BoxProps {
   style?: StyleProp<ViewStyle>;
   testID?: string;
   accessibilityLabel?: string;
-}
+};
 
-interface PaddingProps {
+type PaddingProps = {
   padding?: SpacingKey;
   paddingX?: SpacingKey;
   paddingY?: SpacingKey;
@@ -67,9 +67,9 @@ interface PaddingProps {
   paddingBottom?: SpacingKey;
   paddingLeft?: SpacingKey;
   paddingRight?: SpacingKey;
-}
+};
 
-interface MarginProps {
+type MarginProps = {
   margin?: SpacingKey;
   marginX?: SpacingKey;
   marginY?: SpacingKey;
@@ -77,7 +77,7 @@ interface MarginProps {
   marginBottom?: SpacingKey;
   marginLeft?: SpacingKey;
   marginRight?: SpacingKey;
-}
+};
 
 function buildPaddingStyle(p: PaddingProps): ViewStyle {
   return {
@@ -103,14 +103,14 @@ function buildMarginStyle(m: MarginProps): ViewStyle {
   };
 }
 
-interface LayoutStyleProps {
+type LayoutStyleProps = {
   gap?: SpacingKey;
   direction?: BoxProps['direction'];
   align?: BoxProps['align'];
   justify?: BoxProps['justify'];
   flex?: number;
   wrap?: BoxProps['wrap'];
-}
+};
 
 function buildLayoutStyle(props: LayoutStyleProps): ViewStyle {
   const { gap, direction, align, justify, flex, wrap } = props;

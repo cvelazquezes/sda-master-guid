@@ -5,8 +5,8 @@
 
 import React from 'react';
 import { render } from '@testing-library/react-native';
-import { Text, TextVariant, TextColor, TextWeight } from '../Text';
 import { ThemeProvider } from '../../../state/ThemeContext';
+import { Text, type TextVariant, type TextColor, type TextWeight } from '../Text';
 
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage', () => ({
@@ -25,7 +25,7 @@ jest.mock('../../../utils/logger', () => ({
 }));
 
 // Helper to render with provider
-const renderWithTheme = (ui: React.ReactElement) => {
+const renderWithTheme = (ui: React.ReactElement): ReturnType<typeof render> => {
   return render(<ThemeProvider>{ui}</ThemeProvider>);
 };
 
@@ -163,7 +163,7 @@ describe('Text Component', () => {
   describe('Combined Props', () => {
     it('should handle multiple style props', () => {
       const { getByText } = renderWithTheme(
-        <Text variant="h1" color="primary" weight="bold" align="center" uppercase>
+        <Text uppercase variant="h1" color="primary" weight="bold" align="center">
           Combined Styles
         </Text>
       );
@@ -172,7 +172,7 @@ describe('Text Component', () => {
 
     it('should handle variant with decorations', () => {
       const { getByText } = renderWithTheme(
-        <Text variant="body" italic strikethrough>
+        <Text italic strikethrough variant="body">
           Decorated Body
         </Text>
       );
@@ -182,7 +182,8 @@ describe('Text Component', () => {
 
   describe('Number of Lines', () => {
     it('should accept numberOfLines prop', () => {
-      const longText = 'This is a very long text that should be truncated after a certain number of lines to prevent overflow in the UI';
+      const longText =
+        'This is a very long text that should be truncated after a certain number of lines to prevent overflow in the UI';
       const { getByText } = renderWithTheme(<Text numberOfLines={2}>{longText}</Text>);
       expect(getByText(longText)).toBeTruthy();
     });
@@ -199,9 +200,7 @@ describe('Text Component', () => {
 
   describe('Custom Styles', () => {
     it('should accept custom style prop', () => {
-      const { getByText } = renderWithTheme(
-        <Text style={{ marginTop: 10 }}>Custom styled</Text>
-      );
+      const { getByText } = renderWithTheme(<Text style={{ marginTop: 10 }}>Custom styled</Text>);
       expect(getByText('Custom styled')).toBeTruthy();
     });
 
@@ -258,7 +257,7 @@ describe('Text Component', () => {
 
   describe('Edge Cases', () => {
     it('should render empty string', () => {
-      const { container } = renderWithTheme(<Text>{''}</Text>);
+      const { container } = renderWithTheme(<Text />);
       expect(container).toBeTruthy();
     });
 
@@ -278,4 +277,3 @@ describe('Text Component', () => {
     });
   });
 });
-

@@ -10,11 +10,11 @@
  */
 
 import React from 'react';
-import { View, ViewStyle } from 'react-native';
-import { designTokens } from '../../theme/designTokens';
+import { View, type ViewStyle } from 'react-native';
 import { ORIENTATION, SPACING_KEY, DIMENSIONS } from '../../../shared/constants';
 import { useThemeColor } from '../../hooks/useThemeColor';
-import { DividerColor, SpacingKey } from '../../../shared/types/theme';
+import { designTokens } from '../../theme/designTokens';
+import type { DividerColor, SpacingKey } from '../../../shared/types/theme';
 
 // ============================================================================
 // TYPES
@@ -22,7 +22,7 @@ import { DividerColor, SpacingKey } from '../../../shared/types/theme';
 
 type DividerOrientation = typeof ORIENTATION.HORIZONTAL | typeof ORIENTATION.VERTICAL;
 
-export interface DividerProps {
+export type DividerProps = {
   /** Orientation of the divider */
   orientation?: DividerOrientation;
   /** Spacing around the divider */
@@ -35,7 +35,7 @@ export interface DividerProps {
   style?: ViewStyle;
   /** Test ID */
   testID?: string;
-}
+};
 
 // ============================================================================
 // COMPONENT

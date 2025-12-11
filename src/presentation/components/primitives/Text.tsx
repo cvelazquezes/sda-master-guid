@@ -13,18 +13,18 @@
  * <Text variant="caption" weight="bold">Label</Text>
  */
 
-import React, { ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 import {
   Text as RNText,
-  TextStyle,
-  TextProps as RNTextProps,
-  StyleProp,
   StyleSheet,
+  type StyleProp,
+  type TextProps as RNTextProps,
+  type TextStyle,
 } from 'react-native';
-import { useTheme } from '../../state/ThemeContext';
-import { semanticTypography } from '../../theme/tokens/semantic';
-import { typographyPrimitives } from '../../theme/tokens/primitives';
 import { HEADING_LEVEL } from '../../../shared/constants/components';
+import { useTheme } from '../../state/ThemeContext';
+import { typographyPrimitives } from '../../theme/tokens/primitives';
+import { semanticTypography } from '../../theme/tokens/semantic';
 
 // ============================================================================
 // TYPES
@@ -80,7 +80,7 @@ export type TextWeight = 'light' | 'regular' | 'medium' | 'semibold' | 'bold' | 
 
 export type TextAlign = 'left' | 'center' | 'right' | 'auto';
 
-export interface TextProps extends Omit<RNTextProps, 'style'> {
+export type TextProps = {
   /** Text content */
   children: ReactNode;
   /** Typography variant - determines font size, weight, line height */
@@ -103,12 +103,13 @@ export interface TextProps extends Omit<RNTextProps, 'style'> {
   style?: StyleProp<TextStyle>;
   /** Test ID for testing */
   testID?: string;
-}
+} & Omit<RNTextProps, 'style'>;
 
 // ============================================================================
 // VARIANT STYLES MAPPING
 // ============================================================================
 
+// eslint-disable-next-line complexity -- Many variant cases require multiple branches
 const getVariantStyle = (variant: TextVariant): TextStyle => {
   const typography = semanticTypography;
 
@@ -268,7 +269,7 @@ export const Text: React.FC<TextProps> = ({
   };
 
   return (
-    <RNText style={computedStyle} testID={testID} accessible {...props}>
+    <RNText accessible style={computedStyle} testID={testID} {...props}>
       {children}
     </RNText>
   );

@@ -23,19 +23,19 @@
  * />
  */
 
-import React, { memo, ReactNode, useMemo } from 'react';
-import { View, TouchableOpacity, ViewStyle, StyleSheet, StyleProp } from 'react-native';
+import React, { memo, useMemo, type ReactNode } from 'react';
+import { View, TouchableOpacity, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
+import { A11Y_ROLE, TOUCH_OPACITY } from '../../../shared/constants';
 import { useShadowStyle } from '../../hooks/useShadowStyle';
 import { useTheme } from '../../state/ThemeContext';
 import { designTokens } from '../../theme/designTokens';
-import { A11Y_ROLE, TOUCH_OPACITY } from '../../../shared/constants';
-import { ThemeColors, ShadowPreset } from '../../../shared/types/theme';
+import type { ShadowPreset, ThemeColors } from '../../../shared/types/theme';
 
 // =============================================================================
 // TYPES
 // =============================================================================
 
-export interface EntityCardRenderProps<T> {
+export type EntityCardRenderProps<T> = {
   /** The entity being displayed */
   entity: T;
   /** Whether the entity is active */
@@ -44,16 +44,16 @@ export interface EntityCardRenderProps<T> {
   colors: ThemeColors;
   /** Whether dark mode is active */
   isDark: boolean;
-}
+};
 
-export interface EntityCardActionProps<T> {
+export type EntityCardActionProps<T> = {
   /** The entity being displayed */
   entity: T;
   /** Press handler (if provided) */
   onPress?: () => void;
-}
+};
 
-export interface EntityCardProps<T> {
+export type EntityCardProps<T> = {
   /** The entity data to display */
   entity: T;
   /** Whether the entity is in active state */
@@ -84,7 +84,7 @@ export interface EntityCardProps<T> {
   contentStyle?: StyleProp<ViewStyle>;
   /** Test ID for the card */
   testID?: string;
-}
+};
 
 // =============================================================================
 // CONSTANTS
@@ -158,7 +158,7 @@ function EntityCardInner<T>(props: EntityCardProps<T>): React.ReactElement {
       <View style={[styles.content, contentStyle]}>
         {renderIcon(renderProps)}
         {renderInfo(renderProps)}
-        {renderActions && renderActions(actionProps)}
+        {renderActions?.(actionProps)}
       </View>
     </View>
   );
@@ -167,13 +167,13 @@ function EntityCardInner<T>(props: EntityCardProps<T>): React.ReactElement {
   if (onPress) {
     return (
       <TouchableOpacity
-        onPress={onPress}
-        activeOpacity={TOUCH_OPACITY.default}
         accessible
+        activeOpacity={TOUCH_OPACITY.default}
         accessibilityRole={A11Y_ROLE.BUTTON}
         accessibilityLabel={accessibilityLabel}
         accessibilityHint={accessibilityHint}
         accessibilityState={{ disabled: !isActive }}
+        onPress={onPress}
       >
         {CardContent}
       </TouchableOpacity>

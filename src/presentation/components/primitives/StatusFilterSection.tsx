@@ -5,10 +5,9 @@
  */
 
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, type ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from './Text';
-import { designTokens, layoutConstants } from '../../theme';
 import {
   ICONS,
   FILTER_STATUS,
@@ -16,23 +15,24 @@ import {
   TEXT_COLOR,
   TEXT_VARIANT,
   TEXT_WEIGHT,
-  IconName,
+  type IconName,
 } from '../../../shared/constants';
 import { useTheme } from '../../state/ThemeContext';
+import { designTokens, layoutConstants } from '../../theme';
 
 type StatusValue =
   | typeof FILTER_STATUS.ALL
   | typeof FILTER_STATUS.ACTIVE
   | typeof FILTER_STATUS.INACTIVE;
 
-interface StatusOption {
+type StatusOption = {
   value: StatusValue;
   label: string;
   icon: IconName;
   activeColor?: string;
-}
+};
 
-interface StatusFilterSectionProps {
+type StatusFilterSectionProps = {
   /** Section label */
   label: string;
   /** Currently selected status */
@@ -52,7 +52,7 @@ interface StatusFilterSectionProps {
   options?: StatusOption[];
   /** Style overrides */
   style?: ViewStyle;
-}
+};
 
 const DEFAULT_ICONS: Record<StatusValue, IconName> = {
   [FILTER_STATUS.ALL]: ICONS.VIEW_LIST as IconName,
@@ -115,8 +115,8 @@ export function StatusFilterSection({
                 { borderColor: colors.primary, backgroundColor: `${themeColors.primary}10` },
               ],
             ]}
-            onPress={() => onSelect(option.value)}
             activeOpacity={0.7}
+            onPress={() => onSelect(option.value)}
           >
             <View style={styles.optionContent}>
               <MaterialCommunityIcons

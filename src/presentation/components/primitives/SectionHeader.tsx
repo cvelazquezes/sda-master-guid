@@ -9,20 +9,20 @@
  * <SectionHeader title={t('sections.members')} badge={12} />
  */
 
-import React, { ReactNode } from 'react';
-import { View, ViewStyle } from 'react-native';
-import { useTheme } from '../../state/ThemeContext';
+import React, { type ReactNode } from 'react';
+import { View, type ViewStyle } from 'react-native';
+import { Text } from './Text';
 import { FLEX, TEXT_VARIANT, TEXT_WEIGHT } from '../../../shared/constants';
 import { SPACING } from '../../../shared/constants/numbers';
-import { Text } from './Text';
+import { useTheme } from '../../state/ThemeContext';
 
-interface SectionHeaderProps {
+type SectionHeaderProps = {
   title: string;
   badge?: string | number;
   action?: ReactNode;
   style?: ViewStyle;
   testID?: string;
-}
+};
 
 export const SectionHeader: React.FC<SectionHeaderProps> = ({
   title,

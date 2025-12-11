@@ -10,26 +10,26 @@
  * </Pressable>
  */
 
-import React, { ReactNode, useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useState, useMemo, type ReactNode } from 'react';
 import {
   TouchableOpacity,
-  ViewStyle,
-  StyleProp,
   StyleSheet,
-  GestureResponderEvent,
+  type GestureResponderEvent,
+  type StyleProp,
+  type ViewStyle,
 } from 'react-native';
-import { designTokens } from '../../theme/designTokens';
-import { useThemeColor } from '../../hooks/useThemeColor';
 import { A11Y_ROLE, TOUCH_OPACITY } from '../../../shared/constants';
-import {
+import { useThemeColor } from '../../hooks/useThemeColor';
+import { designTokens } from '../../theme/designTokens';
+import type {
+  BorderWidthKey,
   InteractiveBackgroundColor,
   PressableBorderColor,
-  SpacingKey,
   RadiusKey,
-  BorderWidthKey,
+  SpacingKey,
 } from '../../../shared/types/theme';
 
-export interface PressableProps {
+export type PressableProps = {
   children?: ReactNode;
   onPress?: (event: GestureResponderEvent) => void;
   onLongPress?: (event: GestureResponderEvent) => void;
@@ -53,22 +53,22 @@ export interface PressableProps {
   accessibilityLabel?: string;
   accessibilityHint?: string;
   accessibilityRole?: 'button' | 'link' | 'menuitem' | 'tab';
-}
+};
 
 // Style builder helpers
-interface PaddingStyleInput {
+type PaddingStyleInput = {
   padding?: SpacingKey;
   paddingX?: SpacingKey;
   paddingY?: SpacingKey;
-}
+};
 
-interface LayoutStyleInput {
+type LayoutStyleInput = {
   gap?: SpacingKey;
   direction?: PressableProps['direction'];
   align?: PressableProps['align'];
   justify?: PressableProps['justify'];
   flex?: number;
-}
+};
 
 function buildPaddingStyle(p: PaddingStyleInput): ViewStyle {
   return {
@@ -157,19 +157,19 @@ export const Pressable: React.FC<PressableProps> = (props) => {
 
   return (
     <TouchableOpacity
+      accessible
       style={[computedStyle, flattenedStyle]}
-      onPress={onPress}
-      onLongPress={onLongPress}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
       disabled={disabled}
       activeOpacity={activeOpacity}
       testID={testID}
-      accessible
       accessibilityRole={accessibilityRole}
       accessibilityLabel={accessibilityLabel}
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled }}
+      onPress={onPress}
+      onLongPress={onLongPress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
     >
       {children}
     </TouchableOpacity>

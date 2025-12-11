@@ -5,12 +5,15 @@
  * Improves initial bundle size and app startup time.
  */
 
-import React, { Suspense, ComponentType, LazyExoticComponent, Component, lazy } from 'react';
+import React, {
+  Suspense,
+  Component,
+  lazy,
+  type ComponentType,
+  type LazyExoticComponent,
+} from 'react';
 import { View, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
-import { useTheme, layoutConstants } from '../../theme';
-import { designTokens } from '../../theme/designTokens';
-import { LOG_MESSAGES } from '../../../shared/constants/logMessages';
-import { logger } from '../../../shared/utils/logger';
+import { Text } from './Text';
 import {
   A11Y_ROLE,
   ACTIVITY_INDICATOR_SIZE,
@@ -21,16 +24,19 @@ import {
   TEXT_VARIANT,
   TEXT_WEIGHT,
 } from '../../../shared/constants';
-import { Text } from './Text';
+import { LOG_MESSAGES } from '../../../shared/constants/logMessages';
+import { logger } from '../../../shared/utils/logger';
+import { useTheme, layoutConstants } from '../../theme';
+import { designTokens } from '../../theme/designTokens';
 
 /**
  * Loading fallback labels (passed via options or use defaults)
  */
-interface LoadingLabels {
+type LoadingLabels = {
   loadingText?: string;
   errorTitle?: string;
   retryText?: string;
-}
+};
 
 /**
  * Loading fallback component
@@ -51,12 +57,12 @@ function LoadingFallback({ loadingText }: { loadingText?: string }): React.JSX.E
 /**
  * Error fallback component
  */
-interface ErrorFallbackProps {
+type ErrorFallbackProps = {
   error: Error;
   retry: () => void;
   errorTitle?: string;
   retryText?: string;
-}
+};
 
 function ErrorFallback({
   error,
@@ -64,7 +70,7 @@ function ErrorFallback({
   errorTitle,
   retryText,
 }: ErrorFallbackProps): React.JSX.Element {
-  const { theme, colors } = useTheme();
+  const { colors } = useTheme();
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -80,10 +86,10 @@ function ErrorFallback({
         {error.message}
       </Text>
       <TouchableOpacity
-        onPress={retry}
         activeOpacity={TOUCH_OPACITY.default}
         accessibilityRole={A11Y_ROLE.BUTTON}
         accessibilityLabel={retryText}
+        onPress={retry}
       >
         <Text
           variant={TEXT_VARIANT.BODY_LARGE}
@@ -120,7 +126,7 @@ class LazyErrorBoundary extends Component<
     logger.error(LOG_MESSAGES.LAZY_SCREEN.LOAD_ERROR, error, { errorInfo });
   }
 
-  retry = (): void => {
+  retry: () => void = (): void => {
     this.setState({ error: null });
   };
 
@@ -203,6 +209,7 @@ export function lazyScreen<P extends Record<string, unknown>>(
  * ```
  */
 export function preloadScreen<P extends object>(
+  // eslint-disable-next-line @typescript-eslint/naming-convention -- React convention for components
   Component: LazyExoticComponent<ComponentType<P>>
 ): void {
   // Force React to start loading the component by accessing it

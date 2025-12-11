@@ -5,14 +5,21 @@
  */
 
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, type ViewStyle } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Text } from './Text';
+import {
+  ICONS,
+  FLEX,
+  TEXT_COLOR,
+  TEXT_VARIANT,
+  TEXT_WEIGHT,
+  type IconName,
+} from '../../../shared/constants';
 import { useTheme } from '../../state/ThemeContext';
 import { designTokens, layoutConstants } from '../../theme';
-import { ICONS, FLEX, TEXT_COLOR, TEXT_VARIANT, TEXT_WEIGHT, IconName } from '../../../shared/constants';
 
-interface HierarchyFilterItemProps {
+type HierarchyFilterItemProps = {
   /** Label text for the filter section */
   label: string;
   /** Icon to display */
@@ -36,7 +43,7 @@ interface HierarchyFilterItemProps {
   disabled?: boolean;
   /** Style overrides */
   style?: ViewStyle;
-}
+};
 
 /**
  * Renders a single hierarchy filter section with auto-select for single options
@@ -103,9 +110,9 @@ export function HierarchyFilterItem({
                 { borderColor: colors.primary, backgroundColor: `${themeColors.primary}10` },
               ],
             ]}
-            onPress={() => !disabled && onSelect(option)}
             disabled={disabled}
             activeOpacity={0.7}
+            onPress={() => !disabled && onSelect(option)}
           >
             <Text
               variant={TEXT_VARIANT.BODY_SMALL}

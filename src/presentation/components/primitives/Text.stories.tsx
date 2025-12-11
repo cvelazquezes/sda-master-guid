@@ -9,8 +9,8 @@
 
 import React from 'react';
 import { View } from 'react-native';
-import type { Meta, StoryObj } from '@storybook/react';
 import { Text, Heading, Body, Label, Caption } from './Text';
+import type { Meta, StoryObj } from '@storybook/react';
 
 const meta: Meta<typeof Text> = {
   title: 'Primitives/Text',
