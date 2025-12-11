@@ -1,14 +1,14 @@
 import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text } from '../../../components/primitives';
-import { MemberBalance } from '../../../../types';
-import { useTheme } from '../../../state/ThemeContext';
-import { BALANCE_STATUS, ICONS } from '../../../../shared/constants';
-import { NUMERIC } from '../../../../shared/constants/http';
 import { createStyles } from './styles';
+import { BALANCE_STATUS, ICONS } from '../../../../shared/constants';
+import { NUMERIC } from '../../../../shared/constants/validation';
+import { Text } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
+import type { MemberBalance } from '../../../../types';
 
-interface BalanceCardProps {
+type BalanceCardProps = {
   balance: MemberBalance | null;
   balanceStatus: { color: string; status: string };
   paidPayments: number;
@@ -16,7 +16,7 @@ interface BalanceCardProps {
   chargesCount: number;
   colors: Record<string, string>;
   t: (key: string) => string;
-}
+};
 
 export function BalanceCard({
   balance,

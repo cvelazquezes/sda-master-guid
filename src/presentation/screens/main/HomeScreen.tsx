@@ -12,7 +12,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, ScrollView, RefreshControl, Alert } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import i18next from 'i18next';
+import { t as i18nT } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import { clubService } from '../../../infrastructure/repositories/clubService';
 import { matchService } from '../../../infrastructure/repositories/matchService';
@@ -26,17 +26,15 @@ import {
   TEXT_VARIANT,
   TEXT_WEIGHT,
 } from '../../../shared/constants';
-import { DISPLAY_LIMITS } from '../../../shared/constants/http';
 import { BORDER_WIDTH } from '../../../shared/constants/numbers';
-import { MatchStatus } from '../../../types';
+import { DISPLAY_LIMITS } from '../../../shared/constants/ui';
+import { type Club, type User, MatchStatus } from '../../../types';
 import { ClubCard } from '../../components/features/ClubCard';
 import { ClubDetailModal } from '../../components/features/ClubDetailModal';
 import { StatCard } from '../../components/features/StatCard';
 import { Text, EmptyState, Card, SectionHeader, PageHeader } from '../../components/primitives';
 import { useAuth } from '../../state/AuthContext';
-import { useTheme } from '../../state/ThemeContext';
-import type { Club, User } from '../../../types';
-import type { ThemeContextType } from '../../state/ThemeContext';
+import { useTheme, type ThemeContextType } from '../../state/ThemeContext';
 
 type HomeStats = {
   totalMembers: number;
@@ -91,7 +89,7 @@ function useHomeData(clubId?: string): UseHomeDataReturn {
       );
       setRecentMembers(sorted.slice(0, DISPLAY_LIMITS.MAX_PREVIEW_ITEMS));
     } catch {
-      Alert.alert(i18next.t('common.error'), i18next.t('errors.failedToLoadData'));
+      Alert.alert(i18nT('common.error'), i18nT('errors.failedToLoadData'));
     } finally {
       setRefreshing(false);
     }

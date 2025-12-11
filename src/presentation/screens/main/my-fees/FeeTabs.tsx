@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { createTabStyles } from './styles';
+import { ICONS, MY_FEES_TAB } from '../../../../shared/constants';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
-import { MY_FEES_TAB, ICONS } from '../../../../shared/constants';
-import { createTabStyles } from './styles';
 import type { MyFeesTabValue } from './types';
 
 type TabStylesType = ReturnType<typeof createTabStyles>;
@@ -38,10 +38,10 @@ export function FeeTabs({ selectedTab, onTabChange, colors, t }: FeeTabsProps): 
           key={tab}
           tab={tab}
           isActive={selectedTab === tab}
-          onPress={(): void => onTabChange(tab)}
           colors={colors}
           t={t}
           tabStyles={tabStyles}
+          onPress={(): void => onTabChange(tab)}
         />
       ))}
     </View>
@@ -76,7 +76,13 @@ function TabButton({
   ];
 
   return (
-    <TouchableOpacity style={tabStyle} onPress={onPress}>
+    <TouchableOpacity
+      style={tabStyle}
+      accessibilityRole="tab"
+      accessibilityState={{ selected: isActive }}
+      accessibilityLabel={t(`screens.myFees.${tab}`)}
+      onPress={onPress}
+    >
       <MaterialCommunityIcons
         name={icon}
         size={iconSizes.md}

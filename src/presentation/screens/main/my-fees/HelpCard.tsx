@@ -1,15 +1,15 @@
 import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { createStyles } from './styles';
+import { ICONS } from '../../../../shared/constants';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
-import { ICONS } from '../../../../shared/constants';
-import { createStyles } from './styles';
 
-interface HelpCardProps {
+type HelpCardProps = {
   colors: Record<string, string>;
   t: (key: string) => string;
-}
+};
 
 export function HelpCard({ colors, t }: HelpCardProps): React.JSX.Element {
   const { iconSizes, spacing, radii, typography } = useTheme();

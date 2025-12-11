@@ -1,23 +1,23 @@
 import React, { useState } from 'react';
-import { View, ScrollView, RefreshControl, Animated } from 'react-native';
+import { Animated, RefreshControl, ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../../state/AuthContext';
-import { useTheme } from '../../../state/ThemeContext';
-import { UserDetailModal } from '../../../components/features/UserDetailModal';
-import { useSettingsData } from './useSettingsData';
-import { showToggleActiveAlert, showLogoutAlert } from './settingsHandlers';
-import { getRoleConfig } from './roleConfig';
-import { useSettingsStyles } from './useSettingsStyles';
+import { LoadingState } from './LoadingState';
 import { ProfileHeader } from './ProfileHeader';
 import { QuickActions } from './QuickActions';
-import { LoadingState } from './LoadingState';
+import { getRoleConfig } from './roleConfig';
+import { showLogoutAlert, showToggleActiveAlert } from './settingsHandlers';
 import {
-  AppearanceSection,
   AccountSection,
+  AppearanceSection,
+  LogoutSection,
   NotificationsSection,
   SupportSection,
-  LogoutSection,
 } from './SettingsSections';
+import { useSettingsData } from './useSettingsData';
+import { useSettingsStyles } from './useSettingsStyles';
+import { UserDetailModal } from '../../../components/features/UserDetailModal';
+import { useAuth } from '../../../state/AuthContext';
+import { useTheme } from '../../../state/ThemeContext';
 
 const BOTTOM_SPACER_HEIGHT = 40;
 
@@ -49,8 +49,8 @@ const SettingsScreen = (): React.JSX.Element => {
       refreshControl={
         <RefreshControl
           refreshing={data.refreshing}
-          onRefresh={data.onRefresh}
           tintColor={colors.primary}
+          onRefresh={data.onRefresh}
         />
       }
       showsVerticalScrollIndicator={false}
@@ -67,11 +67,11 @@ const SettingsScreen = (): React.JSX.Element => {
         <QuickActions
           userRole={user?.role}
           isActive={data.isActive}
+          colors={colors}
+          t={t}
           onViewProfile={openProfile}
           onToggleActive={(): void => handleToggleActive(!data.isActive)}
           onLogout={handleLogout}
-          colors={colors}
-          t={t}
         />
         <AppearanceSection colors={colors} t={t} />
         <AccountSection

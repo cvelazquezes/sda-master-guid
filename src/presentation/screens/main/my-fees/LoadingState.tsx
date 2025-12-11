@@ -1,14 +1,14 @@
 import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { createLoadingStyles, createStyles } from './styles';
+import { ICONS } from '../../../../shared/constants';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
-import { ICONS } from '../../../../shared/constants';
-import { createStyles, createLoadingStyles } from './styles';
 
-interface LoadingStateProps {
+type LoadingStateProps = {
   colors: Record<string, string>;
-}
+};
 
 export function LoadingState({ colors }: LoadingStateProps): React.JSX.Element {
   const { spacing, radii, typography } = useTheme();
@@ -60,10 +60,10 @@ export function LoadingState({ colors }: LoadingStateProps): React.JSX.Element {
   );
 }
 
-interface NotAMemberStateProps {
+type NotAMemberStateProps = {
   colors: Record<string, string>;
   t: (key: string) => string;
-}
+};
 
 export function NotAMemberState({ colors, t }: NotAMemberStateProps): React.JSX.Element {
   const { iconSizes, spacing, radii, typography } = useTheme();

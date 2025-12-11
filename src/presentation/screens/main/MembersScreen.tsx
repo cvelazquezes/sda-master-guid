@@ -3,23 +3,12 @@
  * ✅ COMPLIANT: Uses theme values via useTheme() hook
  */
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, ScrollView, RefreshControl, Alert, Linking, TextStyle, ViewStyle } from 'react-native';
-import { useTranslation } from 'react-i18next';
-import i18next from 'i18next';
+import { View, ScrollView, RefreshControl, Alert, Linking } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { t as i18nT } from 'i18next';
+import { useTranslation } from 'react-i18next';
 import { createStyles, createMemberCardStyles } from './members/styles';
-import { useAuth } from '../../state/AuthContext';
-import { useTheme, ThemeContextType } from '../../state/ThemeContext';
 import { clubService } from '../../../infrastructure/repositories/clubService';
-import { User } from '../../../types';
-import {
-  Text,
-  Input,
-  EmptyState,
-  Card,
-  PageHeader,
-  StandardButton,
-} from '../../components/primitives';
 import {
   BUTTON_SIZE,
   COMPONENT_VARIANT,
@@ -29,9 +18,20 @@ import {
   PHONE,
   FLEX,
 } from '../../../shared/constants';
+import {
+  Text,
+  Input,
+  EmptyState,
+  Card,
+  PageHeader,
+  StandardButton,
+} from '../../components/primitives';
+import { useAuth } from '../../state/AuthContext';
+import { useTheme, type ThemeContextType } from '../../state/ThemeContext';
+import type { User } from '../../../types';
 
 // Extracted member card component
-interface MemberCardProps {
+type MemberCardProps = {
   member: User;
   currentUserId?: string;
   onContact: (member: User) => void;
@@ -41,7 +41,7 @@ interface MemberCardProps {
   iconSizes: ThemeContextType['iconSizes'];
   typography: ThemeContextType['typography'];
   t: ReturnType<typeof useTranslation>['t'];
-}
+};
 
 function MemberCard({
   member,
@@ -75,7 +75,9 @@ function MemberCard({
                 size={iconSizes.xs}
                 color={colors.success}
               />
-              <Text style={cardStyles.whatsappText}>{t('screens.members.availableOnWhatsApp')}</Text>
+              <Text style={cardStyles.whatsappText}>
+                {t('screens.members.availableOnWhatsApp')}
+              </Text>
             </View>
           )}
         </View>
@@ -94,7 +96,7 @@ function MemberCard({
 }
 
 // Extracted member list content
-interface MemberListContentProps {
+type MemberListContentProps = {
   loading: boolean;
   members: User[];
   searchQuery: string;
@@ -106,7 +108,7 @@ interface MemberListContentProps {
   iconSizes: ThemeContextType['iconSizes'];
   typography: ThemeContextType['typography'];
   t: ReturnType<typeof useTranslation>['t'];
-}
+};
 
 function MemberListContent({
   loading,
@@ -147,13 +149,13 @@ function MemberListContent({
           key={m.id}
           member={m}
           currentUserId={currentUserId}
-          onContact={onContact}
           colors={colors}
           spacing={spacing}
           radii={radii}
           iconSizes={iconSizes}
           typography={typography}
           t={t}
+          onContact={onContact}
         />
       ))}
     </>
@@ -161,14 +163,14 @@ function MemberListContent({
 }
 
 // Custom hook for members data management
-interface UseMembersDataReturn {
+type UseMembersDataReturn = {
   filteredMembers: User[];
   loading: boolean;
   refreshing: boolean;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   refresh: () => void;
-}
+};
 
 function useMembersData(clubId?: string): UseMembersDataReturn {
   const [members, setMembers] = useState<User[]>([]);
@@ -187,7 +189,7 @@ function useMembersData(clubId?: string): UseMembersDataReturn {
       setMembers(active);
       setFilteredMembers(active);
     } catch {
-      Alert.alert(i18next.t('common.error'), i18next.t('errors.failedToLoadMembers'));
+      Alert.alert(i18nT('common.error'), i18nT('errors.failedToLoadMembers'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -220,13 +222,13 @@ function useMembersData(clubId?: string): UseMembersDataReturn {
 // Contact member helper
 const contactMember = (member: User, message: string): void => {
   if (!member.whatsappNumber) {
-    Alert.alert(i18next.t('titles.noWhatsApp'), i18next.t('info.noWhatsAppProvided'));
+    Alert.alert(i18nT('titles.noWhatsApp'), i18nT('info.noWhatsAppProvided'));
     return;
   }
   const cleanNumber = member.whatsappNumber.replace(PHONE.STRIP_NON_DIGITS, EMPTY_VALUE);
   const url = `${EXTERNAL_URLS.WHATSAPP_BASE}${cleanNumber}?text=${encodeURIComponent(message)}`;
   Linking.openURL(url).catch(() => {
-    Alert.alert(i18next.t('common.error'), i18next.t('errors.couldNotOpenWhatsApp'));
+    Alert.alert(i18nT('common.error'), i18nT('errors.couldNotOpenWhatsApp'));
   });
 };
 
@@ -278,13 +280,13 @@ const MembersScreen = (): React.JSX.Element => {
 
   return (
     <View style={styles.container}>
-      <PageHeader title={t('screens.members.title')} subtitle={subtitle} showActions />
+      <PageHeader showActions title={t('screens.members.title')} subtitle={subtitle} />
       <View style={styles.searchContainer}>
         <Input
           placeholder={t('placeholders.searchByNameOrEmail')}
           value={searchQuery}
-          onChangeText={setSearchQuery}
           icon={ICONS.MAGNIFY}
+          onChangeText={setSearchQuery}
         />
       </View>
       <ScrollView
@@ -297,13 +299,13 @@ const MembersScreen = (): React.JSX.Element => {
             members={filteredMembers}
             searchQuery={searchQuery}
             currentUserId={user?.id}
-            onContact={handleContact}
             colors={colors}
             spacing={spacing}
             radii={radii}
             iconSizes={iconSizes}
             typography={typography}
             t={t}
+            onContact={handleContact}
           />
         </View>
       </ScrollView>

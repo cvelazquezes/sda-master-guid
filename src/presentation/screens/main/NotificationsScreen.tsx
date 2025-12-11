@@ -106,7 +106,13 @@ function NotificationCard({
   const color = getNotificationColor(notification.type, colors);
   const cardStyles = [styles.card, !notification.read && styles.cardUnread];
   return (
-    <TouchableOpacity style={cardStyles} activeOpacity={TOUCH_OPACITY.default} onPress={onPress}>
+    <TouchableOpacity
+      style={cardStyles}
+      activeOpacity={TOUCH_OPACITY.default}
+      accessibilityRole="button"
+      accessibilityLabel={notification.title}
+      onPress={onPress}
+    >
       {!notification.read && <View style={styles.unreadDot} />}
       <View style={[styles.iconContainer, { backgroundColor: `${color}20` }]}>
         <MaterialCommunityIcons
@@ -232,7 +238,12 @@ const NotificationsScreen = (): React.JSX.Element => {
 
   const markAllAction =
     unreadCount > 0 ? (
-      <TouchableOpacity style={headerStyles.markAllButton} onPress={markAllAsRead}>
+      <TouchableOpacity
+        style={headerStyles.markAllButton}
+        accessibilityRole="button"
+        accessibilityLabel="Mark all as read"
+        onPress={markAllAsRead}
+      >
         <Text style={headerStyles.markAllText}>{t('screens.notifications.markAllAsRead')}</Text>
       </TouchableOpacity>
     ) : null;

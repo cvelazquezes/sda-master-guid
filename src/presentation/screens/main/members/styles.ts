@@ -4,10 +4,9 @@
  * Note: This screen uses a factory pattern with useTheme() for theme-aware styles.
  * This file provides the style factory functions.
  */
-import { StyleSheet } from 'react-native';
-import type { ViewStyle, TextStyle } from 'react-native';
-import type { ThemeContextType } from '../../../state/ThemeContext';
+import { StyleSheet, type ViewStyle, type TextStyle } from 'react-native';
 import { FLEX, DIMENSIONS } from '../../../../shared/constants';
+import type { ThemeContextType } from '../../../state/ThemeContext';
 
 // ============================================================================
 // STYLE FACTORY

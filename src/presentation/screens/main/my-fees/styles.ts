@@ -2,9 +2,10 @@
  * My Fees Screen Styles
  * Theme-aware style factories
  */
-import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
-import { ThemeContextType } from '../../../state/ThemeContext';
+/* eslint-disable max-lines-per-function -- Style factory functions require many style definitions */
+import { StyleSheet, type ViewStyle, type TextStyle } from 'react-native';
 import { BORDERS, DIMENSIONS, FLEX } from '../../../../shared/constants';
+import type { ThemeContextType } from '../../../state/ThemeContext';
 
 // ============================================================================
 // MAIN STYLES FACTORY
@@ -15,7 +16,7 @@ export const createStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): Record<string, ViewStyle | TextStyle> =>
   StyleSheet.create({
     container: { flex: FLEX.ONE, backgroundColor: colors.background },
     balanceCardContainer: {
@@ -221,7 +222,13 @@ export const createTabStyles = (
   colors: ThemeContextType['colors'],
   spacing: ThemeContextType['spacing'],
   typography: ThemeContextType['typography']
-) =>
+): {
+  tabContainer: ViewStyle;
+  tab: ViewStyle;
+  tabActive: ViewStyle;
+  tabText: TextStyle;
+  tabTextActive: TextStyle;
+} =>
   StyleSheet.create({
     tabContainer: {
       flexDirection: 'row',
@@ -262,7 +269,7 @@ export const createItemStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): Record<string, ViewStyle | TextStyle> =>
   StyleSheet.create({
     activityItem: {
       flexDirection: 'row',
@@ -399,7 +406,7 @@ export const createLoadingStyles = (
   spacing: ThemeContextType['spacing'],
   radii: ThemeContextType['radii'],
   typography: ThemeContextType['typography']
-) =>
+): Record<string, ViewStyle | TextStyle> =>
   StyleSheet.create({
     skeletonHeader: {
       alignItems: 'center',

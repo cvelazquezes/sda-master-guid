@@ -1,21 +1,21 @@
-import { UserRole } from '../../../../types';
 import { ICONS } from '../../../../shared/constants';
+import { UserRole } from '../../../../types';
 
-interface RoleConfig {
+type RoleConfig = {
   label: string;
   color: string;
   bg: string;
   icon: string;
-}
+};
 
-interface RoleColors {
+type RoleColors = {
   error: string;
   warning: string;
   info: string;
   errorAlpha20?: string;
   warningAlpha20?: string;
   infoAlpha20?: string;
-}
+};
 
 export function getRoleConfig(
   role: UserRole | undefined,

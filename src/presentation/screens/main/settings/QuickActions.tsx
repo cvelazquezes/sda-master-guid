@@ -1,13 +1,13 @@
 import React from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text } from '../../../components/primitives';
-import { UserRole } from '../../../../types';
-import { useTheme } from '../../../state/ThemeContext';
-import { ICONS } from '../../../../shared/constants';
 import { useSettingsStyles } from './useSettingsStyles';
+import { ICONS } from '../../../../shared/constants';
+import { UserRole } from '../../../../types';
+import { Text } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
 
-interface QuickActionsProps {
+type QuickActionsProps = {
   userRole?: UserRole;
   isActive: boolean;
   onViewProfile: () => void;
@@ -15,7 +15,7 @@ interface QuickActionsProps {
   onLogout: () => void;
   colors: Record<string, string>;
   t: (key: string) => string;
-}
+};
 
 export function QuickActions({
   userRole,
@@ -38,8 +38,8 @@ export function QuickActions({
         iconBg={`${colors.primary}15`}
         iconColor={colors.primary}
         label={t('screens.settings.viewProfile')}
-        onPress={onViewProfile}
         colors={colors}
+        onPress={onViewProfile}
       />
       {userRole !== UserRole.ADMIN && (
         <QuickActionButton
@@ -47,8 +47,8 @@ export function QuickActions({
           iconBg={activeIconBg}
           iconColor={activeIconColor}
           label={activeLabel}
-          onPress={onToggleActive}
           colors={colors}
+          onPress={onToggleActive}
         />
       )}
       <QuickActionButton
@@ -56,15 +56,15 @@ export function QuickActions({
         iconBg={`${colors.error}15`}
         iconColor={colors.error}
         label={t('screens.settings.signOut')}
-        onPress={onLogout}
         colors={colors}
         textColor={colors.error}
+        onPress={onLogout}
       />
     </View>
   );
 }
 
-interface QuickActionButtonProps {
+type QuickActionButtonProps = {
   icon: string;
   iconBg: string;
   iconColor: string;
@@ -72,7 +72,7 @@ interface QuickActionButtonProps {
   onPress: () => void;
   colors: Record<string, string>;
   textColor?: string;
-}
+};
 
 function QuickActionButton({
   icon,
@@ -89,7 +89,12 @@ function QuickActionButton({
   const labelColor = textColor || colors.textPrimary;
 
   return (
-    <TouchableOpacity style={actionStyle} onPress={onPress}>
+    <TouchableOpacity
+      style={actionStyle}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+    >
       <View style={[styles.actionIcon, { backgroundColor: iconBg }]}>
         <MaterialCommunityIcons
           name={icon as typeof ICONS.ACCOUNT_CIRCLE}

@@ -1,13 +1,13 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated } from 'react-native';
 import { clubService } from '../../../../infrastructure/repositories/clubService';
 import { paymentService } from '../../../../infrastructure/repositories/paymentService';
-import { Club, MemberBalance, MemberPayment, CustomCharge } from '../../../../types';
-import { DURATION, DISPLAY_LIMITS } from '../../../../shared/constants';
+import { DISPLAY_LIMITS, DURATION } from '../../../../shared/constants';
 import { LOG_MESSAGES } from '../../../../shared/constants/logMessages';
 import { logger } from '../../../../shared/utils/logger';
+import type { Club, CustomCharge, MemberBalance, MemberPayment } from '../../../../types';
 
-interface UseMyFeesReturn {
+type UseMyFeesReturn = {
   club: Club | null;
   balance: MemberBalance | null;
   payments: MemberPayment[];
@@ -17,7 +17,7 @@ interface UseMyFeesReturn {
   fadeAnim: Animated.Value;
   slideAnim: Animated.Value;
   onRefresh: () => void;
-}
+};
 
 export function useMyFees(userId: string | undefined, clubId: string | undefined): UseMyFeesReturn {
   const [club, setClub] = useState<Club | null>(null);

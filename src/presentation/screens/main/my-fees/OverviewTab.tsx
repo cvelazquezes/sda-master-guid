@@ -1,25 +1,25 @@
 import React, { useMemo } from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text } from '../../../components/primitives';
-import { Club, MemberBalance, MemberPayment } from '../../../../types';
-import { useTheme } from '../../../state/ThemeContext';
+import { getStatusConfig } from './statusUtils';
+import { createItemStyles, createStyles } from './styles';
 import {
   DEFAULT_DISPLAY,
+  DISPLAY_LIMITS,
   EMPTY_VALUE,
   ICONS,
   MY_FEES_TAB,
-  DISPLAY_LIMITS,
   SINGLE_SPACE,
 } from '../../../../shared/constants';
-import { NUMERIC } from '../../../../shared/constants/http';
-import { MATH } from '../../../../shared/constants/numbers';
 import { DATE_LOCALE_OPTIONS } from '../../../../shared/constants/formats';
-import { createStyles, createItemStyles } from './styles';
-import { getStatusConfig } from './statusUtils';
-import { MyFeesTabValue } from './types';
+import { MATH } from '../../../../shared/constants/numbers';
+import { NUMERIC } from '../../../../shared/constants/validation';
+import { Text } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
+import type { MyFeesTabValue } from './types';
+import type { Club, MemberBalance, MemberPayment } from '../../../../types';
 
-interface OverviewTabProps {
+type OverviewTabProps = {
   club: Club | null;
   balance: MemberBalance | null;
   payments: MemberPayment[];
@@ -29,7 +29,7 @@ interface OverviewTabProps {
   setSelectedTab: (tab: MyFeesTabValue) => void;
   colors: Record<string, string>;
   t: (key: string, opts?: Record<string, unknown>) => string;
-}
+};
 
 export function OverviewTab({
   club,
@@ -63,8 +63,17 @@ export function OverviewTab({
         t={t}
         styles={styles}
       />
-      {club?.feeSettings?.isActive && <MonthlyFeeInfo club={club} colors={colors} t={t} styles={styles} />}
-      <RecentActivity payments={payments} setSelectedTab={setSelectedTab} colors={colors} t={t} styles={styles} itemStyles={itemStyles} />
+      {club?.feeSettings?.isActive && (
+        <MonthlyFeeInfo club={club} colors={colors} t={t} styles={styles} />
+      )}
+      <RecentActivity
+        payments={payments}
+        setSelectedTab={setSelectedTab}
+        colors={colors}
+        t={t}
+        styles={styles}
+        itemStyles={itemStyles}
+      />
     </>
   );
 }
@@ -144,7 +153,7 @@ function SummaryGrid({
       <SummaryItem
         icon={ICONS.CHECK_CIRCLE}
         color={colors.success}
-        bgColor={colors.successLight || `${colors.success}15`}
+        bgColor={colors.successAlpha20 || `${colors.success}20`}
         value={`$${totalPaid}`}
         label={t('screens.myFees.totalPaid')}
         colors={colors}
@@ -275,14 +284,26 @@ function RecentActivity({
         <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>
           {t('screens.myFees.recentActivity')}
         </Text>
-        <TouchableOpacity onPress={(): void => setSelectedTab(MY_FEES_TAB.HISTORY)}>
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel="See all history"
+          onPress={(): void => setSelectedTab(MY_FEES_TAB.HISTORY)}
+        >
           <Text style={[styles.seeAllLink, { color: colors.primary }]}>
             {t('screens.myFees.seeAll')}
           </Text>
         </TouchableOpacity>
       </View>
       {payments.slice(0, DISPLAY_LIMITS.MAX_PREVIEW_ITEMS).map((payment, index) => (
-        <ActivityItem key={payment.id} payment={payment} index={index} colors={colors} t={t} itemStyles={itemStyles} spacing={spacing} />
+        <ActivityItem
+          key={payment.id}
+          payment={payment}
+          index={index}
+          colors={colors}
+          t={t}
+          itemStyles={itemStyles}
+          spacing={spacing}
+        />
       ))}
       {payments.length === 0 && <EmptyActivity colors={colors} t={t} itemStyles={itemStyles} />}
     </View>
@@ -306,9 +327,11 @@ function ActivityItem({
 }): React.JSX.Element {
   const { iconSizes } = useTheme();
   const config = getStatusConfig(payment.status, colors, t);
+  // eslint-disable-next-line no-magic-numbers -- Thin border width divider
+  const borderDivider = 8;
   const borderStyle =
     index < MATH.HALF
-      ? { borderBottomWidth: spacing.xs / 8, borderBottomColor: colors.border }
+      ? { borderBottomWidth: spacing.xs / borderDivider, borderBottomColor: colors.border }
       : {};
   return (
     <View style={[itemStyles.activityItem, borderStyle]}>

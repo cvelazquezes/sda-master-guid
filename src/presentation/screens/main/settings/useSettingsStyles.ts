@@ -9,20 +9,27 @@
  * ```
  */
 import { useMemo } from 'react';
-import { useTheme } from '../../../state/ThemeContext';
 import {
-  createStyles,
+  createMenuItemStyles,
   createQuickActionStyles,
   createSectionStyles,
-  createMenuItemStyles,
   createSkeletonStyles,
+  createStyles,
 } from './styles';
+import { useTheme } from '../../../state/ThemeContext';
 
-export function useSettingsStyles() {
+export function useSettingsStyles(): {
+  styles: ReturnType<typeof createStyles>;
+  quickActionStyles: ReturnType<typeof createQuickActionStyles>;
+  sectionStyles: ReturnType<typeof createSectionStyles>;
+  menuItemStyles: ReturnType<typeof createMenuItemStyles>;
+  skeletonStyles: ReturnType<typeof createSkeletonStyles>;
+} {
   const theme = useTheme();
 
   const styles = useMemo(
     () => createStyles(theme),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- theme object parts are sufficient
     [
       theme.spacing,
       theme.radii,
@@ -37,6 +44,7 @@ export function useSettingsStyles() {
 
   const quickActionStyles = useMemo(
     () => createQuickActionStyles(theme),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- theme object parts are sufficient
     [
       theme.spacing,
       theme.radii,
@@ -51,6 +59,7 @@ export function useSettingsStyles() {
 
   const sectionStyles = useMemo(
     () => createSectionStyles(theme),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- theme object parts are sufficient
     [
       theme.spacing,
       theme.radii,
@@ -65,6 +74,7 @@ export function useSettingsStyles() {
 
   const menuItemStyles = useMemo(
     () => createMenuItemStyles(theme),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- theme object parts are sufficient
     [
       theme.spacing,
       theme.radii,
@@ -79,6 +89,7 @@ export function useSettingsStyles() {
 
   const skeletonStyles = useMemo(
     () => createSkeletonStyles(theme),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- theme object parts are sufficient
     [
       theme.spacing,
       theme.radii,
@@ -99,4 +110,3 @@ export function useSettingsStyles() {
     skeletonStyles,
   };
 }
-

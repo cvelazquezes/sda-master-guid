@@ -1,6 +1,6 @@
-import { MemberBalance } from '../../../../types';
-import { PAYMENT_STATUS, BALANCE_STATUS, ICONS } from '../../../../shared/constants';
-import { StatusConfig } from './types';
+import { BALANCE_STATUS, ICONS, PAYMENT_STATUS } from '../../../../shared/constants';
+import type { StatusConfig } from './types';
+import type { MemberBalance } from '../../../../types';
 
 export function getStatusConfig(
   status: string,

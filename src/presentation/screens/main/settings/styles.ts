@@ -4,9 +4,9 @@
  * ✅ COMPLIANT: Uses factory pattern with useTheme() values
  * All design tokens come from ThemeContext, not direct imports
  */
-import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
-import { ThemeContextType } from '../../../state/ThemeContext';
+import { StyleSheet, type TextStyle, type ViewStyle } from 'react-native';
 import { FLEX, TEXT_TRANSFORM, TYPOGRAPHY } from '../../../../shared/constants';
+import type { ThemeContextType } from '../../../state/ThemeContext';
 
 // Type for theme values needed by these styles
 type ThemeValues = Pick<
@@ -25,7 +25,7 @@ type ThemeValues = Pick<
 // MAIN STYLES
 // ============================================================================
 
-interface MainStyles {
+type MainStyles = {
   container: ViewStyle;
   header: ViewStyle;
   headerContent: ViewStyle;
@@ -42,7 +42,7 @@ interface MainStyles {
   headerStatText: TextStyle;
   headerStatDot: ViewStyle;
   statusDot: ViewStyle;
-}
+};
 
 export const createStyles = (theme: ThemeValues): MainStyles =>
   StyleSheet.create<MainStyles>({
@@ -131,12 +131,12 @@ export const createStyles = (theme: ThemeValues): MainStyles =>
 // QUICK ACTION STYLES
 // ============================================================================
 
-interface QuickActionStyles {
+type QuickActionStyles = {
   container: ViewStyle;
   action: ViewStyle;
   actionIcon: ViewStyle;
   actionText: TextStyle;
-}
+};
 
 export const createQuickActionStyles = (theme: ThemeValues): QuickActionStyles =>
   StyleSheet.create<QuickActionStyles>({
@@ -172,11 +172,11 @@ export const createQuickActionStyles = (theme: ThemeValues): QuickActionStyles =
 // SECTION STYLES
 // ============================================================================
 
-interface SectionStyles {
+type SectionStyles = {
   section: ViewStyle;
   sectionHeader: ViewStyle;
   sectionTitle: TextStyle;
-}
+};
 
 export const createSectionStyles = (theme: ThemeValues): SectionStyles =>
   StyleSheet.create<SectionStyles>({
@@ -207,13 +207,13 @@ export const createSectionStyles = (theme: ThemeValues): SectionStyles =>
 // MENU ITEM STYLES
 // ============================================================================
 
-interface MenuItemStyles {
+type MenuItemStyles = {
   menuItem: ViewStyle;
   menuIcon: ViewStyle;
   menuContent: ViewStyle;
   menuTitle: TextStyle;
   menuSubtitle: TextStyle;
-}
+};
 
 export const createMenuItemStyles = (theme: ThemeValues): MenuItemStyles =>
   StyleSheet.create<MenuItemStyles>({
@@ -245,12 +245,12 @@ export const createMenuItemStyles = (theme: ThemeValues): MenuItemStyles =>
 // SKELETON STYLES
 // ============================================================================
 
-interface SkeletonStyles {
+type SkeletonStyles = {
   skeletonProfile: ViewStyle;
   skeletonAvatar: ViewStyle;
   skeletonName: ViewStyle;
   skeletonEmail: ViewStyle;
-}
+};
 
 export const createSkeletonStyles = (theme: ThemeValues): SkeletonStyles =>
   StyleSheet.create<SkeletonStyles>({

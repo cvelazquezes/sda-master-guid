@@ -2,9 +2,9 @@ import React from 'react';
 import { View } from 'react-native';
 import { useSettingsStyles } from './useSettingsStyles';
 
-interface LoadingStateProps {
+type LoadingStateProps = {
   colors: Record<string, string>;
-}
+};
 
 export function LoadingState({ colors }: LoadingStateProps): React.JSX.Element {
   const { styles, skeletonStyles } = useSettingsStyles();

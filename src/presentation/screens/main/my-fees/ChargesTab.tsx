@@ -1,19 +1,19 @@
 import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text } from '../../../components/primitives';
-import { CustomCharge } from '../../../../types';
-import { useTheme } from '../../../state/ThemeContext';
+import { createItemStyles, createStyles } from './styles';
 import { ICONS } from '../../../../shared/constants';
-import { NUMERIC } from '../../../../shared/constants/http';
 import { DATE_LOCALE_OPTIONS } from '../../../../shared/constants/formats';
-import { createStyles, createItemStyles } from './styles';
+import { NUMERIC } from '../../../../shared/constants/validation';
+import { Text } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
+import type { CustomCharge } from '../../../../types';
 
-interface ChargesTabProps {
+type ChargesTabProps = {
   customCharges: CustomCharge[];
   colors: Record<string, string>;
   t: (key: string, opts?: Record<string, unknown>) => string;
-}
+};
 
 export function ChargesTab({ customCharges, colors, t }: ChargesTabProps): React.JSX.Element {
   const { spacing, radii, typography } = useTheme();

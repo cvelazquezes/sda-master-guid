@@ -1,13 +1,13 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated } from 'react-native';
 import { clubService } from '../../../../infrastructure/repositories/clubService';
 import { userService } from '../../../../infrastructure/repositories/userService';
-import { Club, User } from '../../../../types';
-import { logger } from '../../../../shared/utils/logger';
-import { LOG_MESSAGES } from '../../../../shared/constants/logMessages';
 import { ANIMATION_DURATION } from '../../../../shared/constants';
+import { LOG_MESSAGES } from '../../../../shared/constants/logMessages';
+import { logger } from '../../../../shared/utils/logger';
+import type { Club, User } from '../../../../types';
 
-interface UseSettingsDataReturn {
+type UseSettingsDataReturn = {
   club: Club | null;
   fullUser: User | null;
   isActive: boolean;
@@ -17,7 +17,7 @@ interface UseSettingsDataReturn {
   fadeAnim: Animated.Value;
   loadData: () => Promise<void>;
   onRefresh: () => void;
-}
+};
 
 export function useSettingsData(
   userId?: string,

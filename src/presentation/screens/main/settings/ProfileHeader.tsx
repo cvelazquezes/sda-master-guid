@@ -1,20 +1,20 @@
 import React from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text } from '../../../components/primitives';
-import { User, Club } from '../../../../types';
-import { useTheme } from '../../../state/ThemeContext';
-import { ICONS } from '../../../../shared/constants';
 import { useSettingsStyles } from './useSettingsStyles';
+import { ICONS } from '../../../../shared/constants';
+import { Text } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
+import type { Club, User } from '../../../../types';
 
-interface ProfileHeaderProps {
+type ProfileHeaderProps = {
   user: User | null;
   club: Club | null;
   isActive: boolean;
   roleConfig: { label: string; icon: string };
   colors: Record<string, string>;
   t: (key: string) => string;
-}
+};
 
 export function ProfileHeader({
   user,
@@ -63,12 +63,12 @@ export function ProfileHeader({
   );
 }
 
-interface HeaderStatsProps {
+type HeaderStatsProps = {
   club: Club;
   isActive: boolean;
   colors: Record<string, string>;
   t: (key: string) => string;
-}
+};
 
 function HeaderStats({ club, isActive, colors, t }: HeaderStatsProps): React.JSX.Element {
   const { iconSizes } = useTheme();

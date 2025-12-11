@@ -1,20 +1,20 @@
 import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text } from '../../../components/primitives';
-import { MemberPayment } from '../../../../types';
-import { useTheme } from '../../../state/ThemeContext';
-import { ICONS } from '../../../../shared/constants';
-import { NUMERIC } from '../../../../shared/constants/http';
-import { DATE_LOCALE_OPTIONS } from '../../../../shared/constants/formats';
-import { createStyles, createItemStyles } from './styles';
 import { getStatusConfig } from './statusUtils';
+import { createItemStyles, createStyles } from './styles';
+import { ICONS } from '../../../../shared/constants';
+import { DATE_LOCALE_OPTIONS } from '../../../../shared/constants/formats';
+import { NUMERIC } from '../../../../shared/constants/validation';
+import { Text } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
+import type { MemberPayment } from '../../../../types';
 
-interface HistoryTabProps {
+type HistoryTabProps = {
   payments: MemberPayment[];
   colors: Record<string, string>;
   t: (key: string, opts?: Record<string, unknown>) => string;
-}
+};
 
 export function HistoryTab({ payments, colors, t }: HistoryTabProps): React.JSX.Element {
   const { spacing, radii, typography } = useTheme();

@@ -7,11 +7,11 @@
 import React from 'react';
 import { View, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '../../state/ThemeContext';
-import { PageHeader, MenuCard, SectionHeader } from '../../components/primitives';
 import { ICONS, MENU_ITEM_IDS, FLEX } from '../../../shared/constants';
+import { PageHeader, MenuCard, SectionHeader } from '../../components/primitives';
+import { useTheme } from '../../state/ThemeContext';
 
-interface MenuItem {
+type MenuItem = {
   id: string;
   title: string;
   description: string;
@@ -19,7 +19,7 @@ interface MenuItem {
   screen: string | null;
   color: string;
   disabled?: boolean;
-}
+};
 
 // Extracted menu section component
 function DisabledMenuSection({
@@ -40,8 +40,8 @@ function DisabledMenuSection({
           description={item.disabled ? t('common.comingSoon') : item.description}
           icon={item.icon}
           color={item.disabled ? colors.textTertiary : item.color}
-          onPress={undefined}
           disabled={item.disabled}
+          onPress={undefined}
         />
       ))}
     </>
@@ -99,7 +99,11 @@ const UserMoreScreen = (): React.JSX.Element => {
 
   return (
     <View style={containerStyle}>
-      <PageHeader title={t('screens.userMore.title')} subtitle={t('screens.userMore.subtitle')} showActions />
+      <PageHeader
+        showActions
+        title={t('screens.userMore.title')}
+        subtitle={t('screens.userMore.subtitle')}
+      />
       <ScrollView style={{ flex: FLEX.ONE }}>
         <View style={contentStyle}>
           <SectionHeader title={t('screens.userMore.myClubSection')} />

@@ -1,20 +1,20 @@
 import React from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useSettingsStyles } from './useSettingsStyles';
+import { ICONS, TOUCH_OPACITY, type IconName } from '../../../../shared/constants';
 import { Text } from '../../../components/primitives';
 import { useTheme } from '../../../state/ThemeContext';
-import { ICONS, IconName, TOUCH_OPACITY } from '../../../../shared/constants';
-import { useSettingsStyles } from './useSettingsStyles';
 
-interface MenuColors {
+type MenuColors = {
   border: string;
   error: string;
   primary: string;
   textPrimary: string;
   textTertiary: string;
-}
+};
 
-interface MenuItemProps {
+type MenuItemProps = {
   icon: IconName;
   iconColor?: string;
   iconBg?: string;
@@ -26,13 +26,13 @@ interface MenuItemProps {
   danger?: boolean;
   colors: MenuColors;
   noBorder?: boolean;
-}
+};
 
-interface MenuItemColors {
+type MenuItemColors = {
   iconBg: string;
   iconColor: string;
   titleColor: string;
-}
+};
 
 function getColors(danger: boolean, colors: MenuColors): MenuItemColors {
   const color = danger ? colors.error : colors.primary;
@@ -65,9 +65,12 @@ export function MenuItem({
   return (
     <TouchableOpacity
       style={[styles.menuItem, { borderBottomColor: colors.border }, borderStyle]}
-      onPress={onPress}
       disabled={!hasInteraction}
       activeOpacity={onPress ? TOUCH_OPACITY.default : 1}
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      accessibilityState={{ disabled: !hasInteraction }}
+      onPress={onPress}
     >
       <View style={[styles.menuIcon, { backgroundColor: iconBg ?? defaults.iconBg }]}>
         <MaterialCommunityIcons

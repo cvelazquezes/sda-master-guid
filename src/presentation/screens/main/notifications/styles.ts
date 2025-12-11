@@ -2,9 +2,9 @@
  * Notifications Screen Styles
  * Theme-aware style factories
  */
-import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
-import { ThemeContextType } from '../../../state/ThemeContext';
-import { FLEX, BORDERS, DIMENSIONS, SHADOW_OFFSET } from '../../../../shared/constants';
+import { StyleSheet, type TextStyle, type ViewStyle } from 'react-native';
+import { BORDERS, DIMENSIONS, FLEX, SHADOW_OFFSET } from '../../../../shared/constants';
+import type { ThemeContextType } from '../../../state/ThemeContext';
 
 // ============================================================================
 // TYPE DEFINITIONS

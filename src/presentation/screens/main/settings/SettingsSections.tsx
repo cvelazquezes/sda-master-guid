@@ -1,27 +1,27 @@
 import React from 'react';
-import { View, Switch } from 'react-native';
+import { Switch, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text } from '../../../components/primitives';
-import { ThemeSwitcher } from '../../../components/features/ThemeSwitcher';
-import { LanguageSwitcher } from '../../../components/features/LanguageSwitcher';
-import { Club, UserRole } from '../../../../types';
-import { useTheme } from '../../../state/ThemeContext';
-import { ICONS } from '../../../../shared/constants';
-import { useSettingsStyles } from './useSettingsStyles';
 import { MenuItem } from './MenuItem';
+import { useSettingsStyles } from './useSettingsStyles';
+import { ICONS } from '../../../../shared/constants';
+import { UserRole, type Club } from '../../../../types';
+import { LanguageSwitcher } from '../../../components/features/LanguageSwitcher';
+import { ThemeSwitcher } from '../../../components/features/ThemeSwitcher';
+import { Text } from '../../../components/primitives';
+import { useTheme } from '../../../state/ThemeContext';
 
-interface SectionProps {
+type SectionProps = {
   colors: Record<string, string>;
   t: (key: string, opts?: Record<string, unknown>) => string;
-}
+};
 
-interface AccountSectionProps extends SectionProps {
+type AccountSectionProps = SectionProps & {
   club: Club | null;
   userRole?: UserRole;
   isActive: boolean;
   onViewProfile: () => void;
   onToggleActive: (v: boolean) => void;
-}
+};
 
 export function AppearanceSection({ colors, t }: SectionProps): React.JSX.Element {
   const { iconSizes } = useTheme();
@@ -102,8 +102,8 @@ export function AccountSection({
         icon={ICONS.ACCOUNT_CIRCLE_OUTLINE}
         title={t('screens.settings.profileInformation')}
         subtitle={t('screens.settings.profileSubtitle')}
-        onPress={onViewProfile}
         colors={colors}
+        onPress={onViewProfile}
       />
       {club && (
         <MenuItem
@@ -121,9 +121,9 @@ export function AccountSection({
           statusColor={statusColor}
           statusText={statusText}
           isActive={isActive}
-          onToggleActive={onToggleActive}
           colors={colors}
           t={t}
+          onToggleActive={onToggleActive}
         />
       )}
     </View>
@@ -168,9 +168,10 @@ function AccountStatusSwitch({
       </View>
       <Switch
         value={isActive}
-        onValueChange={onToggleActive}
         trackColor={{ false: colors.border, true: `${colors.success}50` }}
         thumbColor={isActive ? colors.success : colors.textTertiary}
+        accessibilityLabel="Active status toggle"
+        onValueChange={onToggleActive}
       />
     </View>
   );
@@ -186,12 +187,12 @@ export function NotificationsSection({ colors, t }: SectionProps): React.JSX.Ele
         colors={colors}
       />
       <NotificationToggle
+        hasBorder
         icon={ICONS.BELL_RING_OUTLINE}
         color={colors.primary}
         title={t('screens.settings.pushNotifications')}
         subtitle={t('screens.settings.receiveAppNotifications')}
         colors={colors}
-        hasBorder
       />
       <NotificationToggle
         icon={ICONS.EMAIL_OUTLINE}
@@ -239,7 +240,12 @@ function NotificationToggle({
           {subtitle}
         </Text>
       </View>
-      <Switch value trackColor={{ false: colors.border, true: `${color}50` }} thumbColor={color} />
+      <Switch
+        value
+        trackColor={{ false: colors.border, true: `${color}50` }}
+        thumbColor={color}
+        accessibilityLabel="Toggle setting"
+      />
     </View>
   );
 }
@@ -277,43 +283,43 @@ export function SupportSection({ colors, t }: SectionProps): React.JSX.Element {
         colors={colors}
       />
       <MenuItem
+        noBorder
         icon={ICONS.INFORMATION_OUTLINE}
         title={t('screens.settings.about')}
         subtitle={t('screens.settings.version', { version: '1.0.0' })}
         showChevron={false}
         colors={colors}
-        noBorder
       />
     </View>
   );
 }
 
-interface LogoutSectionProps extends SectionProps {
+type LogoutSectionProps = SectionProps & {
   onLogout: () => void;
-}
+};
 
 export function LogoutSection({ colors, t, onLogout }: LogoutSectionProps): React.JSX.Element {
   const { sectionStyles } = useSettingsStyles();
   return (
     <View style={[sectionStyles.section, { backgroundColor: colors.surface }]}>
       <MenuItem
+        danger
+        noBorder
         icon={ICONS.LOGOUT}
         title={t('screens.settings.signOut')}
-        danger
-        onPress={onLogout}
         showChevron={false}
         colors={colors}
-        noBorder
+        onPress={onLogout}
       />
     </View>
   );
 }
 
-interface SectionHeaderProps {
+type SectionHeaderProps = {
   icon: string;
   title: string;
   colors: Record<string, string>;
-}
+};
 
 function SectionHeader({ icon, title, colors }: SectionHeaderProps): React.JSX.Element {
   const { iconSizes } = useTheme();
