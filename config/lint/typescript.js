@@ -6,7 +6,23 @@
  *
  * NOTE: Type-aware rules require parserOptions.project in .eslintrc.js
  * These rules are THE most important TypeScript rules used by big tech.
+ *
+ * Usage:
+ *   Local (fast):  npx eslint src/
+ *   CI (strict):   CI=true npx eslint src/
+ *   Strict:        STRICT_LINT=true npx eslint src/
  */
+
+// Detect CI/strict mode from environment
+const isStrict = process.env.CI === 'true' || process.env.STRICT_LINT === 'true';
+
+/**
+ * Helper: Returns rule config based on environment
+ * @param {boolean} strictOnly - If true, only enable in strict mode
+ * @param {string|Array} config - The rule configuration
+ */
+const rule = (strictOnly, config) => (strictOnly && !isStrict ? 'off' : config);
+
 module.exports = {
   rules: {
     // =========================================================================
@@ -49,38 +65,38 @@ module.exports = {
      * Prevents silent failures in async code
      * Standard: Google/Meta REQUIRE this
      */
-    '@typescript-eslint/no-floating-promises': 'error',
+    '@typescript-eslint/no-floating-promises': rule(true, 'error'),
 
     /**
      * CRITICAL: Correct promise usage in conditions
      * Catches: if (promise) { ... } - always truthy!
      * Standard: Google/Meta REQUIRE this
      */
-    '@typescript-eslint/no-misused-promises': [
+    '@typescript-eslint/no-misused-promises': rule(true, [
       'error',
       {
         checksVoidReturn: {
           arguments: false, // Allow void-returning callbacks
         },
       },
-    ],
+    ]),
 
     /**
      * Only await promises/thenables
      * Catches: await nonPromiseValue
      */
-    '@typescript-eslint/await-thenable': 'error',
+    '@typescript-eslint/await-thenable': rule(true, 'error'),
 
     /**
      * Async functions must have await
      * Catches: async function that doesn't await anything
      */
-    '@typescript-eslint/require-await': 'error',
+    '@typescript-eslint/require-await': rule(true, 'error'),
 
     /**
      * Return await in try/catch for proper stack traces
      */
-    '@typescript-eslint/return-await': ['error', 'in-try-catch'],
+    '@typescript-eslint/return-await': rule(true, ['error', 'in-try-catch']),
 
     // =========================================================================
     // TYPE SAFETY - Strict Rules (Microsoft Standard)
@@ -90,27 +106,27 @@ module.exports = {
      * Prevent any type propagation
      * Catches assigning any to typed variables
      */
-    '@typescript-eslint/no-unsafe-assignment': 'error',
+    '@typescript-eslint/no-unsafe-assignment': rule(true, 'error'),
 
     /**
      * Prevent member access on any
      */
-    '@typescript-eslint/no-unsafe-member-access': 'error',
+    '@typescript-eslint/no-unsafe-member-access': rule(true, 'error'),
 
     /**
      * Prevent calling any as function
      */
-    '@typescript-eslint/no-unsafe-call': 'error',
+    '@typescript-eslint/no-unsafe-call': rule(true, 'error'),
 
     /**
      * Prevent returning any from functions
      */
-    '@typescript-eslint/no-unsafe-return': 'error',
+    '@typescript-eslint/no-unsafe-return': rule(true, 'error'),
 
     /**
      * Prevent using any as argument
      */
-    '@typescript-eslint/no-unsafe-argument': 'error',
+    '@typescript-eslint/no-unsafe-argument': rule(true, 'error'),
 
     // =========================================================================
     // CODE QUALITY
@@ -158,17 +174,17 @@ module.exports = {
     /**
      * Disallow unnecessary type assertions
      */
-    '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+    '@typescript-eslint/no-unnecessary-type-assertion': rule(true, 'error'),
 
     /**
      * Detect conditions that are always truthy/falsy
      */
-    '@typescript-eslint/no-unnecessary-condition': [
+    '@typescript-eslint/no-unnecessary-condition': rule(true, [
       'error',
       {
         allowConstantLoopConditions: true,
       },
-    ],
+    ]),
 
     // =========================================================================
     // MODERN TYPESCRIPT - All Big Tech
@@ -184,33 +200,33 @@ module.exports = {
      * Use nullish coalescing (??)
      * Modern: value ?? default instead of value || default
      */
-    '@typescript-eslint/prefer-nullish-coalescing': [
+    '@typescript-eslint/prefer-nullish-coalescing': rule(true, [
       'error',
       {
         ignoreConditionalTests: true,
         ignoreMixedLogicalExpressions: true,
       },
-    ],
+    ]),
 
     /**
      * Use readonly for properties that are never reassigned
      */
-    '@typescript-eslint/prefer-readonly': 'error',
+    '@typescript-eslint/prefer-readonly': rule(true, 'error'),
 
     /**
      * Use includes() instead of indexOf() !== -1
      */
-    '@typescript-eslint/prefer-includes': 'error',
+    '@typescript-eslint/prefer-includes': rule(true, 'error'),
 
     /**
      * Use String.startsWith() and String.endsWith()
      */
-    '@typescript-eslint/prefer-string-starts-ends-with': 'error',
+    '@typescript-eslint/prefer-string-starts-ends-with': rule(true, 'error'),
 
     /**
      * Use Array.find() instead of filter()[0]
      */
-    '@typescript-eslint/prefer-find': 'error',
+    '@typescript-eslint/prefer-find': rule(true, 'error'),
 
     /**
      * Use for-of loops where possible
@@ -242,12 +258,12 @@ module.exports = {
     /**
      * Consistent type exports
      */
-    '@typescript-eslint/consistent-type-exports': [
+    '@typescript-eslint/consistent-type-exports': rule(true, [
       'error',
       {
         fixMixedExportsWithInlineTypeSpecifier: true,
       },
-    ],
+    ]),
 
     /**
      * Consistent array type syntax
@@ -347,13 +363,8 @@ module.exports = {
     ],
 
     // =========================================================================
-    // PROMISE HANDLING
+    // TYPE ASSERTIONS
     // =========================================================================
-
-    /**
-     * Disallow async functions which have no await expression
-     */
-    '@typescript-eslint/require-await': 'error',
 
     /**
      * Enforce consistent use of type assertions
@@ -424,26 +435,19 @@ module.exports = {
     /**
      * Disallow unnecessary namespace qualifiers
      */
-    '@typescript-eslint/no-unnecessary-qualifier': 'error',
-
-    /**
-     * Prefer using concise optional chain expressions instead of chained logical ands
-     */
-    '@typescript-eslint/prefer-optional-chain': 'error',
-
-    /**
-     * Enforce using the nullish coalescing operator instead of logical chaining
-     */
-    '@typescript-eslint/prefer-nullish-coalescing': 'error',
+    '@typescript-eslint/no-unnecessary-qualifier': rule(true, 'error'),
 
     /**
      * Require Array#sort calls to always provide a compare function
      */
-    '@typescript-eslint/require-array-sort-compare': ['error', { ignoreStringArrays: true }],
+    '@typescript-eslint/require-array-sort-compare': rule(true, [
+      'error',
+      { ignoreStringArrays: true },
+    ]),
 
     /**
      * Disallow comparing an enum value with a non-enum value
      */
-    '@typescript-eslint/no-unsafe-enum-comparison': 'error',
+    '@typescript-eslint/no-unsafe-enum-comparison': rule(true, 'error'),
   },
 };

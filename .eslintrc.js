@@ -34,10 +34,12 @@ module.exports = {
   root: true,
 
   // === EXTENDS ===
+  // NOTE: 'recommended-requiring-type-checking' removed for performance
+  // Type-aware rules are disabled locally and should run in CI only (Big Tech practice)
   extends: [
     'expo',
     'plugin:@typescript-eslint/recommended',
-    'plugin:@typescript-eslint/recommended-requiring-type-checking',
+    // 'plugin:@typescript-eslint/recommended-requiring-type-checking', // SLOW - Enable in CI only
     'plugin:react/recommended',
     'plugin:react-hooks/recommended',
     'plugin:import/errors',

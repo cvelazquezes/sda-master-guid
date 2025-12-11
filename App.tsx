@@ -1,14 +1,14 @@
 import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { featureFlagsService } from './src/infrastructure/services/featureFlags';
+import { initializeSentry } from './src/infrastructure/services/sentry';
+import { ErrorBoundary } from './src/presentation/components/features/ErrorBoundary';
+import AppNavigator from './src/presentation/navigation/AppNavigator';
 import { AuthProvider } from './src/presentation/state/AuthContext';
 import { ThemeProvider } from './src/presentation/state/ThemeContext';
-import AppNavigator from './src/presentation/navigation/AppNavigator';
-import { ErrorBoundary } from './src/presentation/components/features/ErrorBoundary';
-import { initializeSentry } from './src/infrastructure/services/sentry';
-import { featureFlagsService } from './src/infrastructure/services/featureFlags';
-import { logger } from './src/shared/utils/logger';
 import { LOG_MESSAGES, STATUS_BAR_STYLE } from './src/shared/constants';
+import { logger } from './src/shared/utils/logger';
 import './src/shared/i18n'; // Initialize i18n
 
 // Initialize Sentry for error tracking and performance monitoring

@@ -2,6 +2,7 @@
  * Detox E2E Test Initialization
  */
 
+// eslint-disable-next-line import/named -- Detox exports are available at runtime
 import { device, element, by, expect as detoxExpect } from 'detox';
 
 beforeAll(async () => {
